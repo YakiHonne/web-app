@@ -5,9 +5,11 @@ import ShareLink from "@/Components/ShareLink";
 import {
   copyText,
   getLinkFromAddr,
+} from "@/Helpers/Helpers";
+import {
   getWallets,
   updateWallets,
-} from "@/Helpers/Helpers";
+} from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import OptionsDropdown from "@/Components/OptionsDropdown";

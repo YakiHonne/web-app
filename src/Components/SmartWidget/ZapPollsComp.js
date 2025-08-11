@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { nip19 } from "nostr-tools";
 import { checkForLUDS, convertDate } from "@/Helpers/Encryptions";
 import relaysOnPlatform from "@/Content/Relays";
-import { getNoteTree } from "@/Helpers/Helpers";
+import { getNoteTree } from "@/Helpers/ClientHelpers";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import LoadingDots from "@/Components/LoadingDots";
 import { decode } from "light-bolt11-decoder";

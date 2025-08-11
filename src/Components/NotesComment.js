@@ -18,7 +18,7 @@ import Zap from "@/Components/Reactions/Zap";
 import { customHistory } from "@/Helpers/History";
 import { NDKUser } from "@nostr-dev-kit/ndk";
 import { useTranslation } from "react-i18next";
-import { getNoteTree } from "@/Helpers/Helpers";
+import { getNoteTree } from "@/Helpers/ClientHelpers";
 import LoadingDots from "@/Components/LoadingDots";
 import ZapAd from "@/Components/ZapAd";
 import EventOptions from "@/Components/ElementOptions/EventOptions";

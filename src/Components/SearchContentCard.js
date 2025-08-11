@@ -8,7 +8,8 @@ import Link from "next/link";
 import DynamicIndicator from "@/Components/DynamicIndicator";
 import { NDKUser } from "@nostr-dev-kit/ndk";
 import { ndkInstance } from "@/Helpers/NDKInstance";
-import { getLinkFromAddr, nEventEncode } from "@/Helpers/Helpers";
+import { getLinkFromAddr } from "@/Helpers/Helpers";
+import { nEventEncode } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
 
 export default function SearchContentCard({ event, exit, userProfile = true }) {

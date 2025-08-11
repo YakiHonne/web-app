@@ -7,7 +7,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { setToast } from "@/Store/Slides/Publishers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import OptionsDropdown from "@/Components/OptionsDropdown";
-import { compactContent, nEventEncode } from "@/Helpers/Helpers";
+import { compactContent, nEventEncode } from "@/Helpers/ClientHelpers";
 import Slider from "@/Components/Slider";
 import Link from "next/link";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";

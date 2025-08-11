@@ -984,8 +984,8 @@ const getWotConfigDefault = () => {
   };
 };
 
-const nEventEncode = (id) => {
+export function nEventEncode(id) {
   return nip19.neventEncode({
     id,
   });
-};
+}

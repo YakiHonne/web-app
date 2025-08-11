@@ -19,14 +19,14 @@ import {
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { nip19, sortEvents } from "nostr-tools";
 import Link from "next/link";
+import { straightUp } from "@/Helpers/Helpers";
 import {
   compactContent,
   getCustomSettings,
   getNoteTree,
   getWotConfig,
   nEventEncode,
-  straightUp,
-} from "@/Helpers/Helpers";
+} from "@/Helpers/ClientHelpers";
 import { eventKinds } from "@/Content/Extra";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { customHistory } from "@/Helpers/History";

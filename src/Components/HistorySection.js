@@ -6,7 +6,8 @@ import { saveUsers } from "@/Helpers/DB";
 import LoadingDots from "@/Components/LoadingDots";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import { useTranslation } from "react-i18next";
-import { getParsedNote , getParsedRepEvent} from "@/Helpers/ClientHelpers";
+import { getParsedNote } from "@/Helpers/ClientHelpers";
+import { getParsedRepEvent } from "@/Helpers/Encryptions";
 
 const traceEventPath = (id, all, mainEventID, tagKind) => {
   const path = [];

@@ -6,8 +6,10 @@ import { getImagePlaceholder } from "@/Content/NostrPPPlaceholder";
 import CryptoJS from "crypto-js";
 import {
   getAppLang,
-  getKeys,
 } from "./Helpers";
+import {
+  getKeys,
+} from "./ClientHelpers";
 // Translation function will be passed as parameter to avoid SSR issues
 import axiosInstance from "./HTTP_Client";
 import { DORA_CONFIG } from "@/Content/MACI";

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getNoteTree } from "@/Helpers/Helpers";
+import { getNoteTree } from "@/Helpers/ClientHelpers";
 
 export default function TextComp({
   content = "",

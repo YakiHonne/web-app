@@ -8,7 +8,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import SearchContentCard from "@/Components/SearchContentCard";
 import { getUser } from "@/Helpers/Controlers";
 import { setToast } from "@/Store/Slides/Publishers";
-import { compactContent, nEventEncode } from "@/Helpers/Helpers";
+import { compactContent, nEventEncode } from "@/Helpers/ClientHelpers";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";

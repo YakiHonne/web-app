@@ -1,17 +1,17 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  compactContent,
   getLinkFromAddr,
   isHex,
   sortByKeyword,
 } from "@/Helpers/Helpers";
+import { compactContent } from "@/Helpers/ClientHelpers";
 import { customHistory } from "@/Helpers/History";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import { saveFetchedUsers, saveUsers } from "@/Helpers/DB";
 import { nip19 } from "nostr-tools";
 import LoadingDots from "@/Components/LoadingDots";
-import { SelectTabs } from "@/Components/SearchSidebar";
+import { SelectTabs } from "@/Components/SelectTabs";
 import { getSubData } from "@/Helpers/Controlers";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import SearchUserCard from "@/Components/SearchUserCard";

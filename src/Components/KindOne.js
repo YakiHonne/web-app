@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getParsedNote, getParsedRepEvent } from "@/Helpers/ClientHelpers";
+import { getParsedNote } from "@/Helpers/ClientHelpers";
+import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import ShowUsersList from "@/Components/ShowUsersList";
