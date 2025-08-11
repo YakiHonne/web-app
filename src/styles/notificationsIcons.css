@@ -1,0 +1,69 @@
+.not-articles,
+.not-curations,
+.not-mentions,
+.not-notes,
+.not-paid-notes,
+.not-quotes,
+.not-reactions,
+.not-replies-comments,
+.not-reposts,
+.not-smart-widgets,
+.not-videos,
+.not-zaps {
+
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    transition: .2s ease-in-out;
+    min-width: 16px;
+    min-height: 16px;
+}
+
+.not-articles {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/articles.svg');
+}
+
+.not-curations {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/curations.svg');
+}
+
+.not-mentions {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/mentions.svg');
+}
+
+.not-notes {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/notes.svg');
+}
+
+.not-paid-notes {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/paid-notes.svg');
+}
+
+.not-quotes {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/quotes.svg');
+}
+
+.not-reactions {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/reactions.svg');
+}
+
+.not-replies-comments {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/replies-comments.svg');
+}
+
+.not-reposts {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/reposts.svg');
+}
+
+.not-smart-widgets {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/smart-widgets.svg');
+}
+
+.not-videos {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/videos.svg');
+}
+
+.not-zaps {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/notificationsIcon/zaps.svg');
+}

@@ -1,0 +1,196 @@
+.login-ph-1,
+.login-ph-2,
+.login-ph-3,
+.login-ph-4,
+.avatar-1,
+.avatar-2,
+.avatar-3,
+.avatar-4,
+.avatar-5,
+.avatar-6,
+.avatar-7,
+.avatar-8 {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    cursor: pointer;
+    transition: .2s ease-in-out;
+    border-radius: var(--border-r-50);
+}
+
+.warning-page-placeholder-hero {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/stories-hero.png);
+    width: 300px;
+    height: 300px;
+}
+
+.yakihonne-logo, .yakihonne-logo-white, .yakihonne-logo-128,
+.login-hero {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    /* transition: .2s ease-in-out; */
+}
+
+
+.yakihonne-logo, .yakihonne-logo-white, .yakihonne-logo-128,
+.login-hero {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    /* transition: .2s ease-in-out; */
+
+}
+
+
+.buidl,
+.dao,
+.defi,
+.desci,
+.gamefi,
+.gov,
+.layer1layer2,
+.nft,
+.public-goods,
+.quantum,
+.regulations,
+.socialFi,
+.space,
+.tokeconomics,
+.web3,
+.zk {
+    width: 64px;
+    height: 64px;
+    position: relative;
+    border-radius: var(--border-r-50);
+    overflow: hidden;
+}
+
+.login-ph-1 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph1.png);
+    /* background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/login-ph-1.png); */
+}
+
+.login-ph-2 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph2.png);
+    /* background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/login-ph-2.png); */
+}
+
+.login-ph-3 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph3.png);
+    /* background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/login-ph-3.png); */
+}
+
+.login-ph-4 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph4.png);
+    /* background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/login-ph-4.png); */
+}
+
+.avatar-1 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph1.png);
+}
+
+.avatar-2 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph2.png);
+}
+
+.avatar-3 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph3.png);
+}
+
+.avatar-4 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph4.png);
+}
+
+.avatar-5 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph5.png);
+}
+
+.avatar-6 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph6.png);
+}
+
+.avatar-7 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph7.png);
+}
+
+.avatar-8 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ph8.png);
+}
+
+.yakihonne-logo, .yakihonne-logo-white, .yakihonne-logo-128 {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/yakihonne_logo.svg);
+}
+
+.yakihonne-logo {
+    width: 256px;
+    height: 100px;
+    filter: brightness(0);
+}
+
+.yakihonne-logo-128 {
+    width: 128px;
+    height: 50px;
+    filter: brightness(0);
+}
+
+@media (prefers-color-scheme: dark) {
+
+    .yakihonne-logo {
+        width: 256px;
+        height: 100px;
+        filter: brightness(0) invert();
+    }
+
+    .yakihonne-logo-128 {
+        width: 128px;
+        height: 50px;
+        filter: brightness(0) invert();
+    }
+}
+
+.login-hero {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/hero.png);
+    width: 450px;
+    height: 450px;
+}
+
+.chest {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 0;
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/chest.png);
+    width: 350px;
+    aspect-ratio: 16/9;
+}
+
+.bronze-tier, .silver-tier, .gold-tier ,.platinum-tier{
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    border-radius: 0;
+    aspect-ratio: 1/1;
+    cursor: pointer;
+}
+
+.platinum-tier {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/platinum-tier.png);
+}
+.bronze-tier {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/bronze-tier.png);
+}
+
+.silver-tier {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/silver-tier.png);
+}
+
+.gold-tier {
+    background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/gold-tier.png);
+}

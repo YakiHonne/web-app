@@ -1,0 +1,169 @@
+/* :root {
+    --white: #1b1717;
+    --white-transparent: #1b1717dd;
+    --black: #ececec;
+    --black-transparent: #0000009e;
+    --dark-gray: #E5E5E5;
+    --gray: #909090;
+    --pale-gray: #2b2b2b;
+    --dim-gray: #303030;
+    --very-dim-gray: #202020;
+    --c1: #86318C;
+    --c1-side: #fef7ff;
+    --c1-transparent: #86318c08;
+    --c1-pale: #28002B;
+    --c2: #1F0021;
+    --c3: #7303be;
+    --c3-transparent: #2200385A;
+    --c3-transparent-darker: #220038ea;
+    --red-main: #FF4A4A;
+    --red-side: #fff6f6;
+    --green-main: #00C04D;
+    --green-side: #F2FDF6;
+    --blue-main: #504DFF;
+    --blue-side: #F6F6FF;
+    --orange-main: #FF9C08;
+    --orange-side: #FFFAF3;
+    --yellow: #FFED4B;
+    --90: 90px;
+    --64: 64px;
+    --54: 54px;
+    --48: 3rem;
+    --40: 2.5rem;
+    --32: 2rem;
+    --24: 1.5rem;
+    --20: 1.25rem;
+    --16: 1rem;
+    --12: .75rem;
+    --10: .65rem;
+    --border-r-6: 6px;
+    --border-r-18: 18px;
+    --border-r-32: 32px;
+    --border-r-50: 50%;
+    transition: .2s ease-in-out;
+} */
+
+
+:root {
+    --white: #ffffff;
+    --white-transparent: #ffffffda;
+    --white-high-transparent: #ffffffa8;
+    --black: #000000;
+    --black-transparent: #0000009e;
+    --black-high-transparent: #000000a8;
+    --dark-gray: #202020;
+    --gray: #909090;
+    --pale-gray: #E5E5E5;
+    --dim-gray: #e5e5e5;
+    --very-dim-gray: #f1f1f1;
+    --c1: #ee7700;
+    --c1-side: #f1f1f1;
+    /* --c1-side: #FFFAF3; */
+    /* --c1-side: #86318c0d; */
+    /* --c1-side: #fef7ff; */
+    --c1-transparent: #86318c08;
+    --c1-pale: #28002B;
+    --c2: #1F0021;
+    --c3: #220038;
+    --c3-transparent: #2200385A;
+    --c3-transparent-darker: #220038ea;
+    --red-main: #FF4A4A;
+    --red-side: #fff6f6;
+    --green-main: #00C04D;
+    --green-side: #F2FDF6;
+    --blue-main: #1792fe;
+    --blue-side: #504dff17;
+    --orange-main: #ee7700;
+    --orange-side: #FFFAF3;
+    --yellow: #FFED4B;
+    --90: 90px;
+    --64: 64px;
+    --54: 54px;
+    --48: 3rem;
+    --40: 2.5rem;
+    --32: 2rem;
+    --24: 1.5rem;
+    --20: 1.25rem;
+    --16: 1rem;
+    --12: .75rem;
+    --10: .65rem;
+    --border-r-6: 6px;
+    --border-r-18: 10px;
+    --border-r-14: 14px;
+    --border-r-32: 32px;
+    --border-r-50: 50%;
+}
+
+.gradient-bg-right {
+    background:
+        linear-gradient(-90deg, rgb(255, 255, 255) 0%, rgba(225, 225, 225, 0) 100%) !important
+}
+
+.gradient-bg-left {
+    background:
+        linear-gradient(-270deg, rgb(255, 255, 255) 0%, rgba(225, 225, 225, 0) 100%) !important
+}
+
+@media (prefers-color-scheme: dark) {
+    .gradient-bg-right {
+        background:
+            linear-gradient(-90deg, rgba(23, 23, 24, 1) 0%, rgba(23, 23, 24, 0)100%) !important;
+    }
+
+    .gradient-bg-left {
+        background:
+            linear-gradient(-270deg, rgba(23, 23, 24, 1) 0%, rgba(23, 23, 24, 0)100%) !important
+    }
+
+    :root {
+        --white: #171718;
+        /* --white: #150016; */
+        /* --white: #1b1717; */
+        --white-transparent: #171718ed;
+        --white-high-transparent: #0000007b;
+        --black: #d8d8d8;
+        --black-transparent: #0000009e;
+        --black-high-transparent: #ffffff04;
+        --dark-gray: #E5E5E5;
+        --gray: #909090;
+        --pale-gray: #343434;
+        /* --pale-gray: #3a003e; */
+        --dim-gray: #343434;
+        --very-dim-gray: #2f2f2f;
+        --c1: #ee7700;
+        --c1-side: #252429;
+        /* --c1-side: #86318c21; */
+        --c1-transparent: #86318c08;
+        --c1-pale: #28002B;
+        --c2: #1F0021;
+        --c3: #220038;
+        --c3-transparent: #2200385A;
+        --c3-transparent-darker: #220038ea;
+        --red-main: #FF4A4A;
+        --red-side: #ff4a4a17;
+        --green-main: #00C04D;
+        --green-side: #00c04d20;
+        --blue-main: #79c0ff;
+        --blue-side: rgba(246, 246, 255, 0.141);
+        --orange-main: #ee7700;
+        --orange-side: #ee770026;
+        --yellow: #FFED4B;
+        --90: 90px;
+        --64: 64px;
+        --54: 54px;
+        --48: 3rem;
+        --40: 2.5rem;
+        --32: 2rem;
+        --24: 1.5rem;
+        --20: 1.25rem;
+        --16: 1rem;
+        --12: .75rem;
+        --10: .65rem;
+        --border-r-6: 6px;
+        --border-r-18: 10px;
+        --border-r-14: 14px;
+        --border-r-32: 32px;
+        --border-r-50: 50%;
+    }
+
+}
