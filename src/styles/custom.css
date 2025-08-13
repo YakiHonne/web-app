@@ -237,15 +237,16 @@
 }
 
 main {
-    width: calc(100% - 200px);
+    /* width: calc(100% - 200px); */
+    width: 100%;
     float: right;
-    overflow: scroll;
+    /* overflow: scroll; */
 }
 
-main {
+/* main {
     height: 100vh;
 
-}
+} */
 
 @supports (height: 100dvh) {
     main {
@@ -909,24 +910,24 @@ main {
     border-color: var(--c1);
 }
 
-/* NOSTR NOSTR NOSTR NOSTR */
-
 .main-container {
     width: min(100%, 1200px);
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 0 1rem;
 }
 
 .main-page-nostr-container {
     width: calc(100% - 230px);
-    /* flex: 2.75; */
-    /* padding: 1rem; */
-    overflow-x: hidden;
     position: relative;
     z-index: 200;
-    /* scroll-behavior: smooth; */
+}
+
+.nostr-sidebar-container {
+    position: sticky;
+    left: 0;
+    top: 0;
+    height: 100vh;
 }
 
 .nostr-sidebar {
@@ -2104,9 +2105,24 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-right: 1px solid var(--very-dim-gray);
 }
 
+/* .bg-sp {
+    border-radius: 1rem;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 3px 3px rgba(0, 0, 0, 0.1), 0 8px 7px rgba(0, 0, 0, 0.13), 0 17px 14px rgba(0, 0, 0, 0.17), 0 35px 29px rgba(0, 0, 0, 0.22), 0px -4px 4px 0px rgba(0, 0, 0, 0.04) inset;
+    background-color: #222b;
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    --rich-button-border-color: rgba(255,255,255,0.08)
+} */
+
 .bg-sp {
     background-color: var(--white) !important;
     box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.072);
+    /* box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 3px 3px rgba(0, 0, 0, 0.1), 0 8px 7px rgba(0, 0, 0, 0.13), 0 17px 14px rgba(0, 0, 0, 0.17), 0 35px 29px rgba(0, 0, 0, 0.22), 0px -4px 4px 0px rgba(0, 0, 0, 0.04) inset;
+    backdrop-filter: blur(16px);
+    background-color: rgba(25, 25, 25, 0.733) !important;
+    -webkit-backdrop-filter: blur(16px); */
 }
 
 .reply-tail {
@@ -2210,23 +2226,28 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     letter-spacing: .025rem !important;
     line-height: 1.8em !important;
 }
+
 .md-content strong {
     color: var(--blue-main);
 }
+
 .md-content a {
     text-decoration: underline;
     color: var(--c1);
 }
+
 .md-content blockquote {
     margin-top: 2rem;
     padding-left: 1rem;
     border-left: 2px solid var(--c1);
 }
-.md-content blockquote p{
-   color: var(--gray);
+
+.md-content blockquote p {
+    color: var(--gray);
 }
-.md-content blockquote strong{
-   color: var(--black);
+
+.md-content blockquote strong {
+    color: var(--black);
 }
 
 .md-content table {

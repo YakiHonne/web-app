@@ -199,22 +199,23 @@ export default function SidebarComp() {
         />
       )}
       <div
-        className="fx-scattered fx-end-v nostr-sidebar box-pad-v-m fx-col "
+        className="fx-scattered fx-end-v nostr-sidebar-container fx-col "
         style={{
           zIndex: isActive ? 1000 : 200,
+          
         }}
         onClick={() => setIsActive(true)}
         ref={mainFrame}
       >
         <div
-          className="fx-scattered fx-start-v fx-col fit-container"
+          className="nostr-sidebar fx-scattered fx-start-v fx-col fit-container"
           style={{ height: "100%" }}
         >
           <div className="fx-start-h fx-centered fx-col fit-container">
-            <div className="fx-centered fx-start-h fit-container">
+            <div className="fx-centered fx-start-h fit-container box-pad-v-s">
               <div
                 className="yakihonne-logo-128"
-                onClick={() => customHistory("/a")}
+                onClick={() => customHistory("/")}
               ></div>
             </div>
             <div className="mb-show" style={{ height: "200px" }}></div>

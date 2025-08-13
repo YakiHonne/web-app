@@ -28,6 +28,8 @@ import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
 import ContentSource from "@/Components/ContentSettings/ContentSource";
 import ContentFilter from "@/Components/ContentSettings/ContentFilter";
+import InfiniteScroll from "@/Components/InfiniteScroll";
+import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 
 const MixEvents = (articles, curations, videos) => {
   const interleavedArray = [];
@@ -76,74 +78,90 @@ export default function Discover() {
   }, []);
 
   return (
-    <div>
-      <ArrowUp />
-      <div
-        className="fit-container fx-centered fx-start-h fx-start-v"
-        style={{ gap: 0 }}
-      >
-        <div
-          className={`fit-container fx-centered fx-start-v fx-wrap  fit-container mobile-container`}
-          style={{
-            position: "relative",
-          }}
-        >
+    <>
+      <div style={{ overflow: "auto" }}>
+        <ArrowUp />
+        <div className="fit-container fx-centered fx-start-h fx-start-v">
           <div
-            className="fit-container sticky fx-centered box-pad-h "
-            style={{
-              padding: "1rem",
-              borderBottom: "1px solid var(--very-dim-gray)",
-            }}
+            className="fit-container fx-centered fx-start-v fx-start-h"
+            style={{ gap: 0 }}
           >
-            <div className="main-middle fx-scattered">
-              <ContentSource
+            <div
+              style={{ gap: 0 }}
+              className={`fx-centered  fx-wrap fit-container`}
+            >
+              {/* <div
+                className="fit-container sticky fx-centered box-pad-h "
+                style={{
+                  padding: "1rem",
+                  borderBottom: "1px solid var(--very-dim-gray)",
+                }}
+              > */}
+              {/* <div className="main-middle fx-scattered">
+                  <ContentSource
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                  />
+                  <ContentFilter
+                    selectedFilter={selectedFilter}
+                    setSelectedFilter={setSelectedFilter}
+                  />
+                </div> */}
+              <ContentSourceAndFilter
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
-              />
-              <ContentFilter
                 selectedFilter={selectedFilter}
                 setSelectedFilter={setSelectedFilter}
               />
+              {/* </div> */}
+              <div
+                className=" main-middle"
+                style={{
+                  marginBottom: "4rem",
+                }}
+              >
+                <div style={{height: "90px"}}></div>
+                <ExploreFeed
+                  selectedTab={selectedTab}
+                  selectedCategory={selectedCategory}
+                  selectedFilter={selectedFilter}
+                  isLoading={isLoading}
+                  setIsLoading={setIsLoading}
+                />
+              </div>
             </div>
           </div>
-
-          <div
-            className=" main-middle feed-container"
-            style={{
-              overflow: "scroll",
-              marginBottom: "4rem",
-              height: "calc(100dvh - 4.375rem)",
-            }}
-          >
-            <ExploreFeed
-              selectedTab={selectedTab}
-              selectedCategory={selectedCategory}
-              selectedFilter={selectedFilter}
-              isLoading={isLoading}
-              setIsLoading={setIsLoading}
-            />
-          </div>
-          {selectedCategory.group !== "mf" && (
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                pointerEvents: isLoading ? "none" : "auto",
-                zIndex: 101,
-              }}
-              className="fit-container fx-centered box-pad-v"
-            >
-              <SelectTabs
-                selectedTab={selectedTab}
-                setSelectedTab={setSelectedTab}
-                tabs={tabs}
-              />
-            </div>
-          )}
         </div>
       </div>
-    </div>
+      {selectedCategory.group !== "mf" && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            pointerEvents: isLoading ? "none" : "auto",
+            zIndex: 101,
+          }}
+          className="fit-container fx-centered box-pad-v "
+        >
+          <div className="main-container">
+            <main style={{ height: "80px" }} className="fx-centered fx-end-h box-pad-h-s">
+              <div className="main-page-nostr-container fx-centered">
+                <div className="main-middle fx-centered box-pad-h">
+                  <div className="fx-centered" style={{ width: "max-content" }}>
+                    <SelectTabs
+                      selectedTab={selectedTab}
+                      setSelectedTab={setSelectedTab}
+                      tabs={tabs}
+                    />
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -183,9 +201,9 @@ const ExploreFeed = ({
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
       let [articles, curations, videos] = await Promise.all([
-        getSubData(artsFilter, 200, algoRelay),
-        getSubData(curationsFilter, 200, algoRelay),
-        getSubData(videosFilter, 200, algoRelay),
+        getSubData(artsFilter, 200, algoRelay, undefined, 20),
+        getSubData(curationsFilter, 200, algoRelay, undefined, 20),
+        getSubData(videosFilter, 200, algoRelay, undefined, 20),
       ]);
 
       let articles_ = sortEvents(articles.data).filter(
@@ -290,29 +308,30 @@ const ExploreFeed = ({
       contentFromRelays();
     if (["mf"].includes(selectedCategory?.group)) contentFromDVM();
   }, [timestamp]);
-  useEffect(() => {
-    const handleScroll = () => {
-      if (isLoading || isEndOfQuerying) return;
-      let container = document.querySelector(".feed-container");
-      if (!container) return;
-      if (
-        container.scrollHeight - container.scrollTop - 60 >
-        document.documentElement.offsetHeight
-      ) {
-        return;
-      }
-      setTimestamp(Date.now());
-    };
 
-    document
-      .querySelector(".feed-container")
-      ?.addEventListener("scroll", handleScroll);
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     if (isLoading || isEndOfQuerying) return;
+  //     let container = document.querySelector(".feed-container");
+  //     if (!container) return;
+  //     if (
+  //       container.scrollHeight - container.scrollTop - 60 >
+  //       document.documentElement.offsetHeight
+  //     ) {
+  //       return;
+  //     }
+  //     setTimestamp(Date.now());
+  //   };
 
-    return () =>
-      document
-        .querySelector(".feed-container")
-        ?.removeEventListener("scroll", handleScroll);
-  }, [isLoading]);
+  //   document
+  //     .querySelector(".feed-container")
+  //     ?.addEventListener("scroll", handleScroll);
+
+  //   return () =>
+  //     document
+  //       .querySelector(".feed-container")
+  //       ?.removeEventListener("scroll", handleScroll);
+  // }, [isLoading]);
 
   useEffect(() => {
     setContent([]);
@@ -490,7 +509,8 @@ const ExploreFeed = ({
   };
 
   return (
-    <div className="fit-container fx-centered fx-col " style={{ gap: 0 }}>
+    <InfiniteScroll onRefresh={setTimestamp} events={content}>
+      {/* <div className="fit-container fx-centered fx-col " style={{ gap: 0 }}> */}
       {content.map((item, index) => {
         if (!bannedList.includes(item.pubkey))
           return (
@@ -521,6 +541,7 @@ const ExploreFeed = ({
           <LoadingLogo />
         </div>
       )}
-    </div>
+      {/* </div> */}
+    </InfiniteScroll>
   );
 };

@@ -65,7 +65,7 @@ const MobileDemo = ({ exit }) => {
           className="fit-container"
         >
           <source
-            src="https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/videos/yakihonne-mobile-app-promo-2.mp4"
+            src="https://yakihonne.s3.ap-east-1.amazonaws.com/videos/yakihonne-mobile-app-promo-2.mp4"
             type="video/mp4"
           />{" "}
           Your browser does not support HTML5 video.

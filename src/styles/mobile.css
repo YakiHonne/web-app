@@ -7,6 +7,7 @@
 @media only screen and (max-width: 1450px) {
   .main-page-nostr-container {
     flex: 4;
+       min-width: calc(100% - 230px);
   }
 }
 
@@ -25,6 +26,7 @@
 
   .main-page-nostr-container {
     flex: 4;
+       min-width: calc(100% - 230px);
   }
 
 }

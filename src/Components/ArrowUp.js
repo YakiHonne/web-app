@@ -6,7 +6,7 @@ export default function ArrowUp() {
 
   useEffect(() => {
     const handleScroll = (e) => {
-      let el = document.querySelector(".main-page-nostr-container");
+      let el = document.querySelector(".page-container");
       if (!el) return;
       if (el.scrollTop >= 600) setShowArrow(true);
       else setShowArrow(false);
@@ -16,7 +16,7 @@ export default function ArrowUp() {
   }, []);
 
   const straightUp = () => {
-    let el = document.querySelector(".main-page-nostr-container");
+    let el = document.querySelector(".page-container");
     if (!el) return;
     el.scrollTop = 0;
   };

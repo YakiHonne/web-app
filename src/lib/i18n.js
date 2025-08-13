@@ -40,7 +40,7 @@ import { initReactI18next } from 'react-i18next';
 import HttpBackend from 'i18next-http-backend';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-import supportedLanguageKeys from '@/Content/SupportedLanguages';
+import {supportedLanguageKeys} from '@/Content/SupportedLanguages';
 
 if (!i18n.isInitialized) {
   i18n

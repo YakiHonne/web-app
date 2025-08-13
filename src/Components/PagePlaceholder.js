@@ -18,8 +18,8 @@ let HeroUnsupported = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images
 let HeroMutedUser = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/muted-user.png";
 let HeroMaintenance = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/maintenance.png";
 let HeroAI = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ai.png";
-let LoginWithAPI = "./LoginWithAPI";
-let AddWallet = "./AddWallet";
+import LoginWithAPI from "@/Components/LoginWithAPI";
+import AddWallet from "@/Components/AddWallet";
 
 export default function PagePlaceholder({ page, onClick = null }) {
   const userKeys = useSelector((state) => state.userKeys);

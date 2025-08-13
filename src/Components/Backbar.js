@@ -1,12 +1,13 @@
-'use client';
 import React from "react";
-import { customHistory } from "@/Helpers/History";
+import { useRouter } from "next/navigation";
 
 export default function Backbar() {
+  const router = useRouter();
+
   return (
     <div
       className="fx-centered fit-container fx-start-h box-pad-v-s sticky"
-      onClick={() => customHistory.back()}
+      onClick={() => router.back()}
       style={{ padding: ".5rem 0" }}
     >
       <div>

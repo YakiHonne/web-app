@@ -11,7 +11,7 @@ Potential use cases:
 - Community-Driven Minting Initiatives.
 - Minting Rewards and Incentives.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/mint.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/mint.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -117,7 +117,7 @@ Potential use cases:
 - Affiliate/Advertising Revenue.
 - Crowdfunding and Donations.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/monetization.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/monetization.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -191,7 +191,7 @@ Potential use cases:
 - Crowdfunding Programs.
 - Community Polls.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/staking-on-the-2024-us-election.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/staking-on-the-2024-us-election.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -275,7 +275,7 @@ Potential use cases:
 - Users Base Growth.
 - Networking Monetization.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/building-social-network.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/building-social-network.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -352,7 +352,7 @@ Potential use cases:
 - Collaboration and Team Building.
 - Interest-Based Groups and Meetups.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/connecting-users.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/connecting-users.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -614,7 +614,7 @@ Potential use cases:
 - Support Programs.
 - User Engagement Gamification.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/support-free-speech.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/support-free-speech.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -696,7 +696,7 @@ Potential use cases:
 - Launch Feature Coordination.
 - Social Sharing Options.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/product-announcement.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/product-announcement.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -771,7 +771,7 @@ Potential use cases:
 - Membership Sign-Ups.
 - Product Trials.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/apply-now.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/apply-now.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -864,7 +864,7 @@ Potential use cases:
 - Recurring Donations.
 - Events Fundraising.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/donation.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/donation.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -964,7 +964,7 @@ Potential use cases:
 - Open Discussions.
 - Proposal Submission.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/voice-of-the-community.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/voice-of-the-community.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -1029,7 +1029,7 @@ Potential use cases:
 - Events Proposals.
 - Engagement Through Incentivized Voting.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/make-something-happen.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/make-something-happen.png",
         metadata: {
           border_color: "",
           background_color: "",
@@ -1104,7 +1104,7 @@ Potential use cases:
 - Ticket Purchases.
 - Agenda Guidelines.`,
         thumbnail:
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/RSVP.png",
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/RSVP.png",
         metadata: {
           border_color: "",
           background_color: "",

@@ -78,11 +78,11 @@ export default function CountDownToNewProduct() {
             }}
             className="fit-container"
             // src={
-            //   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/videos/yakihonne-mobile-app-promo.mp4"
+            //   "https://yakihonne.s3.ap-east-1.amazonaws.com/videos/yakihonne-mobile-app-promo.mp4"
             // }
           >
             <source
-              src="https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-videos/smart-widget-teaser.mp4"
+              src="https://yakihonne.s3.ap-east-1.amazonaws.com/sw-videos/smart-widget-teaser.mp4"
               type="video/mp4"
             />{" "}
             Your browser does not support HTML5 video.

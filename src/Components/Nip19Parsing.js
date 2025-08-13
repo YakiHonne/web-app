@@ -148,6 +148,7 @@ export default function Nip19Parsing({ addr, minimal = false }) {
             title,
           });
         }
+        saveUsers([event.pubkey])
         setIsLoading(false);
         sub.stop();
       }

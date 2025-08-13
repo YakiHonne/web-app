@@ -18,7 +18,9 @@ import LoadingLogo from "@/Components/LoadingLogo";
 import ToastMessages from "@/Components/ToastMessages";
 import dynamic from "next/dynamic";
 
-const SideBarClient = dynamic(() => import("@/Components/SideBar/Sidebar"), { ssr: false });
+const SideBarClient = dynamic(() => import("@/Components/SideBar/Sidebar"), {
+  ssr: false,
+});
 
 function App({ Component, pageProps }) {
   const router = useRouter();
@@ -43,21 +45,25 @@ function App({ Component, pageProps }) {
     <ReduxProvider>
       <ToastMessages />
       <AppInit />
-      <div className="fit-container fx-centered">
+      <div className="page-container fit-container fx-centered fx-start-v" style={{ overflow: "scroll", height: "100dvh" }}>
         <div className="main-container">
-          <SideBarClient />
           {/* <Sidebar /> */}
-          <main className="main-page-nostr-container">
-            {loading ? (
-              <div
-                className="fit-container fx-centered"
-                style={{ height: "100vh" }}
-              >
-                <LoadingLogo size={58} />{" "}
+          <main className="fit-container fx-centered fx-end-h fx-start-v">
+            <div className="fx-scattered fx-start-v box-pad-h-s fit-container" style={{ gap: 0 }}>
+              <SideBarClient />
+              <div className="main-page-nostr-container">
+                {loading ? (
+                  <div
+                    className="fit-container fx-centered"
+                    style={{ height: "100vh" }}
+                  >
+                    <LoadingLogo size={58} />{" "}
+                  </div>
+                ) : (
+                  <Component {...pageProps} />
+                )}
               </div>
-            ) : (
-              <Component {...pageProps} />
-            )}
+            </div>
           </main>
         </div>
       </div>

@@ -498,15 +498,13 @@ const getSubData = async (
   timeout = 1000,
   relayUrls = [],
   ndk = ndkInstance,
-  maxEvents = 1000
+  maxEvents = 1000,
 ) => {
-  // console.log(store)
-  // const userRelays = store.getState().userRelays;
   const userRelays = relaysOnPlatform;
 
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     let events = [];
     let pubkeys = [];
 
@@ -524,17 +522,16 @@ const getSubData = async (
       return;
     }
     let sub = ndk.subscribe(filter_, {
-      // cacheUsage: "CACHE_FIRST",
       groupable: false,
       skipVerification: true,
       skipValidation: true,
       relayUrls: relayUrls.length > 0 ? relayUrls : userRelays,
     });
     let timer;
-
     const startTimer = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
+        sub.removeAllListeners();
         sub.stop();
         resolve({
           data: sortEvents(removeEventsDuplicants(events)),
@@ -548,6 +545,7 @@ const getSubData = async (
         pubkeys.push(event.pubkey);
         if (event.id) events.push(event.rawEvent());
         if (maxEvents === 1) {
+          sub.removeAllListeners();
           sub.stop();
           resolve({
             data: sortEvents(removeEventsDuplicants(events)),
@@ -557,8 +555,9 @@ const getSubData = async (
         startTimer();
       }
     });
-
-    startTimer();
+    sub.on("eose", () => {
+      if (events.length === 0) startTimer();
+    });
   });
 };
 

@@ -22,7 +22,7 @@ import ToDeleteGeneral from "@/Components/ToDeleteGeneral";
 import AddVideo from "@/Components/AddVideo";
 import AddCuration from "@/Components/AddCuration";
 import LinkWallet from "@/Components/LinkWallet";
-import { InitEvent, walletWarning } from "@/Helpers/Controlers";
+import { exportWallet, InitEvent, walletWarning } from "@/Helpers/Controlers";
 import { decodeUrlOrAddress, encodeLud06 } from "@/Helpers/Encryptions";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import DeleteWallet from "@/Components/DeleteWallet";
@@ -181,7 +181,7 @@ export default function EventOptions({
     </div>
   );
 
-  const exportWallet = (
+  const exportOneWallet = (
     <div
       onClick={(e) => {
         e.stopPropagation();
@@ -453,7 +453,7 @@ export default function EventOptions({
           !checkIsLinked(event.entitle) && linkWalletWithUser,
           event.kind === 3 && copyNWC,
           event.kind !== 1 && copyAddress,
-          exportWallet,
+          exportOneWallet,
           removeWallet,
         ];
     }

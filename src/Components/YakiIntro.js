@@ -10,28 +10,28 @@ const content = [
   {
     url: "/yakihonne-smart-widgets",
     thumbnail:
-      "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/update-smart-widget.png",
+      "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/update-smart-widget.png",
     tag: "Smart widgets",
     new: true,
   },
   {
     url: "/points-system",
     thumbnail:
-      "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/update-points-system.png",
+      "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/update-points-system.png",
     tag: "Points system",
     new: false,
   },
   {
     url: "/yakihonne-paid-notes",
     thumbnail:
-      "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/update-flash-news.png",
+      "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/update-flash-news.png",
     tag: "Paid note",
     new: false,
   },
   {
     url: "/yakihonne-mobile-app",
     thumbnail:
-      "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-thumbnails/update-mobile-app.png",
+      "https://yakihonne.s3.ap-east-1.amazonaws.com/sw-thumbnails/update-mobile-app.png",
     tag: "Mobile app",
     new: false,
   },

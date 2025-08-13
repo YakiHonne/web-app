@@ -11,6 +11,7 @@ import { Fragment } from "react";
 import { localStorage_ } from "./utils";
 import { nip19 } from "nostr-tools";
 import React from "react";
+import MediaUploaderServer from "@/Content/MediaUploaderServer";
 
 export function getNoteTree(
   note,

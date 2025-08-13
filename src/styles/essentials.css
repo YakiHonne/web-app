@@ -283,6 +283,7 @@ li {
     -webkit-line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    word-break: break-word;
 }
 
 .p-n-lines {
@@ -291,6 +292,7 @@ li {
     line-clamp: var(--lines, 2);;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    word-break: break-word;
 }
 
 /* hr style */

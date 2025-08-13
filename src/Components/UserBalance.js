@@ -168,7 +168,7 @@ export default function UserBalance() {
           {isHidden && <h4>***</h4>}
         </div>
         <p className="gray-c">&#8596;</p>
-        <SatsToUSD sats={userBalance} isHidden={isHidden} />
+        {/* <SatsToUSD sats={userBalance} isHidden={isHidden} /> */}
       </div>
       {!isHidden && (
         <div className="eye-closed-24" onClick={handleSatsDisplay}></div>

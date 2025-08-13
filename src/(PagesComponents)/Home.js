@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useReducer, Fragment } from "react";
 import { useSelector } from "react-redux";
 import { filterContent, getBackupWOTList } from "@/Helpers/Encryptions";
-import { getNoteTree, getParsedNote } from "@/Helpers/ClientHelpers";
-// import { Helmet } from "react-helmet";
+import { getParsedNote } from "@/Helpers/ClientHelpers";
 import ArrowUp from "@/Components/ArrowUp";
 import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
@@ -19,19 +18,13 @@ import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSugg
 import { straightUp } from "@/Helpers/Helpers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import KindOne from "@/Components/KindOne";
-import UserToFollowSuggestionsCards from "@/Components/SuggestionsCards/UserToFollowSuggestionsCards";
-import ContentSuggestionsCards from "@/Components/SuggestionsCards/ContentSuggestionCards";
-import DonationBoxSuggestionCards from "@/Components/SuggestionsCards/DonationBoxSuggestionCards";
-import ProfileShareSuggestionCards from "@/Components/SuggestionsCards/ProfileShareSuggestionCards";
 import PostAsNote from "@/Components/PostAsNote";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
-import ContentSource from "@/Components/ContentSettings/ContentSource";
-import ContentFilter from "@/Components/ContentSettings/ContentFilter";
 import { getKeys } from "@/Helpers/ClientHelpers";
-import { localStorage_ } from "@/Helpers/utils";
-import { store } from "@/Store/Store";
-import { setHomeSavedNotes } from "@/Store/Slides/Extras";
+import InfiniteScroll from "@/Components/InfiniteScroll";
+import SuggestionsCards from "@/Components/SuggestionsCards/SuggestionsCards";
+import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -184,39 +177,6 @@ const notesReducer = (notes, action) => {
   }
 };
 
-const getInitialNotes = () => {
-  let defaultState = {
-    widgets: [],
-    recent: [],
-    recent_with_replies: [],
-    paid: [],
-    dvms: [],
-    algo: [],
-    global: [],
-  };
-
-  let savedNotes = store.getState().homeSavedNotes;
-  if (savedNotes) {
-    let key = Object.entries(savedNotes)
-      .filter((_) => _[1].length > 0)
-      .map((_) => _[0]);
-    savedNotes = {
-      ...savedNotes,
-      [key]: savedNotes[key].map((_) => {
-        let note_tree =
-          _.kind === 6
-            ? getNoteTree(_.relatedEvent.content)
-            : getNoteTree(_.content);
-        if (_.kind === 6) {
-          return { ..._, relatedEvent: { ..._.relatedEvent, note_tree } };
-        }
-        return { ..._, note_tree };
-      }),
-    };
-  }
-  return savedNotes;
-};
-
 let notesInitialState = {
   widgets: [],
   recent: [],
@@ -245,28 +205,16 @@ export default function Home() {
               style={{ gap: 0 }}
               className={`fx-centered  fx-wrap fit-container`}
             >
-              <div
-                className="fit-container sticky fx-centered box-pad-h "
-                style={{
-                  padding: "1rem",
-                  borderBottom: "1px solid var(--very-dim-gray)",
-                }}
-              >
-                <div className="main-middle fx-scattered">
-                  <ContentSource
-                    selectedCategory={selectedCategory}
-                    setSelectedCategory={setSelectedCategory}
-                    type={2}
-                  />
-                  <ContentFilter
-                    selectedFilter={selectedFilter}
-                    setSelectedFilter={setSelectedFilter}
-                    type={2}
-                  />
-                </div>
-              </div>
+              <ContentSourceAndFilter
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+                selectedFilter={selectedFilter}
+                setSelectedFilter={setSelectedFilter}
+                type={2}
+              />
               <HomeCarouselContentSuggestions />
               <div className="main-middle">
+                <div style={{ height: "90px" }}></div>
                 <PostNote />
                 {selectedCategory !== SUGGESTED_TAGS_VALUE && (
                   <HomeFeed
@@ -322,11 +270,10 @@ const PostNote = () => {
 const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const { t } = useTranslation();
   const userMutedList = useSelector((state) => state.userMutedList);
-  const userInterestList = useSelector((state) => state.userInterestList);
   const userKeys = useSelector((state) => state.userKeys);
   const [userFollowings, setUserFollowings] = useState(false);
   const [notes, dispatchNotes] = useReducer(notesReducer, notesInitialState);
-  const [isLoading, setIsLoading] = useState( true);
+  const [isLoading, setIsLoading] = useState(true);
   const [notesContentFrom, setNotesContentFrom] = useState(
     getContentFromValue(selectedCategory)
   );
@@ -335,7 +282,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   );
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
   const [rerenderTimestamp, setRerenderTimestamp] = useState(undefined);
-  const [articlesSuggestions, setArticlesSuggestions] = useState([]);
 
   useEffect(() => {
     let contentFromValue = getContentFromValue(selectedCategory);
@@ -466,44 +412,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     };
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      let container = document.querySelector(".main-page-nostr-container");
-      if (!container && isLoading) return;
-      if (
-        container.scrollHeight - container.scrollTop - 400 >
-        document.documentElement.offsetHeight
-      ) {
-        return;
-      }
-      if (notes[notesContentFrom]?.length > 0)
-        setNotesLastEventTime(
-          notes[notesContentFrom][notes[notesContentFrom]?.length - 1]
-            ?.created_at || undefined
-        );
-    };
-    document
-      .querySelector(".main-page-nostr-container")
-      ?.addEventListener("scroll", handleScroll);
-    return () =>
-      document
-        .querySelector(".main-page-nostr-container")
-        ?.removeEventListener("scroll", handleScroll);
-  }, [isLoading, selectedCategory, notes]);
-
-  useEffect(() => {
-    if (
-      !isLoading &&
-      notes[notesContentFrom]?.length > 0 &&
-      notes[notesContentFrom].length < 7
-    ) {
-      setNotesLastEventTime(
-        notes[notesContentFrom][notes[notesContentFrom].length - 1]
-          ?.created_at || undefined
-      );
-    }
-  }, [isLoading, notes[notesContentFrom]]);
-
   // useEffect(() => {
   //   if (notesInitialState) {
   //     let el = document.querySelector(".main-page-nostr-container");
@@ -523,15 +431,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
 
-      const filterSpeed = selectedCategory.group === "af" ? 1000 : 120;
-
-      const data = await getSubData(
-        filter,
-        filterSpeed,
-        algoRelay,
-        undefined,
-        200
-      );
+      const data = await getSubData(filter, 50, algoRelay, undefined, 200);
       events = data.data
         .splice(0, 50)
         .map((event) => {
@@ -576,7 +476,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           let events = [];
           let eventsPubkeys = [];
 
-          const res = await getSubData([{ ids: data }], 200);
+          const res = await getSubData([{ ids: data }], 50);
 
           events = res.data
             .map((event) => {
@@ -620,29 +520,11 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     selectedFilter,
   ]);
 
-  const getContentCard = (index) => {
-    if (index === 10)
-      return (
-        <ContentSuggestionsCards
-          content={articlesSuggestions}
-          kind="articles"
-        />
-      );
-    if (index === 20) return <UserToFollowSuggestionsCards />;
-    if (index === 30)
-      return (
-        <InterestSuggestionsCards
-          limit={5}
-          list={userInterestList}
-          update={true}
-          expand={true}
-        />
-      );
-    if (index === 40) return <DonationBoxSuggestionCards />;
-    if (index === 50) return <ProfileShareSuggestionCards />;
-  };
   return (
-    <div className="fx-centered  fx-wrap fit-container" style={{ gap: 0 }}>
+    <InfiniteScroll
+      onRefresh={setNotesLastEventTime}
+      events={notes[notesContentFrom]}
+    >
       {["recent", "recent_with_replies"].includes(notesContentFrom) &&
         userFollowings &&
         userFollowings?.length < 5 &&
@@ -708,20 +590,20 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
               return (
                 <Fragment key={note.id}>
                   <KindSix event={note} />
-                  {getContentCard(index)}
+                  <SuggestionsCards index={index} />
                 </Fragment>
               );
             if (note.kind !== 6)
               return (
                 <Fragment key={note.id}>
                   <KindOne event={note} border={true} />
-                  {getContentCard(index)}
+                  <SuggestionsCards index={index} />
                 </Fragment>
               );
           }
         })}
 
-      <div className="box-pad-v"></div>
+      <div className="box-marg-full"></div>
       {isLoading && (
         <div
           className="fit-container box-pad-v fx-centered fx-col"
@@ -730,6 +612,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           <LoadingLogo size={64} />
         </div>
       )}
-    </div>
+    </InfiniteScroll>
   );
 };

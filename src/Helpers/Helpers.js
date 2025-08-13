@@ -28,7 +28,7 @@ import { InitEvent } from "./Controlers";
 // import VideoLoader from "@/Components/VideoLoader";
 // import AudioLoader from "@/Components/AudioLoader";
 import { localStorage_ } from "./utils";
-import supportedLanguageKeys from "@/Content/SupportedLanguages";
+import {supportedLanguageKeys} from "@/Content/SupportedLanguages";
 
 const LoginToAPI = async (publicKey, userKeys) => {
   try {
