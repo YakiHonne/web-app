@@ -175,7 +175,7 @@ const OracleMACIPoll = ({ setPollAddr, exit }) => {
       if (!isInputValid) return;
       setIsLoading(true);
       const client = new MaciClient({
-        network: process.env.REACT_APP_NETWORK,
+        network: process.env.NEXT_PUBLIC_NETWORK,
       });
       let { signer } = await getKeplrSigner();
 
@@ -185,7 +185,7 @@ const OracleMACIPoll = ({ setPollAddr, exit }) => {
     console.log("contract.oracleCodeId",client.contract.oracleCodeId)
       let poll = await client.createOracleMaciRound({
         signer: signer,
-        operatorPubkey: process.env.REACT_APP_OP_PUBKEY,
+        operatorPubkey: process.env.NEXT_PUBLIC_OP_PUBKEY,
         startVoting: new Date(voteStart),
         endVoting: new Date(voteEnd),
         title: roundName,
@@ -560,7 +560,7 @@ const PollGasStation = ({ poll, signer, exit }) => {
       }
 
       const client = new MaciClient({
-        network: process.env.REACT_APP_NETWORK,
+        network: process.env.NEXT_PUBLIC_NETWORK,
       });
 
       const oracleMaciClient = await client.oracleMaciClient({
@@ -696,12 +696,12 @@ const MACIPoll = ({ setPollAddr }) => {
       if (isLoading) return;
       setIsLoading(true);
       const client = new MaciClient({
-        network: process.env.REACT_APP_NETWORK,
+        network: process.env.NEXT_PUBLIC_NETWORK,
       });
       let signer = await getKeplrSigner();
       let poll = await client.contract.createMaciRound({
         signer,
-        operatorPubkey: process.env.REACT_APP_OP_PUBKEY,
+        operatorPubkey: process.env.NEXT_PUBLIC_OP_PUBKEY,
         startVoting: new Date(voteStart),
         endVoting: new Date(voteEnd),
         title: roundName,
@@ -918,12 +918,12 @@ const AMACIPoll = ({ setPollAddr }) => {
       if (isLoading) return;
       setIsLoading(true);
       const client = new MaciClient({
-        network: process.env.REACT_APP_NETWORK,
+        network: process.env.NEXT_PUBLIC_NETWORK,
       });
       let signer = await getKeplrSigner();
       let poll = await client.createAMaciRound({
         signer,
-        operator: process.env.REACT_APP_OP_PUBKEY,
+        operator: process.env.NEXT_PUBLIC_OP_PUBKEY,
         startVoting: new Date(voteStart),
         endVoting: new Date(voteEnd),
         title: roundName?.trim(),
@@ -1138,7 +1138,7 @@ const ErrorMessage = ({ message }) => {
 //     console.log("Please install keplr extension");
 //     return false;
 //   } else {
-//     const chainId = DORA_CONFIG[process.env.REACT_APP_NETWORK].chainId;
+//     const chainId = DORA_CONFIG[process.env.NEXT_PUBLIC_NETWORK].chainId;
 
 //     await window.keplr.enable(chainId);
 
@@ -1154,13 +1154,13 @@ const ErrorMessage = ({ message }) => {
 //   const addMaciPoll = async () => {
 //     try {
 // const client = new MaciClient({
-//   network: process.env.REACT_APP_NETWORK,
+//   network: process.env.NEXT_PUBLIC_NETWORK,
 // });
 
 //       let signer = await getKeplrSigner();
 // const newRound = await client.contract.createOracleMaciRound({
 //         signer: signer,
-//         operatorPubkey: process.env.REACT_APP_OP_PUBKEY,
+//         operatorPubkey: process.env.NEXT_PUBLIC_OP_PUBKEY,
 //         startVoting: new Date(),
 //         endVoting: new Date(new Date().getTime() + 1 * 60 * 1000),
 //         title: "MaciPollTest",
@@ -1185,10 +1185,10 @@ const ErrorMessage = ({ message }) => {
 
 //   const getKeplrSigner = async () => {
 //     try {
-//       const chainId = DORA_CONFIG[process.env.REACT_APP_NETWORK].chainId;
-//       const rpc = DORA_CONFIG[process.env.REACT_APP_NETWORK].rpc;
+//       const chainId = DORA_CONFIG[process.env.NEXT_PUBLIC_NETWORK].chainId;
+//       const rpc = DORA_CONFIG[process.env.NEXT_PUBLIC_NETWORK].rpc;
 //       await window.keplr.experimentalSuggestChain(
-//         DORA_CONFIG[process.env.REACT_APP_NETWORK]
+//         DORA_CONFIG[process.env.NEXT_PUBLIC_NETWORK]
 //       );
 
 //       await window.keplr.enable(chainId);
@@ -1210,7 +1210,7 @@ const ErrorMessage = ({ message }) => {
 //   const getPoll = async () => {
 //     try {
 //       const client = new MaciClient({
-//         network: process.env.REACT_APP_NETWORK,
+//         network: process.env.NEXT_PUBLIC_NETWORK,
 //       });
 //       let poll = await client.getRoundById(
 //         "dora1695vj3dd72pklzcpaezvhw847txe057as9ttuf5ray9ze6zvacjq685qyk"

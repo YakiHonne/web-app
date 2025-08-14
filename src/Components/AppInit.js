@@ -1,4 +1,3 @@
-'use client'
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLiveQuery } from "dexie-react-hooks";
@@ -814,7 +813,7 @@ export default function AppInit() {
         [
           {
             kinds: [3],
-            authors: [process.env.REACT_APP_YAKI_PUBKEY],
+            authors: [process.env.NEXT_PUBLIC_YAKI_PUBKEY],
             until: prevData.last_updated,
           },
         ],

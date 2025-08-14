@@ -63,7 +63,7 @@ export default function BrowseMaciPolls({ setPollAddr, exit }) {
     try {
       setIsLoading(true);
       const client = new MaciClient({
-        network: process.env.REACT_APP_NETWORK,
+        network: process.env.NEXT_PUBLIC_NETWORK,
       });
 
       let poll = await client.getRounds(cursor, 10);
@@ -147,7 +147,7 @@ export default function BrowseMaciPolls({ setPollAddr, exit }) {
                       onClick={() =>
                         setPollAddr(
                           `https://vota${
-                            process.env.REACT_APP_NETWORK === "testnet"
+                            process.env.NEXT_PUBLIC_NETWORK === "testnet"
                               ? "-test"
                               : ""
                           }.dorafactory.org/round/${round.id}`

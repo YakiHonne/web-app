@@ -212,9 +212,9 @@ export default function Home() {
                 setSelectedFilter={setSelectedFilter}
                 type={2}
               />
+              <div style={{ height: "75px" }} className="fit-container"></div>
               <HomeCarouselContentSuggestions />
               <div className="main-middle">
-                <div style={{ height: "90px" }}></div>
                 <PostNote />
                 {selectedCategory !== SUGGESTED_TAGS_VALUE && (
                   <HomeFeed
@@ -340,10 +340,10 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           tempUserFollowings =
             followings?.followings?.length > 0
               ? [userKeys.pub, ...Array.from(followings.followings)]
-              : [userKeys.pub, process.env.REACT_APP_YAKI_PUBKEY];
+              : [userKeys.pub, process.env.NEXT_PUBLIC_YAKI_PUBKEY];
           setUserFollowings(tempUserFollowings);
         } else {
-          tempUserFollowings = [process.env.REACT_APP_YAKI_PUBKEY];
+          tempUserFollowings = [process.env.NEXT_PUBLIC_YAKI_PUBKEY];
           setUserFollowings(tempUserFollowings);
         }
       }

@@ -1,6 +1,6 @@
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+// import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import React from "react";
-import nextI18nextConfig from "../../../next-i18next.config";
+// import nextI18nextConfig from "../../../next-i18next.config";
 import { getSubData } from "@/Helpers/Controlers";
 import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";
@@ -47,11 +47,11 @@ export async function getStaticProps({ locale, params }) {
   return {
     props: {
       event: event,
-      ...(await serverSideTranslations(
-        locale ?? "en",
-        ["common"],
-        nextI18nextConfig
-      )),
+      // ...(await serverSideTranslations(
+      //   locale ?? "en",
+      //   ["common"],
+      //   nextI18nextConfig
+      // )),
       author:
         author.data.length > 0
           ? getParsedAuthor(author.data[0])

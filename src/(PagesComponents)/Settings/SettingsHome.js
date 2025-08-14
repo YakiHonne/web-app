@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import { useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
 import KeysManagement from "./KeysManagement";
 import RelaysManagement from "./RelaysManagement";
 import LanguagesManagement from "./LanguagesManagement";
@@ -28,37 +27,6 @@ export default function SettingsHome() {
   return (
     <>
       <div>
-        {/* <Helmet>
-        <title>Yakihonne | Settings</title>
-        <meta
-          name="description"
-          content={"Customize your Yakihonne experience with powerful privacy and interface options. Take control of your digital presence on the Nostr network.."}
-        />
-        <meta
-          property="og:description"
-          content={"Customize your Yakihonne experience with powerful privacy and interface options. Take control of your digital presence on the Nostr network.."}
-        />
-        <meta
-          property="og:image"
-          content="https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-        />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="700" />
-        <meta property="og:url" content={`https://yakihonne.com/settings`} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Yakihonne" />
-        <meta property="og:title" content="Yakihonne | Settings" />
-        <meta property="twitter:title" content="Yakihonne | Settings" />
-        <meta
-          property="twitter:description"
-          content={"Customize your Yakihonne experience with powerful privacy and interface options. Take control of your digital presence on the Nostr network.."}
-        />
-        <meta
-          property="twitter:image"
-          content="https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-        />
-        </Helmet> */}
-
         <div className="fx-centered fit-container  fx-start-v ">
           <div className="main-middle">
             {userMetadata &&

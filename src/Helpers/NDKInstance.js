@@ -10,11 +10,13 @@ const ndkInstance = new NDK({
 });
 
 await ndkInstance.connect(1000);
-ndkInstance.cacheAdapter = new NDKCacheAdapterDexie({
-  dbName: "ndk-store",
-  expirationTime: 3600 * 24 * 7,
-  profileCacheSize: 200,
-});
+if (typeof window !== "undefined") {
+  ndkInstance.cacheAdapter = new NDKCacheAdapterDexie({
+    dbName: "ndk-store",
+    expirationTime: 3600 * 24 * 7,
+    profileCacheSize: 200,
+  });
+}
 
 export { ndkInstance };
 

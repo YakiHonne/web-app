@@ -911,7 +911,7 @@ const getDefaultFilter = (type = 1) => {
 
 const getDVMJobRequest = async (DVM_PUBKEY) => {
   try {
-    let DVM_COMMUNICATOR_SEC = process.env.REACT_APP_DVM_COMMUNICATOR_SEC;
+    let DVM_COMMUNICATOR_SEC = process.env.NEXT_PUBLIC_DVM_COMMUNICATOR_SEC;
     let request_kind = 5300;
     let request_tags = [
       ["p", DVM_PUBKEY],

@@ -56,7 +56,7 @@ export default function MACIPollsCompB({ poll, header = true, url = "" }) {
     const init = async () => {
       try {
         const client = new MaciClient({
-          network: process.env.REACT_APP_NETWORK,
+          network: process.env.NEXT_PUBLIC_NETWORK,
         });
         const roundBalance_ = await client.maci.queryRoundBalance({
           contractAddress: poll.id,
@@ -438,7 +438,7 @@ const PollDetails = ({ poll, exit }) => {
   const downloadProofs = async () => {
     try {
       const client = new MaciClient({
-        network: process.env.REACT_APP_NETWORK,
+        network: process.env.NEXT_PUBLIC_NETWORK,
       });
       let proof = await client.getProofByContractAddress(poll.id);
       if (proof.code === 200)
@@ -807,7 +807,7 @@ const PollGasStation = ({ poll, exit }) => {
       }
 
       const client = new MaciClient({
-        network: process.env.REACT_APP_NETWORK,
+        network: process.env.NEXT_PUBLIC_NETWORK,
       });
 
       const oracleMaciClient = await client.oracleMaciClient({
@@ -928,7 +928,7 @@ const MACIPollVote = ({ poll, exit, onVoteSuccess }) => {
           return;
         }
         const client = new MaciClient({
-          network: process.env.REACT_APP_NETWORK,
+          network: process.env.NEXT_PUBLIC_NETWORK,
         });
         let { signer, address } = await getKeplrSigner();
         let vcBalance_ = false;

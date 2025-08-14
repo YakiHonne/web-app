@@ -5,7 +5,7 @@ import Date_ from "@/Components/Date_";
 import LoadingDots from "@/Components/LoadingDots";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
-import {  translate } from "@/Helpers/Controlers";
+import { translate } from "@/Helpers/Controlers";
 import useNoteStats from "@/Hooks/useNoteStats";
 import CommentsSection from "@/Components/CommentsSection";
 import { customHistory } from "@/Helpers/History";
@@ -19,6 +19,7 @@ import Link from "next/link";
 import useIsMute from "@/Hooks/useIsMute";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import PostReaction from "@/Components/PostReaction";
+import Backbar from "@/Components/Backbar";
 
 export default function Note({ event }) {
   const { state } = {};
@@ -101,19 +102,7 @@ export default function Note({ event }) {
         >
           {note && (
             <div className="main-middle">
-              <div
-                className="fx-centered fit-container fx-start-h box-pad-v-m sticky"
-                onClick={() => customHistory.back()}
-              >
-                <div className="box-pad-h-m">
-                  <button
-                    className="btn btn-normal btn-gray"
-                    style={{ padding: "0 1rem" }}
-                  >
-                    <div className="arrow arrow-back"></div>
-                  </button>
-                </div>
-              </div>
+              <Backbar />
               {note && !note.isRoot && (
                 <>
                   <div

@@ -6,8 +6,8 @@ import Follow from "@/Components/Follow";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { useDispatch, useSelector } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
-import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
+import { getSubData } from "@/Helpers/Controlers";
 
 const getBulkListStats = (list) => {
   let toFollow = list.filter((item) => item.to_follow).length;
@@ -36,27 +36,9 @@ export default function ShowPeople({ exit, list, type = "following" }) {
           if (list.length > 0) setIsLoaded(true);
           return;
         }
-
-        let sub = ndkInstance.subscribe([{ kinds: [0], authors: list }], {
-          closeOnEose: true,
-          cacheUsage: "CACHE_FIRST",
-          groupable: false,
-        });
-
-        sub.on("event", (event) => {
-          setPeople((data) => {
-            let newF = [...data, getParsedAuthor(event)];
-            let netF = newF.filter((item, index, newF) => {
-              if (
-                newF.findIndex((_item) => item.pubkey === _item.pubkey) ===
-                index
-              )
-                return item;
-            });
-            return netF;
-          });
-          setIsLoaded(true);
-        });
+        let sub = await getSubData([{ kinds: [0], authors: list }], 50);
+        if (sub.data.length > 0) setIsLoaded(true);
+        setPeople(sub.data.map((_) => getParsedAuthor(_)));
       } catch (err) {
         console.log(err);
       }

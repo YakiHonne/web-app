@@ -31,10 +31,11 @@ export default function UserFollowers({
           });
         setFollowers(userFollowers);
       } else {
-        let data = await getSubData([{ kinds: [3], "#p": [id] }], 300);
+        let data = await getSubData([{ kinds: [3], "#p": [id] }], 50);
 
         let users = await getSubData([
           { kinds: [0], authors: [...new Set(data.pubkeys)] },
+          50,
         ]);
 
         userFollowers = users.data

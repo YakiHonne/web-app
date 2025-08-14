@@ -1,47 +1,6 @@
 import { getParsedAuthor } from "./Encryptions";
 
 const pendingRequests = new Map();
-// let socket = null;
-
-// const connectWebSocket = (url) => {
-//   return new Promise((resolve, reject) => {
-//     const socket_ = new WebSocket(url);
-
-//     socket_.onopen = () => {
-//       console.log("WebSocket is connected");
-//       resolve(socket_);
-//     };
-
-//     socket_.onerror = (error) => {
-//       reject(error);
-//     };
-
-//     socket_.onclose = async () => {
-//       console.log("WebSocket connection closed");
-//       // socket = await connectWebSocket(url);
-//     };
-
-//     socket_.onmessage = (event) => {
-//       const ev = JSON.parse(event.data);
-//       const messageType = ev[0];
-//       const requestId = ev[1];
-//       if (messageType === "EOSE" && pendingRequests.has(requestId)) {
-//         const { resolve, responses } = pendingRequests.get(requestId);
-//         resolve(responses);
-//         pendingRequests.delete(requestId);
-//       } else {
-//         const response = ev[2];
-//         if (pendingRequests.has(requestId)) {
-//           const { responses } = pendingRequests.get(requestId);
-//           if (response) responses.push(response);
-//         }
-//       }
-//     };
-//   });
-// };
-
-// socket = await connectWebSocket("wss://cache.yakihonne.com/waa");
-// socket = await connectWebSocket("wss://cache2.primal.net/v1");
 
 let socket = null;
 
@@ -101,7 +60,8 @@ function initWebSocket(url) {
 }
 
 // Start connection (non-blocking)
-initWebSocket("wss://cache.yakihonne.com/ws");
+if (typeof window !== "undefined")
+  initWebSocket("wss://cache.yakihonne.com/ws");
 
 export const getMutualFollows = async (pubkey, user_pubkey) => {
   try {

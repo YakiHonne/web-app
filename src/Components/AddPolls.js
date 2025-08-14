@@ -201,7 +201,7 @@ const CreatePoll = ({ exit, setPollAddr, switchCategory }) => {
             setPollAddr={(data) => {
               setPollAddr(
                 `https://vota${
-                  process.env.REACT_APP_NETWORK === "testnet" ? "-test" : ""
+                  process.env.NEXT_PUBLIC_NETWORK === "testnet" ? "-test" : ""
                 }.dorafactory.org/round/${data}`
               );
               exit();

@@ -197,8 +197,8 @@ const checkAlbyToken = async (wallets, activeWallet) => {
       fd,
       {
         auth: {
-          username: process.env.REACT_APP_ALBY_CLIENT_ID,
-          password: process.env.REACT_APP_ALBY_SECRET_ID,
+          username: process.env.NEXT_PUBLIC_ALBY_CLIENT_ID,
+          password: process.env.NEXT_PUBLIC_ALBY_SECRET_ID,
         },
         headers: {
           "Content-Type": "multipart/form-data",

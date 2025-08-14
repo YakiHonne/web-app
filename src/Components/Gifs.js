@@ -3,7 +3,7 @@ import { Grid } from "@giphy/react-components";
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { useTranslation } from "react-i18next";
 
-const gf = new GiphyFetch(process.env.REACT_APP_GHIPHY_API_KEY);
+const gf = new GiphyFetch(process.env.NEXT_PUBLIC_GHIPHY_API_KEY);
 
 export default function Gifs({ setGif, exit, position = "left" }) {
   const ref = useRef(null);

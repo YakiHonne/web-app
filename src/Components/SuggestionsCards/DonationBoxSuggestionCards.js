@@ -35,8 +35,8 @@ export default function DonationBoxSuggestionCards({ padding = true }) {
           </p>
 
           <ZapTip
-            recipientLNURL={process.env.REACT_APP_YAKI_LUD16}
-            recipientPubkey={process.env.REACT_APP_YAKI_PUBKEY}
+            recipientLNURL={process.env.NEXT_PUBLIC_YAKI_LUD16}
+            recipientPubkey={process.env.NEXT_PUBLIC_YAKI_PUBKEY}
             senderPubkey={userKeys.pub}
             recipientInfo={{
               name: "Yakihonne",

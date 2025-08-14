@@ -28,7 +28,7 @@ import { InitEvent } from "./Controlers";
 // import VideoLoader from "@/Components/VideoLoader";
 // import AudioLoader from "@/Components/AudioLoader";
 import { localStorage_ } from "./utils";
-import {supportedLanguageKeys} from "@/Content/SupportedLanguages";
+import { supportedLanguageKeys } from "@/Content/SupportedLanguages";
 
 const LoginToAPI = async (publicKey, userKeys) => {
   try {
@@ -51,7 +51,7 @@ const getLoginsParams = async (publicKey, userKeys) => {
 
     let password = await encrypt44(
       userKeys,
-      process.env.REACT_APP_CHECKER_PUBKEY,
+      process.env.NEXT_PUBLIC_CHECKER_PUBKEY,
       content
     );
 
@@ -65,7 +65,7 @@ const getLoginsParams = async (publicKey, userKeys) => {
 const getAnswerFromAIRemoteAPI = async (pubkey_, input) => {
   try {
     let { password } = await getLoginsParams(pubkey_, {
-      sec: process.env.REACT_APP_CHECKER_SEC,
+      sec: process.env.NEXT_PUBLIC_CHECKER_SEC,
     });
     const res = await axios.post(
       // "http://localhost:4700/api/v1/ai",
@@ -158,6 +158,7 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
     const data = await axios.get(
       `https://${addressParts[1]}/.well-known/nostr.json?name=${addressParts[0]}`
     );
+
     return data.data?.names ? data.data.names[addressParts[0]] : false;
   } catch (err) {
     console.error(err);
@@ -501,7 +502,6 @@ const validateWidgetValues = (value, kind, type) => {
   return false;
 };
 
-
 const getAppLang = () => {
   let browserLanguage = navigator.languages
     ? navigator.languages[0]
@@ -535,7 +535,6 @@ const getContentTranslationConfig = () => {
     return defaultService;
   }
 };
-
 
 const updateContentTranslationConfig = (
   service,
@@ -598,8 +597,6 @@ const handleAppDirection = (toChangeLang) => {
     document.documentElement.dir = "ltr";
 };
 
-
-
 const getDefaultArtDraft = (pubkey) => {
   return {
     pubkey,
@@ -609,7 +606,6 @@ const getDefaultArtDraft = (pubkey) => {
     default: true,
   };
 };
-
 
 const toggleColorScheme = (theme) => {
   const stylesheets = document.styleSheets;
@@ -1253,8 +1249,6 @@ const addWidgetPathToUrl = (url) => {
     return false;
   }
 };
-
-
 
 export {
   getLinkFromAddr,
