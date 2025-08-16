@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "next dev --turbo -p 3400",
     "build": "next build",
-    "build:turbo": "next build --turbo",
     "start": "next start",
     "lint": "next lint"
   },
