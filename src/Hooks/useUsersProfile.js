@@ -4,6 +4,7 @@ import { NDKUser } from "@nostr-dev-kit/ndk";
 import { useSelector } from "react-redux";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import { getUser } from "@/Helpers/Controlers";
+import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 
 const useUserProfile = (pubkey) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
@@ -16,14 +17,15 @@ const useUserProfile = (pubkey) => {
         let auth = getUser(pubkey);
         if (auth) {
           setUserProfile(auth);
-          let ndkUser = new NDKUser({ pubkey });
-          ndkUser.ndk = ndkInstance;
-          let checknip05 =
-            auth.nip05 && typeof auth.nip05 === "string"
-              ? await ndkUser.validateNip05(auth.nip05)
-              : false;
+          let isChecked = auth.nip05 && typeof auth.nip05 === "string" ? await getAuthPubkeyFromNip05(auth.nip05) : false;
+          // let ndkUser = new NDKUser({ pubkey });
+          // ndkUser.ndk = ndkInstance;
+          // let checknip05 =
+          //   auth.nip05 && typeof auth.nip05 === "string"
+          //     ? await ndkUser.validateNip05(auth.nip05)
+          //     : false;
 
-          if (checknip05) setIsNip05Verified(true);
+          if (isChecked) setIsNip05Verified(true);
         }
       } catch (err) {
         console.log(err);

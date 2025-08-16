@@ -37,23 +37,16 @@ export async function getStaticProps({ locale, params }) {
   let pubkey = userId.includes("@")
     ? await getAuthPubkeyFromNip05(userId)
     : nip19.decode(userId).data.pubkey || nip19.decode(userId).data;
+  if (pubkey) {
+    pubkey =
+      pubkey.startsWith("npub") || pubkey.startsWith("nprofile")
+        ? nip19.decode(pubkey).data.pubkey || nip19.decode(pubkey).data
+        : pubkey;
+  }
   const [resMetaData, resFollowings] = await Promise.all([
-    getSubData(
-      [{ authors: [pubkey], kinds: [0] }],
-      undefined,
-      undefined,
-      undefined,
-      1
-    ),
-    getSubData(
-      [{ authors: [pubkey], kinds: [3] }],
-      undefined,
-      undefined,
-      undefined,
-      1
-    ),
+    getSubData([{ authors: [pubkey], kinds: [0] }], 400),
+    getSubData([{ authors: [pubkey], kinds: [3] }], 50),
   ]);
-
   let metadata = getEmptyuserMetadata(pubkey);
   let followings = [];
 

@@ -1,5 +1,5 @@
 
-import  router from "next/router";
+import router from "next/router";
 export function customHistory(path) {
-    router.push(path)
-} 
+  router.push(path);
+}

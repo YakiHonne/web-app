@@ -18,6 +18,7 @@ import ShowUsersList from "@/Components/ShowUsersList";
 import ZapAd from "@/Components/ZapAd";
 import RepEventCommentsSection from "@/Components/RepEventCommentsSection";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
+import useUserProfile from "@/Hooks/useUsersProfile";
 
 const checkFollowing = (list, toFollowKey) => {
   if (!list) return false;
@@ -42,43 +43,16 @@ export default function RepEventPreviewCard({
   border = true,
   minimal = false,
 }) {
-  const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const userFollowings = useSelector((state) => state.userFollowings);
   const { t } = useTranslation();
-  const [authorData, setAuthorData] = useState(
-    getEmptyuserMetadata(item.pubkey)
-  );
   const [showContent, setShowContent] = useState(!item.contentSensitive);
-  const [isNip05Verified, setIsNip05Verified] = useState(false);
-
+  const { isNip05Verified, userProfile } = useUserProfile(item.pubkey);
   const isFollowing = useMemo(() => {
     return checkFollowing(userFollowings, item.pubkey);
   }, [userFollowings]);
   const url = useMemo(() => {
-    return getURL(item, isNip05Verified);
+    return getURL(item);
   }, [isNip05Verified]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let auth = getUser(item.pubkey);
-        if (auth) {
-          setAuthorData(auth);
-          let ndkUser = new NDKUser({ pubkey: item.pubkey });
-          ndkUser.ndk = ndkInstance;
-          let checknip05 = auth.nip05
-            ? await ndkUser.validateNip05(auth.nip05)
-            : false;
-
-          if (checknip05) setIsNip05Verified(auth.nip05);
-        }
-        return;
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchData();
-  }, [nostrAuthors]);
 
   if (minimal)
     return (
@@ -118,7 +92,7 @@ export default function RepEventPreviewCard({
               <div className="fx-scattered fit-container">
                 <div className="fx-centered box-pad-h-m">
                   <AuthorPreviewMinimal
-                    author={authorData}
+                    author={userProfile}
                     item={item}
                     isNip05Verified={isNip05Verified}
                   />
@@ -166,7 +140,7 @@ export default function RepEventPreviewCard({
             <div className="fx-scattered box-pad-v-m">
               <div className="fx-centered">
                 <AuthorPreview
-                  author={authorData}
+                  author={userProfile}
                   item={item}
                   isNip05Verified={isNip05Verified}
                 />
@@ -208,7 +182,7 @@ export default function RepEventPreviewCard({
                   backgroundColor:
                     "linear-gradient(93deg, #880185 -6.44%, #FA4EFF 138.71%)",
                   backgroundImage: `url(${
-                    item.image || authorData.picture || item.imagePP
+                    item.image || userProfile.picture || item.imagePP
                   })`,
                   width: "max(30%,200px)",
                   aspectRatio: "1/1",
@@ -233,7 +207,7 @@ export default function RepEventPreviewCard({
               </div>
             </Link>
           </div>
-          <Reactions post={item} author={authorData} url={url} />
+          <Reactions post={item} author={userProfile} url={url} />
         </div>
       </div>
     </>

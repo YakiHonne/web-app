@@ -151,7 +151,7 @@ export default function UserBalance() {
       style={{ borderLeft: "2px solid var(--orange-main)", margin: ".75rem" }}
       onClick={(e) => {
         e.stopPropagation();
-        customHistory.push("/wallet");
+        customHistory("/wallet");
       }}
     >
       <div

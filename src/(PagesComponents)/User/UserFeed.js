@@ -17,6 +17,7 @@ import { useTranslation } from "react-i18next";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
 import { useRouter } from "next/router";
 import useIsMute from "@/Hooks/useIsMute";
+import InfiniteScroll from "@/Components/InfiniteScroll";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -152,38 +153,11 @@ export default function UserFeed({ user }) {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      // if (notesContentFrom === "trending") return;
-      let container = document.querySelector(".main-page-nostr-container");
-
-      if (!container) return;
-      if (
-        container.scrollHeight - container.scrollTop - 60 >
-          document.documentElement.offsetHeight &&
-        events[contentFrom].length > 4
-      ) {
-        return;
-      }
-      setLastEventTime(
-        events[contentFrom][events[contentFrom].length - 1]?.created_at ||
-          undefined
-      );
-    };
-    document
-      .querySelector(".main-page-nostr-container")
-      ?.addEventListener("scroll", handleScroll);
-    return () =>
-      document
-        .querySelector(".main-page-nostr-container")
-        ?.removeEventListener("scroll", handleScroll);
-  }, [isLoading]);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         let filter = getNotesFilter();
-        const res = await getSubData(filter, 50);
-        let data = res.data.slice(0, 100);
+        const res = await getSubData(filter, 100);
+        let data = res.data.slice(0, 50);
         let pubkeys = res.pubkeys;
         let ev = [];
         if (data.length > 0) {
@@ -232,13 +206,12 @@ export default function UserFeed({ user }) {
           }
           dispatchEvents({ type: contentFrom, note: ev });
         }
-        setIsLoading(false);
+        if(ev.length === 0) setIsLoading(false);
       } catch (err) {
         console.log(err);
       }
     };
     if (!pubkey) return;
-    setIsLoading(true);
     fetchData();
   }, [lastEventTime, contentFrom, pubkey]);
 
@@ -252,7 +225,7 @@ export default function UserFeed({ user }) {
 
   if (isMuted) return;
   return (
-    <div className="fx-centered  fx-wrap fit-container" style={{ gap: 0 }}>
+    <div className="fx-centered  fx-wrap" style={{ gap: 0, Width: "min(100%, 800px)" }}>
       <div
         className="fit-container fx-even sticky box-pad-h"
         style={{
@@ -313,87 +286,74 @@ export default function UserFeed({ user }) {
           {t("AStkKfQ")}
         </div>
       </div>
-      {["notes", "replies"].includes(contentFrom) && (
-        <div className="fit-container fx-centered fx-col">
-          {events[contentFrom].length > 0 && (
-            <>
-              <div
-                style={{ width: "min(100%,800px)", gap: 0 }}
-                className="fx-around fx-wrap"
-              >
+      <InfiniteScroll onRefresh={setLastEventTime} events={events[contentFrom]}>
+        {["notes", "replies"].includes(contentFrom) && (
+          <>
+            {events[contentFrom].length > 0 && (
+              <>
                 {events[contentFrom].map((note) => {
                   if (note.kind === 6)
                     return <KindSix event={note} key={note.id} />;
                   return <KindOne event={note} key={note.id} border={true} />;
                 })}
-              </div>
-            </>
-          )}
-          {events[contentFrom].length === 0 && !isLoading && (
-            <div
-              className="fx-centered fx-col box-pad-v"
-              style={{ height: "30vh" }}
-            >
-              <h4>{t("Aezm5AZ")}</h4>
-              <p className="gray-c">{t("AmK41uU", { name: user?.name })}</p>
+              </>
+            )}
+            {events[contentFrom].length === 0 && !isLoading && (
               <div
-                className="note-2-24"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
-            </div>
-          )}
-        </div>
-      )}
-      {contentFrom === "curations" && (
-        <div className="fit-container fx-centered fx-col">
-          {events[contentFrom].length > 0 && (
-            <>
-              <div
-                style={{ width: "min(100%,800px)" }}
-                className="fx-around fx-wrap posts-cards"
+                className="fx-centered fx-col box-pad-v"
+                style={{ height: "30vh" }}
               >
+                <h4>{t("Aezm5AZ")}</h4>
+                <p className="gray-c">{t("AmK41uU", { name: user?.name })}</p>
+                <div
+                  className="note-2-24"
+                  style={{ width: "48px", height: "48px" }}
+                ></div>
+              </div>
+            )}
+          </>
+        )}
+        {contentFrom === "curations" && (
+          <>
+            {events[contentFrom].length > 0 && (
+              <>
                 {events[contentFrom].map((item) => {
                   return <RepEventPreviewCard key={item.id} item={item} />;
                 })}
-              </div>
-            </>
-          )}
-          {events[contentFrom].length === 0 && !isLoading && (
-            <div
-              className="fx-centered fx-col box-pad-v"
-              style={{ height: "30vh" }}
-            >
-              <h4>{t("Aezm5AZ")}</h4>
-              <p className="gray-c">{t("A8pbTGs", { name: user?.name })}</p>
+              </>
+            )}
+            {events[contentFrom].length === 0 && !isLoading && (
               <div
-                className="curation-24"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
-            </div>
-          )}
-        </div>
-      )}
-      {contentFrom === "articles" && (
-        <div className="fit-container fx-centered fx-col">
-          {events[contentFrom].length === 0 && !isLoading && (
-            <div
-              className="fx-centered fx-col box-pad-v"
-              style={{ height: "30vh" }}
-            >
-              <h4>{t("AUBYIOq")}</h4>
-              <p className="gray-c">{t("AkqCrW5", { name: user?.name })}</p>
-              <div
-                className="posts"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
-            </div>
-          )}
-          {events[contentFrom].length > 0 && (
-            <>
-              <div
-                style={{ width: "min(100%,800px)", gap: 0 }}
-                className="fx-around fx-wrap posts-cards"
+                className="fx-centered fx-col box-pad-v"
+                style={{ height: "30vh" }}
               >
+                <h4>{t("Aezm5AZ")}</h4>
+                <p className="gray-c">{t("A8pbTGs", { name: user?.name })}</p>
+                <div
+                  className="curation-24"
+                  style={{ width: "48px", height: "48px" }}
+                ></div>
+              </div>
+            )}
+          </>
+        )}
+        {contentFrom === "articles" && (
+          <>
+            {events[contentFrom].length === 0 && !isLoading && (
+              <div
+                className="fx-centered fx-col box-pad-v"
+                style={{ height: "30vh" }}
+              >
+                <h4>{t("AUBYIOq")}</h4>
+                <p className="gray-c">{t("AkqCrW5", { name: user?.name })}</p>
+                <div
+                  className="posts"
+                  style={{ width: "48px", height: "48px" }}
+                ></div>
+              </div>
+            )}
+            {events[contentFrom].length > 0 && (
+              <>
                 {events[contentFrom].map((post) => {
                   let fullPost = {
                     ...post,
@@ -405,32 +365,27 @@ export default function UserFeed({ user }) {
                     </div>
                   );
                 })}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      {contentFrom === "videos" && (
-        <div className="fit-container fx-centered fx-col">
-          {events[contentFrom].length === 0 && !isLoading && (
-            <div
-              className="fx-centered fx-col box-pad-v"
-              style={{ height: "30vh" }}
-            >
-              <h4>{t("A3QrgxE")}</h4>
-              <p className="gray-c">{t("A70xEba", { name: user?.name })}</p>
+              </>
+            )}
+          </>
+        )}
+        {contentFrom === "videos" && (
+          <>
+            {events[contentFrom].length === 0 && !isLoading && (
               <div
-                className="play-24"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
-            </div>
-          )}
-          {events[contentFrom].length > 0 && (
-            <>
-              <div
-                style={{ width: "min(100%,800px)" }}
-                className="fx-around fx-wrap posts-cards"
+                className="fx-centered fx-col box-pad-v"
+                style={{ height: "30vh" }}
               >
+                <h4>{t("A3QrgxE")}</h4>
+                <p className="gray-c">{t("A70xEba", { name: user?.name })}</p>
+                <div
+                  className="play-24"
+                  style={{ width: "48px", height: "48px" }}
+                ></div>
+              </div>
+            )}
+            {events[contentFrom].length > 0 && (
+              <>
                 {events[contentFrom].map((video) => {
                   return (
                     <div key={video.id} className="fx-centered fit-container">
@@ -438,32 +393,27 @@ export default function UserFeed({ user }) {
                     </div>
                   );
                 })}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      {contentFrom === "smart-widget" && (
-        <div className="fit-container fx-centered fx-col">
-          {events[contentFrom].length === 0 && !isLoading && (
-            <div
-              className="fx-centered fx-col box-pad-v"
-              style={{ height: "30vh" }}
-            >
-              <h4>{t("Aezm5AZ")}</h4>
-              <p className="gray-c">{t("A1MlrcU", { name: user?.name })}</p>
+              </>
+            )}
+          </>
+        )}
+        {contentFrom === "smart-widget" && (
+          <>
+            {events[contentFrom].length === 0 && !isLoading && (
               <div
-                className="play-24"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
-            </div>
-          )}
-          {events[contentFrom].length > 0 && (
-            <>
-              <div
-                style={{ width: "min(100%,800px)" }}
-                className="fx-around fx-wrap box-pad-v-s"
+                className="fx-centered fx-col box-pad-v"
+                style={{ height: "30vh" }}
               >
+                <h4>{t("Aezm5AZ")}</h4>
+                <p className="gray-c">{t("A1MlrcU", { name: user?.name })}</p>
+                <div
+                  className="play-24"
+                  style={{ width: "48px", height: "48px" }}
+                ></div>
+              </div>
+            )}
+            {events[contentFrom].length > 0 && (
+              <>
                 {events[contentFrom].map((widget) => {
                   return (
                     <div key={widget.id} className="fx-centered fit-container">
@@ -475,19 +425,19 @@ export default function UserFeed({ user }) {
                     </div>
                   );
                 })}
-              </div>
-            </>
-          )}
-        </div>
-      )}
-      {isLoading && (
-        <div
-          className="fit-container box-pad-v fx-centered fx-col"
-          style={{ height: "40vh" }}
-        >
-          <LoadingLogo />
-        </div>
-      )}
+              </>
+            )}
+          </>
+        )}
+        {isLoading && (
+          <div
+            className="fit-container box-pad-v fx-centered fx-col"
+            style={{ height: "40vh" }}
+          >
+            <LoadingLogo />
+          </div>
+        )}
+      </InfiniteScroll>
     </div>
   );
 }

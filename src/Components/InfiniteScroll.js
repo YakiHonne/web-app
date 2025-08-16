@@ -33,5 +33,5 @@ export default function InfiniteScroll({ children, events, onRefresh }) {
       observer.disconnect();
     };
   }, [events]);
-  return <div className="infinite-scroll">{children}</div>;
+  return <div className="infinite-scroll fit-container">{children}</div>;
 }

@@ -90,7 +90,7 @@ const HighestZapper = ({ data, onClick }) => {
         <InitiConvo exit={() => setInitConv(false)} receiver={author.pubkey} />
       )}
 
-      <div className="fx-centered pointer" onClick={onClick}>
+      <div className="fx-centered pointer" >
         <div
           className="fx-centered"
           style={{ position: "relative", zIndex: 1, gap: 0 }}
@@ -100,7 +100,7 @@ const HighestZapper = ({ data, onClick }) => {
             user_id={data.pubkey}
             allowPropagation={true}
             size={30}
-            allowClick={false}
+            allowClick={true}
           />
           <div className="fx-centered" style={{ width: "8px" }}>
             <hr style={{ borderBottom: " 3px solid var(--pale-gray)" }} />
@@ -126,6 +126,7 @@ const HighestZapper = ({ data, onClick }) => {
                 minHeight: "30px",
                 borderRadius: "32px",
               }}
+              onClick={onClick}
             >
               <div className="fx-centered">
                 <div className="bolt-bold"></div>

@@ -6,7 +6,7 @@ import ShowUsersList from "@/Components/ShowUsersList";
 import Date_ from "@/Components/Date_";
 import NumberShrink from "@/Components/NumberShrink";
 import { useDispatch, useSelector } from "react-redux";
-import { setToast, setToPublish } from "@/Store/Slides/Publishers";
+import { setToast } from "@/Store/Slides/Publishers";
 import { getUser, translate } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import useNoteStats from "@/Hooks/useNoteStats";
@@ -35,7 +35,6 @@ export default function NotesComment({
   const { t } = useTranslation();
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const userKeys = useSelector((state) => state.userKeys);
-  const userRelays = useSelector((state) => state.userRelays);
   const userMutedList = useSelector((state) => state.userMutedList);
 
   const [user, setUser] = useState(getEmptyuserMetadata(event.pubkey));
@@ -220,7 +219,7 @@ export default function NotesComment({
                 mainAccountUser={false}
                 user_id={user.pubkey}
                 img={user.picture}
-                metadata={user}
+                metadata={noReactions ? undefined : user}
               />
               <div>
                 <div

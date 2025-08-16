@@ -143,43 +143,39 @@ export default function KindOne({
 
   const onClick = (e) => {
     e.stopPropagation();
-    customHistory(`/notes/${event.nEvent}`);
-    // Prevent multiple rapid clicks
-    // if (isNavigating) {
-    //   console.log('Click ignored - already navigating');
-    //   return;
-    // }
+    if (isNavigating) {
+      console.log('Click ignored - already navigating');
+      return;
+    }
 
-    // try {
-    //   let isSelected = window.getSelection().toString();
-    //   if (!reactions) {
-    //     console.log('Redirecting via redirect function');
-    //     redirect(e);
-    //     return;
-    //   }
-    //   if (isSelected) {
-    //     console.log('Text selected, ignoring click');
-    //     return null;
-    //   }
+    try {
+      let isSelected = window.getSelection().toString();
+      if (!reactions) {
+        console.log('Redirecting via redirect function');
+        redirect(e);
+        return;
+      }
+      if (isSelected) {
+        console.log('Text selected, ignoring click');
+        return null;
+      }
 
-    //   if (!event?.nEvent) {
-    //     console.error('Missing nEvent in event object:', event);
-    //     return;
-    //   }
+      if (!event?.nEvent) {
+        console.error('Missing nEvent in event object:', event);
+        return;
+      }
 
-    //   console.log('Navigating to:', `/notes/${event.nEvent}`);
-    //   setIsNavigating(true);
+      console.log('Navigating to:', `/notes/${event.nEvent}`);
+      setIsNavigating(true);
 
-    //   customHistory(`/notes/${event.nEvent}`, {
-    //     triggerTranslation: translatedNote ? true : false,
-    //   });
+      customHistory(`/notes/${event.nEvent}`);
 
-    //   // Reset navigation state after a short delay
-    //   setTimeout(() => setIsNavigating(false), 1000);
-    // } catch (error) {
-    //   console.error('Error in onClick handler:', error);
-    //   setIsNavigating(false);
-    // }
+      // Reset navigation state after a short delay
+      setTimeout(() => setIsNavigating(false), 1000);
+    } catch (error) {
+      console.error('Error in onClick handler:', error);
+      setIsNavigating(false);
+    }
   };
 
   const redirect = (e) => {

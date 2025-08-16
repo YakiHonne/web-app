@@ -2,10 +2,7 @@ import { nip19 } from "nostr-tools";
 import React, { useEffect, useState } from "react";
 import Avatar from "boring-avatars";
 import InitiConvo from "@/Components/InitConvo";
-import {
-  checkForLUDS,
-  getuserMetadata,
-} from "@/Helpers/Encryptions";
+import { checkForLUDS, getuserMetadata } from "@/Helpers/Encryptions";
 import ZapTip from "@/Components/ZapTip";
 import { useSelector } from "react-redux";
 import { getUser } from "@/Helpers/Controlers";
@@ -17,6 +14,7 @@ import NumberShrink from "@/Components/NumberShrink";
 import { NDKUser } from "@nostr-dev-kit/ndk";
 import { useTranslation } from "react-i18next";
 import Follow from "@/Components/Follow";
+import useUserProfile from "@/Hooks/useUsersProfile";
 
 export default function UserProfilePic({
   user_id,
@@ -38,7 +36,7 @@ export default function UserProfilePic({
   const [isLoading, setIsLoading] = useState(true);
   const [initConv, setInitConv] = useState(false);
   const [followers, setFollowers] = useState(0);
-  const [isNip05Verified, setIsNip05Verified] = useState(false);
+  const { isNip05Verified, userProfile } = useUserProfile(user_id);
 
   useEffect(() => {
     if (user_id && nostrAuthors.length > 0 && !img) {
@@ -53,23 +51,13 @@ export default function UserProfilePic({
     try {
       if (!allowPropagation) e.stopPropagation();
       if (allowClick) {
-        let auth = getUser(mainAccountUser ? userMetadata.pubkey : user_id);
-        if (auth) {
-          let ndkUser = new NDKUser({
-            pubkey: mainAccountUser ? userMetadata.pubkey : user_id,
-          });
-          ndkUser.ndk = ndkInstance;
-          let isVer = auth.nip05
-            ? await ndkUser.validateNip05(auth.nip05)
-            : false;
-          if (isVer) {
-            customHistory(`/profile/${auth.nip05}`);
-            return;
-          }
-        }
         let pubkey = nip19.nprofileEncode({
           pubkey: mainAccountUser ? userMetadata.pubkey : user_id,
         });
+        // if (isNip05Verified) {
+        //   customHistory(`/profile/${userProfile.nip05}`);
+        //   return
+        // } 
         customHistory(`/profile/${pubkey}`);
       }
       return null;
@@ -93,17 +81,15 @@ export default function UserProfilePic({
       setSubStart(true);
       let ndkUser = new NDKUser({ pubkey: metadata.pubkey });
       ndkUser.ndk = ndkInstance;
-      let [mutuals, userStats, isNip05Verified] = await Promise.all([
+      let [mutuals, userStats] = await Promise.all([
         getMutualFollows(userKeys.pub, user_id),
         getUserStats(user_id),
-        metadata.nip05 ? await ndkUser.validateNip05(metadata.nip05) : false,
       ]);
       let userStats_ = userStats.find((_) => _.kind === 10000105);
       userStats_ = userStats_ ? JSON.parse(userStats_.content) : 0;
       mutuals = mutuals
         ? mutuals.filter((_) => _.kind === 0).map((_) => getuserMetadata(_))
         : [];
-      setIsNip05Verified(isNip05Verified);
       setFollowers(userStats_.followers_count);
       setMutualFollows(mutuals);
       setIsLoading(false);
@@ -197,7 +183,7 @@ export default function UserProfilePic({
             />
           </div>
         )}
-          {showMetadata && metadata && (
+        {showMetadata && metadata && (
           <div
             style={{
               position: "absolute",

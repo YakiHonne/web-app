@@ -149,8 +149,20 @@ const getLinkPreview = async (url) => {
   }
 };
 
+// In-memory cache for NIP-05 lookups
+const nip05Cache = new Map();
+const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour in milliseconds
+
 const getAuthPubkeyFromNip05 = async (nip05Addr) => {
   try {
+    // Check cache first
+    const cacheKey = nip05Addr.toLowerCase();
+    const cached = nip05Cache.get(cacheKey);
+    
+    if (cached && Date.now() - cached.timestamp < CACHE_EXPIRY) {
+      return cached.pubkey;
+    }
+
     let addressParts = nip05Addr.split("@");
     if (addressParts.length === 1) {
       addressParts.unshift("_");
@@ -159,7 +171,15 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
       `https://${addressParts[1]}/.well-known/nostr.json?name=${addressParts[0]}`
     );
 
-    return data.data?.names ? data.data.names[addressParts[0]] : false;
+    const pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
+    
+    // Cache the result
+    nip05Cache.set(cacheKey, {
+      pubkey,
+      timestamp: Date.now()
+    });
+    
+    return pubkey;
   } catch (err) {
     console.error(err);
     return false;
@@ -1287,3 +1307,5 @@ export {
   addWidgetPathToUrl,
   getAnswerFromAIRemoteAPI,
 };
+
+  

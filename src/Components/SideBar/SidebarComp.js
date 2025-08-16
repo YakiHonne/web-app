@@ -33,14 +33,12 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { nip19 } from "nostr-tools";
 import SearchSidebar from "@/Components/SearchSidebar";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { customHistory } from "@/Helpers/History";
 import Link from "next/link";
 
 export default function SidebarComp() {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const router = useRouter();
   const userMetadata = useSelector((state) => state.userMetadata);
   const userKeys = useSelector((state) => state.userKeys);
   const userChatrooms = useSelector((state) => state.userChatrooms);
