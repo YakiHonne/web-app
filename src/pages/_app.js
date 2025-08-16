@@ -7,6 +7,7 @@ import "@/styles/essentials.css";
 import "@/styles/custom.css";
 import "@/styles/mobile.css";
 import "@/styles/chatAI.css";
+import "katex/dist/katex.css";
 import { useState, useEffect } from "react";
 // Import client-side i18n instead of next-i18next
 import "@/lib/i18n";

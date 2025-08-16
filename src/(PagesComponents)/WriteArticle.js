@@ -21,7 +21,6 @@ import ToPublish from "@/Components/ToPublish";
 import LoadingScreen from "@/Components/LoadingScreen";
 import ToPublishDrafts from "@/Components/ToPublishDrafts";
 import katex from "katex";
-import "katex/dist/katex.css";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { getAppLang } from "@/Helpers/Helpers";
 import {
