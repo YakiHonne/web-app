@@ -985,6 +985,16 @@ const getWotConfigDefault = () => {
   };
 };
 
+const getDefaultArtDraft = (pubkey) => {
+  return {
+    pubkey,
+    content: "",
+    title: "",
+    created_at: Math.floor(Date.now() / 1000),
+    default: true,
+  };
+};
+
 export function nEventEncode(id) {
   return nip19.neventEncode({
     id,

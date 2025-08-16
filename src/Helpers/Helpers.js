@@ -616,15 +616,6 @@ const handleAppDirection = (toChangeLang) => {
     document.documentElement.dir = "ltr";
 };
 
-const getDefaultArtDraft = (pubkey) => {
-  return {
-    pubkey,
-    content: "",
-    title: "",
-    created_at: Math.floor(Date.now() / 1000),
-    default: true,
-  };
-};
 
 const toggleColorScheme = (theme) => {
   const stylesheets = document.styleSheets;

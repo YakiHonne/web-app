@@ -26,6 +26,29 @@ function App({ Component, pageProps }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
+  // Define pages that should not show the sidebar
+  const noSidebarPages = [
+    "/yakihonne-mobile-app",
+    "/yakihonne-paid-notes",
+    "/yakihonne-smart-widgets",
+    "/privacy",
+    "/terms",
+    "/login",
+    "/points-system",
+    "/write-article",
+    "/m/maci-poll",
+    "/docs/sw/intro",
+    "/docs/sw/getting-started",
+    "/docs/sw/basic-widgets",
+    "/docs/sw/action-tool-widgets",
+    "/docs/sw/smart-widget-builder",
+    "/docs/sw/smart-widget-previewer",
+    "/docs/sw/smart-widget-handler",
+  ];
+
+  // Check if current route should hide sidebar
+  const shouldHideSidebar = noSidebarPages.includes(router.pathname);
+
   useEffect(() => {
     const handleStart = () => setLoading(true);
     const handleComplete = () => setLoading(false);
@@ -40,32 +63,51 @@ function App({ Component, pageProps }) {
       router.events.off("routeChangeError", handleComplete);
     };
   }, [router]);
-
   return (
     <ReduxProvider>
       <ToastMessages />
       <AppInit />
-      <div className="page-container fit-container fx-centered fx-start-v" style={{ overflow: "scroll", height: "100dvh" }}>
-        <div className="main-container">
-          {/* <Sidebar /> */}
-          <main className="fit-container fx-centered fx-end-h fx-start-v">
-            <div className="fx-scattered fx-start-v box-pad-h-s fit-container" style={{ gap: 0 }}>
-              <SideBarClient />
-              <div className="main-page-nostr-container">
-                {loading ? (
-                  <div
-                    className="fit-container fx-centered"
-                    style={{ height: "100vh" }}
-                  >
-                    <LoadingLogo size={58} />{" "}
-                  </div>
-                ) : (
-                  <Component {...pageProps} />
-                )}
+      <div
+        className="page-container fit-container fx-centered fx-start-v"
+        style={{ overflow: "scroll", height: "100dvh" }}
+      >
+        {shouldHideSidebar ? (
+          <div className="fit-container" style={{ width: "min(100%, 1700px)" }}>
+            {loading ? (
+              <div
+                className="fit-container fx-centered"
+                style={{ height: "100vh" }}
+              >
+                <LoadingLogo size={58} />
               </div>
-            </div>
-          </main>
-        </div>
+            ) : (
+              <Component {...pageProps} />
+            )}
+          </div>
+        ) : (
+          <div className="main-container">
+            <main className="fit-container fx-centered fx-end-h fx-start-v">
+              <div
+                className="fx-scattered fx-start-v box-pad-h-s fit-container"
+                style={{ gap: 0 }}
+              >
+                <SideBarClient />
+                <div className="main-page-nostr-container">
+                  {loading ? (
+                    <div
+                      className="fit-container fx-centered"
+                      style={{ height: "100vh" }}
+                    >
+                      <LoadingLogo size={58} />
+                    </div>
+                  ) : (
+                    <Component {...pageProps} />
+                  )}
+                </div>
+              </div>
+            </main>
+          </div>
+        )}
       </div>
     </ReduxProvider>
   );
