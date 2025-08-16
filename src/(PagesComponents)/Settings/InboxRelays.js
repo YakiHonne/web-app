@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { NDK } from "@nostr-dev-kit/ndk";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import { InitEvent } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import RelaysPicker from "@/Components/RelaysPicker";
 import RelayImage from "@/Components/RelayImage";
+import NDK from "@nostr-dev-kit/ndk";
 
 export function InboxRelays({ setShowRelaysInfo, allRelays }) {
   const dispatch = useDispatch();

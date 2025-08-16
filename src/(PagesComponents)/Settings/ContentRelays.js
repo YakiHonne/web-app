@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { NDK } from "@nostr-dev-kit/ndk";
+import NDK from "@nostr-dev-kit/ndk";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import RelaysPicker from "@/Components/RelaysPicker";
@@ -276,6 +276,6 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
       </div>
     </div>
   );
-};
+}
 
 export default ContentRelays;

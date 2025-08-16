@@ -19,7 +19,10 @@ export default function HomeCarouselContentSuggestions() {
     const fetchContentSuggestions = async () => {
       let content = await getSubData(
         [{ kinds: [16], limit: 50, "#k": ["30023"] }],
-        400
+        30,
+        undefined,
+        undefined,    
+        30
       );
       if (content.data.length > 0) {
         let data = content.data
