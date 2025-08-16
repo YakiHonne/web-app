@@ -822,8 +822,8 @@ main {
     height: 200%;
     left: 0;
     top: 50%;
-    background: rgb(255, 255, 255);
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .1) 40%, rgba(255, 255, 255, .1) 70%, rgba(255, 255, 255, 0) 100%);
+    background: rgb(130, 130, 130);
+    background: linear-gradient(90deg, rgba(130, 130, 130, 0) 0%, rgba(130, 130, 130, .1) 40%, rgba(130, 130, 130, .1) 70%, rgba(130, 130, 130, 0) 100%);
     z-index: 10;
     transform: translateY(-50%);
     animation: sliding 1s ease-in-out infinite;

@@ -1,14 +1,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import UserProfilePic from "@/Components/UserProfilePic";
-import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import { useSelector } from "react-redux";
-import { getUser } from "@/Helpers/Controlers";
 import DynamicIndicator from "@/Components/DynamicIndicator";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
-import { NDKUser } from "@nostr-dev-kit/ndk";
-import { ndkInstance } from "@/Helpers/NDKInstance";
 import useRepEventStats from "@/Hooks/useRepEventStats";
 import Like from "@/Components/Reactions/Like";
 import NumberShrink from "@/Components/NumberShrink";

@@ -158,7 +158,7 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
     // Check cache first
     const cacheKey = nip05Addr.toLowerCase();
     const cached = nip05Cache.get(cacheKey);
-    
+
     if (cached && Date.now() - cached.timestamp < CACHE_EXPIRY) {
       return cached.pubkey;
     }
@@ -171,14 +171,13 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
       `https://${addressParts[1]}/.well-known/nostr.json?name=${addressParts[0]}`
     );
 
-    const pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
-    
+    const pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;å
     // Cache the result
     nip05Cache.set(cacheKey, {
       pubkey,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
-    
+
     return pubkey;
   } catch (err) {
     console.error(err);
@@ -1307,5 +1306,3 @@ export {
   addWidgetPathToUrl,
   getAnswerFromAIRemoteAPI,
 };
-
-  

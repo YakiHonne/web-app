@@ -828,11 +828,11 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
 
   const handleAddContent = () => {
     if (["articles", "drafts"].includes(contentFrom)) {
-      customHistory.push("/write-article");
+      customHistory("/write-article");
       return;
     }
     if (["widgets"].includes(contentFrom)) {
-      customHistory.push("/smart-widget-builder");
+      customHistory("/smart-widget-builder");
       return;
     }
     if (["notes"].includes(contentFrom)) {
@@ -1133,7 +1133,7 @@ const Widgets = ({ setPostToNote, localDraft }) => {
   };
 
   const handleAddContent = () => {
-    customHistory.push("/smart-widget-builder");
+    customHistory("/smart-widget-builder");
   };
 
   return (
@@ -1890,8 +1890,8 @@ const DraftCard = ({ event, refreshAfterDeletion }) => {
       onClick={(e) => {
         e.stopPropagation();
         event.local
-          ? customHistory.push("/write-article")
-          : customHistory.push("/write-article", {
+          ? customHistory("/write-article")
+          : customHistory("/write-article", {
               post_pubkey: event.pubkey,
               post_id: event.id,
               post_kind: event.kind,
@@ -1950,7 +1950,7 @@ const DraftCardOthers = ({ event, setPostToNote }) => {
       return;
     }
     if (event.kind === 300331) {
-      customHistory.push("/smart-widget-builder");
+      customHistory("/smart-widget-builder");
     }
   };
   const eventKindsDisplayName = {
@@ -2063,8 +2063,8 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
       }}
       onClick={(e) => {
         e.stopPropagation();
-        customHistory.push(getLinkFromAddr(event.naddr));
-        // customHistory.push(`/${event.naddr}`);
+        customHistory(getLinkFromAddr(event.naddr));
+        // customHistory(`/${event.naddr}`);
       }}
     >
       <div className="fx-centered fx-start-v">
@@ -2181,7 +2181,7 @@ const NoteCard = ({ event }) => {
       }}
       onClick={(e) => {
         e.stopPropagation();
-        customHistory.push(`/notes/${nEventEncode(isRepost.id)}`);
+        customHistory(`/notes/${nEventEncode(isRepost.id)}`);
       }}
     >
       <div className="fx-centered fx-start-v">
