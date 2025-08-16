@@ -10,6 +10,8 @@ import "@/styles/chatAI.css";
 import "katex/dist/katex.css";
 import "highlight.js/styles/github.css";
 import "highlight.js/styles/github-dark.css";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 import { useState, useEffect } from "react";
 // Import client-side i18n instead of next-i18next
 import "@/lib/i18n";
