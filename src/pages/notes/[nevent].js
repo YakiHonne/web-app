@@ -18,7 +18,7 @@ export default function Page({ event, author }) {
     description: event.content,
     image:
       extractFirstImage(event.content) || author?.picture || author?.banner,
-    path: `notes/${nip19.neventEncode(event.id)}`,
+    path: `notes/${nip19.neventEncode({ id: event.id })}`,
   };
   if (event)
     return (
