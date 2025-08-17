@@ -20,7 +20,7 @@ export default function Page({ event }) {
     title: event?.display_name || event?.name,
     description: event.about || "N/A",
     image: event?.picture || event?.banner,
-    path: `profile/${event.nip05}`,
+    path: `profile/${nip19.nprofileEncode({ pubkey: event.pubkey })}`,
   };
 
   if (event)

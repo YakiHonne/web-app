@@ -171,7 +171,7 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
       `https://${addressParts[1]}/.well-known/nostr.json?name=${addressParts[0]}`
     );
 
-    const pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;å
+    const pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
     // Cache the result
     nip05Cache.set(cacheKey, {
       pubkey,
