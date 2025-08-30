@@ -398,7 +398,6 @@ export default function KindOne({
                       )}
                       {isNoteTranslating && <LoadingDots />}
                     </div>
-                    {/* <EventOptions event={event} component="notes" /> */}
                   </div>
                 </div>
               </>
