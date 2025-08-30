@@ -30,12 +30,7 @@ export function getStaticPaths() {
       { params: { keyword: "action-tool-widgets" } },
       { params: { keyword: "smart-widget-builder" } },
       { params: { keyword: "smart-widget-previewer" } },
-      { params: { keyword: "smart-widget-uploader" } },
-      { params: { keyword: "smart-widget-deleter" } },
-      { params: { keyword: "smart-widget-updater" } },
-      { params: { keyword: "smart-widget-listener" } },
-      { params: { keyword: "smart-widget-subscriber" } },
-      { params: { keyword: "smart-widget-subscriber" } },
+      { params: { keyword: "smart-widget-handler" } },
     ],
     fallback: "blocking",
   };
