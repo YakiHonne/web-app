@@ -15,6 +15,7 @@ import ZapAd from "@/Components/ZapAd";
 import RepEventCommentsSection from "@/Components/RepEventCommentsSection";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import useUserProfile from "@/Hooks/useUsersProfile";
+import PostReaction from "./PostReaction";
 
 const checkFollowing = (list, toFollowKey) => {
   if (!list) return false;
@@ -25,7 +26,8 @@ const getURL = (item, isNip05Verified) => {
   if (!isNip05Verified) {
     if (item.kind === 30023) return `/article/${item.naddr}`;
     if ([30004, 30005].includes(item.kind)) return `/curation/${item.naddr}`;
-    if ([34235, 34236, 21, 22].includes(item.kind)) return `/video/${item.naddr}`;
+    if ([34235, 34236, 21, 22].includes(item.kind))
+      return `/video/${item.naddr}`;
   }
   if (item.kind === 30023) return `/article/s/${isNip05Verified}/${item.d}`;
   if (item.kind === 30004) return `/curation/a/${isNip05Verified}/${item.d}`;
@@ -75,7 +77,9 @@ export default function RepEventPreviewCard({
               backgroundImage: `url(${item.image || item.imagePP})`,
             }}
           >
-            {(item.kind === 34235 || item.kind === 21 || item.kind === 22) && <div className="play-vid-58"></div>}
+            {(item.kind === 34235 || item.kind === 21 || item.kind === 22) && (
+              <div className="play-vid-58"></div>
+            )}
           </div>
           <div
             className="fx-scattered fx-start-v fit-container fx-col  box-pad-v-s"
@@ -186,7 +190,9 @@ export default function RepEventPreviewCard({
                   position: "relative",
                 }}
               >
-                {(item.kind === 34235 || item.kind === 21 || item.kind === 22) && (
+                {(item.kind === 34235 ||
+                  item.kind === 21 ||
+                  item.kind === 22) && (
                   <div
                     className="fx-centered"
                     style={{
@@ -203,7 +209,7 @@ export default function RepEventPreviewCard({
               </div>
             </Link>
           </div>
-          <Reactions post={item} author={userProfile} url={url} />
+          <Reactions post={item} author={userProfile} />
         </div>
       </div>
     </>
@@ -249,28 +255,11 @@ const AuthorPreviewMinimal = ({ author, isNip05Verified }) => {
   );
 };
 
-const Reactions = ({ post, author, url }) => {
+const Reactions = ({ post, author }) => {
   const { t } = useTranslation();
   const { postActions } = useRepEventStats(post.aTag, post.pubkey);
-  const userKeys = useSelector((state) => state.userKeys);
   const [usersList, setUsersList] = useState(false);
   const [showCommentsSection, setShowCommentsSections] = useState(false);
-
-  const isLiked = useMemo(() => {
-    return userKeys
-      ? postActions.likes.likes.find((post) => post.pubkey === userKeys.pub)
-      : false;
-  }, [postActions, userKeys]);
-  const isQuoted = useMemo(() => {
-    return userKeys
-      ? postActions.quotes.quotes.find((post) => post.pubkey === userKeys.pub)
-      : false;
-  }, [postActions, userKeys]);
-  const isZapped = useMemo(() => {
-    return userKeys
-      ? postActions.zaps.zaps.find((post) => post.pubkey === userKeys.pub)
-      : false;
-  }, [postActions, userKeys]);
 
   return (
     <>
@@ -336,98 +325,13 @@ const Reactions = ({ post, author, url }) => {
           />
         )}
         <div className="fit-container fx-scattered">
-          <div className="fx-centered" style={{ gap: "18px" }}>
-            <div className="fx-centered  pointer">
-              <div
-                data-tooltip={t("ADHdLfJ")}
-                className={`pointer round-icon-tooltip ${
-                  isZapped ? "orange-c" : ""
-                }`}
-                onClick={() => setShowCommentsSections({ comment: true })}
-              >
-                <div className="comment-24"></div>
-              </div>
-              <div
-                data-tooltip={t("AMBxvKP")}
-                className={`pointer round-icon-tooltip `}
-                onClick={() => setShowCommentsSections({ comment: false })}
-              >
-                <p>{postActions.replies.replies.length}</p>
-              </div>
-            </div>
-            <div className="fx-centered">
-              <Like
-                isLiked={isLiked}
-                event={post}
-                actions={postActions}
-                tagKind={"a"}
-              />
-              <div
-                className={`pointer round-icon-tooltip ${
-                  isLiked ? "orange-c" : ""
-                }`}
-                data-tooltip={t("Alz0E9Y")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  postActions.likes.likes.length > 0 &&
-                    setUsersList({
-                      title: t("Alz0E9Y"),
-                      list: postActions.likes.likes.map((item) => item.pubkey),
-                      extras: postActions.likes.likes,
-                      extrasType: "reaction",
-                    });
-                }}
-              >
-                <NumberShrink value={postActions.likes.likes.length} />
-              </div>
-            </div>
-            <div className="fx-centered  pointer">
-              <Quote isQuoted={isQuoted} event={post} actions={postActions} />
-              <div
-                className={`round-icon-tooltip ${isQuoted ? "orange-c" : ""}`}
-                data-tooltip={t("AWmDftG")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  postActions.quotes.quotes.length > 0 &&
-                    setUsersList({
-                      title: t("AWmDftG"),
-                      list: postActions.quotes.quotes.map(
-                        (item) => item.pubkey
-                      ),
-                      extras: [],
-                    });
-                }}
-              >
-                <NumberShrink value={postActions.quotes.quotes.length} />
-              </div>
-            </div>
-            <div className="fx-centered">
-              <div className="round-icon-tooltip" data-tooltip={t("AtGAGPY")}>
-                <Zap
-                  user={author}
-                  event={post}
-                  actions={postActions}
-                  isZapped={isZapped}
-                />
-              </div>
-              <div
-                data-tooltip={t("AO0OqWT")}
-                className={`pointer round-icon-tooltip ${
-                  isZapped ? "orange-c" : ""
-                }`}
-                onClick={() =>
-                  postActions.zaps.total > 0 &&
-                  setUsersList({
-                    title: t("AVDZ5cJ"),
-                    list: postActions.zaps.zaps.map((item) => item.pubkey),
-                    extras: postActions.zaps.zaps,
-                  })
-                }
-              >
-                <NumberShrink value={postActions.zaps.total} />
-              </div>
-            </div>
-          </div>
+          <PostReaction
+            event={post}
+            setShowComments={setShowCommentsSections}
+            setOpenComment={setShowCommentsSections}
+            postActions={postActions}
+            userProfile={author}
+          />
           <EventOptions
             event={post}
             eventActions={postActions}

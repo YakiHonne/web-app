@@ -55,11 +55,17 @@ export default function PostReaction({
         />
       )}
       <div className="fx-centered" style={{ columnGap: "20px" }}>
-       
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
-          <Like isLiked={isLiked} event={event} actions={postActions} />
+          <Like
+            isLiked={isLiked}
+            event={event}
+            actions={postActions}
+            tagKind={event.kind > 30000 ? "a" : "e"}
+          />
           <div
-            className={`round-icon-tooltip ${isLiked ? "orange-c" : "opacity-4"}`}
+            className={`round-icon-tooltip ${
+              isLiked ? "orange-c" : "opacity-4"
+            }`}
             data-tooltip={t("Alz0E9Y")}
             onClick={(e) => {
               e.stopPropagation();
@@ -75,10 +81,9 @@ export default function PostReaction({
             <NumberShrink value={postActions.likes.likes.length} />
           </div>
         </div>
-         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
+        <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <div
             className="comment-24 opacity-4"
-            
             onClick={() => setOpenComment(!openComment)}
           ></div>
           <div onClick={() => setShowComments(true)} className="opacity-4">
@@ -88,7 +93,9 @@ export default function PostReaction({
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <Repost isReposted={isReposted} event={event} actions={postActions} />
           <div
-            className={`round-icon-tooltip ${isReposted ? "orange-c" : "opacity-4"}`}
+            className={`round-icon-tooltip ${
+              isReposted ? "orange-c" : "opacity-4"
+            }`}
             data-tooltip={t("Aai65RJ")}
             onClick={(e) => {
               e.stopPropagation();
@@ -106,7 +113,9 @@ export default function PostReaction({
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <Quote isQuoted={isQuoted} event={event} actions={postActions} />
           <div
-            className={`round-icon-tooltip ${isQuoted ? "orange-c" : "opacity-4"}`}
+            className={`round-icon-tooltip ${
+              isQuoted ? "orange-c" : "opacity-4"
+            }`}
             data-tooltip={t("AWmDftG")}
             onClick={(e) => {
               e.stopPropagation();
