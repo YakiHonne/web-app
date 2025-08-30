@@ -38,7 +38,7 @@ export default function SearchContentCard({ event, exit, userProfile = true }) {
   if (event.kind === 1)
     return (
       <Link
-        href={`/notes/${nEventEncode(event.id)}`}
+        href={`/note/${nEventEncode(event.id)}`}
         className="fx-centered fx-start-h box-pad-v-s box-pad-h-m fit-container pointer search-bar-post"
         onClick={(e) => {
           exit();
@@ -85,7 +85,7 @@ export default function SearchContentCard({ event, exit, userProfile = true }) {
               <div className="curation-24"></div>
             )}
             {[30023].includes(event.kind) && <div className="posts-24"></div>}
-            {[34235].includes(event.kind) && <div className="play-24"></div>}
+            {[34235, 21, 22].includes(event.kind) && <div className="play-24"></div>}
             {[30031].includes(event.kind) && (
               <div className="smart-widget-24"></div>
             )}

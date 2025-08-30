@@ -44,6 +44,7 @@ import {
   TrendingUsersReducer,
   RecentTagsReducer,
   HomeSavedNotesReducer,
+  HomeCarouselPostsReducer,
 } from "./Slides/Extras";
 
 export const store = configureStore({
@@ -86,5 +87,6 @@ export const store = configureStore({
     userBlossomServers: UserBlossomServersReducer,
     userFollowingsInboxRelays: UserFollowingsInboxRelaysReducer,
     homeSavedNotes: HomeSavedNotesReducer,
+    homeCarouselPosts: HomeCarouselPostsReducer,
   },
 });

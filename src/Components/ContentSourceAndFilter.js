@@ -31,7 +31,7 @@ export default function ContentSourceAndFilter({
               backgroundColor: "var(--white)",
             }}
           >
-            <div className="main-middle fx-scattered">
+            <div className="main-middle fx-scattered box-pad-h-m">
               <ContentSource
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}

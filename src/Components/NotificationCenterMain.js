@@ -58,10 +58,10 @@ const getReaction = (reaction) => {
 const getRepEventsLink = (pubkey, kind, identifier) => {
   let naddr = nip19.naddrEncode({ pubkey, identifier, kind });
   if (kind == 30023) return `/article/${naddr}`;
-  if (kind == 30004) return `/curations/${naddr}`;
-  if (kind == 30005) return `/curations/${naddr}`;
-  if (kind == 34235) return `/videos/${naddr}`;
-  if (kind == 34236) return `/videos/${naddr}`;
+  if (kind == 30004) return `/curation/${naddr}`;
+  if (kind == 30005) return `/curation/${naddr}`;
+  if (kind == 34235 || kind == 21 || kind == 22) return `/video/${naddr}`;
+  if (kind == 34236) return `/video/${naddr}`;
   if (kind == 30031) return `/smart-widget-checker?naddr=${naddr}`;
 };
 
@@ -94,7 +94,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           label_2,
           icon: eventIcons.paid_notes,
           id: false,
-          url: `/notes/${nEventEncode(event.id)}`,
+          url: `/note/${nEventEncode(event.id)}`,
         };
       }
       if (isReply) {
@@ -114,7 +114,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           label_2,
           icon: eventIcons.replies_comments,
           id: isReply[1],
-          url: `/notes/${nEventEncode(event.id)}`,
+          url: `/note/${nEventEncode(event.id)}`,
         };
       }
       if (isRoot) {
@@ -134,7 +134,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         let label_2 = event.content;
         let url = eventPubkey
           ? getRepEventsLink(eventPubkey, eventKind, eventIdentifier)
-          : `/notes/${nEventEncode(isRoot[1])}`;
+          : `/note/${nEventEncode(isRoot[1])}`;
 
         return {
           type: "replies",
@@ -162,7 +162,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           label_2,
           id: isQuote[1],
           icon: eventIcons.quotes,
-          url: `/notes/${nEventEncode(event.id)}`,
+          url: `/note/${nEventEncode(event.id)}`,
         };
       }
 
@@ -175,11 +175,11 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         label_2,
         icon: eventIcons.mentions,
         id: false,
-        url: `/notes/${nEventEncode(event.id)}`,
+        url: `/note/${nEventEncode(event.id)}`,
       };
     }
 
-    if ([30023, 30004, 30005, 34235, 30031, 34236].includes(event.kind)) {
+    if ([30023, 30004, 30005, 34235, 30031, 34236, 21, 22].includes(event.kind)) {
       let self = event.tags.find((tag) => tag[1] === pubkey);
       let identifier = event.tags.find((tag) => tag[0] === "d");
       let content = event.tags.find((tag) => tag[0] === "title");
@@ -226,7 +226,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
       let label_2 = content;
       let url = eventPubkey
         ? getRepEventsLink(eventPubkey, eventKind, eventIdentifier)
-        : `/notes/${nEventEncode(ev[1])}`;
+        : `/note/${nEventEncode(ev[1])}`;
 
       return {
         type: "reactions",
@@ -253,7 +253,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         label_2,
         icon: eventIcons.reposts,
         id: false,
-        url: `/notes/${nEventEncode(innerEvent.id)}`,
+        url: `/note/${nEventEncode(innerEvent.id)}`,
       };
     }
 
@@ -269,7 +269,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         let eventIdentifier = ev[0] === "a" ? ev[1].split(":")[2] : false;
         url = eventPubkey
           ? getRepEventsLink(eventPubkey, eventKind, eventIdentifier)
-          : `/notes/${nEventEncode(ev[1])}`;
+          : `/note/${nEventEncode(ev[1])}`;
       }
 
       let amount =
@@ -488,7 +488,7 @@ export default function NotificationCenterMain() {
 
     if (!mentions) {
       filter.push({
-        kinds: [30023, 30004, 34235, 30031],
+        kinds: [30023, 30004, 34235, 30031, 21, 22],
         "#p": [userKeys.pub],
         limit: 10,
         since,
@@ -523,7 +523,7 @@ export default function NotificationCenterMain() {
       });
     if (!following) {
       filter.push({
-        kinds: [30023, 30004, 34235, 30031],
+        kinds: [30023, 30004, 34235, 30031, 21, 22],
         authors: fList,
         limit: 10,
         since,

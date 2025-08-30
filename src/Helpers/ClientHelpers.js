@@ -176,8 +176,10 @@ export function getNoteTree(
             {hashes.slice(1)}
             <Link
               style={{ wordBreak: "break-word", color: "var(--orange-main)" }}
-              href={`/search?keyword=${text}`}
-              state={{ tab: "notes" }}
+              href={{
+                pathname: `/search`,
+                query: { tab: "notes", keyword: text },
+              }}
               className="btn-text-gray"
               onClick={(e) => e.stopPropagation()}
             >
@@ -1000,3 +1002,24 @@ export function nEventEncode(id) {
     id,
   });
 }
+
+const isImageUrlSync = (url) => {
+  try {
+    if (/(https?:\/\/[^ ]*\.(?:gif|png|jpg|jpeg|webp))/i.test(url)) return true;
+    return false;
+  } catch (error) {
+    return false;
+  }
+};
+
+const getNIP21FromURL = (url) => {
+  const regex = /n(event|profile|pub|addr)([^\s\W]*)/;
+  const match = url.match(regex);
+
+  if (match) {
+    const extracted = match[0];
+    return `nostr:${extracted}`;
+  } else {
+    return url;
+  }
+};

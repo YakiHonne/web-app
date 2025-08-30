@@ -575,7 +575,7 @@ const ShareImg = ({ data, kind, path, setIsLoading }) => {
         </div>
       </div>
     );
-  if ([30023, 34235, 30004].includes(kind))
+  if ([30023, 34235, 30004, 21, 22].includes(kind))
     return (
       <div
         className="box-pad-h box-pad-v fx-centered fx-col"
@@ -642,7 +642,7 @@ const ShareImg = ({ data, kind, path, setIsLoading }) => {
                   </p>
                 </div>
               )}
-              {kind === 34235 && (
+              {(kind === 34235 || kind === 21 || kind === 22) && (
                 <div className="fx-centered">
                   <div
                     className="video"
@@ -666,7 +666,7 @@ const ShareImg = ({ data, kind, path, setIsLoading }) => {
                     className="like"
                     style={{ filter: "brightness(0)", rotate: "-180deg" }}
                   ></div>
-                  {kind === 34235 && (
+                  {(kind === 34235 || kind === 21 || kind === 22) && (
                     <p className="p-medium" style={{ color: "black" }}>
                       {t("AginxGR", { count: data.views })}
                     </p>

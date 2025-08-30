@@ -41,6 +41,8 @@ const action_key_from_kind = {
   30023: "article_post",
   30024: "article_draft",
   34235: "video_post",
+  22: "video_post",
+  21: "video_post",
   4: "dms-5",
   44: "dms-10",
   1059: "dms-5",

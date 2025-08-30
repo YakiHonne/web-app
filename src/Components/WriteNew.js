@@ -67,8 +67,10 @@ const RedictingLinks = ({ exit, internalExit }) => {
         <h4 className="box-marg-s">{t("AfTMpSr")}</h4>
         <div className="fx-centered fx-wrap" onClick={exit}>
           <Link
-            href="/dashboard"
-            state={{ tabNumber: 1, filter: "notes", init: true }}
+            href={{
+              pathname: "/dashboard",
+              query: { tabNumber: 1, init: true },
+            }}
             className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18`}
             style={{
               width: "48%",
@@ -97,24 +99,6 @@ const RedictingLinks = ({ exit, internalExit }) => {
             ></div>
             <div>{t("AyYkCrS")}</div>
           </div>
-          {/* 
-          <Link
-            href="/dashboard"
-            state={{ tabNumber: 1, filter: "curations", init: true }}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18`}
-            style={{
-              width: "48%",
-              padding: "2rem",
-              backgroundColor: "transparent",
-            }}
-          >
-            <div
-              className="curation-plus-24"
-              style={{ width: "32px", height: "32px" }}
-            ></div>
-            <div>{t("Ac6UnVb")}</div>
-          </Link> */}
-
           <Link
             href={"/smart-widget-builder"}
             className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18`}
@@ -129,43 +113,6 @@ const RedictingLinks = ({ exit, internalExit }) => {
             ></div>
             <div style={{ width: "max-content" }}>{t("AkvXmyz")}</div>
           </Link>
-          {/* <Link
-            href="/dashboard"
-            state={{ tabNumber: 1, filter: "videos", init: true }}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18`}
-            style={{
-              width: "48%",
-              padding: "2rem",
-              backgroundColor: "transparent",
-            }}
-          >
-            <div
-              className="play-plus-24"
-              style={{ width: "32px", height: "32px" }}
-            ></div>
-            <div>{t("AVdmifm")}</div>
-          </Link>
-          <Link
-            href="/dashboard"
-            state={{
-              tabNumber: 1,
-              filter: "notes",
-              init: true,
-              triggerCP: true,
-            }}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18`}
-            style={{
-              width: "48%",
-              padding: "2rem",
-              backgroundColor: "transparent",
-            }}
-          >
-            <div
-              className="polls-24"
-              style={{ width: "32px", height: "32px" }}
-            ></div>
-            <div>{t("A91LHJy")}</div>
-          </Link> */}
         </div>
       </div>
     </div>

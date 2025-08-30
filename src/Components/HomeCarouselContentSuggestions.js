@@ -4,25 +4,32 @@ import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import { filterContent, getParsedRepEvent, removeEventsDuplicants } from "@/Helpers/Encryptions";
+import {
+  filterContent,
+  getParsedRepEvent,
+  removeEventsDuplicants,
+} from "@/Helpers/Encryptions";
 import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { localStorage_ } from "@/Helpers/utils";
+import { setHomeCarouselPosts } from "@/Store/Slides/Extras";
+import { useDispatch } from "react-redux";
 
 export default function HomeCarouselContentSuggestions() {
-  const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
+  const dispatch = useDispatch()
+  const userKeys = useSelector((state) => state.userKeys);
+  const homeCarouselPosts = useSelector((state) => state.homeCarouselPosts);
   const [hide, setHide] = useState(localStorage_.getItem("hsuggest"));
-  const [content, setContentSuggestions] = useState([]);
+  const [content, setContentSuggestions] = useState(homeCarouselPosts);
 
   useEffect(() => {
     const fetchContentSuggestions = async () => {
       let content = await getSubData(
-        [{ kinds: [16], limit: 50, "#k": ["30023"] }],
-        30,
+        [{ kinds: [16], limit: 100, "#k": ["30023"] }],
+        100,
         undefined,
-        undefined,    
-        30
+        undefined
       );
       if (content.data.length > 0) {
         let data = content.data
@@ -33,13 +40,13 @@ export default function HomeCarouselContentSuggestions() {
             if (event && event.title) return event;
           });
         let defaultFilter = getDefaultFilter();
-        setContentSuggestions(
-          filterContent(defaultFilter, removeEventsDuplicants(data))
-        );
+        let posts = filterContent(defaultFilter, removeEventsDuplicants(data));
+        setContentSuggestions(posts);
+        dispatch(setHomeCarouselPosts(posts));
         saveUsers(data.map((_) => _.pubkey));
       }
     };
-    if (!hide) fetchContentSuggestions();
+    if (!hide && homeCarouselPosts.length === 0) fetchContentSuggestions();
   }, [hide]);
 
   let getItems = () => {
@@ -47,25 +54,14 @@ export default function HomeCarouselContentSuggestions() {
       <RepEventPreviewCard item={item} key={item.id} minimal={true} />
     ));
   };
-  
 
   const handleHideSuggestion = () => {
     localStorage_.setItem("hsuggest", `${Date.now()}`);
     setHide(true);
   };
 
-  // // Don't render anything until client-side hydration is complete
-  // if (!isClient) {
-  //   return (
-  //     <div
-  //       className="fit-container box-pad-v skeleton-container "
-  //       style={{ height: "285px" }}
-  //     ></div>
-  //   );
-  // }
-
   if (hide) return null;
-  
+
   let items = getItems();
   if (content.length === 0)
     return (

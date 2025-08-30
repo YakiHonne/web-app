@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import LoadingDots from "@/Components/LoadingDots";
 import relaysOnPlatform from "@/Content/Relays";
 import axiosInstance from "@/Helpers/HTTP_Client";
@@ -14,6 +13,7 @@ import {removeArticleDraft } from "@/Helpers/ClientHelpers";
 import UploadFile from "@/Components/UploadFile";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
+import { useRouter } from "next/router";
 
 const getSuggestions = (custom) => {
   if (!custom) return [];
@@ -40,7 +40,7 @@ export default function ToPublish({
   const dispatch = useDispatch();
   // const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
-  const navigateTo = useNavigate();
+  const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState(
     tags.length > 0
       ? tags
@@ -148,8 +148,9 @@ export default function ToPublish({
             userKeys
           );
           if (!eventInitEx) {
-            navigateTo("/dashboard", {
-              state: { tabNumber: 1, filter: "articles" },
+            router.push({
+              pathname: "/dashboard",
+              query: { tabNumber: 2, filter: "articles" }
             });
             exit();
             setIsLoading(false);
@@ -162,15 +163,19 @@ export default function ToPublish({
             })
           );
           setIsLoading(false);
-          navigateTo("/dashboard", {
-            state: { tabNumber: 1, filter: "articles" },
+          router.push({
+            pathname: "/dashboard",
+            query: { tabNumber: 2, filter: "articles" }
           });
           exit();
         }, 5000);
         return;
       }
       removeArticleDraft();
-      navigateTo("/dashboard", { state: { tabNumber: 1, filter: "articles" } });
+      router.push({
+        pathname: "/dashboard",
+        query: { tabNumber: 2, filter: "articles" }
+      });
       exit();
       return;
     } catch (err) {

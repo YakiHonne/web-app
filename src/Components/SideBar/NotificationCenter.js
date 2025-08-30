@@ -119,7 +119,7 @@ export default function NotificationCenter({
 
     if (!mentions) {
       filter.push({
-        kinds: [30023, 30004, 34235, 30031],
+        kinds: [30023, 30004, 34235, 30031, 21, 22],
         "#p": [userKeys.pub],
         limit: 20,
         since,
@@ -154,7 +154,7 @@ export default function NotificationCenter({
       });
     if (!following) {
       filter.push({
-        kinds: [30023, 30004, 34235, 30031],
+        kinds: [30023, 30004, 34235, 30031, 21, 22],
         authors: fList,
         limit: 20,
         since,

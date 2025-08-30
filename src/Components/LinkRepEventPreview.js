@@ -80,7 +80,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
           aspectRatio: "16/9",
         }}
       >
-        {event.kind === 34235 && <div className="play-vid-58"></div>}
+        {(event.kind === 34235 || event.kind === 21 || event.kind === 22) && <div className="play-vid-58"></div>}
       </div>
       <div
         className="fx-centered fx-col fx-start-h fx-start-v box-pad-h-m box-pad-v-m"

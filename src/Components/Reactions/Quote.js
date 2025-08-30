@@ -53,7 +53,7 @@ const [isLogin, setIsLogin] = useState(false);
         onClick={() => userKeys ? setShowQuoteBox(true) : setIsLogin(true)}
       >
         <div
-          className={isQuoted ? "quote-bold-24 pointer" : "quote-24 pointer"}
+          className={isQuoted ? "quote-bold-24 pointer" : "quote-24 opacity-4 pointer"}
         ></div>
       </div>
     </>

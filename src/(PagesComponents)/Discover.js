@@ -120,7 +120,7 @@ export default function Discover() {
                   marginBottom: "4rem",
                 }}
               >
-                <div style={{height: "90px"}}></div>
+                <div style={{ height: "90px" }}></div>
                 <ExploreFeed
                   selectedTab={selectedTab}
                   selectedCategory={selectedCategory}
@@ -145,7 +145,10 @@ export default function Discover() {
           className="fit-container fx-centered box-pad-v "
         >
           <div className="main-container">
-            <main style={{ height: "80px" }} className="fx-centered fx-end-h box-pad-h-s">
+            <main
+              style={{ height: "80px" }}
+              className="fx-centered fx-end-h box-pad-h-s"
+            >
               <div className="main-page-nostr-container fx-centered">
                 <div className="main-middle fx-centered box-pad-h">
                   <div className="fx-centered" style={{ width: "max-content" }}>
@@ -198,6 +201,7 @@ const ExploreFeed = ({
       // : Math.floor(Date.now() / 1000) - 86400;
       let extraPubkeys = [];
       const { artsFilter, curationsFilter, videosFilter } = getFilter();
+      console.log(videosFilter);
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
       let [articles, curations, videos] = await Promise.all([
@@ -205,7 +209,6 @@ const ExploreFeed = ({
         getSubData(curationsFilter, 200, algoRelay, undefined, 20),
         getSubData(videosFilter, 200, algoRelay, undefined, 20),
       ]);
-
       let articles_ = sortEvents(articles.data).filter(
         (_) => _.created_at > dateCheckerArts
       );
@@ -215,7 +218,6 @@ const ExploreFeed = ({
       let videos_ = sortEvents(videos.data).filter(
         (_) => _.created_at > dateCheckerVideos
       );
-
       articles_ = articles_.length === 0 ? articles.data : articles_;
       curations_ = curations_.length === 0 ? curations.data : curations_;
       videos_ = videos_.length === 0 ? videos.data : videos_;
@@ -241,6 +243,7 @@ const ExploreFeed = ({
         videos_.length === 0
       )
         setIsEndOfQuerying(true);
+       
       let sortedData = MixEvents(articles_, curations_, videos_)
         .map((event) =>
           selectedCategory.value === "top"
@@ -396,7 +399,7 @@ const ExploreFeed = ({
           ? [
               {
                 kinds: [16],
-                "#k": ["34235"],
+                "#k": ["34235", "21", "22"],
                 limit: 50,
                 until: v_until,
                 since,
@@ -433,7 +436,7 @@ const ExploreFeed = ({
         videosFilter: [0, 3].includes(selectedTab)
           ? [
               {
-                kinds: [34235],
+                kinds: [34235, 21, 22],
                 limit: 100,
                 authors: authors_,
                 until: v_until,
@@ -470,7 +473,7 @@ const ExploreFeed = ({
       videosFilter: [0, 3].includes(selectedTab)
         ? [
             {
-              kinds: [34235],
+              kinds: [34235, 21, 22],
               limit: 50,
               authors,
               until: v_until,

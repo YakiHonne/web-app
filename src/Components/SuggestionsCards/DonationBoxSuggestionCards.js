@@ -40,7 +40,7 @@ export default function DonationBoxSuggestionCards({ padding = true }) {
             senderPubkey={userKeys.pub}
             recipientInfo={{
               name: "Yakihonne",
-              img: "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3/files/1691722198488-YAKIHONNES3.png",
+              img: "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3/files/1691722198488-YAKIHONNES3.png",
             }}
             custom={{
               textColor: "",

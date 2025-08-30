@@ -117,13 +117,13 @@ export default function NotesComment({
       return;
     }
     if (isSelected) return null;
-    customHistory(`/notes/${event.nEvent}`);
+    customHistory(`/note/${event.nEvent}`);
   };
   const redirect = (e) => {
     e.stopPropagation();
-    if (window.location.pathname.includes("/notes/"))
-      customHistory(`/notes/${event.nEvent}`);
-    else customHistory(`/notes/${event.nEvent}`);
+    if (window.location.pathname.includes("/note/"))
+      customHistory(`/note/${event.nEvent}`);
+    else customHistory(`/note/${event.nEvent}`);
   };
 
   const translateNote = async () => {
@@ -135,7 +135,7 @@ export default function NotesComment({
     }
     try {
       if (event.isCollapsedNote) {
-        customHistory(`/notes/${event.nEvent}`, {
+        customHistory(`/note/${event.nEvent}`, {
           triggerTranslation: true,
         });
         return;

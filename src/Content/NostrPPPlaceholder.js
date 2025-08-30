@@ -1,15 +1,15 @@
 
 const thumbnailPlaceholder = [
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_1.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_2.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_3.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_4.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_5.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_6.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_7.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_8.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_9.png",
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/profilePicPlaceholder/random_cover_10.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_1.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_2.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_3.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_4.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_5.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_6.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_7.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_8.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_9.png",
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/profilePicPlaceholder/random_cover_10.png",
 ];
 
 const nostrPpPlaceholder = [

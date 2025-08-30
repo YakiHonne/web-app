@@ -11,6 +11,7 @@ import Zap from "./Reactions/Zap";
 export default function PostReaction({
   event,
   setOpenComment = () => null,
+  setShowComments = () => null,
   openComment = false,
   postActions,
   userProfile,
@@ -54,20 +55,11 @@ export default function PostReaction({
         />
       )}
       <div className="fx-centered" style={{ columnGap: "20px" }}>
-        <div
-          className={`fx-centered pointer `}
-          style={{ columnGap: "8px" }}
-          onClick={() => setOpenComment(!openComment)}
-        >
-          <div className="comment-24"></div>
-          <div>
-            <NumberShrink value={postActions.replies.replies.length} />
-          </div>
-        </div>
+       
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <Like isLiked={isLiked} event={event} actions={postActions} />
           <div
-            className={`round-icon-tooltip ${isLiked ? "orange-c" : ""}`}
+            className={`round-icon-tooltip ${isLiked ? "orange-c" : "opacity-4"}`}
             data-tooltip={t("Alz0E9Y")}
             onClick={(e) => {
               e.stopPropagation();
@@ -83,10 +75,20 @@ export default function PostReaction({
             <NumberShrink value={postActions.likes.likes.length} />
           </div>
         </div>
+         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
+          <div
+            className="comment-24 opacity-4"
+            
+            onClick={() => setOpenComment(!openComment)}
+          ></div>
+          <div onClick={() => setShowComments(true)} className="opacity-4">
+            <NumberShrink value={postActions.replies.replies.length} />
+          </div>
+        </div>
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <Repost isReposted={isReposted} event={event} actions={postActions} />
           <div
-            className={`round-icon-tooltip ${isReposted ? "orange-c" : ""}`}
+            className={`round-icon-tooltip ${isReposted ? "orange-c" : "opacity-4"}`}
             data-tooltip={t("Aai65RJ")}
             onClick={(e) => {
               e.stopPropagation();
@@ -104,7 +106,7 @@ export default function PostReaction({
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <Quote isQuoted={isQuoted} event={event} actions={postActions} />
           <div
-            className={`round-icon-tooltip ${isQuoted ? "orange-c" : ""}`}
+            className={`round-icon-tooltip ${isQuoted ? "orange-c" : "opacity-4"}`}
             data-tooltip={t("AWmDftG")}
             onClick={(e) => {
               e.stopPropagation();
@@ -131,7 +133,7 @@ export default function PostReaction({
           <div
             data-tooltip={t("AO0OqWT")}
             className={`pointer round-icon-tooltip ${
-              isZapped ? "orange-c" : ""
+              isZapped ? "orange-c" : "opacity-4"
             }`}
             onClick={() =>
               postActions.zaps.total > 0 &&

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import LoadingDots from "@/Components/LoadingDots";
 import { nanoid } from "nanoid";
 import { useDispatch } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { InitEvent } from "@/Helpers/Controlers";
 import { useTranslation } from "react-i18next";
+import { useRouter } from "next/router";
 
 export default function ToPublishDrafts({
   postContent = "",
@@ -17,7 +17,7 @@ export default function ToPublishDrafts({
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const navigateTo = useNavigate();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const Submit = async (kind = 30023) => {
@@ -53,7 +53,10 @@ export default function ToPublishDrafts({
           allRelays: [],
         })
       );
-      navigateTo("/dashboard", { state: { tabNumber: 1, filter: "drafts" } });
+      router.push({
+        pathname: "/dashboard",
+        query: { tabNumber: 2, filter: "drafts" }
+      });
       exit();
       setIsLoading(false);
       return;

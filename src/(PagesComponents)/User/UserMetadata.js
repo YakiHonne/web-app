@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   checkForLUDS,
-  getEmptyuserMetadata,
-  getParsedAuthor,
-  getuserMetadata,
   shortenKey,
 } from "@/Helpers/Encryptions";
 import ZapTip from "@/Components/ZapTip";
@@ -12,21 +9,14 @@ import ShowPeople from "@/Components/ShowPeople";
 import axios from "axios";
 import NumberShrink from "@/Components/NumberShrink";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
-import LoadingDots from "@/Components/LoadingDots";
 import InitiConvo from "@/Components/InitConvo";
 import Avatar from "boring-avatars";
-import { useDispatch, useSelector } from "react-redux";
-import { setFollowersCountSL } from "@/Store/Slides/Extras";
-import { saveFetchedUsers } from "@/Helpers/DB";
-import { ndkInstance } from "@/Helpers/NDKInstance";
-import { getUser } from "@/Helpers/Controlers";
-import { NDKUser } from "@nostr-dev-kit/ndk";
+import { useSelector } from "react-redux";
 import { getUserStats } from "@/Helpers/WSInstance";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import Carousel from "@/Components/Carousel";
 import PagePlaceholder from "@/Components/PagePlaceholder";
-import bannedList from "@/Content/BannedList";
 import UserFollowers from "@/Components/UserFollowers";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import QRSharing from "@/Components/QRSharing";
@@ -203,7 +193,7 @@ export default function UserMetadata({ user }) {
                   {user.pubkey === userKeys.pub && (
                     <button
                       className="btn btn-gray"
-                      onClick={() => customHistory.push("/settings/profile")}
+                      onClick={() => customHistory("/settings/profile")}
                     >
                       {t("AfxwB6z")}
                     </button>

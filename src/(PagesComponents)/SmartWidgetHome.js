@@ -7,8 +7,6 @@ import { getParsedSW } from "@/Helpers/Encryptions";
 import LoadingDots from "@/Components/LoadingDots";
 import { useSelector } from "react-redux";
 import axiosInstance from "@/Helpers/HTTP_Client";
-import "highlight.js/styles/github.css";
-import "highlight.js/styles/github-dark.css";
 import { t } from "i18next";
 import LaunchSW from "@/Components/LaunchSW";
 import Link from "next/link";

@@ -38,7 +38,7 @@ export default function ShowPeople({ exit, list, type = "following" }) {
         }
         let sub = await getSubData([{ kinds: [0], authors: list }], 50);
         if (sub.data.length > 0) setIsLoaded(true);
-        setPeople(sub.data.map((_) => getParsedAuthor(_)));
+        setPeople(sub.data.map((_) => getParsedAuthor(_)).filter((_, index, arr) => arr.findIndex((item) => item.pubkey === _.pubkey) === index));
       } catch (err) {
         console.log(err);
       }

@@ -261,7 +261,7 @@ const getParsedRepEvent = (event) => {
       created_at: event.created_at,
       tags: event.tags,
       author: getEmptyuserMetadata(event.pubkey),
-      title: [34235, 34236, 30033].includes(event.kind) ? event.content : "",
+      title: [34235, 34236, 30033, 21, 22].includes(event.kind) ? event.content : "Untitled",
       description: "",
       image: "",
       imagePP: getImagePlaceholder(),
@@ -1130,7 +1130,7 @@ const filterContent = (selectedFilter, list) => {
     let c_min_items = [30004, 30005].includes(_.kind)
       ? _.items.length > selectedFilter.for_curations.min_items
       : true;
-    let v_source = [34235, 34236].includes(_.kind)
+    let v_source = [34235, 34236, 21, 22].includes(_.kind)
       ? sameOrigin(selectedFilter.for_videos.source, _.vUrl)
       : true;
 

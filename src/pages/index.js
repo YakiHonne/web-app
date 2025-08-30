@@ -3,7 +3,7 @@ import React from 'react'
 // import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 // import nextI18nextConfig from "../../next-i18next.config.js";
 
-const ClientComponent = dynamic(() => import("@/(PagesComponents)/Home"), {
+const ClientComponent = dynamic(() => import("@/(PagesComponents)/HomeB"), {
   ssr: false,
 });
 

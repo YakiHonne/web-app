@@ -83,7 +83,7 @@ export default function OptionsDropdown({
             rowGap: "10px",
             overflow: "visible",
           }}
-          className="box-pad-h-m box-pad-v-s sc-s-18 fx-centered fx-col fx-start-v pointer"
+          className="box-pad-h-m box-pad-v-s sc-s-18 fx-centered fx-col fx-start-v pointer drop-down"
           onClick={(e) => {
             e.stopPropagation();
             setShowOptions(false);

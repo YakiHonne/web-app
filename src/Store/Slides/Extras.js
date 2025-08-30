@@ -63,9 +63,18 @@ const recentTagsSlice = createSlice({
 
 const homeSavedNotesSlice = createSlice({
   name: "homeSavedNotes",
-  initialState: false,
+  initialState: {scrollTo: 0, notes: []},
   reducers: {
     setHomeSavedNotes(state, action) {
+      return action.payload;
+    },
+  },
+});
+const homeCarouselPostsSlice = createSlice({
+  name: "homeCarouselPosts",
+  initialState: [],
+  reducers: {
+    setHomeCarouselPosts(state, action) {
       return action.payload;
     },
   },
@@ -78,6 +87,7 @@ export const { setImportantFlashNews } = importantFlashNewsSlice.actions;
 export const { setTrendingUsers } = trendingUsersSlice.actions;
 export const { setRecentTags } = recentTagsSlice.actions;
 export const { setHomeSavedNotes } = homeSavedNotesSlice.actions;
+export const { setHomeCarouselPosts } = homeCarouselPostsSlice.actions;
 
 export const InitDMSReducer = initDMSSlice.reducer;
 export const IsDarkModeReducer = isDarkModeSlice.reducer;
@@ -86,3 +96,4 @@ export const ImportantFlashNewsReducer = importantFlashNewsSlice.reducer;
 export const TrendingUsersReducer = trendingUsersSlice.reducer;
 export const RecentTagsReducer = recentTagsSlice.reducer;
 export const HomeSavedNotesReducer = homeSavedNotesSlice.reducer;
+export const HomeCarouselPostsReducer = homeCarouselPostsSlice.reducer;

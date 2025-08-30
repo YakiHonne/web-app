@@ -20,6 +20,7 @@ import useIsMute from "@/Hooks/useIsMute";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import PostReaction from "@/Components/PostReaction";
 import Backbar from "@/Components/Backbar";
+import { straightUp } from "@/Helpers/Helpers";
 
 export default function Note({ event }) {
   const { state } = {};
@@ -41,6 +42,7 @@ export default function Note({ event }) {
       let { triggerTranslation } = state;
       if (triggerTranslation) translateNote();
     }
+    straightUp();
   }, [event]);
 
   const translateNote = async () => {

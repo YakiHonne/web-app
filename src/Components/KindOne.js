@@ -5,15 +5,10 @@ import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import ShowUsersList from "@/Components/ShowUsersList";
 import Date_ from "@/Components/Date_";
-import NumberShrink from "@/Components/NumberShrink";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { getSubData, getUser, translate } from "@/Helpers/Controlers";
 import useNoteStats from "@/Hooks/useNoteStats";
-import Like from "@/Components/Reactions/Like";
-import Repost from "@/Components/Reactions/Repost";
-import Quote from "@/Components/Reactions/Quote";
-import Zap from "@/Components/Reactions/Zap";
 import Comments from "@/Components/Reactions/Comments";
 import { saveUsers } from "@/Helpers/DB";
 import CommentsSection from "@/Components/CommentsSection";
@@ -22,7 +17,7 @@ import {
   getRepliesViewSettings,
   isImageUrl,
   isVid,
-  compactContent
+  compactContent,
 } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
 import LoadingDots from "@/Components/LoadingDots";
@@ -32,8 +27,8 @@ import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import NotesComment from "@/Components/NotesComment";
 import { nip19 } from "nostr-tools";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
-import { useRouter } from "next/navigation";
 import { customHistory } from "@/Helpers/History";
+import PostReaction from "./PostReaction";
 
 export default function KindOne({
   event,
@@ -43,22 +38,17 @@ export default function KindOne({
   getReposts = () => null,
 }) {
   const dispatch = useDispatch();
-  const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
-  const router = useRouter();
   const { isNip05Verified, userProfile } = useUserProfile(event?.pubkey);
   const [toggleComment, setToggleComment] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [usersList, setUsersList] = useState(false);
   const { postActions } = useNoteStats(event?.id, event?.pubkey);
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
   const [translatedNote, setTranslatedNote] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
-  const [isTransEnabled, setIsTransEnabled] = useState(true);
   const [isNavigating, setIsNavigating] = useState(false);
   const isThread = useMemo(() => getRepliesViewSettings(), []);
-
   const [isClamped, setIsClamped] = useState(10000);
   const noteRef = React.useRef(null);
 
@@ -114,28 +104,6 @@ export default function KindOne({
     }
   }, [showTranslation, translatedNote, event.note_tree, checkNotes]);
 
-  const isLiked = useMemo(() => {
-    return userKeys
-      ? postActions.likes.likes.find((item) => item.pubkey === userKeys.pub)
-      : false;
-  }, [postActions, userKeys]);
-
-  const isReposted = useMemo(() => {
-    return userKeys
-      ? postActions.reposts.reposts.find((item) => item.pubkey === userKeys.pub)
-      : false;
-  }, [postActions, userKeys]);
-  const isQuoted = useMemo(() => {
-    return userKeys
-      ? postActions.quotes.quotes.find((item) => item.pubkey === userKeys.pub)
-      : false;
-  }, [postActions, userKeys]);
-  const isZapped = useMemo(() => {
-    return userKeys
-      ? postActions.zaps.zaps.find((item) => item.pubkey === userKeys.pub)
-      : false;
-  }, [postActions, userKeys]);
-
   useEffect(() => {
     if (postActions && postActions?.reposts?.reposts?.length > 0)
       getReposts(postActions?.reposts?.reposts);
@@ -144,36 +112,30 @@ export default function KindOne({
   const onClick = (e) => {
     e.stopPropagation();
     if (isNavigating) {
-      console.log('Click ignored - already navigating');
+      console.log("Click ignored - already navigating");
       return;
     }
 
     try {
       let isSelected = window.getSelection().toString();
-      if (!reactions) {
-        console.log('Redirecting via redirect function');
-        redirect(e);
-        return;
-      }
       if (isSelected) {
-        console.log('Text selected, ignoring click');
+        console.log("Text selected, ignoring click");
         return null;
       }
 
       if (!event?.nEvent) {
-        console.error('Missing nEvent in event object:', event);
+        console.error("Missing nEvent in event object:", event);
         return;
       }
 
-      console.log('Navigating to:', `/notes/${event.nEvent}`);
       setIsNavigating(true);
 
-      customHistory(`/notes/${event.nEvent}`);
+      customHistory(`/note/${event.nEvent}`);
 
       // Reset navigation state after a short delay
       setTimeout(() => setIsNavigating(false), 1000);
     } catch (error) {
-      console.error('Error in onClick handler:', error);
+      console.error("Error in onClick handler:", error);
       setIsNavigating(false);
     }
   };
@@ -192,18 +154,18 @@ export default function KindOne({
         window.location.pathname
       );
 
-      if (window.location.pathname.includes("/notes/")) {
+      if (window.location.pathname.includes("/note/")) {
         console.log(
           "Using customHistory for redirect to:",
-          `/notes/${event.nEvent}`
+          `/note/${event.nEvent}`
         );
-        customHistory(`/notes/${event.nEvent}`);
+        customHistory(`/note/${event.nEvent}`);
       } else {
         console.log(
           "Using window.location for redirect to:",
-          `/notes/${event.nEvent}`
+          `/note/${event.nEvent}`
         );
-        window.location = `/notes/${event.nEvent}`;
+        window.location = `/note/${event.nEvent}`;
       }
     } catch (error) {
       console.error("Error in redirect function:", error);
@@ -219,7 +181,7 @@ export default function KindOne({
     }
     try {
       if (event.isCollapsedNote) {
-        customHistory(`/notes/${event.nEvent}`, {
+        customHistory(`/note/${event.nEvent}`, {
           triggerTranslation: true,
         });
         return;
@@ -278,7 +240,8 @@ export default function KindOne({
         />
       )}
       <div
-        className="box-pad-v-m fit-container"
+        className="box-pad-v-m fit-container note-item"
+        id={event.id} 
         style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
       >
         {event.isComment && isThread && (
@@ -342,9 +305,12 @@ export default function KindOne({
                       />
                     </p>
                   </div>
-                  {event.isPaidNote && (
-                    <div className="sticker sticker-c1">{t("AAg9D6c")}</div>
-                  )}
+                  <div className="fx-centered">
+                    {event.isPaidNote && (
+                      <div className="sticker sticker-c1">{t("AAg9D6c")}</div>
+                    )}
+                    <EventOptions event={event} component="notes"/>
+                  </div>
                 </div>
                 {event.isComment && !isThread && (
                   <RelatedEvent event={event.isComment} />
@@ -356,7 +322,6 @@ export default function KindOne({
                         className="p-n-lines"
                         style={{
                           "--lines": isClamped ? isClamped : "unset",
-                          // whiteSpace: "unset",
                         }}
                         ref={noteRef}
                       >
@@ -365,7 +330,6 @@ export default function KindOne({
                     ) : (
                       <div className="p-six-lines" ref={noteRef}>
                         {compactContent(event.content, event.pubkey)}
-                        {/* {compactContent(event.content, event.pubkey)} */}
                       </div>
                     )}
                   </div>
@@ -373,7 +337,6 @@ export default function KindOne({
               </div>
             </div>
             {isClamped !== 10000 && (
-              // {event.isCollapsedNote || isClamped && (
               <div
                 className="fit-container note-indent fx-centered fx-start-h pointer"
                 style={{ paddingTop: ".5rem" }}
@@ -405,175 +368,37 @@ export default function KindOne({
                   className="fx-scattered fit-container note-indent"
                   style={{ paddingTop: "1rem" }}
                 >
-                  <div className="fx-centered" style={{ columnGap: "1rem" }}>
-                    <div className="fx-centered">
-                      <div
-                        className="round-icon-tooltip"
-                        data-tooltip={t("ADHdLfJ")}
-                      >
-                        <div
-                          className="comment-24"
-                          onClick={() => setToggleComment(!toggleComment)}
-                        ></div>
-                      </div>
-                      <div
-                        className="round-icon-tooltip"
-                        data-tooltip={t("AMBxvKP")}
-                        onClick={() =>
-                          postActions.replies.replies.length > 0
-                            ? setShowComments(true)
-                            : null
-                        }
-                      >
-                        <p>{postActions.replies.replies.length}</p>
-                      </div>
-                    </div>
-                    <div className="fx-centered">
-                      <Like
-                        isLiked={isLiked}
-                        event={event}
-                        actions={postActions}
-                      />
-                      <div
-                        className={`round-icon-tooltip ${
-                          isLiked ? "orange-c" : ""
-                        }`}
-                        data-tooltip={t("Alz0E9Y")}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          postActions.likes.likes.length > 0 &&
-                            setUsersList({
-                              title: t("Alz0E9Y"),
-                              list: postActions.likes.likes.map(
-                                (item) => item.pubkey
-                              ),
-                              extras: postActions.likes.likes,
-                              extrasType: "reaction",
-                            });
-                        }}
-                      >
-                        <NumberShrink value={postActions.likes.likes.length} />
-                      </div>
-                    </div>
-                    <div
-                      className={`fx-centered pointer ${
-                        isLoading ? "flash" : ""
-                      }`}
-                      style={{ columnGap: "8px" }}
-                    >
-                      <Repost
-                        isReposted={isReposted}
-                        event={event}
-                        actions={postActions}
-                      />
-                      <div
-                        className={`round-icon-tooltip ${
-                          isReposted ? "orange-c" : ""
-                        }`}
-                        data-tooltip={t("Aai65RJ")}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          postActions.reposts.reposts.length > 0 &&
-                            setUsersList({
-                              title: t("Aai65RJ"),
-                              list: postActions.reposts.reposts.map(
-                                (item) => item.pubkey
-                              ),
-                              extras: [],
-                            });
-                        }}
-                      >
-                        <NumberShrink
-                          value={postActions.reposts.reposts.length}
-                        />
-                      </div>
-                    </div>
-                    <div className="fx-centered">
-                      <Quote
-                        isQuoted={isQuoted}
-                        event={event}
-                        actions={postActions}
-                      />
-                      <div
-                        className={`round-icon-tooltip ${
-                          isQuoted ? "orange-c" : ""
-                        }`}
-                        data-tooltip={t("AWmDftG")}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          postActions.quotes.quotes.length > 0 &&
-                            setUsersList({
-                              title: t("AWmDftG"),
-                              list: postActions.quotes.quotes.map(
-                                (item) => item.pubkey
-                              ),
-                              extras: [],
-                            });
-                        }}
-                      >
-                        <NumberShrink
-                          value={postActions.quotes.quotes.length}
-                        />
-                      </div>
-                    </div>
-                    <div className="fx-centered">
-                      <div
-                        className="round-icon-tooltip"
-                        data-tooltip={t("AtGAGPY")}
-                      >
-                        <Zap
-                          user={userProfile}
-                          event={event}
-                          actions={postActions}
-                          isZapped={isZapped}
-                        />
-                      </div>
-                      <div
-                        className={`round-icon-tooltip ${
-                          isZapped ? "orange-c" : ""
-                        }`}
-                        data-tooltip={t("AVDZ5cJ")}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          postActions.zaps.total > 0 &&
-                            setUsersList({
-                              title: t("AVDZ5cJ"),
-                              list: postActions.zaps.zaps.map(
-                                (item) => item.pubkey
-                              ),
-                              extras: postActions.zaps.zaps,
-                            });
-                        }}
-                      >
-                        <NumberShrink value={postActions.zaps.total} />
-                      </div>
-                    </div>
-                  </div>
+                  <PostReaction
+                    event={event}
+                    setOpenComment={setToggleComment}
+                    openComment={toggleComment}
+                    postActions={postActions}
+                    userProfile={userProfile}
+                    setShowComments={setShowComments}
+                  />
                   <div className="fx-centered">
-                    {isTransEnabled && (
-                      <div className="fit-container">
-                        {!isNoteTranslating && !showTranslation && (
-                          <div
-                            className="round-icon-tooltip"
-                            data-tooltip={t("AdHV2qJ")}
-                            onClick={translateNote}
-                          >
-                            <div className="translate-24"></div>
-                          </div>
-                        )}
-                        {!isNoteTranslating && showTranslation && (
-                          <div
-                            className="round-icon-tooltip"
-                            data-tooltip={t("AE08Wte")}
-                            onClick={() => setShowTranslation(false)}
-                          >
-                            <div className="translate-24"></div>
-                          </div>
-                        )}
-                        {isNoteTranslating && <LoadingDots />}
-                      </div>
-                    )}
-                    <EventOptions event={event} component="notes" />
+                    <div className="fit-container">
+                      {!isNoteTranslating && !showTranslation && (
+                        <div
+                          className="round-icon-tooltip"
+                          data-tooltip={t("AdHV2qJ")}
+                          onClick={translateNote}
+                        >
+                          <div className="translate-24 opacity-4"></div>
+                        </div>
+                      )}
+                      {!isNoteTranslating && showTranslation && (
+                        <div
+                          className="round-icon-tooltip"
+                          data-tooltip={t("AE08Wte")}
+                          onClick={() => setShowTranslation(false)}
+                        >
+                          <div className="translate-24 opacity-4"></div>
+                        </div>
+                      )}
+                      {isNoteTranslating && <LoadingDots />}
+                    </div>
+                    {/* <EventOptions event={event} component="notes" /> */}
                   </div>
                 </div>
               </>

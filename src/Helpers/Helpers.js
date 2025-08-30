@@ -1,3 +1,4 @@
+import React from "react";
 import { nip19 } from "nostr-tools";
 import {
   decryptEventData,
@@ -6,29 +7,20 @@ import {
   getHex,
   removeObjDuplicants,
 } from "./Encryptions";
-// import IMGElement from "@/Components/IMGElement";
 import axios from "axios";
 import relaysOnPlatform from "@/Content/Relays";
 import { getImagePlaceholder } from "@/Content/NostrPPPlaceholder";
-import React, { Fragment } from "react";
-// import Nip19Parsing from "@/Components/Nip19Parsing";
 import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
 import { uploadToS3 } from "./NostrPublisher";
 import { customHistory } from "./History";
-import Link from "next/link";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
 import { t } from "i18next";
-// import LNBCInvoice from "@/Components/LNBCInvoice";
 import axiosInstance from "./HTTP_Client";
-// import LinkPreview from "@/Components/LinkPreview";
-// import Gallery from "@/Components/Gallery";
-// import MACIPollPreview from "@/Components/MACIPollPreview";
 import { InitEvent } from "./Controlers";
-// import VideoLoader from "@/Components/VideoLoader";
-// import AudioLoader from "@/Components/AudioLoader";
 import { localStorage_ } from "./utils";
 import { supportedLanguageKeys } from "@/Content/SupportedLanguages";
+import { getMediaUploader, getSelectedServer, isVid, nEventEncode } from "./ClientHelpers";
 
 const LoginToAPI = async (publicKey, userKeys) => {
   try {
@@ -68,7 +60,7 @@ const getAnswerFromAIRemoteAPI = async (pubkey_, input) => {
       sec: process.env.NEXT_PUBLIC_CHECKER_SEC,
     });
     const res = await axios.post(
-      // "http://localhost:4700/api/v1/ai",
+    
       "https://yakiai.yakihonne.com/api/v1/ai",
       {
         input,
@@ -97,9 +89,9 @@ const getLinkFromAddr = (addr_) => {
       let data = nip19.decode(addr);
 
       if (data.data.kind === 30023) return `/article/${addr}`;
-      if ([30004, 30005].includes(data.data.kind)) return `/curations/${addr}`;
-      if (data.data.kind === 34235 || data.data.kind === 34236)
-        return `/videos/${addr}`;
+      if ([30004, 30005].includes(data.data.kind)) return `/curation/${addr}`;
+      if ([34235, 21, 22].includes(data.data.kind))
+        return `/video/${addr}`;
       if (data.data.kind === 30033) return `/smart-widget/${addr}`;
     }
     if (addr.startsWith("nprofile")) {
@@ -111,19 +103,16 @@ const getLinkFromAddr = (addr_) => {
     }
     if (addr.startsWith("nevent")) {
       let data = nip19.decode(addr);
-      return `/notes/${nEventEncode(data.data.id)}`;
-      // return `/notes/${nip19.neventEncode({
-      //   author: data.data.author,
-      //   id: data.data.id,
-      // })}`;
+      return `/note/${nEventEncode(data.data.id)}`;
     }
     if (addr.startsWith("note")) {
       let data = nip19.decode(addr);
-      return `/notes/${nEventEncode(data.data)}`;
+      return `/note/${nEventEncode(data.data)}`;
     }
 
     return addr;
   } catch (err) {
+    console.log(err)
     return addr_;
   }
 };
@@ -149,13 +138,12 @@ const getLinkPreview = async (url) => {
   }
 };
 
-// In-memory cache for NIP-05 lookups
 const nip05Cache = new Map();
-const CACHE_EXPIRY = 60 * 60 * 1000; // 1 hour in milliseconds
+const CACHE_EXPIRY = 60 * 60 * 1000;
 
 const getAuthPubkeyFromNip05 = async (nip05Addr) => {
   try {
-    // Check cache first
+  
     const cacheKey = nip05Addr.toLowerCase();
     const cached = nip05Cache.get(cacheKey);
 
@@ -172,7 +160,7 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
     );
 
     const pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
-    // Cache the result
+  
     nip05Cache.set(cacheKey, {
       pubkey,
       timestamp: Date.now(),
@@ -472,7 +460,7 @@ const validateWidgetValues = (value, kind, type) => {
   }
   if (kind.includes("color")) {
     let regex = /^#[0-9a-fA-F]{6}/;
-    // let regex = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
+  
     if (value === "") return true;
     return regex.test(value);
   }
@@ -741,26 +729,26 @@ const mirrorBlossomServerFileUpload = async (
   fileUrl
 ) => {
   try {
-    // let hash = await downloadBlobAsArrayBuffer(fileUrl);
-    // if (!hash) return;
-    // let expiration = `${Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7}`;
-    // let event = {
-    //   kind: 24242,
-    //   content: "Image mirror",
-    //   created_at: Math.floor(Date.now() / 1000),
-    //   tags: [
-    //     ["t", "upload"],
-    //     ["x", hash],
-    //     ["expiration", expiration],
-    //   ],
-    // };
-    // event = await InitEvent(
-    //   event.kind,
-    //   event.content,
-    //   event.tags,
-    //   event.created_at
-    // );
-    // let encodeB64 = encodeBase64URL(JSON.stringify(event));
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
     if (isMirror && serversList.length > 1) {
       serversList = serversList.filter((_, index) => index !== 0);
       let promises = await Promise.allSettled(
@@ -958,10 +946,10 @@ const decodeNip19 = (word) => {
   }
 };
 
-const straightUp = () => {
-  let el = document.querySelector(".main-page-nostr-container");
+const straightUp = (scrollTo) => {
+  let el = document.querySelector(".page-container");
   if (!el) return;
-  el.scrollTop = 0;
+  el.scrollTop = scrollTo || 0;
 };
 
 const redirectToLogin = () => {
@@ -1057,26 +1045,26 @@ function sortByKeyword(array, keyword) {
       return scoreB - scoreA;
     });
 
-  // return array.sort((a, b) => {
-  //   // if (!a.nip05 && b.nip05) return 1;
-  //   // if (a.nip05 && !b.nip05) return -1;
 
-  //   const distanceA = getLevenshteinDistance(
-  //     a.display_name.toLowerCase() || a.name.toLowerCase(),
-  //     keyword.toLowerCase()
-  //   );
-  //   const distanceB = getLevenshteinDistance(
-  //     b.display_name.toLowerCase() || b.name.toLowerCase(),
-  //     keyword.toLowerCase()
-  //   );
 
-  //   return distanceA - distanceB;
-  // });
-  // return array.sort((a, b) => {
-  //   const distanceA = getLevenshteinDistance(a.display_name || b.name, keyword);
-  //   const distanceB = getLevenshteinDistance(b.display_name || b.name, keyword);
-  //   return distanceA - distanceB; // Sort by ascending distance
-  // });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 const verifyEvent = (event) => {

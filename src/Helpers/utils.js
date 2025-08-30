@@ -13,3 +13,18 @@ export const localStorage_ = {
     localStorage.removeItem(key);
   },
 };
+
+// notesCache.js
+const cache = new Map();
+
+export function setNotesCache(key, data) {
+  cache.set(key, data);
+}
+
+export function getNotesCache(key) {
+  return cache.get(key);
+}
+
+export function clearNotesCache(key) {
+  cache.delete(key);
+}

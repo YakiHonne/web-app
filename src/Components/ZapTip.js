@@ -95,7 +95,7 @@ export default function ZapTip({
       <>
         {onlyIcon && (
           <div
-            className={smallIcon ? "bolt" : "bolt-24"}
+            className={smallIcon ? "bolt" : "bolt-24 opacity-4"}
             style={{ opacity: ".2" }}
           ></div>
         )}
@@ -107,7 +107,7 @@ export default function ZapTip({
             data-tooltip="Zap"
           >
             <div
-              className={smallIcon ? "lightning" : "lightning-24"}
+              className={smallIcon ? "lightning" : "lightning-24 opacity-4"}
               style={{ cursor: "not-allowed" }}
             ></div>
           </div>
@@ -120,7 +120,7 @@ export default function ZapTip({
         {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
         {onlyIcon && (
           <div
-            className={smallIcon ? "bolt" : "bolt-24"}
+            className={smallIcon ? "bolt" : "bolt-24 opacity-4"}
             onClick={() => setIsLogin(true)}
           ></div>
         )}
@@ -132,7 +132,7 @@ export default function ZapTip({
             onClick={() => setIsLogin(true)}
             data-tooltip="Zap"
           >
-            <div className={smallIcon ? "lightning" : "lightning-24"}></div>
+            <div className={smallIcon ? "lightning" : "lightning-24 opacity-4"}></div>
           </div>
         )}
       </>
@@ -156,10 +156,10 @@ export default function ZapTip({
             smallIcon
               ? isZapped
                 ? "bolt-bold"
-                : "bolt"
+                : "bolt opacity-4"
               : isZapped
               ? "bolt-bold-24"
-              : "bolt-24"
+              : "bolt-24 opacity-4"
           }
           onClick={() => setCashier(true)}
         ></div>
@@ -175,7 +175,7 @@ export default function ZapTip({
             setCashier(true);
           }}
         >
-          <div className={smallIcon ? "lightning" : "lightning-24"}></div>
+          <div className={smallIcon ? "lightning" : "lightning-24 opacity-4"}></div>
         </div>
       )}
     </>

@@ -31,7 +31,6 @@ export default function WriteNote({
   content,
   linkedEvent,
   isQuote = false,
-  triggerCP = false,
 }) {
   const navigateTo = useRouter();
   const dispatch = useDispatch();
@@ -579,7 +578,6 @@ export default function WriteNote({
                 <ActionTools
                   setData={(data) => handleInsertTextInPosition(data)}
                 />
-                {/* <AddPolls setPollAddr={handleInsertTextInPosition} triggerCP={triggerCP}/> */}
               </div>
               <div className="fx-centered">
                 {exit && (

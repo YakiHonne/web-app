@@ -230,7 +230,7 @@ export default function SearchNetwork({ exit }) {
     let content = await getSubData(
       [
         { kinds: [1], limit: 10, "#t": tags },
-        { kinds: [30023, 34235], limit: 30, "#t": tags },
+        { kinds: [30023, 34235, 21, 22], limit: 30, "#t": tags },
       ],
       500
     );

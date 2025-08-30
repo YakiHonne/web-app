@@ -10,6 +10,8 @@ export const eventKinds = {
   30004: "curation",
   30005: "curation",
   34235: "video",
+  22: "video",
+  21: "video",
   34236: "video",
   300311: "smart widget",
   30031: "smart widget",

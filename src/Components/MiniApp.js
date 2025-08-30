@@ -5,16 +5,16 @@ import { assignClientTag, extractRootDomain } from "@/Helpers/Helpers";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { InitEvent, publishEvent } from "@/Helpers/Controlers";
-import OptionsDropdown from "@/Components/OptionsDropdown";
-import PostAsNote from "@/Components/PostAsNote";
-import PaymentGateway from "@/Components/PaymentGateway";
-import LoadingLogo from "@/Components/LoadingLogo";
+import OptionsDropdown from "./OptionsDropdown";
+import PostAsNote from "./PostAsNote";
+import PaymentGateway from "./PaymentGateway";
 import axios from "axios";
 import { saveUsers } from "@/Helpers/DB";
 import useUserProfile from "@/Hooks/useUsersProfile";
-import UserProfilePic from "@/Components/UserProfilePic";
-import Link from "next/link";
+import UserProfilePic from "./UserProfilePic";
 import { nip19 } from "nostr-tools";
+import Link from "next/link";
+import LoadingLogo from "./LoadingLogo";
 
 export default function MiniApp({ url, exit, setReturnedData }) {
   const { t } = useTranslation();
@@ -135,7 +135,7 @@ export default function MiniApp({ url, exit, setReturnedData }) {
     dispatch(
       setToast({
         type: 1,
-        desc: "Link was copied",
+        desc: t("AfnTOQk"),
       })
     );
   };
@@ -209,11 +209,11 @@ export default function MiniApp({ url, exit, setReturnedData }) {
               options={[
                 <div className="fx-centered pointer">
                   <div className="copy"></div>
-                  <p onClick={copyURL}>Copy link</p>
+                  <p onClick={copyURL}>{t("AahCFK4")}</p>
                 </div>,
                 <div className="fx-centered">
                   <div className="switch-arrows"></div>
-                  <p onClick={reloadiFrame}>Reload app</p>
+                  <p onClick={reloadiFrame}>{t("A0isRl7")}</p>
                 </div>,
               ]}
             />
@@ -242,7 +242,6 @@ export default function MiniApp({ url, exit, setReturnedData }) {
                 className="fx-centered fx-col sc-s-18"
                 style={{
                   position: "absolute",
-                  borderRadius: 0,
                   left: 0,
                   top: 0,
                   zIndex: 1,
@@ -268,6 +267,7 @@ export default function MiniApp({ url, exit, setReturnedData }) {
 }
 
 const UserPreview = ({ pubkey }) => {
+  const {t} = useTranslation()
   const { userProfile } = useUserProfile(pubkey);
   if (!pubkey) return null;
   return (
@@ -283,7 +283,7 @@ const UserPreview = ({ pubkey }) => {
           size={48}
         />
         <div>
-          <p className="gray-c p-medium">Developed by</p>
+          <p className="gray-c p-medium">{t("AwHZ4t1")}</p>
           <p className="p-maj p-big">
             {userProfile.display_name || userProfile.name}
           </p>

@@ -138,7 +138,7 @@ export default function UserFeed({ user }) {
       replies: [1],
       flashnews: [1],
       articles: [30023],
-      videos: [34235, 34236],
+      videos: [34235, 34236, 21, 22],
       curations: [30004],
       "smart-widget": [30033],
     };
@@ -195,7 +195,7 @@ export default function UserFeed({ user }) {
                 console.log(err);
               }
             }
-            if ([34235, 34236].includes(event.kind)) {
+            if ([34235, 34236, 21, 22].includes(event.kind)) {
               let event_ = getParsedRepEvent(event);
               return event_;
             }

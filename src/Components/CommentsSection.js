@@ -422,7 +422,7 @@ const Comment = ({
               position: "relative",
               paddingTop: "2rem",
             }}
-            onClick={() => customHistory(`/notes/${comment.nEvent}`)}
+            onClick={() => customHistory(`/note/${comment.nEvent}`)}
           >
             <div
               className="reply-tail"

@@ -102,7 +102,7 @@ export default function Repost({ isReposted, event, actions }) {
         onClick={reactToNote}
       >
         <div
-          className={isReposted ? "switch-arrows-bold-24" : "switch-arrows-24"}
+          className={isReposted ? "switch-arrows-bold-24" : "switch-arrows-24 opacity-4"}
         ></div>
       </div>
     </>

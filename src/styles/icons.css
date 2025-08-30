@@ -411,7 +411,11 @@
 .raw-event,
 .raw-event-24,
 .pub-hex,
-.pub-hex-24 {
+.pub-hex-24,
+.recent,
+.recent-24,
+.recent-wr,
+.recent-wr-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -783,7 +787,11 @@
     .raw-event,
     .raw-event-24,
     .pub-hex,
-    .pub-hex-24 {
+    .pub-hex-24,
+    .recent,
+    .recent-24,
+    .recent-wr,
+    .recent-wr-24 {
         background-position: center center;
         background-repeat: no-repeat;
         background-size: contain;
@@ -1009,7 +1017,9 @@
 .star-bold,
 .burger-menu,
 .raw-event,
-.pub-hex {
+.pub-hex,
+.recent,
+.recent-wr {
     min-width: 16px;
     min-height: 16px;
 }
@@ -1223,9 +1233,11 @@
 .star-24,
 .star-bold-24,
 .burger-menu-24,
-.raw-event-24 {
-    min-width: 20px;
-    min-height: 20px;
+.raw-event-24,
+.recent-24,
+.recent-wr-24 {
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .play-vid-58,
@@ -1238,391 +1250,398 @@
     min-width: 8rem;
     min-height: 8rem;
 }
+
 .pub-hex-24 {
     min-width: 24px;
     min-height: 24px;
 }
 
+.recent-wr, .recent-wr-24 {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/recent-with-replies-mono.svg');
+}
+.recent, .recent-24 {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/recent-mono.svg');
+}
 .pub-hex, .pub-hex-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/pub-hex.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/pub-hex.svg');
 }
 
 .raw-event, .raw-event-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/raw-event.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/raw-event.svg');
 }
 
 .burger-menu, .burger-menu-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/burger-menu.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/burger-menu.svg');
 }
 
 .star, .star-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/star.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/star.svg');
 }
 
 .star-bold, .star-boldt-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/star-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/star-bold.svg');
 }
 
 .keplr-icon {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/keplr-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/keplr-logo.svg');
     min-width: 48px;
     min-height: 48px;
 }
 
 .switch-arrows-v2,
 .switch-arrows-v2-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/switch-arrows-v2.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/switch-arrows-v2.svg');
 }
 
 .posts-bold,
 .posts-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/posts-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/posts-bold.svg');
 }
 
 .ringbell-bold,
 .ringbell-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/ringbell-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/ringbell-bold.svg');
 }
 
 .github-logo,
 .github-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/github-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/github-logo.svg');
 }
 
 .export,
 .export-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/export.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/export.svg');
 }
 
 .user-bold,
 .user-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/user-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/user-bold.svg');
 }
 
 .flag-it,
 .flag-it-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-it.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-it.svg');
 }
 
 .flag-fr,
 .flag-fr-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-fr.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-fr.svg');
 }
 
 .flag-th,
 .flag-th-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-th.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-th.svg');
 }
 
 .flag-ar,
 .flag-ar-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-ar.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-ar.svg');
 }
 
 .flag-en,
 .flag-en-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-en.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-en.svg');
 }
 
 .flag-zh,
 .flag-zh-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-zh.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-zh.svg');
 }
 
 .flag-es,
 .flag-es-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-es.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-es.svg');
 }
 
 .flag-pt,
 .flag-pt-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-pt.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-pt.svg');
 }
 
 .flag-ja,
 .flag-ja-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag-ja.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-ja.svg');
 }
 
 .translate,
 .translate-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/translate.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/translate.svg');
 }
 
 .emoji,
 .emoji-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/emoji.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/emoji.svg');
 }
 
 .apple,
 .apple-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/apple.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/apple.svg');
 }
 
 .google,
 .google-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/google.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/google.svg');
 }
 
 .check,
 .check-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/check.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/check.svg');
 }
 
 .logout-red,
 .logout-red-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/logout-red.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/logout-red.svg');
 }
 
 .wallet-confirm,
 .wallet-confirm-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/wallet-confirm.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/wallet-confirm.svg');
 }
 
 .undo,
 .undo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/undo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/undo.svg');
 }
 
 .custom,
 .custom-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/custom.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/custom.svg');
 }
 
 .yaki-logomark,
 .yaki-logomark-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/yaki-logomark.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/yaki-logomark.svg');
     min-width: 28px;
     min-height: 28px;
 }
 
 .info,
 .info-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/info.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info.svg');
     min-width: 28px;
     min-height: 28px;
 }
 
 .discover,
 .discover-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/discover.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/discover.svg');
 }
 
 .discover-bold,
 .discover-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/discover-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/discover-bold.svg');
 }
 
 .dashboard,
 .dashboard-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/dashboard.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/dashboard.svg');
 }
 
 .dashboard-bold,
 .dashboard-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/dashboard-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/dashboard-bold.svg');
 }
 
 .cache,
 .cache-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/cache.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/cache.svg');
 }
 
 .theme,
 .theme-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/theme.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/theme.svg');
 }
 
 .total-events,
 .total-events-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/total-events.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/total-events.svg');
 }
 
 .succeeded-events,
 .succeeded-events-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/succeeded-events.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/succeeded-events.svg');
 }
 
 .failed-events,
 .failed-events-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/failed-events.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/failed-events.svg');
 }
 
 .bunny-icon {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bunny-icon.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bunny-icon.svg');
 }
 
 .smart-widget-draft,
 .smart-widget-draft-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sw-draft.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/sw-draft.svg');
 }
 
 .layers,
 .layers-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/layers.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/layers.svg');
 }
 
 .smart-widget-checker,
 .smart-widget-checker-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/smart-widget-checker.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/smart-widget-checker.svg');
 }
 
 .checkmark-tt,
 .checkmark-tt-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/checkmark-tt.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/checkmark-tt.svg');
 }
 
 .crossmark-tt,
 .crossmark-tt-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/crossmark-tt.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/crossmark-tt.svg');
 }
 
 .info-tt,
 .info-tt-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/info-tt.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info-tt.svg');
 }
 
 .clone,
 .clone-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/clone.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/clone.svg');
 }
 
 .layout,
 .layout-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/layout.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/layout.svg');
 }
 
 .frames,
 .frames-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/frames.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/frames.svg');
 }
 
 .smart-widget,
 .smart-widget-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/smart-widget.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/smart-widget.svg');
 }
 
 .smart-widget-bold,
 .smart-widget-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/smart-widget-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/smart-widget-bold.svg');
 }
 
 .telegram-b-logo,
 .telegram-b-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/telegram.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/telegram.svg');
 }
 
 .youtube-logo,
 .youtube-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/youtube.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/youtube.svg');
 
 }
 
 .container-one,
 .container-one-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/container-one.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/container-one.svg');
 }
 
 .container-one-one,
 .container-one-one-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/container-one-one.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/container-one-one.svg');
 }
 
 .container-one-two,
 .container-one-two-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/container-one-two.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/container-one-two.svg');
 }
 
 .container-two-one,
 .container-two-one-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/container-two-one.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/container-two-one.svg');
 }
 
 .button,
 .button-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/button.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/button.svg');
 }
 
 .text,
 .text-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/text.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/text.svg');
 }
 
 .smart-widget-add,
 .smart-widget-add-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/smart-widget-add.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/smart-widget-add.svg');
 }
 
 .wallet-add,
 .wallet-add-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/wallet-add.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/wallet-add.svg');
 }
 
 .qrcode,
 .qrcode-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/qrcode.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/qrcode.svg');
 }
 
 .unmute,
 .unmute-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/unmute.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/unmute.svg');
 }
 
 .mute,
 .mute-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/mute.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/mute.svg');
 }
 
 .webln-logo,
 .webln-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/webln-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/webln-logo.svg');
 }
 
 .wallet,
 .wallet-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/wallet.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/wallet.svg');
 }
 
 .followings,
 .followings-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/followings.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/followings.svg');
 }
 
 .timeline,
 .timeline-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/timeline.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/timeline.svg');
 }
 
 .trending-up,
 .trending-up-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/trending-up.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/trending-up.svg');
 }
 
 .share-v2,
 .share-v2-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/share-v2.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/share-v2.svg');
 }
 
 .comment-not,
 .comment-not-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/comment-not.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/comment-not.svg');
 }
 
 .user-to-follow,
 .user-to-follow-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/user-to-follow.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/user-to-follow.svg');
 }
 
 .user-to-unfollow,
 .user-to-unfollow-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/user-to-unfollow.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/user-to-unfollow.svg');
 }
 
 .user-followed,
 .user-followed-24,
 .user-followed-w,
 .user-followed-w-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/user-followed.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/user-followed.svg');
 }
 
 .user-followed-w,
@@ -1632,119 +1651,119 @@
 
 .nwc-logo,
 .nwc-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/nwc-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/nwc-logo.svg');
 }
 
 .alby-logo,
 .alby-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/alby-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/alby-logo.svg');
 }
 
 .bookmark-i-bold,
 .bookmark-i-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bookmark-i-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bookmark-i-bold.svg');
 }
 
 .buzz-bold,
 .buzz-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/buzz-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/buzz-bold.svg');
 }
 
 .curation-bold,
 .curation-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/curation-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/curation-bold.svg');
 }
 
 .env-bold,
 .env-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/env-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/env-bold.svg');
 }
 
 .folder-bold,
 .folder-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/folder-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/folder-bold.svg');
 }
 
 .home-bold,
 .home-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/home-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/home-bold.svg');
 }
 
 .media-bold,
 .media-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/media-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/media-bold.svg');
 }
 
 .news-bold,
 .news-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/news-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/news-bold.svg');
 }
 
 .note-2-bold,
 .note-2-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/note-2-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/note-2-bold.svg');
 }
 
 .note-bold,
 .note-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/note-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/note-bold.svg');
 }
 
 .posts-bold,
 .posts-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/posts-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/posts-bold.svg');
 }
 
 .play-bold,
 .play-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/play-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/play-bold.svg');
 }
 
 .eye-closed,
 .eye-closed-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/eye-closed.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/eye-closed.svg');
 }
 
 .eye-opened,
 .eye-opened-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/eye-opened.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/eye-opened.svg');
 }
 
 .sats,
 .sats-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/sats.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/sats.svg');
 }
 
 .note-plus,
 .note-plus-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/note-plus.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/note-plus.svg');
 }
 
 .play-plus,
 .play-plus-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/play-plus.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/play-plus.svg');
 }
 
 .news-plus,
 .news-plus-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/news-plus.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/news-plus.svg');
 }
 
 .curation-plus,
 .curation-plus-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/curation-plus.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/curation-plus.svg');
 }
 
 .posts-plus,
 .posts-plus-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/posts-plus.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/posts-plus.svg');
 }
 
 .plus-sign,
 .plus-sign-24,
 .plus-sign-w,
 .plus-sign-w-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/plus-sign.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/plus-sign.svg');
 }
 
 .plus-sign,
@@ -1760,497 +1779,497 @@
 
 .media,
 .media-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/media.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/media.svg');
 }
 
 .hashtag,
 .hashtag-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/hashtag.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/hashtag.svg');
 }
 
 .note-2,
 .note-2-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/note-2.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/note-2.svg');
 }
 
 .quote-bold,
 .quote-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/quote-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/quote-bold.svg');
 }
 
 .switch-arrows-bold,
 .switch-arrows-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/switch-arrows-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/switch-arrows-bold.svg');
 }
 
 .heart,
 .heart-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/heart.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/heart.svg');
 }
 
 .heart-bold,
 .heart-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/heart-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/heart-bold.svg');
 }
 
 .quote,
 .quote-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/quote.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/quote.svg');
 }
 
 .infinity,
 .infinity-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/infinity.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/infinity.svg');
 }
 
 .ai-loader,
 .ai-loader-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/ai_loading.gif');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/ai_loading.gif');
 }
 
 .connect,
 .connect-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/connect.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/connect.svg');
     filter: invert();
 }
 
 .ai-loader,
 .ai-loader-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/ai_loading.gif');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/ai_loading.gif');
 }
 
 .env-edit,
 .env-edit-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/env-edit.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/env-edit.svg');
 }
 
 .download-file,
 .download-file-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/download-file.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/download-file.svg');
 }
 
 .play-vid,
 .play-vid-58 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/play-vid.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/play-vid.svg');
 }
 
 .play,
 .play-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/play.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/play.svg');
 }
 
 .like-bold,
 .like-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/like-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/like-bold.svg');
 }
 
 .write,
 .write-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/write.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/write.svg');
 }
 
 .folder,
 .folder-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/folder.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/folder.svg');
 }
 
 .buzz,
 .buzz-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/buzz.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/buzz.svg');
 }
 
 .unprotected,
 .unprotected-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/unprotected.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/unprotected.svg');
 }
 
 .protected,
 .protected-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/protected.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/protected.svg');
 }
 
 .ringbell,
 .ringbell-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/ringbell.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/ringbell.svg');
 }
 
 .msg-icon,
 .msg-icon-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/msg-icon.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/msg-icon.svg');
 }
 
 .nostr-icon,
 .nostr-icon-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/nostr-icon.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/nostr-icon.svg');
 }
 
 .telegram-logo,
 .telegram-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/telegram-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/telegram-logo.svg');
 }
 
 .add-note,
 .add-note-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/add-note.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/add-note.svg');
 }
 
 .medal,
 .medal-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/medal.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/medal.svg');
 }
 
 .msg-bubbles,
 .msg-bubbles-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/msg-bubbles.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/msg-bubbles.svg');
 }
 
 .thumbsup,
 .thumbsup-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/thumbsup.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/thumbsup.svg');
 }
 
 .thumbsdown,
 .thumbsdown-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/thumbsdown.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/thumbsdown.svg');
 }
 
 .cup,
 .cup-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/cup.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/cup.svg');
 }
 
 .note,
 .note-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/note.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/note.svg');
 }
 
 .calendar,
 .calendar-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/calendar.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/calendar.svg');
 }
 
 .globe,
 .globe-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/globe.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/globe.svg');
 }
 
 .play-b,
 .play-b-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/play-b.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/play-b.svg');
 }
 
 .mobile,
 .mobile-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/mobile.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/mobile.svg');
 }
 
 .news,
 .news-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/news.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/news.svg');
 }
 
 .content-s,
 .content-s-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/content-s.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/content-s.svg');
 }
 
 .nip05,
 .nip05-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/nip05.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/nip05.svg');
 }
 
 .add-curation,
 .add-curation-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/add-curation.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/add-curation.svg');
 }
 
 .share-icon,
 .share-icon-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/share.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/share.svg');
 }
 
 .share-icon-2,
 .share-icon-2-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/share-icon-2.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/share-icon-2.svg');
 }
 
 .in-icon,
 .in-icon-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/in-icon.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/in-icon.svg');
 }
 
 .whatsapp-icon,
 .whatsapp-icon-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/whatsapp-icon.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/whatsapp-icon.svg');
 }
 
 .fb-icon,
 .fb-icon-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/fb-icon.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/fb-icon.svg');
 }
 
 .report,
 .report-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/report.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/report.svg');
 }
 
 .bookmark-b,
 .bookmark-24-b {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bookmark-checked-2.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bookmark-checked-2.svg');
 }
 
 .bookmark,
 .bookmark-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bookmark-add.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bookmark-add.svg');
 }
 
 .bookmark-i-b,
 .bookmark-i-24-b {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/save-bookmark-b.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/save-bookmark-b.svg');
 }
 
 .bookmark-i,
 .bookmark-i-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/save-bookmark.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/save-bookmark.svg');
 }
 
 .upload-file, .upload-file-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/upload-file.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/upload-file.svg');
 }
 
 .flag, .flag-24 {
     cursor: pointer;
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/flag.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag.svg');
 }
 
 .checkmark, .checkmark-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/checkmark.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/checkmark.svg');
 }
 
 .checkmark-c1, .checkmark-c1-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/checkmark-c1.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/checkmark-c1.svg');
 }
 
 .bolt, .bolt-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bolt.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bolt.svg');
 }
 
 .bolt-bold, .bolt-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bolt-bold-c1.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bolt-bold-c1.svg');
 }
 
 .arrow-up {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/arrow-up.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/arrow-up.svg');
 }
 
 .arrow-up:hover {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/arrow-up-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/arrow-up-bold.svg');
 }
 
 .arrow-up-bold {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/arrow-up-bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/arrow-up-bold.svg');
 }
 
 .lightning, .lightning-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/lightning.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/lightning.svg');
 }
 
 
 .menu, .menu-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/menu.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/menu.svg');
 }
 
 .user, .user-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/user.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/user.svg');
 }
 
 .server, .server-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/relay.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/relay.svg');
 }
 
 .key-icon, .key-icon-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/keys.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/keys.svg');
 }
 
 .copy, .copy-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/copy.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/copy.svg');
 }
 
 .bronze-medal {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bronze-medal.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bronze-medal.svg');
 }
 
 .silver-medal {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/silver-medal.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/silver-medal.svg');
 }
 
 .golden-medal {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/golden-medal.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/golden-medal.svg');
 }
 
 .info-flag, .info-flag-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/info-flag.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info-flag.svg');
 }
 
 .warning, .warning-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/warning.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/warning.svg');
 }
 
 .success, .success-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/success.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/success.svg');
 }
 
 .weechat-logo, .weechat-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/weechat-logo.png');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/weechat-logo.png');
 }
 
 .logout, .logout-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/logout.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/logout.svg');
 }
 
 .switch-arrows, .switch-arrows-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/switch-arrows.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/switch-arrows.svg');
 }
 
 .env, .env-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/env.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/env.svg');
 }
 
 .cancel, .cancel-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/cancel.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/cancel.svg');
 }
 
 .comment-icon, .comment-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/comment.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/comment.svg');
 }
 
 .send, .send-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/send.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/send.svg');
 }
 
 .like, .like-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/like.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/like.svg');
 }
 
 .categories, .categories-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/categories.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/categories.svg');
 }
 
 .polls, .polls-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/polls.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/polls.svg');
 }
 
 .views, .views-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/views.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/views.svg');
 }
 
 .admin, .admin-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/admin.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/admin.svg');
 }
 
 .arrow, .arrow-24, .arrow-12 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/arrow.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/arrow.svg');
 }
 
 .bold, .bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bold.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bold.svg');
 }
 
 .bounties, .bounties-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/bounties.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bounties.svg');
 }
 
 .code, .code-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/code.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/code.svg');
 }
 
 .curation, .curation-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/curation.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/curation.svg');
 }
 
 .discord-logo, .discord-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/discord-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/discord-logo.svg');
     filter: invert();
 }
 
 .edit, .edit-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/edit.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/edit.svg');
 }
 
 .facebook-logo, .facebook-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/facebook-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/facebook-logo.svg');
 }
 
 .filter, .filter-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/filter.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/filter.svg');
 }
 
 .home, .home-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/home.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/home.svg');
 }
 
 .image, .image-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/image.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/image.svg');
 }
 
 .instagram-logo, .instagram-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/instagram-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/instagram-logo.svg');
 }
 
 .italic, .italic-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/italic.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/italic.svg');
 }
 
 .plain, .plain-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/plain.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/plain.svg');
 }
 
 .link, .link-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/link.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/link.svg');
 }
 
 .metamask-logo, .metamask-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/metamask-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/metamask-logo.svg');
 }
 
 .podcast, .podcast-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/podcast.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/podcast.svg');
 }
 
 .posts, .posts-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/posts.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/posts.svg');
 }
 
 .quote, .quote-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/quote.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/quote.svg');
 }
 
 .search, .search-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/search.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/search.svg');
 }
 
 .setting, .setting-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/setting.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/setting.svg');
 }
 
 .stories, .stories-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/stories.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/stories.svg');
 }
 
 .title, .title-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/title.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/title.svg');
 }
 
 .trash, .trash-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/trash.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/trash.svg');
 }
 
 .twitter-logo, .twitter-logo-24, .twitter-w-logo, .twitter-w-logo-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/twitter-logo.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/twitter-logo.svg');
 }
 
 .video, .video-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/video.svg');
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/video.svg');
 }
 
 .article .arrow,

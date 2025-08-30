@@ -14,7 +14,7 @@ export default function DynamicIndicator({ item }) {
       dynElem = t("AkamgHX", { count: item.items.length });
     if (item.kind === 30005)
       dynElem = t("APXDxmq", { count: item.items.length });
-    if (item.kind === 34235) dynElem = t("A8Ewal4");
+    if ([34235, 21, 22].includes(item.kind)) dynElem = t("A8Ewal4");
     return (
       <p className="gray-c p-medium">
         <Date_ toConvert={new Date(item.created_at * 1000)} /> &#x2022;{"  "}

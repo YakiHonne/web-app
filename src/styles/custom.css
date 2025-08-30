@@ -956,6 +956,10 @@ main {
 
 }
 
+.opacity-4 {
+    opacity: .4;
+}
+
 .drop-down {
     right: 0px
 }

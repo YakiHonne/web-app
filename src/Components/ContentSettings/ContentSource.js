@@ -330,79 +330,79 @@ export default function ContentSource({
         <div className="fx-centered">
           {category.value === "top" && (
             <div
-              className="round-icon"
-              style={{
-                minWidth: minimal ? "28px" : "34px",
-                minHeight: minimal ? "28px" : "34px",
-              }}
+              // className="round-icon"
+              // style={{
+              //   minWidth: minimal ? "28px" : "34px",
+              //   minHeight: minimal ? "28px" : "34px",
+              // }}
             >
-              <div className="medal"></div>
+              <div className="medal-24"></div>
             </div>
           )}
           {category.value === "widgets" && (
             <div
-              className="round-icon"
-              style={{
-                minWidth: minimal ? "28px" : "34px",
-                minHeight: minimal ? "28px" : "34px",
-              }}
+              // className="round-icon"
+              // style={{
+              //   minWidth: minimal ? "28px" : "34px",
+              //   minHeight: minimal ? "28px" : "34px",
+              // }}
             >
-              <div className="smart-widget"></div>
+              <div className="smart-widget-24"></div>
             </div>
           )}
           {category.value === "recent" && (
             <div
-              className="round-icon"
-              style={{
-                minWidth: minimal ? "28px" : "34px",
-                minHeight: minimal ? "28px" : "34px",
-              }}
+              // className="round-icon"
+              // style={{
+              //   minWidth: minimal ? "28px" : "34px",
+              //   minHeight: minimal ? "28px" : "34px",
+              // }}
             >
-              <div className="posts"></div>
+              <div className="recent-24"></div>
             </div>
           )}
           {category.value === "recent_with_replies" && (
             <div
-              className="round-icon"
-              style={{
-                minWidth: minimal ? "28px" : "34px",
-                minHeight: minimal ? "28px" : "34px",
-              }}
+              // className="round-icon"
+              // style={{
+              //   minWidth: minimal ? "28px" : "34px",
+              //   minHeight: minimal ? "28px" : "34px",
+              // }}
             >
-              <div className="note"></div>
+              <div className="recent-wr-24"></div>
             </div>
           )}
           {category.value === "paid" && (
             <div
-              className="round-icon"
-              style={{
-                minWidth: minimal ? "28px" : "34px",
-                minHeight: minimal ? "28px" : "34px",
-              }}
+              // className="round-icon"
+              // style={{
+              //   minWidth: minimal ? "28px" : "34px",
+              //   minHeight: minimal ? "28px" : "34px",
+              // }}
             >
-              <div className="sats"></div>
+              <div className="sats-24"></div>
             </div>
           )}
           {category.value === "network" && (
             <div
-              className="round-icon"
-              style={{
-                minWidth: minimal ? "28px" : "34px",
-                minHeight: minimal ? "28px" : "34px",
-              }}
+              // className="round-icon"
+              // style={{
+              //   minWidth: minimal ? "28px" : "34px",
+              //   minHeight: minimal ? "28px" : "34px",
+              // }}
             >
-              <div className="posts"></div>
+              <div className="posts-24"></div>
             </div>
           )}
           {category.value === "global" && (
             <div
-              className="round-icon"
-              style={{
-                minWidth: minimal ? "28px" : "34px",
-                minHeight: minimal ? "28px" : "34px",
-              }}
+              // className="round-icon"
+              // style={{
+              //   minWidth: minimal ? "28px" : "34px",
+              //   minHeight: minimal ? "28px" : "34px",
+              // }}
             >
-              <div className="globe"></div>
+              <div className="globe-24"></div>
             </div>
           )}
           <p className="p-maj p-one-line">{category.display_name}</p>

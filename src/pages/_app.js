@@ -12,11 +12,11 @@ import "highlight.js/styles/github.css";
 import "highlight.js/styles/github-dark.css";
 import "@uiw/react-md-editor/markdown-editor.css";
 import "@uiw/react-markdown-preview/markdown.css";
+import "@/styles/PlayPauseButton.css";
+
 import { useState, useEffect } from "react";
-// Import client-side i18n instead of next-i18next
 import "@/lib/i18n";
 import ReduxProvider from "@/Store/ReduxProvider";
-import Sidebar from "@/Components/SideBar/Sidebar";
 import AppInit from "@/Components/AppInit";
 import { useRouter } from "next/router";
 import LoadingLogo from "@/Components/LoadingLogo";
@@ -42,23 +42,16 @@ function App({ Component, pageProps }) {
     "/points-system",
     "/write-article",
     "/m/maci-poll",
-    "/docs/sw/intro",
-    "/docs/sw/getting-started",
-    "/docs/sw/basic-widgets",
-    "/docs/sw/action-tool-widgets",
-    "/docs/sw/smart-widget-builder",
-    "/docs/sw/smart-widget-previewer",
-    "/docs/sw/smart-widget-handler",
+    "/docs/sw/[keyword]",
   ];
 
   // Check if current route should hide sidebar
   const shouldHideSidebar = noSidebarPages.includes(router.pathname);
-
   useEffect(() => {
     const handleStart = () => setLoading(true);
     const handleComplete = () => setLoading(false);
 
-    router.events.on("routeChangeStart", handleStart);
+    router.events.on("routeChangeStart", shouldHideSidebar ? () => {} :handleStart);
     router.events.on("routeChangeComplete", handleComplete);
     router.events.on("routeChangeError", handleComplete);
 
@@ -68,28 +61,29 @@ function App({ Component, pageProps }) {
       router.events.off("routeChangeError", handleComplete);
     };
   }, [router]);
+  
   return (
     <ReduxProvider>
       <ToastMessages />
       <AppInit />
-      <div
-        className="page-container fit-container fx-centered fx-start-v"
-        style={{ overflow: "scroll", height: "100dvh" }}
-      >
-        {shouldHideSidebar ? (
-          <div className="fit-container" style={{ width: "min(100%, 1700px)" }}>
-            {loading ? (
-              <div
-                className="fit-container fx-centered"
-                style={{ height: "100vh" }}
-              >
-                <LoadingLogo size={58} />
-              </div>
-            ) : (
-              <Component {...pageProps} />
-            )}
-          </div>
-        ) : (
+      {shouldHideSidebar ? (
+        <div >
+          {loading ? (
+            <div
+              className="fit-container fx-centered"
+              style={{ height: "100vh" }}
+            >
+              <LoadingLogo size={58} />
+            </div>
+          ) : (
+            <Component {...pageProps} />
+          )}
+        </div>
+      ) : (
+        <div
+          className="page-container fit-container fx-centered fx-start-v"
+          style={{ overflow: "scroll", height: "100dvh" }}
+        >
           <div className="main-container">
             <main className="fit-container fx-centered fx-end-h fx-start-v">
               <div
@@ -112,8 +106,8 @@ function App({ Component, pageProps }) {
               </div>
             </main>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </ReduxProvider>
   );
 }

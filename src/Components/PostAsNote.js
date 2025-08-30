@@ -1,7 +1,7 @@
 import React from "react";
 import WriteNote from "@/Components/WriteNote";
 
-export default function PostAsNote({ exit , content = "", linkedEvent, triggerCP = false}) {
+export default function PostAsNote({ exit , content = "", linkedEvent}) {
   
   return (
     <div className="fixed-container fx-centered box-pad-h"      onClick={(e) => e.stopPropagation()}>
@@ -10,7 +10,7 @@ export default function PostAsNote({ exit , content = "", linkedEvent, triggerCP
         className="sc-s-18"
         onClick={(e) => e.stopPropagation()}
       >
-        <WriteNote border={false} exit={exit} content={content} linkedEvent={linkedEvent} triggerCP={triggerCP}/>
+        <WriteNote border={false} exit={exit} content={content} linkedEvent={linkedEvent}/>
       </div>
     </div>
   );

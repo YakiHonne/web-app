@@ -29,7 +29,7 @@ export default function Page({ event, author }) {
     );
 }
 
-export async function getStaticProps({ locale, params }) {
+export async function getStaticProps({ params }) {
   const { nevent } = params;
   let id = nip19.decode(nevent)?.data.id || nip19.decode(nevent)?.data;
   const res = await getSubData([{ ids: [id] }], 1000, undefined, undefined, 1);

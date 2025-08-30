@@ -21,6 +21,7 @@ import {
   getArticleDraft,
   nEventEncode,
   getNoteDraft,
+  getParsedNote,
 } from "@/Helpers/ClientHelpers";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { nip19 } from "nostr-tools";
@@ -205,7 +206,9 @@ const getInterestList = (list) => {
 export default function Dashboard() {
   const { query } = useRouter();
   const userKeys = useSelector((state) => state.userKeys);
-  const [selectedTab, setSelectedTab] = useState(query?.tabNumber || 0);
+  const [selectedTab, setSelectedTab] = useState(
+    query?.tabNumber ? parseInt(query.tabNumber) : 0
+  );
   const [userPreview, setUserPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [postToNote, setPostToNote] = useState(query?.init ? "" : false);
@@ -231,7 +234,7 @@ export default function Dashboard() {
           getPopularNotes(userKeys.pub),
           getSubData([
             {
-              kinds: [30023, 30004, 30005, 34235],
+              kinds: [30023, 30004, 30005, 34235, 21, 22],
               limit: 5,
               authors: [userKeys.pub],
             },
@@ -273,7 +276,7 @@ export default function Dashboard() {
   const handleUpdate = async () => {
     let userContent = await getSubData([
       {
-        kinds: [30023, 30004, 30005, 34235],
+        kinds: [30023, 30004, 30005, 34235, 21, 22],
         limit: 5,
         authors: [userKeys.pub],
       },
@@ -287,7 +290,7 @@ export default function Dashboard() {
       return { ...prev, latestPublished: sortEvents(latestPublished) };
     });
   };
-
+  console.log(selectedTab);
   return (
     <>
       {postToNote !== false && (
@@ -295,7 +298,6 @@ export default function Dashboard() {
           exit={() => setPostToNote(false)}
           content={typeof postToNote === "string" ? postToNote : ""}
           linkedEvent={typeof postToNote !== "string" ? postToNote : ""}
-          triggerCP={query?.triggerCP ? query.triggerCP : false}
         />
       )}
       <div>
@@ -374,15 +376,15 @@ export default function Dashboard() {
                 <Content
                   filter={"notes"}
                   localDraft={userPreview.localDraft}
-                  init={query?.init || false}
+                  init={postToNote || false}
                   setPostToNote={setPostToNote}
                 />
               )}
               {selectedTab === 2 && (
                 <Content
-                  filter={"articles"}
+                  filter={query?.filter || "articles"}
                   localDraft={userPreview.localDraft}
-                  init={query?.init || false}
+                  init={postToNote || false}
                   setPostToNote={setPostToNote}
                 />
               )}
@@ -390,7 +392,7 @@ export default function Dashboard() {
                 <Content
                   filter={"curations"}
                   localDraft={userPreview.localDraft}
-                  init={query?.init || false}
+                  init={postToNote || false}
                   setPostToNote={setPostToNote}
                 />
               )}
@@ -398,7 +400,7 @@ export default function Dashboard() {
                 <Content
                   filter={"videos"}
                   localDraft={userPreview.localDraft}
-                  init={query?.init || false}
+                  init={postToNote || false}
                   setPostToNote={setPostToNote}
                 />
               )}
@@ -693,8 +695,8 @@ const SideMenuMobile = ({ setSelectedTab, selectedTab }) => {
 };
 
 const Content = ({ filter, setPostToNote, localDraft, init }) => {
-  const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
+  const userKeys = useSelector((state) => state.userKeys);
   const [contentFrom, setContentFrom] = useState(filter);
   const [isLoading, setIsLoading] = useState(true);
   const [lastEventTime, setLastEventTime] = useState(undefined);
@@ -802,7 +804,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
     if (contentFrom === "articles") filter.kinds = [30023];
     if (contentFrom === "drafts") filter.kinds = [30024];
     if (contentFrom === "curations") filter.kinds = [30004, 30005];
-    if (contentFrom === "videos") filter.kinds = [34235];
+    if (contentFrom === "videos") filter.kinds = [34235, 21, 22];
     if (contentFrom === "widgets") filter.kinds = [30033];
     if (contentFrom === "notes") filter.kinds = [1, 6];
     return filter;
@@ -856,6 +858,8 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
     }
     setEditEvent(event);
   };
+
+  console.log(contentFrom);
   return (
     <>
       {showVideosCreator && (
@@ -1616,7 +1620,6 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                   href={`/profile/${nip19.nprofileEncode({
                     pubkey: userMetadata.pubkey,
                   })}`}
-                  state={{ contentType: "notes" }}
                 >
                   <div
                     className="note-24"
@@ -1634,10 +1637,12 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                     gap: "16px",
                     flex: "1 1 100px",
                   }}
-                  href={`/profile/${nip19.nprofileEncode({
-                    pubkey: userMetadata.pubkey,
-                  })}`}
-                  state={{ contentType: "replies" }}
+                  href={{
+                    pathname: `/profile/${nip19.nprofileEncode({
+                      pubkey: userMetadata.pubkey,
+                    })}`,
+                    query: { contentType: "replies" },
+                  }}
                 >
                   <div
                     className="comment-icon"
@@ -1862,7 +1867,7 @@ const ContentCard = ({
       {event.kind === 30024 && (
         <DraftCard event={event} refreshAfterDeletion={refreshAfterDeletion} />
       )}
-      {[30004, 30005, 30023, 34235, 30033].includes(event.kind) && (
+      {[30004, 30005, 30023, 34235, 30033, 21, 22].includes(event.kind) && (
         <RepCard
           event={event}
           setPostToNote={setPostToNote}
@@ -1963,6 +1968,8 @@ const DraftCardOthers = ({ event, setPostToNote }) => {
     30004: t("Ac6UnVb"),
     30005: t("Ac6UnVb"),
     34235: t("AVdmifm"),
+    21: t("AVdmifm"),
+    22: t("AVdmifm"),
     34236: t("AVdmifm"),
     300331: t("AkvXmyz"),
     30033: t("AkvXmyz"),
@@ -2048,6 +2055,8 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
     30004: t("Ac6UnVb"),
     30005: t("Ac6UnVb"),
     34235: t("AVdmifm"),
+    22: t("AVdmifm"),
+    21: t("AVdmifm"),
     34236: t("AVdmifm"),
     300331: t("AkvXmyz"),
     30033: t("AkvXmyz"),
@@ -2074,7 +2083,7 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
               <div className="curation-24"></div>
             )}
             {[30023].includes(event.kind) && <div className="posts-24"></div>}
-            {[34235].includes(event.kind) && <div className="play-24"></div>}
+            {[34235, 21, 22].includes(event.kind) && <div className="play-24"></div>}
             {[30033].includes(event.kind) && (
               <div className="smart-widget-24"></div>
             )}
@@ -2141,7 +2150,7 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
               refreshAfterDeletion={refreshAfterDeletion}
             />
           )}
-          {[34235, 34236].includes(event.kind) && (
+          {[34235, 34236, 21, 22].includes(event.kind) && (
             <EventOptions
               event={event}
               component="dashboardVideos"
@@ -2162,9 +2171,11 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
 };
 
 const NoteCard = ({ event }) => {
-  const dispatch = useDispatch();
   const { t } = useTranslation();
-  const isRepost = event.kind === 6 ? JSON.parse(event.content) : event;
+  const isRepost =
+    event.kind === 6
+      ? getParsedNote(JSON.parse(event.content))
+      : getParsedNote(event);
   const { postActions } = useNoteStats(isRepost.id, isRepost.pubkey);
   const isFlashNews = isRepost.tags.find(
     (tag) => tag[0] === "l" && tag[1] === "FLASH NEWS"
@@ -2181,7 +2192,7 @@ const NoteCard = ({ event }) => {
       }}
       onClick={(e) => {
         e.stopPropagation();
-        customHistory(`/notes/${nEventEncode(isRepost.id)}`);
+        customHistory(`/note/${nEventEncode(isRepost.id)}`);
       }}
     >
       <div className="fx-centered fx-start-v">
@@ -2227,27 +2238,6 @@ const NoteCard = ({ event }) => {
       </div>
       <div className="fx-centered" style={{ minWidth: "max-content" }}>
         <EventOptions event={isRepost} component="dashboardNotes" />
-        {/* <OptionsDropdown
-          options={[
-            <div onClick={copyID} className="pointer">
-              <p>{t("AYFAFKs")}</p>
-            </div>,
-            <div className="fit-container fx-centered fx-start-h pointer">
-              <ShareLink
-                label="Share note"
-                path={`/notes/${nEventEncode(isRepost.id)}`}
-                title={userMetadata.display_name || userMetadata.name}
-                description={isRepost.content}
-                kind={1}
-                shareImgData={{
-                  post: isRepost,
-                  author: userMetadata,
-                  label: t("Az5ftet"),
-                }}
-              />
-            </div>,
-          ]}
-        /> */}
       </div>
     </div>
   );
@@ -2395,7 +2385,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
       let events = await getSubData(filter);
 
       events = events.data.map((event) => {
-        if ([30004, 30005, 30023, 34235].includes(event.kind)) {
+        if ([30004, 30005, 30023, 34235, 21, 22].includes(event.kind)) {
           let parsedEvent = getParsedRepEvent(event);
           return parsedEvent;
         }
@@ -2482,7 +2472,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
             )}
             {content.map((item) => {
               let content = getParsedRepEvent(item);
-              let naddr = [30004, 30023, 30005, 34235].includes(item.kind)
+              let naddr = [30004, 30023, 30005, 34235, 21, 22].includes(item.kind)
                 ? nip19.naddrEncode({
                     identifier: content.d,
                     pubkey: item.pubkey,
@@ -2495,7 +2485,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                     id: item.id,
                   })
                 : "";
-              if (!postKind && [30004, 30023, 30005, 34235].includes(item.kind))
+              if (!postKind && [30004, 30023, 30005, 34235, 21, 22].includes(item.kind))
                 return (
                   <div
                     className="sc-s-18 fit-container fx-scattered box-pad-h-s box-pad-v-s"
@@ -2536,7 +2526,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                         <p className="p-small">{t("Ac6UnVb")}</p>
                       </div>
                     )}
-                    {[34235].includes(item.kind) && (
+                    {[34235, 21, 22].includes(item.kind) && (
                       <div
                         style={{
                           position: "absolute",
@@ -2583,8 +2573,8 @@ const BookmarkContent = ({ bookmark, exit }) => {
                         href={
                           (item.kind === 30023 && `/article/${naddr}`) ||
                           ([30005, 30004].includes(item.kind) &&
-                            `/curations/${naddr}`) ||
-                          (item.kind === 34235 && `/videos/${naddr}`)
+                            `/curation/${naddr}`) ||
+                          ([34235, 21, 22].includes(item.kind) && `/video/${naddr}`)
                         }
                       >
                         <div className="share-icon-24"></div>
@@ -2704,7 +2694,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                       </div>
                     </div>
                     <div className="box-pad-h-s fx-centered">
-                      <Link target={"_blank"} href={`/notes/${nEvent}`}>
+                      <Link target={"_blank"} href={`/note/${nEvent}`}>
                         <div className="share-icon-24"></div>
                       </Link>
                       <BookmarkEvent pubkey={item.id} kind={1} itemType="e" />
@@ -2764,7 +2754,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                         href={
                           item.kind === 30023
                             ? `/article/${naddr}`
-                            : `/curations/${naddr}`
+                            : `/curation/${naddr}`
                         }
                       >
                         <div className="share-icon-24"></div>

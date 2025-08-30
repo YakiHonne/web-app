@@ -2,14 +2,8 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BookmarkEvent from "@/Components/BookmarkEvent";
 import ShareLink from "@/Components/ShareLink";
-import {
-  copyText,
-  getLinkFromAddr,
-} from "@/Helpers/Helpers";
-import {
-  getWallets,
-  updateWallets,
-} from "@/Helpers/ClientHelpers";
+import { copyText, getLinkFromAddr } from "@/Helpers/Helpers";
+import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import OptionsDropdown from "@/Components/OptionsDropdown";
@@ -63,9 +57,9 @@ export default function EventOptions({
   };
 
   let path = getLinkFromAddr(
-    event.nEvent || event.naddr || event.pubkey
-      ? nip19.npubEncode(event.pubkey)
-      : ""
+    event.nEvent ||
+      event.naddr ||
+      (event.pubkey ? nip19.npubEncode(event.pubkey) : "")
   );
 
   const postAsNote = (
@@ -77,7 +71,7 @@ export default function EventOptions({
       className="pointer fx-scattered fit-container"
     >
       <p>{t("AB8DnjO")}</p>
-      <div className="add-note"></div>
+      <div className="add-note-24"></div>
     </div>
   );
   const copyID = (
@@ -89,7 +83,7 @@ export default function EventOptions({
       className="pointer fx-scattered fit-container"
     >
       <p>{t("AYFAFKs")}</p>
-      <div className="hashtag"></div>
+      <div className="hashtag-24"></div>
     </div>
   );
   const copyNaddr = (
@@ -101,7 +95,7 @@ export default function EventOptions({
       className="pointer fx-scattered fit-container"
     >
       <p>{t("ApPw14o", { item: "naddr" })}</p>
-      <div className="hashtag"></div>
+      <div className="hashtag-24"></div>
     </div>
   );
   const copyPubkey = (
@@ -113,7 +107,7 @@ export default function EventOptions({
       className="pointer fx-scattered fit-container"
     >
       <p>{t("AHrJpSX")}</p>
-      <div className="key-icon"></div>
+      <div className="key-icon-24"></div>
     </div>
   );
   const copyPubkeyHex = (
@@ -138,7 +132,7 @@ export default function EventOptions({
       className="pointer fx-scattered fit-container"
     >
       <p>{t("AUrrk1e")}</p>
-      <div className="raw-event"></div>
+      <div className="raw-event-24"></div>
     </div>
   );
 
@@ -151,7 +145,7 @@ export default function EventOptions({
       className="fit-container fx-scattered pointer"
     >
       <p>{t("A89Qqmt")}</p>
-      <div className="curation-plus"></div>
+      <div className="curation-plus-24"></div>
     </div>
   );
 
@@ -164,7 +158,7 @@ export default function EventOptions({
       className="fit-container fx-scattered pointer"
     >
       <p>{t("Aoq0uKa")}</p>
-      <div className="copy"></div>
+      <div className="copy-24"></div>
     </div>
   );
 
@@ -177,7 +171,7 @@ export default function EventOptions({
       className="fit-container fx-scattered pointer"
     >
       <p>{t("ArCMp34")}</p>
-      <div className="copy"></div>
+      <div className="copy-24"></div>
     </div>
   );
 
@@ -190,7 +184,7 @@ export default function EventOptions({
       className="fit-container fx-scattered pointer"
     >
       <p>{t("A4A5psW")}</p>
-      <div className="share-icon"></div>
+      <div className="share-icon-24"></div>
     </div>
   );
 
@@ -203,7 +197,7 @@ export default function EventOptions({
       className="fit-container fx-scattered pointer"
     >
       <span>{t("AmQVpu4")}</span>
-      <div className="link"></div>
+      <div className="link-24"></div>
     </div>
   );
 
@@ -216,7 +210,7 @@ export default function EventOptions({
       className="fit-container fx-scattered pointer"
     >
       <span className="red-c">{t("AawdN9R")}</span>
-      <div className="trash"></div>
+      <div className="trash-24"></div>
     </div>
   );
 
@@ -226,7 +220,7 @@ export default function EventOptions({
       href={`/smart-widget-checker?naddr=${event.naddr}`}
     >
       <p>{t("AavUrQj")}</p>
-      <div className="smart-widget-checker"></div>
+      <div className="smart-widget-checker-24"></div>
     </Link>
   );
 
@@ -240,7 +234,7 @@ export default function EventOptions({
       }}
     >
       <p>{t("AyWVBDx")}</p>
-      <div className="clone"></div>
+      <div className="clone-24"></div>
     </Link>
   );
 
@@ -256,7 +250,7 @@ export default function EventOptions({
       }}
     >
       <p>{t("AsXohpb")}</p>
-      <div className="edit"></div>
+      <div className="edit-24"></div>
     </Link>
   );
 
@@ -282,7 +276,7 @@ export default function EventOptions({
       }}
     >
       <p>{t("AsXohpb")}</p>
-      <div className="edit"></div>
+      <div className="edit-24"></div>
     </div>
   );
 
@@ -295,7 +289,7 @@ export default function EventOptions({
       }}
     >
       <p>{t("AsXohpb")}</p>
-      <div className="edit"></div>
+      <div className="edit-24"></div>
     </div>
   );
   const editCuration = (
@@ -307,7 +301,7 @@ export default function EventOptions({
       }}
     >
       <p>{t("AsXohpb")}</p>
-      <div className="edit"></div>
+      <div className="edit-24"></div>
     </div>
   );
 
@@ -346,12 +340,12 @@ export default function EventOptions({
         {isMuted ? (
           <>
             <p className="red-c">{t("AKELUbQ")}</p>
-            <div className="unmute"></div>
+            <div className="unmute-24"></div>
           </>
         ) : (
           <>
             <p className="red-c">{t("AGMxuQ0")}</p>
-            <div className="mute"></div>
+            <div className="mute-24"></div>
           </>
         )}
       </div>
@@ -368,7 +362,7 @@ export default function EventOptions({
       }}
     >
       <p className="red-c">{t("Almq94P")}</p>
-      <div className="trash"></div>
+      <div className="trash-24"></div>
     </div>
   );
 
@@ -576,7 +570,7 @@ export default function EventOptions({
           wallet={event}
         />
       )}
-      <OptionsDropdown options={optionsItem} border={border} minWidth={180} />
+      <OptionsDropdown options={optionsItem} border={border} minWidth={180} vertical={false}/>
     </>
   );
 }

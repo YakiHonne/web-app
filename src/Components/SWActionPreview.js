@@ -26,16 +26,24 @@ export default function SWActionPreview({
   useEffect(() => {
     const fetchData = async () => {
       let appPubkey = metadata.pubkey;
-      try {
-        let swmdt = await axios.get(
-          metadata.buttons[0].url + "/.well-known/widget.json"
-        );
-        appPubkey = swmdt?.data?.pubkey || metadata.pubkey;
-      } catch (err) {
-        console.log(err);
+      if(metadata.buttons[0].url) {
+        try {
+          const baseUrl = metadata.buttons[0].url.replace(/\/$/, "");
+          let swmdt = await axios.get(
+            baseUrl + "/.well-known/widget.json"
+          );
+          if (swmdt?.data?.pubkey) {
+            appPubkey = swmdt.data.pubkey;
+          } else {
+            console.log("No pubkey found in widget.json");
+          }
+        } catch (err) {
+          console.log(err);
+        }
       }
       const data = getUser(appPubkey);
       if (data) setAuthor(data);
+      else setAuthor(getEmptyuserMetadata(appPubkey));
     };
     fetchData();
   }, [nostrAuthors]);

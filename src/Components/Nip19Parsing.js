@@ -45,8 +45,8 @@ export default function Nip19Parsing({ addr, minimal = false }) {
         let url_ = "";
         if (data.data.kind === 30023) url_ = `/article/${addr_}`;
         if ([30004, 30005].includes(data.data.kind))
-          url_ = `/curations/${addr_}`;
-        if (data.data.kind === 34235) url_ = `/videos/${addr_}`;
+          url_ = `/curation/${addr_}`;
+        if ([34235, 21, 22].includes(data.data.kind)) url_ = `/video/${addr_}`;
         setUrl(url_);
       }
       if (addr_.startsWith("nprofile")) {
@@ -134,13 +134,13 @@ export default function Nip19Parsing({ addr, minimal = false }) {
           saveUsers([event.pubkey]);
           setIsLoading(false);
         }
-        if ([30004, 30005, 30023, 34235].includes(event.kind)) {
+        if ([30004, 30005, 30023, 34235, 21, 22].includes(event.kind)) {
           let parsedContent = getParsedRepEvent(event);
           let title = parsedContent.title;
           if (!title) {
             if ([30004, 30005].includes(event.kind)) title = t("A1lshru");
             if ([30023].includes(event.kind)) title = t("Aqw9gzk");
-            if ([34235].includes(event.kind)) title = t("A3vFdLd");
+            if ([34235, 21, 22].includes(event.kind)) title = t("A3vFdLd");
           }
 
           setEvent({
@@ -206,7 +206,7 @@ export default function Nip19Parsing({ addr, minimal = false }) {
                 <p className="p-medium gray-c">{t("AQeXcer")}</p>
               </div>
             )}
-            {[30004, 30005, 30023, 34235].includes(event.kind) && (
+            {[30004, 30005, 30023, 34235, 21, 22].includes(event.kind) && (
               <div className="fit-container" style={{ margin: ".5rem 0" }}>
                 {!minimal && (
                   <LinkRepEventPreview event={event} allowClick={true} />
@@ -228,7 +228,7 @@ export default function Nip19Parsing({ addr, minimal = false }) {
         )}
         {minimal && (
           <Link
-            href={`/notes/${addr}`}
+            href={`/note/${addr}`}
             className="btn-text-gray"
             target={"_blank"}
             onClick={(e) => e.stopPropagation()}
@@ -295,7 +295,7 @@ export default function Nip19Parsing({ addr, minimal = false }) {
       </div>
     );
 
-  if ([30004, 30005, 30023, 34235].includes(event.kind))
+  if ([30004, 30005, 30023, 34235, 21, 22].includes(event.kind))
     return (
       <div className="fit-container" style={{ margin: ".5rem 0" }}>
         {!minimal && <LinkRepEventPreview event={event} allowClick={true} />}

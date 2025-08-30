@@ -24,14 +24,14 @@ const checkFollowing = (list, toFollowKey) => {
 const getURL = (item, isNip05Verified) => {
   if (!isNip05Verified) {
     if (item.kind === 30023) return `/article/${item.naddr}`;
-    if ([30004, 30005].includes(item.kind)) return `/curations/${item.naddr}`;
-    if ([34235, 34236].includes(item.kind)) return `/videos/${item.naddr}`;
+    if ([30004, 30005].includes(item.kind)) return `/curation/${item.naddr}`;
+    if ([34235, 34236, 21, 22].includes(item.kind)) return `/video/${item.naddr}`;
   }
-  if (item.kind === 30023) return `/article/${isNip05Verified}/${item.d}`;
-  if (item.kind === 30004) return `/curations/a/${isNip05Verified}/${item.d}`;
-  if (item.kind === 30005) return `/curations/v/${isNip05Verified}/${item.d}`;
-  if ([34235, 34236].includes(item.kind))
-    return `/videos/${isNip05Verified}/${item.d}`;
+  if (item.kind === 30023) return `/article/s/${isNip05Verified}/${item.d}`;
+  if (item.kind === 30004) return `/curation/a/${isNip05Verified}/${item.d}`;
+  if (item.kind === 30005) return `/curation/v/${isNip05Verified}/${item.d}`;
+  if ([34235, 34236, 21, 22].includes(item.kind))
+    return `/video/s/${isNip05Verified}/${item.d}`;
 };
 
 export default function RepEventPreviewCard({
@@ -47,7 +47,7 @@ export default function RepEventPreviewCard({
     return checkFollowing(userFollowings, item.pubkey);
   }, [userFollowings]);
   const url = useMemo(() => {
-    return getURL(item);
+    return getURL(item, userProfile.nip05);
   }, [isNip05Verified]);
 
   if (minimal)
@@ -75,7 +75,7 @@ export default function RepEventPreviewCard({
               backgroundImage: `url(${item.image || item.imagePP})`,
             }}
           >
-            {item.kind === 34235 && <div className="play-vid-58"></div>}
+            {(item.kind === 34235 || item.kind === 21 || item.kind === 22) && <div className="play-vid-58"></div>}
           </div>
           <div
             className="fx-scattered fx-start-v fit-container fx-col  box-pad-v-s"
@@ -186,7 +186,7 @@ export default function RepEventPreviewCard({
                   position: "relative",
                 }}
               >
-                {item.kind === 34235 && (
+                {(item.kind === 34235 || item.kind === 21 || item.kind === 22) && (
                   <div
                     className="fx-centered"
                     style={{

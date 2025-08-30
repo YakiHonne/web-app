@@ -78,7 +78,7 @@ export default function CountDownToNewProduct() {
             }}
             className="fit-container"
             // src={
-            //   "https://yakihonne.s3.ap-east-1.amazonaws.com/videos/yakihonne-mobile-app-promo.mp4"
+            //   "https://yakihonne.s3.ap-east-1.amazonaws.com/video/yakihonne-mobile-app-promo.mp4"
             // }
           >
             <source

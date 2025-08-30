@@ -122,7 +122,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
           onClick={() => !isLiked ? setShowEmoji(!showEmoji) : reactToNote(undefined)}
           onDoubleClick={() => reactToNote("+")}
         >
-          {!isLiked && <div className={"heart-24"}></div>}
+          {!isLiked && <div className={"heart-24 opacity-4"}></div>}
           {isLiked && <EmojiImg content={isLiked?.content} />}
         </div>
         {showEmoji && (
