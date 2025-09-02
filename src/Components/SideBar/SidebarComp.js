@@ -213,7 +213,7 @@ export default function SidebarComp() {
             <div className="fx-centered fx-start-h fit-container box-pad-v-s">
               <div
                 className="yakihonne-logo-128"
-                onClick={() => customHistory("/")}
+                onClick={() => customHistory("/", true)}
               ></div>
             </div>
             <div className="mb-show" style={{ height: "200px" }}></div>
@@ -224,7 +224,7 @@ export default function SidebarComp() {
             >
               <div
                 onClick={() => {
-                  customHistory("/");
+                  customHistory("/", true);
                 }}
                 className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
                   isPage("/") ? "active-link" : "inactive-link"
@@ -234,11 +234,11 @@ export default function SidebarComp() {
                 <div className="link-label">{t("AJDdA3h")}</div>
               </div>
 
-              <Link
-                // onClick={() => {
-                //   customHistory("/discover");
-                // }}
-                href={"/discover"}
+              <div
+                onClick={() => {
+                  customHistory("/discover", true);
+                }}
+                // href={"/discover"}
                 prefetch={true}
                 className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
                   isPage("/discover") ? "active-link" : "inactive-link"
@@ -250,7 +250,7 @@ export default function SidebarComp() {
                   }
                 ></div>
                 <div className="link-label">{t("ABSoIm9")}</div>
-              </Link>
+              </div>
               <div
                 onClick={() => {
                   customHistory("/smart-widgets");

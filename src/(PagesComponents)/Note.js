@@ -209,7 +209,7 @@ export default function Note({ event }) {
                           data-tooltip={t("AdHV2qJ")}
                           onClick={translateNote}
                         >
-                          <div className="translate-24"></div>
+                          <div className="translate-24 opacity-4"></div>
                         </div>
                       )}
                       {!isNoteTranslating && showTranslation && (
@@ -218,7 +218,7 @@ export default function Note({ event }) {
                           data-tooltip={t("AE08Wte")}
                           onClick={() => setShowTranslation(false)}
                         >
-                          <div className="translate-24"></div>
+                          <div className="translate-24 opacity-4"></div>
                         </div>
                       )}
                       {isNoteTranslating && <LoadingDots />}

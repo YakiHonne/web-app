@@ -5,9 +5,11 @@ import { useSelector } from "react-redux";
 import { redirectToLogin } from "@/Helpers/Helpers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import SearchNetwork from "@/Components/SearchNetwork";
+import { useRouter } from "next/router";
 
 export default function Navbar() {
   const userKeys = useSelector((state) => state.userKeys);
+  const router = useRouter()
   const [showSearchMobile, setShowSearchMobile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -22,7 +24,8 @@ export default function Navbar() {
       "/points-system",
       "/write-article",
       "/m/maci-poll",
-    ].includes(window.location.pathname) || window.location.pathname.includes("/docs/sw")
+      "/docs/sw/[keyword]",
+    ].includes(router.pathname)
   )
     return;
   return (

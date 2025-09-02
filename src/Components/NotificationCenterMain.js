@@ -179,7 +179,9 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
       };
     }
 
-    if ([30023, 30004, 30005, 34235, 30031, 34236, 21, 22].includes(event.kind)) {
+    if (
+      [30023, 30004, 30005, 34235, 30031, 34236, 21, 22].includes(event.kind)
+    ) {
       let self = event.tags.find((tag) => tag[1] === pubkey);
       let identifier = event.tags.find((tag) => tag[0] === "d");
       let content = event.tags.find((tag) => tag[0] === "title");

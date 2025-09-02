@@ -8,6 +8,9 @@ import { saveUsers } from "@/Helpers/DB";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import ZapTip from "@/Components/ZapTip";
 import InitiConvo from "@/Components/InitConvo";
+import { useTranslation } from "react-i18next";
+import { customHistory } from "@/Helpers/History";
+import { nip19 } from "nostr-tools";
 
 const getZaps = (zappers, pubkey) => {
   let sats = zappers.reduce(
@@ -78,6 +81,7 @@ const HighestZapper = ({ data, onClick }) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const [author, setAuthor] = useState(getEmptyuserMetadata(data.pubkey));
   const [initConv, setInitConv] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     let auth = getUser(data.pubkey);
@@ -90,7 +94,7 @@ const HighestZapper = ({ data, onClick }) => {
         <InitiConvo exit={() => setInitConv(false)} receiver={author.pubkey} />
       )}
 
-      <div className="fx-centered pointer" >
+      <div className="fx-centered pointer">
         <div
           className="fx-centered"
           style={{ position: "relative", zIndex: 1, gap: 0 }}
@@ -142,18 +146,44 @@ const HighestZapper = ({ data, onClick }) => {
               <OptionsDropdown
                 vertical={false}
                 options={[
-                  <div key="zap-options" style={{ position: "relative" }} className="fx-centered">
+                  <div
+                    key="zap-options"
+                    style={{ position: "relative" }}
+                    className="fx-centered"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <div
-                      className="round-icon-small round-icon-tooltip"
-                      data-tooltip={"Message"}
-                      style={{ borderColor: "var(--gray)", border: "none" }}
-                      onClick={() => setInitConv(true)}
+                      style={{
+                        borderRight: "1px solid var(--gray)",
+                        paddingRight: ".75rem",
+                      }}
+                      onClick={() =>
+                        customHistory(
+                          "/profile/" +
+                            nip19.nprofileEncode({ pubkey: author.pubkey })
+                        )
+                      }
                     >
-                      <div className="env"></div>
+                      <div className="user-24"></div>
+                      <p className="p-medium">{t("AyBBPWE")}</p>
                     </div>
                     <div
-                      className="round-icon-small"
-                      style={{ borderColor: "var(--gray)", border: "none" }}
+                      // className="round-icon-small round-icon-tooltip"
+                      // data-tooltip={"Message"}
+                      // style={{ borderColor: "var(--gray)", border: "none" }}
+                      style={{
+                        borderRight: "1px solid var(--gray)",
+                        paddingRight: ".75rem",
+                      }}
+                      onClick={() => setInitConv(true)}
+                    >
+                      <div className="env-24"></div>
+                      <p className="p-medium">{t("AN0NVU3")}</p>
+                    </div>
+                    <div
+                      // className="round-icon-small"
+                      // style={{ borderColor: "var(--gray)", border: "none" }}
+                      style={{ paddingLeft: ".75rem" }}
                     >
                       <ZapTip
                         recipientLNURL={checkForLUDS(
@@ -163,7 +193,7 @@ const HighestZapper = ({ data, onClick }) => {
                         recipientPubkey={author.pubkey}
                         senderPubkey={userKeys.pub}
                         recipientInfo={author}
-                        smallIcon={true}
+                        zapLabel={true}
                       />
                     </div>
                   </div>,

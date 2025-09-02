@@ -16,4 +16,5 @@ module.exports = {
   interpolation: {
     escapeValue: false,
   },
+  
 };

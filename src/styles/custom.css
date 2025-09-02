@@ -1298,7 +1298,19 @@ main {
 }
 
 .navbar-mobile {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 900;
+    background-color: var(--white);
     display: none;
+}
+
+.recent-post-container {
+    position: fixed;
+    top: 50px;
+    left: 0;
+    z-index: 1000;
 }
 
 .menu-toggle {
@@ -2318,4 +2330,11 @@ h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
+}
+
+.content-source-and-filter {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 101;
 }

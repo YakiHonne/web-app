@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useReducer, Fragment } from "react";
+import React, {
+  useEffect,
+  useState,
+  useReducer,
+  Fragment,
+  useMemo,
+} from "react";
 import { useSelector } from "react-redux";
 import { filterContent, getBackupWOTList } from "@/Helpers/Encryptions";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
@@ -25,6 +31,7 @@ import { getKeys } from "@/Helpers/ClientHelpers";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import SuggestionsCards from "@/Components/SuggestionsCards/SuggestionsCards";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
+import RecentPosts from "@/Components/RecentPosts";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -36,155 +43,34 @@ const getContentFromValue = (contentSource) => {
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
-    case "widgets": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.note];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "paid": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.note];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "global": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.note];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (
-            tempArr.findIndex(
-              (_) =>
-                _.id === note.id ||
-                (note.kind === 6 &&
-                  (note.relatedEvent.id === _.id ||
-                    note.relatedEvent.id === _.relatedEvent?.id)) ||
-                (_.kind === 6 &&
-                  (_.relatedEvent.id === note.id ||
-                    _.relatedEvent.id === note.relatedEvent?.id))
-            ) === index
-          )
-            return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "recent": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.note];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (
-            tempArr.findIndex(
-              (_) =>
-                _.id === note.id ||
-                (note.kind === 6 &&
-                  (note.relatedEvent.id === _.id ||
-                    note.relatedEvent.id === _.relatedEvent?.id)) ||
-                (_.kind === 6 &&
-                  (_.relatedEvent.id === note.id ||
-                    _.relatedEvent.id === note.relatedEvent?.id))
-            ) === index
-          )
-            return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      // store.dispatch(
-      //   setHomeSavedNotes({
-      //     ...nextState,
-      //     [action.type]: nextState[action.type].map((_) => {
-      //       let n = { ..._ };
-      //       delete n.note_tree;
-      //       if (n.kind === 6) {
-      //         delete n.relatedEvent.note_tree;
-      //       }
-      //       return n;
-      //     }),
-      //   })
-      // );
-      return nextState;
-    }
-    case "recent_with_replies": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.note];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (
-            tempArr.findIndex(
-              (_) =>
-                _.id === note.id ||
-                (note.kind === 6 &&
-                  (note.relatedEvent.id === _.id ||
-                    note.relatedEvent.id === _.relatedEvent?.id)) ||
-                (_.kind === 6 &&
-                  (_.relatedEvent.id === note.id ||
-                    _.relatedEvent.id === note.relatedEvent?.id))
-            ) === index
-          )
-            return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "dvms": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState["dvms"], ...action.note];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState["dvms"] = sortedNotes;
-      return nextState;
-    }
-    case "algo": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState["algo"], ...action.note];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState["algo"] = sortedNotes;
-      return nextState;
-    }
-
     case "empty-recent": {
-      let nextState = { ...notes };
-      nextState["recent"] = [];
-      return nextState;
+      return [];
     }
     case "remove-events": {
-      return notesInitialState;
+      return [];
     }
     default: {
-      console.log("wrong action type");
+      let tempArr = [...notes, ...action.note];
+      let sortedNotes = tempArr
+        .filter((note, index, tempArr) => {
+          if (
+            tempArr.findIndex(
+              (_) =>
+                _.id === note.id ||
+                (note.kind === 6 &&
+                  (note.relatedEvent.id === _.id ||
+                    note.relatedEvent.id === _.relatedEvent?.id)) ||
+                (_.kind === 6 &&
+                  (_.relatedEvent.id === note.id ||
+                    _.relatedEvent.id === note.relatedEvent?.id))
+            ) === index
+          )
+            return note;
+        })
+        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
+      return sortedNotes;
     }
   }
-};
-
-let notesInitialState = {
-  widgets: [],
-  recent: [],
-  recent_with_replies: [],
-  paid: [],
-  dvms: [],
-  algo: [],
-  global: [],
 };
 
 export default function Home() {
@@ -272,7 +158,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const userMutedList = useSelector((state) => state.userMutedList);
   const userKeys = useSelector((state) => state.userKeys);
   const [userFollowings, setUserFollowings] = useState(false);
-  const [notes, dispatchNotes] = useReducer(notesReducer, notesInitialState);
+  const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [notesContentFrom, setNotesContentFrom] = useState(
     getContentFromValue(selectedCategory)
@@ -282,6 +168,11 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   );
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
   const [rerenderTimestamp, setRerenderTimestamp] = useState(undefined);
+  const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
+  const since = useMemo(
+    () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
+    [notes]
+  );
 
   useEffect(() => {
     let contentFromValue = getContentFromValue(selectedCategory);
@@ -431,6 +322,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
 
+      setSubfilter({ filter, relays: algoRelay });
       const data = await getSubData(filter, 50, algoRelay, undefined, 200);
       events = data.data
         .splice(0, 50)
@@ -520,15 +412,29 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     selectedFilter,
   ]);
 
+  const handleRecentPostsClick = (notes) => {
+    dispatchNotes({ type: notesContentFrom, note: notes });
+    // let timer = setTimeout(() => {
+    straightUp(undefined, "smooth");
+    // clearTimeout(timer);
+    // }, 200);
+  };
+
   return (
-    <InfiniteScroll
-      onRefresh={setNotesLastEventTime}
-      events={notes[notesContentFrom]}
-    >
+    <InfiniteScroll onRefresh={setNotesLastEventTime} events={notes}>
+      {!["mf"].includes(selectedCategory?.group) && (
+        <RecentPosts
+          filter={subFilter}
+          contentFrom={notesContentFrom}
+          selectedFilter={selectedFilter}
+          since={since}
+          onClick={handleRecentPostsClick}
+        />
+      )}
       {["recent", "recent_with_replies"].includes(notesContentFrom) &&
         userFollowings &&
         userFollowings?.length < 5 &&
-        notes[notesContentFrom]?.length > 0 && (
+        notes?.length > 0 && (
           <div className="fit-container box-pad-h">
             <hr />
             <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-pad-v-m">
@@ -544,42 +450,38 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
             <hr />
           </div>
         )}
-      {!selectedFilter.default &&
-        notes[notesContentFrom]?.length === 0 &&
-        !isLoading && (
+      {!selectedFilter.default && notes?.length === 0 && !isLoading && (
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ height: "40vh" }}
+        >
           <div
-            className="fit-container fx-centered fx-col"
-            style={{ height: "40vh" }}
-          >
-            <div
-              className="yaki-logomark"
-              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-            ></div>
-            <h4>{t("A5BPCrj")}</h4>
-            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-              {t("AgEkYer")}
-            </p>
-          </div>
-        )}
-      {selectedFilter.default &&
-        notes[notesContentFrom]?.length === 0 &&
-        !isLoading && (
+            className="yaki-logomark"
+            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+          ></div>
+          <h4>{t("A5BPCrj")}</h4>
+          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+            {t("AgEkYer")}
+          </p>
+        </div>
+      )}
+      {selectedFilter.default && notes?.length === 0 && !isLoading && (
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ height: "40vh" }}
+        >
           <div
-            className="fit-container fx-centered fx-col"
-            style={{ height: "40vh" }}
-          >
-            <div
-              className="yaki-logomark"
-              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-            ></div>
-            <h4>{t("A5BPCrj")}</h4>
-            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-              {t("ASpI7pT")}
-            </p>
-          </div>
-        )}
+            className="yaki-logomark"
+            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+          ></div>
+          <h4>{t("A5BPCrj")}</h4>
+          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+            {t("ASpI7pT")}
+          </p>
+        </div>
+      )}
       {notesContentFrom &&
-        notes[notesContentFrom].map((note, index) => {
+        notes.map((note, index) => {
           if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
             if (
               note.kind === 6 &&

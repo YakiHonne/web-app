@@ -57,7 +57,7 @@ import {
   updateYakiChestStats,
   userLogout,
 } from "@/Helpers/Controlers";
-import { setInitDMS, setTrendingUsers } from "@/Store/Slides/Extras";
+import { setInitDMS, setIsDarkMode, setTrendingUsers } from "@/Store/Slides/Extras";
 import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
 import {
   toggleColorScheme,
@@ -324,10 +324,13 @@ export default function AppInit() {
   ]);
 
   useEffect(() => {
-    if (isDarkMode === "0") {
+    let previousDarkMode = localStorage.getItem("yaki-theme");
+    if (previousDarkMode === "0") {
+      setIsDarkMode("1");
       toggleColorScheme(false);
     }
-    if (isDarkMode === "1") {
+    if (previousDarkMode === "1") {
+      setIsDarkMode("0");
       toggleColorScheme(true);
     }
     saveNostrClients();

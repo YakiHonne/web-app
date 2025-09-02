@@ -159,8 +159,11 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
       `https://${addressParts[1]}/.well-known/nostr.json?name=${addressParts[0]}`
     );
 
-    const pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
+    let pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
   
+    if(pubkey) {
+      pubkey = pubkey.startsWith("npub") ? nip19.decode(pubkey).data : pubkey;
+    }
     nip05Cache.set(cacheKey, {
       pubkey,
       timestamp: Date.now(),
@@ -946,10 +949,11 @@ const decodeNip19 = (word) => {
   }
 };
 
-const straightUp = (scrollTo) => {
-  let el = document.querySelector(".page-container");
-  if (!el) return;
-  el.scrollTop = scrollTo || 0;
+const straightUp = (scrollTo, behavior = "instant") => {
+  // let el = document.querySelector(".page-container");
+  // if (!el) return;
+  // el.scrollTop = scrollTo || 0;
+  window.scrollTo({ top: scrollTo || 0, behavior });
 };
 
 const redirectToLogin = () => {

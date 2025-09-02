@@ -81,6 +81,8 @@ const Actions = ({ exit, setReturnedData }) => {
             position: "relative",
             width: "min(100%, 600px)",
             minHeight: "60vh",
+            maxHeight: "60vh",
+            overflow: "scroll",
           }}
           className="sc-s-18 bg-sp"
           onClick={(e) => {

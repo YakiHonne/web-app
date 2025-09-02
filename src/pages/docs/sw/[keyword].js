@@ -1,3 +1,5 @@
+import { swContent } from "@/(PagesComponents)/Docs/SW/content";
+import HeadMetadata from "@/Components/HeadMetadata";
 import dynamic from "next/dynamic";
 import React from "react";
 
@@ -9,7 +11,19 @@ const ClientComponent = dynamic(
 );
 
 export default function index({ keyword }) {
-  return <ClientComponent keyword={keyword} />;
+  let data = {
+    path: `docs/sw/${keyword}`,
+    title: swContent[keyword].title,
+    description: swContent[keyword].title,
+    image:
+      "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",
+  };
+  return (
+    <div>
+      <HeadMetadata data={data} />
+      <ClientComponent keyword={keyword} />
+    </div>
+  );
 }
 
 export function getStaticProps({ params }) {

@@ -13,6 +13,9 @@ import { nip19 } from "nostr-tools";
 import React from "react";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
 
+const nostrSchemaRegex =
+  /\b(naddr1|note1|nevent1|npub1|nprofile1|nsec1|nrelay1)[a-zA-Z0-9]+\b/;
+
 export function getNoteTree(
   note,
   minimal = false,
@@ -32,7 +35,11 @@ export function getNoteTree(
   let maxChar = isCollapsedNote ? wordsCount : tree.length;
   for (let i = 0; i < maxChar; i++) {
     const el = tree[i];
+
     const key = `${el}-${i}`;
+    if (!el) {
+      continue;
+    }
     if (el === "\n") {
       const last1 = finalTree[finalTree.length - 1];
       const last2 = finalTree[finalTree.length - 2];
@@ -100,6 +107,21 @@ export function getNoteTree(
             el.includes(".wav")
           ) {
             finalTree.push(<AudioLoader audioSrc={el} key={key} />);
+          } else if (nostrSchemaRegex.test(el)) {
+            let cleanPart = el.match(nostrSchemaRegex)?.[0];
+            if (cleanPart) {
+              finalTree.push(
+                <Fragment key={key}>
+                  <Nip19Parsing addr={cleanPart} minimal={minimal} />
+                </Fragment>
+              );
+            } else {
+              finalTree.push(
+                <Fragment key={key}>
+                  <LinkPreview url={el} minimal={minimal} />{" "}
+                </Fragment>
+              );
+            }
           } else {
             finalTree.push(
               <Fragment key={key}>
@@ -121,11 +143,11 @@ export function getNoteTree(
             </a>{" "}
           </Fragment>
         );
-    } else if (
-      el?.includes("https://vota.dorafactory.org/round/") ||
-      el?.includes("https://vota-test.dorafactory.org/round/")
-    ) {
-      finalTree.push(<MACIPollPreview url={el} key={key} />);
+      // } else if (
+      //   el?.includes("https://vota.dorafactory.org/round/") ||
+      //   el?.includes("https://vota-test.dorafactory.org/round/")
+      // ) {
+      //   finalTree.push(<MACIPollPreview url={el} key={key} />);
     } else if (
       (el?.includes("nostr:") ||
         el?.includes("naddr") ||

@@ -9,7 +9,6 @@ import React, {
 import { useDispatch, useSelector } from "react-redux";
 import { filterContent, removeEventsDuplicants } from "@/Helpers/Encryptions";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
-import { Helmet } from "react-helmet";
 import ArrowUp from "@/Components/ArrowUp";
 import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
@@ -152,7 +151,6 @@ const notesInitialState = {
 };
 
 export default function NoteSharedRelay() {
-  const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
   const userKeys = useSelector((state) => state.userKeys);

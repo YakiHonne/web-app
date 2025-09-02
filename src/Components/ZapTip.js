@@ -31,6 +31,7 @@ export default function ZapTip({
   onlyIcon = false,
   smallIcon = false,
   custom = false,
+  zapLabel = false,
   setReceivedEvent = () => null,
   isZapped = false,
 }) {
@@ -93,13 +94,19 @@ export default function ZapTip({
   )
     return (
       <>
-        {onlyIcon && (
+        {onlyIcon && !zapLabel && (
           <div
             className={smallIcon ? "bolt" : "bolt-24 opacity-4"}
             style={{ opacity: ".2" }}
           ></div>
         )}
-        {!onlyIcon && (
+        {zapLabel && (
+          <div>
+            <div className={smallIcon ? "bolt" : "bolt-24 opacity-4"}></div>
+            <p className="p-medium">Zap</p>
+          </div>
+        )}
+        {!onlyIcon && !zapLabel && (
           <div
             className={`${
               smallIcon ? "round-icon-small" : "round-icon"
@@ -107,7 +114,7 @@ export default function ZapTip({
             data-tooltip="Zap"
           >
             <div
-              className={smallIcon ? "lightning" : "lightning-24 opacity-4"}
+              className={smallIcon ? "lightning" : "lightning-24"}
               style={{ cursor: "not-allowed" }}
             ></div>
           </div>
@@ -118,13 +125,29 @@ export default function ZapTip({
     return (
       <>
         {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
-        {onlyIcon && (
+        {onlyIcon && !zapLabel && (
           <div
             className={smallIcon ? "bolt" : "bolt-24 opacity-4"}
             onClick={() => setIsLogin(true)}
           ></div>
         )}
-        {!onlyIcon && (
+        {zapLabel && (
+          <div onClick={() => setIsLogin(true)}>
+            <div
+              className={
+                smallIcon
+                  ? isZapped
+                    ? "bolt-bold"
+                    : "bolt"
+                  : isZapped
+                  ? "bolt-bold-24"
+                  : "bolt-24"
+              }
+            ></div>
+            <p className="p-medium">Zap</p>
+          </div>
+        )}
+        {!onlyIcon && !zapLabel && (
           <div
             className={`${
               smallIcon ? "round-icon-small" : "round-icon"
@@ -132,7 +155,7 @@ export default function ZapTip({
             onClick={() => setIsLogin(true)}
             data-tooltip="Zap"
           >
-            <div className={smallIcon ? "lightning" : "lightning-24 opacity-4"}></div>
+            <div className={smallIcon ? "lightning" : "lightning-24"}></div>
           </div>
         )}
       </>
@@ -150,7 +173,7 @@ export default function ZapTip({
           exit={() => setCashier(false)}
         />
       )}
-      {onlyIcon && (
+      {onlyIcon && !zapLabel && (
         <div
           className={
             smallIcon
@@ -164,7 +187,7 @@ export default function ZapTip({
           onClick={() => setCashier(true)}
         ></div>
       )}
-      {!onlyIcon && (
+      {!onlyIcon && !zapLabel && (
         <div
           className={`${
             smallIcon ? "round-icon-small" : "round-icon"
@@ -175,7 +198,23 @@ export default function ZapTip({
             setCashier(true);
           }}
         >
-          <div className={smallIcon ? "lightning" : "lightning-24 opacity-4"}></div>
+          <div className={smallIcon ? "lightning" : "lightning-24"}></div>
+        </div>
+      )}
+      {zapLabel && (
+        <div onClick={() => setCashier(true)}>
+          <div
+            className={
+              smallIcon
+                ? isZapped
+                  ? "bolt-bold"
+                  : "bolt"
+                : isZapped
+                ? "bolt-bold-24"
+                : "bolt-24"
+            }
+          ></div>
+          <p className="p-medium">Zap</p>
         </div>
       )}
     </>

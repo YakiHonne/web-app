@@ -3,6 +3,7 @@
     font-size: 17px;
   }
 }
+
 @media only screen and (max-width: 1990px) {
   html {
     font-size: 16px;
@@ -12,7 +13,7 @@
 @media only screen and (max-width: 1450px) {
   .main-page-nostr-container {
     /* flex: 4; */
-       min-width: calc(100% - 230px);
+    min-width: calc(100% - 230px);
   }
 }
 
@@ -176,6 +177,7 @@
   .wmde-markdown table {
     max-width: 500px !important;
   }
+
   .desk-hide-1000 {
     display: flex;
   }
@@ -286,6 +288,15 @@
     font-size: 12px;
   } */
 
+  .content-source-and-filter {
+    top: 80px
+  }
+
+  .recent-post-container {
+    top: 130px;
+
+  }
+
   .carousel .carousel-arrows {
     display: flex;
   }
@@ -375,12 +386,13 @@
     color: var(--black);
      pointer-events: none;
 } */
-.feed-container {
+  .feed-container {
     display: flex;
     justify-content: flex-start;
     align-items: flex-start;
     flex-direction: column;
-}
+  }
+
   .sw-container .round-icon-small {
     display: flex;
   }

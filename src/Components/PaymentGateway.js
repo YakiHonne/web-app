@@ -755,7 +755,7 @@ const Cashier = ({
         {confirmation === "confirmed" && (
           <div
             className="fx-centered fx-col fit-container"
-            style={{ height: "16vh" }}
+            style={{ height: "25vh" }}
           >
             <div style={{ maxHeight: "70px", maxWidth: "70px" }}>
               <Lottie animationData={successJSON} loop={false} />

@@ -63,9 +63,7 @@ export default function PostReaction({
             tagKind={event.kind > 30000 ? "a" : "e"}
           />
           <div
-            className={`round-icon-tooltip ${
-              isLiked ? "orange-c" : "opacity-4"
-            }`}
+            className={`round-icon-tooltip ${isLiked ? "orange-c" : ""}`}
             data-tooltip={t("Alz0E9Y")}
             onClick={(e) => {
               e.stopPropagation();
@@ -78,7 +76,9 @@ export default function PostReaction({
                 });
             }}
           >
-            <NumberShrink value={postActions.likes.likes.length} />
+            <div className={isLiked ? "" :"opacity-4"}>
+              <NumberShrink value={postActions.likes.likes.length} />
+            </div>
           </div>
         </div>
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
@@ -93,9 +93,7 @@ export default function PostReaction({
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <Repost isReposted={isReposted} event={event} actions={postActions} />
           <div
-            className={`round-icon-tooltip ${
-              isReposted ? "orange-c" : "opacity-4"
-            }`}
+            className={`round-icon-tooltip ${isReposted ? "orange-c" : ""}`}
             data-tooltip={t("Aai65RJ")}
             onClick={(e) => {
               e.stopPropagation();
@@ -107,15 +105,15 @@ export default function PostReaction({
                 });
             }}
           >
-            <NumberShrink value={postActions.reposts.reposts.length} />
+            <div className={isReposted ? "" : "opacity-4"}>
+              <NumberShrink value={postActions.reposts.reposts.length} />
+            </div>
           </div>
         </div>
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <Quote isQuoted={isQuoted} event={event} actions={postActions} />
           <div
-            className={`round-icon-tooltip ${
-              isQuoted ? "orange-c" : "opacity-4"
-            }`}
+            className={`round-icon-tooltip ${isQuoted ? "orange-c" : ""}`}
             data-tooltip={t("AWmDftG")}
             onClick={(e) => {
               e.stopPropagation();
@@ -127,7 +125,9 @@ export default function PostReaction({
                 });
             }}
           >
-            <NumberShrink value={postActions.quotes.quotes.length} />
+            <div className={isQuoted ? "" : "opacity-4"}>
+              <NumberShrink value={postActions.quotes.quotes.length} />
+            </div>
           </div>
         </div>
         <div className="fx-centered" style={{ columnGap: "8px" }}>
@@ -142,7 +142,7 @@ export default function PostReaction({
           <div
             data-tooltip={t("AO0OqWT")}
             className={`pointer round-icon-tooltip ${
-              isZapped ? "orange-c" : "opacity-4"
+              isZapped ? "orange-c" : ""
             }`}
             onClick={() =>
               postActions.zaps.total > 0 &&
@@ -153,7 +153,9 @@ export default function PostReaction({
               })
             }
           >
-            <NumberShrink value={postActions.zaps.total} />
+            <div className={isZapped ? "" : "opacity-4"}>
+              <NumberShrink value={postActions.zaps.total} />
+            </div>
           </div>
         </div>
       </div>

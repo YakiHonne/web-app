@@ -11,13 +11,8 @@ export default function ContentSourceAndFilter({
 }) {
   return (
     <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: 101,
-      }}
-      className="fit-container fx-centered"
+      
+      className="fit-container content-source-and-filter fx-centered"
     >
       <div className="main-container">
         <main

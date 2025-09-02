@@ -5,7 +5,6 @@ import { getBech32, minimizeKey } from "@/Helpers/Encryptions";
 import { nip19 } from "nostr-tools";
 import { useMemo } from "react";
 import WriteNew from "@/Components/WriteNew";
-import NotificationCenter from "@/Components/NotificationCenter";
 import { getConnectedAccounts } from "@/Helpers/ClientHelpers";
 import { redirectToLogin } from "@/Helpers/Helpers";
 import { useSelector } from "react-redux";
@@ -17,6 +16,7 @@ import {
 import { customHistory } from "@/Helpers/History";
 import YakiMobileappSidebar from "@/Components/YakiMobileappSidebar";
 import { useTranslation } from "react-i18next";
+import NotificationCenter from "./SideBar/NotificationCenter";
 
 export default function MenuMobile({ toggleLogin, exit }) {
   const userMetadata = useSelector((state) => state.userMetadata);
@@ -171,19 +171,6 @@ export default function MenuMobile({ toggleLogin, exit }) {
           <div className="smart-widget-24"></div>
           <div className="p-big">{t("AkvXmyz")}</div>
         </div>
-
-        {/* <div
-          onClick={() => {
-            customHistory("/verify-notes");
-            dismiss();
-          }}
-          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${
-            isPage("/verify-notes") ? "active-link" : "inactive-link"
-          }`}
-        >
-          <div className="news-24"></div>
-          <div className="p-big">{t("AltGBkP")}</div>
-        </div> */}
         <div
           onClick={() => {
             customHistory("/messages");

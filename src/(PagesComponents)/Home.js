@@ -210,8 +210,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     notes.length > 0 ? notes[notes.length - 1].created_at : undefined
   );
   const [rerenderTimestamp, setRerenderTimestamp] = useState(undefined);
-  // useScrollRestoration("page-container");
-  console.log(getNotesCache("home"));
   useEffect(() => {
     let contentFromValue = getContentFromValue(selectedCategory);
     if (selectedCategoryValue !== selectedCategory.value) {

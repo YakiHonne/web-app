@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import ArrowUp from "@/Components/ArrowUp";
 import { SelectTabs } from "@/Components/SelectTabs";
 import { useSelector } from "react-redux";
@@ -26,10 +26,10 @@ import DonationBoxSuggestionCards from "@/Components/SuggestionsCards/DonationBo
 import ProfileShareSuggestionCards from "@/Components/SuggestionsCards/ProfileShareSuggestionCards";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
-import ContentSource from "@/Components/ContentSettings/ContentSource";
-import ContentFilter from "@/Components/ContentSettings/ContentFilter";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
+import RecentPosts from "@/Components/RecentPosts";
+import { straightUp } from "@/Helpers/Helpers";
 
 const MixEvents = (articles, curations, videos) => {
   const interleavedArray = [];
@@ -185,8 +185,11 @@ const ExploreFeed = ({
     videos: undefined,
   });
   const [notesSuggestions, setNotesSuggestions] = useState([]);
-  const [isEndOfQuerying, setIsEndOfQuerying] = useState(false);
-
+  const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
+  const since = useMemo(
+    () => (content.length > 0 ? content[0].created_at + 1 : undefined),
+    [content]
+  );
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
@@ -201,9 +204,13 @@ const ExploreFeed = ({
       // : Math.floor(Date.now() / 1000) - 86400;
       let extraPubkeys = [];
       const { artsFilter, curationsFilter, videosFilter } = getFilter();
-      console.log(videosFilter);
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
+      setSubfilter({
+        filter: [...artsFilter, ...curationsFilter, ...videosFilter],
+        relays: algoRelay,
+      });
+
       let [articles, curations, videos] = await Promise.all([
         getSubData(artsFilter, 200, algoRelay, undefined, 20),
         getSubData(curationsFilter, 200, algoRelay, undefined, 20),
@@ -237,13 +244,6 @@ const ExploreFeed = ({
             : undefined,
       });
 
-      if (
-        articles_.length === 0 &&
-        curations_.length === 0 &&
-        videos_.length === 0
-      )
-        setIsEndOfQuerying(true);
-       
       let sortedData = MixEvents(articles_, curations_, videos_)
         .map((event) =>
           selectedCategory.value === "top"
@@ -312,30 +312,6 @@ const ExploreFeed = ({
     if (["mf"].includes(selectedCategory?.group)) contentFromDVM();
   }, [timestamp]);
 
-  // useEffect(() => {
-  //   const handleScroll = () => {
-  //     if (isLoading || isEndOfQuerying) return;
-  //     let container = document.querySelector(".feed-container");
-  //     if (!container) return;
-  //     if (
-  //       container.scrollHeight - container.scrollTop - 60 >
-  //       document.documentElement.offsetHeight
-  //     ) {
-  //       return;
-  //     }
-  //     setTimestamp(Date.now());
-  //   };
-
-  //   document
-  //     .querySelector(".feed-container")
-  //     ?.addEventListener("scroll", handleScroll);
-
-  //   return () =>
-  //     document
-  //       .querySelector(".feed-container")
-  //       ?.removeEventListener("scroll", handleScroll);
-  // }, [isLoading]);
-
   useEffect(() => {
     setContent([]);
     setLastEventsTimestamps({
@@ -344,7 +320,6 @@ const ExploreFeed = ({
       videos: undefined,
     });
     setTimestamp(Date.now());
-    setIsEndOfQuerying(false);
   }, [selectedCategory, selectedTab, selectedFilter]);
 
   const getFilter = () => {
@@ -511,8 +486,22 @@ const ExploreFeed = ({
     if (index === 75) return <ProfileShareSuggestionCards />;
   };
 
+  const handleRecentPostsClick = (posts) => {
+    setContent(posts);
+    straightUp(undefined, "smooth");
+  };
+
   return (
     <InfiniteScroll onRefresh={setTimestamp} events={content}>
+      {!["mf"].includes(selectedCategory?.group) && (
+        <RecentPosts
+          filter={subFilter}
+          since={since}
+          onClick={handleRecentPostsClick}
+          selectedFilter={selectedFilter}
+          kind="posts"
+        />
+      )}
       {/* <div className="fit-container fx-centered fx-col " style={{ gap: 0 }}> */}
       {content.map((item, index) => {
         if (!bannedList.includes(item.pubkey))
