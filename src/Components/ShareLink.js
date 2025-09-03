@@ -280,12 +280,12 @@ export default function ShareLink({
         </div>
       )}
       <div
-        className={label ? "fx-scattered fit-container" : "round-icon-tooltip"}
+        className={label ? "fx-centered fx-start-h fit-container" : "round-icon-tooltip"}
         data-tooltip={t("AGB5vpj")}
         onClick={handleSharing}
       >
+        <div className="share-v2"></div>
         {label && <p>{label}</p>}
-        <div className="share-v2-24"></div>
       </div>
     </>
   );

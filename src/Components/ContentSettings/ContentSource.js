@@ -330,77 +330,77 @@ export default function ContentSource({
         <div className="fx-centered">
           {category.value === "top" && (
             <div
-              // className="round-icon"
-              // style={{
-              //   minWidth: minimal ? "28px" : "34px",
-              //   minHeight: minimal ? "28px" : "34px",
-              // }}
+            // className="round-icon"
+            // style={{
+            //   minWidth: minimal ? "28px" : "34px",
+            //   minHeight: minimal ? "28px" : "34px",
+            // }}
             >
               <div className="medal-24"></div>
             </div>
           )}
           {category.value === "widgets" && (
             <div
-              // className="round-icon"
-              // style={{
-              //   minWidth: minimal ? "28px" : "34px",
-              //   minHeight: minimal ? "28px" : "34px",
-              // }}
+            // className="round-icon"
+            // style={{
+            //   minWidth: minimal ? "28px" : "34px",
+            //   minHeight: minimal ? "28px" : "34px",
+            // }}
             >
               <div className="smart-widget-24"></div>
             </div>
           )}
           {category.value === "recent" && (
             <div
-              // className="round-icon"
-              // style={{
-              //   minWidth: minimal ? "28px" : "34px",
-              //   minHeight: minimal ? "28px" : "34px",
-              // }}
+            // className="round-icon"
+            // style={{
+            //   minWidth: minimal ? "28px" : "34px",
+            //   minHeight: minimal ? "28px" : "34px",
+            // }}
             >
               <div className="recent-24"></div>
             </div>
           )}
           {category.value === "recent_with_replies" && (
             <div
-              // className="round-icon"
-              // style={{
-              //   minWidth: minimal ? "28px" : "34px",
-              //   minHeight: minimal ? "28px" : "34px",
-              // }}
+            // className="round-icon"
+            // style={{
+            //   minWidth: minimal ? "28px" : "34px",
+            //   minHeight: minimal ? "28px" : "34px",
+            // }}
             >
               <div className="recent-wr-24"></div>
             </div>
           )}
           {category.value === "paid" && (
             <div
-              // className="round-icon"
-              // style={{
-              //   minWidth: minimal ? "28px" : "34px",
-              //   minHeight: minimal ? "28px" : "34px",
-              // }}
+            // className="round-icon"
+            // style={{
+            //   minWidth: minimal ? "28px" : "34px",
+            //   minHeight: minimal ? "28px" : "34px",
+            // }}
             >
               <div className="sats-24"></div>
             </div>
           )}
           {category.value === "network" && (
             <div
-              // className="round-icon"
-              // style={{
-              //   minWidth: minimal ? "28px" : "34px",
-              //   minHeight: minimal ? "28px" : "34px",
-              // }}
+            // className="round-icon"
+            // style={{
+            //   minWidth: minimal ? "28px" : "34px",
+            //   minHeight: minimal ? "28px" : "34px",
+            // }}
             >
               <div className="posts-24"></div>
             </div>
           )}
           {category.value === "global" && (
             <div
-              // className="round-icon"
-              // style={{
-              //   minWidth: minimal ? "28px" : "34px",
-              //   minHeight: minimal ? "28px" : "34px",
-              // }}
+            // className="round-icon"
+            // style={{
+            //   minWidth: minimal ? "28px" : "34px",
+            //   minHeight: minimal ? "28px" : "34px",
+            // }}
             >
               <div className="globe-24"></div>
             </div>
@@ -566,11 +566,7 @@ export default function ContentSource({
                             return (
                               <div
                                 key={_index}
-                                className={`pointer fit-container box-pad-h-s box-pad-v-s fx-scattered ${
-                                  selectedCategory.value === _.value
-                                    ? "sc-s-18"
-                                    : ""
-                                }`}
+                                className={`pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale`}
                                 style={{
                                   borderRadius: "var(--border-r-18)",
                                 }}
@@ -582,15 +578,18 @@ export default function ContentSource({
                                   group: option.value,
                                   ..._,
                                 })}
-                                {option.value === "af" && (
-                                  <div
-                                    className="share-icon"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setshowRelaySharing(_.value);
-                                    }}
-                                  ></div>
-                                )}
+                                <div className="fx-centered">
+                                  {  selectedCategory.value === _.value && <div className="check-24"></div>}
+                                  {option.value === "af" && (
+                                    <div
+                                      className="share-icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setshowRelaySharing(_.value);
+                                      }}
+                                    ></div>
+                                  )}
+                                </div>
                               </div>
                             );
                         })}

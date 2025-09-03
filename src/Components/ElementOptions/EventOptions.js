@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BookmarkEvent from "@/Components/BookmarkEvent";
 import ShareLink from "@/Components/ShareLink";
@@ -22,6 +22,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import DeleteWallet from "@/Components/DeleteWallet";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import RelayImage from "../RelayImage";
 
 export default function EventOptions({
   event,
@@ -68,10 +69,10 @@ export default function EventOptions({
         e.stopPropagation();
         setPostToNote(event);
       }}
-      className="pointer fx-scattered fit-container"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="add-note"></div>
       <p>{t("AB8DnjO")}</p>
-      <div className="add-note-24"></div>
     </div>
   );
   const copyID = (
@@ -80,10 +81,10 @@ export default function EventOptions({
         e.stopPropagation();
         copyText(event.nEvent, t("ARJICtS"));
       }}
-      className="pointer fx-scattered fit-container"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="hashtag"></div>
       <p>{t("AYFAFKs")}</p>
-      <div className="hashtag-24"></div>
     </div>
   );
   const copyNaddr = (
@@ -92,10 +93,10 @@ export default function EventOptions({
         e.stopPropagation();
         copyText(event.naddr, t("ApPw14o", { item: "naddr" }));
       }}
-      className="pointer fx-scattered fit-container"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="hashtag"></div>
       <p>{t("ApPw14o", { item: "naddr" })}</p>
-      <div className="hashtag-24"></div>
     </div>
   );
   const copyPubkey = (
@@ -104,10 +105,10 @@ export default function EventOptions({
         e.stopPropagation();
         copyText(nip19.npubEncode(event.pubkey), t("AzSXXQm"));
       }}
-      className="pointer fx-scattered fit-container"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="key-icon"></div>
       <p>{t("AHrJpSX")}</p>
-      <div className="key-icon-24"></div>
     </div>
   );
   const copyPubkeyHex = (
@@ -116,10 +117,10 @@ export default function EventOptions({
         e.stopPropagation();
         copyText(event.pubkey, t("AzSXXQm"));
       }}
-      className="pointer fx-scattered fit-container"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="pub-hex"></div>
       <p>{t("AHrJpSX")}</p>
-      <div className="pub-hex-24"></div>
     </div>
   );
 
@@ -129,10 +130,10 @@ export default function EventOptions({
         e.stopPropagation();
         setShowRawEvent(!showRawEvent);
       }}
-      className="pointer fx-scattered fit-container"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="raw-event"></div>
       <p>{t("AUrrk1e")}</p>
-      <div className="raw-event-24"></div>
     </div>
   );
 
@@ -142,10 +143,10 @@ export default function EventOptions({
         e.stopPropagation();
         setShowArticleToCuration(true);
       }}
-      className="fit-container fx-scattered pointer"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="curation-plus"></div>
       <p>{t("A89Qqmt")}</p>
-      <div className="curation-plus-24"></div>
     </div>
   );
 
@@ -155,10 +156,10 @@ export default function EventOptions({
         e.stopPropagation();
         copyText(event.data, t("A6Pj02S"));
       }}
-      className="fit-container fx-scattered pointer"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="copy"></div>
       <p>{t("Aoq0uKa")}</p>
-      <div className="copy-24"></div>
     </div>
   );
 
@@ -168,12 +169,13 @@ export default function EventOptions({
         e.stopPropagation();
         copyText(event.entitle, t("ALR84Tq"));
       }}
-      className="fit-container fx-scattered pointer"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="copy"></div>
       <p>{t("ArCMp34")}</p>
-      <div className="copy-24"></div>
     </div>
   );
+  const broadcastEvent = <BroadcastEvent event={event} />;
 
   const exportOneWallet = (
     <div
@@ -181,10 +183,10 @@ export default function EventOptions({
         e.stopPropagation();
         exportWallet(event.data, event.entitle);
       }}
-      className="fit-container fx-scattered pointer"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="share-icon"></div>
       <p>{t("A4A5psW")}</p>
-      <div className="share-icon-24"></div>
     </div>
   );
 
@@ -194,10 +196,10 @@ export default function EventOptions({
         e.stopPropagation();
         setSelectWalletToLink(event.entitle);
       }}
-      className="fit-container fx-scattered pointer"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="link"></div>
       <span>{t("AmQVpu4")}</span>
-      <div className="link-24"></div>
     </div>
   );
 
@@ -207,40 +209,40 @@ export default function EventOptions({
         e.stopPropagation();
         setShowDeletionWallet(true);
       }}
-      className="fit-container fx-scattered pointer"
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <div className="trash"></div>
       <span className="red-c">{t("AawdN9R")}</span>
-      <div className="trash-24"></div>
     </div>
   );
 
   const checkWidgetValidity = (
     <Link
-      className="fit-container fx-scattered"
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       href={`/smart-widget-checker?naddr=${event.naddr}`}
     >
+      <div className="smart-widget-checker"></div>
       <p>{t("AavUrQj")}</p>
-      <div className="smart-widget-checker-24"></div>
     </Link>
   );
 
   const cloneWidget = (
     <Link
-      className="fit-container fx-scattered"
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       href={"/smart-widget-builder"}
       state={{
         ops: "clone",
         metadata: { ...event },
       }}
     >
+      <div className="clone"></div>
       <p>{t("AyWVBDx")}</p>
-      <div className="clone-24"></div>
     </Link>
   );
 
   const editWidget = (
     <Link
-      className="fit-container fx-scattered"
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       href={"/smart-widget-builder"}
       state={{
         ops: "edit",
@@ -249,14 +251,14 @@ export default function EventOptions({
         },
       }}
     >
+      <div className="edit"></div>
       <p>{t("AsXohpb")}</p>
-      <div className="edit-24"></div>
     </Link>
   );
 
   const editArticle = (
     <div
-      className="fit-container fx-scattered pointer"
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       onClick={(e) => {
         e.stopPropagation();
         navigate.push("/write-article", {
@@ -275,77 +277,86 @@ export default function EventOptions({
         });
       }}
     >
+      <div className="edit"></div>
       <p>{t("AsXohpb")}</p>
-      <div className="edit-24"></div>
     </div>
   );
 
   const editVideo = (
     <div
-      className="fit-container  fx-scattered pointer"
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       onClick={(e) => {
         e.stopPropagation();
         setShowEditVideo(true);
       }}
     >
+      <div className="edit"></div>
       <p>{t("AsXohpb")}</p>
-      <div className="edit-24"></div>
     </div>
   );
   const editCuration = (
     <div
-      className="fit-container fx-scattered pointer"
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       onClick={(e) => {
         e.stopPropagation();
         setShowEditCuration(true);
       }}
     >
+      <div className="edit"></div>
       <p>{t("AsXohpb")}</p>
-      <div className="edit-24"></div>
     </div>
   );
 
   const repEventBookmark = (
-    <BookmarkEvent label={t("A4ZQj8F")} pubkey={event.pubkey} d={event.d} />
+    <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
+      <BookmarkEvent label={t("A4ZQj8F")} pubkey={event.pubkey} d={event.d} />
+    </div>
   );
 
   const noteBookmark = (
-    <BookmarkEvent
-      label={t("Ar5VgpT")}
-      pubkey={event.id}
-      kind={"1"}
-      itemType="e"
-    />
+    <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
+      <BookmarkEvent
+        label={t("Ar5VgpT")}
+        pubkey={event.id}
+        kind={"1"}
+        itemType="e"
+      />
+    </div>
   );
 
   const shareLink = (
-    <ShareLink
-      label={t("A6enIP3")}
-      title={event.title || userProfile.display_name || userProfile.name}
-      description={event.description || event.about || event.content || ""}
-      path={path}
-      kind={event.kind}
-      shareImgData={{
-        post: event,
-        author: userProfile,
-        likes: eventActions ? eventActions.likes.likes.length : null,
-        label: t("Az5ftet"),
-      }}
-    />
+    <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
+      <ShareLink
+        label={t("A6enIP3")}
+        title={event.title || userProfile.display_name || userProfile.name}
+        description={event.description || event.about || event.content || ""}
+        path={path}
+        kind={event.kind}
+        shareImgData={{
+          post: event,
+          author: userProfile,
+          likes: eventActions ? eventActions.likes.likes.length : null,
+          label: t("Az5ftet"),
+        }}
+      />
+    </div>
   );
 
   const muteUser =
     event.pubkey !== userKeys.pub ? (
-      <div onClick={muteUnmute} className="pointer fit-container fx-scattered">
+      <div
+        onClick={muteUnmute}
+        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+      >
         {isMuted ? (
           <>
+            <div className="unmute"></div>
             <p className="red-c">{t("AKELUbQ")}</p>
-            <div className="unmute-24"></div>
           </>
         ) : (
           <>
+            <div className="mute"></div>
             <p className="red-c">{t("AGMxuQ0")}</p>
-            <div className="mute-24"></div>
           </>
         )}
       </div>
@@ -355,28 +366,32 @@ export default function EventOptions({
 
   const toDeleteEvent = (
     <div
-      className="fit-container fx-scattered pointer"
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       onClick={(e) => {
         e.stopPropagation();
         setDeleteEvent(event);
       }}
     >
+      <div className="trash"></div>
       <p className="red-c">{t("Almq94P")}</p>
-      <div className="trash-24"></div>
     </div>
   );
+
+  const HR = <hr style={{ margin: "4px 0", padding: "0 5px" }} />;
 
   const getOptionsItem = () => {
     switch (component) {
       case "user":
-        return [copyPubkey, copyPubkeyHex, shareLink, muteUser];
+        return [copyPubkey, copyPubkeyHex, shareLink, HR, muteUser];
       case "notes":
         return [
           copyID,
           copyPubkey,
           showRawEventContent,
+          broadcastEvent,
           noteBookmark,
           shareLink,
+          HR,
           muteUser,
         ];
       case "repEvents":
@@ -385,9 +400,11 @@ export default function EventOptions({
           copyNaddr,
           copyPubkey,
           showRawEventContent,
+          broadcastEvent,
           addToCuration,
           repEventBookmark,
           shareLink,
+          HR,
           muteUser,
         ];
       case "repEventsCard":
@@ -396,21 +413,25 @@ export default function EventOptions({
           copyNaddr,
           copyPubkey,
           showRawEventContent,
+          broadcastEvent,
           repEventBookmark,
           shareLink,
+          HR,
           muteUser,
         ];
       case "dashboardNotes":
-        return [copyID, showRawEventContent, shareLink];
+        return [copyID, showRawEventContent, HR, shareLink];
       case "dashboardSW":
         return [
           postAsNote,
           copyNaddr,
           showRawEventContent,
+          broadcastEvent,
           cloneWidget,
           checkWidgetValidity,
           editWidget,
           shareLink,
+          HR,
           toDeleteEvent,
         ];
       case "dashboardArticles":
@@ -418,19 +439,23 @@ export default function EventOptions({
           postAsNote,
           copyNaddr,
           showRawEventContent,
+          broadcastEvent,
           editArticle,
           shareLink,
+          HR,
           toDeleteEvent,
         ];
       case "dashboardArticlesDraft":
-        return [showRawEventContent, editArticle, toDeleteEvent];
+        return [showRawEventContent, editArticle, HR, toDeleteEvent];
       case "dashboardVideos":
         return [
           postAsNote,
           copyNaddr,
           showRawEventContent,
+          broadcastEvent,
           editVideo,
           shareLink,
+          HR,
           toDeleteEvent,
         ];
       case "dashboardCuration":
@@ -438,8 +463,10 @@ export default function EventOptions({
           postAsNote,
           copyNaddr,
           showRawEventContent,
+          broadcastEvent,
           editCuration,
           shareLink,
+          HR,
           toDeleteEvent,
         ];
       case "wallet":
@@ -448,6 +475,7 @@ export default function EventOptions({
           event.kind === 3 && copyNWC,
           event.kind !== 1 && copyAddress,
           exportOneWallet,
+          HR,
           removeWallet,
         ];
     }
@@ -570,7 +598,87 @@ export default function EventOptions({
           wallet={event}
         />
       )}
-      <OptionsDropdown options={optionsItem} border={border} minWidth={180} vertical={false}/>
+      <OptionsDropdown
+        options={optionsItem}
+        border={border}
+        minWidth={180}
+        vertical={false}
+      />
     </>
   );
 }
+
+const BroadcastEvent = ({ event }) => {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const userRelays = useSelector((state) => state.userRelays);
+  const userFavRelays = useSelector((state) => state.userFavRelays);
+  const [showRelays, setShowRelays] = useState(false);
+  const allRelays = useMemo(() => {
+    return [...new Set([...userRelays, ...(userFavRelays?.relays || [])])];
+  }, [userRelays, userFavRelays]);
+
+  const handleRepublish = async (relay) => {
+    let rawEvent = {
+      id: event.id,
+      pubkey: event.pubkey,
+      created_at: event.created_at,
+      kind: event.kind,
+      tags: event.tags,
+      content: event.content,
+      sig: event.sig,
+    };
+    dispatch(
+      setToPublish({
+        eventInitEx: rawEvent,
+        allRelays: [relay],
+      })
+    );
+    setShowRelays(false);
+  };
+
+  if (allRelays.length === 0) return null;
+  return (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        setShowRelays(!showRelays);
+      }}
+      style={{ position: "relative" }}
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
+      onMouseEnter={() => setShowRelays(true)}
+    >
+      {showRelays && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "-10px",
+            minWidth: "max-content",
+            transform: "translate(-100%, -50%)",
+            maxHeight: "600px",
+            overflow: "scroll",
+            gap: 0,
+          }}
+          onMouseLeave={() => setShowRelays(false)}
+          className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
+        >
+          {allRelays.map((_) => {
+            return (
+              <div
+                key={_}
+                className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+             onClick={() => handleRepublish(_)}
+             >
+                <RelayImage url={_} />
+                <p className="p-one-line">{_}</p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      <div className="arrow" style={{ rotate: "90deg" }}></div>
+      <p>{t("AHhMsNx")}</p>
+    </div>
+  );
+};

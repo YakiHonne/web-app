@@ -57,7 +57,6 @@ export default function ToPublish({
   const [contentSensitive, setContentSensitive] = useState(false);
   const [zapSplit, setZapSplit] = useState([["zap", userKeys.pub, "", "100"]]);
   const [zapSplitEnabled, setZapSplitEnabled] = useState(false);
-  const [relaysToPublish, setRelaysToPublish] = useState([...relaysOnPlatform]);
   const [deleteDraft, setDeleteDraft] = useState(
     postKind === 30024 ? true : false
   );

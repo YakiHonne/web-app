@@ -145,13 +145,19 @@ export default function Publishing() {
   useEffect(() => {
     const publishPost = async () => {
       let { kind, content, tags, eventInitEx, allRelays } = toPublish;
-      let relaysToPublish =
-        [...userRelays, ...(allRelays || [])].map((relay) => {
-          return {
-            url: relay,
-            status: 0,
-          };
-        }) || [];
+      let relaysToPublish = allRelays.length
+        ? allRelays.map((relay) => {
+            return {
+              url: relay,
+              status: 0,
+            };
+          })
+        : userRelays.map((relay) => {
+            return {
+              url: relay,
+              status: 0,
+            };
+          }) || [];
       if (relaysToPublish.length === 0)
         relaysToPublish = relaysOnPlatform.map((relay) => {
           return {

@@ -4,7 +4,7 @@ import BookmarksPicker from "@/Components/BookmarksPicker";
 import { useSelector } from "react-redux";
 import LoginSignup from "@/Components/LoginSignup";
 
-export default function BookmarkEvent({
+export default function   BookmarkEvent({
   pubkey = "",
   d = "",
   kind = 30023,
@@ -46,16 +46,16 @@ export default function BookmarkEvent({
       )}
       {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
       <div
-        className="fx-scattered fit-container pointer"
+        className="fx-centered fx-start-h fit-container pointer"
         onClick={(e) => {
           e.stopPropagation();
           !userKeys ? setIsLogin(true) : setShowBookmarksPicker(true);
         }}
       >
-        {label && <p>{label}</p>}
         <div
-          className={isBookmarked ? "bookmark-i-b-24" : "bookmark-i-24"}
-        ></div>
+          className={isBookmarked ? "bookmark-i-b" : "bookmark-i"}
+          ></div>
+          {label && <p>{label}</p>}
       </div>
     </>
   );

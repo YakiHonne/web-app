@@ -1664,8 +1664,9 @@ main {
 }
 
 .option-no-scale:hover {
+    border-radius: 10px;
     position: relative;
-    background-color: var(--very-dim-gray);
+    background-color: var(--c1-side);
     z-index: 100;
 }
 
@@ -2136,9 +2137,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background-color: var(--white) !important;
     box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.072);
     /* box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 3px 3px rgba(0, 0, 0, 0.1), 0 8px 7px rgba(0, 0, 0, 0.13), 0 17px 14px rgba(0, 0, 0, 0.17), 0 35px 29px rgba(0, 0, 0, 0.22), 0px -4px 4px 0px rgba(0, 0, 0, 0.04) inset;
-    backdrop-filter: blur(16px);
-    background-color: rgba(25, 25, 25, 0.733) !important;
-    -webkit-backdrop-filter: blur(16px); */
+    background-color: rgba(25, 25, 25, 0.933) !important;
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px); */
 }
 
 .reply-tail {

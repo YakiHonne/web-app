@@ -62,11 +62,11 @@ export default function WalletNWC() {
           });
           oldVersion.push(nwcNode);
           updateWallets(oldVersion);
-          customHistory.push("/wallet");
+          customHistory("/wallet");
           return;
         } catch (err) {
           updateWallets([nwcNode]);
-          customHistory.push("/wallet");
+          customHistory("/wallet");
           return;
         }
       }
@@ -74,7 +74,7 @@ export default function WalletNWC() {
 
       nwc.close();
       setIsLoading(false);
-      customHistory.push("/wallet");
+      customHistory("/wallet");
     } catch (err) {
       console.log(err);
       setIsLoading(false);

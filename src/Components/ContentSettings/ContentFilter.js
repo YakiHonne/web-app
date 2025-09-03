@@ -112,7 +112,8 @@ export default function ContentFilter({
     }
   };
 
-  if (!(userKeys && (userKeys?.sec || userKeys?.ext || userKeys?.bunker))) return null;
+  if (!(userKeys && (userKeys?.sec || userKeys?.ext || userKeys?.bunker)))
+    return null;
 
   return (
     <>
@@ -232,9 +233,7 @@ export default function ContentFilter({
                 return (
                   <div
                     key={index}
-                    className={` pointer fit-container fx-scattered box-pad-h-s box-pad-v-s ${
-                      selectedFilter.index === index ? "sc-s-18" : ""
-                    }`}
+                    className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s option-no-scale`}
                     style={{
                       height: "35px",
                       borderRadius: "var(--border-r-18)",
@@ -249,30 +248,37 @@ export default function ContentFilter({
                   >
                     <p className="p-maj p-one-line">{filter.title}</p>
                     <div className="fx-centered">
-                      {/* {selectedFilter.index === index && (
+                      {selectedFilter.index === index && (
                         <div className="check-24"></div>
-                      )} */}
+                      )}
                       <OptionsDropdown
                         vertical={false}
                         options={[
-                          <p
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowAddFilter(true);
-                              setFilterToEdit({ ...filter, index });
-                            }}
-                          >
-                            {t("AsXohpb")}
-                          </p>,
-                          <p
-                            className="red-c"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteFilter(index);
-                            }}
-                          >
-                            {t("Almq94P")}
-                          </p>,
+                          <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
+                            <div className="edit"></div>
+                            <p
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowAddFilter(true);
+                                setFilterToEdit({ ...filter, index });
+                              }}
+                            >
+                              {t("AsXohpb")}
+                            </p>
+                          </div>,
+                          <hr style={{ margin: "4px 0", padding: "0 5px" }} />,
+                          <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
+                            <div className="trash"> </div>
+                            <p
+                              className="red-c"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteFilter(index);
+                              }}
+                            >
+                              {t("Almq94P")}
+                            </p>
+                          </div>,
                         ]}
                       />
                     </div>

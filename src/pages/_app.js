@@ -600,20 +600,12 @@ function App({ Component, pageProps }) {
               style={{ gap: 0 }}
             >
               {!shouldHideSidebar && <SideBarClient />}
-              {/* {loading && (
-                <div
-                  style={{
-                    zIndex: 99999999,
-                  }}
-                  className="fixed-container fx-centered"
-                >
-                  <LoadingLogo size={58} />
-                </div>
-              )} */}
+
               <div
                 className="main-page-nostr-container"
                 style={{ flex: 1, position: "relative" }}
               >
+               
                 <KeepAlive routeKey={router.asPath}>
                   <Component {...pageProps} />
                 </KeepAlive>
@@ -622,7 +614,37 @@ function App({ Component, pageProps }) {
           </main>
         </div>
       </div>
-
+      {loading && (
+                  <div
+                    className="fit-container content-source-and-filter fx-centered"
+                    style={{ zIndex: 10000 }}
+                  >
+                    <div className="main-container">
+                      <main
+                        style={{ height: "auto" }}
+                        className="fx-centered fx-end-h box-pad-h-s"
+                      >
+                        <div
+                          className="main-page-nostr-container fx-centered box-pad-v-m"
+                          style={{
+                            borderBottom: "1px solid var(--very-dim-gray)",
+                            backgroundColor: "var(--white)",
+                            height: "100vh",
+                          }}
+                        >
+                          <div
+                            style={{ gap: 0 }}
+                            className={`fx-centered  fx-wrap fit-container`}
+                          >
+                            <div className="fx-centered">
+                              <LoadingLogo size={58} />
+                            </div>
+                          </div>
+                        </div>
+                      </main>
+                    </div>
+                  </div>
+                )}
       {/* Overlay loader */}
       {/* {loading && (
         <div

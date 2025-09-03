@@ -76,14 +76,15 @@ export default function OptionsDropdown({
             [displayAbove_ ? "bottom" : "top"]: "110%",
             [displayLeft ? "right" : "left"]: "0",
             backgroundColor: "var(--dim-gray)",
-            border: "none",
+            // border: "none",
             minWidth: minWidth,
             width: "max-content",
             zIndex: 1000,
-            rowGap: "10px",
+            // rowGap: "10px",
+            rowGap: "0px",
             overflow: "visible",
           }}
-          className="box-pad-h-m box-pad-v-s sc-s-18 fx-centered fx-col fx-start-v pointer drop-down"
+          className="box-pad-h-s box-pad-v-s sc-s-18 bg-sp fx-centered fx-col fx-start-v pointer drop-down"
           onClick={(e) => {
             e.stopPropagation();
             setShowOptions(false);

@@ -56,7 +56,6 @@ export default function Wallet() {
   const [showAddWallet, setShowAddWallet] = useState(false);
   const [showWalletsList, setShowWalletList] = useState(false);
   const [timestamp, setTimestamp] = useState(Date.now());
-  const [showDeletionPopup, setShowDeletionPopup] = useState(false);
   const walletListRef = useRef(null);
 
   const checkIsLinked = (addr) => {
@@ -373,7 +372,7 @@ export default function Wallet() {
                         )}
                         {showWalletsList && (
                           <div
-                            className="fx-centered fx-col sc-s-18  box-pad-v-s fx-start-v drop-down"
+                            className="fx-centered fx-col sc-s-18 bg-sp box-pad-v-s box-pad-h-s fx-start-v drop-down"
                             style={{
                               width: "400px",
                               backgroundColor: "var(--c1-side)",
@@ -392,7 +391,7 @@ export default function Wallet() {
                               return (
                                 <div
                                   key={wallet.id}
-                                  className="option-no-scale fit-container fx-scattered sc-s-18 pointer box-pad-h-m box-pad-v-s"
+                                  className="option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     handleSelectWallet(wallet.id);

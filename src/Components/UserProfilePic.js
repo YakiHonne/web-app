@@ -54,10 +54,6 @@ export default function UserProfilePic({
         let pubkey = nip19.nprofileEncode({
           pubkey: mainAccountUser ? userMetadata.pubkey : user_id,
         });
-        // if (isNip05Verified) {
-        //   customHistory(`/profile/${userProfile.nip05}`);
-        //   return
-        // } 
         customHistory(`/profile/${pubkey}`);
       }
       return null;

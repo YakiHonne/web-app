@@ -22,11 +22,7 @@ import PagePlaceholder from "@/Components/PagePlaceholder";
 import UploadFile from "@/Components/UploadFile";
 import InitiConvo from "@/Components/InitConvo";
 import axiosInstance from "@/Helpers/HTTP_Client";
-import {
-  getUser,
-  InitEvent,
-  updateYakiChestStats,
-} from "@/Helpers/Controlers";
+import { getUser, InitEvent, updateYakiChestStats } from "@/Helpers/Controlers";
 import { useDispatch, useSelector } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import { setUpdatedActionFromYakiChest } from "@/Store/Slides/YakiChest";
@@ -502,28 +498,26 @@ export default function Messages() {
               </div>
               <OptionsDropdown
                 options={[
-                  <div className="pointer" onClick={handleReadAll}>
+                  <div
+                    className="pointer option-no-scale box-pad-h-s box-pad-v-s fit-container"
+                    onClick={handleReadAll}
+                    style={{ width: "150px" }}
+                  >
                     <p>{t("A0qY0bf")}</p>
                   </div>,
                   <div className="fit-container">
-                    <hr
-                      style={{
-                        borderColor: "#555555",
-                        width: "30px",
-                        marginBottom: ".5rem",
-                      }}
-                    />
-                    <p
+                    <hr style={{ margin: "4px 0", padding: "0 5px" }} />
+                    {/* <p
                       className="p-medium gray-c"
                       style={{ marginBottom: ".25rem" }}
                     >
                       {t("ATpzz5G")}
-                    </p>
+                    </p> */}
                     <div className="fit-container">
                       {filterByTimeTypes.map((type) => {
                         return (
                           <div
-                            className="pointer fit-container fx-scattered"
+                            className="pointer fit-container fx-scattered box-pad-h-s box-pad-v-s option-no-scale"
                             onClick={() => handleDMFilter(type.value)}
                           >
                             <span
@@ -1100,9 +1094,7 @@ const ConversationBox = ({ convo, back }) => {
             className="fit-container"
             style={{ position: "sticky", zIndex: 100, top: 0 }}
           >
-            <div
-              className="fit-container"
-            >
+            <div className="fit-container">
               <div className="box-pad-h-m box-pad-v-m fx-centered fx-start-h fit-container sc-s-18">
                 <div className="info-tt-24"></div>
                 <div>
@@ -1204,7 +1196,9 @@ const ConversationBox = ({ convo, back }) => {
                     overflow: "visible",
                   }}
                 >
-                  {<div className="fit-container">{convo.content}</div> || <LoadingDots />}
+                  {<div className="fit-container">{convo.content}</div> || (
+                    <LoadingDots />
+                  )}
                   <div
                     className="fx-centered fx-start-h round-icon-tooltip pointer fit-container"
                     data-tooltip={
