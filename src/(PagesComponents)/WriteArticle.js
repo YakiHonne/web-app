@@ -4,12 +4,11 @@ import PagePlaceholder from "@/Components/PagePlaceholder";
 import ToPublish from "@/Components/ToPublish";
 import LoadingScreen from "@/Components/LoadingScreen";
 import ToPublishDrafts from "@/Components/ToPublishDrafts";
-import katex from "katex";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { getAppLang } from "@/Helpers/Helpers";
 import {
   getArticleDraft,
-  getComponent,
+  getPostToEdit,
   updateArticleDraft,
 } from "@/Helpers/ClientHelpers";
 import UserProfilePic from "@/Components/UserProfilePic";
@@ -18,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import ProfilesPicker from "@/Components/ProfilesPicker";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 
 const getUploadsHistory = () => {
   let history = localStorage?.getItem("YakihonneUploadsHistory");
@@ -29,6 +28,8 @@ const getUploadsHistory = () => {
 };
 
 export default function WritingArticle() {
+  const { query } = useRouter();
+  const { edit } = query || {};
   const {
     post_pubkey,
     post_id,
@@ -40,7 +41,7 @@ export default function WritingArticle() {
     post_d,
     post_content,
     post_published_at,
-  } = {};
+  } = getPostToEdit(edit);
   const dispatch = useDispatch();
 
   const { t } = useTranslation();

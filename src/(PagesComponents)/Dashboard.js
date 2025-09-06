@@ -244,6 +244,7 @@ export default function Dashboard() {
         userProfile = JSON.parse(
           userProfile.find((event) => event.kind === 10000105).content
         );
+        
         let zaps_sent = sats
           ? sats.data.stats[userKeys.pub].zaps_sent
           : { count: 0, msats: 0 };
@@ -265,12 +266,14 @@ export default function Dashboard() {
           latestPublished: sortEvents(latestPublished),
           localDraft,
         });
+      
         setIsLoading(false);
       } catch (err) {
         console.log(err);
       }
     };
     if (userKeys) fetchHomeData();
+  
   }, [userKeys]);
 
   const handleUpdate = async () => {
@@ -290,7 +293,6 @@ export default function Dashboard() {
       return { ...prev, latestPublished: sortEvents(latestPublished) };
     });
   };
-  console.log(selectedTab);
   return (
     <>
       {postToNote !== false && (
@@ -301,46 +303,6 @@ export default function Dashboard() {
         />
       )}
       <div>
-        {/* <Helmet>
-          <title>Yakihonne | Dashboard</title>
-          <meta
-            name="description"
-            content={
-              "Manage your content, track engagement, and monitor earnings in one intuitive dashboard. Your personal command center for the decentralized publishing world."
-            }
-          />
-          <meta
-            property="og:description"
-            content={
-              "Manage your content, track engagement, and monitor earnings in one intuitive dashboard. Your personal command center for the decentralized publishing world."
-            }
-          />
-          <meta
-            property="og:image"
-            content={
-              "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-            }
-          />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="700" />
-          <meta property="og:url" content={`https://yakihonne.com/dashboard`} />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Yakihonne" />
-          <meta property="og:title" content={"Dashboard"} />
-          <meta property="twitter:title" content={"Dashboard"} />
-          <meta
-            property="twitter:description"
-            content={
-              "Manage your content, track engagement, and monitor earnings in one intuitive dashboard. Your personal command center for the decentralized publishing world."
-            }
-          />
-          <meta
-            property="twitter:image"
-            content={
-              "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-            }
-          />
-        </Helmet> */}
         <div
           className="fx-centered fit-container fx-start-h fx-start-v"
           style={{ gap: 0 }}
@@ -859,7 +821,6 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
     setEditEvent(event);
   };
 
-  console.log(contentFrom);
   return (
     <>
       {showVideosCreator && (
@@ -2083,7 +2044,9 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
               <div className="curation-24"></div>
             )}
             {[30023].includes(event.kind) && <div className="posts-24"></div>}
-            {[34235, 21, 22].includes(event.kind) && <div className="play-24"></div>}
+            {[34235, 21, 22].includes(event.kind) && (
+              <div className="play-24"></div>
+            )}
             {[30033].includes(event.kind) && (
               <div className="smart-widget-24"></div>
             )}
@@ -2173,9 +2136,10 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
 const NoteCard = ({ event }) => {
   const { t } = useTranslation();
   const isRepost =
-    event.kind === 6
-      ? getParsedNote(JSON.parse(event.content))
-      : getParsedNote(event);
+  event.kind === 6
+  ? getParsedNote(JSON.parse(event.content))
+  : getParsedNote(event);
+  if(!isRepost) return null;
   const { postActions } = useNoteStats(isRepost.id, isRepost.pubkey);
   const isFlashNews = isRepost.tags.find(
     (tag) => tag[0] === "l" && tag[1] === "FLASH NEWS"
@@ -2472,7 +2436,9 @@ const BookmarkContent = ({ bookmark, exit }) => {
             )}
             {content.map((item) => {
               let content = getParsedRepEvent(item);
-              let naddr = [30004, 30023, 30005, 34235, 21, 22].includes(item.kind)
+              let naddr = [30004, 30023, 30005, 34235, 21, 22].includes(
+                item.kind
+              )
                 ? nip19.naddrEncode({
                     identifier: content.d,
                     pubkey: item.pubkey,
@@ -2485,7 +2451,10 @@ const BookmarkContent = ({ bookmark, exit }) => {
                     id: item.id,
                   })
                 : "";
-              if (!postKind && [30004, 30023, 30005, 34235, 21, 22].includes(item.kind))
+              if (
+                !postKind &&
+                [30004, 30023, 30005, 34235, 21, 22].includes(item.kind)
+              )
                 return (
                   <div
                     className="sc-s-18 fit-container fx-scattered box-pad-h-s box-pad-v-s"
@@ -2574,7 +2543,8 @@ const BookmarkContent = ({ bookmark, exit }) => {
                           (item.kind === 30023 && `/article/${naddr}`) ||
                           ([30005, 30004].includes(item.kind) &&
                             `/curation/${naddr}`) ||
-                          ([34235, 21, 22].includes(item.kind) && `/video/${naddr}`)
+                          ([34235, 21, 22].includes(item.kind) &&
+                            `/video/${naddr}`)
                         }
                       >
                         <div className="share-icon-24"></div>

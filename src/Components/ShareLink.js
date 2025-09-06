@@ -5,6 +5,7 @@ import QRCode from "react-qr-code";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { useToPng } from "@hugocxl/react-to-image";
 import axios from "axios";
+import axiosInstance from "@/Helpers/HTTP_Client";
 import { getBech32 } from "@/Helpers/Encryptions";
 import Date_ from "@/Components/Date_";
 import UN from "@/Components/UN";
@@ -302,10 +303,10 @@ const ShareImg = ({ data, kind, path, setIsLoading }) => {
       try {
         setIsLoading(true);
         let [_pp, _thumbnail] = await Promise.all([
-          axios.post("/api/v1/url-to-base64", {
+          axiosInstance.post("/api/v1/url-to-base64", {
             images: [data.author.picture],
           }),
-          axios.post("/api/v1/url-to-base64", {
+          axiosInstance.post("/api/v1/url-to-base64", {
             images: [data.post.image],
           }),
         ]);

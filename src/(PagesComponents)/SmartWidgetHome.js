@@ -14,45 +14,6 @@ import Link from "next/link";
 export default function SWhome() {
   return (
     <div>
-      {/* <Helmet>
-        <title>Yakihonne | Smart widgets</title>
-        <meta
-          name="description"
-          content={"Experience the next generation of interactive content tools on the Nostr network. Upgraded performance and new features for content creators."}
-        />
-        <meta
-          property="og:description"
-          content={"Experience the next generation of interactive content tools on the Nostr network. Upgraded performance and new features for content creators."}
-        />
-        <meta
-          property="og:image"
-          content={"https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"}
-        />  
-        <meta
-          property="og:image:width"
-          content="1200"
-        />
-        <meta
-          property="og:image:height"
-          content="700"
-        />
-        <meta
-          property="og:url"
-          content={`https://yakihonne.com/smart-widgets`}
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Yakihonne" />
-        <meta property="og:title" content="Yakihonne | Smart widgets" />
-        <meta property="twitter:title" content="Yakihonne | Smart widgets" />
-        <meta
-          property="twitter:description"
-          content={"Experience the next generation of interactive content tools on the Nostr network. Upgraded performance and new features for content creators."}
-        />
-        <meta
-          property="twitter:image"
-          content={"https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"}
-        />
-      </Helmet> */}
       <Main />
     </div>
   );
@@ -184,9 +145,7 @@ const Main = () => {
           <hr />
           <hr />
         </div>
-        <div
-          className="fx-centered fx-col fx-start-v box-pad-h-m fit-container"
-        >
+        <div className="fx-centered fx-col fx-start-v box-pad-h-m fit-container">
           {searchKeyword && (
             <div className="fit-container fx-scattered">
               <h4>

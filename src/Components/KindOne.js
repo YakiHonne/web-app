@@ -241,7 +241,7 @@ export default function KindOne({
       )}
       <div
         className="box-pad-v-m fit-container note-item"
-        id={event.id} 
+        id={event.id}
         style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
       >
         {event.isComment && isThread && (
@@ -309,7 +309,9 @@ export default function KindOne({
                     {event.isPaidNote && (
                       <div className="sticker sticker-c1">{t("AAg9D6c")}</div>
                     )}
-                    <EventOptions event={event} component="notes"/>
+                    {reactions && (
+                      <EventOptions event={event} component="notes" />
+                    )}{" "}
                   </div>
                 </div>
                 {event.isComment && !isThread && (

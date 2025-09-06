@@ -3,6 +3,7 @@ import {
   getBech32,
   getEmptyuserMetadata,
   getHex,
+  getParsedAuthor,
   getParsedRepEvent,
   getParsedSW,
 } from "@/Helpers/Encryptions";
@@ -18,6 +19,7 @@ import { useTranslation } from "react-i18next";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import ZapPollsComp from "@/Components/SmartWidget/ZapPollsComp";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
+import UserProfilePic from "./UserProfilePic";
 
 export default function Nip19Parsing({ addr, minimal = false }) {
   const [event, setEvent] = useState(false);
@@ -97,19 +99,8 @@ export default function Nip19Parsing({ addr, minimal = false }) {
     sub.on("event", (event) => {
       if (event.id) {
         if (event.kind === 0) {
-          let content = JSON.parse(event.content);
-          setEvent({
-            kind: event.kind,
-            picture: content.picture || "",
-            name:
-              content.name ||
-              content.display_name ||
-              getBech32("npub", event.pubkey).substring(0, 10),
-            display_name:
-              content.display_name ||
-              content.name ||
-              getBech32("npub", event.pubkey).substring(0, 10),
-          });
+          let content = getParsedAuthor(event.rawEvent()) || getEmptyuserMetadata(event.pubkey);
+          setEvent({...content, kind: 0});
         }
         if (event.kind === 1) {
           let parsedEvent = getParsedNote(event, true);
@@ -148,7 +139,7 @@ export default function Nip19Parsing({ addr, minimal = false }) {
             title,
           });
         }
-        saveUsers([event.pubkey])
+        saveUsers([event.pubkey]);
         setIsLoading(false);
         sub.stop();
       }
@@ -174,7 +165,14 @@ export default function Nip19Parsing({ addr, minimal = false }) {
         {!minimal && (
           <>
             {event?.kind === 1 && (
-              <div className="fit-container sc-s-18 box-pad-h-s box-pad-v-s" style={{ marginTop: ".5rem", backgroundColor: "var(--c1-side)", border:"none" }}>
+              <div
+                className="fit-container sc-s-18 "
+                style={{
+                  marginTop: ".5rem",
+                  backgroundColor: "var(--c1-side)",
+                  border: "none",
+                }}
+              >
                 <KindOne event={event} reactions={false} minimal={true} />
               </div>
             )}
@@ -259,15 +257,23 @@ export default function Nip19Parsing({ addr, minimal = false }) {
     );
   if (event.kind === 0)
     return (
-      <Link
-        href={url}
-        className="btn-text-gray"
-        target={"_blank"}
-        onClick={(e) => e.stopPropagation()}
-        style={{ color: "var(--orange-main)" }}
-      >
-        @{event.display_name}
-      </Link>
+      // <Link
+      //   href={url}
+      //   className="btn-text-gray"
+      //   target={"_blank"}
+      //   onClick={(e) => e.stopPropagation()}
+      //   style={{ color: "var(--orange-main)" }}
+      // >
+      //   @{event.display_name}
+      // </Link>
+      <UserProfilePic
+        user_id={event.pubkey}
+        size={16}
+        mainAccountUser={false}
+        withName={event.display_name || event.name}
+        img={event.picture}
+        // metadata={event}
+      />
     );
   if (event.kind === 30031)
     return (

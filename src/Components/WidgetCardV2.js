@@ -148,10 +148,11 @@ export default function WidgetCardV2({
                   </button>
                 )}
                 <OptionsDropdown
+                  vertical={false}
                   options={[
                     userKeys && (
                       <div
-                        className="fit-container"
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                         onClick={() =>
                           swMetadata.id === widget.id
                             ? setPostNoteWithWidget(
@@ -163,12 +164,13 @@ export default function WidgetCardV2({
                               })
                         }
                       >
+                        <div className="add-note"></div>
                         <p>{t("AB8DnjO")}</p>
                       </div>
                     ),
                     userKeys && (
                       <div
-                        className="fit-container"
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                         onClick={handlePostImageInNote}
                       >
                         {isLoading ? (
@@ -181,55 +183,87 @@ export default function WidgetCardV2({
                             />
                           </div>
                         ) : (
-                          <p>{t("AznTfYL")}</p>
+                          <>
+                            <div className="share-icon"></div>
+                            <p>{t("AznTfYL")}</p>
+                          </>
                         )}
                       </div>
                     ),
                     swMetadata.id === widget.id && (
-                      <div className="fit-container" onClick={copyNaddr}>
+                      <div
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        onClick={copyNaddr}
+                      >
+                        <div className="copy"></div>
                         <p>{t("ApPw14o", { item: "naddr" })}</p>
                       </div>
                     ),
                     userKeys && (
                       <Link
-                        className="fit-container"
-                        href={"/smart-widget-builder"}
-                        state={{ ops: "clone", metadata: { ...swMetadata } }}
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        href={
+                          "/smart-widget-builder?clone=" + widget.metadata.naddr
+                        }
+                        onClick={() => {
+                          localStorage.setItem(
+                            widget.metadata.naddr,
+                            JSON.stringify(swMetadata)
+                          );
+                        }}
                       >
+                        <div className="clone"></div>
                         <p>{t("AyWVBDx")}</p>
                       </Link>
                     ),
                     <Link
-                      className="fit-container"
+                      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                       href={`/smart-widget-checker?naddr=${widget.metadata.naddr}`}
                     >
+                      <div className="smart-widget-checker"></div>
                       <p>{t("AavUrQj")}</p>
                     </Link>,
                     deleteWidget && userKeys.pub === swMetadata.pubkey && (
                       <Link
-                        className="fit-container"
-                        href={"/smart-widget-builder"}
-                        state={{ ops: "edit", metadata: { ...swMetadata } }}
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        href={
+                          "/smart-widget-builder?edit=" + widget.metadata.naddr
+                        }
+                        onClick={() => {
+                          localStorage.setItem(
+                            widget.metadata.naddr,
+                            JSON.stringify(swMetadata)
+                          );
+                        }}
                       >
+                        <div className="edit"></div>
                         <p>{t("AsXohpb")}</p>
                       </Link>
                     ),
-                    deleteWidget && userKeys.pub === swMetadata.pubkey && (
-                      <div className="fit-container" onClick={deleteWidget}>
-                        <p className="red-c">{t("Almq94P")}</p>
+                    swMetadata.id === widget.id && (
+                      <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
+                        <ShareLink
+                          label={t("AGB5vpj")}
+                          path={`/smart-widget/${
+                            isNIP05Verified
+                              ? `${authorData.nip05}/${widget.metadata.d}`
+                              : widget.metadata.naddr
+                          }`}
+                          title={swMetadata.title || swMetadata.description}
+                          description={
+                            swMetadata.description || swMetadata.title
+                          }
+                        />
                       </div>
                     ),
-                    swMetadata.id === widget.id && (
-                      <ShareLink
-                        label={t("AGB5vpj")}
-                        path={`/smart-widget/${
-                          isNIP05Verified
-                            ? `${authorData.nip05}/${widget.metadata.d}`
-                            : widget.metadata.naddr
-                        }`}
-                        title={swMetadata.title || swMetadata.description}
-                        description={swMetadata.description || swMetadata.title}
-                      />
+                    deleteWidget && userKeys.pub === swMetadata.pubkey && (
+                      <div
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        onClick={deleteWidget}
+                      >
+                        <div className="trash"></div>
+                        <p className="red-c">{t("Almq94P")}</p>
+                      </div>
                     ),
                   ]}
                 />
@@ -288,79 +322,199 @@ export default function WidgetCardV2({
                 </button>
               )}
               {options && (
+                // <OptionsDropdown
+                //   vertical={false}
+                //   options={[
+                //     <div
+                //       className="fit-container"
+                //       onClick={() =>
+                //         setPostNoteWithWidget(
+                //           `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`
+                //         )
+                //       }
+                //     >
+                //       <p>{t("AB8DnjO")}</p>
+                //     </div>,
+                //     <div
+                //       className="fit-container"
+                //       onClick={handlePostImageInNote}
+                //     >
+                //       {isLoading ? (
+                //         <div className="fx-centered">
+                //           <p className="c1-c">{t("AdkgVgm")}</p>
+                //           <ProgressCirc
+                //             percentage={progress}
+                //             size={18}
+                //             width={3}
+                //           />
+                //         </div>
+                //       ) : (
+                //         <p>{t("AznTfYL")}</p>
+                //       )}
+                //     </div>,
+                //     swMetadata.id === widget.id && (
+                //       <div className="fit-container" onClick={copyNaddr}>
+                //         <p>{t("ApPw14o", { item: "naddr" })}</p>
+                //       </div>
+                //     ),
+                //     <Link
+                //       className="fit-container"
+                //       href={"/smart-widget-builder"}
+                //       state={{ ops: "clone", metadata: { ...swMetadata } }}
+                //     >
+                //       <p>{t("AyWVBDx")}</p>
+                //     </Link>,
+                //     <Link
+                //       className="fit-container"
+                //       href={`/smart-widget-checker?naddr=${widget.metadata.naddr}`}
+                //     >
+                //       <p>{t("AavUrQj")}</p>
+                //     </Link>,
+                //     deleteWidget && userKeys.pub === swMetadata.pubkey && (
+                //       <Link
+                //         className="fit-container"
+                //         href={"/smart-widget-builder"}
+                //         state={{ ops: "edit", metadata: { ...swMetadata } }}
+                //       >
+                //         <p>{t("AsXohpb")}</p>
+                //       </Link>
+                //     ),
+                //     deleteWidget && userKeys.pub === swMetadata.pubkey && (
+                //       <div className="fit-container" onClick={deleteWidget}>
+                //         <p className="red-c">{t("Almq94P")}</p>
+                //       </div>
+                //     ),
+                //     swMetadata.id === widget.id && (
+                //       <ShareLink
+                //         label={t("AGB5vpj")}
+                //         path={`/smart-widget/${
+                //           isNIP05Verified
+                //             ? `${authorData.nip05}/${widget.metadata.d}`
+                //             : widget.metadata.naddr
+                //         }`}
+                //         title={swMetadata.title || swMetadata.description}
+                //         description={swMetadata.description || swMetadata.title}
+                //       />
+                //     ),
+                //   ]}
+                // />
                 <OptionsDropdown
                   vertical={false}
                   options={[
-                    <div
-                      className="fit-container"
-                      onClick={() =>
-                        setPostNoteWithWidget(
-                          `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`
-                        )
-                      }
-                    >
-                      <p>{t("AB8DnjO")}</p>
-                    </div>,
-                    <div
-                      className="fit-container"
-                      onClick={handlePostImageInNote}
-                    >
-                      {isLoading ? (
-                        <div className="fx-centered">
-                          <p className="c1-c">{t("AdkgVgm")}</p>
-                          <ProgressCirc
-                            percentage={progress}
-                            size={18}
-                            width={3}
-                          />
-                        </div>
-                      ) : (
-                        <p>{t("AznTfYL")}</p>
-                      )}
-                    </div>,
+                    userKeys && (
+                      <div
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        onClick={() =>
+                          swMetadata.id === widget.id
+                            ? setPostNoteWithWidget(
+                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`
+                              )
+                            : setInitPublish({
+                                publish: true,
+                                publishInNote: true,
+                              })
+                        }
+                      >
+                        <div className="add-note"></div>
+                        <p>{t("AB8DnjO")}</p>
+                      </div>
+                    ),
+                    userKeys && (
+                      <div
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        onClick={handlePostImageInNote}
+                      >
+                        {isLoading ? (
+                          <div className="fx-centered">
+                            <p className="c1-c">{t("AdkgVgm")}</p>
+                            <ProgressCirc
+                              percentage={progress}
+                              size={18}
+                              width={3}
+                            />
+                          </div>
+                        ) : (
+                          <>
+                            <div className="share-icon"></div>
+                            <p>{t("AznTfYL")}</p>
+                          </>
+                        )}
+                      </div>
+                    ),
                     swMetadata.id === widget.id && (
-                      <div className="fit-container" onClick={copyNaddr}>
+                      <div
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        onClick={copyNaddr}
+                      >
+                        <div className="copy"></div>
                         <p>{t("ApPw14o", { item: "naddr" })}</p>
                       </div>
                     ),
+                    userKeys && (
+                      <Link
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        href={
+                          "/smart-widget-builder?clone=" + widget.metadata.naddr
+                        }
+                        onClick={() => {
+                          localStorage.setItem(
+                            widget.metadata.naddr,
+                            JSON.stringify(swMetadata)
+                          );
+                        }}
+                      >
+                        <div className="clone"></div>
+                        <p>{t("AyWVBDx")}</p>
+                      </Link>
+                    ),
                     <Link
-                      className="fit-container"
-                      href={"/smart-widget-builder"}
-                      state={{ ops: "clone", metadata: { ...swMetadata } }}
-                    >
-                      <p>{t("AyWVBDx")}</p>
-                    </Link>,
-                    <Link
-                      className="fit-container"
+                      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                       href={`/smart-widget-checker?naddr=${widget.metadata.naddr}`}
                     >
+                      <div className="smart-widget-checker"></div>
                       <p>{t("AavUrQj")}</p>
                     </Link>,
                     deleteWidget && userKeys.pub === swMetadata.pubkey && (
                       <Link
-                        className="fit-container"
-                        href={"/smart-widget-builder"}
-                        state={{ ops: "edit", metadata: { ...swMetadata } }}
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        href={
+                          "/smart-widget-builder?edit=" + widget.metadata.naddr
+                        }
+                        onClick={() => {
+                          localStorage.setItem(
+                            widget.metadata.naddr,
+                            JSON.stringify(swMetadata)
+                          );
+                        }}
                       >
+                        <div className="edit"></div>
                         <p>{t("AsXohpb")}</p>
                       </Link>
                     ),
-                    deleteWidget && userKeys.pub === swMetadata.pubkey && (
-                      <div className="fit-container" onClick={deleteWidget}>
-                        <p className="red-c">{t("Almq94P")}</p>
+                    swMetadata.id === widget.id && (
+                      <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
+                        <ShareLink
+                          label={t("AGB5vpj")}
+                          path={`/smart-widget/${
+                            isNIP05Verified
+                              ? `${authorData.nip05}/${widget.metadata.d}`
+                              : widget.metadata.naddr
+                          }`}
+                          title={swMetadata.title || swMetadata.description}
+                          description={
+                            swMetadata.description || swMetadata.title
+                          }
+                        />
                       </div>
                     ),
-                    swMetadata.id === widget.id && (
-                      <ShareLink
-                        label={t("AGB5vpj")}
-                        path={`/smart-widget/${
-                          isNIP05Verified
-                            ? `${authorData.nip05}/${widget.metadata.d}`
-                            : widget.metadata.naddr
-                        }`}
-                        title={swMetadata.title || swMetadata.description}
-                        description={swMetadata.description || swMetadata.title}
-                      />
+                    deleteWidget && userKeys.pub === swMetadata.pubkey && (
+                      <div
+                        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                        onClick={deleteWidget}
+                      >
+                        <div className="trash"></div>
+                        <p className="red-c">{t("Almq94P")}</p>
+                      </div>
                     ),
                   ]}
                 />

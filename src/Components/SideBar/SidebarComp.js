@@ -200,7 +200,6 @@ export default function SidebarComp() {
         className="fx-scattered fx-end-v nostr-sidebar-container fx-col "
         style={{
           zIndex: isActive ? 1000 : 200,
-          
         }}
         onClick={() => setIsActive(true)}
         ref={mainFrame}
@@ -239,7 +238,6 @@ export default function SidebarComp() {
                   customHistory("/discover", true);
                 }}
                 // href={"/discover"}
-                prefetch={true}
                 className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
                   isPage("/discover") ? "active-link" : "inactive-link"
                 }`}

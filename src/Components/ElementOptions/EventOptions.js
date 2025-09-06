@@ -229,10 +229,9 @@ export default function EventOptions({
   const cloneWidget = (
     <Link
       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
-      href={"/smart-widget-builder"}
-      state={{
-        ops: "clone",
-        metadata: { ...event },
+      href={"/smart-widget-builder?clone=" + event.naddr}
+      onClick={() => {
+        localStorage.setItem(event.naddr, JSON.stringify(event));
       }}
     >
       <div className="clone"></div>
@@ -243,12 +242,9 @@ export default function EventOptions({
   const editWidget = (
     <Link
       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
-      href={"/smart-widget-builder"}
-      state={{
-        ops: "edit",
-        metadata: {
-          ...event,
-        },
+      href={"/smart-widget-builder?edit=" + event.naddr}
+      onClick={() => {
+        localStorage.setItem(event.naddr, JSON.stringify(event));
       }}
     >
       <div className="edit"></div>
@@ -261,8 +257,9 @@ export default function EventOptions({
       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       onClick={(e) => {
         e.stopPropagation();
-        navigate.push("/write-article", {
-          state: {
+        localStorage.setItem(
+          event.naddr,
+          JSON.stringify({
             post_pubkey: event.pubkey,
             post_id: event.id,
             post_kind: event.kind,
@@ -273,8 +270,9 @@ export default function EventOptions({
             post_d: event.d,
             post_content: event.content,
             post_published_at: event.published_at,
-          },
-        });
+          })
+        );
+        navigate.push("/write-article?edit=" + event.naddr);
       }}
     >
       <div className="edit"></div>
@@ -420,7 +418,7 @@ export default function EventOptions({
           muteUser,
         ];
       case "dashboardNotes":
-        return [copyID, showRawEventContent, HR, shareLink];
+        return [copyID, showRawEventContent, broadcastEvent, shareLink];
       case "dashboardSW":
         return [
           postAsNote,
@@ -668,8 +666,8 @@ const BroadcastEvent = ({ event }) => {
               <div
                 key={_}
                 className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
-             onClick={() => handleRepublish(_)}
-             >
+                onClick={() => handleRepublish(_)}
+              >
                 <RelayImage url={_} />
                 <p className="p-one-line">{_}</p>
               </div>

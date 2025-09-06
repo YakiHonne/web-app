@@ -130,7 +130,7 @@
     }
 
     :root {
-        --white: #171718;
+        --white: #010101;
         /* --white: #150016; */
         /* --white: #1b1717; */
         --white-transparent: #171718ed;
@@ -140,12 +140,12 @@
         --black-high-transparent: #ffffff04;
         --dark-gray: #E5E5E5;
         --gray: #909090;
-        --pale-gray: #343434;
+        --pale-gray: #232323;
         /* --pale-gray: #3a003e; */
-        --dim-gray: #343434;
-        --very-dim-gray: #2f2f2f;
+        --dim-gray: #252525;
+        --very-dim-gray: #191919;
         --c1: #ee7700;
-        --c1-side: #252429;
+        --c1-side: #18181b;
         /* --c1-side: #86318c21; */
         --c1-transparent: #86318c08;
         --c1-pale: #28002B;
@@ -179,5 +179,52 @@
         --border-r-32: 32px;
         --border-r-50: 50%;
     }
+    /* :root {
+        --white: #171718;
+      
+        --white-transparent: #171718ed;
+        --white-high-transparent: #0000007b;
+        --black: #d8d8d8;
+        --black-transparent: #0000009e;
+        --black-high-transparent: #ffffff04;
+        --dark-gray: #E5E5E5;
+        --gray: #909090;
+        --pale-gray: #343434;
+        --dim-gray: #343434;
+        --very-dim-gray: #2f2f2f;
+        --c1: #ee7700;
+        --c1-side: #252429;
+        --c1-transparent: #86318c08;
+        --c1-pale: #28002B;
+        --c2: #1F0021;
+        --c3: #220038;
+        --c3-transparent: #2200385A;
+        --c3-transparent-darker: #220038ea;
+        --red-main: #FF4A4A;
+        --red-side: #ff4a4a17;
+        --green-main: #00C04D;
+        --green-side: #00c04d20;
+        --blue-main: #79c0ff;
+        --blue-side: rgba(246, 246, 255, 0.141);
+        --orange-main: #ee7700;
+        --orange-side: #ee770026;
+        --yellow: #FFED4B;
+        --90: 90px;
+        --64: 64px;
+        --54: 54px;
+        --48: 3rem;
+        --40: 2.5rem;
+        --32: 2rem;
+        --24: 1.5rem;
+        --20: 1.25rem;
+        --16: 1rem;
+        --12: .75rem;
+        --10: .65rem;
+        --border-r-6: 6px;
+        --border-r-18: 10px;
+        --border-r-14: 14px;
+        --border-r-32: 32px;
+        --border-r-50: 50%;
+    } */
 
 }

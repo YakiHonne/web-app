@@ -32,6 +32,7 @@ import { saveUsers } from "@/Helpers/DB";
 import { addWidgetPathToUrl } from "@/Helpers/Helpers";
 import widget from "@/JSONs/widgets.json";
 import { useRouter } from "next/router";
+import { getPostToEdit } from "@/Helpers/ClientHelpers";
 const SWT_YAKIHONNE = "https://swt.yakihonne.com";
 
 const getLocalSWv2Drafts = () => {
@@ -57,14 +58,17 @@ const getLocalSWv2CDraft = () => {
 
 export default function SmartWidgetEditor() {
   let { query } = useRouter();
+  let { edit, clone } = query || {};
+  let toEdit = edit ? getPostToEdit(edit) : false ;
+  let toClone = clone ? getPostToEdit(clone) : clone;
   const userKeys = useSelector((state) => state.userKeys);
   const [buildOption, setBuildOption] = useState("normal");
   const [buildOptions, setBuildOptions] = useState(query ? false : true);
   const [template, setTemplate] = useState(
-    query ? query.metadata : getLocalSWv2CDraft()
+    toEdit || toClone ? toEdit || toClone : getLocalSWv2CDraft()
   );
   const [identifier, setIdentifier] = useState(
-    query && query.ops && query.ops === "edit" ? true : false
+    edit ? true : false
   );
   const [templates, setTemplates] = useState([]);
 

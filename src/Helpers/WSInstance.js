@@ -61,7 +61,8 @@ function initWebSocket(url) {
 
 // Start connection (non-blocking)
 if (typeof window !== "undefined")
-  initWebSocket("wss://cache.yakihonne.com/ws");
+  initWebSocket("wss://cache2.primal.net/v1");
+  // initWebSocket("wss://cache.yakihonne.com/ws");
 
 export const getMutualFollows = async (pubkey, user_pubkey) => {
   try {

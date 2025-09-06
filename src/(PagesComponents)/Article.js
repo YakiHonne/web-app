@@ -294,7 +294,23 @@ export default function Article({ event, userProfile }) {
                           </div>
                         )}
                         {userKeys.pub === post.pubkey && (
-                          <Link href={"/write-article"}>
+                          <Link href={"/write-article?edit=" + post.naddr} onClick={() => {
+                            localStorage.setItem(
+                              post.naddr,
+                              JSON.stringify({
+                                post_pubkey: post.pubkey,
+                                post_id: post.id,
+                                post_kind: post.kind,
+                                post_title: post.title,
+                                post_desc: post.description,
+                                post_thumbnail: post.image,
+                                post_tags: post.items,
+                                post_d: post.d,
+                                post_content: post.content,
+                                post_published_at: post.published_at,
+                              })
+                            );
+                          }}>
                             <button className="btn btn-gray">
                               {t("Aig65l1")}
                             </button>

@@ -880,6 +880,21 @@ export function redirectToLogin() {
   customHistory("/login");
 }
 
+export function getPostToEdit(naddr) {
+  if (!naddr) return {};
+  try {
+    let post = localStorage.getItem(naddr);
+    if (post) {
+      post = JSON.parse(post);
+      return post;
+    }
+    return {};
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+}
+
 const mergeConsecutivePElements = (arr, pubkey) => {
   const result = [];
   let currentTextElement = null;
