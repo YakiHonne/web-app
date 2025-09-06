@@ -108,7 +108,7 @@ export default function ToPublish({
       let tempEvent = {
         created_at,
         kind: kind,
-        content: processedContent.content.replace(imageRegex, "!(image)[$&]"),
+        content: processedContent.content.replace(imageRegex, "![image]($&)"),
         tags: [...tags, ...processedContent.tags.filter((_) => _[0] !== "t")],
       };
 
