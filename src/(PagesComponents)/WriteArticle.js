@@ -233,45 +233,6 @@ export default function WritingArticle() {
         <ClearEditPopup handleClearOptions={handleClearOptions} />
       )}
       <div>
-        {/* <Helmet>
-          <title>Yakihonne | Write an article</title>
-          <meta
-            name="description"
-            content={
-              "Create beautiful long-form content with our powerful yet intuitive editor. Publish directly to the decentralized Nostr network with Bitcoin rewards enabled."
-            }
-          />
-          <meta
-            property="og:description"
-            content={
-              "Create beautiful long-form content with our powerful yet intuitive editor. Publish directly to the decentralized Nostr network with Bitcoin rewards enabled."
-            }
-          />
-          <meta
-            property="og:image"
-            content="https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-          />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="700" />
-          <meta property="og:url" content={`https://yakihonne.com/write`} />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Yakihonne" />
-          <meta property="og:title" content="Yakihonne | Write an article" />
-          <meta
-            property="twitter:title"
-            content="Yakihonne | Write an article"
-          />
-          <meta
-            property="twitter:description"
-            content={
-              "Create beautiful long-form content with our powerful yet intuitive editor. Publish directly to the decentralized Nostr network with Bitcoin rewards enabled."
-            }
-          />
-          <meta
-            property="twitter:image"
-            content="https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-          />
-        </Helmet> */}
         <div className="fit-container fx-centered">
           <div
             className="main-container"

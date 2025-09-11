@@ -8,7 +8,6 @@ import { chartActionKeys } from "@/Content/ActionKeys";
 import ProgressCirc from "@/Components/ProgressCirc";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import { getCurrentLevel, levelCount } from "@/Helpers/Helpers";
-import { HashLink } from "react-router-hash-link";
 import { userLogout } from "@/Helpers/Controlers";
 import { useSelector } from "react-redux";
 import LoadingLogo from "@/Components/LoadingLogo";

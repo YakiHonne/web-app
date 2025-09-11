@@ -27,7 +27,6 @@ import {
 } from "@nostr-dev-kit/ndk";
 import relaysOnPlatform from "@/Content/Relays";
 import { FilePicker } from "@/Components/FilePicker";
-import { customHistory } from "@/Helpers/History";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import {
@@ -37,7 +36,6 @@ import {
 } from "nostr-tools/nip46";
 import { NostrConnect } from "nostr-tools/kinds";
 import QRCode from "react-qr-code";
-import { Helmet } from "react-helmet";
 import Link from "next/link";
 import Router from "next/router";
 let profilePlaceholder =
@@ -73,46 +71,6 @@ export default function Login() {
       className="fit-container fx-centered"
       style={{ height: "100vh", gap: 0 }}
     >
-      <Helmet>
-        <title>Yakihonne | Login</title>
-        <meta
-          name="description"
-          content={
-            "Securely access your decentralized Yakihonne identity with cryptographic keys. One login unlocks all features across web and mobile platforms."
-          }
-        />
-        <meta
-          property="og:description"
-          content={
-            "Securely access your decentralized Yakihonne identity with cryptographic keys. One login unlocks all features across web and mobile platforms."
-          }
-        />
-        <meta
-          property="og:image"
-          content={
-            "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-          }
-        />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="700" />
-        <meta property="og:url" content={`https://yakihonne.com/login`} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Yakihonne" />
-        <meta property="og:title" content="Yakihonne | Login" />
-        <meta property="twitter:title" content="Yakihonne | Login" />
-        <meta
-          property="twitter:description"
-          content={
-            "Securely access your decentralized Yakihonne identity with cryptographic keys. One login unlocks all features across web and mobile platforms."
-          }
-        />
-        <meta
-          property="twitter:image"
-          content={
-            "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-          }
-        />
-      </Helmet>
       <LeftSection />
       <div
         className="fx-centered fx-col box-pad-h"

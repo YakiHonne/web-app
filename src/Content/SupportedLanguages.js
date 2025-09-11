@@ -17,7 +17,7 @@ const supportedLanguage = [
     disabled: false,
   },
   {
-    display_name: "中国人",
+    display_name: "中文",
     value: "zh",
     left_el: <div className="flag-zh"></div>,
     disabled: false,

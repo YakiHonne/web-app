@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Helmet } from "react-helmet";
 import {
   SimplePool,
   nip44,
@@ -284,75 +283,12 @@ export default function Messages() {
   if (!userKeys)
     return (
       <div>
-        <Helmet>
-          <title>Yakihonne | Messages</title>
-          <meta
-            name="description"
-            content={"Your end-to-end encrypted inbox"}
-          />
-          <meta
-            property="og:description"
-            content={"Your end-to-end encrypted inbox"}
-          />
-
-          <meta property="og:url" content={`https://yakihonne.com/messages`} />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Yakihonne" />
-          <meta property="og:title" content="Yakihonne | Messages" />
-          <meta property="twitter:title" content="Yakihonne | Messages" />
-          <meta
-            property="twitter:description"
-            content={"Your end-to-end encrypted inbox"}
-          />
-        </Helmet>
-
         <PagePlaceholder page={"nostr-not-connected"} />
       </div>
     );
   if (userKeys.bunker)
     return (
       <div>
-        <Helmet>
-          <title>Yakihonne | Messages</title>
-          <meta
-            name="description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="og:description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="og:image"
-            content={
-              "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-            }
-          />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="700" />
-          <meta property="og:url" content={`https://yakihonne.com/messages`} />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Yakihonne" />
-          <meta property="og:title" content="Yakihonne | Messages" />
-          <meta property="twitter:title" content="Yakihonne | Messages" />
-          <meta
-            property="twitter:description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="twitter:image"
-            content={
-              "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-            }
-          />
-        </Helmet>
-
         <PagePlaceholder page={"nostr-bunker-dms"} />
       </div>
     );
@@ -360,43 +296,6 @@ export default function Messages() {
   if (!(userKeys.sec || userKeys.ext))
     return (
       <div>
-        <Helmet>
-          <title>Yakihonne | Messages</title>
-          <meta
-            name="description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="og:description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="og:image"
-            content="https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-          />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="700" />
-          <meta property="og:url" content={`https://yakihonne.com/messages`} />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Yakihonne" />
-          <meta property="og:title" content="Yakihonne | Messages" />
-          <meta property="twitter:title" content="Yakihonne | Messages" />
-          <meta
-            property="twitter:description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="twitter:image"
-            content="https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-          />
-        </Helmet>
-
         <PagePlaceholder page={"nostr-unauthorized-messages"} />
       </div>
     );
@@ -404,69 +303,12 @@ export default function Messages() {
   if (initDMS)
     return (
       <div>
-        <Helmet>
-          <title>Yakihonne | Messages</title>
-          <meta
-            name="description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="og:description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="og:image"
-            content={
-              "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-            }
-          />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="700" />
-          <meta property="og:url" content={`https://yakihonne.com/messages`} />
-          <meta property="og:type" content="website" />
-          <meta property="og:site_name" content="Yakihonne" />
-          <meta property="og:title" content="Yakihonne | Messages" />
-          <meta property="twitter:title" content="Yakihonne | Messages" />
-          <meta
-            property="twitter:description"
-            content={
-              "Connect directly with other Nostr users through end-to-end encrypted messaging. Build relationships in a private communication channel free from surveillance."
-            }
-          />
-          <meta
-            property="twitter:image"
-            content="https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
-          />
-        </Helmet>
-
         <PagePlaceholder page={"nostr-DMS-waiting"} />
       </div>
     );
 
   return (
     <div>
-      <Helmet>
-        <title>Yakihonne | Messages</title>
-        <meta name="description" content={"Your end-to-end encrypted inbox"} />
-        <meta
-          property="og:description"
-          content={"Your end-to-end encrypted inbox"}
-        />
-
-        <meta property="og:url" content={`https://yakihonne.com/messages`} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="Yakihonne" />
-        <meta property="og:title" content="Yakihonne | Messages" />
-        <meta property="twitter:title" content="Yakihonne | Messages" />
-        <meta
-          property="twitter:description"
-          content={"Your end-to-end encrypted inbox"}
-        />
-      </Helmet>
       {initConv && <InitiConvo exit={() => setInitConv(false)} />}
       <div
         className="fit-container fx-centered fx-start-h fx-stretch DM-container"
