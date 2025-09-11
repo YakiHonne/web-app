@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Helmet } from "react-helmet";
 import ArrowUp from "@/Components/ArrowUp";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import ProgressBar from "@/Components/ProgressBar";

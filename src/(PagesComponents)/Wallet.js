@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { webln } from "@getalby/sdk";
-import { Helmet } from "react-helmet";
 import ArrowUp from "@/Components/ArrowUp";import axios from "axios";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import * as secp from "@noble/secp256k1";

@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ArrowUp from "@/Components/ArrowUp";
-import { Helmet } from "react-helmet";
 import { useDispatch, useSelector } from "react-redux";
 import { nip19 } from "nostr-tools";
 import { getLinkFromAddr, isHex, sortByKeyword } from "@/Helpers/Helpers";
