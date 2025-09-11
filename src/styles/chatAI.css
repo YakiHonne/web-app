@@ -95,6 +95,10 @@ body[data-theme='dark'] .hljs {
   background: #1e1e1e;
   color: #d4d4d4;
 }
+body[data-theme='gray'] .hljs {
+  background: #1e1e1e;
+  color: #d4d4d4;
+}
 
 /* Optional scroll + padding */
 pre code.hljs {

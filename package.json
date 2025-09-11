@@ -9,14 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@cosmjs/amino": "^0.34.0",
-    "@cosmjs/cosmwasm-stargate": "^0.34.0",
-    "@cosmjs/crypto": "^0.34.0",
-    "@cosmjs/launchpad": "^0.27.1",
-    "@cosmjs/proto-signing": "^0.34.0",
-    "@cosmjs/stargate": "^0.34.0",
-    "@dorafactory/circomlib": "^0.0.3",
-    "@dorafactory/maci-sdk": "^0.1.2-pre.0",
     "@getalby/sdk": "^5.1.2",
     "@giphy/js-fetch-api": "^5.7.0",
     "@giphy/react-components": "^10.1.0",
@@ -39,7 +31,6 @@
     "bech32": "^2.0.0",
     "boring-avatars": "^1.11.2",
     "cipher-base": "^1.0.6",
-    "cosmjs-types": "^0.8.0",
     "crypto-js": "^4.2.0",
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7",
@@ -82,10 +73,9 @@
     "smart-widget-previewer": "^1.0.18",
     "typescript": "^5.9.2",
     "unified": "^11.0.5",
-    "util": "^0.12.5",
     "wavesurfer.js": "^7.10.1",
     "web-vitals": "^2.1.4",
-    "web3-utils": "^4.3.3",
+    "next-themes": "^0.4.6",
     "webln": "^0.3.2",
     "webpack": "^5.101.0"
   },
@@ -93,15 +83,7 @@
     "@eslint/eslintrc": "^3",
     "assert": "^2.1.0",
     "buffer": "^6.0.3",
-    "crypto-browserify": "^3.12.1",
     "eslint": "^9",
-    "eslint-config-next": "15.4.5",
-    "https-browserify": "^1.0.0",
-    "os-browserify": "^0.3.0",
-    "path-browserify": "^1.0.1",
-    "process": "^0.11.10",
-    "stream-browserify": "^3.0.0",
-    "stream-http": "^3.2.0",
-    "url": "^0.11.4"
+    "process": "^0.11.10"
   }
 }

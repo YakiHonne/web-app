@@ -183,7 +183,7 @@ export default function NotesComment({
                   </div>
                 )}
               </div>
-              <EventOptions event={event} component="notes" />
+              {!noReactions && <EventOptions event={event} component="notes" />}
             </div>
           )}
           {isMuted && (
@@ -244,7 +244,10 @@ export default function NotesComment({
               {!noReactions && (
                 <>
                   {postActions?.zaps?.zaps?.length > 0 && (
-                    <div className="fit-container" style={{paddingRight: "1rem"}}>
+                    <div
+                      className="fit-container"
+                      style={{ paddingRight: "1rem" }}
+                    >
                       <ZapAd
                         zappers={postActions.zaps.zaps}
                         onClick={() =>
@@ -260,7 +263,10 @@ export default function NotesComment({
                     </div>
                   )}
 
-                  <div className="fx-scattered fit-container"  style={{ paddingTop: ".5rem" }}>
+                  <div
+                    className="fx-scattered fit-container"
+                    style={{ paddingTop: ".5rem" }}
+                  >
                     <PostReaction
                       event={event}
                       setOpenComment={setToggleComment}

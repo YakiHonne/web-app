@@ -288,8 +288,15 @@
     font-size: 12px;
   } */
 
-  .content-source-and-filter {
+  .content-source-and-filter{
     top: 80px
+  }
+   .page-container{
+    position: relative;
+    top: 80px
+  }
+  .user-feed-tab {
+    width: 100vw;
   }
 
   .recent-post-container {

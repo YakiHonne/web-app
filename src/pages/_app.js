@@ -537,6 +537,7 @@ import "@/styles/PlayPauseButton.css";
 import { useState, useEffect } from "react";
 import "@/lib/i18n";
 import ReduxProvider from "@/Store/ReduxProvider";
+import { ThemeProvider } from "next-themes";
 import AppInit from "@/Components/AppInit";
 import { useRouter } from "next/router";
 import LoadingLogo from "@/Components/LoadingLogo";
@@ -586,82 +587,66 @@ function App({ Component, pageProps }) {
 
   return (
     <ReduxProvider>
-      <ToastMessages />
-      <AppInit />
-      <Navbar />
-      <div
-        className="page-container fit-container fx-centered fx-start-v"
-        style={{ height: "100dvh" }} // parent container no scroll
-      >
-        <div className="main-container">
-          <main className="fit-container fx-centered fx-end-h fx-start-v">
-            <div
-              className="fx-scattered fx-start-v box-pad-h-s fit-container"
-              style={{ gap: 0 }}
-            >
-              {!shouldHideSidebar && <SideBarClient />}
-
+      <ThemeProvider>
+        <ToastMessages />
+        <AppInit />
+        <Navbar />
+        <div
+          className="page-container fit-container fx-centered fx-start-v"
+          style={{ height: "100dvh" }} // parent container no scroll
+        >
+          <div className="main-container">
+            <main className="fit-container fx-centered fx-end-h fx-start-v">
               <div
-                className="main-page-nostr-container"
-                style={{ flex: 1, position: "relative" }}
+                className="fx-scattered fx-start-v box-pad-h-s fit-container"
+                style={{ gap: 0 }}
               >
-               
-                <KeepAlive routeKey={router.asPath}>
-                  <Component {...pageProps} />
-                </KeepAlive>
+                {!shouldHideSidebar && <SideBarClient />}
+
+                <div
+                  className="main-page-nostr-container"
+                  style={{ flex: 1, position: "relative" }}
+                >
+                  <KeepAlive routeKey={router.asPath}>
+                    <Component {...pageProps} />
+                  </KeepAlive>
+                </div>
               </div>
-            </div>
-          </main>
+            </main>
+          </div>
         </div>
-      </div>
-      {loading && (
+        {loading && (
+          <div
+            className="fit-container content-source-and-filter fx-centered"
+            style={{ zIndex: 10000 }}
+          >
+            <div className="main-container">
+              <main
+                style={{ height: "auto" }}
+                className="fx-centered fx-end-h box-pad-h-s"
+              >
+                <div
+                  className="main-page-nostr-container fx-centered box-pad-v-m"
+                  style={{
+                    borderBottom: "1px solid var(--very-dim-gray)",
+                    backgroundColor: "var(--white)",
+                    height: "100vh",
+                  }}
+                >
                   <div
-                    className="fit-container content-source-and-filter fx-centered"
-                    style={{ zIndex: 10000 }}
+                    style={{ gap: 0 }}
+                    className={`fx-centered  fx-wrap fit-container`}
                   >
-                    <div className="main-container">
-                      <main
-                        style={{ height: "auto" }}
-                        className="fx-centered fx-end-h box-pad-h-s"
-                      >
-                        <div
-                          className="main-page-nostr-container fx-centered box-pad-v-m"
-                          style={{
-                            borderBottom: "1px solid var(--very-dim-gray)",
-                            backgroundColor: "var(--white)",
-                            height: "100vh",
-                          }}
-                        >
-                          <div
-                            style={{ gap: 0 }}
-                            className={`fx-centered  fx-wrap fit-container`}
-                          >
-                            <div className="fx-centered">
-                              <LoadingLogo size={58} />
-                            </div>
-                          </div>
-                        </div>
-                      </main>
+                    <div className="fx-centered">
+                      <LoadingLogo size={58} />
                     </div>
                   </div>
-                )}
-      {/* Overlay loader */}
-      {/* {loading && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(0,0,0,0.0)",
-            pointerEvents: "none",
-            zIndex: 9999,
-          }}
-        >
-          <LoadingLogo size={58} />
-        </div>
-      )} */}
+                </div>
+              </main>
+            </div>
+          </div>
+        )}
+      </ThemeProvider>
     </ReduxProvider>
   );
 }

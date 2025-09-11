@@ -1,3 +1,4 @@
+import LoadingDots from "@/Components/LoadingDots";
 import LoginWithAPI from "@/Components/LoginWithAPI";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";

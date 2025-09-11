@@ -1,9 +1,12 @@
+import { nanoid } from "nanoid";
 import React, { useEffect } from "react";
 
 export default function InfiniteScroll({ children, events, onRefresh }) {
-  useEffect(() => {
-    const contentArea = document.querySelector(".infinite-scroll");
+  const id = nanoid()
+  let containerName = "infinite-scroll-" + id
 
+  useEffect(() => {
+    const contentArea = document.querySelector(`.${containerName}`);
     if (!contentArea) {
       return;
     }
@@ -33,5 +36,5 @@ export default function InfiniteScroll({ children, events, onRefresh }) {
       observer.disconnect();
     };
   }, [events]);
-  return <div className="infinite-scroll fit-container">{children}</div>;
+  return <div className={`${containerName} fit-container`}>{children}</div>;
 }

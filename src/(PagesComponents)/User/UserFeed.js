@@ -18,6 +18,7 @@ import WidgetCardV2 from "@/Components/WidgetCardV2";
 import { useRouter } from "next/router";
 import useIsMute from "@/Hooks/useIsMute";
 import InfiniteScroll from "@/Components/InfiniteScroll";
+import Slider from "@/Components/Slider";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -206,7 +207,7 @@ export default function UserFeed({ user }) {
           }
           dispatchEvents({ type: contentFrom, note: ev });
         }
-        if(ev.length === 0) setIsLoading(false);
+        if (ev.length === 0) setIsLoading(false);
       } catch (err) {
         console.log(err);
       }
@@ -223,10 +224,15 @@ export default function UserFeed({ user }) {
     setContentFrom(type);
   };
 
+  console.log(lastEventTime);
+
   if (isMuted) return;
   return (
-    <div className="fx-centered  fx-wrap" style={{ gap: 0, Width: "min(100%, 800px)" }}>
-      <div
+    <div
+      className="fx-centered  fx-wrap"
+      style={{ gap: 0, Width: "min(100%, 800px)" }}
+    >
+      {/* <div
         className="fit-container fx-even sticky box-pad-h"
         style={{
           top: "-1px",
@@ -236,8 +242,8 @@ export default function UserFeed({ user }) {
           borderBottom: "1px solid var(--very-dim-gray)",
           borderTop: "1px solid var(--very-dim-gray)",
         }}
-      >
-        <div
+      > */}
+        {/* <div
           className={`list-item-b fx-centered fx-shrink ${
             contentFrom === "notes" ? "selected-list-item-b" : ""
           }`}
@@ -284,7 +290,63 @@ export default function UserFeed({ user }) {
           onClick={() => switchContentType("videos")}
         >
           {t("AStkKfQ")}
-        </div>
+        </div> */}
+      {/* </div> */}
+      <div className="user-feed-tab">
+        <Slider
+          items={[
+            <div
+              className={`list-item-b fx-centered fx-shrink ${
+                contentFrom === "notes" ? "selected-list-item-b" : ""
+              }`}
+              onClick={() => switchContentType("notes")}
+            >
+              {t("AYIXG83")}
+            </div>,
+            <div
+              className={`list-item-b fx-centered fx-shrink ${
+                contentFrom === "replies" ? "selected-list-item-b" : ""
+              }`}
+              onClick={() => switchContentType("replies")}
+            >
+              {t("AENEcn9")}
+            </div>,
+            <div
+              className={`list-item-b fx-centered fx-shrink ${
+                contentFrom === "articles" ? "selected-list-item-b" : ""
+              }`}
+              onClick={() => switchContentType("articles")}
+            >
+              {t("AesMg52")}
+            </div>,
+            <div
+              className={`list-item-b fx-centered fx-shrink ${
+                contentFrom === "smart-widget" ? "selected-list-item-b" : ""
+              }`}
+              onClick={() => switchContentType("smart-widget")}
+            >
+              {t("A2mdxcf")}
+            </div>,
+            <div
+              className={`list-item-b fx-centered fx-shrink ${
+                contentFrom === "curations" ? "selected-list-item-b" : ""
+              }`}
+              onClick={() => switchContentType("curations")}
+            >
+              {t("AVysZ1s")}
+            </div>,
+            <div
+              className={`list-item-b fx-centered fx-shrink ${
+                contentFrom === "videos" ? "selected-list-item-b" : ""
+              }`}
+              onClick={() => switchContentType("videos")}
+            >
+              {t("AStkKfQ")}
+            </div>,
+          ]}
+          slideBy={100}
+          noGap={true}
+        />
       </div>
       <InfiniteScroll onRefresh={setLastEventTime} events={events[contentFrom]}>
         {["notes", "replies"].includes(contentFrom) && (

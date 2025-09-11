@@ -46,7 +46,6 @@ export default function UserMetadata({ user }) {
     try {
       let followersCount = 0;
       followersCount = await getUserFollowersCache();
-      console.log(followersCount);
       if (followersCount === 0) {
         followersCount = await getUserFollowersNostrBand();
       }

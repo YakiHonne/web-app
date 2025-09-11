@@ -3,7 +3,6 @@ import Gallery from "@/Components/Gallery";
 import IMGElement from "@/Components/IMGElement";
 import LinkPreview from "@/Components/LinkPreview";
 import LNBCInvoice from "@/Components/LNBCInvoice";
-import MACIPollPreview from "@/Components/MACIPollPreview";
 import Nip19Parsing from "@/Components/Nip19Parsing";
 import VideoLoader from "@/Components/VideoLoader";
 import Link from "next/link";
@@ -143,11 +142,6 @@ export function getNoteTree(
             </a>{" "}
           </Fragment>
         );
-      // } else if (
-      //   el?.includes("https://vota.dorafactory.org/round/") ||
-      //   el?.includes("https://vota-test.dorafactory.org/round/")
-      // ) {
-      //   finalTree.push(<MACIPollPreview url={el} key={key} />);
     } else if (
       (el?.includes("nostr:") ||
         el?.includes("naddr") ||

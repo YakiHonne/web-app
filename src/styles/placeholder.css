@@ -1,3 +1,13 @@
+/* CSS Custom Properties for theme-based icon filtering */
+[data-theme='dark'],
+[data-theme='gray'] {
+    --icon-filter: brightness(0) invert();
+}
+
+[data-theme='light'] {
+    --icon-filter: brightness(0);
+}
+
 .login-ph-1,
 .login-ph-2,
 .login-ph-3,
@@ -128,19 +138,21 @@
     background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/yakihonne_logo.svg);
 }
 
+
 .yakihonne-logo {
     width: 256px;
     height: 100px;
-    filter: brightness(0);
+    filter: var(--icon-filter, none);
 }
 
 .yakihonne-logo-128 {
     width: 128px;
     height: 50px;
-    filter: brightness(0);
+    filter: var(--icon-filter, none);
 }
 
-@media (prefers-color-scheme: dark) {
+
+/* @media (prefers-color-scheme: dark) {
 
     .yakihonne-logo {
         width: 256px;
@@ -153,7 +165,7 @@
         height: 50px;
         filter: brightness(0) invert();
     }
-}
+} */
 
 .login-hero {
     background-image: url(https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/hero.png);

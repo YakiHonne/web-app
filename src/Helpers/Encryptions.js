@@ -12,8 +12,6 @@ import {
 } from "./ClientHelpers";
 // Translation function will be passed as parameter to avoid SSR issues
 import axiosInstance from "./HTTP_Client";
-import { DORA_CONFIG } from "@/Content/MACI";
-import { MaciClient } from "@dorafactory/maci-sdk";
 import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
@@ -344,58 +342,6 @@ const getParsedRepEvent = (event) => {
   }
 };
 
-const parsedMaciPoll = (poll) => {
-  try {
-    if (!poll)
-      return { ...poll, voteOptionMap: [], results: [], resultsList: [] };
-    const client = new MaciClient({
-      network: process.env.NEXT_PUBLIC_NETWORK,
-    });
-    let voteOptionMap = JSON.parse(poll.voteOptionMap);
-    let results = JSON.parse(poll.results);
-
-    let votingEnd = Math.floor(parseInt(poll.votingEnd) / 1000000);
-    let votingStart = Math.floor(parseInt(poll.votingStart) / 1000000);
-    let totalBond =
-      poll.totalBond === "0"
-        ? 0
-        : parseInt(poll.totalBond.slice(0, -14)) / 10000;
-
-    const votes = results.map((r) => ({
-      v: Number(r.slice(0, -24)),
-      v2: Number(r.slice(-24)),
-    }));
-    const totalVotes = votes.reduce(
-      (s, c) => ({ v: s.v + c.v, v2: s.v2 + c.v2 }),
-      { v: 0, v2: 0 }
-    );
-    const resultsList = votes.map((v) => ({
-      v: parseFloat(((v.v / (totalVotes.v || 1)) * 100).toFixed(1)),
-      v2: parseFloat(((v.v2 / (totalVotes.v2 || 1)) * 100).toFixed(1)),
-    }));
-
-    const status = client.maci.parseRoundStatus(
-      Number(poll.votingStart),
-      Number(poll.votingEnd),
-      poll.status,
-      new Date()
-    );
-
-    return {
-      ...poll,
-      status,
-      voteOptionMap,
-      results,
-      resultsList,
-      votingEnd,
-      votingStart,
-      totalBond,
-    };
-  } catch (err) {
-    console.log(err);
-    return { ...poll, voteOptionMap: [], results: [], resultsList: [] };
-  }
-};
 
 const detectDirection = (text) => {
   const rtlCharRegExp =
@@ -889,25 +835,6 @@ const downloadAsFile = (
     );
 };
 
-const getKeplrSigner = async () => {
-  try {
-    const chainId = DORA_CONFIG[process.env.NEXT_PUBLIC_NETWORK].chainId;
-    const rpc = DORA_CONFIG[process.env.NEXT_PUBLIC_NETWORK].rpc;
-    await window.keplr.experimentalSuggestChain(
-      DORA_CONFIG[process.env.NEXT_PUBLIC_NETWORK]
-    );
-
-    await window.keplr.enable(chainId);
-
-    const offlineSigner = window.getOfflineSigner(chainId);
-
-    let address = await offlineSigner.getAccounts();
-    return { signer: offlineSigner, address: address[0].address };
-  } catch (err) {
-    console.log(err);
-    return false;
-  }
-};
 
 const getWOTScoreForPubkeyLegacy = (pubkey, enabled, minScore = 3) => {
   try {
@@ -1231,9 +1158,7 @@ export {
   sortEvents,
   detectDirection,
   enableTranslation,
-  parsedMaciPoll,
   downloadAsFile,
-  getKeplrSigner,
   getWOTScoreForPubkey,
   getWOTList,
   filterContent,

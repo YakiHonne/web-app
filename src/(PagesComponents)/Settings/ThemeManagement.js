@@ -1,9 +1,11 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import DtoLToggleButton from "../../Components/DtoLToggleButton";
+import { useTheme } from "next-themes";
 
 export function ThemeManagement({ selectedTab, setSelectedTab }) {
   const { t } = useTranslation();
+  const { theme, setTheme } = useTheme();
   return (
     <div
       className="fit-container fx-scattered fx-col pointer"
@@ -29,6 +31,10 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
         </div>
         <div className="arrow"></div>
       </div>
+      <button onClick={() => setTheme("gray")}>gray</button>
+      <button onClick={() => setTheme("dark")}>dark</button>
+      <button onClick={() => setTheme("light")}>light</button>
+      <button onClick={() => setTheme("creamy")}>creamy</button>
       {selectedTab === "theme" && (
         <div className="fit-container fx-col fx-centered box-pad-h-m box-pad-v-m ">
           <div className="fx-scattered fit-container">
@@ -38,6 +44,6 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
       )}
     </div>
   );
-};
+}
 
 export default ThemeManagement;
