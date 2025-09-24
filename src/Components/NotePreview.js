@@ -30,6 +30,7 @@ export default function NotePreview({
       className="fit-container box-pad-h-m box-pad-v-m sc-s-18 bg-sp fx-centered fx-col fx-start-h fx-start-v"
       style={{
         maxHeight: viewPort ? `${viewPort}vh` : "50%",
+        minHeight: viewPort ? `${viewPort}vh` : "50%",
         overflow: "scroll",
       }}
     >

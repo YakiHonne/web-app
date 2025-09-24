@@ -37,7 +37,7 @@ export default function UserProfilePic({
   const [isLoading, setIsLoading] = useState(true);
   const [initConv, setInitConv] = useState(false);
   const [followers, setFollowers] = useState(0);
-  const { isNip05Verified, userProfile } = useUserProfile(user_id);
+  const { isNip05Verified } = useUserProfile(user_id, metadata ? true : false);
 
   useEffect(() => {
     if (user_id && nostrAuthors.length > 0 && !img) {
@@ -149,7 +149,7 @@ export default function UserProfilePic({
           <div
             style={{
               opacity: "1",
-              maxWidth: "max-content",
+              maxWidth: "180px",
              
               gap: "4px",
               transform: "translateY(4px)",
@@ -196,7 +196,7 @@ export default function UserProfilePic({
                 />
               </div>
             )}
-            <p>{withName}</p>
+            <p className="p-one-line">{withName}</p>
           </div>
           {showMetadata && metadata && (
             <div

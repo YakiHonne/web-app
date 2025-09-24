@@ -31,17 +31,85 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
         </div>
         <div className="arrow"></div>
       </div>
-      <button onClick={() => setTheme("gray")}>gray</button>
-      <button onClick={() => setTheme("dark")}>dark</button>
-      <button onClick={() => setTheme("light")}>light</button>
-      <button onClick={() => setTheme("creamy")}>creamy</button>
       {selectedTab === "theme" && (
+        <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m fx-wrap">
+          <div className="fx-centered fit-container">
+            <div
+              className="fx-centered fx fx-col sc-s-18"
+              style={{
+                borderColor: theme === "dark" ? "var(--c1)" : "",
+                backgroundColor: "#000000",
+              }}
+              onClick={() => setTheme("dark")}
+            >
+              <div className="box-pad-h box-pad-v-m fx-centered">
+                <div
+                  className="yaki-logomark"
+                  style={{ filter: "brightness(0) invert()", minWidth: "60px", minHeight: "60px" }}
+                ></div>
+                <p style={{ color: "white" }}>Noir</p>
+              </div>
+            </div>
+            <div
+              className="fx-centered fx fx-col sc-s-18"
+              style={{
+                borderColor: theme === "gray" ? "var(--c1)" : "",
+                backgroundColor: "#171718",
+              }}
+              onClick={() => setTheme("gray")}
+            >
+              <div className="box-pad-h box-pad-v-m fx-centered">
+                <div
+                  className="yaki-logomark"
+                  style={{ filter: "brightness(0) invert()",  minWidth: "60px", minHeight: "60px" }}
+                ></div>
+                <p style={{ color: "white" }}>Graphite</p>
+              </div>
+            </div>
+          </div>
+          <div className="fx-centered fit-container">
+            <div
+              className="fx-centered fx fx-col sc-s-18"
+              style={{
+                borderColor: theme === "light" ? "var(--c1)" : "",
+                backgroundColor: "#ffffff",
+              }}
+              onClick={() => setTheme("light")}
+            >
+              <div className="box-pad-h box-pad-v-m fx-centered">
+                <div
+                  className="yaki-logomark"
+                  style={{ filter: "brightness(0) " , minWidth: "60px", minHeight: "60px"}}
+                ></div>
+                <p style={{ color: "black" }}>Neige</p>
+              </div>
+            </div>
+            <div
+              className="fx-centered fx fx-col sc-s-18"
+              style={{
+                borderColor: theme === "creamy" ? "var(--c1)" : "",
+                backgroundColor: "#fff5eb",
+              }}
+              onClick={() => setTheme("creamy")}
+            >
+              <div className="box-pad-h box-pad-v-m fx-centered">
+                <div
+                  className="yaki-logomark"
+                  style={{ filter: "brightness(0) " , minWidth: "60px", minHeight: "60px"}}
+                ></div>
+                <p style={{ color: "black", width: "max-content" }}>Ivory</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* {selectedTab === "theme" && (
         <div className="fit-container fx-col fx-centered box-pad-h-m box-pad-v-m ">
           <div className="fx-scattered fit-container">
             <DtoLToggleButton />
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

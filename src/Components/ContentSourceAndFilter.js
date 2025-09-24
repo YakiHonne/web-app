@@ -1,5 +1,5 @@
 import React from "react";
-import ContentSource from "./ContentSettings/ContentSource";
+import ContentSource from "./ContentSettings/ContentSource/ContentSource";
 import ContentFilter from "./ContentSettings/ContentFilter";
 
 export default function ContentSourceAndFilter({
@@ -10,10 +10,7 @@ export default function ContentSourceAndFilter({
   type = 1,
 }) {
   return (
-    <div
-      
-      className="fit-container content-source-and-filter fx-centered"
-    >
+    <div className="fit-container content-source-and-filter fx-centered">
       <div className="main-container">
         <main
           style={{ height: "auto" }}

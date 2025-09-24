@@ -32,6 +32,7 @@ import InfiniteScroll from "@/Components/InfiniteScroll";
 import SuggestionsCards from "@/Components/SuggestionsCards/SuggestionsCards";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import RecentPosts from "@/Components/RecentPosts";
+import { getNDKInstance } from "@/Helpers/utils";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -52,6 +53,7 @@ const notesReducer = (notes, action) => {
     default: {
       let tempArr = [...notes, ...action.note];
       let sortedNotes = tempArr
+        .sort((note_1, note_2) => note_2.created_at - note_1.created_at)
         .filter((note, index, tempArr) => {
           if (
             tempArr.findIndex(
@@ -66,8 +68,8 @@ const notesReducer = (notes, action) => {
             ) === index
           )
             return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
+        });
+
       return sortedNotes;
     }
   }
@@ -101,7 +103,7 @@ export default function Home() {
               <div style={{ height: "75px" }} className="fit-container"></div>
               <HomeCarouselContentSuggestions />
               <div className="main-middle">
-                <PostNote />
+                <PostNote selectedCategory={selectedCategory} />
                 {selectedCategory !== SUGGESTED_TAGS_VALUE && (
                   <HomeFeed
                     selectedCategory={selectedCategory}
@@ -125,10 +127,13 @@ export default function Home() {
   );
 }
 
-const PostNote = () => {
+const PostNote = ({ selectedCategory }) => {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const [showWriteNote, setShowWriteNote] = useState(false);
+  let protectedRelay =
+    selectedCategory.group === "af" ? selectedCategory.value : false;
+
   return (
     <>
       {userKeys && !showWriteNote && (
@@ -147,7 +152,11 @@ const PostNote = () => {
       )}
 
       {userKeys && showWriteNote && (
-        <PostAsNote content={""} exit={() => setShowWriteNote(false)} />
+        <PostAsNote
+          content={""}
+          exit={() => setShowWriteNote(false)}
+          protectedRelay={protectedRelay}
+        />
       )}
     </>
   );
@@ -213,7 +222,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     );
     twoDaysPrior = notesLastEventTime
       ? notesLastEventTime - towDaysPeriod
-      : twoDaysPrior;
+      : notesLastEventTime;
     let since =
       selectedFilter.from ||
       (["paid", "widgets"].includes(notesContentFrom)
@@ -318,12 +327,14 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       let events = [];
       let fallBackEvents = [];
       let { filter } = await getNotesFilter();
-
+      let ndk =
+        selectedCategory.group === "af"
+          ? await getNDKInstance(selectedCategory.value)
+          : undefined;
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
-
-      setSubfilter({ filter, relays: algoRelay });
-      const data = await getSubData(filter, 50, algoRelay, undefined, 200);
+      setSubfilter({ filter, relays: algoRelay, ndk });
+      const data = await getSubData(filter, 50, algoRelay, ndk, 200);
       events = data.data
         .splice(0, 50)
         .map((event) => {
@@ -355,56 +366,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       saveUsers(eventsPubkeys);
       if (tempEvents.length === 0) setIsLoading(false);
     };
-    const contentFromDVM = async () => {
-      try {
-        setIsLoading(true);
-        let eventId = await getDVMJobRequest(selectedCategory.value);
-        if (!eventId) {
-          setIsLoading(false);
-          return;
-        }
-        let data = await getDVMJobResponse(eventId, selectedCategory.value);
-        if (data.length > 0) {
-          let events = [];
-          let eventsPubkeys = [];
 
-          const res = await getSubData([{ ids: data }], 50);
-
-          events = res.data
-            .map((event) => {
-              eventsPubkeys.push(event.pubkey);
-              let event_ = getParsedNote(event, true);
-              if (event_) {
-                if (notesContentFrom !== "recent_with_replies") {
-                  if (!event_.isComment) {
-                    if (event.kind === 6) {
-                      eventsPubkeys.push(event_.relatedEvent.pubkey);
-                    }
-                    return event_;
-                  }
-                } else {
-                  if (event.kind === 6) {
-                    eventsPubkeys.push(event_.relatedEvent.pubkey);
-                  }
-                  return event_;
-                }
-              }
-            })
-            .filter((_) => _);
-
-          dispatchNotes({ type: notesContentFrom, note: events });
-          saveUsers(eventsPubkeys);
-          setIsLoading(false);
-        }
-      } catch (err) {
-        console.log(err);
-        setIsLoading(false);
-      }
-    };
     if (notesContentFrom && ["cf", "af"].includes(selectedCategory?.group))
       contentFromRelays();
-    if (notesContentFrom && ["mf"].includes(selectedCategory?.group))
-      contentFromDVM();
   }, [
     notesLastEventTime,
     selectedCategoryValue,
@@ -414,10 +378,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
 
   const handleRecentPostsClick = (notes) => {
     dispatchNotes({ type: notesContentFrom, note: notes });
-    // let timer = setTimeout(() => {
     straightUp(undefined, "smooth");
-    // clearTimeout(timer);
-    // }, 200);
   };
 
   return (

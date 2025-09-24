@@ -29,6 +29,7 @@ import { nip19 } from "nostr-tools";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import { customHistory } from "@/Helpers/History";
 import PostReaction from "./PostReaction";
+import useIsMute from "@/Hooks/useIsMute";
 
 export default function KindOne({
   event,
@@ -51,7 +52,7 @@ export default function KindOne({
   const isThread = useMemo(() => getRepliesViewSettings(), []);
   const [isClamped, setIsClamped] = useState(10000);
   const noteRef = React.useRef(null);
-
+  const { isMuted, muteUnmute } = useIsMute(event?.pubkey);
   const checkNotes = useMemo(() => {
     const NOTE_PREFIXES = ["note1", "nevent", "naddr"];
     const MAX_COMPONENTS = 5;
@@ -227,6 +228,19 @@ export default function KindOne({
     }
   };
 
+  if (isMuted) {
+    return (
+      <div
+        className="box-pad-v fx-centered fx-col fit-container note-item"
+        id={event.id}
+        style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
+      >
+        <p className="box-pad-h p-centered gray-c" style={{maxWidth: "400px"}}>{t("Ao4Segq")}</p>
+        <button className="btn btn-gray btn-small" onClick={() => muteUnmute()}>{t("AKELUbQ")}</button>
+      </div>
+    );
+  }
+
   return (
     <>
       {showComments && (
@@ -331,7 +345,7 @@ export default function KindOne({
                       </div>
                     ) : (
                       <div className="p-six-lines" ref={noteRef}>
-                        {compactContent(event.content, event.pubkey)}
+                        {compactContent(event.content)}
                       </div>
                     )}
                   </div>

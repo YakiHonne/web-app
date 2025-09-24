@@ -36,6 +36,7 @@ import { useTranslation } from "react-i18next";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import relaysOnPlatform from "@/Content/Relays";
 import Link from "next/link";
+import { sendMessage } from "@/Helpers/DMHelpers";
 
 const getFilterDMByTime = (type) => {
   let filterType =
@@ -689,161 +690,12 @@ const ConversationBox = ({ convo, back }) => {
     }
   }, [message]);
 
-  const handleSendMessage = async () => {
-    if (
-      !message ||
-      !userKeys ||
-      (userKeys && !(userKeys.ext || userKeys.sec || userKeys.bunker))
-    )
-      return;
-    let otherPartyRelays = await getInboxRelaysForUser(convo.pubkey);
-    let relaysToPublish = [
-      ...new Set([
-        ...userInboxRelays,
-        ...relaysOnPlatform,
-        ...otherPartyRelays,
-      ]),
-    ];
-    // setMessage("");
-    // setReplayOn(false);
-    // setShowProgress(true);
-    if (legacy) {
-      let encryptedMessage = await encrypt04(userKeys, convo.pubkey, message);
-
-      setMessage("");
-      setReplayOn(false);
-      setShowProgress(true);
-      let tags = [];
-      tags.push(["p", convo.pubkey, convo.display_name || convo.name || ""]);
-      if (replayOn) tags.push(["e", replayOn.id]);
-      let created_at = Math.floor(Date.now() / 1000);
-      // let tempEvent = {
-      //   created_at,
-      //   kind: 4,
-      //   content: encryptedMessage,
-      //   tags,
-      // };
-
-      dispatch(
-        setToPublish({
-          userKeys: userKeys,
-          kind: 4,
-          content: encryptedMessage,
-          tags,
-          allRelays: relaysToPublish,
-        })
-      );
-    }
-    if (!legacy) {
-      let { sender_event, receiver_event } = await getGiftWrap();
-      setMessage("");
-      setReplayOn(false);
-      setShowProgress(true);
-      let response = await initPublishing(
-        relaysToPublish,
-        sender_event,
-        receiver_event
-      );
-
-      if (response) {
-        let action_key =
-          convo.pubkey ===
-          "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3"
-            ? "dms-10"
-            : "dms-5";
-        updateYakiChest(action_key);
-      }
-    }
-  };
-
-  const updateYakiChest = async (action_key) => {
-    try {
-      let data = await axiosInstance.post("/api/v1/yaki-chest", {
-        action_key,
-      });
-      let { user_stats, is_updated } = data.data;
-
-      if (is_updated) {
-        dispatch(setUpdatedActionFromYakiChest(is_updated));
-        updateYakiChestStats(user_stats);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  const getGiftWrap = async () => {
-    let g_sk_1 = bytesTohex(generateSecretKey());
-    let g_sk_2 = bytesTohex(generateSecretKey());
-
-    let [signedKind13_1, signedKind13_2] = await Promise.all([
-      getEventKind13(convo.pubkey),
-      getEventKind13(userKeys.pub),
-    ]);
-
-    let content_1 = nip44.v2.encrypt(
-      JSON.stringify(signedKind13_1),
-      nip44.v2.utils.getConversationKey(g_sk_1, convo.pubkey)
-    );
-    let content_2 = nip44.v2.encrypt(
-      JSON.stringify(signedKind13_2),
-      nip44.v2.utils.getConversationKey(g_sk_2, userKeys.pub)
-    );
-    let event_1 = {
-      created_at: Math.floor(Date.now() / 1000) - 432000,
-      kind: 1059,
-      tags: [["p", convo.pubkey]],
-      content: content_1,
-    };
-    let event_2 = {
-      created_at: Math.floor(Date.now() / 1000) - 432000,
-      kind: 1059,
-      tags: [["p", userKeys.pub]],
-      content: content_2,
-    };
-    event_1 = finalizeEvent(event_1, g_sk_1);
-    event_2 = finalizeEvent(event_2, g_sk_2);
-    return { sender_event: event_2, receiver_event: event_1 };
-  };
-
-  const getEventKind14 = () => {
-    let event = {
-      pubkey: userKeys.pub,
-      created_at: Math.floor(Date.now() / 1000),
-      kind: 14,
-      tags: [
-        ["p", convo.pubkey],
-        ["p", userKeys.pub],
-      ],
-      content: message,
-    };
-
-    if (replayOn) event.tags.push(["e", replayOn.id]);
-    event.id = getEventHash(event);
-    return event;
-  };
-
-  const getEventKind13 = async (pubkey) => {
-    let unsignedKind14 = getEventKind14();
-    let content = await encrypt44(
-      userKeys,
-      pubkey,
-      JSON.stringify(unsignedKind14)
-    );
-
-    let event = {
-      created_at: Math.floor(Date.now() / 1000) - 172800,
-      kind: 13,
-      tags: [],
-      content,
-    };
-    event = await InitEvent(
-      event.kind,
-      event.content,
-      event.tags,
-      event.created_at
-    );
-    return event;
+  const handleSendMessage = () => {
+    if (!message || !convo.pubkey) return;
+    setMessage("");
+    setReplayOn(false);
+    setShowProgress(true);
+    sendMessage(convo.pubkey, message);
   };
 
   const getReply = (ID) => {
@@ -1028,7 +880,7 @@ const ConversationBox = ({ convo, back }) => {
                   className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fx-start-h fx-start-v fx-col"
                   style={{
                     backgroundColor: convo.peer
-                      ? "var(--c1-side)"
+                      ? "var(--pale-gray)"
                       : "var(--dim-gray)",
                     borderBottomLeftRadius: !convo.peer ? 0 : "inital",
                     borderBottomRightRadius: convo.peer ? 0 : "inital",

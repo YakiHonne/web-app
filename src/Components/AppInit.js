@@ -48,24 +48,27 @@ import {
   getInboxRelays,
   saveInboxRelays,
   getFollowingsInboxRelays,
+  getRelaysStats,
 } from "@/Helpers/DB";
 import {
   addConnectedAccounts,
   getSubData,
+  saveFavRelaysListsForUsers,
   saveInboxRelaysListsForUsers,
+  saveRelayMetadata,
   saveRelaysListsForUsers,
   updateYakiChestStats,
   userLogout,
 } from "@/Helpers/Controlers";
-import { setInitDMS, setIsDarkMode, setTrendingUsers } from "@/Store/Slides/Extras";
+import {
+  setInitDMS,
+  setIsDarkMode,
+  setRelaysStats,
+  setTrendingUsers,
+} from "@/Store/Slides/Extras";
 import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
-import {
-  toggleColorScheme,
-} from "@/Helpers/Helpers";
-import {
-  getConnectedAccounts,
-  getKeys,
-} from "@/Helpers/ClientHelpers";
+import { toggleColorScheme } from "@/Helpers/Helpers";
+import { getConnectedAccounts, getKeys } from "@/Helpers/ClientHelpers";
 import { setNostrAuthors, setNostrClients } from "@/Store/Slides/Profiles";
 import {
   decrypt04,
@@ -77,7 +80,7 @@ import {
   unwrapGiftWrap,
 } from "@/Helpers/Encryptions";
 import axiosInstance from "@/Helpers/HTTP_Client";
-import { setIsYakiChestLoaded } from "@/Store/Slides/YakiChest";
+import { setIsConnectedToYaki, setIsYakiChestLoaded } from "@/Store/Slides/YakiChest";
 import relaysOnPlatform from "@/Content/Relays";
 import {
   NDKNip07Signer,
@@ -91,9 +94,7 @@ import { savedToolsIdentifier } from "@/Content/Extras";
 export default function AppInit() {
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
-  const isDarkMode = useSelector((state) => state.isDarkMode);
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
-
   const chatrooms =
     useLiveQuery(
       async () => (userKeys ? await getChatrooms(userKeys.pub) : []),
@@ -137,8 +138,7 @@ export default function AppInit() {
     ) || [];
   const inboxRelays =
     useLiveQuery(
-      async () =>
-        userKeys ? await getInboxRelays(userKeys.pub) : [],
+      async () => (userKeys ? await getInboxRelays(userKeys.pub) : []),
       [userKeys]
     ) || [];
   const wotList =
@@ -155,12 +155,13 @@ export default function AppInit() {
   const followingsRelays = useLiveQuery(
     async () => await getFollowingsRelays(),
     []
-  );
+  ) || [];
   const followingsInboxRelays = useLiveQuery(
     async () => await getFollowingsInboxRelays(),
     []
-  );
+  ) || [];
   const nostrClients = useLiveQuery(async () => await getClients(), []);
+  const relaysStats = useLiveQuery(async () => await getRelaysStats(), []);
 
   const previousChatrooms = useRef([]);
   const previousRelays = useRef([]);
@@ -176,6 +177,7 @@ export default function AppInit() {
   const previousWotList = useRef([]);
   const previousBlossomServers = useRef([]);
   const previousInboxRelays = useRef([]);
+  const previousRelaysStats = useRef([]);
   const previousFavRelays = useRef({ relays: [] });
 
   useEffect(() => {
@@ -208,10 +210,12 @@ export default function AppInit() {
     ) {
       previousFavRelays.current = favRelays;
       dispatch(setUserFavRelays(favRelays));
-      addExplicitRelays(favRelays.relays || []);
+      saveRelayMetadata(favRelays.relays || []);
+      // addExplicitRelays(favRelays.relays || []);
     }
     if (
-      JSON.stringify(previousInboxRelays.current) !== JSON.stringify(inboxRelays)
+      JSON.stringify(previousInboxRelays.current) !==
+      JSON.stringify(inboxRelays)
     ) {
       previousInboxRelays.current = inboxRelays;
       dispatch(setUserInboxRelays(inboxRelays.relays));
@@ -241,20 +245,20 @@ export default function AppInit() {
       JSON.stringify(appSettings)
     ) {
       previousAppSettings.current = appSettings;
-      let relaysFeedMiedxContent =
-        appSettings?.settings?.content_sources?.mixed_content?.relays?.list?.map(
-          (_) => _[0]
-        ) || [];
-      let relaysFeedNotes =
-        appSettings?.settings?.content_sources?.notes?.relays?.list?.map(
-          (_) => _[0]
-        ) || [];
-      let relaysFeed = [
-        ...new Set([...relaysFeedMiedxContent, ...relaysFeedNotes]),
-      ];
-      if (relaysFeed.length > 0) {
-        addExplicitRelays(relaysFeed);
-      }
+      // let relaysFeedMiedxContent =
+      //   appSettings?.settings?.content_sources?.mixed_content?.relays?.list?.map(
+      //     (_) => _[0]
+      //   ) || [];
+      // let relaysFeedNotes =
+      //   appSettings?.settings?.content_sources?.notes?.relays?.list?.map(
+      //     (_) => _[0]
+      //   ) || [];
+      // let relaysFeed = [
+      //   ...new Set([...relaysFeedMiedxContent, ...relaysFeedNotes]),
+      // ];
+      // if (relaysFeed.length > 0) {
+      //   addExplicitRelays(relaysFeed);
+      // }
       dispatch(setUserAppSettings(appSettings || false));
     }
     if (
@@ -308,6 +312,13 @@ export default function AppInit() {
       previousNostrClients.current = nostrClients;
       dispatch(setNostrClients(nostrClients));
     }
+    if (
+      JSON.stringify(previousRelaysStats.current) !==
+      JSON.stringify(relaysStats)
+    ) {
+      previousRelaysStats.current = relaysStats;
+      dispatch(setRelaysStats(relaysStats));
+    }
   }, [
     chatrooms,
     relays,
@@ -320,11 +331,15 @@ export default function AppInit() {
     interestsList,
     appSettings,
     blossomServers,
-    inboxRelays
+    inboxRelays,
+    relaysStats,
+    favRelays,
   ]);
 
   useEffect(() => {
     let previousDarkMode = localStorage.getItem("yaki-theme");
+    let previousIsConnectedToYaki = localStorage?.getItem("connect_yc") ? true : false
+    console.log(previousIsConnectedToYaki)
     if (previousDarkMode === "0") {
       setIsDarkMode("1");
       toggleColorScheme(false);
@@ -332,6 +347,9 @@ export default function AppInit() {
     if (previousDarkMode === "1") {
       setIsDarkMode("0");
       toggleColorScheme(true);
+    }
+    if(previousIsConnectedToYaki) {
+      dispatch(setIsConnectedToYaki(true));
     }
     saveNostrClients();
     // getFlashNews();
@@ -370,11 +388,7 @@ export default function AppInit() {
           ndkInstance.signer = signer;
         }
       }
-      // ndkInstance.relayAuthDefaultPolicy = async (relay) => {
-      //   console.log(relay);
-      //   const signIn = NDKRelayAuthPolicies.signIn({ ndk: ndkInstance });
-      //   let ev = await signIn(relay);
-      // };
+  
       ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
         ndk: ndkInstance,
       });
@@ -398,7 +412,7 @@ export default function AppInit() {
         APPSETTINGS,
         FAVRELAYS,
         BLOSSOMSERVERS,
-        INBOXRELAYS
+        INBOXRELAYS,
       ] = await Promise.all([
         getChatrooms(userKeys.pub),
         getRelays(userKeys.pub),
@@ -547,9 +561,7 @@ export default function AppInit() {
           tempAuthors = [...new Set([...tempAuthors, event.pubkey])];
           let peer =
             event.pubkey === userKeys.pub
-              ? event.tags.find(
-                  (tag) => tag[0] === "p" && tag[1] !== userKeys.pub
-                )[1]
+              ? event.tags.find((tag) => tag[0] === "p" && tag[1])[1]
               : "";
           let reply = event.tags.find((tag) => tag[0] === "e");
           let replyID = reply ? reply[1] : "";
@@ -567,7 +579,11 @@ export default function AppInit() {
           tempInbox.push(tempEvent);
           if (eose) saveChatrooms(tempInbox, [event.pubkey], userKeys.pub);
         }
-        if (event.kind === 1059 && (userKeys.sec || window?.nostr?.nip44) && !userKeys.bunker) {
+        if (
+          event.kind === 1059 &&
+          (userKeys.sec || window?.nostr?.nip44) &&
+          !userKeys.bunker
+        ) {
           try {
             let unwrappedEvent = await unwrapGiftWrap(event, userKeys);
             if (unwrappedEvent && unwrappedEvent.kind === 14) {
@@ -576,9 +592,7 @@ export default function AppInit() {
               ];
               let peer =
                 unwrappedEvent.pubkey === userKeys.pub
-                  ? unwrappedEvent.tags.find(
-                      (tag) => tag[0] === "p" && tag[1] !== userKeys.pub
-                    )[1]
+                  ? unwrappedEvent.tags.find((tag) => tag[0] === "p")[1]
                   : "";
               let reply = unwrappedEvent.tags.find((tag) => tag[0] === "e");
               let replyID = reply ? reply[1] : "";
@@ -664,7 +678,11 @@ export default function AppInit() {
         saveInterests(tempUserInterests, userKeys.pub, lastInterestsTimestamp);
         saveMutedlist(tempMutedList, userKeys.pub, lastMutedTimestamp);
         saveRelays(tempRelays, userKeys.pub, lastRelaysTimestamp);
-        saveInboxRelays(tempInboxRelays, userKeys.pub, lastInboxRelaysTimestamp);
+        saveInboxRelays(
+          tempInboxRelays,
+          userKeys.pub,
+          lastInboxRelaysTimestamp
+        );
         saveFavRelays(tempFavRelays, userKeys.pub, lastFavRelaysTimestamp);
         saveBlossomServers(
           tempBlossomServers,
@@ -703,6 +721,7 @@ export default function AppInit() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+     
         dispatch(setIsYakiChestLoaded(false));
         const data = await axiosInstance.get("/api/v1/yaki-chest/stats");
         if (data.data.user_stats.pubkey !== userKeys.pub) {
@@ -721,6 +740,7 @@ export default function AppInit() {
     };
     if (userKeys && isConnectedToYaki) fetchData();
     if (userKeys && !isConnectedToYaki) dispatch(setIsYakiChestLoaded(true));
+    console.log("isConnectedToYaki", isConnectedToYaki)
   }, [userKeys, isConnectedToYaki]);
   useEffect(() => {
     const buildWOTList = async () => {
@@ -894,6 +914,7 @@ export default function AppInit() {
     if (followings && followings?.followings?.length > 0) {
       saveRelaysListsForUsers(followings?.followings);
       saveInboxRelaysListsForUsers(followings?.followings);
+      saveFavRelaysListsForUsers(followings?.followings);
     }
     if (followings && followings?.followings?.length >= 5) {
       buildWOTList();
@@ -924,4 +945,3 @@ export default function AppInit() {
 
   return null;
 }
-

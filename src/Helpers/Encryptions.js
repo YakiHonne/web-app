@@ -4,12 +4,8 @@ import { nip04, nip19, nip44 } from "nostr-tools";
 import { decode } from "light-bolt11-decoder";
 import { getImagePlaceholder } from "@/Content/NostrPPPlaceholder";
 import CryptoJS from "crypto-js";
-import {
-  getAppLang,
-} from "./Helpers";
-import {
-  getKeys,
-} from "./ClientHelpers";
+import { getAppLang } from "./Helpers";
+import { getKeys } from "./ClientHelpers";
 // Translation function will be passed as parameter to avoid SSR issues
 import axiosInstance from "./HTTP_Client";
 import { store } from "@/Store/Store";
@@ -25,18 +21,34 @@ const LNURLP_REGEX =
   /^lnurlp:\/\/([\w-]+\.)+[\w-]+(:\d{1,5})?(\/[\w-.\/?%&=]*)?$/;
 
 const getBech32 = (prefix, key) => {
+  if (key.startsWith("npub")) return key;
   if (prefix === "npub") return nip19.npubEncode(key);
-  if (prefix === "nsec") return nip19.nsecEncode(key);
+  if (prefix === "nsec") return nip19.nsecEncode(hexToUint8Array(key));
   if (prefix === "nprofile") return nip19.nprofileEncode({ pubkey: key });
 
   return "";
 };
-export function getHex (key) {
-  return nip19.decode(key).data;
+export function getHex(key) {
+  // return nip19.decode(key).data;
+  let hex = nip19.decode(key).data;
+  if (typeof hex !== "string") return bytesTohex(hex);
+  return hex;
   // return secp.utils.bytesToHex(
   //   Uint8Array.from(bech32.fromWords(bech32.decode(key).words))
   // );
-};
+}
+
+export function hexToUint8Array(hex) {
+  if (hex.length % 2 !== 0) {
+    throw new Error("Invalid hex string");
+  }
+  const array = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    array[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return array;
+}
+
 const bytesTohex = (arrayBuffer) => {
   const byteToHex = [];
 
@@ -87,6 +99,46 @@ const getEmptyEventStats = (eventID) => {
     },
   };
 };
+const getEmptyRelaysStats = (url) => {
+  return {
+    url,
+    followings: {
+      pubkeys: [],
+      since: undefined,
+    },
+    monitor: {
+      countryCode: "",
+      countryFlag: "",
+      isAuthRequired: false,
+      isPaymentRequired: false,
+      rttOpen: null,
+      since: undefined,
+    },
+  };
+};
+
+const getEmptyRelaysData = (url) => {
+  return {
+    url,
+    name: url.replace("wss://", "").replace("https://", "").replace("/", ""),
+    description: "N/A",
+    pubkey: "",
+    contact: "",
+    supported_nips: [],
+    supported_nip_extensions: [],
+    software: "",
+    version: "",
+    limitation: {
+      auth_required: false,
+      payment_required: false,
+    },
+    payments_url: "",
+    fees: {
+      admission: [],
+    },
+  };
+};
+
 const getEmptyuserMetadata = (pubkey) => {
   return {
     name: pubkey ? getBech32("npub", pubkey).substring(0, 10) : "",
@@ -259,7 +311,9 @@ const getParsedRepEvent = (event) => {
       created_at: event.created_at,
       tags: event.tags,
       author: getEmptyuserMetadata(event.pubkey),
-      title: [34235, 34236, 30033, 21, 22].includes(event.kind) ? event.content : "Untitled",
+      title: [34235, 34236, 30033, 21, 22].includes(event.kind)
+        ? event.content
+        : "Untitled",
       description: "",
       image: "",
       imagePP: getImagePlaceholder(),
@@ -341,7 +395,6 @@ const getParsedRepEvent = (event) => {
     return false;
   }
 };
-
 
 const detectDirection = (text) => {
   const rtlCharRegExp =
@@ -435,11 +488,11 @@ const convertDate = (toConvert, time = false, t = null) => {
     });
   }
   // Fallback for when no translation function is provided
-  return new Intl.DateTimeFormat('en', {
-    year: "numeric", 
-    month: "short", 
-    day: "numeric", 
-    ...timeConfig
+  return new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    ...timeConfig,
   }).format(toConvert);
 };
 
@@ -465,11 +518,19 @@ export function timeAgo(date, t = null) {
         range: "minute",
       });
     } else if (diffInHours < 24) {
-      return t("AOPBXtv", { val: -diffInHours, style: "narrow", range: "hour" });
+      return t("AOPBXtv", {
+        val: -diffInHours,
+        style: "narrow",
+        range: "hour",
+      });
     } else if (diffInDays < 7) {
       return t("AOPBXtv", { val: -diffInDays, style: "narrow", range: "day" });
     } else if (diffInWeeks < 5) {
-      return t("AOPBXtv", { val: -diffInWeeks, style: "narrow", range: "weeks" });
+      return t("AOPBXtv", {
+        val: -diffInWeeks,
+        style: "narrow",
+        range: "weeks",
+      });
     } else if (diffInMonths < 11 && diffInYears === 0) {
       return t("AOPBXtv", {
         val: -diffInMonths,
@@ -612,7 +673,6 @@ const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
       },
     });
     await bunker.connect();
-
     let data = await bunker.nip04Decrypt(otherPartyPubkey, content);
     return data;
   } catch (err) {
@@ -688,91 +748,114 @@ const decrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
 };
 
 const encrypt44 = async (userKeys, otherPartyPubkey, content) => {
-  let encryptedMessage = "";
-  if (userKeys.ext) {
-    encryptedMessage = await window.nostr.nip44.encrypt(
-      otherPartyPubkey,
-      content
-    );
-  } else if (userKeys.sec) {
-    encryptedMessage = nip44.v2.encrypt(
-      content,
-      nip44.v2.utils.getConversationKey(userKeys.sec, otherPartyPubkey)
-    );
-  } else {
-    encryptedMessage = await encrypt44UsingBunker(
-      userKeys,
-      otherPartyPubkey,
-      content
-    );
+  try {
+    let encryptedMessage = "";
+    if (userKeys.ext) {
+      encryptedMessage = await window.nostr.nip44.encrypt(
+        otherPartyPubkey,
+        content
+      );
+    } else if (userKeys.sec) {
+      encryptedMessage = nip44.v2.encrypt(
+        content,
+        nip44.v2.utils.getConversationKey(userKeys.sec, otherPartyPubkey)
+      );
+    } else {
+      encryptedMessage = await encrypt44UsingBunker(
+        userKeys,
+        otherPartyPubkey,
+        content
+      );
+    }
+    return encryptedMessage;
+  } catch (err) {
+    return false;
   }
-  return encryptedMessage;
 };
 
 const decrypt44 = async (userKeys, otherPartyPubkey, content) => {
-  let decryptedMessage = "";
-  if (userKeys.ext) {
-    decryptedMessage = await window.nostr.nip44.decrypt(
-      otherPartyPubkey,
-      content
-    );
-  } else if (userKeys.sec) {
-    decryptedMessage = await nip44.v2.decrypt(
-      content,
-      nip44.v2.utils.getConversationKey(userKeys.sec, otherPartyPubkey)
-    );
-  } else {
-    decryptedMessage = await decrypt44UsingBunker(
-      userKeys,
-      otherPartyPubkey,
-      content
-    );
+  try {
+    let decryptedMessage = "";
+    if (userKeys.ext) {
+      decryptedMessage = await window.nostr.nip44.decrypt(
+        otherPartyPubkey,
+        content
+      );
+    } else if (userKeys.sec) {
+      decryptedMessage = await nip44.v2.decrypt(
+        content,
+        nip44.v2.utils.getConversationKey(userKeys.sec, otherPartyPubkey)
+      );
+    } else {
+      decryptedMessage = await decrypt44UsingBunker(
+        userKeys,
+        otherPartyPubkey,
+        content
+      );
+    }
+    return decryptedMessage;
+  } catch (err) {
+    return false;
   }
-  return decryptedMessage;
 };
 
 const decrypt04 = async (event, userKeys) => {
-  let pubkey =
-    event.pubkey === userKeys.pub
-      ? event.tags.find((tag) => tag[0] === "p")[1]
-      : event.pubkey;
+  try {
+    let pubkey =
+      event.pubkey === userKeys.pub
+        ? event.tags.find((tag) => tag[0] === "p")[1]
+        : event.pubkey;
 
-  let decryptedMessage = "";
-  if (userKeys.ext) {
-    decryptedMessage = await window.nostr.nip04.decrypt(pubkey, event.content);
-  } else if (userKeys.sec) {
-    decryptedMessage = await nip04.decrypt(userKeys.sec, pubkey, event.content);
-  } else {
-    decryptedMessage = await decrypt04UsingBunker(
-      userKeys,
-      pubkey,
-      event.content
-    );
+    let decryptedMessage = "";
+    if (userKeys.ext) {
+      decryptedMessage = await window.nostr.nip04.decrypt(
+        pubkey,
+        event.content
+      );
+    } else if (userKeys.sec) {
+      decryptedMessage = await nip04.decrypt(
+        userKeys.sec,
+        pubkey,
+        event.content
+      );
+    } else {
+      decryptedMessage = await decrypt04UsingBunker(
+        userKeys,
+        pubkey,
+        event.content
+      );
+    }
+    return decryptedMessage;
+  } catch (err) {
+    return false;
   }
-  return decryptedMessage;
 };
 
 const encrypt04 = async (userKeys, otherPartyPubkey, content) => {
-  let encryptedMessage = "";
-  if (userKeys.ext) {
-    encryptedMessage = await window.nostr.nip04.encrypt(
-      otherPartyPubkey,
-      content
-    );
-  } else if (userKeys.sec) {
-    encryptedMessage = await nip04.encrypt(
-      userKeys.sec,
-      otherPartyPubkey,
-      content
-    );
-  } else {
-    encryptedMessage = await encrypt04UsingBunker(
-      userKeys,
-      otherPartyPubkey,
-      content
-    );
+  try {
+    let encryptedMessage = "";
+    if (userKeys.ext) {
+      encryptedMessage = await window.nostr.nip04.encrypt(
+        otherPartyPubkey,
+        content
+      );
+    } else if (userKeys.sec) {
+      encryptedMessage = await nip04.encrypt(
+        userKeys.sec,
+        otherPartyPubkey,
+        content
+      );
+    } else {
+      encryptedMessage = await encrypt04UsingBunker(
+        userKeys,
+        otherPartyPubkey,
+        content
+      );
+    }
+    return encryptedMessage;
+  } catch (err) {
+    return false;
   }
-  return encryptedMessage;
 };
 
 const unwrapGiftWrap = async (event, userKeys) => {
@@ -834,7 +917,6 @@ const downloadAsFile = (
       })
     );
 };
-
 
 const getWOTScoreForPubkeyLegacy = (pubkey, enabled, minScore = 3) => {
   try {
@@ -1165,4 +1247,6 @@ export {
   precomputeTrustingCounts,
   getBackupWOTList,
   getWOTScoreForPubkeyLegacy,
+  getEmptyRelaysData,
+  getEmptyRelaysStats,
 };

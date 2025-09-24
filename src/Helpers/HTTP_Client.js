@@ -5,6 +5,7 @@ const axiosInstance = axios.create({
   headers: {
     "yakihonne-api-key": process.env.NEXT_PUBLIC_API_KEY,
   },
+  withCredentials: true,
 });
 
 export default axiosInstance;

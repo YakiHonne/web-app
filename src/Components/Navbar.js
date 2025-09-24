@@ -22,7 +22,6 @@ export default function Navbar() {
       "/terms",
       "/login",
       "/points-system",
-      "/write-article",
       "/m/maci-poll",
       "/docs/sw/[keyword]",
     ].includes(router.pathname)

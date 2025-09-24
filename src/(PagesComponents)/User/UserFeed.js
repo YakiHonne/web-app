@@ -5,7 +5,6 @@ import {
   getParsedSW,
 } from "@/Helpers/Encryptions";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
-import { nip19 } from "nostr-tools";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import { straightUp } from "@/Helpers/Helpers";
 import KindOne from "@/Components/KindOne";
@@ -224,8 +223,6 @@ export default function UserFeed({ user }) {
     setContentFrom(type);
   };
 
-  console.log(lastEventTime);
-
   if (isMuted) return;
   return (
     <div
@@ -292,7 +289,7 @@ export default function UserFeed({ user }) {
           {t("AStkKfQ")}
         </div> */}
       {/* </div> */}
-      <div className="user-feed-tab">
+      <div className="user-feed-tab sticky" style={{ padding: 0}}>
         <Slider
           items={[
             <div

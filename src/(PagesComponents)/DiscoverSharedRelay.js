@@ -1,24 +1,21 @@
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import ArrowUp from "@/Components/ArrowUp";
 import { SelectTabs } from "@/Components/SelectTabs";
-import { useDispatch, useSelector } from "react-redux";
 import {
-  filterContent,
   getParsedRepEvent,
   removeEventsDuplicants,
   sortEvents,
 } from "@/Helpers/Encryptions";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import { saveUsers } from "@/Helpers/DB";
-import { getDefaultFilter, getSubData, InitEvent } from "@/Helpers/Controlers";
+import {  getSubData } from "@/Helpers/Controlers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
-import { setToPublish } from "@/Store/Slides/Publishers";
-import NDK, {
-  NDKPrivateKeySigner,
-  NDKRelayAuthPolicies,
-} from "@nostr-dev-kit/ndk";
+import InfiniteScroll from "@/Components/InfiniteScroll";
+import { getNDKInstance } from "@/Helpers/utils";
+import Backbar from "@/Components/Backbar";
+import RelayPreview from "./Relays/RelayPreview/RelayPreview";
 import { useRouter } from "next/router";
 
 const MixEvents = (articles, curations, videos) => {
@@ -42,27 +39,12 @@ const MixEvents = (articles, curations, videos) => {
 
 export default function DiscoverSharedRelay() {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState(0);
-  const [selectedFilter, setSelectedFilter] = useState(getDefaultFilter());
-  const [selectedCategory, setSelectedCategory] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const userKeys = useSelector((state) => state.userKeys);
-  const userAppSettings = useSelector((state) => state.userAppSettings);
   const extrasRef = useRef(null);
   const tabs = [t("AR9ctVs"), t("AesMg52"), t("AVysZ1s"), t("AStkKfQ")];
   const relay = router.query.r;
-  const relaysList = useMemo(() => {
-    if (userAppSettings) {
-      return (
-        userAppSettings?.settings?.content_sources?.notes?.relays?.list?.map(
-          (_) => _[0]
-        ) || []
-      );
-    }
-    return [];
-  }, [userAppSettings]);
 
   useEffect(() => {
     if (!extrasRef.current) return;
@@ -82,167 +64,91 @@ export default function DiscoverSharedRelay() {
     };
   }, []);
 
-  const handleUpdateSettings = async () => {
-    try {
-      let optionsToSave = {
-        ...userAppSettings?.settings,
-        content_sources: {
-          ...userAppSettings?.settings?.content_sources,
-          mixed_content: {
-            ...userAppSettings?.settings?.content_sources?.mixed_content,
-            relays: {
-              index:
-                userAppSettings?.settings?.content_sources?.mixed_content
-                  ?.relays?.index || 0,
-              list: [
-                ...(userAppSettings?.settings?.content_sources?.mixed_content
-                  ?.relays?.list || []),
-                [relay, true],
-              ],
-            },
-          },
-        },
-      };
-      const event = {
-        kind: 30078,
-        content: JSON.stringify(optionsToSave),
-        tags: [
-          [
-            "client",
-            "Yakihonne",
-            "31990:20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3:1700732875747",
-          ],
-          ["d", "YakihonneAppSettings"],
-        ],
-      };
-
-      let eventInitEx = await InitEvent(
-        event.kind,
-        event.content,
-        event.tags,
-        undefined
-      );
-      if (!eventInitEx) {
-        return;
-      }
-      dispatch(
-        setToPublish({
-          eventInitEx,
-          allRelays: [],
-        })
-      );
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   return (
-    <div>
-      <ArrowUp />
-      <div
-        className="fit-container fx-centered fx-start-h fx-start-v"
-        style={{ gap: 0 }}
-      >
-        {relay && (
+    <>
+      <div style={{ overflow: "auto" }}>
+        <ArrowUp />
+        <div className="fit-container fx-centered fx-start-h fx-start-v">
           <div
-            className={`fit-container fx-centered fx-start-v fx-wrap  fit-container mobile-container`}
-            style={{
-              position: "relative",
-            }}
+            className="fit-container fx-centered fx-start-v fx-start-h"
+            style={{ gap: 0 }}
           >
             <div
-              className="fit-container sticky fx-centered box-pad-h "
-              style={{
-                padding: "1rem",
-                borderBottom: "1px solid var(--very-dim-gray)",
-              }}
+              style={{ gap: 0 }}
+              className={`fx-centered  fx-wrap fit-container`}
             >
-              <div className="main-middle fx-scattered">
-                <h4>{relay}</h4>
-                {userKeys && !relaysList.includes(relay) && (
-                  <button
-                    className="fx-centered btn btn-normal btn-small"
-                    onClick={handleUpdateSettings}
-                  >
-                    <div className="plus-sign"></div>Add to my list
-                  </button>
-                )}
-                {userKeys && relaysList.includes(relay) && (
-                  <div
-                    className="fx-centered btn btn-gst btn-small"
-                    style={{ pointerEvents: "none" }}
-                  >
-                    On my list
-                    <div className="check-24" style={{ margin: 0 }}></div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div
-              className=" main-middle feed-container"
-              style={{
-                overflow: "scroll",
-                marginBottom: "4rem",
-                height: "calc(100dvh - 4.375rem)",
-              }}
-            >
-              <ExploreFeed
-                selectedTab={selectedTab}
-                selectedCategory={selectedCategory}
-                selectedFilter={selectedFilter}
-                isLoading={isLoading}
-                setIsLoading={setIsLoading}
-                relay={relay}
-              />
-            </div>
-            {selectedCategory.group !== "mf" && (
               <div
+                className="fit-container fx-centered box-pad-h "
                 style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  pointerEvents: isLoading ? "none" : "auto",
-                  zIndex: 101,
+                  padding: 0,
                 }}
-                className="fit-container fx-centered box-pad-v"
               >
-                <SelectTabs
+                <div className="main-middle">
+                  <Backbar />
+                </div>
+              </div>
+              <div className="main-middle">
+                <div className="fit-container fx-centered">
+                  <div
+                    className="fit-container fx-scattered fx-col box-marg-s"
+                    style={{ gap: 0 }}
+                  >
+                    <RelayPreview url={relay} addToFavList={true} />
+                  </div>
+                </div>
+              </div>
+              <div
+                className=" main-middle"
+                style={{
+                  marginBottom: "4rem",
+                }}
+              >
+                <ExploreFeed
+                  relay={relay}
                   selectedTab={selectedTab}
-                  setSelectedTab={setSelectedTab}
-                  tabs={tabs}
+                  isLoading={isLoading}
+                  setIsLoading={setIsLoading}
                 />
               </div>
-            )}
+            </div>
           </div>
-        )}
-        {!relay && (
-          <div
-            className="fit-container fx-centered fx-col"
-            style={{ height: "80vh" }}
-          >
-            <div
-              className="yaki-logomark"
-              style={{
-                minWidth: "48px",
-                minHeight: "48px",
-                opacity: 0.5,
-              }}
-            ></div>
-            <h4>Invalid URL</h4>
-            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-              It looks like the shared relay URL is broken or does not exist
-            </p>
-          </div>
-        )}
+        </div>
       </div>
-    </div>
+
+      <div
+        style={{
+          position: "fixed",
+          bottom: 0,
+          left: 0,
+          pointerEvents: isLoading ? "none" : "auto",
+          zIndex: 101,
+        }}
+        className="fit-container fx-centered box-pad-v "
+      >
+        <div className="main-container">
+          <main
+            style={{ height: "80px" }}
+            className="fx-centered fx-end-h box-pad-h-s"
+          >
+            <div className="main-page-nostr-container fx-centered">
+              <div className="main-middle fx-centered box-pad-h">
+                <div className="fx-centered" style={{ width: "max-content" }}>
+                  <SelectTabs
+                    selectedTab={selectedTab}
+                    setSelectedTab={setSelectedTab}
+                    tabs={tabs}
+                  />
+                </div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </>
   );
 }
 
 const ExploreFeed = ({
-  selectedCategory,
-  selectedFilter,
   selectedTab,
   isLoading,
   setIsLoading,
@@ -256,29 +162,22 @@ const ExploreFeed = ({
     curations: undefined,
     videos: undefined,
   });
-  const [notesSuggestions, setNotesSuggestions] = useState([]);
   const [isEndOfQuerying, setIsEndOfQuerying] = useState(false);
-  const [ndkInstance, setNDKInstance] = useState(false);
 
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
       let dateCheckerArts = lastEventsTimestamps.articles;
-      // ? lastEventsTimestamps.articles - 86400
-      // : Math.floor(Date.now() / 1000) - 86400;
       let dateCheckerCurations = lastEventsTimestamps.curations;
-      // ? lastEventsTimestamps.curations - 86400
-      // : Math.floor(Date.now() / 1000) - 86400;
       let dateCheckerVideos = lastEventsTimestamps.videos;
-      // ? lastEventsTimestamps.videos - 86400
-      // : Math.floor(Date.now() / 1000) - 86400;
 
       const { artsFilter, curationsFilter, videosFilter } = getFilter();
+      let ndk = await getNDKInstance(relay);
       let relayUrls = [relay];
       let [articles, curations, videos] = await Promise.all([
-        getSubData(artsFilter, undefined, relayUrls, ndkInstance),
-        getSubData(curationsFilter, undefined, relayUrls, ndkInstance),
-        getSubData(videosFilter, undefined, relayUrls, ndkInstance),
+        getSubData(artsFilter, undefined, relayUrls, ndk),
+        getSubData(curationsFilter, undefined, relayUrls, ndk),
+        getSubData(videosFilter, undefined, relayUrls, ndk),
       ]);
 
       let articles_ = sortEvents(articles.data).filter(
@@ -310,36 +209,20 @@ const ExploreFeed = ({
             : undefined,
       });
 
-      if (
-        articles_.length === 0 &&
-        curations_.length === 0 &&
-        videos_.length === 0
-      )
-        setIsEndOfQuerying(true);
       setContent((prev) =>
-        filterContent(
-          selectedFilter,
-          removeEventsDuplicants([
-            ...prev,
-            ...MixEvents(articles_, curations_, videos_).map((event) =>
-              selectedCategory.value === "top"
-                ? event.content
-                  ? {
-                      ...getParsedRepEvent(JSON.parse(event.content)),
-                      created_at: event.created_at,
-                    }
-                  : false
-                : getParsedRepEvent(event)
-            ),
-          ]).filter((event) => {
-            if (
-              event &&
-              event.title &&
-              !([30004, 30005].includes(event.kind) && event.items.length === 0)
-            )
-              return event;
-          })
-        )
+        removeEventsDuplicants([
+          ...prev,
+          ...MixEvents(articles_, curations_, videos_).map((event) =>
+            getParsedRepEvent(event)
+          ),
+        ]).filter((event) => {
+          if (
+            event &&
+            event.title &&
+            !([30004, 30005].includes(event.kind) && event.items.length === 0)
+          )
+            return event;
+        })
       );
       saveUsers([
         ...new Set([
@@ -348,12 +231,19 @@ const ExploreFeed = ({
           ...videos.pubkeys,
         ]),
       ]);
-      setIsLoading(false);
+      if (
+        articles_.length === 0 &&
+        curations_.length === 0 &&
+        videos_.length === 0
+      ) {
+        setIsEndOfQuerying(true);
+        setIsLoading(false);
+      }
       return;
     };
 
-    if (ndkInstance) contentFromRelays();
-  }, [timestamp, ndkInstance]);
+    contentFromRelays();
+  }, [timestamp]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -422,29 +312,8 @@ const ExploreFeed = ({
     };
   };
 
-  useEffect(() => {
-    const initNDK = async () => {
-      const ndkInstance_ = new NDK({
-        explicitRelayUrls: [relay],
-        enableOutboxModel: true,
-      });
-
-      const signer = new NDKPrivateKeySigner(
-        process.env.NEXT_PUBLIC_DVM_COMMUNICATOR_SEC
-      );
-      ndkInstance_.signer = signer;
-
-      await ndkInstance_.connect();
-      ndkInstance_.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
-        ndk: ndkInstance_,
-      });
-      setNDKInstance(ndkInstance_);
-    };
-    if (relay) initNDK();
-  }, [relay]);
-
   return (
-    <div className="fit-container fx-centered fx-col " style={{ gap: 0 }}>
+    <InfiniteScroll onRefresh={setTimestamp} events={content}>
       {content.map((item, index) => {
         if (!bannedList.includes(item.pubkey))
           return (
@@ -474,6 +343,6 @@ const ExploreFeed = ({
           <LoadingLogo />
         </div>
       )}
-    </div>
+    </InfiniteScroll>
   );
 };

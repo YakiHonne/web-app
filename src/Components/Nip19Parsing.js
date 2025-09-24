@@ -170,7 +170,7 @@ export default function Nip19Parsing({ addr, minimal = false }) {
                 style={{
                   marginTop: ".5rem",
                   backgroundColor: "var(--c1-side)",
-                  border: "none",
+                  // border: "none",
                 }}
               >
                 <KindOne event={event} reactions={false} minimal={true} />

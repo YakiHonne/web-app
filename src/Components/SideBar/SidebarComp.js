@@ -232,6 +232,17 @@ export default function SidebarComp() {
                 <div className={isPage("/") ? "home-bold-24" : "home-24"}></div>
                 <div className="link-label">{t("AJDdA3h")}</div>
               </div>
+              <div
+                onClick={() => {
+                  customHistory("/relays", true);
+                }}
+                className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
+                  isPage("/relays") ? "active-link" : "inactive-link"
+                }`}
+              >
+                <div className={isPage("/relays") ? "server-bold-24" : "server-24"}></div>
+                <div className="link-label">{t("AjGFut6")}</div>
+              </div>
 
               <div
                 onClick={() => {
@@ -489,6 +500,7 @@ export default function SidebarComp() {
                       zIndex: "900",
                       rowGap: 0,
                     }}
+                    onClick={() => setShowSettings(false)}
                   >
                     <div
                       className="fx-centered fx-col fx-start-v fit-container"

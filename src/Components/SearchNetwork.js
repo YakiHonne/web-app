@@ -316,17 +316,19 @@ export default function SearchNetwork({ exit }) {
               </div>
             )}
           </div>
+          <div className="fit-container fx-centered fx-col box-pad-h-s box-pad-v-s">
+
           {searchKeyword && (
             <div
-              className="fit-container box-pad-h-s box-pad-v-s fx-centered"
-              onClick={() => {
-                customHistory(
-                  `/search?keyword=${searchKeyword?.replace("#", "%23")}`
-                );
-                exit();
-              }}
+            className="fit-container fx-centered"
+            onClick={() => {
+              customHistory(
+                `/search?keyword=${searchKeyword?.replace("#", "%23")}`
+              );
+              exit();
+            }}
             >
-              <div className="fit-container slide-down box-pad-h-m box-pad-v-m sc-s-18 fx-centered fx-start-h pointer">
+              <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18 bg-sp fx-centered fx-start-h pointer">
                 <div className="search"></div>{" "}
                 <p className="p-one-line">
                   {t("AvpIWa1")}{" "}
@@ -337,6 +339,28 @@ export default function SearchNetwork({ exit }) {
               </div>
             </div>
           )}
+          {searchKeyword && (
+            <div
+            className="fit-container fx-centered"
+            onClick={() => {
+              customHistory(
+                `/r/notes?r=wss://${searchKeyword?.replace("#", "%23").replace("ws://", "").replace("wss://", "")}`
+              );
+              exit();
+            }}
+            >
+              <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18  bg-sp fx-centered fx-start-h pointer">
+                <div className="server"></div>{" "}
+                <p className="p-one-line">
+                  {t("AlQx13z")}{" "}
+                  <span className="p-bold ">
+                    {searchKeyword.replaceAll("#", "")}
+                  </span>
+                </p>
+              </div>
+            </div>
+          )}
+          </div>
           {userInterestList.length > 0 && (
             <div className="fit-container fx-centered fx-col fx-start-h fx-start-v box-pad-h-m box-pad-v-s">
               <p className="gray-c">{t("AvcFYqP")}</p>

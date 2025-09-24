@@ -454,7 +454,11 @@
 .recent,
 .recent-24,
 .recent-wr,
-.recent-wr-24 {
+.recent-wr-24,
+.republish,
+.republish-24,
+.protected-2,
+.protected-2-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -800,7 +804,11 @@
 .recent,
 .recent-24,
 .recent-wr,
-.recent-wr-24 {
+.recent-wr-24,
+.republish,
+.republish-24,
+.protected-2,
+.protected-2-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -1088,7 +1096,9 @@
 .raw-event,
 .pub-hex,
 .recent,
-.recent-wr {
+.recent-wr,
+.republish,
+.protected-2 {
     min-width: 16px;
     min-height: 16px;
 }
@@ -1304,7 +1314,9 @@
 .burger-menu-24,
 .raw-event-24,
 .recent-24,
-.recent-wr-24 {
+.recent-wr-24,
+.republish-24,
+.protected-2-24 {
     min-width: 24px;
     min-height: 24px;
 }
@@ -1325,6 +1337,12 @@
     min-height: 24px;
 }
 
+.protected-2, .protected-2-24 {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/secure-mono.svg');
+}
+.republish, .republish-24 {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/republish-1-mono.svg');
+}
 .recent-wr, .recent-wr-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/recent-with-replies-mono.svg');
 }

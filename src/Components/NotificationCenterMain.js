@@ -55,6 +55,15 @@ const getReaction = (reaction) => {
   return reaction;
 };
 
+const checkMentionInContent = (note, pubkey) => {
+  let matches = note.match(/\b(?:npub1|nprofile1)[0-9a-z]+\b/g);
+  matches = matches?.map((_) => {
+    if(_.startsWith("npub")) return nip19.decode(_).data;
+    if(_.startsWith("nprofile")) return nip19.decode(_).data.pubkey;
+  }) || []
+  return matches?.includes(pubkey);
+}
+
 const getRepEventsLink = (pubkey, kind, identifier) => {
   let naddr = nip19.naddrEncode({ pubkey, identifier, kind });
   if (kind == 30023) return `/article/${naddr}`;
@@ -98,6 +107,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         };
       }
       if (isReply) {
+        let isMention = checkMentionInContent(event.content, pubkey);
         let label_1 =
           relatedEvent && relatedEvent.pubkey === pubkey
             ? t(eventKind ? "Aj3QSsl" : "A3hNKTw", {
@@ -107,9 +117,18 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
                 name: username,
               });
         let label_2 = event.content;
+        let type = "replies";
+
+        if (isMention) {
+          label_1 = t("A1DWKNA", {
+            name: username,
+          });
+          label_2 = event.content;
+          type = "mentions";
+        }
 
         return {
-          type: "replies",
+          type,
           label_1,
           label_2,
           icon: eventIcons.replies_comments,
@@ -118,6 +137,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         };
       }
       if (isRoot) {
+        let isMention = checkMentionInContent(event.content, pubkey);
         let eventKind = isRoot[0] === "a" ? isRoot[1].split(":")[0] : 1;
         let eventPubkey = isRoot[0] === "a" ? isRoot[1].split(":")[1] : false;
         let eventIdentifier =
@@ -135,9 +155,16 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         let url = eventPubkey
           ? getRepEventsLink(eventPubkey, eventKind, eventIdentifier)
           : `/note/${nEventEncode(isRoot[1])}`;
-
+        let type = "replies";
+        if(isMention) {
+          label_1 = t("A1DWKNA", {
+            name: username,
+          });
+          label_2 = event.content;
+          type = "mentions";
+        }
         return {
-          type: "replies",
+          type,
           label_1,
           label_2,
           id: isRoot[0] === "a" ? eventPubkey : isRoot[1],
@@ -608,9 +635,9 @@ export default function NotificationCenterMain() {
               <div className="setting-24"></div>
             </Link>
           </div>
-          <div className="fit-container box-pad-h fx-even">
+          <div className="fit-container fx-even" style={{gap: 0}}>
             <div
-              className={`list-item-b fx-centered fx-shrink  ${
+              className={`list-item-b fx-centered fx  ${
                 contentFrom === "all" ? "selected-list-item-b" : ""
               }`}
               style={{ padding: " .5rem 1rem" }}
@@ -619,7 +646,7 @@ export default function NotificationCenterMain() {
               {t("AR9ctVs")}
             </div>
             <div
-              className={`list-item-b fx-centered fx-shrink ${
+              className={`list-item-b fx-centered fx ${
                 contentFrom === "mentions" ? "selected-list-item-b" : ""
               }`}
               style={{ padding: " .5rem 1rem" }}
@@ -628,7 +655,7 @@ export default function NotificationCenterMain() {
               {t("A8Da0of")}
             </div>
             <div
-              className={`list-item-b fx-centered fx-shrink ${
+              className={`list-item-b fx-centered fx ${
                 contentFrom === "replies" ? "selected-list-item-b" : ""
               }`}
               style={{ padding: " .5rem 1rem" }}
@@ -638,7 +665,7 @@ export default function NotificationCenterMain() {
             </div>
 
             <div
-              className={`list-item-b fx-centered fx-shrink ${
+              className={`list-item-b fx-centered fx ${
                 contentFrom === "zaps" ? "selected-list-item-b" : ""
               }`}
               style={{ padding: " .5rem 1rem" }}
@@ -647,7 +674,7 @@ export default function NotificationCenterMain() {
               Zaps
             </div>
             <div
-              className={`list-item-b fx-centered fx-shrink ${
+              className={`list-item-b fx-centered fx ${
                 contentFrom === "following" ? "selected-list-item-b" : ""
               }`}
               style={{ padding: " .5rem 1rem" }}
@@ -664,7 +691,7 @@ export default function NotificationCenterMain() {
                   width: "100%",
                   position: "absolute",
                   left: 0,
-                  top: "100px",
+                  top: "110px",
                   overflow: "hidden",
                   zIndex: 211,
                   height: "20px",
@@ -818,12 +845,12 @@ const Notification = ({ event, filterByType = false }) => {
                   </div>
                 )}
               </div>
-              <p
+              <div
                 className="gray-c p-four-lines poll-content-box"
                 style={{ "--p-color": "var(--gray)" }}
               >
                 <MinimalNoteView note={type?.label_2} pubkey={user.pubkey} />
-              </p>
+              </div>
               {/* <p className="gray-c p-four-lines">{type?.label_2}</p> */}
             </div>
           </div>
@@ -851,19 +878,5 @@ const ActivateNotification = () => {
 };
 
 const MinimalNoteView = ({ note, pubkey }) => {
-  const [noteTree, setNoteTree] = useState(false);
-
-  useEffect(() => {
-    const parseNote = () => {
-      try {
-        let pNote = getNoteTree(note, true, true, 50, pubkey);
-
-        setNoteTree(pNote);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    if (note) parseNote();
-  }, [note]);
-  return <>{noteTree || compactContent(note, pubkey)}</>;
+  return <>{getNoteTree(note)}</>;
 };

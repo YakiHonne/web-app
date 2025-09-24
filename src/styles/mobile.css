@@ -288,7 +288,7 @@
     font-size: 12px;
   } */
 
-  .content-source-and-filter{
+  .content-source-and-filter, .sticky{
     top: 80px
   }
    .page-container{

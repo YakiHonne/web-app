@@ -360,6 +360,12 @@
     animation: pulse-orange 2s infinite;
 }
 
+.green-pulse {
+    background: rgba(88, 255, 33, 0.3);
+    box-shadow: 0 0 0 0 rgba(88, 255, 33, 1);
+    animation: pulse-green 2s infinite;
+}
+
 @keyframes bxSpin {
     17% {
         border-bottom-right-radius: 3px;
@@ -457,6 +463,23 @@
     100% {
         transform: scale(0.95);
         box-shadow: 0 0 0 0 rgba(255, 122, 33, 0);
+    }
+}
+
+@keyframes pulse-green {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(88, 255, 33, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(88, 255, 33, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(88, 255, 33, 0);
     }
 }
 

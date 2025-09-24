@@ -15,11 +15,19 @@ export default function Slider({
   useEffect(() => {
     let carousel_container = noScrollBarContainerMain.current;
     let carousel = noScrollBarContainer.current;
-    if (carousel_container.clientWidth < carousel.scrollWidth) {
+    if (carousel_container.clientWidth < carousel.scrollWidth && items.length > 3) {
       setShowArrows(true);
     } else {
       setShowArrows(false);
     }
+
+    if (
+      !(
+        scrollPX + slideBy <
+        carousel.scrollWidth - carousel_container.clientWidth
+      )
+    )
+      slideLeft();
   }, [items]);
 
   const slideRight = () => {
@@ -36,7 +44,7 @@ export default function Slider({
     let pxToSlide = scrollPX - slideBy > 0 ? scrollPX - slideBy : 0;
     setScrollPX(pxToSlide);
   };
-  
+
   return (
     <div
       className="fit-container fx-scattered fx-start-h"

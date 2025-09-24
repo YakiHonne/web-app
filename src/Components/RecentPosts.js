@@ -1,8 +1,7 @@
 import useRecentNotes from "@/Hooks/useRecentNotes";
 import React, { useMemo } from "react";
-import UserProfilePic from "./UserProfilePic";
-import useUserProfile from "@/Hooks/useUsersProfile";
 import useRecentPosts from "@/Hooks/useRecentPosts";
+import UsersGroupProfilePicture from "./UsersGroupProfilePicture";
 
 export default function RecentPosts({
   filter,
@@ -30,12 +29,8 @@ export default function RecentPosts({
 }
 
 const RecentPostsContent = ({ pubkeys, notesLength, onClick }) => {
-  let users = pubkeys.slice(0, 3);
-
   return (
-    <div
-      className="fit-container fx-centered recent-post-container"
-    >
+    <div className="fit-container fx-centered recent-post-container">
       <div className="main-container">
         <main
           style={{ height: "auto" }}
@@ -48,22 +43,7 @@ const RecentPostsContent = ({ pubkeys, notesLength, onClick }) => {
                 style={{ backgroundColor: "var(--c1)", border: "none" }}
                 onClick={onClick}
               >
-                <div className="fx-centered" style={{ position: "relative" }}>
-                  {users.map((user, index) => {
-                    return (
-                      <div
-                        key={user}
-                        style={{
-                          marginLeft: index > 0 ? "-15px" : "0",
-                          zIndex: users.length - index,
-                          position: "relative",
-                        }}
-                      >
-                        <UserCard pubkey={user} />
-                      </div>
-                    );
-                  })}
-                </div>
+                <UsersGroupProfilePicture pubkeys={pubkeys} />
                 <div
                   className="fx-centered"
                   style={{
@@ -80,19 +60,5 @@ const RecentPostsContent = ({ pubkeys, notesLength, onClick }) => {
         </main>
       </div>
     </div>
-  );
-};
-
-const UserCard = ({ pubkey }) => {
-  const { userProfile } = useUserProfile(pubkey);
-  return (
-    <UserProfilePic
-      size={30}
-      mainAccountUser={false}
-      user_id={pubkey}
-      img={userProfile?.picture}
-      allowClick={false}
-      allowPropagation={true}
-    />
   );
 };

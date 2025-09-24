@@ -38,12 +38,15 @@ import { getSubData } from "@/Helpers/Controlers";
 import Link from "next/link";
 import { customHistory } from "@/Helpers/History";
 import PostReaction from "@/Components/PostReaction";
+import { useTheme } from "next-themes";
 
 export default function Article({ event, userProfile }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
-  const isDarkMode = useSelector((state) => state.isDarkMode);
+  // const isDarkMode = useSelector((state) => state.isDarkMode);
+  const { theme } = useTheme()
+  const isDarkMode = ["dark", "gray"].includes(theme);
   const post = event
   const [readMore, setReadMore] = useState([]);
   const [usersList, setUsersList] = useState(false);
@@ -409,7 +412,7 @@ export default function Article({ event, userProfile }) {
                       <MarkdownPreview
                         wrapperElement={{
                           "data-color-mode":
-                            isDarkMode === "0" ? "dark" : "light",
+                            isDarkMode ? "dark" : "light",
                         }}
                         source={
                           showTranslation ? translatedContent : post.content

@@ -22,7 +22,8 @@ export default function useRecentPosts(filter, since, selectedFilter) {
           };
         }),
         1000,
-        filter.relays
+        filter.relays,
+        filter.ndk
       );
       if (data.data.length > 0) {
         let posts = data.data

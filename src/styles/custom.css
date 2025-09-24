@@ -287,7 +287,7 @@ main {
     height: 100svh;
     /* background-color: var(--white); */
     background: var(--white-high-transparent);
-    /* backdrop-filter: blur(8px); */
+    backdrop-filter: blur(5px);
     z-index: 2000;
     opacity: 0;
     animation: fadeout .3s ease-in-out forwards;
@@ -1308,9 +1308,9 @@ main {
 
 .recent-post-container {
     position: fixed;
-    top: 50px;
+    top: 80px;
     left: 0;
-    z-index: 1000;
+    z-index: 100;
 }
 
 .menu-toggle {
@@ -1896,11 +1896,11 @@ main {
 
 .list-item-b {
     padding: 1rem;
-
+    color: var(--gray);
     font-size: 1rem;
     cursor: pointer;
     transition: none;
-
+    border-bottom: 1px solid var(--pale-gray);
 }
 
 .preview-icon {
@@ -1948,7 +1948,7 @@ main {
 }
 
 .selected-list-item-b {
-
+    color: var(--black);
     border-bottom: 2px solid var(--c1);
 }
 
@@ -2142,6 +2142,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     -webkit-backdrop-filter: blur(40px); */
 }
 
+.bg-dg {
+    background-color: var(--dim-gray) !important;
+}
+
 .reply-tail {
     position: absolute;
     left: -.0625rem;
@@ -2152,6 +2156,18 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-bottom: 1px solid var(--dim-gray);
     border-bottom-left-radius: var(--border-r-18);
 }
+
+.relay-item .round-icon-small{
+    display: none;
+}
+.relay-item:hover .round-icon-small{
+    display: flex;
+}
+
+.relay-item:hover {
+    padding-bottom: 1rem;
+}
+
 
 [dir="rtl"] .reply-tail {
     position: absolute;

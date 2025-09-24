@@ -6,20 +6,54 @@ const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
   loading: () => <div>Loading editor...</div>,
 });
 
-const MDEditorWrapper = ({ 
-  direction, 
-  dataColorMode, 
-  preview, 
-  height, 
-  width, 
-  value, 
-  onChange, 
-  selectedTab, 
+const MDEditorWrapper = ({
+  direction,
+  dataColorMode,
+  preview,
+  height,
+  width,
+  value,
+  onChange,
+  selectedTab,
   setSelectedTab,
-  execute 
+  execute,
 }) => {
   const [commands, setCommands] = useState(null);
   const [editorCommands, setEditorCommands] = useState(null);
+
+  useEffect(() => {
+    const handlePaste = (event) => {
+      const items = event.clipboardData?.items;
+
+      if (items) {
+        for (const item of items) {
+          if (item.type.startsWith("image/")) {
+            const file = item.getAsFile();
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+              let fileName = await execute(file);
+              if (fileName) {
+                onChange(
+                  value
+                    ? value + ` ![image](${fileName})`
+                    : `![image](${fileName})`
+                );
+              }
+            };
+            reader.readAsDataURL(file);
+            break;
+          }
+        }
+      }
+    };
+
+    document.addEventListener("paste", handlePaste);
+
+    return () => {
+      document.removeEventListener("paste", handlePaste);
+    };
+  }, [value]);
 
   useEffect(() => {
     const loadCommands = async () => {
@@ -220,12 +254,33 @@ const MDEditorWrapper = ({
             <path
               d="M9 10C10.1046 10 11 9.10457 11 8C11 6.89543 10.1046 6 9 6C7.89543 6 7 6.89543 7 8C7 9.10457 7.89543 10 9 10Z"
               stroke="currentColor"
-              strokeWidth="1.5"
+              strokeWidth="2.3"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
             <path
               d="M13 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V10"
+              stroke="currentColor"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M2.66992 18.9501L7.59992 15.6401C8.38992 15.1101 9.52992 15.1701 10.2399 15.7801L10.5699 16.0701C11.3499 16.7401 12.6099 16.7401 13.3899 16.0701L17.5499 12.5001C18.3299 11.8301 19.5899 11.8301 20.3699 12.5001L21.9999 13.9001"
+              stroke="currentColor"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M18.5138 4.72471C19.2362 5.67443 19.0524 7.02699 18.1031 7.74568C17.1539 8.46437 15.8009 8.28423 15.0822 7.33502C14.3635 6.38581 14.5436 5.03275 15.4928 4.31405"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M17.4704 5.518C16.7191 4.5303 16.911 3.11828 17.8992 2.36326C18.8874 1.60824 20.2989 1.8039 21.054 2.79211C21.809 3.78031 21.6133 5.19182 20.6251 5.94684"
               stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
@@ -246,16 +301,37 @@ const MDEditorWrapper = ({
         icon: (
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
             <path
+              d="M9 10C10.1046 10 11 9.10457 11 8C11 6.89543 10.1046 6 9 6C7.89543 6 7 6.89543 7 8C7 9.10457 7.89543 10 9 10Z"
+              stroke="currentColor"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M13 2H9C4 2 2 4 2 9V15C2 20 4 22 9 22H15C20 22 22 20 22 15V10"
+              stroke="currentColor"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
               d="M18 8V2L20 4"
               stroke="currentColor"
-              strokeWidth="1.5"
+              strokeWidth="2.3"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
             <path
               d="M18 2L16 4"
               stroke="currentColor"
-              strokeWidth="1.5"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M2.66992 18.9501L7.59992 15.6401C8.38992 15.1101 9.52992 15.1701 10.2399 15.7801L10.5699 16.0701C11.3499 16.7401 12.6099 16.7401 13.3899 16.0701L17.5499 12.5001C18.3299 11.8301 19.5899 11.8301 20.3699 12.5001L21.9999 13.9001"
+              stroke="currentColor"
+              strokeWidth="2.3"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
@@ -286,7 +362,7 @@ const MDEditorWrapper = ({
   }, [commands, selectedTab, setSelectedTab, execute]);
 
   if (!commands || !editorCommands) {
-    return <div>Loading editor...</div>;
+    return <div></div>;
   }
 
   return (

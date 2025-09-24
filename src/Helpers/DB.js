@@ -8,6 +8,7 @@ import {
 } from "./Controlers";
 import {
   getEmptyEventStats,
+  getEmptyRelaysStats,
   getEmptyuserMetadata,
   getParsedAuthor,
   sortEvents,
@@ -33,6 +34,7 @@ if (typeof window !== "undefined") {
     followings: "",
     followingsRelays: "",
     followingsInboxRelays: "",
+    followingsFavRelays: "",
     appSettings: "",
     relays: "",
     inboxRelays: "",
@@ -44,6 +46,7 @@ if (typeof window !== "undefined") {
     wot: "",
     blossomServers: "",
     notificationLastEventTS: "",
+    relaysStats: "",
   });
 }
 export { db, ndkdb };
@@ -248,6 +251,17 @@ export const getFollowingsRelays = async () => {
     }
   } else return [];
 };
+export const getFollowingsFavRelays = async () => {
+  if (db) {
+    try {
+      let followingsFavRelays = await db.table("followingsFavRelays").toArray();
+      return followingsFavRelays;
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
+  } else return [];
+};
 
 export const getFollowingsInboxRelays = async () => {
   if (db) {
@@ -274,6 +288,30 @@ export const getEventStats = async (event_id) => {
     }
   } else return [];
 };
+export const getRelaysStats = async (relay) => {
+  if (db) {
+    try {
+      let relayStats = await db.table("relaysStats").toArray();
+
+      return relayStats || [];
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
+  } else return [];
+};
+// export const getRelaysStats = async (relay) => {
+//   if (db) {
+//     try {
+//       let relayStats = await db.table("relaysStats").get(relay);
+
+//       return relayStats || getEmptyRelaysStats(relay);
+//     } catch (err) {
+//       console.log(err);
+//       return [];
+//     }
+//   } else return [];
+// };
 export const saveChatrooms = async (inbox, authors, pubkey) => {
   if (db) {
     let usersPubkeys = inbox.map((inbox) => inbox.pubkey);
@@ -405,6 +443,20 @@ export const savefollowingsRelays = async (followingsRelays) => {
         await db.transaction("rw", db.followingsRelays, async () => {
           for (let relaysSet of followingsRelays)
             await db.followingsRelays.put(relaysSet, relaysSet.pubkey);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+export const savefollowingsFavRelays = async (followingsFavRelays) => {
+  if (db) {
+    try {
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.followingsFavRelays, async () => {
+          for (let relaysSet of followingsFavRelays)
+            await db.followingsFavRelays.put(relaysSet, relaysSet.pubkey);
         });
       });
     } catch (err) {
@@ -784,6 +836,20 @@ export const saveEventStats = async (event_id, stats) => {
       await Dexie.ignoreTransaction(async () => {
         await db.transaction("rw", db.eventStats, async () => {
           await db.eventStats.put(stats, event_id);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+
+export const saveRelaysStats = async (url, stats) => {
+  if (db) {
+    try {
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.relaysStats, async () => {
+          await db.relaysStats.put(stats, url);
         });
       });
     } catch (err) {

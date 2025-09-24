@@ -4,7 +4,8 @@
     --icon-filter: brightness(0) invert();
 }
 
-[data-theme='light'] {
+[data-theme='light'],
+[data-theme='creamy'] {
     --icon-filter: brightness(0);
 }
 

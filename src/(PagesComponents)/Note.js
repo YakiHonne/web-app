@@ -21,6 +21,7 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import PostReaction from "@/Components/PostReaction";
 import Backbar from "@/Components/Backbar";
 import { straightUp } from "@/Helpers/Helpers";
+import ShowUsersList from "@/Components/ShowUsersList";
 
 export default function Note({ event }) {
   const { state } = {};
@@ -30,6 +31,7 @@ export default function Note({ event }) {
   const { userProfile, isNip05Verified } = useUserProfile(event?.pubkey);
   const { postActions } = useNoteStats(event?.id, event?.pubkey);
   const [showHistory, setShowHistory] = useState(false);
+  const [usersList, setUsersList] = useState(false);
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
   const [translatedNote, setTranslatedNote] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
@@ -97,6 +99,15 @@ export default function Note({ event }) {
   return (
     <div>
       <ArrowUp />
+      {usersList && (
+        <ShowUsersList
+          exit={() => setUsersList(false)}
+          title={usersList.title}
+          list={usersList.list}
+          extras={usersList.extras}
+          extrasType={usersList.extrasType}
+        />
+      )}
       {!isMuted && (
         <div
           className="fx-centered fit-container fx-col fx-start-h"

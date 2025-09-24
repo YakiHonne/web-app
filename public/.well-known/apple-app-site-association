@@ -1,0 +1,24 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "JU5BUTKJC2.com.yakihonne.appyakihonne",
+        "paths": [
+          "/",
+          "/*",
+          "/article/*",
+          "/r/note/*",
+          "/r/discover/*",
+          "/notes/*",
+          "/videos/*",
+          "/profile/*",
+          "/curations/*",
+          "/verify-notes/*",
+          "/wallet/*",
+          "/smart-widget-checker/*"
+        ]
+      }
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = null;
@@ -63,7 +63,7 @@ const recentTagsSlice = createSlice({
 
 const homeSavedNotesSlice = createSlice({
   name: "homeSavedNotes",
-  initialState: {scrollTo: 0, notes: []},
+  initialState: { scrollTo: 0, notes: [] },
   reducers: {
     setHomeSavedNotes(state, action) {
       return action.payload;
@@ -79,6 +79,15 @@ const homeCarouselPostsSlice = createSlice({
     },
   },
 });
+const relaysStatsSlice = createSlice({
+  name: "relaysStats",
+  initialState: [],
+  reducers: {
+    setRelaysStats(state, action) {
+      return action.payload;
+    },
+  },
+});
 
 export const { setInitDMS } = initDMSSlice.actions;
 export const { setIsDarkMode } = isDarkModeSlice.actions;
@@ -88,6 +97,7 @@ export const { setTrendingUsers } = trendingUsersSlice.actions;
 export const { setRecentTags } = recentTagsSlice.actions;
 export const { setHomeSavedNotes } = homeSavedNotesSlice.actions;
 export const { setHomeCarouselPosts } = homeCarouselPostsSlice.actions;
+export const { setRelaysStats } = relaysStatsSlice.actions;
 
 export const InitDMSReducer = initDMSSlice.reducer;
 export const IsDarkModeReducer = isDarkModeSlice.reducer;
@@ -97,3 +107,4 @@ export const TrendingUsersReducer = trendingUsersSlice.reducer;
 export const RecentTagsReducer = recentTagsSlice.reducer;
 export const HomeSavedNotesReducer = homeSavedNotesSlice.reducer;
 export const HomeCarouselPostsReducer = homeCarouselPostsSlice.reducer;
+export const RelaysStatsReducer = relaysStatsSlice.reducer;

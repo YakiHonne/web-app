@@ -142,7 +142,22 @@ export function getNoteTree(
             </a>{" "}
           </Fragment>
         );
-    } else if (
+    } else if (isRelayUrl(el))
+      finalTree.push(
+        <Fragment key={key}>
+          <a
+            style={{ position: "relative", display: "inline-flex" }}
+            className="fx-centered pointer sticker sticker-normal sticker-green-side"
+            href={`/r/notes?r=${el}`}
+            target="_blank"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p>{el}</p>
+            <div className="share-icon"></div>
+          </a>{" "}
+        </Fragment>
+      );
+    else if (
       (el?.includes("nostr:") ||
         el?.includes("naddr") ||
         el?.includes("https://yakihonne.com/smart-widget-checker?naddr=") ||
@@ -156,8 +171,7 @@ export function getNoteTree(
         .replace("https://yakihonne.com/smart-widget-checker?naddr=", "")
         .replace("nostr:", "");
 
-      const parts = nip19add.split(/([@.,?!\s:()’"'])/);
-
+      const parts = nip19add.split(/([@.,?!\s:()’"'`])/);
       const finalOutput = parts.map((part, index) => {
         if (
           part?.startsWith("npub1") ||
@@ -167,17 +181,32 @@ export function getNoteTree(
           part?.startsWith("note1")
         ) {
           const cleanedPart = part.replace(/[@.,?!]/g, "");
-
           return (
             <Fragment key={index}>
               <Nip19Parsing addr={cleanedPart} minimal={minimal} />
             </Fragment>
           );
+        } else if (part.match(nostrSchemaRegex)?.[0]) {
+          return (
+            <Fragment key={index}>
+              <Nip19Parsing
+                addr={part.match(nostrSchemaRegex)?.[0]}
+                minimal={minimal}
+              />
+            </Fragment>
+          );
         }
-
         return part;
       });
       finalTree.push(<Fragment key={key}>{finalOutput} </Fragment>);
+    } else if (el.match(nostrSchemaRegex)?.[0]) {
+      let cleanPart = el.match(nostrSchemaRegex)?.[0];
+
+      finalTree.push(
+        <Fragment key={key}>
+          <Nip19Parsing addr={cleanPart} minimal={minimal} />
+        </Fragment>
+      );
     } else if (el?.startsWith("lnbc") && el.length > 30) {
       finalTree.push(<LNBCInvoice lnbc={el} key={key} />);
     } else if (el?.startsWith("#")) {
@@ -354,11 +383,11 @@ export function getParsedNote(event, isCollapsedNote = false) {
     }
 
     let nEvent = nEventEncode(event.id);
-
+    
     let rawEvent =
       typeof event.rawEvent === "function" ? event.rawEvent() : event;
     let stringifiedEvent = JSON.stringify(rawEvent);
-
+    let isProtected = event.tags.find((tag) => tag[0] === "-");
     if (event.kind === 1) {
       let note_tree = getNoteTree(
         event.content,
@@ -380,6 +409,7 @@ export function getParsedNote(event, isCollapsedNote = false) {
         isPaidNote,
         isCollapsedNote: isCollapsedNote_,
         nEvent,
+        isProtected
       };
     }
 
@@ -893,45 +923,74 @@ const mergeConsecutivePElements = (arr, pubkey) => {
   const result = [];
   let currentTextElement = null;
   let currentImages = [];
-  let tempArray = [];
 
+  // Helpers
+  const isImage = (el) =>
+    el &&
+    typeof el.type !== "string" &&
+    el.props?.src &&
+    el.props?.poster === undefined;
+
+  const isVideo = (el) =>
+    el &&
+    typeof el.type !== "string" &&
+    el.props?.src &&
+    el.props?.poster !== undefined;
+
+  const isComponent = (el) =>
+    el && typeof el.type !== "string" && !el.props?.src;
+
+  const isMediaOrComponent = (el) =>
+    isImage(el) || isVideo(el) || isComponent(el);
+
+  // Step 1: collapse/clean br
+  const cleanedArray = [];
   for (let i = 0; i < arr.length; i++) {
-    if (
-      !(
-        i - 1 > 0 &&
-        i + 1 < arr.length &&
-        arr[i].type === "br" &&
-        typeof arr[i - 1].type !== "string" &&
-        arr[i - 1].props?.src &&
-        typeof arr[i + 1].type !== "string" &&
-        arr[i + 1].props?.src
-      )
-    ) {
-      tempArray.push(arr[i]);
+    const el = arr[i];
+
+    if (el.type === "br") {
+      const prev = arr[i - 1];
+      const next = arr[i + 1];
+
+      // 1. remove br between media/components
+      if (isMediaOrComponent(prev) || isMediaOrComponent(next)) {
+        continue;
+      }
+
+      // 2. remove br if next is br and prev is media/component
+      if (next?.type === "br" && isMediaOrComponent(prev)) {
+        continue;
+      }
+      // 2. remove br if next is br and prev is media/component
+      if (["p", "span"].includes(next?.type) && isMediaOrComponent(prev)) {
+        continue;
+      }
+
+      // Count trailing <br> in cleanedArray
+      let trailingBrCount = 0;
+      for (let j = cleanedArray.length - 1; j >= 0; j--) {
+        if (cleanedArray[j].type === "br") trailingBrCount++;
+        else break;
+      }
+
+      // 3. If already 2 br → only allow more if next is text
+      if (trailingBrCount >= 2) {
+        if (["p", "span"].includes(next?.type)) {
+          continue; // cap at 2 before text
+        } else {
+          continue; // remove any more before media/component
+        }
+      }
+
+      // Otherwise keep this br
+      cleanedArray.push(el);
+    } else {
+      cleanedArray.push(el);
     }
   }
-  tempArray = tempArray.filter((element, index, arr) => {
-    if (element.type === "br") {
-      const prev = arr
-        .slice(0, index)
-        .reverse()
-        .find((el) => el.type !== "br");
-      const next = arr.slice(index + 1).find((el) => el.type !== "br");
 
-      if (
-        prev?.type !== "string" &&
-        prev?.props?.src &&
-        next?.type !== "string" &&
-        next?.props?.src
-      ) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-  for (const element of tempArray) {
+  // Step 2: merge p/span & group images
+  for (const element of cleanedArray) {
     if (["p", "span"].includes(element.type)) {
       if (!currentTextElement) {
         currentTextElement = { ...element };
@@ -941,6 +1000,7 @@ const mergeConsecutivePElements = (arr, pubkey) => {
         };
       } else {
         let tempPrevChildren = currentTextElement.props.children;
+
         if (typeof element.props.children !== "string") {
           tempPrevChildren.push(element.props.children);
         }
@@ -958,6 +1018,7 @@ const mergeConsecutivePElements = (arr, pubkey) => {
         ) {
           tempPrevChildren.push(` ${element.props.children}`);
         }
+
         currentTextElement = {
           ...currentTextElement,
           props: {
@@ -966,11 +1027,7 @@ const mergeConsecutivePElements = (arr, pubkey) => {
           },
         };
       }
-    } else if (
-      typeof element.type !== "string" &&
-      element.props?.src &&
-      element.props?.poster === undefined
-    ) {
+    } else if (isImage(element)) {
       if (currentTextElement) {
         result.push(currentTextElement);
         currentTextElement = null;
@@ -989,15 +1046,372 @@ const mergeConsecutivePElements = (arr, pubkey) => {
     }
   }
 
-  if (currentTextElement) {
-    result.push(currentTextElement);
-  }
-  if (currentImages.length > 0) {
+  // Flush leftovers
+  if (currentTextElement) result.push(currentTextElement);
+  if (currentImages.length > 0)
     result.push(createImageGrid(currentImages, pubkey));
-  }
 
   return result;
 };
+
+function isRelayUrl(value) {
+  try {
+    const u = new URL(value);
+
+    // 1) scheme must be ws:// or wss://
+    if (!/^wss?:$/i.test(u.protocol)) return false;
+
+    const host = u.hostname; // hostname excludes port
+
+    // 2) allow "localhost"
+    if (host === "localhost") return true;
+
+    // 3) allow IPv4 (0.0.0.0 - 255.255.255.255)
+    const ipv4 =
+      /^(25[0-5]|2[0-4]\d|1?\d{1,2})(\.(25[0-5]|2[0-4]\d|1?\d{1,2})){3}$/;
+    if (ipv4.test(host)) return true;
+
+    // 4) require domain with at least one dot and TLD of 2-63 letters
+    //    labels: start/end with alnum, inner chars alnum or hyphen, max 63 per label
+    const domain = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
+    if (domain.test(host)) return true;
+
+    // otherwise reject (this will reject single-label hosts like "a")
+    return false;
+  } catch (e) {
+    return false; // invalid URL string
+  }
+}
+
+// const mergeConsecutivePElements = (arr, pubkey) => {
+//   const result = [];
+//   let currentTextElement = null;
+//   let currentImages = [];
+//   let tempArray = [];
+
+//   // Step 1: filter out <br> between consecutive images
+//   for (let i = 0; i < arr.length; i++) {
+//     if (
+//       !(
+//         i - 1 > 0 &&
+//         i + 1 < arr.length &&
+//         arr[i].type === "br" &&
+//         typeof arr[i - 1].type !== "string" &&
+//         arr[i - 1].props?.src &&
+//         typeof arr[i + 1].type !== "string" &&
+//         arr[i + 1].props?.src
+//       )
+//     ) {
+//       tempArray.push(arr[i]);
+//     }
+//   }
+
+//   // Step 2: collapse multiple consecutive <br> into one
+//   let collapsedArray = [];
+//   for (let i = 0; i < tempArray.length; i++) {
+//     const el = tempArray[i];
+//     if (el.type === "br" && collapsedArray.at(-1)?.type === "br") {
+//       continue; // skip duplicate <br>
+//     }
+//     collapsedArray.push(el);
+//   }
+
+//   // Step 3: remove <br> that touches an image, video, or component
+//   collapsedArray = collapsedArray.filter((el, i, arr) => {
+//     if (el.type === "br") {
+//       const prev = arr[i - 1];
+//       const next = arr[i + 1];
+
+//       const isMediaOrComponent = (node) =>
+//         node &&
+//         typeof node.type !== "string" && // not "p" / "span" / "br"
+//         (node.props?.src || node.props?.poster !== undefined);
+
+//       if (isMediaOrComponent(prev) || isMediaOrComponent(next)) {
+//         return false; // drop this <br>
+//       }
+//     }
+//     return true;
+//   });
+
+//   // Step 4: process collapsedArray like before
+//   for (const element of collapsedArray) {
+//     if (["p", "span"].includes(element.type)) {
+//       if (!currentTextElement) {
+//         currentTextElement = { ...element };
+//         currentTextElement.props = {
+//           ...element.props,
+//           children: [element.props.children],
+//         };
+//       } else {
+//         let tempPrevChildren = currentTextElement.props.children;
+//         if (typeof element.props.children !== "string") {
+//           tempPrevChildren.push(element.props.children);
+//         }
+//         if (
+//           typeof tempPrevChildren[tempPrevChildren.length - 1] === "string" &&
+//           typeof element.props.children === "string"
+//         ) {
+//           tempPrevChildren[tempPrevChildren.length - 1] =
+//             `${tempPrevChildren[tempPrevChildren.length - 1]} ${element.props.children}`;
+//         }
+//         if (
+//           typeof tempPrevChildren[tempPrevChildren.length - 1] !== "string" &&
+//           typeof element.props.children === "string"
+//         ) {
+//           tempPrevChildren.push(` ${element.props.children}`);
+//         }
+//         currentTextElement = {
+//           ...currentTextElement,
+//           props: {
+//             ...currentTextElement.props,
+//             children: tempPrevChildren,
+//           },
+//         };
+//       }
+//     } else if (
+//       typeof element.type !== "string" &&
+//       element.props?.src &&
+//       element.props?.poster === undefined
+//     ) {
+//       if (currentTextElement) {
+//         result.push(currentTextElement);
+//         currentTextElement = null;
+//       }
+//       currentImages.push(element);
+//     } else {
+//       if (currentTextElement) {
+//         result.push(currentTextElement);
+//         currentTextElement = null;
+//       }
+//       if (currentImages.length > 0) {
+//         result.push(createImageGrid(currentImages, pubkey));
+//         currentImages = [];
+//       }
+//       result.push(element);
+//     }
+//   }
+
+//   if (currentTextElement) {
+//     result.push(currentTextElement);
+//   }
+//   if (currentImages.length > 0) {
+//     result.push(createImageGrid(currentImages, pubkey));
+//   }
+
+//   return result;
+// };
+
+// const mergeConsecutivePElements = (arr, pubkey) => {
+//   const result = [];
+//   let currentTextElement = null;
+//   let currentImages = [];
+//   let tempArray = [];
+
+//   // Step 1: filter out <br> between consecutive images
+//   for (let i = 0; i < arr.length; i++) {
+//     if (
+//       !(
+//         i - 1 > 0 &&
+//         i + 1 < arr.length &&
+//         arr[i].type === "br" &&
+//         typeof arr[i - 1].type !== "string" &&
+//         arr[i - 1].props?.src &&
+//         typeof arr[i + 1].type !== "string" &&
+//         arr[i + 1].props?.src
+//       )
+//     ) {
+//       tempArray.push(arr[i]);
+//     }
+//   }
+
+//   // Step 2: collapse multiple consecutive <br> into a single one
+//   const collapsedArray = [];
+//   for (let i = 0; i < tempArray.length; i++) {
+//     const el = tempArray[i];
+//     if (el.type === "br" && collapsedArray.at(-1)?.type === "br") {
+//       continue; // skip duplicate <br>
+//     }
+//     collapsedArray.push(el);
+//   }
+
+//   // Step 3: process collapsedArray
+//   for (const element of collapsedArray) {
+//     if (["p", "span"].includes(element.type)) {
+//       if (!currentTextElement) {
+//         currentTextElement = { ...element };
+//         currentTextElement.props = {
+//           ...element.props,
+//           children: [element.props.children],
+//         };
+//       } else {
+//         let tempPrevChildren = currentTextElement.props.children;
+//         if (typeof element.props.children !== "string") {
+//           tempPrevChildren.push(element.props.children);
+//         }
+//         if (
+//           typeof tempPrevChildren[tempPrevChildren.length - 1] === "string" &&
+//           typeof element.props.children === "string"
+//         ) {
+//           tempPrevChildren[tempPrevChildren.length - 1] =
+//             `${tempPrevChildren[tempPrevChildren.length - 1]} ${element.props.children}`;
+//         }
+//         if (
+//           typeof tempPrevChildren[tempPrevChildren.length - 1] !== "string" &&
+//           typeof element.props.children === "string"
+//         ) {
+//           tempPrevChildren.push(` ${element.props.children}`);
+//         }
+//         currentTextElement = {
+//           ...currentTextElement,
+//           props: {
+//             ...currentTextElement.props,
+//             children: tempPrevChildren,
+//           },
+//         };
+//       }
+//     } else if (
+//       typeof element.type !== "string" &&
+//       element.props?.src &&
+//       element.props?.poster === undefined
+//     ) {
+//       if (currentTextElement) {
+//         result.push(currentTextElement);
+//         currentTextElement = null;
+//       }
+//       currentImages.push(element);
+//     } else {
+//       if (currentTextElement) {
+//         result.push(currentTextElement);
+//         currentTextElement = null;
+//       }
+//       if (currentImages.length > 0) {
+//         result.push(createImageGrid(currentImages, pubkey));
+//         currentImages = [];
+//       }
+//       result.push(element);
+//     }
+//   }
+
+//   if (currentTextElement) {
+//     result.push(currentTextElement);
+//   }
+//   if (currentImages.length > 0) {
+//     result.push(createImageGrid(currentImages, pubkey));
+//   }
+
+//   return result;
+// };
+
+// const mergeConsecutivePElements = (arr, pubkey) => {
+//   const result = [];
+//   let currentTextElement = null;
+//   let currentImages = [];
+//   let tempArray = [];
+
+//   for (let i = 0; i < arr.length; i++) {
+//     if (
+//       !(
+//         i - 1 > 0 &&
+//         i + 1 < arr.length &&
+//         arr[i].type === "br" &&
+//         typeof arr[i - 1].type !== "string" &&
+//         arr[i - 1].props?.src &&
+//         typeof arr[i + 1].type !== "string" &&
+//         arr[i + 1].props?.src
+//       )
+//     ) {
+//       tempArray.push(arr[i]);
+//     }
+//   }
+//   tempArray = tempArray.filter((element, index, arr) => {
+//     if (element.type === "br") {
+//       const prev = arr
+//         .slice(0, index)
+//         .reverse()
+//         .find((el) => el.type !== "br");
+//       const next = arr.slice(index + 1).find((el) => el.type !== "br");
+
+//       if (
+//         prev?.type !== "string" &&
+//         prev?.props?.src &&
+//         next?.type !== "string" &&
+//         next?.props?.src
+//       ) {
+//         return false;
+//       }
+//     }
+
+//     return true;
+//   });
+
+//   for (const element of tempArray) {
+//     if (["p", "span"].includes(element.type)) {
+//       if (!currentTextElement) {
+//         currentTextElement = { ...element };
+//         currentTextElement.props = {
+//           ...element.props,
+//           children: [element.props.children],
+//         };
+//       } else {
+//         let tempPrevChildren = currentTextElement.props.children;
+//         if (typeof element.props.children !== "string") {
+//           tempPrevChildren.push(element.props.children);
+//         }
+//         if (
+//           typeof tempPrevChildren[tempPrevChildren.length - 1] === "string" &&
+//           typeof element.props.children === "string"
+//         ) {
+//           tempPrevChildren[tempPrevChildren.length - 1] = `${
+//             tempPrevChildren[tempPrevChildren.length - 1]
+//           } ${element.props.children}`;
+//         }
+//         if (
+//           typeof tempPrevChildren[tempPrevChildren.length - 1] !== "string" &&
+//           typeof element.props.children === "string"
+//         ) {
+//           tempPrevChildren.push(` ${element.props.children}`);
+//         }
+//         currentTextElement = {
+//           ...currentTextElement,
+//           props: {
+//             ...currentTextElement.props,
+//             children: tempPrevChildren,
+//           },
+//         };
+//       }
+//     } else if (
+//       typeof element.type !== "string" &&
+//       element.props?.src &&
+//       element.props?.poster === undefined
+//     ) {
+//       if (currentTextElement) {
+//         result.push(currentTextElement);
+//         currentTextElement = null;
+//       }
+//       currentImages.push(element);
+//     } else {
+//       if (currentTextElement) {
+//         result.push(currentTextElement);
+//         currentTextElement = null;
+//       }
+//       if (currentImages.length > 0) {
+//         result.push(createImageGrid(currentImages, pubkey));
+//         currentImages = [];
+//       }
+//       result.push(element);
+//     }
+//   }
+
+//   if (currentTextElement) {
+//     result.push(currentTextElement);
+//   }
+//   if (currentImages.length > 0) {
+//     result.push(createImageGrid(currentImages, pubkey));
+//   }
+
+//   return result;
+// };
 
 const createImageGrid = (images, pubkey) => {
   let images_ = images.map((image) => image.props.src);

@@ -30,6 +30,7 @@ import InfiniteScroll from "@/Components/InfiniteScroll";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import RecentPosts from "@/Components/RecentPosts";
 import { straightUp } from "@/Helpers/Helpers";
+import { getNDKInstance } from "@/Helpers/utils";
 
 const MixEvents = (articles, curations, videos) => {
   const interleavedArray = [];
@@ -90,30 +91,12 @@ export default function Discover() {
               style={{ gap: 0 }}
               className={`fx-centered  fx-wrap fit-container`}
             >
-              {/* <div
-                className="fit-container sticky fx-centered box-pad-h "
-                style={{
-                  padding: "1rem",
-                  borderBottom: "1px solid var(--very-dim-gray)",
-                }}
-              > */}
-              {/* <div className="main-middle fx-scattered">
-                  <ContentSource
-                    selectedCategory={selectedCategory}
-                    setSelectedCategory={setSelectedCategory}
-                  />
-                  <ContentFilter
-                    selectedFilter={selectedFilter}
-                    setSelectedFilter={setSelectedFilter}
-                  />
-                </div> */}
               <ContentSourceAndFilter
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
                 selectedFilter={selectedFilter}
                 setSelectedFilter={setSelectedFilter}
               />
-              {/* </div> */}
               <div
                 className=" main-middle"
                 style={{
@@ -206,15 +189,20 @@ const ExploreFeed = ({
       const { artsFilter, curationsFilter, videosFilter } = getFilter();
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
+      let ndk =
+        selectedCategory.group === "af"
+          ? await getNDKInstance(selectedCategory.value)
+          : undefined;
       setSubfilter({
         filter: [...artsFilter, ...curationsFilter, ...videosFilter],
         relays: algoRelay,
+        ndk,
       });
 
       let [articles, curations, videos] = await Promise.all([
-        getSubData(artsFilter, 200, algoRelay, undefined, 20),
-        getSubData(curationsFilter, 200, algoRelay, undefined, 20),
-        getSubData(videosFilter, 200, algoRelay, undefined, 20),
+        getSubData(artsFilter, 200, algoRelay, ndk, 20),
+        getSubData(curationsFilter, 200, algoRelay, ndk, 20),
+        getSubData(videosFilter, 200, algoRelay, ndk, 20),
       ]);
       let articles_ = sortEvents(articles.data).filter(
         (_) => _.created_at > dateCheckerArts

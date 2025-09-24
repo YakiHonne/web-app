@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { filterContent, getBackupWOTList } from "@/Helpers/Encryptions";
-import { getNoteTree, getParsedNote } from "@/Helpers/ClientHelpers";
+import { getParsedNote } from "@/Helpers/ClientHelpers";
 import ArrowUp from "@/Components/ArrowUp";
 import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
@@ -21,7 +21,6 @@ import {
 import HomeCarouselContentSuggestions from "@/Components/HomeCarouselContentSuggestions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
-import { straightUp } from "@/Helpers/Helpers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import KindOne from "@/Components/KindOne";
 import PostAsNote from "@/Components/PostAsNote";
@@ -33,11 +32,6 @@ import SuggestionsCards from "@/Components/SuggestionsCards/SuggestionsCards";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import { setHomeSavedNotes } from "@/Store/Slides/Extras";
 import { useDispatch } from "react-redux";
-import {
-  useFeedScrollRestore,
-  useScrollRestoration,
-} from "@/Hooks/useScrollRestoration";
-import { setNotesCache, getNotesCache } from "@/Helpers/utils";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -195,10 +189,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const homeSavedNotes = useSelector((state) => state.homeSavedNotes);
   const userKeys = useSelector((state) => state.userKeys);
   const [userFollowings, setUserFollowings] = useState(false);
-  const [notes, dispatchNotes] = useReducer(
-    notesReducer,
-    getNotesCache("home") || []
-  );
+  const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(!(notes.length > 0));
   const [notesContentFrom, setNotesContentFrom] = useState(
     getContentFromValue(selectedCategory)
@@ -268,7 +259,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       el.removeEventListener("scroll", handleScroll);
 
       // Save the *latest* value we tracked, not whatever reset value we see at unmount
-      setNotesCache("home", latestNotesRef.current);
       dispatch(
         setHomeSavedNotes({
           scrollTo: latestScrollRef.current,

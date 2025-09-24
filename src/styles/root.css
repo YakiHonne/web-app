@@ -130,7 +130,7 @@
 }
 
 [data-theme='dark'] {
-    --white: #010101;
+    --white: #000000;
     --white-transparent: #171718ed;
     --white-high-transparent: #0000007b;
     --black: #d8d8d8;
@@ -138,7 +138,7 @@
     --black-high-transparent: #ffffff04;
     --dark-gray: #E5E5E5;
     --gray: #909090;
-    --pale-gray: #232323;
+    --pale-gray: #333333;
     --dim-gray: #252525;
     --very-dim-gray: #191919;
     --c1: #ee7700;
@@ -175,46 +175,52 @@
     --border-r-32: 32px;
     --border-r-50: 50%;
 }
+
 [data-theme='creamy'] {
-    --white: #fff5eb;               /* base background */
-    --white-transparent: #fff5ebed; /* subtle overlay */
+    --white: #fff5eb;
+    /* base background */
+    --white-transparent: #fff5ebed;
+    /* subtle overlay */
     --white-high-transparent: #fff5eb7b;
-    
+
     /* Neutrals */
-    --black: #1A1A1A;               /* main text */
-    --black-transparent: #00000080; /* secondary text */
-    --black-high-transparent: #00000012;
-    
-    --dark-gray: #2E2E2E;           /* headings / strong UI */
-    --gray: #555555;                /* secondary text */
-    --pale-gray: #A3A3A3;           /* dividers / disabled text */
-    --dim-gray: #BEBEBE;            /* soft surface */
-    --very-dim-gray: #717171;       /* lightest surface */
-    
+    --black: #000000;
+    --black-transparent: #0000009e;
+    --black-high-transparent: #000000a8;
+    --dark-gray: #202020;
+    --gray: #909090;
+    --pale-gray: #ffe7d2;
+    --dim-gray: #fae7d2;
+    --very-dim-gray: #fff3e5;
+
     /* Accent Colors */
-    --c1: #ee7700;                  /* orange primary */
-    --c1-side: #fceedf;             /* soft orange background */
+    --c1: #ee7700;
+    /* orange primary */
+    --c1-side: #fae7d2;
+    /* soft orange background */
     --c1-transparent: #ee770020;
     --c1-pale: #ffddb8;
-    
-    --c2: #5B21B6;                  /* deep purple */
-    --c3: #1E3A8A;                  /* deep blue */
+
+    --c2: #5B21B6;
+    /* deep purple */
+    --c3: #1E3A8A;
+    /* deep blue */
     --c3-transparent: #1e3a8a40;
     --c3-transparent-darker: #1e3a8acc;
-    
+
     /* Status Colors */
     --red-main: #DC2626;
     --red-side: #dc262620;
-    
+
     --green-main: #16A34A;
     --green-side: #16a34a20;
-    
+
     --blue-main: #2563EB;
     --blue-side: #2563eb20;
-    
+
     --orange-main: #F97316;
     --orange-side: #f9731620;
-    
+
     --yellow: #EAB308;
     --90: 90px;
     --64: 64px;

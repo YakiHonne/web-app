@@ -21,7 +21,13 @@ import {
   setUserKeys,
   setUserMetadata,
 } from "@/Store/Slides/UserData";
-import { clearDB, savefollowingsInboxRelays, savefollowingsRelays } from "./DB";
+import {
+  clearDB,
+  savefollowingsFavRelays,
+  savefollowingsInboxRelays,
+  savefollowingsRelays,
+  saveUsers,
+} from "./DB";
 import {
   getAppLang,
   getContentTranslationConfig,
@@ -35,7 +41,7 @@ import axios from "axios";
 import relaysOnPlatform from "@/Content/Relays";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
 import { t } from "i18next";
-import { localStorage_ } from "./utils";
+import { getRelayMetadata, localStorage_, saveLocalRelaysMetadata, setRelayMetadata } from "./utils";
 
 const ConnectNDK = async (relays) => {
   try {
@@ -399,7 +405,10 @@ const initiFirstLoginStats = (user_stats) => {
 const getUser = (pubkey) => {
   const store_ = store.getState();
   const nostrAuthors = store_.nostrAuthors;
-  return nostrAuthors.find((item) => item.pubkey === pubkey);
+  return (
+    nostrAuthors.find((item) => item.pubkey === pubkey) ||
+    getEmptyuserMetadata(pubkey)
+  );
 };
 
 const getUsersFromPubkeys = (pubkeys) => {
@@ -446,6 +455,26 @@ const saveInboxRelaysListsForUsers = async (pubkeyList) => {
       });
 
     savefollowingsInboxRelays(followingsRelayList);
+  } catch (err) {
+    console.log(err);
+  }
+};
+const saveFavRelaysListsForUsers = async (pubkeyList) => {
+  try {
+    let list = await getSubData([{ kinds: [10012], authors: pubkeyList }]);
+    let followingsRelayList = [...list.data]
+      .filter((_, index, arr) => {
+        if (arr.findIndex((item) => item.pubkey === _.pubkey) === index)
+          return true;
+      })
+      .map((author) => {
+        return {
+          pubkey: author.pubkey,
+          relays: getFavRelayList(author.tags)
+        };
+      });
+
+    savefollowingsFavRelays(followingsRelayList);
   } catch (err) {
     console.log(err);
   }
@@ -498,7 +527,7 @@ const getSubData = async (
   timeout = 1000,
   relayUrls = [],
   ndk = ndkInstance,
-  maxEvents = 1000,
+  maxEvents = 1000
 ) => {
   const userRelays = relaysOnPlatform;
 
@@ -595,7 +624,7 @@ const InitEvent = async (
           );
         },
       });
-      await bunker.connect();
+      // await bunker.connect();
       tempEvent = await bunker.signEvent(tempEvent);
     } else {
       tempEvent = finalizeEvent(tempEvent, userKeys.sec);
@@ -654,196 +683,12 @@ const translate = async (text) => {
     };
   }
   let lang = getAppLang();
-  let { raw, specialContent } = extractRawContent(text);
-
   let res = await axiosInstance.post("/api/v1/translate", {
     service,
     lang,
     text,
   });
   return res.data;
-  // if (service.service === "dl") {
-  //   let translatedContent = await dlTranslate(
-  //     raw,
-  //     service,
-  //     lang,
-  //     specialContent
-  //   );
-  //   return translatedContent;
-  // }
-  // if (service.service === "lt") {
-  //   let translatedContent = await ltTranslate(
-  //     raw,
-  //     service,
-  //     lang,
-  //     specialContent
-  //   );
-  //   return translatedContent;
-  // }
-  // if (service.service === "nw") {
-  //   let translatedContent = await nwTranslate(
-  //     raw,
-  //     service,
-  //     lang,
-  //     specialContent
-  //   );
-  //   return translatedContent;
-  // }
-};
-
-const dlTranslate = async (text, service, lang, specialContent) => {
-  try {
-    let path = service.plan
-      ? translationServicesEndpoints.dl.pro
-      : translationServicesEndpoints.dl.free;
-    let apikey = service.plan ? service.proApikey : service.freeApikey;
-    if (!apikey) {
-      return {
-        status: 400,
-        res: "",
-      };
-    }
-    let data = await axios.post(
-      path,
-      {
-        text: [text],
-        target_lang: lang,
-      },
-      {
-        headers: {
-          Authorization: `DeepL-Auth-key ${apikey}`,
-        },
-      }
-    );
-    return {
-      status: 200,
-      res: revertContent(data.data.translations[0].text, specialContent),
-    };
-  } catch (err) {
-    console.log(err);
-    return {
-      status:
-        err?.response?.status >= 500 || !err?.response?.status ? 500 : 400,
-      res: "",
-    };
-  }
-};
-const ltTranslate = async (text, service, lang, specialContent) => {
-  try {
-    let path = service.plan
-      ? translationServicesEndpoints.lt.pro
-      : translationServicesEndpoints.lt.free;
-    let apikey = service.plan ? service.proApikey : service.freeApikey;
-    if (service.plan && !apikey) {
-      return {
-        status: 400,
-        res: "",
-      };
-    }
-    let data = await axios.post(
-      path,
-      {
-        q: text,
-        source: "auto",
-        target: lang,
-        format: "text",
-        api_key: apikey || "",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        withCredentials: true,
-      }
-    );
-    return {
-      status: 200,
-      res: revertContent(data.data.translatedText, specialContent),
-    };
-  } catch (err) {
-    console.log(err);
-    return {
-      status:
-        err?.response?.status >= 500 || !err?.response?.status ? 500 : 400,
-      res: "",
-    };
-  }
-};
-const nwTranslate = async (text, service, lang, specialContent) => {
-  try {
-    let path = translationServicesEndpoints.nw.pro;
-
-    let apikey = service.proApikey;
-    if (!apikey) {
-      return {
-        status: 400,
-        res: "",
-      };
-    }
-    let data = await axios.post(
-      path,
-      {
-        q: text,
-        source: "auto",
-        target: lang,
-        format: "text",
-        api_key: apikey || "",
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    return {
-      status: 200,
-      res: revertContent(data.data.translatedText, specialContent),
-    };
-  } catch (err) {
-    console.log(err);
-    return {
-      status:
-        err?.response?.status >= 500 || !err?.response?.status ? 500 : 400,
-      res: "",
-    };
-  }
-};
-
-const extractRawContent = (text) => {
-  let raw = text
-    .split(/(\n)/)
-    .flatMap((segment) => (segment === "\n" ? "\n" : segment.split(/\s+/)))
-    .filter(Boolean);
-
-  let specialContent = [];
-  let scIndex = 0;
-  for (let i = 0; i < raw.length; i++) {
-    if (
-      /(https?:\/\/)/i.test(raw[i]) ||
-      raw[i].startsWith("npub1") ||
-      raw[i].startsWith("nprofile1") ||
-      raw[i].startsWith("nevent") ||
-      raw[i].startsWith("naddr") ||
-      raw[i].startsWith("note1") ||
-      raw[i].startsWith("nostr:") ||
-      raw[i].startsWith("#")
-    ) {
-      specialContent.push(raw[i]);
-      raw[i] = `{${scIndex}}`;
-      scIndex = scIndex + 1;
-    }
-  }
-  return {
-    raw: raw.join(" "),
-    specialContent,
-  };
-};
-const revertContent = (rawContent, specialContent) => {
-  let raw = rawContent;
-  for (let i = 0; i < specialContent.length; i++) {
-    raw = raw.replace(`{${i}}`, specialContent[i]);
-  }
-  return raw;
 };
 
 const publishEvent = async (event, relays = relaysOnPlatform) => {
@@ -979,6 +824,38 @@ const walletWarning = () => {
   );
 };
 
+const saveRelayMetadata = async (relays) => {
+  if (!relays || relays.length === 0) return;
+  let onlyUnsavedRelays = relays.filter((relay) => !getRelayMetadata(relay));
+  let relaysMetadata = await Promise.all(
+    onlyUnsavedRelays.map((relay) => fetchRelayMetadata(relay))
+  );
+  relaysMetadata = relaysMetadata.filter((_) => _);
+  let pubkeys = relaysMetadata.map((_) => _.pubkey);
+
+  relaysMetadata.forEach((_) => {
+    setRelayMetadata(_.url, _);
+  });
+  saveUsers(pubkeys);
+  saveLocalRelaysMetadata()
+  return relaysMetadata;
+};
+
+const fetchRelayMetadata = async (relay) => {
+  try {
+    const info = await axios.get(relay.replace("wss", "https"), {
+      headers: {
+        Accept: "application/nostr+json",
+      },
+    });
+    if(typeof info.data !== "object") return false
+    return { url: relay, ...info.data };
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+
 export {
   ConnectNDK,
   aggregateUsers,
@@ -995,6 +872,7 @@ export {
   getUser,
   getUsersFromPubkeys,
   saveRelaysListsForUsers,
+  saveFavRelaysListsForUsers,
   getRelayList,
   getFavRelayList,
   handleReceivedEvents,
@@ -1009,4 +887,5 @@ export {
   getDVMJobResponse,
   saveInboxRelaysListsForUsers,
   walletWarning,
+  saveRelayMetadata,
 };

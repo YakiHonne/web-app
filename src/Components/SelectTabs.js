@@ -35,7 +35,7 @@ export function SelectTabs({ selectedTab, tabs, setSelectedTab }) {
       style={{
         gap: 0,
         position: "relative",
-        height: "3.2rem",
+        height: "2.8rem",
         border: "none",
         padding: "0 .45rem",
       }}

@@ -5,7 +5,7 @@ import ToPublish from "@/Components/ToPublish";
 import LoadingScreen from "@/Components/LoadingScreen";
 import ToPublishDrafts from "@/Components/ToPublishDrafts";
 import axiosInstance from "@/Helpers/HTTP_Client";
-import { getAppLang } from "@/Helpers/Helpers";
+import { FileUpload, getAppLang } from "@/Helpers/Helpers";
 import {
   getArticleDraft,
   getPostToEdit,
@@ -18,6 +18,7 @@ import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import ProfilesPicker from "@/Components/ProfilesPicker";
 import Router, { useRouter } from "next/router";
+import { useTheme } from "next-themes";
 
 const getUploadsHistory = () => {
   let history = localStorage?.getItem("YakihonneUploadsHistory");
@@ -46,7 +47,9 @@ export default function WritingArticle() {
 
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
-  const isDarkMode = useSelector((state) => state.isDarkMode);
+  // const isDarkMode = useSelector((state) => state.isDarkMode);
+  const { theme } = useTheme();
+  const isDarkMode = ["dark", "gray"].includes(theme);
   const [draftData, setDraftData] = useState({});
 
   const [content, setContent] = useState(post_content);
@@ -104,21 +107,28 @@ export default function WritingArticle() {
     }
   };
 
-  const execute = () => {
-    return new Promise((resolve, reject) => {
-      const input = document.createElement("input");
-      input.type = "file";
-      input.click();
-      input.onchange = async (e) => {
-        if (e.target.files[0]) {
-          setIsLoading(true);
-          let imgPath = await uploadToS3(e.target.files[0]);
-          setIsLoading(false);
-          resolve(imgPath);
-        } else {
-          resolve(false);
-        }
-      };
+  const execute = (file) => {
+    return new Promise(async (resolve, reject) => {
+      if (file) {
+        setIsLoading(true);
+        let imgPath = await FileUpload(file, userKeys);
+        setIsLoading(false);
+        resolve(imgPath);
+      } else {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.click();
+        input.onchange = async (e) => {
+          if (e.target.files[0]) {
+            setIsLoading(true);
+            let imgPath = await FileUpload(e.target.files[0], userKeys);
+            setIsLoading(false);
+            resolve(imgPath);
+          } else {
+            resolve(false);
+          }
+        };
+      }
     });
   };
 
@@ -232,14 +242,14 @@ export default function WritingArticle() {
       {showClearEditPopup && (
         <ClearEditPopup handleClearOptions={handleClearOptions} />
       )}
-      <div>
+      <div >
         <div className="fit-container fx-centered">
           <div
-            className="main-container"
-            style={{ width: !userKeys ? "unset" : "min(100%, 1700px)" }}
+            className="fit-container"
+       
           >
             <main
-              className="main-page-nostr-container fit-container"
+              className="fit-container"
               style={{ overflow: "visible" }}
             >
               <div className="fx-centered fit-container fx-start-h fx-start-v">
@@ -249,7 +259,7 @@ export default function WritingArticle() {
                       {(userKeys.sec || userKeys.ext || userKeys.bunker) && (
                         <>
                           <div className="fit-container">
-                            <div className="fx-scattered fit-container sticky">
+                            <div className="fx-scattered fit-container sticky fx-wrap">
                               <div className="fx-centered">
                                 <button
                                   className="btn btn-normal btn-gray"
@@ -389,9 +399,7 @@ export default function WritingArticle() {
                             >
                               <MDEditorWrapper
                                 direction={selectedTab === 0 ? "ltr" : "rtl"}
-                                dataColorMode={
-                                  isDarkMode === "0" ? "dark" : "light"
-                                }
+                                dataColorMode={isDarkMode ? "dark" : "light"}
                                 preview={!isEdit ? "preview" : "live"}
                                 height={"80vh"}
                                 width={"100%"}

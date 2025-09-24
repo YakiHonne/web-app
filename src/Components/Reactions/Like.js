@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import EmojiPicker from "emoji-picker-react";
 import EmojiImg from "@/Components/EmojiImg";
+import { useTheme } from "next-themes";
 
 export default function Like({ isLiked, event, actions, tagKind = "e" }) {
   const dispatch = useDispatch();
@@ -17,7 +18,9 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
   const [eventID, setEventID] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
 
-  const isDarkMode = useSelector((state) => state.isDarkMode);
+  // const isDarkMode = useSelector((state) => state.isDarkMode);
+  const { theme } = useTheme();
+  const isDarkMode = ["dark", "gray"].includes(theme);
   const [showEmoji, setShowEmoji] = useState(false);
   const optionsRef = useRef(null);
 
@@ -52,6 +55,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
 
   const reactToNote = async (emoji) => {
     // e.stopPropagation();
+    setShowEmoji(false)
     if (isLoading) return;
     try {
       if (!userKeys) {
@@ -138,9 +142,10 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
               reactionsDefaultOpen={true}
               theme={isDarkMode ? "dark" : "light"}
               previewConfig={{ showPreview: false }}
-              skinTonesDisabled={true}
+              suggestedEmojisMode="recent"
+              skinTonesDisabled={false}
               searchDisabled={false}
-              height={300}
+              height={250}
               onEmojiClick={(data) => reactToNote(data.emoji)}
             />
           </div>

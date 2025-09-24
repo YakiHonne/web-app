@@ -9,8 +9,9 @@ import {
   getBech32,
   getEmptyuserMetadata,
   getHex,
+  hexToUint8Array,
 } from "@/Helpers/Encryptions";
-import { generateSecretKey, getPublicKey, nip04, nip44 } from "nostr-tools";
+import { generateSecretKey, getPublicKey, nip04, nip19, nip44 } from "nostr-tools";
 import * as secp from "@noble/secp256k1";
 import { copyText, FileUpload } from "@/Helpers/Helpers";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
@@ -646,8 +647,8 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
       let toSave = [
         "Important: Store this information securely. If you lose it, recovery may not be possible. Keep it private and protected at all times",
         "---",
-        `Private key: ${getBech32("nsec", userKeys.sec)}`,
-        `Public key: ${getBech32("npub", userKeys.pub)}`,
+        `Private key: ${nip19.nsecEncode(hexToUint8Array(userKeys.sec))}`,
+        `Public key: ${nip19.npubEncode(userKeys.pub)}`,
       ];
       downloadAsFile(
         toSave.join("\n"),

@@ -164,7 +164,7 @@ export default function Gallery({ imgs, pubkey }) {
             style={{
               margin: ".5rem 0 .5rem 0",
               cursor: "zoom-in",
-              maxWidth: "100%",
+              maxWidth: "95%",
               objectFit: "fit",
               maxHeight: "600px",
             }}

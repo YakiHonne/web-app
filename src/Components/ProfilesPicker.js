@@ -54,7 +54,7 @@ export default function ProfilesPicker({ setSelectedProfile }) {
             left: showconnectedAccounts ? "-25%" : 0,
             borderRadius: "18px"
           }}
-          className={showconnectedAccounts ? "box-pad-h-s sc-s" : ""}
+          className={showconnectedAccounts ? "box-pad-h-s " : ""}
         >
           <div
             className="fx-centered fx-col box-pad-v-s"

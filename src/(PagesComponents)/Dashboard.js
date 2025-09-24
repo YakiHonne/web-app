@@ -41,7 +41,6 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import AddArticlesToCuration from "@/Components/AddArticlesToCuration";
 import { customHistory } from "@/Helpers/History";
 import LoadingLogo from "@/Components/LoadingLogo";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { useTranslation } from "react-i18next";
 import ShowPeople from "@/Components/ShowPeople";
 import UserFollowers from "@/Components/UserFollowers";
@@ -50,6 +49,7 @@ import LaunchSW from "@/Components/LaunchSW";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { DraggableComp } from "@/Components/DraggableComp";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -244,7 +244,7 @@ export default function Dashboard() {
         userProfile = JSON.parse(
           userProfile.find((event) => event.kind === 10000105).content
         );
-        
+
         let zaps_sent = sats
           ? sats.data.stats[userKeys.pub].zaps_sent
           : { count: 0, msats: 0 };
@@ -266,14 +266,13 @@ export default function Dashboard() {
           latestPublished: sortEvents(latestPublished),
           localDraft,
         });
-      
+
         setIsLoading(false);
       } catch (err) {
         console.log(err);
       }
     };
     if (userKeys) fetchHomeData();
-  
   }, [userKeys]);
 
   const handleUpdate = async () => {
@@ -2136,10 +2135,10 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
 const NoteCard = ({ event }) => {
   const { t } = useTranslation();
   const isRepost =
-  event.kind === 6
-  ? getParsedNote(JSON.parse(event.content))
-  : getParsedNote(event);
-  if(!isRepost) return null;
+    event.kind === 6
+      ? getParsedNote(JSON.parse(event.content))
+      : getParsedNote(event);
+  if (!isRepost) return null;
   const { postActions } = useNoteStats(isRepost.id, isRepost.pubkey);
   const isFlashNews = isRepost.tags.find(
     (tag) => tag[0] === "l" && tag[1] === "FLASH NEWS"
@@ -2839,14 +2838,6 @@ const ManageInterest = ({ exit }) => {
     }
   };
 
-  const handleDragEnd = (res) => {
-    if (!res.destination) return;
-    let tempArr = structuredClone(interests);
-    let [reorderedArr] = tempArr.splice(res.source.index, 1);
-    tempArr.splice(res.destination.index, 0, reorderedArr);
-    setInterest(tempArr);
-  };
-
   return (
     <div className="fx-centered fit-container fx-col ">
       <div className="fit-container fx-scattered box-marg-s box-pad-h ">
@@ -2882,114 +2873,80 @@ const ManageInterest = ({ exit }) => {
           />
           {newInterest && <p className="gray-c slide-down">&#8626;</p>}
         </form>
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="set-carrousel">
-            {(provided, snapshot) => (
-              <div
-                ref={provided.innerRef}
-                style={{
-                  borderRadius: "var(--border-r-18)",
-                  transition: ".2s ease-in-out",
-                  height: "100%",
-                  ...provided.droppableProps.style,
-                }}
-                className="box-pad-v-m fit-container fx-centered fx-start-h fx-start-v fx-col"
-              >
-                {interests.map((item, index) => {
-                  return (
-                    <Draggable
-                      key={index}
-                      draggableId={`${index}`}
-                      index={index}
-                    >
-                      {(provided, snapshot) => (
-                        <div
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          ref={provided.innerRef}
-                          style={{
-                            borderRadius: "var(--border-r-18)",
-                            boxShadow: snapshot.isDragging
-                              ? "14px 12px 105px -41px rgba(0, 0, 0, 0.55)"
-                              : "",
-                            ...provided.draggableProps.style,
-                            overflow: "visible",
-                            backgroundColor: item.toDelete
-                              ? "var(--red-side)"
-                              : "transparent",
-                            borderBottom: "1px solid var(--very-dim-gray)",
-                            gap: 0,
-                          }}
-                          className="fx-scattered  sc-s-18 box-pad-h-m box-pad-v-m fit-container"
-                        >
-                          <div className="fx-centered">
-                            <div
-                              style={{
-                                minWidth: `38px`,
-                                aspectRatio: "1/1",
-                                position: "relative",
-                              }}
-                              className="sc-s-18 fx-centered"
-                            >
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  left: 0,
-                                  top: 0,
-                                  zIndex: 2,
-                                  backgroundImage: `url(${item.icon})`,
-                                }}
-                                className="bg-img cover-bg  fit-container fit-height"
-                              ></div>
-                              <p
-                                className={"p-bold p-caps p-big"}
-                                style={{ position: "relative", zIndex: 1 }}
-                              >
-                                {item.item.charAt(0)}
-                              </p>
-                            </div>
-                            <p className="p-caps">{item.item}</p>
-                          </div>
-                          <div className="fx-centered">
-                            {!item.toDelete && (
-                              <div
-                                onClick={() => handleItemInList(false, index)}
-                                className="round-icon-small"
-                              >
-                                <div className="trash"></div>
-                              </div>
-                            )}
-                            {item.toDelete && (
-                              <div
-                                onClick={() => handleItemInList(true, index)}
-                                className="round-icon-small"
-                              >
-                                <div className="undo"></div>
-                              </div>
-                            )}
-                            <div
-                              className="drag-el"
-                              style={{
-                                minWidth: "16px",
-                                aspectRatio: "1/1",
-                              }}
-                            ></div>
-                          </div>
-                        </div>
-                      )}
-                    </Draggable>
-                  );
-                })}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        <DraggableComp
+          children={interests.map((_) => ({ ..._, id: _?.item }))}
+          setNewOrderedList={setInterest}
+          component={InterestItem}
+          props={{
+            handleItemInList,
+          }}
+          background={false}
+        />
       </div>
       <InterestSuggestionsCards
         list={interests.map((_) => _.item)}
         addItemToList={handleItemsFromSuggestion}
       />
+    </div>
+  );
+};
+
+const InterestItem = ({ item, handleItemInList, index }) => {
+  return (
+    <div className="fx-scattered  sc-s-18 bg-sp box-pad-h-m box-pad-v-s fit-container">
+      <div className="fx-centered">
+        <div
+          style={{
+            minWidth: `38px`,
+            aspectRatio: "1/1",
+            position: "relative",
+          }}
+          className="sc-s-18 fx-centered"
+        >
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              zIndex: 2,
+              backgroundImage: `url(${item.icon})`,
+            }}
+            className="bg-img cover-bg  fit-container fit-height"
+          ></div>
+          <p
+            className={"p-bold p-caps p-big"}
+            style={{ position: "relative", zIndex: 1 }}
+          >
+            {item.item.charAt(0)}
+          </p>
+        </div>
+        <p className="p-caps">{item.item}</p>
+      </div>
+      <div className="fx-centered">
+        {!item.toDelete && (
+          <div
+            onClick={() => handleItemInList(false, index)}
+            className="round-icon-small"
+          >
+            <div className="trash"></div>
+          </div>
+        )}
+        {item.toDelete && (
+          <div
+            onClick={() => handleItemInList(true, index)}
+            className="round-icon-small"
+          >
+            <div className="undo"></div>
+          </div>
+        )}
+        <div
+          className="drag-el"
+          style={{
+            minWidth: "16px",
+            aspectRatio: "1/1",
+          }}
+        ></div>
+      </div>
     </div>
   );
 };

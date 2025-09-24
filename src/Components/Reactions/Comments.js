@@ -4,9 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { getEventStatAfterEOSE, InitEvent } from "@/Helpers/Controlers";
 import { saveEventStats } from "@/Helpers/DB";
-import {
-  extractNip19,
-} from "@/Helpers/Helpers";
+import { extractNip19 } from "@/Helpers/Helpers";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import LoadingDots from "@/Components/LoadingDots";
 import UploadFile from "@/Components/UploadFile";
@@ -17,7 +15,8 @@ import NotePreview from "@/Components/NotePreview";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import ProfilesPicker from "@/Components/ProfilesPicker";
-import { getNoteDraft , updateNoteDraft} from "@/Helpers/ClientHelpers";
+import { getNoteDraft, updateNoteDraft } from "@/Helpers/ClientHelpers";
+import { SelectTabs } from "../SelectTabs";
 
 export default function Comments({
   noteTags = false,
@@ -40,7 +39,8 @@ export default function Comments({
   const [showGIFs, setShowGIFs] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [mention, setMention] = useState("");
-    const [selectedProfile, setSelectedProfile] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(0);
   const textareaRef = useRef(null);
   const ref = useRef(null);
 
@@ -106,7 +106,13 @@ export default function Comments({
       }
 
       tags = [...tags, ...extracted.tags];
-      let eventInitEx = await InitEvent(1, content, tags, undefined, selectedProfile);
+      let eventInitEx = await InitEvent(
+        1,
+        content,
+        tags,
+        undefined,
+        selectedProfile
+      );
       if (!eventInitEx) {
         setIsLoading(false);
         return;
@@ -130,7 +136,7 @@ export default function Comments({
   useEffect(() => {
     updateNoteDraft(replyId, comment);
     adjustHeight();
-  }, [comment]);
+  }, [comment, selectedTab]);
 
   const adjustHeight = () => {
     if (textareaRef.current) {
@@ -265,58 +271,83 @@ export default function Comments({
         </div>
       )}
       <div
-        className="fit-container fx-centered fx-start-v sc-s-18 box-pad-h-m box-pad-v-m"
+        className="fit-container fx-centered fx-start-v sc-s-18 bg-sp box-pad-h-m box-pad-v-m"
         // style={{ paddingTop: ".5rem" }}
-        style={{ overflow: "visible", zIndex: "10", position: "relative" }}
+        style={{
+          overflow: "visible",
+          zIndex: "10",
+          position: "relative",
+          height: "300px",
+        }}
         ref={ref}
       >
         {/* <UserProfilePic size={48} mainAccountUser={true} allowClick={false} /> */}
-        <ProfilesPicker setSelectedProfile={setSelectedProfile}/>
+        <ProfilesPicker setSelectedProfile={setSelectedProfile} />
         <div
-          className="fit-container fx-centered fx-wrap"
+          className="fit-container fx-centered fx-wrap fit-height"
           style={{ maxWidth: "calc(100% - 48px)" }}
         >
           <div
             className="fit-container fx-scattered fx-col"
-            style={{ position: "relative" }}
+            style={{
+              position: "relative",
+              height: "calc(100% - 60px)",
+            }}
           >
-            <div className="fit-container" style={{ position: "relative" }}>
-              <textarea
-                type="text"
-                style={{
-                  padding: 0,
-                  maxHeight: "30vh",
-                  borderRadius: 0,
-                }}
-                className="txt-area ifs-full if if-no-border"
-                placeholder={t("AOmRQKF")}
-                value={comment}
-                onChange={handleOnChange}
-                disabled={isLoading}
-                autoFocus
-                ref={textareaRef}
-                dir="auto"
-              />
-              {showMentionSuggestions && (
-                <MentionSuggestions
-                  mention={mention}
-                  setSelectedMention={handleSelectingMention}
+            <div
+              className="fit-container fx-scattered fx-col fx-start-h fx-start-v"
+              style={{ height: "100%" }}
+            >
+              <div>
+                <SelectTabs
+                  tabs={[t("AsXohpb"), t("Ao1TlO5")]}
+                  selectedTab={selectedTab}
+                  setSelectedTab={setSelectedTab}
                 />
+              </div>
+              {selectedTab === 0 && (
+                <div
+                  className="fit-container  box-pad-h-s box-pad-v-s"
+                  style={{
+                    position: "relative",
+                    height: "auto",
+                    maxHeight: "100%",
+                    minHeight: "45px",
+                  }}
+                >
+                  <textarea
+                    type="text"
+                    style={{
+                      padding: 0,
+                      maxHeight: "100%",
+                      minHeight: "100%",
+                      borderRadius: 0,
+                    }}
+                    className="txt-area ifs-full if if-no-border"
+                    placeholder={t("AOmRQKF")}
+                    value={comment}
+                    onChange={handleOnChange}
+                    disabled={isLoading}
+                    autoFocus
+                    ref={textareaRef}
+                    dir="auto"
+                  />
+                  {showMentionSuggestions && (
+                    <MentionSuggestions
+                      mention={mention}
+                      setSelectedMention={handleSelectingMention}
+                    />
+                  )}
+                </div>
+              )}
+
+              {selectedTab === 1 && (
+                <NotePreview content={comment} viewPort={true} />
               )}
             </div>
-            <NotePreview content={comment} viewPort={40} />
           </div>
           <div className="fit-container fx-scattered">
             <div className="fx-centered" style={{ gap: "12px" }}>
-              {/* <div
-                className="p-big pointer"
-                onClick={() => {
-                  handleInsertTextInPosition("@");
-                  setShowGIFs(false);
-                }}
-              >
-                @
-              </div> */}
               <UploadFile
                 round={false}
                 small={false}

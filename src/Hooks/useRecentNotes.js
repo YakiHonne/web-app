@@ -2,6 +2,7 @@ import { getParsedNote } from "@/Helpers/ClientHelpers";
 import { getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { filterContent } from "@/Helpers/Encryptions";
+import { getNDKInstance } from "@/Helpers/utils";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -14,6 +15,18 @@ export default function useRecentNotes(
   const userMutedList = useSelector((state) => state.userMutedList);
   const [recentNotes, setRecentNotes] = useState([]);
 
+  const getPubkey = (event) => {
+    if(event.kind === 6) {
+      try {
+        let parsedNote = JSON.parse(event.content);
+        return [...new Set([parsedNote.pubkey, event.pubkey])];
+      } catch(err) {
+        return false;
+      }
+    }
+    return event.pubkey;
+  }
+
   useEffect(() => {
     let interval;
     let newSince = since;
@@ -23,7 +36,8 @@ export default function useRecentNotes(
       let data = await getSubData(
         [{ ...filter.filter[0], since: newSince }],
         1000,
-        filter.relays
+        filter.relays,
+        filter.ndk
       );
       if (data.data.length > 0) {
         let posts = data.data
@@ -46,7 +60,7 @@ export default function useRecentNotes(
         setRecentNotes((_) => [..._, ...posts]);
         if (posts.length > 0) {
           newSince = posts[0].created_at + 1;
-          pubkeys = [...new Set([...pubkeys, ...data.pubkeys])];
+          pubkeys = [...new Set([...pubkeys, ...data.data.map(_ => getPubkey(_)).flat()])];
           if (!isUsersSaved) {
             saveUsers(pubkeys.slice(0, 3));
             if (pubkeys.length > 3) {

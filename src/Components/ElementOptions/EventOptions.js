@@ -610,6 +610,8 @@ const BroadcastEvent = ({ event }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userRelays = useSelector((state) => state.userRelays);
+  const userKeys = useSelector((state) => state.userKeys);
+  const isProtected = event.isProtected && userKeys.pub !== event.pubkey;
   const userFavRelays = useSelector((state) => state.userFavRelays);
   const [showRelays, setShowRelays] = useState(false);
   const allRelays = useMemo(() => {
@@ -642,16 +644,20 @@ const BroadcastEvent = ({ event }) => {
         e.stopPropagation();
         setShowRelays(!showRelays);
       }}
-      style={{ position: "relative" }}
-      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
+      style={{
+        position: "relative",
+        cursor: isProtected ? "not-allowed" : "pointer",
+      }}
+      className="pointer fx-scattered fit-container box-pad-h-s box-pad-v-s option-no-scale"
       onMouseEnter={() => setShowRelays(true)}
+      onMouseLeave={() => setShowRelays(false)}
     >
-      {showRelays && (
+      {showRelays && !isProtected && (
         <div
           style={{
             position: "absolute",
             top: "50%",
-            left: "-10px",
+            left: "-5px",
             minWidth: "max-content",
             transform: "translate(-100%, -50%)",
             maxHeight: "600px",
@@ -661,6 +667,7 @@ const BroadcastEvent = ({ event }) => {
           onMouseLeave={() => setShowRelays(false)}
           className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
         >
+          <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
           {allRelays.map((_) => {
             return (
               <div
@@ -675,8 +682,35 @@ const BroadcastEvent = ({ event }) => {
           })}
         </div>
       )}
-      <div className="arrow" style={{ rotate: "90deg" }}></div>
-      <p>{t("AHhMsNx")}</p>
+      {showRelays && isProtected && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "-5px",
+            width: "200px",
+            transform: "translate(-100%, -50%)",
+            maxHeight: "600px",
+            overflow: "scroll",
+            gap: 0,
+          }}
+          onMouseLeave={() => setShowRelays(false)}
+          className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-m"
+        >
+          <div className="fx-centered fx-centered fx-col">
+            <div className="protected-2-24"></div>
+            <p className="gray-c p-centered">{t("AqqpEOw")}</p>
+          </div>
+        </div>
+      )}
+      <div className="fx-centered">
+        <div className="republish" style={{opacity: isProtected ? 0.5 : 1 }}></div>
+        <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
+      </div>
+      <div
+        className="arrow"
+        style={{ rotate: "-90deg", opacity: isProtected ? 0.5 : 1 }}
+      ></div>
     </div>
   );
 };

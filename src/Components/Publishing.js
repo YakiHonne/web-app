@@ -145,7 +145,7 @@ export default function Publishing() {
   useEffect(() => {
     const publishPost = async () => {
       let { kind, content, tags, eventInitEx, allRelays } = toPublish;
-      let relaysToPublish = allRelays.length
+      let relaysToPublish = allRelays?.length > 0 
         ? allRelays.map((relay) => {
             return {
               url: relay,
