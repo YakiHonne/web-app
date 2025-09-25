@@ -1,6 +1,4 @@
-// import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import React from "react";
-// import nextI18nextConfig from "../../../next-i18next.config";
 import { getSubData } from "@/Helpers/Controlers";
 import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";
@@ -14,12 +12,16 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Video"), {
 });
 
 export default function Page({ event, author }) {
-    let parsedEvent = getVideoContent(event)
+  let parsedEvent = getVideoContent(event);
   let data = {
     title: parsedEvent.title || author?.display_name || author?.name,
-    description: parsedEvent.description || parsedEvent.content.substring(0, 100),
+    description:
+      parsedEvent.description || parsedEvent.content.substring(0, 100),
     image:
-    parsedEvent.image || extractFirstImage(parsedEvent.content) || author?.picture || author?.banner,
+      parsedEvent.image ||
+      extractFirstImage(parsedEvent.content) ||
+      author?.picture ||
+      author?.banner,
     path: `video/${parsedEvent.naddr}`,
   };
   if (event)
@@ -33,9 +35,11 @@ export default function Page({ event, author }) {
 
 export async function getStaticProps({ params }) {
   const { naddr } = params;
-  let { pubkey, identifier, kind } = nip19.decode(naddr).data || {};
+  let { pubkey, identifier, kind, id } = nip19.decode(naddr).data || {};
   const res = await getSubData(
-    [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }],
+    identifier
+      ? [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }]
+      : [{ ids: [id] }],
     1000,
     undefined,
     undefined,

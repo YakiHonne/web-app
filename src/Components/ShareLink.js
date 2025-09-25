@@ -1,7 +1,5 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
-import { nip19 } from "nostr-tools";
-import { copyText, getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
-import QRCode from "react-qr-code";
+import { copyText } from "@/Helpers/Helpers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";

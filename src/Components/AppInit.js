@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
@@ -80,7 +80,10 @@ import {
   unwrapGiftWrap,
 } from "@/Helpers/Encryptions";
 import axiosInstance from "@/Helpers/HTTP_Client";
-import { setIsConnectedToYaki, setIsYakiChestLoaded } from "@/Store/Slides/YakiChest";
+import {
+  setIsConnectedToYaki,
+  setIsYakiChestLoaded,
+} from "@/Store/Slides/YakiChest";
 import relaysOnPlatform from "@/Content/Relays";
 import {
   NDKNip07Signer,
@@ -152,14 +155,10 @@ export default function AppInit() {
       [userKeys]
     ) || [];
   const users = useLiveQuery(async () => await getUsers(), []);
-  const followingsRelays = useLiveQuery(
-    async () => await getFollowingsRelays(),
-    []
-  ) || [];
-  const followingsInboxRelays = useLiveQuery(
-    async () => await getFollowingsInboxRelays(),
-    []
-  ) || [];
+  const followingsRelays =
+    useLiveQuery(async () => await getFollowingsRelays(), []) || [];
+  const followingsInboxRelays =
+    useLiveQuery(async () => await getFollowingsInboxRelays(), []) || [];
   const nostrClients = useLiveQuery(async () => await getClients(), []);
   const relaysStats = useLiveQuery(async () => await getRelaysStats(), []);
 
@@ -211,7 +210,6 @@ export default function AppInit() {
       previousFavRelays.current = favRelays;
       dispatch(setUserFavRelays(favRelays));
       saveRelayMetadata(favRelays.relays || []);
-      // addExplicitRelays(favRelays.relays || []);
     }
     if (
       JSON.stringify(previousInboxRelays.current) !==
@@ -245,20 +243,6 @@ export default function AppInit() {
       JSON.stringify(appSettings)
     ) {
       previousAppSettings.current = appSettings;
-      // let relaysFeedMiedxContent =
-      //   appSettings?.settings?.content_sources?.mixed_content?.relays?.list?.map(
-      //     (_) => _[0]
-      //   ) || [];
-      // let relaysFeedNotes =
-      //   appSettings?.settings?.content_sources?.notes?.relays?.list?.map(
-      //     (_) => _[0]
-      //   ) || [];
-      // let relaysFeed = [
-      //   ...new Set([...relaysFeedMiedxContent, ...relaysFeedNotes]),
-      // ];
-      // if (relaysFeed.length > 0) {
-      //   addExplicitRelays(relaysFeed);
-      // }
       dispatch(setUserAppSettings(appSettings || false));
     }
     if (
@@ -338,8 +322,9 @@ export default function AppInit() {
 
   useEffect(() => {
     let previousDarkMode = localStorage.getItem("yaki-theme");
-    let previousIsConnectedToYaki = localStorage?.getItem("connect_yc") ? true : false
-    console.log(previousIsConnectedToYaki)
+    let previousIsConnectedToYaki = localStorage?.getItem("connect_yc")
+      ? true
+      : false;
     if (previousDarkMode === "0") {
       setIsDarkMode("1");
       toggleColorScheme(false);
@@ -348,13 +333,11 @@ export default function AppInit() {
       setIsDarkMode("0");
       toggleColorScheme(true);
     }
-    if(previousIsConnectedToYaki) {
+    if (previousIsConnectedToYaki) {
       dispatch(setIsConnectedToYaki(true));
     }
     saveNostrClients();
-    // getFlashNews();
     getTrendingProfiles();
-    // getRecentTags();
     let keys = getKeys();
     if (keys) {
       dispatch(setUserMetadata(getMetadataFromCachedAccounts(keys.pub)));
@@ -388,7 +371,7 @@ export default function AppInit() {
           ndkInstance.signer = signer;
         }
       }
-  
+
       ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
         ndk: ndkInstance,
       });
@@ -721,12 +704,12 @@ export default function AppInit() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-     
         dispatch(setIsYakiChestLoaded(false));
         const data = await axiosInstance.get("/api/v1/yaki-chest/stats");
         if (data.data.user_stats.pubkey !== userKeys.pub) {
           userLogout();
-          dispatch(setIsYakiChestLoaded(false));
+          localStorage.removeItem("connect_yc");
+          dispatch(setIsYakiChestLoaded(true));
           return;
         }
         let { user_stats } = data.data;
@@ -740,8 +723,8 @@ export default function AppInit() {
     };
     if (userKeys && isConnectedToYaki) fetchData();
     if (userKeys && !isConnectedToYaki) dispatch(setIsYakiChestLoaded(true));
-    console.log("isConnectedToYaki", isConnectedToYaki)
   }, [userKeys, isConnectedToYaki]);
+
   useEffect(() => {
     const buildWOTList = async () => {
       let prevData = localStorage.getItem(`network_${userKeys.pub}`);

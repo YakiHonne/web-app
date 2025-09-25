@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import SWHandler from "smart-widget-handler";
 import { useDispatch, useSelector } from "react-redux";
-import { assignClientTag, extractRootDomain } from "@/Helpers/Helpers";
+import { assignClientTag } from "@/Helpers/Helpers";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { InitEvent, publishEvent } from "@/Helpers/Controlers";
@@ -11,14 +11,7 @@ export default function MiniTool({ url, setReturnedData }) {
   const dispatch = useDispatch();
   const userRelays = useSelector((state) => state.userRelays);
   const userMetadata = useSelector((state) => state.userMetadata);
-  const domain = extractRootDomain(url);
   const iframeRef = useRef(null);
-
-  const [customData, setCustomData] = useState("");
-
-  const reloadiFrame = () => {
-    iframeRef.current.src = url;
-  };
 
   useEffect(() => {
     let listener;
@@ -100,7 +93,6 @@ export default function MiniTool({ url, setReturnedData }) {
           }
         }
         if (event?.kind === "custom-data") {
-          setCustomData(event.data);
           setReturnedData(event.data);
         }
       });

@@ -20,7 +20,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
 
   // const isDarkMode = useSelector((state) => state.isDarkMode);
   const { theme } = useTheme();
-  const isDarkMode = ["dark", "gray"].includes(theme);
+  const isDarkMode = ["dark", "gray", "system"].includes(theme);
   const [showEmoji, setShowEmoji] = useState(false);
   const optionsRef = useRef(null);
 

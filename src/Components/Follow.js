@@ -11,11 +11,6 @@ const FOLLOWING = <div className="user-followed-w-24"></div>;
 const FOLLOW = <div className="user-to-follow-24"></div>;
 const UNFOLLOW = <div className="user-to-unfollow-24"></div>;
 
-const FOLLOWING_ = "Unfollow";
-const FOLLOW_ = "Follow";
-const TOFOLLOW = "To follow";
-const TOUNFOLLOW = "To unfollow";
-
 const checkFollowing = (list, toFollowKey) => {
   if (!list) return false;
   return list.find((people) => people === toFollowKey) ? true : false;

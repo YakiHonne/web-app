@@ -8,7 +8,6 @@ import { setToast } from "@/Store/Slides/Publishers";
 import { translate } from "@/Helpers/Controlers";
 import useNoteStats from "@/Hooks/useNoteStats";
 import CommentsSection from "@/Components/CommentsSection";
-import { customHistory } from "@/Helpers/History";
 import HistorySection from "@/Components/HistorySection";
 import { useTranslation } from "react-i18next";
 import { getNoteTree, getParsedNote } from "@/Helpers/ClientHelpers";

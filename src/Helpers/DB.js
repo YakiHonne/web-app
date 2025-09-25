@@ -8,7 +8,6 @@ import {
 } from "./Controlers";
 import {
   getEmptyEventStats,
-  getEmptyRelaysStats,
   getEmptyuserMetadata,
   getParsedAuthor,
   sortEvents,

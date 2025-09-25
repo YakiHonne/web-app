@@ -6,7 +6,6 @@ import { setUserKeys } from "@/Store/Slides/UserData";
 import {
   bytesTohex,
   downloadAsFile,
-  getBech32,
   getEmptyuserMetadata,
   getHex,
   hexToUint8Array,
@@ -56,6 +55,7 @@ export default function Login() {
   let pk = getPublicKey(sk);
   let userKeys = { pub: pk, sec: sk };
   const [isLogin, setIsLogin] = useState(true);
+
   useEffect(() => {
     let pubkeys = [
       ...new Set(
@@ -1393,6 +1393,7 @@ const Suggestions = ({ index, selectedInterests, handleSelectInterests }) => {
     }
     return false;
   };
+
   return (
     <div
       className="sc-s-18 box-pad-h-m box-pad-v-m fit-container box-marg-s slide-down"

@@ -11,44 +11,12 @@ export default function NProfilePreviewer({
   close = false,
   showSharing = true,
   onClose,
-  setMetataData = () => null,
 }) {
   const [author, setAuthor] = useState(getEmptyuserMetadata(pubkey));
 
   useEffect(() => {
-    let last_created_at = 0;
     let user = getUser(pubkey);
     if (user) setAuthor(user);
-    // const sub = ndkInstance.subscribe([{ kinds: [0], authors: [pubkey] }], {
-    //   cacheUsage: "CACHE_FIRST",
-    //   groupable: false,
-    // });
-
-    // sub.on("event", (event) => {
-    //   console.log(event)
-    //   if (event.created_at > last_created_at) {
-    //     last_created_at = event.created_at;
-    //     let content = JSON.parse(event.content);
-    //     setMetataData(content);
-    //     setAuthor({
-    //       picture: content.picture || "",
-    //       name:
-    //         content.name || content.display_name || getBech32("npub", event.pubkey).substring(0, 10),
-    //       display_name:
-    //         content.display_name || content.name ||
-    //         getBech32("npub", event.pubkey).substring(0, 10),
-    //     });
-    //     sub.stop();
-    //   }
-    // });
-
-    // let timeout = setTimeout(() => {
-    //   sub.stop();
-    //   clearTimeout(timeout);
-    // }, 4000);
-    // return () => {
-    //   sub.stop();
-    // };
   }, []);
 
   return (
@@ -67,7 +35,10 @@ export default function NProfilePreviewer({
         </div>
       </div>
       {!close && showSharing && (
-        <Link href={`/profile/${nip19.nprofileEncode({ pubkey })}`} target="_blank">
+        <Link
+          href={`/profile/${nip19.nprofileEncode({ pubkey })}`}
+          target="_blank"
+        >
           <div className="share-icon-24"></div>
         </Link>
       )}

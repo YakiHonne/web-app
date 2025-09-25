@@ -1,11 +1,5 @@
-// import router from "next/router";
-// export function customHistory(path) {
-//   router.push(path);
-// }
-
 import router from "next/router";
 
-// Store scroll positions for different routes
 const scrollPositions = new Map();
 
 export function customHistory(path, preserveScroll = true) {
@@ -25,8 +19,6 @@ export function customHistory(path, preserveScroll = true) {
 }
 
 export function customBack() {
-  const currentPath = router.asPath;
-
   router.back();
 
   const handleRouteChange = () => {

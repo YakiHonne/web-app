@@ -20,7 +20,7 @@ function initWebSocket(url) {
     socket_.onopen = () => {
       console.log("WebSocket is connected");
       socket = socket_;
-      attempts = 0; // reset attempts on successful connection
+      attempts = 0;
     };
 
     socket_.onerror = (error) => {
@@ -29,7 +29,6 @@ function initWebSocket(url) {
 
     socket_.onclose = () => {
       if (attempts < maxAttempts) {
-        // console.log(`WebSocket connection closed, retrying in 3 seconds... (attempt ${attempts}/${maxAttempts})`);
         setTimeout(connect, 3000);
       } else {
         console.error(
@@ -59,10 +58,8 @@ function initWebSocket(url) {
   connect();
 }
 
-// Start connection (non-blocking)
-if (typeof window !== "undefined")
-  initWebSocket("wss://cache2.primal.net/v1");
-  // initWebSocket("wss://cache.yakihonne.com/ws");
+if (typeof window !== "undefined") initWebSocket("wss://cache2.primal.net/v1");
+// initWebSocket("wss://cache.yakihonne.com/ws");
 
 export const getMutualFollows = async (pubkey, user_pubkey) => {
   try {

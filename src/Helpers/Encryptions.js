@@ -6,7 +6,6 @@ import { getImagePlaceholder } from "@/Content/NostrPPPlaceholder";
 import CryptoJS from "crypto-js";
 import { getAppLang } from "./Helpers";
 import { getKeys } from "./ClientHelpers";
-// Translation function will be passed as parameter to avoid SSR issues
 import axiosInstance from "./HTTP_Client";
 import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";

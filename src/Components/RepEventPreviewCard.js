@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import Link from "next/link";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { useSelector } from "react-redux";
@@ -6,10 +6,6 @@ import DynamicIndicator from "@/Components/DynamicIndicator";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import useRepEventStats from "@/Hooks/useRepEventStats";
-import Like from "@/Components/Reactions/Like";
-import NumberShrink from "@/Components/NumberShrink";
-import Quote from "@/Components/Reactions/Quote";
-import Zap from "@/Components/Reactions/Zap";
 import ShowUsersList from "@/Components/ShowUsersList";
 import ZapAd from "@/Components/ZapAd";
 import RepEventCommentsSection from "@/Components/RepEventCommentsSection";

@@ -76,11 +76,9 @@ export default function OptionsDropdown({
             [displayAbove_ ? "bottom" : "top"]: "110%",
             [displayLeft ? "right" : "left"]: "0",
             backgroundColor: "var(--dim-gray)",
-            // border: "none",
             minWidth: minWidth,
             width: "max-content",
             zIndex: 1000,
-            // rowGap: "10px",
             rowGap: "0px",
             overflow: "visible",
           }}

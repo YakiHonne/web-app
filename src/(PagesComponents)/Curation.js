@@ -1,17 +1,13 @@
-import React, { useState, useEffect, useMemo } from "react";
-import { nip19 } from "nostr-tools";
+import React, { useState, useEffect } from "react";
 import {
   checkForLUDS,
   convertDate,
-  getEmptyuserMetadata,
   getParsedRepEvent,
   minimizeKey,
   removeDuplicants,
 } from "@/Helpers/Encryptions";
-import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 import Date_ from "@/Components/Date_";
 import UserProfilePic from "@/Components/UserProfilePic";
-import LoadingScreen from "@/Components/LoadingScreen";
 import LoadingDots from "@/Components/LoadingDots";
 import ZapTip from "@/Components/ZapTip";
 import ShowUsersList from "@/Components/ShowUsersList";
@@ -19,18 +15,15 @@ import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import CheckNOSTRClient from "@/Components/CheckNOSTRClient";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
-import { getSubData, getUser } from "@/Helpers/Controlers";
+import { getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
-import { ndkInstance } from "@/Helpers/NDKInstance";
 import useRepEventStats from "@/Hooks/useRepEventStats";
 import Follow from "@/Components/Follow";
 import RepEventCommentsSection from "@/Components/RepEventCommentsSection";
-import { customHistory } from "@/Helpers/History";
 import Backbar from "@/Components/Backbar";
 import DynamicIndicator from "@/Components/DynamicIndicator";
 import { useTranslation } from "react-i18next";
 import PagePlaceholder from "@/Components/PagePlaceholder";
-import bannedList from "@/Content/BannedList";
 import ZapAd from "@/Components/ZapAd";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import useIsMute from "@/Hooks/useIsMute";
@@ -143,7 +136,6 @@ export default function Curation({ event, userProfile }) {
     return tempArray.filter((item) => item);
   };
 
-  
   return (
     <>
       {usersList && (

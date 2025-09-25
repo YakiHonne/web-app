@@ -2,7 +2,6 @@ import { getParsedNote } from "@/Helpers/ClientHelpers";
 import { getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { filterContent } from "@/Helpers/Encryptions";
-import { getNDKInstance } from "@/Helpers/utils";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 

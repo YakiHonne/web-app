@@ -29,7 +29,7 @@ export default function YakiChestManagement() {
           </div>
         </div>
         {yakiChestStats && isYakiChestLoaded && (
-          <div className="fx-centered">
+          <div className="fx-centered" style={{minWidth: "max-content"}}>
             <p className="green-c p-medium">{t("A5aXNG9")}</p>
             <div
               style={{

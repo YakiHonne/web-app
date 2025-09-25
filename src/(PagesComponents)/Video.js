@@ -1,30 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
-import LoadingScreen from "@/Components/LoadingScreen";
-import { nip19 } from "nostr-tools";
-import { getEmptyuserMetadata, getParsedRepEvent } from "@/Helpers/Encryptions";
+import React, { useEffect, useState } from "react";
+import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import ArrowUp from "@/Components/ArrowUp";
 import UserProfilePic from "@/Components/UserProfilePic";
 import ShowUsersList from "@/Components/ShowUsersList";
 import Date_ from "@/Components/Date_";
-import {
-  getAuthPubkeyFromNip05,
-  getVideoContent,
-  getVideoFromURL,
-} from "@/Helpers/Helpers";
+import { getVideoContent, getVideoFromURL } from "@/Helpers/Helpers";
 import Follow from "@/Components/Follow";
 import AddArticleToCuration from "@/Components/AddArticleToCuration";
 import { useDispatch, useSelector } from "react-redux";
 import { getSubData, getUser } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
-import { ndkInstance } from "@/Helpers/NDKInstance";
-import { customHistory } from "@/Helpers/History";
 import useRepEventStats from "@/Hooks/useRepEventStats";
 import RepEventCommentsSection from "@/Components/RepEventCommentsSection";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import Backbar from "@/Components/Backbar";
 import { useTranslation } from "react-i18next";
 import PagePlaceholder from "@/Components/PagePlaceholder";
-import bannedList from "@/Content/BannedList";
 import ZapAd from "@/Components/ZapAd";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import useIsMute from "@/Hooks/useIsMute";
@@ -81,7 +72,7 @@ export default function Video({ event, userProfile }) {
         );
         let posts = data.data
           .splice(0, 5)
-          .map((post) => getParsedRepEvent(post))
+          .map((post) => getVideoContent(post))
           .filter((_) => _.id !== video.id);
         setMorePosts(posts);
         saveUsers(data.pubkeys);
@@ -368,6 +359,7 @@ const AuthorPreviewExtra = ({ authorPubkey }) => {
   const [authorData, setAuthorData] = useState(
     getEmptyuserMetadata(authorPubkey)
   );
+  
   useEffect(() => {
     const fetchData = async () => {
       try {

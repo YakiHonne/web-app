@@ -14,8 +14,6 @@ import KindSix from "@/Components/KindSix";
 import { getFollowings, saveUsers } from "@/Helpers/DB";
 import {
   getDefaultFilter,
-  getDVMJobRequest,
-  getDVMJobResponse,
   getSubData,
 } from "@/Helpers/Controlers";
 import HomeCarouselContentSuggestions from "@/Components/HomeCarouselContentSuggestions";

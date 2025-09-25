@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import DtoLToggleButton from "@/Components/DtoLToggleButton";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { downloadAsFile, getBech32, minimizeKey } from "@/Helpers/Encryptions";
 import { useMemo } from "react";
@@ -34,7 +33,6 @@ import { nip19 } from "nostr-tools";
 import SearchSidebar from "@/Components/SearchSidebar";
 import { usePathname } from "next/navigation";
 import { customHistory } from "@/Helpers/History";
-import Link from "next/link";
 
 export default function SidebarComp() {
   const { t } = useTranslation();
@@ -354,13 +352,13 @@ export default function SidebarComp() {
                 </div>
               )}
               <YakiMobileappSidebar />
-              {!userKeys && (
+              {/* {!userKeys && (
                 <div>
                   <div className="pointer fx-centered inactive-link">
                     <DtoLToggleButton />
                   </div>
                 </div>
-              )}
+              )} */}
               <div style={{ height: ".5rem" }}></div>
               {/* {window.location.pathname !== "/dashboard" && ( */}
               <WriteNew exit={() => null} />

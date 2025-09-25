@@ -1,4 +1,4 @@
-import NDK, { NDKRelay } from "@nostr-dev-kit/ndk";
+import NDK from "@nostr-dev-kit/ndk";
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
 import relaysOnPlatform from "@/Content/Relays";
 import bannedList from "@/Content/BannedList";

@@ -1,12 +1,11 @@
-import EmojiPicker, { SkinTonePickerLocation } from "emoji-picker-react";
+import EmojiPicker from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
 
 export default function Emojis({ setEmoji, position = "left" }) {
   // const isDarkMode = useSelector((state) => state.isDarkMode);
   const { theme } = useTheme();
-  const isDarkMode = ["dark", "gray"].includes(theme);
+  const isDarkMode = ["dark", "gray", "system"].includes(theme);
   const [showEmoji, setShowEmoji] = useState(false);
   const optionsRef = useRef(null);
 
@@ -37,7 +36,6 @@ export default function Emojis({ setEmoji, position = "left" }) {
           }}
         >
           <EmojiPicker
-          
             reactionsDefaultOpen={true}
             theme={isDarkMode ? "dark" : "light"}
             previewConfig={{ showPreview: false }}

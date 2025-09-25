@@ -23,15 +23,3 @@ export default function index() {
     </div>
   )
 }
-
-// export async function getServerSideProps({ locale }) {
-//   return {
-//     props: {
-//       ...(await serverSideTranslations(
-//         locale ?? "en",
-//         ["common"],
-//         nextI18nextConfig
-//       )),
-//     },
-//   };
-// }

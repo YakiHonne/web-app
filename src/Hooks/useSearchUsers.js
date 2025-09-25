@@ -1,7 +1,7 @@
 import bannedList from "@/Content/BannedList";
 import { isHex, sortByKeyword } from "@/Helpers/Helpers";
 import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function useSearchUsers(keyword) {

@@ -6,7 +6,6 @@ import ContentSourceSettingsItem from "./ContentSourceSettingsItem";
 export default function CommunityFeed({
   sources,
   setSources,
-  dvmList,
   update,
 }) {
   const { t } = useTranslation();
@@ -70,7 +69,6 @@ export default function CommunityFeed({
                   }
                   component={ContentSourceSettingsItem}
                   props={{
-                    dvmList,
                     handleToggleOption,
                     group: _,
                   }}

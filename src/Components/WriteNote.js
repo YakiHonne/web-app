@@ -25,7 +25,6 @@ import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
 
 export default function WriteNote({
-  widget,
   exit,
   border = true,
   borderBottom = false,

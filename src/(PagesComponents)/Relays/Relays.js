@@ -6,7 +6,6 @@ import Global from "./Global";
 import Collections from "./Collections";
 import useFollowingsFavRelays from "@/Hooks/useFollowingsFavRelays";
 import LocalAggregated from "./LocalAggregated";
-import Network from "./Network";
 import useOutboxRelays from "@/Hooks/useOutboxRelays";
 
 export default function Relays() {

@@ -20,13 +20,21 @@ import axiosInstance from "./HTTP_Client";
 import { InitEvent } from "./Controlers";
 import { localStorage_ } from "./utils";
 import { supportedLanguageKeys } from "@/Content/SupportedLanguages";
-import { getMediaUploader, getSelectedServer, isVid, nEventEncode } from "./ClientHelpers";
+import {
+  getMediaUploader,
+  getSelectedServer,
+  isVid,
+  nEventEncode,
+} from "./ClientHelpers";
 
 const LoginToAPI = async (publicKey, userKeys) => {
   try {
     let { pubkey, password } = await getLoginsParams(publicKey, userKeys);
     if (!(pubkey && password)) return;
-    const data = await axiosInstance.post("/api/v1/login", { password, pubkey });
+    const data = await axiosInstance.post("/api/v1/login", {
+      password,
+      pubkey,
+    });
     return data.data;
   } catch (err) {
     console.log(err);
@@ -60,7 +68,6 @@ const getAnswerFromAIRemoteAPI = async (pubkey_, input) => {
       sec: process.env.NEXT_PUBLIC_CHECKER_SEC,
     });
     const res = await axios.post(
-    
       "https://yakiai.yakihonne.com/api/v1/ai",
       {
         input,
@@ -87,11 +94,10 @@ const getLinkFromAddr = (addr_) => {
       .replaceAll(".", "");
     if (addr.startsWith("naddr")) {
       let data = nip19.decode(addr);
-
+      if (!data.identifier) return `/video/${addr}`;
       if (data.data.kind === 30023) return `/article/${addr}`;
       if ([30004, 30005].includes(data.data.kind)) return `/curation/${addr}`;
-      if ([34235, 21, 22].includes(data.data.kind))
-        return `/video/${addr}`;
+      if ([34236].includes(data.data.kind)) return `/video/${addr}`;
       if (data.data.kind === 30033) return `/smart-widget/${addr}`;
     }
     if (addr.startsWith("nprofile")) {
@@ -112,7 +118,7 @@ const getLinkFromAddr = (addr_) => {
 
     return addr;
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return addr_;
   }
 };
@@ -143,7 +149,6 @@ const CACHE_EXPIRY = 60 * 60 * 1000;
 
 const getAuthPubkeyFromNip05 = async (nip05Addr) => {
   try {
-  
     const cacheKey = nip05Addr.toLowerCase();
     const cached = nip05Cache.get(cacheKey);
 
@@ -160,8 +165,8 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
     );
 
     let pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
-  
-    if(pubkey) {
+
+    if (pubkey) {
       pubkey = pubkey.startsWith("npub") ? nip19.decode(pubkey).data : pubkey;
     }
     nip05Cache.set(cacheKey, {
@@ -301,6 +306,7 @@ const getVideoContent = (video) => {
     if (tag[0] === "duration" && tag[1]) duration = parseInt(tag[1]);
     if (tag[0] === "d") d = tag[1];
     if (tag[0] === "url") url = tag[1];
+    if (tag[0] === "r") url = tag[1];
     if (tag[0] === "imeta") imeta_url = tag.find((_) => _.includes("url"));
     if (tag[0] === "imeta") imeta_image = tag.find((_) => _.includes("image"));
     if (tag[0] === "title") title = tag[1];
@@ -325,12 +331,17 @@ const getVideoContent = (video) => {
     url,
     title,
     image,
-    naddr: nip19.naddrEncode({
-      pubkey: video.pubkey,
-      kind: video.kind,
-      identifier: d,
-    }),
-    aTag: `${video.kind}:${video.pubkey}:${d}`,
+    naddr: d
+      ? nip19.naddrEncode({
+          pubkey: video.pubkey,
+          kind: video.kind,
+          identifier: d,
+        })
+      : nip19.neventEncode({
+          id: video.id,
+          pubkey: video.pubkey,
+        }),
+    aTag: d ? `${video.kind}:${video.pubkey}:${d}` : video.id,
   };
 };
 
@@ -463,7 +474,7 @@ const validateWidgetValues = (value, kind, type) => {
   }
   if (kind.includes("color")) {
     let regex = /^#[0-9a-fA-F]{6}/;
-  
+
     if (value === "") return true;
     return regex.test(value);
   }
@@ -607,7 +618,6 @@ const handleAppDirection = (toChangeLang) => {
     document.documentElement.dir = "ltr";
 };
 
-
 const toggleColorScheme = (theme) => {
   const stylesheets = document.styleSheets;
   for (const sheet of stylesheets) {
@@ -732,26 +742,6 @@ const mirrorBlossomServerFileUpload = async (
   fileUrl
 ) => {
   try {
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
     if (isMirror && serversList.length > 1) {
       serversList = serversList.filter((_, index) => index !== 0);
       let promises = await Promise.allSettled(
@@ -1048,27 +1038,6 @@ function sortByKeyword(array, keyword) {
       if (aHasNip05 !== bHasNip05) return bHasNip05 - aHasNip05;
       return scoreB - scoreA;
     });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 const verifyEvent = (event) => {

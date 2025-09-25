@@ -46,7 +46,7 @@ export default function Article({ event, userProfile }) {
   const userKeys = useSelector((state) => state.userKeys);
   // const isDarkMode = useSelector((state) => state.isDarkMode);
   const { theme } = useTheme()
-  const isDarkMode = ["dark", "gray"].includes(theme);
+  const isDarkMode = ["dark", "gray", "system"].includes(theme);
   const post = event
   const [readMore, setReadMore] = useState([]);
   const [usersList, setUsersList] = useState(false);

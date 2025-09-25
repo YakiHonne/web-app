@@ -57,11 +57,7 @@ export default function EventOptions({
     sig: event.sig,
   };
 
-  let path = getLinkFromAddr(
-    event.nEvent ||
-      event.naddr ||
-      (event.pubkey ? nip19.npubEncode(event.pubkey) : "")
-  );
+  let path = window.location.pathname;
 
   const postAsNote = (
     <div
@@ -704,7 +700,10 @@ const BroadcastEvent = ({ event }) => {
         </div>
       )}
       <div className="fx-centered">
-        <div className="republish" style={{opacity: isProtected ? 0.5 : 1 }}></div>
+        <div
+          className="republish"
+          style={{ opacity: isProtected ? 0.5 : 1 }}
+        ></div>
         <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
       </div>
       <div

@@ -25,7 +25,7 @@ import {
 } from "@/Helpers/ClientHelpers";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { nip19 } from "nostr-tools";
-import { setToast, setToPublish } from "@/Store/Slides/Publishers";
+import { setToPublish } from "@/Store/Slides/Publishers";
 import useRepEventStats from "@/Hooks/useRepEventStats";
 import Select from "@/Components/Select";
 import AddCuration from "@/Components/AddCuration";

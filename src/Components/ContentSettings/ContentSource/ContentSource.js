@@ -11,7 +11,6 @@ export default function ContentSource({
   type = 1,
 }) {
   const { t } = useTranslation();
-  const [list, setList] = useState([]);
   const userAppSettings = useSelector((state) => state.userAppSettings);
   const userFavRelays = useSelector((state) => state.userFavRelays);
   const userKeys = useSelector((state) => state.userKeys);
@@ -200,7 +199,6 @@ export default function ContentSource({
         <CustomizeContentSource
           exit={() => setShowFeedMarketPlace(false)}
           optionsList={optionsList}
-          list={list}
           type={type}
         />
       )}

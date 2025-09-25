@@ -21,7 +21,6 @@ import { nip19, sortEvents } from "nostr-tools";
 import Link from "next/link";
 import { straightUp } from "@/Helpers/Helpers";
 import {
-  compactContent,
   getCustomSettings,
   getNoteTree,
   getWotConfig,
@@ -64,12 +63,13 @@ const checkMentionInContent = (note, pubkey) => {
   return matches?.includes(pubkey);
 }
 
-const getRepEventsLink = (pubkey, kind, identifier) => {
+const getRepEventsLink = (pubkey, kind, identifier, id) => {
+  
   let naddr = nip19.naddrEncode({ pubkey, identifier, kind });
   if (kind == 30023) return `/article/${naddr}`;
   if (kind == 30004) return `/curation/${naddr}`;
   if (kind == 30005) return `/curation/${naddr}`;
-  if (kind == 34235 || kind == 21 || kind == 22) return `/video/${naddr}`;
+  if (kind == 34235) return `/video/${naddr}`;
   if (kind == 34236) return `/video/${naddr}`;
   if (kind == 30031) return `/smart-widget-checker?naddr=${naddr}`;
 };
@@ -118,20 +118,21 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
               });
         let label_2 = event.content;
         let type = "replies";
-
+              let icon = eventIcons.replies_comments
         if (isMention) {
           label_1 = t("A1DWKNA", {
             name: username,
           });
           label_2 = event.content;
           type = "mentions";
+          icon = eventIcons.mentions
         }
 
         return {
           type,
           label_1,
           label_2,
-          icon: eventIcons.replies_comments,
+          icon,
           id: isReply[1],
           url: `/note/${nEventEncode(event.id)}`,
         };
@@ -156,12 +157,14 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           ? getRepEventsLink(eventPubkey, eventKind, eventIdentifier)
           : `/note/${nEventEncode(isRoot[1])}`;
         let type = "replies";
+        let icon = eventIcons.replies_comments
         if(isMention) {
           label_1 = t("A1DWKNA", {
             name: username,
           });
           label_2 = event.content;
           type = "mentions";
+          icon = eventIcons.mentions
         }
         return {
           type,
@@ -169,7 +172,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           label_2,
           id: isRoot[0] === "a" ? eventPubkey : isRoot[1],
           identifier: eventIdentifier,
-          icon: eventIcons.replies_comments,
+          icon,
           url,
         };
       }
@@ -224,7 +227,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         label_2,
         icon: eventIcons[eventKinds[event.kind]],
         id: false,
-        url: getRepEventsLink(event.pubkey, event.kind, identifier[1]),
+        url: identifier ? getRepEventsLink(event.pubkey, event.kind,identifier[1]) : `/video/${nip19.neventEncode({id: event.id, pubkey: event.pubkey})}`,
       };
     }
 
@@ -319,7 +322,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
       };
     }
   } catch (err) {
-    console.log(err);
+    console.log(event, err);
     return false;
   }
 };
@@ -691,7 +694,7 @@ export default function NotificationCenterMain() {
                   width: "100%",
                   position: "absolute",
                   left: 0,
-                  top: "110px",
+                  top: "104px",
                   overflow: "hidden",
                   zIndex: 211,
                   height: "20px",
@@ -700,7 +703,7 @@ export default function NotificationCenterMain() {
                 }}
               >
                 <div
-                  style={{ height: "4px", backgroundColor: "var(--c1)" }}
+                  style={{ height: "2px", backgroundColor: "var(--c1)" }}
                   className="v-bounce"
                 ></div>
               </div>

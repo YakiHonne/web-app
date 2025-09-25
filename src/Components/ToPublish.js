@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import LoadingDots from "@/Components/LoadingDots";
-import relaysOnPlatform from "@/Content/Relays";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { nanoid } from "nanoid";
 import TopicsTags from "@/Content/TopicsTags";
@@ -38,7 +37,6 @@ export default function ToPublish({
   userKeys,
 }) {
   const dispatch = useDispatch();
-  // const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
   const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState(

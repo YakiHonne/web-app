@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { getSubData } from "@/Helpers/Controlers";
-import { ndkInstance } from "@/Helpers/NDKInstance";
 import {
   getEmptyEventStats,
   getWOTScoreForPubkeyLegacy,

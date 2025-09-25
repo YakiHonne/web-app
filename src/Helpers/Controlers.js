@@ -36,12 +36,16 @@ import {
 } from "./Helpers";
 import { getCustomServices, getKeys, getWallets } from "./ClientHelpers";
 import { finalizeEvent } from "nostr-tools";
-import { translationServicesEndpoints } from "@/Content/TranslationServices";
 import axios from "axios";
 import relaysOnPlatform from "@/Content/Relays";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
 import { t } from "i18next";
-import { getRelayMetadata, localStorage_, saveLocalRelaysMetadata, setRelayMetadata } from "./utils";
+import {
+  getRelayMetadata,
+  localStorage_,
+  saveLocalRelaysMetadata,
+  setRelayMetadata,
+} from "./utils";
 
 const ConnectNDK = async (relays) => {
   try {
@@ -219,9 +223,9 @@ const yakiChestDisconnect = async () => {
 const logoutAllAccounts = async () => {
   let ignore = ["app-lang", "yaki-wallets", "i18nextLng", "chsettings"];
   downloadAllKeys();
-  Object.keys(localStorage_).forEach((key) => {
+  Object.keys(localStorage).forEach((key) => {
     if (!ignore.includes(key)) {
-      localStorage_.removeItem(key);
+      localStorage.removeItem(key);
     }
   });
   // localStorage_.clear();
@@ -470,7 +474,7 @@ const saveFavRelaysListsForUsers = async (pubkeyList) => {
       .map((author) => {
         return {
           pubkey: author.pubkey,
-          relays: getFavRelayList(author.tags)
+          relays: getFavRelayList(author.tags),
         };
       });
 
@@ -837,7 +841,7 @@ const saveRelayMetadata = async (relays) => {
     setRelayMetadata(_.url, _);
   });
   saveUsers(pubkeys);
-  saveLocalRelaysMetadata()
+  saveLocalRelaysMetadata();
   return relaysMetadata;
 };
 
@@ -848,7 +852,7 @@ const fetchRelayMetadata = async (relay) => {
         Accept: "application/nostr+json",
       },
     });
-    if(typeof info.data !== "object") return false
+    if (typeof info.data !== "object") return false;
     return { url: relay, ...info.data };
   } catch (err) {
     console.log(err);

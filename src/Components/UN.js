@@ -1,7 +1,5 @@
 import React, { Fragment, useEffect, useState } from "react";
-import Date_ from "@/Components/Date_";
 import { convertDate, encryptEventData } from "@/Helpers/Encryptions";
-import { finalizeEvent } from "nostr-tools";
 import LoadingDots from "@/Components/LoadingDots";
 import Counter from "@/Components/Counter";
 import { redirectToLogin } from "@/Helpers/Helpers";

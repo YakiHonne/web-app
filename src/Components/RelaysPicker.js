@@ -4,8 +4,6 @@ import RelayImage from "./RelayImage";
 import LoadingDots from "./LoadingDots";
 import { saveRelayMetadata } from "@/Helpers/Controlers";
 import { getRelayMetadata } from "@/Helpers/utils";
-import useUserProfile from "@/Hooks/useUsersProfile";
-import UserProfilePic from "./UserProfilePic";
 import RelayMetadataPreview from "./RelayMetadataPreview";
 
 export default function RelaysPicker({

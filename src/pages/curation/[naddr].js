@@ -1,6 +1,4 @@
-// import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import React from "react";
-// import nextI18nextConfig from "../../../next-i18next.config";
 import { getSubData } from "@/Helpers/Controlers";
 import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";

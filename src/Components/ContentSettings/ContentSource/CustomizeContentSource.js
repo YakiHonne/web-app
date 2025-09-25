@@ -23,7 +23,6 @@ const NotesDefaultCF = [
 export default function CustomizeContentSource({
   exit,
   optionsList = [],
-  list = [],
   type,
 }) {
   const { t } = useTranslation();
@@ -255,7 +254,6 @@ export default function CustomizeContentSource({
         {category === 2 && (
           <CommunityFeed
             sources={sources}
-            dvmList={list}
             setSources={setSources}
             update={updateCommunityFeed}
           />

@@ -49,7 +49,7 @@ export default function WritingArticle() {
   const userKeys = useSelector((state) => state.userKeys);
   // const isDarkMode = useSelector((state) => state.isDarkMode);
   const { theme } = useTheme();
-  const isDarkMode = ["dark", "gray"].includes(theme);
+  const isDarkMode = ["dark", "gray", "system"].includes(theme);
   const [draftData, setDraftData] = useState({});
 
   const [content, setContent] = useState(post_content);

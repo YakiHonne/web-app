@@ -2,7 +2,7 @@ import { saveRelayMetadata } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { getEmptyRelaysData } from "@/Helpers/Encryptions";
 import { getRelayMetadata } from "@/Helpers/utils";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function useRelaysMetadata(url) {
   const [relayMetadata, setRelayMetadata] = useState(getEmptyRelaysData(url));

@@ -25,7 +25,6 @@ export default function Comments({
   exit,
   actions,
   tagKind = "e",
-  kind = "note",
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();

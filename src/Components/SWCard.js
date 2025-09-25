@@ -33,8 +33,6 @@ export default function SWCard({ widget, onNextWidget }) {
     </>
   );
 }
-
-//   recipientLNURL,
 //   recipientPubkey,
 //   callback,
 //   recipientInfo,

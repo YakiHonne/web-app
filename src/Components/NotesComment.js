@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from "react";
-import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import ShowUsersList from "@/Components/ShowUsersList";
 import Date_ from "@/Components/Date_";
@@ -36,7 +35,6 @@ export default function NotesComment({
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
   const [translatedNote, setTranslatedNote] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
-  const [isTransEnabled, setIsTransEnabled] = useState(true);
   const isLikedByAuthor = useMemo(() => {
     return postActions.likes.likes.find(
       (item) => item.pubkey === rootNotePubkey

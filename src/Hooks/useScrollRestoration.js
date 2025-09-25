@@ -7,7 +7,6 @@ export function useScrollRestoration(key = "page-container") {
     const el = document.querySelector(`.${key}`);
     if (!el) return;
 
-    // --- 1. Track scroll continuously ---
     const handleScroll = () => {
       latestScrollRef.current = el.scrollTop;
       sessionStorage.setItem(`${key}-scroll`, latestScrollRef.current);
@@ -15,7 +14,6 @@ export function useScrollRestoration(key = "page-container") {
 
     el.addEventListener("scroll", handleScroll);
 
-    // --- 2. Restore when mounting ---
     const saved = parseInt(sessionStorage.getItem(`${key}-scroll`) || "0", 10);
     if (saved > 0) {
       const tryRestore = () => {
@@ -26,9 +24,7 @@ export function useScrollRestoration(key = "page-container") {
         return false;
       };
 
-      // initial attempt
       if (!tryRestore()) {
-        // --- 3. Retry on resize until it works ---
         const resizeObserver = new ResizeObserver(() => {
           if (tryRestore()) {
             resizeObserver.disconnect();
@@ -38,7 +34,6 @@ export function useScrollRestoration(key = "page-container") {
       }
     }
 
-    // --- Cleanup ---
     return () => {
       el.removeEventListener("scroll", handleScroll);
     };
