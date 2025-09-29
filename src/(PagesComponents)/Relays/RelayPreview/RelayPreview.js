@@ -10,6 +10,7 @@ import { customHistory } from "@/Helpers/History";
 import RelayStatus from "./RelayStatus";
 import RelayRtt from "./RelayRtt";
 import AddToFavList from "./AddToFavList";
+import useCloseContainer from "@/Hooks/useCloseContainer";
 
 export default function RelayPreview({
   url,
@@ -19,26 +20,33 @@ export default function RelayPreview({
   const { t } = useTranslation();
   const { relayMetadata } = useRelaysMetadata(url);
   const { relayStats } = useRelaysStats(url);
-  const [showPreview, setShowPreview] = useState(false);
+  // const [showPreview, setShowPreview] = useState(false);
+  const { containerRef, open, setOpen } = useCloseContainer();
   return (
     <div
       className="fit-container fx-scattered fx-col box-pad-h-m box-pad-v-m sc-s-18 bg-sp pointer"
       style={{ overflow: "visible" }}
-      onClick={() => setShowPreview(!showPreview)}
+      onClick={() => {
+        setOpen(!open);
+      }}
+      ref={containerRef}
     >
       <div className="fit-container fx-scattered">
         <div className="fx-centered">
           <RelayImage url={relayMetadata.url} size={58} />
           <div>
             <p className="p-maj">{relayMetadata.name}</p>
-            {!showPreview && (
-              <p className="gray-c p-one-line slide-left">
-                {relayMetadata.description}
-              </p>
-            )}
-            {showPreview && (
+
+            <p
+              className="gray-c p-one-line slide-left"
+              style={{ display: open ? "none" : "block" }}
+            >
+              {relayMetadata.description}
+            </p>
+
+            {open && (
               <div
-                className="fx-centered slide-right"
+                className="fx-centered slide-right fx-start-h"
                 style={{ gap: "5px" }}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -74,7 +82,7 @@ export default function RelayPreview({
           <div className="arrow"></div>
         </div>
       </div>
-      {showPreview && <RelayMetadataPreview metadata={relayMetadata} />}
+      {open && <RelayMetadataPreview metadata={relayMetadata} />}
       {(relayStats.followings.pubkeys.length > 0 ||
         relayStats.monitor.rttOpen ||
         favoredList.length > 0) && (

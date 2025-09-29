@@ -43,7 +43,7 @@ export default function CommunityFeed({
   };
 
   return (
-    <div className="fit-container fx-centered fx-start-h fx-start-v fx-col box-pad-h-m box-pad-v-m">
+    <div className="fit-container fx-centered fx-start-h fx-start-v fx-col box-pad-h box-pad-v">
       <div className="fit-container fx-scattered">
         <p className="c1-c">{t("AJYvlq1")}</p>
 

@@ -46,7 +46,7 @@ export default function ZapTip({
   if (custom) {
     if (
       !recipientLNURL ||
-      (!recipientPubkey && !recipientLNURL.startsWith("lnbc")) ||
+      // (!recipientPubkey && !recipientLNURL.startsWith("lnbc")) ||
       senderPubkey === recipientPubkey
     )
       return (

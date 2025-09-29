@@ -40,7 +40,11 @@ const RecentPostsContent = ({ pubkeys, notesLength, onClick }) => {
             <div className="fit-container fx-centered">
               <div
                 className="sc-s  box-pad-h-s box-pad-v-s fx-scattered slide-down pointer"
-                style={{ backgroundColor: "var(--c1)", border: "none" }}
+                style={{
+                  backgroundColor: "var(--c1)",
+                  border: "none",
+                  gap: "10px",
+                }}
                 onClick={onClick}
               >
                 <UsersGroupProfilePicture pubkeys={pubkeys} />
@@ -48,11 +52,14 @@ const RecentPostsContent = ({ pubkeys, notesLength, onClick }) => {
                   className="fx-centered"
                   style={{
                     minWidth: "max-content",
+                    gap: "0",
                   }}
                 >
                   <p className="white-c">
-                    {notesLength > 99 ? "+99" : notesLength} New
+                    {notesLength > 99 ? "+99" : notesLength} new{" "}
+                    {notesLength === 1 ? "post" : "posts"}
                   </p>
+                  <p className="white-c box-pad-h-s">&#8593;</p>
                 </div>
               </div>
             </div>

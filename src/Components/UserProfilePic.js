@@ -140,7 +140,7 @@ export default function UserProfilePic({
           <InitiConvo exit={() => setInitConv(false)} receiver={user_id} />
         )}
         <div
-          style={{ position: "relative",  display: "inline-flex", }}
+          style={{ position: "relative", display: "inline-flex" }}
           onMouseEnter={onMouseHover}
           onMouseLeave={() => {
             setShowMetada(false);
@@ -150,7 +150,7 @@ export default function UserProfilePic({
             style={{
               opacity: "1",
               maxWidth: "180px",
-             
+
               gap: "4px",
               transform: "translateY(4px)",
               alignItems: "center",
@@ -346,7 +346,7 @@ export default function UserProfilePic({
               zIndex: 200,
               overflow: "visible",
               backgroundColor: "var(--very-dim-gray)",
-              borderRadius: "18px",
+              // borderRadius: "18px",
             }}
             className="fx-centered fx-col fx-start-h fx-start-v sc-s box-pad-h-m box-pad-v-m drop-down-r bg-sp"
             onClick={(e) => e.stopPropagation()}
@@ -401,12 +401,14 @@ export default function UserProfilePic({
               )}
             </div>
             <div className="fx-centered fit-container">
-              <button
-                className="btn btn-gst btn-full"
-                onClick={handleInitConvo}
-              >
-                {t("AN0NVU3")}
-              </button>
+              {!userKeys.bunker && (
+                <button
+                  className="btn btn-gst btn-full"
+                  onClick={handleInitConvo}
+                >
+                  {t("AN0NVU3")}
+                </button>
+              )}
               <Follow
                 toFollowKey={user_id}
                 toFollowName={""}

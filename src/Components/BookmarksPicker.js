@@ -109,7 +109,7 @@ export default function BookmarksPicker({
       )}
       <div className="fixed-container fx-centered box-pad-h">
         <section
-          className="sc-s-18 bg-sp box-pad-h box-pad-v fx-centered"
+          className="sc-s bg-sp box-pad-h box-pad-v fx-centered"
           style={{ width: "min(100%, 500px)", position: "relative" }}
         >
           <div className="close" onClick={exit}>

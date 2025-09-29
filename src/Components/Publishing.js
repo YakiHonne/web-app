@@ -492,7 +492,7 @@ export default function Publishing() {
           style={{ zIndex: 200000 }}
         >
           <div
-            className="fx-centered fx-start-h box-pad-v fx-col slide-up box-pad-h sc-s-18 bg-sp"
+            className="fx-centered fx-start-h box-pad-v fx-col slide-up box-pad-h sc-s bg-sp"
             style={{
               width: "700px",
               minHeight: "50vh",

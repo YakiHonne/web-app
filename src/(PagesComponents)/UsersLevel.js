@@ -641,10 +641,17 @@ export default function UserLevels() {
 const TierDemo = ({ tier, exit }) => {
   const { t } = useTranslation();
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <div
+      className="fixed-container fx-centered box-pad-h"
+      onClick={(e) => {
+        e.stopPropagation();
+        exit();
+      }}
+    >
       <div
-        className="box-pad-h box-pad-v sc-s-18 bg-sp fx-centered fx-col fx-start-h"
+        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col fx-start-h slide-up"
         style={{ width: "min(100%, 450px)" }}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="box-pad-h-s box-pad-v-s">
           <div className={tier.image} style={{ width: "180px" }}></div>
@@ -705,19 +712,26 @@ const TierDemo = ({ tier, exit }) => {
 const PointsDesc = ({ exit }) => {
   const { t } = useTranslation();
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <div
+      className="fixed-container fx-centered box-pad-h"
+      onClick={(e) => {
+        e.stopPropagation();
+        exit();
+      }}
+    >
       <div
-        className="box-pad-h box-pad-v sc-s-18 bg-sp fx-centered fx-col fx-start-h"
+        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col fx-start-h slide-up"
         style={{ width: "min(100%, 450px)" }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
-        <h3 className="p-centered">{t("AIdLWAb")}</h3>
-        <p className="p-centered">{t("AIjkhSn")}</p>
-        <ol>
-          <li>{t("A6fM6gw")}</li>
-          <li>{t("AaZQAOK")}</li>
-          <li>{t("Av0e6zQ")}</li>
-        </ol>
-        <p className="green-c p-centered">{t("A3moqWy")}</p>
+        <h3 className="p-centered box-pad-h box-marg-s">{t("AIdLWAb")}</h3>
+        <p className="p-centered gray-c">{t("AIjkhSn")}</p>
+          <p className="p-centered gray-c">{"> " + t("A6fM6gw") + " <"}</p>
+          <p className="p-centered gray-c">{"> " + t("AaZQAOK") + " <"}</p>
+          <p className="p-centered gray-c">{"> " + t("Av0e6zQ") + " <"}</p>
+        <p className="green-c p-centered box-pad-h box-marg-s">{t("A3moqWy")}</p>
         <div className="fx-centered fx-col fit-container">
           <button className="btn btn-normal btn-full" onClick={exit}>
             {t("AGLUuNR")}

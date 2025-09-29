@@ -732,7 +732,7 @@ const GenerateManifestFile = ({ exit }) => {
       )}
       {!processDone && (
         <div
-          className="sc-s-18 bg-sp slide-up"
+          className="sc-s bg-sp slide-up"
           style={{ width: "min(100%,500px)" }}
           onClick={(e) => {
             e.stopPropagation();

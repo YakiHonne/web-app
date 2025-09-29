@@ -16,8 +16,11 @@ export default function AddWallet({ exit, refresh }) {
       }}
     >
       <div
-        className="sc-s-18 box-pad-h box-pad-v fx-centered fx-col bg-sp"
+        className="sc-s box-pad-h box-pad-v fx-centered fx-col bg-sp"
         style={{ width: "min(100%,500px)", position: "relative" }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
         <div className="close">
           <div></div>

@@ -49,7 +49,7 @@ export default function CFCategoryPreview({ category, minimal = false }) {
     return (
       <div className="fx-centered">
         <div style={{ position: "relative" }}>
-          <RelayImage url={category.value} size={minimal ? 28 : 32} />
+          <RelayImage url={category.value} size={minimal ? 32 : 40} />
         </div>
         <div>
           <p className="p-one-line">{category.display_name}</p>

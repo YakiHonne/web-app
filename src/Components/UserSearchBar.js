@@ -9,7 +9,7 @@ export default function UserSearchBar({
   getUserMetadata = false,
   full = false,
   placeholder,
-  displayAbove = false
+  displayAbove = false,
 }) {
   const [keyword, setKeyword] = useState("");
   const { t } = useTranslation();
@@ -36,7 +36,9 @@ export default function UserSearchBar({
   };
 
   const setSelectedMentionPubkey = (data) => {
-    onClick(nip19.decode(data).data);
+    onClick(
+      data.includes("npub") ? getHex(data) : nip19.decode(data).data?.pubkey
+    );
     setKeyword("");
   };
   const setSelectedMentionMetadata = (data) => {

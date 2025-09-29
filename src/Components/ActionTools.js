@@ -84,7 +84,7 @@ const Actions = ({ exit, setReturnedData }) => {
             maxHeight: "60vh",
             overflow: "scroll",
           }}
-          className="sc-s-18 bg-sp"
+          className="sc-s bg-sp"
           onClick={(e) => {
             e.stopPropagation();
           }}

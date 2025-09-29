@@ -189,7 +189,7 @@ export default function CustomizeContentSource({
       }}
     >
       <div
-        className="fx-centered fx-col fx-start-h f-start-v  sc-s-18 bg-sp"
+        className="fx-centered fx-col fx-start-h f-start-v  sc-s bg-sp"
         style={{
           maxHeight: "70vh",
           minHeight: "30vh",
@@ -202,7 +202,7 @@ export default function CustomizeContentSource({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="sticky fit-container" style={{ padding: 0 }}>
-          <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m">
+          <div className="fit-container fx-scattered box-pad-h box-pad-v-m">
             <h4>{t("AH4Mub1")}</h4>
             <div className="fx-centered">
               <div

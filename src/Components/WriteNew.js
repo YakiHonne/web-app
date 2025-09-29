@@ -52,7 +52,7 @@ const RedictingLinks = ({ exit, internalExit }) => {
       }}
     >
       <div
-        className="sc-s-18 box-pad-h-m box-pad-v fx-centered fx-col bg-sp"
+        className="sc-s box-pad-h box-pad-v fx-centered fx-col bg-sp slide-up"
         style={{ width: "min(100%,400px)", position: "relative" }}
       >
         <div
@@ -64,54 +64,51 @@ const RedictingLinks = ({ exit, internalExit }) => {
         >
           <div></div>
         </div>
-        <h4 className="box-marg-s">{t("AfTMpSr")}</h4>
+        <h3 className="box-marg-s">{t("AfTMpSr")}</h3>
         <div className="fx-centered fx-wrap" onClick={exit}>
           <Link
             href={{
               pathname: "/dashboard",
               query: { tabNumber: 1, init: true },
             }}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18`}
+            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s bg-sp`}
             style={{
               width: "48%",
               padding: "2rem",
-              backgroundColor: "transparent",
             }}
           >
             <div
               className="note-plus-24"
-              style={{ width: "32px", height: "32px" }}
+              style={{ width: "48px", height: "48px" }}
             ></div>
-            <div>{t("Az5ftet")}</div>
+            <div className="gray-c">{t("Az5ftet")}</div>
           </Link>
           <div
             onClick={() => customHistory("/write-article")}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18`}
+            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s bg-sp`}
             style={{
               width: "48%",
               padding: "2rem",
-              backgroundColor: "transparent",
             }}
           >
             <div
               className="posts-plus-24"
-              style={{ width: "32px", height: "32px" }}
+              style={{ width: "48px", height: "48px" }}
             ></div>
-            <div>{t("AyYkCrS")}</div>
+            <div className="gray-c">{t("AyYkCrS")}</div>
           </div>
           <Link
             href={"/smart-widget-builder"}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18`}
+            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s bg-sp`}
             style={{
               padding: "2rem",
-              backgroundColor: "transparent",
             }}
           >
             <div
               className="smart-widget-add-24"
-              style={{ width: "32px", height: "32px" }}
+              style={{ width: "48px", height: "48px" }}
             ></div>
-            <div style={{ width: "max-content" }}>{t("AkvXmyz")}</div>
+            <div style={{ width: "max-content" }} className="gray-c">{t("AkvXmyz")}</div>
           </Link>
         </div>
       </div>

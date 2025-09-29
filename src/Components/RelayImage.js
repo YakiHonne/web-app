@@ -11,6 +11,7 @@ export default function RelayImage({ url, size = 24 }) {
         minWidth: `${size}px`,
         aspectRatio: "1/1",
         position: "relative",
+        transition: "0.1s cubic-bezier(0.99, 0.01, 0.03, 0.76)",
       }}
       className="sc-s fx-centered"
     >
@@ -38,6 +39,7 @@ export default function RelayImage({ url, size = 24 }) {
             width: "110%",
             height: "110%",
             objectPosition: "center",
+            
           }}
         />
       )}

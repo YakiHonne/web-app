@@ -276,7 +276,7 @@ export default function SearchNetwork({ exit }) {
       }}
     >
       <div
-        className="sc-s-18 slide-up bg-sp"
+        className="sc-s slide-up bg-sp"
         style={{
           width: "min(100%,600px)",
           height: "60vh",
@@ -292,7 +292,7 @@ export default function SearchNetwork({ exit }) {
             className="sticky fit-container fx-centered fx-start-h box-pad-h"
             style={{
               borderBottom: "1px solid var(--very-dim-gray)",
-              padding: "0 1rem",
+              padding: ".5rem 1rem",
             }}
           >
             <div className="search-24"></div>

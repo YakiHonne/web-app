@@ -98,7 +98,7 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
       style={{ zIndex: "10001" }}
     >
       <section
-        className="fx-centered fx-col sc-s-18 bg-sp box-pad-v-m"
+        className="fx-centered fx-col sc-s bg-sp box-pad-v"
         style={{ width: "500px", }}
       >
         <div className="close" onClick={exit}>

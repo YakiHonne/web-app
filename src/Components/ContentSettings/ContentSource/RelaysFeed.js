@@ -52,7 +52,7 @@ export default function RelaysFeed({
   };
 
   return (
-    <div className="fit-container fx-centered fx-start-h fx-start-v fx-col box-pad-h-m box-pad-v-m">
+    <div className="fit-container fx-centered fx-start-h fx-start-v fx-col box-pad-h box-pad-v">
       <RelaysPicker
         allRelays={allRelays}
         addRelay={handleAddRelaysFeed}

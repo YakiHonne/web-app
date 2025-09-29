@@ -215,7 +215,7 @@ export default function ContentSource({
       <div style={{ position: "relative" }} ref={optionsRef}>
         <div
           className="fx-scattered if option pointer"
-          style={{ height: "40px", padding: "0 .5rem", maxWidth: "300px" }}
+          style={{ height: "40px", padding: "0 .5rem", maxWidth: "300px", border: "none" }}
           onClick={(e) => {
             e.stopPropagation();
             setShowOptions(!showOptions);
@@ -223,7 +223,7 @@ export default function ContentSource({
         >
           <CFCategoryPreview category={selectedCategory} minimal={true} />
 
-          <div className="arrow-12"></div>
+          <div className="arrow"></div>
         </div>
         {showOptions && (
           <div

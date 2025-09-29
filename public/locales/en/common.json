@@ -1285,11 +1285,16 @@
   "AuCcYnT": "Requires authentication",
   "A0eIk2z": "Followed by",
   "AFfSn3R": "Favored by",
-  "AjGFut6": "Relays",
+  "AjGFut6": "Relay Orbits",
   "A0dZ5MX": "Followed by none",
   "A9b04Ry": "Network",
   "AB9jjjH": "Nothing was found in this relay",
   "AeujoKN": "It looks like the shared relay URL is broken or does not exist",
   "AZaUNnH": "Add to my list",
-  "A1DWKNA": "{{name}} mentioned you in a comment"
+  "A1DWKNA": "{{name}} mentioned you in a comment",
+  "Ab749Ch": "Browse and explore relay feeds.",
+  "A2wbv5d": "Active convo with",
+  "A1jvSxI": "No messages",
+  "ALgHcrS": "All your messages will be sorted here",
+  "AtkCver": ""
 }

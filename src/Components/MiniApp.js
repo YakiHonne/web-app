@@ -182,7 +182,7 @@ export default function MiniApp({ url, exit, setReturnedData }) {
             padding: "5px",
             borderRadius: "18px",
             overflow: "hidden",
-            backgroundColor: "#282828",
+            backgroundColor: "var(--dim-gray)",
             gap: 0,
           }}
           onClick={(e) => {

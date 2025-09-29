@@ -1314,7 +1314,7 @@ const ProfilePreview = ({ pubkeys }) => {
     <div style={{ position: "relative", minWidth: "32px", minHeight: "32px" }}>
       <div style={{ position: "absolute", left: 0, bottom: "0" }}>
         <UserProfilePic
-          user_id={pubkeys[0]}
+          user_id={(pubkeys[0])}
           mainAccountUser={false}
           img={images[0] || ""}
           size={10}

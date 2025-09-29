@@ -10,7 +10,7 @@ import { NDKRelaySet, NDKEvent, NDKRelay } from "@nostr-dev-kit/ndk";
 import { store } from "@/Store/Store";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { t } from "i18next";
-import { getInboxRelaysForUser } from "./DB";
+import { checkCurrentConvo, getInboxRelaysForUser } from "./DB";
 import relaysOnPlatform from "@/Content/Relays";
 import { getKeys } from "./ClientHelpers";
 import { ndkInstance } from "./NDKInstance";
@@ -217,4 +217,17 @@ const updateYakiChest = async (action_key) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+export const handleUpdateConversation = (event) => {
+  const userKeys = getKeys();
+  if (event.checked) return;
+  let tempEvent = {
+    pubkey: event.pubkey,
+    convo: event.convo,
+    id: event.id,
+    last_message: event.last_message,
+    checked: true,
+  };
+  checkCurrentConvo(tempEvent, userKeys.pub);
 };

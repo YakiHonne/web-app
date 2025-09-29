@@ -41,7 +41,7 @@ export default function InitiConvo({ exit, receiver = false }) {
   return (
     <div className="fixed-container fx-centered box-pad-h">
       <div
-        className="box-pad-h box-pad-v sc-s-18 bg-sp"
+        className="box-pad-h box-pad-v sc-s bg-sp"
         style={{
           position: "relative",
           width: "min(100%, 500px)",

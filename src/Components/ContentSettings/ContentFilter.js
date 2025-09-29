@@ -118,7 +118,14 @@ export default function ContentFilter({
   return (
     <>
       {showAddFilter && (
-        <div className="fixed-container box-pad-h fx-centered">
+        <div
+          className="fixed-container box-pad-h fx-centered"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowAddFilter(!showAddFilter);
+            setFilterToEdit(false);
+          }}
+        >
           <div
             style={{
               width: "min(100%,450px)",
@@ -126,11 +133,14 @@ export default function ContentFilter({
               overflow: "scroll",
               maxHeight: "75vh",
             }}
-            className="sc-s-18 bg-sp box-pad-h-m box-pad-v-m slide-up"
+            className="sc-s bg-sp box-pad-h box-pad-v slide-up"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
             <div
               className="close"
-              onClick={() => {
+              onClick={(e) => {
                 setShowAddFilter(!showAddFilter);
                 setFilterToEdit(false);
               }}

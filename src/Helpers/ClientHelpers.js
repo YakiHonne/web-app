@@ -11,6 +11,7 @@ import { localStorage_ } from "./utils";
 import { nip19 } from "nostr-tools";
 import React from "react";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
+import LNURLParsing from "@/Components/LNURLParsing";
 
 const nostrSchemaRegex =
   /\b(naddr1|note1|nevent1|npub1|nprofile1|nsec1|nrelay1)[a-zA-Z0-9]+\b/;
@@ -209,6 +210,8 @@ export function getNoteTree(
       );
     } else if (el?.startsWith("lnbc") && el.length > 30) {
       finalTree.push(<LNBCInvoice lnbc={el} key={key} />);
+    }else if (el?.startsWith("lnurl") && el.length > 30) {
+      finalTree.push(<LNURLParsing lnurl={el} key={key} />);
     } else if (el?.startsWith("#")) {
       const match = el.match(/(#+)([\w-+]+)/);
 

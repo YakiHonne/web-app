@@ -33,13 +33,14 @@ import { nip19 } from "nostr-tools";
 import SearchSidebar from "@/Components/SearchSidebar";
 import { usePathname } from "next/navigation";
 import { customHistory } from "@/Helpers/History";
+import useDirectMessages from "@/Hooks/useDirectMessages";
 
 export default function SidebarComp() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const userMetadata = useSelector((state) => state.userMetadata);
   const userKeys = useSelector((state) => state.userKeys);
-  const userChatrooms = useSelector((state) => state.userChatrooms);
+  const { isNewMsg } = useDirectMessages();
   const yakiChestStats = useSelector((state) => state.yakiChestStats);
   const isYakiChestLoaded = useSelector((state) => state.isYakiChestLoaded);
   const updatedActionFromYakiChest = useSelector(
@@ -57,9 +58,6 @@ export default function SidebarComp() {
   }, [userKeys, userMetadata]);
   const [isAccountSwitching, setIsAccountSwitching] = useState(false);
 
-  const isNewMsg = useMemo(() => {
-    return userChatrooms.find((chatroom) => !chatroom.checked);
-  }, [userChatrooms]);
   const isPage = (url) => {
     if (url === pathname) return true;
     return false;
@@ -232,13 +230,17 @@ export default function SidebarComp() {
               </div>
               <div
                 onClick={() => {
-                  customHistory("/relays", true);
+                  customHistory("/relay-orbits", true);
                 }}
                 className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
-                  isPage("/relays") ? "active-link" : "inactive-link"
+                  isPage("/relay-orbits") ? "active-link" : "inactive-link"
                 }`}
               >
-                <div className={isPage("/relays") ? "server-bold-24" : "server-24"}></div>
+                <div
+                  className={
+                    isPage("/relay-orbits") ? "orbit-bold-24" : "orbit-24"
+                  }
+                ></div>
                 <div className="link-label">{t("AjGFut6")}</div>
               </div>
 
@@ -269,7 +271,7 @@ export default function SidebarComp() {
                 <div
                   className={
                     isPage("/smart-widgets")
-                      ? "smart-widget-24"
+                      ? "smart-widget-bold-24"
                       : "smart-widget-24"
                   }
                 ></div>
@@ -391,18 +393,20 @@ export default function SidebarComp() {
                       setShowSettings(!showSettings);
                     }}
                   >
-                    <div className="mb-hide" style={{ pointerEvents: "none" }}>
+                    <div className="mb-hide">
                       <UserProfilePic
                         size={40}
                         mainAccountUser={true}
-                        allowClick={false}
+                        allowClick={true}
+                        allowPropagation={false}
                       />
                     </div>
-                    <div className="mb-show" style={{ pointerEvents: "none" }}>
+                    <div className="mb-show">
                       <UserProfilePic
                         size={40}
                         mainAccountUser={true}
-                        allowClick={false}
+                        allowClick={true}
+                        allowPropagation={false}
                       />
                     </div>
                     <div className="mb-hide">
@@ -421,7 +425,7 @@ export default function SidebarComp() {
                   </div>
                   {isYakiChestLoaded && !yakiChestStats && (
                     <div
-                      className="round-icon round-icon-tooltip purple-pulse"
+                      className="round-icon round-icon-tooltip orange-pulse"
                       data-tooltip={t("ACALoWH")}
                       style={{ minWidth: "40px", minHeight: "40px" }}
                       onClick={(e) => {
@@ -433,7 +437,13 @@ export default function SidebarComp() {
                     </div>
                   )}
                   {isYakiChestLoaded && yakiChestStats && (
-                    <div style={{ position: "relative" }}>
+                    <div
+                      style={{ position: "relative" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        customHistory("/yaki-points");
+                      }}
+                    >
                       {updatedActionFromYakiChest && (
                         <div
                           style={{
@@ -728,7 +738,7 @@ const ConfirmmationBox = ({ exit, handleOnClick }) => {
   return (
     <section className="fixed-container fx-centered box-pad-h">
       <section
-        className="fx-centered fx-col sc-s-18 bg-sp box-pad-h box-pad-v"
+        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
         style={{ width: "450px" }}
       >
         <div

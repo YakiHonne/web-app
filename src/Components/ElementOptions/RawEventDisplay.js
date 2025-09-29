@@ -33,7 +33,7 @@ export default function RawEventDisplay({ event, exit }) {
       }}
     >
       <div
-        className="box-pad-h-s box-pad-v-s bg-sp fx-centered fx-col sc-s-18 slide-up"
+        className="box-pad-h box-pad-v bg-sp fx-centered fx-col sc-s slide-up"
         style={{ width: "min(100%, 500px)", position: "relative" }}
       >
         <div className="close" onClick={exit}>

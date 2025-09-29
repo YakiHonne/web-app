@@ -11,19 +11,19 @@ export default function ShareRelay({ relay, exit, type = 1 }) {
     return (
       <div className="fixed-container fx-centered box-pad-h">
         <div
-          className="sc-s-18 bg-sp box-pad-h-m box-pad-v-m fx-centered fx-col fx-start-h fx-start-v"
+          className="sc-s bg-sp box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up"
           style={{ width: "min(100%, 400px)", position: "relative" }}
         >
-          <div className="fit-container fx-scattered">
-            <div className="fx-centered">
-              <RelayImage url={relay} size={30} />
-              <h4 className="p-one-line">{relay}</h4>
-            </div>
-            <div className="close" style={{ position: "static" }} onClick={exit}>
+            <div className="close" onClick={exit}>
               <div></div>
             </div>
+          <div className="fit-container fx-scattered">
+            <div className="fx-centered fx-col">
+              <RelayImage url={relay} size={40} />
+              <p className="p-centered box-pad-h-m p-big">{relay}</p>
+            </div>
           </div>
-          <div className="box-pad-v-s"></div>
+          {/* <div className="box-pad-v-s"></div> */}
           <p className="c1-c box-pad-h-s">{t("A5DDopE")}</p>
           <div className="fit-container fx-centered fx-col">
             <div

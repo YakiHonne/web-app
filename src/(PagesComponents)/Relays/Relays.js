@@ -47,7 +47,8 @@ export default function Relays() {
         style={{ minHeight: "100vh" }}
       >
         <div className="fit-container fx-centered fx-start-v fx-col box-pad-h-m box-pad-v">
-          <h2>Explore Relays</h2>
+          <h3>{t("AjGFut6")}</h3>
+          <p className="gray-c p-big">{t("Ab749Ch")}</p>
           <div
             className="sticky fit-container"
             style={{ padding: 0, marginTop: "1rem", zIndex: 100 }}

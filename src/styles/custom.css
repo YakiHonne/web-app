@@ -288,7 +288,8 @@ main {
     /* background-color: var(--white); */
     background: var(--white-high-transparent);
     backdrop-filter: blur(5px);
-    z-index: 2000;
+    z-index: 20000;
+    /* z-index: 2000; */
     opacity: 0;
     animation: fadeout .3s ease-in-out forwards;
 
@@ -1654,6 +1655,7 @@ main {
 
 .option, .option-p, .option-p-g, .option-no-scale {
     transition: .2s ease-in-out;
+    cursor: pointer;
 }
 
 .option:hover {

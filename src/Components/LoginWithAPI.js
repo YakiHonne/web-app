@@ -51,10 +51,19 @@ export default function LoginWithAPI({ exit }) {
   };
 
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <div
+      className="fixed-container fx-centered box-pad-h"
+      onClick={(e) => {
+        e.stopPropagation();
+        exit();
+      }}
+    >
       <div
-        className="sc-s-18  fx-centered fx-col bg-sp slide-up"
+        className="sc-s fx-centered fx-col bg-sp slide-up"
         style={{ width: "min(100%, 400px)", padding: "2rem" }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
         <h4>{t("AzVvVt5")}</h4>
         <p className="gray-c p-centered">{t("AbE7B3Z")}</p>
@@ -67,7 +76,7 @@ export default function LoginWithAPI({ exit }) {
           {isLoading ? <LoadingDots /> : t("Amdv4GO")}
         </button>
         {!isLoading && (
-          <button className="btn btn-text btn-small" onClick={exit}>
+          <button className="btn btn-text btn-normal" onClick={exit}>
             {t("ATSr8gI")}
           </button>
         )}

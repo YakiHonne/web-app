@@ -139,9 +139,17 @@ const getEmptyRelaysData = (url) => {
 };
 
 const getEmptyuserMetadata = (pubkey) => {
+  let backupName = "";
+  if (pubkey) {
+    if (pubkey.startsWith("npub") || pubkey.startsWith("nprofile"))
+      backupName = pubkey.substring(0, 10);
+    else {
+      backupName = nip19.npubEncode(pubkey).substring(0, 10);
+    }
+  }
   return {
-    name: pubkey ? getBech32("npub", pubkey).substring(0, 10) : "",
-    display_name: pubkey ? getBech32("npub", pubkey).substring(0, 10) : "",
+    name: backupName,
+    display_name: backupName,
     picture: "",
     banner: "",
     about: "",

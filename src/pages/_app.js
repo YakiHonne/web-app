@@ -24,11 +24,15 @@ import LoadingLogo from "@/Components/LoadingLogo";
 import ToastMessages from "@/Components/ToastMessages";
 import dynamic from "next/dynamic";
 import KeepAlive from "@/Components/KeepAlive";
+import FloatingDMs from "@/Components/FloatingDMs";
 
 const SideBarClient = dynamic(() => import("@/Components/SideBar/Sidebar"), {
   ssr: false,
 });
 const NavbarClient = dynamic(() => import("@/Components/Navbar"), {
+  ssr: false,
+});
+const FloatingDMsClient = dynamic(() => import("@/Components/FloatingDMs"), {
   ssr: false,
 });
 
@@ -71,6 +75,7 @@ function App({ Component, pageProps }) {
     <ReduxProvider>
       <ThemeProvider>
         <ToastMessages />
+        <FloatingDMsClient />
         <AppInit />
         <NavbarClient />
         <div

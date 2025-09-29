@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import Toggle from "./Toggle";
 import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
+import LinkRepEventPreview from "./LinkRepEventPreview";
 
 export default function WriteNote({
   exit,
@@ -226,7 +227,7 @@ export default function WriteNote({
 
       var zapEvent = await getZapEventRequest(
         userKeys,
-        `${userMetadata.name} paid for a flash news note.`,
+        `${userMetadata.name} paid for a paid note.`,
         zapTags
       );
       if (!zapEvent) {
@@ -382,7 +383,7 @@ export default function WriteNote({
       {showWarningBox && (
         <div className="fixed-container fx-centered box-pad-h">
           <div
-            className="sc-s-18 bg-sp box-pad-h box-pad-v fx-centered"
+            className="sc-s bg-sp box-pad-h box-pad-v fx-centered"
             style={{ width: "min(100%, 500px)" }}
           >
             <div className="fx-centered fx-col">
@@ -433,23 +434,25 @@ export default function WriteNote({
           style={{ zIndex: 10001 }}
         >
           <div
-            className="fx-centered fx-col fit-container sc-s-18 box-pad-h-s box-pad-v-s"
-            style={{ width: "400px" }}
+            className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v"
+            style={{ width: "420px" , gap: "1rem"}}
           >
-            <QRCode
-              style={{ width: "100%", aspectRatio: "1/1" }}
-              size={400}
-              value={invoice}
-            />
+            <div style={{width: "100%", backgroundColor: "white", borderRadius: "18px"}} className="fx-centered box-pad-h-m box-pad-v-m">
+              <QRCode
+                style={{ width: "100%", aspectRatio: "1/1" }}
+                size={340}
+                value={invoice}
+              />
+            </div>
             <div
-              className="fx-scattered if pointer dashed-onH fit-container box-marg-s"
+              className="fx-scattered if pointer dashed-onH fit-container "
               style={{ borderStyle: "dashed" }}
               onClick={() => copyKey(invoice)}
             >
               <p>{shortenKey(invoice)}</p>
               <div className="copy-24"></div>
             </div>
-            <div className="fit-container fx-centered box-marg-s">
+            <div className="fit-container fx-centered ">
               <p className="gray-c p-medium">{t("A1ufjMM")}</p>
               <LoadingDots />
             </div>
@@ -469,7 +472,7 @@ export default function WriteNote({
         className="fit-container fx-centered fx-start-v fx-stretch sc-s box-pad-h box-pad-v bg-sp"
         style={{
           overflow: "visible",
-          height: "40vh",
+          height: linkedEvent ? "50vh" : "40vh",
           backgroundColor: !border ? "transparent" : "",
           border: border ? "1px solid var(--very-dim-gray)" : "none",
           borderBottom: borderBottom
@@ -497,7 +500,12 @@ export default function WriteNote({
           >
             <div
               className="fit-container fx-scattered fx-col fx-start-h fx-start-v"
-              style={{ height: "100%" }}
+              style={{
+                height:
+                  linkedEvent && selectedTab === 0
+                    ? "calc(100% - 138px)"
+                    : "100%",
+              }}
             >
               <div
                 className="fit-container fx-centered fx-start-h"
@@ -526,9 +534,12 @@ export default function WriteNote({
                         >
                           {t("A0qEczF")}
                         </p>
-                        <div className="fx-centered" style={{ gap: "3px", }}>
+                        <div className="fx-centered" style={{ gap: "3px" }}>
                           <RelayImage url={protectedRelay} size={16} />
-                          <span className="p-one-line">{protectedRelay.substring(0,25)}{protectedRelay.length > 25 ? "..." : ""}</span>
+                          <span className="p-one-line">
+                            {protectedRelay.substring(0, 25)}
+                            {protectedRelay.length > 25 ? "..." : ""}
+                          </span>
                           {/* <span className="p-one-line">{protectedRelay.replace("wss://", "").replace("ws://", "")}</span> */}
                         </div>
                       </div>
@@ -584,6 +595,11 @@ export default function WriteNote({
                 />
               )}
             </div>
+            {linkedEvent && selectedTab === 0 && (
+              <div className="fit-container">
+                <LinkRepEventPreview event={linkedEvent} />
+              </div>
+            )}
           </div>
           <div className="fit-container fx-centered fx-start-v fx-wrap">
             <div className="fit-container fx-scattered">

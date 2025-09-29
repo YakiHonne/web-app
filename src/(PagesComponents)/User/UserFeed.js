@@ -156,8 +156,8 @@ export default function UserFeed({ user }) {
     const fetchData = async () => {
       try {
         let filter = getNotesFilter();
-        const res = await getSubData(filter, 100);
-        let data = res.data.slice(0, 50);
+        const res = await getSubData(filter, 200);
+        let data = res.data.slice(0, 100);
         let pubkeys = res.pubkeys;
         let ev = [];
         if (data.length > 0) {
@@ -229,67 +229,7 @@ export default function UserFeed({ user }) {
       className="fx-centered  fx-wrap"
       style={{ gap: 0, Width: "min(100%, 800px)" }}
     >
-      {/* <div
-        className="fit-container fx-even sticky box-pad-h"
-        style={{
-          top: "-1px",
-          paddingTop: 0,
-          paddingBottom: 0,
-          columnGap: 0,
-          borderBottom: "1px solid var(--very-dim-gray)",
-          borderTop: "1px solid var(--very-dim-gray)",
-        }}
-      > */}
-        {/* <div
-          className={`list-item-b fx-centered fx-shrink ${
-            contentFrom === "notes" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("notes")}
-        >
-          {t("AYIXG83")}
-        </div>
-        <div
-          className={`list-item-b fx-centered fx-shrink ${
-            contentFrom === "replies" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("replies")}
-        >
-          {t("AENEcn9")}
-        </div>
-        <div
-          className={`list-item-b fx-centered fx-shrink ${
-            contentFrom === "articles" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("articles")}
-        >
-          {t("AesMg52")}
-        </div>
-        <div
-          className={`list-item-b fx-centered fx-shrink ${
-            contentFrom === "smart-widget" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("smart-widget")}
-        >
-          {t("A2mdxcf")}
-        </div>
-        <div
-          className={`list-item-b fx-centered fx-shrink ${
-            contentFrom === "curations" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("curations")}
-        >
-          {t("AVysZ1s")}
-        </div>
-        <div
-          className={`list-item-b fx-centered fx-shrink ${
-            contentFrom === "videos" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("videos")}
-        >
-          {t("AStkKfQ")}
-        </div> */}
-      {/* </div> */}
-      <div className="user-feed-tab sticky" style={{ padding: 0}}>
+      <div className="user-feed-tab sticky" style={{ padding: 0 }}>
         <Slider
           items={[
             <div
