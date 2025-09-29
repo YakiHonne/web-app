@@ -678,7 +678,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         };
         updateWallets([nwcNode], userKeys.pub);
       }
-
+      
       Router.back();
     } catch (err) {
       console.log(err);
@@ -768,13 +768,21 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
 
   const relaysEvent = async () => {
     try {
-      let relaysTags = relaysOnPlatform.map((relay) => ["r", relay]);
+      let defaultRelays = [
+        "wss://nostr-01.yakihonne.com",
+        "wss://nostr-02.yakihonne.com",
+        "wss://relay.damus.io",
+        "wss://relay.nostr.band",
+      ]
+      let relaysTags = defaultRelays.map((relay) => ["r", relay]);
 
-      const ndkRelaysEvent = new NDKEvent(ndkInstance);
-      ndkRelaysEvent.kind = 10002;
-      ndkRelaysEvent.content = "";
-      ndkRelaysEvent.tags = relaysTags;
+      let event = {
+        kind: 10002,
+        content: "",
+        tags: relaysTags,
+      }
 
+      const ndkRelaysEvent = new NDKEvent(ndkInstance, {...event});
       let published = await ndkRelaysEvent.publish(undefined, 2000);
 
       return;

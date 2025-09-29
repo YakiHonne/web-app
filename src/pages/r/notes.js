@@ -16,7 +16,7 @@ export default function index({ relayUrl }) {
     description:
       "Access notes from shared relays across the Nostr ecosystem. Discover content beyond your usual network.",
     image: relayUrl
-      ? relayUrl.replace("wss://", "https://") + "/favicon.ico"
+      ? `https://${relayUrl.split("/")[0]}/favicon.ico`
       : "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",
   };
 

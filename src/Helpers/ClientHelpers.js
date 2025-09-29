@@ -12,6 +12,7 @@ import { nip19 } from "nostr-tools";
 import React from "react";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
 import LNURLParsing from "@/Components/LNURLParsing";
+import { customHistory } from "./History";
 
 const nostrSchemaRegex =
   /\b(naddr1|note1|nevent1|npub1|nprofile1|nsec1|nrelay1)[a-zA-Z0-9]+\b/;

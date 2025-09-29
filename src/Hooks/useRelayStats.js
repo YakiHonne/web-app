@@ -129,7 +129,7 @@ const useRelaysStats = (_url) => {
     };
 
     if (url) fetchData();
-  }, [url]);
+  }, []);
 
   return { relayStats, isLoading };
 };

@@ -11,6 +11,7 @@ export default function RelaysPicker({
   userAllRelays = [],
   addRelay,
   showMessage = true,
+  excludedRelays = [],
 }) {
   const { t } = useTranslation();
   const [showList, setShowList] = useState(false);
@@ -32,7 +33,7 @@ export default function RelaysPicker({
     const handleOffClick = (e) => {
       if (optionsRef.current && !optionsRef.current.contains(e.target))
         setShowList(false);
-      setSelectedRelay(false);
+      // setSelectedRelay(false);
     };
     document.addEventListener("mousedown", handleOffClick);
     return () => {
@@ -90,40 +91,60 @@ export default function RelaysPicker({
             <hr />
           </div>
           {searchedRelays.map((relay) => {
-            return (
-              <div
-                className={`pointer fit-container fx-scattered fx-col ${
-                  selectedRelay !== relay
-                    ? "box-pad-h-s box-pad-v-s"
-                    : "box-pad-h-m box-pad-v-m"
-                } option-no-scale relay-item`}
-                style={{ position: "relative" }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addRelay(relay);
-                  setShowList(false);
-                  setSearchedRelay("");
-                  setSelectedRelay(false);
-                }}
-              >
+            if (!excludedRelays.includes(relay))
+              return (
                 <div
-                  className="fit-container fx-scattered"
+                  className={`pointer fit-container fx-scattered fx-col ${
+                    selectedRelay !== relay
+                      ? "box-pad-h-s box-pad-v-s"
+                      : "box-pad-h-m box-pad-v-m"
+                  } option-no-scale relay-item`}
                   style={{ position: "relative" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addRelay(relay);
+                    setShowList(false);
+                    setSearchedRelay("");
+                    setSelectedRelay(false);
+                  }}
                 >
-                  <div className="fx-centered ">
-                    <RelayImage url={relay} size={16} />
-                    <p>{relay}</p>
-                  </div>
-                  <div className="fx-centered">
-                    <div className="sticker sticker-gray-black">
+                  <div
+                    className="fit-container fx-scattered"
+                    style={{ position: "relative" }}
+                  >
+                    <div className="fx-centered ">
+                      <RelayImage url={relay} size={16} />
+                      <p>{relay}</p>
+                    </div>
+                    <div className="fx-centered">
+                      <div
+                        className="round-icon-small"
+                        style={{ backgroundColor: "var(--dim-gray)" }}
+                      >
+                        <div className="plus-sign"></div>
+                      </div>
+                      <div
+                        className="round-icon-small slide-down"
+                        style={{ backgroundColor: "var(--dim-gray)" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          selectedRelay === relay
+                            ? setSelectedRelay(false)
+                            : setSelectedRelay(relay);
+                        }}
+                      >
+                        <div className="arrow "></div>
+                      </div>
+
+                      {/* <div className="sticker sticker-gray-black">
                       {t("ARWeWgJ")}
+                    </div> */}
                     </div>
                   </div>
-                </div>
-                {selectedRelay === relay && (
-                  <SelectedRelayPreview url={relay} />
-                )}
-                <div
+                  {selectedRelay === relay && (
+                    <SelectedRelayPreview url={relay} />
+                  )}
+                  {/* <div
                   style={{
                     position: "absolute",
                     left: "50%",
@@ -143,9 +164,9 @@ export default function RelaysPicker({
                   >
                     <div className="arrow "></div>
                   </div>
+                </div> */}
                 </div>
-              </div>
-            );
+              );
           })}
           {searchedRelays.length === 0 && searchedRelay && (
             <div
@@ -163,7 +184,10 @@ export default function RelaysPicker({
             >
               <p>{searchedRelay}</p>
               <div className="fx-centered">
-                <div className="sticker sticker-gray-black">{t("ARWeWgJ")}</div>
+                <div className="sticker sticker-gray-black">
+                  <div className="plus-sign"></div>
+                </div>
+                {/* <div className="sticker sticker-gray-black">{t("ARWeWgJ")}</div> */}
               </div>
             </div>
           )}
@@ -176,8 +200,6 @@ export default function RelaysPicker({
 const SelectedRelayPreview = ({ url }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [metadata, setMetadata] = useState(getRelayMetadata(url));
-  const { t } = useTranslation();
-  // const { userProfile } = useUserProfile(metadata?.pubkey);
   useEffect(() => {
     const fetchData = async () => {
       let metadata = await saveRelayMetadata([url]);
@@ -197,63 +219,5 @@ const SelectedRelayPreview = ({ url }) => {
     );
   }
 
-  return (
-    // <div
-    //   className="fit-container fx-centered fx-start-v fx-col"
-    //   onClick={(e) => e.stopPropagation()}
-    // >
-    //   <hr />
-    //   <p className="gray-c">{metadata.description}</p>
-    //   <hr />
-    //   <div className="box-pad-v-s fit-container fx-centered fx-col">
-    //     <div className="fx-scattered fit-container">
-    //       <p>{t("AD6LbxW")}</p>
-    //       <div className="fx-centered">
-    //         {userProfile && (
-    //           <p>{userProfile.display_name || userProfile.name}</p>
-    //         )}
-    //         {!userProfile && <p>N/A</p>}
-    //         {userProfile && (
-    //           <UserProfilePic
-    //             img={userProfile.picture}
-    //             size={24}
-    //             mainAccountUser={false}
-    //             user_id={metadata.pubkey}
-    //           />
-    //         )}
-    //       </div>
-    //     </div>
-    //     <hr />
-    //     <div className="fx-scattered fit-container">
-    //       <p style={{ minWidth: "max-content" }}>{t("ADSorr1")}</p>
-    //       <p className="p-one-line">{metadata.contact || "N/A"}</p>
-    //     </div>
-    //     <hr />
-    //     <div className="fx-scattered fit-container">
-    //       <p>{t("AY2x8jS")}</p>
-    //       <p>{metadata.software.split("/")[4]}</p>
-    //     </div>
-    //     <hr />
-    //     <div className="fx-scattered fit-container">
-    //       <p>{t("ARDY1XM")}</p>
-    //       <p>{metadata.version}</p>
-    //     </div>
-    //     <hr />
-    //   </div>
-    //   <hr />
-    //   <div className="fit-container fx-scattered ">
-    //     <p className="gray-c p-centered p-medium box-marg-s">{t("AVabTbf")}</p>
-    //     <div className="fx-centered fx-end-h fx-wrap ">
-    //       {metadata.supported_nips.map((nip) => {
-    //         return (
-    //           <div key={nip} className="fx-centered round-icon-small">
-    //             <p className="p-medium gray-c">{nip}</p>
-    //           </div>
-    //         );
-    //       })}
-    //     </div>
-    //   </div>
-    // </div>
-    <RelayMetadataPreview metadata={metadata} />
-  );
+  return <RelayMetadataPreview metadata={metadata} />;
 };

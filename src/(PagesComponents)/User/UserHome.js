@@ -21,7 +21,7 @@ export default function UserHome({ user }) {
           >
             <UserMetadata user={user} />
             <div
-              className="it-container fx-centered fx-col"
+              className="fit-container fx-centered fx-col"
               style={{ position: "relative" }}
             >
               <UserFeed pubkey={user.pubkey} user={user} />

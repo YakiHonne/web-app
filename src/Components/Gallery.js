@@ -185,23 +185,42 @@ export default function Gallery({ imgs, pubkey }) {
           }}
         >
           {carouselItems.map((item, index) => {
-            return (
-              <div
-                key={typeof item === "string" ? item : item.fileName || index}
-                className={`bg-img cover-bg pointer fit-height `}
-                style={{
-                  backgroundImage: `url(${item})`,
-                  flex: "1 1 170px",
-                  border: "none",
-                  aspectRatio: "16/9",
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setCurrentImg(index);
-                  setShowCarousel(true);
-                }}
-              ></div>
-            );
+            if (index < 5)
+              return (
+                <div
+                  key={typeof item === "string" ? item : item.fileName || index}
+                  className={`bg-img cover-bg pointer fit-height `}
+                  style={{
+                    backgroundImage: `url(${item})`,
+                    flex: "1 1 170px",
+                    border: "none",
+                    aspectRatio: "16/9",
+                    position: "relative",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentImg(index);
+                    setShowCarousel(true);
+                  }}
+                >
+                  {index === 4 && carouselItems.length > 5 && (
+                    <div
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        width: "100%",
+                        height: "100%",
+                        zIndex: 1,
+                        backgroundColor: "rgba(0,0,0,.8)",
+                      }}
+                      className="fx-centered"
+                    >
+                      <h2 style={{ color: "white" }}>+{carouselItems.length - 5}</h2>
+                    </div>
+                  )}
+                </div>
+              );
           })}
         </div>
       )}

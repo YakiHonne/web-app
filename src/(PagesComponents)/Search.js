@@ -315,6 +315,7 @@ export default function Search() {
                 style={{
                   position: "relative",
                   borderBottom: "1px solid var(--very-dim-gray)",
+                  height: "50px"
                 }}
               >
                 <div className="search-24"></div>
@@ -331,7 +332,7 @@ export default function Search() {
                   <div
                     className="close"
                     onClick={() => {
-                      !isLoading && setSearchKeyword("");
+                     setSearchKeyword("");
                     }}
                   >
                     <div></div>
@@ -340,7 +341,7 @@ export default function Search() {
               </div>
               <Slider
                 items={[
-                  ...["people", "all-media", "articles", "notes", "videos"].map(
+                  ...["people", "all-media", "notes", "articles",  "videos"].map(
                     (tag, index) => {
                       return (
                         <div

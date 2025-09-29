@@ -6,10 +6,26 @@ export default function KeepAlive({ routeKey, children }) {
 
   const MAX_CACHE = 5;
   const ALWAYS_KEEP = ["/", "/discover"]; 
+  const ALWAYS_REMOVE = ["/login"]; 
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // Purge any keys that should never be cached
+  if (isClient) {
+    Object.keys(cacheRef.current).forEach((key) => {
+      if (ALWAYS_REMOVE.includes(key)) {
+        delete cacheRef.current[key];
+      }
+    });
+  }
+
+  // If current route should never be cached, render it directly and skip caching
+  if (isClient && ALWAYS_REMOVE.includes(routeKey)) {
+    if (cacheRef.current[routeKey]) delete cacheRef.current[routeKey];
+    return <div style={{ height: "100%" }}>{children}</div>;
+  }
 
   if (isClient && !cacheRef.current[routeKey]) {
     cacheRef.current[routeKey] = children;
@@ -45,3 +61,4 @@ export default function KeepAlive({ routeKey, children }) {
     </>
   );
 }
+

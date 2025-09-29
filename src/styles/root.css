@@ -58,14 +58,23 @@
         linear-gradient(-270deg, rgb(255, 255, 255) 0%, rgba(225, 225, 225, 0) 100%) !important
 }
 
-[data-theme='dark'] .gradient-bg-right, [data-theme='gray'] .gradient-bg-right {
+[data-theme='gray'] .gradient-bg-right {
     background:
         linear-gradient(-90deg, rgba(23, 23, 24, 1) 0%, rgba(23, 23, 24, 0)100%) !important;
 }
 
-[data-theme='dark'] .gradient-bg-left, [data-theme='gray'] .gradient-bg-left {
+ [data-theme='gray'] .gradient-bg-left {
     background:
         linear-gradient(-270deg, rgba(23, 23, 24, 1) 0%, rgba(23, 23, 24, 0)100%) !important
+}
+[data-theme='dark'] .gradient-bg-right {
+    background:
+        linear-gradient(-90deg, rgb(0, 0, 0) 0%, rgba(23, 23, 24, 0)100%) !important;
+}
+
+[data-theme='dark'] .gradient-bg-left{
+    background:
+        linear-gradient(-270deg, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0)100%) !important
 }
 
 [data-theme='dark'] .skeleton-container::after, [data-theme='gray'] .skeleton-container::after {

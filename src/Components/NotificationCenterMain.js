@@ -384,7 +384,7 @@ export default function NotificationCenterMain() {
             notifications,
             score
           ).status;
-          if (!userMutedList.includes(event.pubkey) && scoreStatus) {
+          if (!userMutedList?.includes(event.pubkey) && scoreStatus) {
             if (event.kind === 9735) {
               let description = JSON.parse(
                 event.tags.find((tag) => tag[0] === "description")[1]

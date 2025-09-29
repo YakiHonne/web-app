@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 export default function useRelaysMetadata(url) {
   const [relayMetadata, setRelayMetadata] = useState(getEmptyRelaysData(url));
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -25,7 +26,7 @@ export default function useRelaysMetadata(url) {
       }
     };
     fetchData();
-  }, [url]);
+  }, []);
 
   return { relayMetadata };
 }

@@ -55,7 +55,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
     e.stopPropagation();
     if (allowClick) {
       if (isNip05Verified) {
-        let nip05Url = `/${url.split("/")[1]}/${userProfile.nip05}/${event.d}`;
+        let nip05Url = `/${url.split("/")[1]}/s/${userProfile.nip05}/${event.d}`;
         customHistory(nip05Url);
       }
       if (!isNip05Verified) {

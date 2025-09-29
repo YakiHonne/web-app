@@ -75,7 +75,7 @@ function App({ Component, pageProps }) {
     <ReduxProvider>
       <ThemeProvider>
         <ToastMessages />
-        <FloatingDMsClient />
+        {!shouldHideSidebar && <FloatingDMsClient />}
         <AppInit />
         <NavbarClient />
         <div
@@ -113,7 +113,11 @@ function App({ Component, pageProps }) {
                 className="fx-centered fx-end-h box-pad-h-s"
               >
                 <div
-                  className="main-page-nostr-container fx-centered box-pad-v-m"
+                  className={`${
+                    shouldHideSidebar
+                      ? "fit-container"
+                      : "main-page-nostr-container"
+                  } fx-centered box-pad-v-m`}
                   style={{
                     borderBottom: "1px solid var(--very-dim-gray)",
                     backgroundColor: "var(--white)",

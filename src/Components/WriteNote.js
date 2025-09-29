@@ -24,6 +24,7 @@ import Toggle from "./Toggle";
 import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
 import LinkRepEventPreview from "./LinkRepEventPreview";
+import { customHistory } from "@/Helpers/History";
 
 export default function WriteNote({
   exit,
@@ -188,9 +189,13 @@ export default function WriteNote({
       })
     );
     updateNoteDraft("root", "");
-    navigateTo.push("/dashboard", { state: { tabNumber: 1, filter: "notes" } });
-    exit();
-    setIsLoading(false);
+    let timer = setTimeout(() => {
+      if (window.location.pathname !== "/") customHistory("/");
+      // navigateTo.push("/dashboard", { state: { tabNumber: 1, filter: "notes" } });
+      exit();
+      setIsLoading(false);
+      clearTimeout(timer);
+    }, 1000);
   };
 
   const publishAsPaid = async (content, tags_, relay) => {
@@ -435,9 +440,16 @@ export default function WriteNote({
         >
           <div
             className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v"
-            style={{ width: "420px" , gap: "1rem"}}
+            style={{ width: "420px", gap: "1rem" }}
           >
-            <div style={{width: "100%", backgroundColor: "white", borderRadius: "18px"}} className="fx-centered box-pad-h-m box-pad-v-m">
+            <div
+              style={{
+                width: "100%",
+                backgroundColor: "white",
+                borderRadius: "18px",
+              }}
+              className="fx-centered box-pad-h-m box-pad-v-m"
+            >
               <QRCode
                 style={{ width: "100%", aspectRatio: "1/1" }}
                 size={340}

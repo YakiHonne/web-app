@@ -94,7 +94,7 @@ const getLinkFromAddr = (addr_) => {
       .replaceAll(".", "");
     if (addr.startsWith("naddr")) {
       let data = nip19.decode(addr);
-      if (!data.identifier) return `/video/${addr}`;
+      if (!data.data.identifier) return `/video/${addr}`;
       if (data.data.kind === 30023) return `/article/${addr}`;
       if ([30004, 30005].includes(data.data.kind)) return `/curation/${addr}`;
       if ([34236].includes(data.data.kind)) return `/video/${addr}`;

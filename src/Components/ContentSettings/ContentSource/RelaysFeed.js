@@ -24,7 +24,6 @@ export default function RelaysFeed({
         return prev;
       }
       return [
-        ...prev,
         {
           display_name: tempString
             .replaceAll("wss://", "")
@@ -32,6 +31,7 @@ export default function RelaysFeed({
           value: tempString,
           enabled: true,
         },
+        ...prev,
       ];
     });
   };
@@ -56,6 +56,7 @@ export default function RelaysFeed({
       <RelaysPicker
         allRelays={allRelays}
         addRelay={handleAddRelaysFeed}
+        excludedRelays={selectedRelaysFeed.map((_) => _.value)}
         showMessage={false}
       />
       <div className="fit-container fx-scattered">

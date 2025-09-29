@@ -39,7 +39,6 @@ export default function Relays() {
     };
     fetchData();
   }, []);
-
   return (
     <div>
       <div

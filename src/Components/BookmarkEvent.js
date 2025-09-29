@@ -53,7 +53,7 @@ export default function   BookmarkEvent({
         }}
       >
         <div
-          className={isBookmarked ? "bookmark-i-b" : "bookmark-i"}
+          className={isBookmarked ? "bookmark-i-b-24" : "bookmark-i-24"}
           ></div>
           {label && <p>{label}</p>}
       </div>

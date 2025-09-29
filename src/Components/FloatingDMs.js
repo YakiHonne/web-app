@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import useDirectMessages from "@/Hooks/useDirectMessages";
@@ -15,13 +15,14 @@ import LoadingDots from "./LoadingDots";
 export default function FloatingDMs() {
   const { t } = useTranslation();
   const router = useRouter();
-  const userKey = useSelector((state) => state.userKeys);
+  const userKeys = useSelector((state) => state.userKeys);
   const initDMS = useSelector((state) => state.initDMS);
   const { sortedInbox, userChatrooms, isNewMsg } = useDirectMessages();
   const { containerRef, open, setOpen } = useCloseContainer();
   const [selectedConvo, setSelectedConvo] = useState(false);
   const [isConvoLoading, setIsConvoLoading] = useState(false);
   const [initConv, setInitConv] = useState(false);
+  const convoBoxRef = useRef();
 
   const handleSelectedConversation = (conversation, ignoreLoading = false) => {
     try {
@@ -71,10 +72,23 @@ export default function FloatingDMs() {
         true
       );
     }
+    if (convoBoxRef.current) {
+      let timer = setTimeout(() => {
+        convoBoxRef.current.classList.remove("slide-up");
+        clearTimeout(timer);
+      }, 500);
+    }
   }, [userChatrooms, open]);
 
+  useEffect(() => {
+    if (selectedConvo) {
+      setSelectedConvo(false);
+      setOpen(false)
+    }
+  }, [userKeys])
+
   if (router.pathname.includes("/messages")) return null;
-  if (!userKey.sec && !userKey?.ext) return null;
+  if (!userKeys.sec && !userKeys?.ext) return null;
   return (
     <>
       {initConv && <InitiConvo exit={() => setInitConv(false)} />}
@@ -152,7 +166,8 @@ export default function FloatingDMs() {
         )}
         {open && (
           <div
-            className="sc-s option slide-up"
+            className="sc-s slide-up"
+            ref={convoBoxRef}
             style={{
               [selectedConvo ? "height" : "maxHeight"]: "60vh",
               overflowY: "scroll",

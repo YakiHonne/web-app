@@ -101,7 +101,7 @@ export default function ShareLink({
         data-tooltip={t("AGB5vpj")}
         onClick={handleSharing}
       >
-        <div className="share-v2"></div>
+        <div className="share-v2-24"></div>
         {label && <p>{label}</p>}
       </div>
     </>

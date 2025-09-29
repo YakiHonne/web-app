@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import RelayImage from "@/Components/RelayImage";
 import { useTranslation } from "react-i18next";
 import useRelaysMetadata from "@/Hooks/useRelaysMetadata";
@@ -6,25 +6,23 @@ import useRelaysStats from "@/Hooks/useRelayStats";
 import UsersGroupProfilePicture from "@/Components/UsersGroupProfilePicture";
 import RelayMetadataPreview from "@/Components/RelayMetadataPreview";
 import { copyText } from "@/Helpers/Helpers";
-import { customHistory } from "@/Helpers/History";
 import RelayStatus from "./RelayStatus";
 import RelayRtt from "./RelayRtt";
 import AddToFavList from "./AddToFavList";
 import useCloseContainer from "@/Hooks/useCloseContainer";
+import { useSelector } from "react-redux";
+import Link from "next/link";
 
-export default function RelayPreview({
-  url,
-  favoredList = [],
-  addToFavList = false,
-}) {
+function RelayPreview({ url, favoredList = [], addToFavList = false }) {
   const { t } = useTranslation();
+  const userKeys = useSelector((state) => state.userKeys);
   const { relayMetadata } = useRelaysMetadata(url);
   const { relayStats } = useRelaysStats(url);
-  // const [showPreview, setShowPreview] = useState(false);
   const { containerRef, open, setOpen } = useCloseContainer();
+
   return (
     <div
-      className="fit-container fx-scattered fx-col box-pad-h-m box-pad-v-m sc-s-18 bg-sp pointer"
+      className="fit-container fx-scattered fx-col box-pad-h-m box-pad-v-m sc-s bg-sp pointer"
       style={{ overflow: "visible" }}
       onClick={() => {
         setOpen(!open);
@@ -66,7 +64,7 @@ export default function RelayPreview({
           {!addToFavList && (
             <>
               <RelayStatus status={relayStats.monitor.rttOpen} />
-              <div
+              {/* <div
                 className="round-icon-tooltip"
                 data-tooltip={t("AlQx13z")}
                 onClick={(e) => {
@@ -75,7 +73,7 @@ export default function RelayPreview({
                 }}
               >
                 <div className="share-icon"></div>
-              </div>
+              </div> */}
             </>
           )}
           {addToFavList && <AddToFavList url={url} />}
@@ -109,7 +107,7 @@ export default function RelayPreview({
                     />
                   </>
                 )}
-                {relayStats.followings.pubkeys.length === 0 && (
+                {relayStats.followings.pubkeys.length === 0 && userKeys && (
                   <p className="gray-c p-medium p-maj">{t("A0dZ5MX")}</p>
                 )}
               </div>
@@ -166,6 +164,25 @@ export default function RelayPreview({
           </div>
         </>
       )}
+      {!addToFavList && (
+        <>
+          <hr style={{ margin: ".5rem 0" }} />
+          <Link
+            className="fit-container fx-centered pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            href={"/r/content?r=" + url}
+          >
+            <p className="gray-c">{t("AlQx13z")}</p>
+            <div>
+              <div className="share-icon"></div>
+            </div>
+          </Link>
+        </>
+      )}
     </div>
   );
 }
+
+export default React.memo(RelayPreview);

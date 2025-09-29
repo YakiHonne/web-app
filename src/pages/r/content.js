@@ -3,7 +3,7 @@ import React from "react";
 import HeadMetadata from "@/Components/HeadMetadata";
 
 const ClientComponent = dynamic(
-  () => import("@/(PagesComponents)/DiscoverSharedRelay"),
+  () => import("@/(PagesComponents)/ContentSharedRelay"),
   {
     ssr: false,
   }
@@ -11,12 +11,12 @@ const ClientComponent = dynamic(
 
 export default function index({ relayUrl }) {
   let data = {
-    path: `r/discover${relayUrl ? `?r=${relayUrl}` : ""}`,
-    title: "Yakihonne | Discover from Shared Relay",
+    path: `r/content${relayUrl ? `?r=${relayUrl}` : ""}`,
+    title: "Yakihonne | Note from Shared Relay",
     description:
-      "Discover content from shared relays across the Nostr network. Expand your content horizon beyond your usual feeds.",
+      "Access content from shared relays across the Nostr ecosystem. Discover new things beyond your usual network.",
     image: relayUrl
-      ?  `https://${relayUrl.split("/")[0]}/favicon.ico`
+      ? `https://${relayUrl.split("/")[0]}/favicon.ico`
       : "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",
   };
 
