@@ -76,18 +76,22 @@ export default function PostReaction({
                 });
             }}
           >
-            <div className={isLiked ? "" :"opacity-4"}>
+            <div className={isLiked ? "" : "opacity-4"}>
               <NumberShrink value={postActions.likes.likes.length} />
             </div>
           </div>
         </div>
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
-          <div
-            className="comment-24 opacity-4"
-            onClick={() => setOpenComment(!openComment)}
-          ></div>
-          <div onClick={() => setShowComments(true)} className="opacity-4">
-            <NumberShrink value={postActions.replies.replies.length} />
+          <div className="round-icon-tooltip" data-tooltip={t("ADHdLfJ")}>
+            <div
+              className="comment-24 opacity-4"
+              onClick={() => setOpenComment(!openComment)}
+            ></div>
+          </div>
+          <div className="round-icon-tooltip" data-tooltip={t("AMBxvKP")}>
+            <div onClick={() => setShowComments(true)} className="opacity-4">
+              <NumberShrink value={postActions.replies.replies.length} />
+            </div>
           </div>
         </div>
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>

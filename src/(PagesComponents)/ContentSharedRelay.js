@@ -160,6 +160,7 @@ const HomeFeed = ({ relay }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
   const [contentFrom, setContentFrom] = useState("all");
+  const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
     straightUp();
@@ -189,6 +190,11 @@ const HomeFeed = ({ relay }) => {
       if (contentFrom === "videos") kinds = [34235, 21, 22];
 
       let ndk = await getNDKInstance(relay);
+      if (!ndk) {
+        setIsConnected(false);
+        setIsLoading(false);
+        return;
+      }
       let data = await getSubData(
         [{ kinds, limit: 100, until: notesLastEventTime, since }],
         50,
@@ -300,7 +306,36 @@ const HomeFeed = ({ relay }) => {
             return null;
           }
         })}
-
+        {notes?.length === 0 && !isLoading && isConnected && (
+          <div
+            className="fit-container fx-centered fx-col"
+            style={{ height: "40vh" }}
+          >
+            <div
+              className="yaki-logomark"
+              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+            ></div>
+            <h4>{t("A5BPCrj")}</h4>
+            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+              {t("AB9jjjH")}
+            </p>
+          </div>
+        )}
+        {notes?.length === 0 && !isLoading && !isConnected && (
+          <div
+            className="fit-container fx-centered fx-col"
+            style={{ height: "40vh" }}
+          >
+            <div
+              className="link"
+              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+            ></div>
+            <h4>{t("AZ826Ej")}</h4>
+            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+              {t("A5ebGh9")}
+            </p>
+          </div>
+        )}
         <div className="box-pad-v"></div>
         {isLoading && (
           <div

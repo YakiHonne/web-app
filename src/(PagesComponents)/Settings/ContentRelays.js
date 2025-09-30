@@ -137,7 +137,7 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
   return (
     <div className="fit-container box-pad-h-m fx-shrink">
       <div
-        className="fit-container sc-s-18 bg-sp"
+        className="fit-container sc-s-18"
         style={{ overflow: "visible" }}
       >
         <div className="fx-centered fx-end-h fx-start-v fit-container box-pad-h-s box-pad-v-s">

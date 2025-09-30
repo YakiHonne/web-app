@@ -634,7 +634,7 @@ export default function NotificationCenterMain() {
         >
           <div className="fit-container fx-scattered box-pad-h box-pad-v-m">
             <h3>{t("ASSFfFZ")}</h3>
-            <Link href={"/settings"} state={{ tab: "customization" }}>
+            <Link href={"/settings?tab=notifications"}>
               <div className="setting-24"></div>
             </Link>
           </div>

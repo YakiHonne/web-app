@@ -15,6 +15,7 @@ import SettingsHeader from "./SettingsHeader";
 import YakiChestManagement from "./YakiChestManagement";
 import UserLogout from "./UserLogout";
 import { useRouter } from "next/router";
+import Notifications from "./Notifications";
 
 export default function SettingsHome() {
   const router = useRouter();
@@ -47,11 +48,7 @@ export default function SettingsHome() {
                       selectedTab={selectedTab}
                       setSelectedTab={setSelectedTab}
                     />
-                    <LanguagesManagement
-                      selectedTab={selectedTab}
-                      setSelectedTab={setSelectedTab}
-                      userKeys={userKeys}
-                    />
+
                     <ContentModerationManagement
                       selectedTab={selectedTab}
                       setSelectedTab={setSelectedTab}
@@ -68,11 +65,21 @@ export default function SettingsHome() {
                       userKeys={userKeys}
                       state={query}
                     />
-                    <CacheManagement
+                    <Notifications
                       selectedTab={selectedTab}
                       setSelectedTab={setSelectedTab}
                     />
+
+                    <LanguagesManagement
+                      selectedTab={selectedTab}
+                      setSelectedTab={setSelectedTab}
+                      userKeys={userKeys}
+                    />
                     <ThemeManagement
+                      selectedTab={selectedTab}
+                      setSelectedTab={setSelectedTab}
+                    />
+                    <CacheManagement
                       selectedTab={selectedTab}
                       setSelectedTab={setSelectedTab}
                     />

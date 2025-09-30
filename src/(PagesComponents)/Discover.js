@@ -162,6 +162,7 @@ const ExploreFeed = ({
   const { t } = useTranslation();
   const [content, setContent] = useState([]);
   const [timestamp, setTimestamp] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
   const [lastEventsTimestamps, setLastEventsTimestamps] = useState({
     articles: undefined,
     curations: undefined,
@@ -176,6 +177,7 @@ const ExploreFeed = ({
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
+      setIsConnected(true);
       let dateCheckerArts = lastEventsTimestamps.articles;
       // ? lastEventsTimestamps.articles - 86400
       // : Math.floor(Date.now() / 1000) - 86400;
@@ -193,6 +195,11 @@ const ExploreFeed = ({
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
           : undefined;
+      if (ndk === false) {
+        setIsConnected(false);
+        setIsLoading(false);
+        return;
+      }
       setSubfilter({
         filter: [...artsFilter, ...curationsFilter, ...videosFilter],
         relays: algoRelay,
@@ -502,7 +509,7 @@ const ExploreFeed = ({
             </Fragment>
           );
       })}
-      {content.length === 0 && !isLoading && (
+      {content.length === 0 && !isLoading && isConnected && (
         <div
           className="fit-container fx-centered fx-col"
           style={{ height: "30vh" }}
@@ -510,6 +517,21 @@ const ExploreFeed = ({
           <div className="search"></div>
           <h4>{t("AUrhqmn")}</h4>
           <p className="gray-c">{t("AtL4qoU")}</p>
+        </div>
+      )}
+      {content?.length === 0 && !isLoading && !isConnected && (
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ height: "40vh" }}
+        >
+          <div
+            className="link"
+            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+          ></div>
+          <h4>{t("AZ826Ej")}</h4>
+          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+            {t("A5ebGh9")}
+          </p>
         </div>
       )}
       <div className="box-pad-v"></div>

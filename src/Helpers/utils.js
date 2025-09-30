@@ -86,7 +86,10 @@ const initiateNDKInstance = async (relay) => {
     const signer = new NDKNip46Signer(ndkInstance, userKeys.bunker, localKeys);
     ndkInstance.signer = signer;
   }
-  await ndkInstance.connect(500);
+  await ndkInstance.connect(1000);
+  if(!ndkInstance.pool.relays.get(relay.endsWith("/") ? relay : `${relay}/`).connected){
+    return false
+  }
   ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
     ndk: ndkInstance,
   });

@@ -11,6 +11,7 @@ export default function NProfilePreviewer({
   close = false,
   showSharing = true,
   onClose,
+  custom = false
 }) {
   const [author, setAuthor] = useState(getEmptyuserMetadata(pubkey));
 
@@ -42,10 +43,13 @@ export default function NProfilePreviewer({
           <div className="share-icon-24"></div>
         </Link>
       )}
-      {close && (
+      {close && !custom && (
         <div className="close" style={{ position: "static" }} onClick={onClose}>
           <div></div>
         </div>
+      )}
+      {close && custom && (
+       <button className="bnt btn-normal btn-small" onClick={onClose}>{custom}</button>
       )}
     </div>
   );

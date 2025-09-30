@@ -163,6 +163,7 @@ const ExploreFeed = ({
     videos: undefined,
   });
   const [isEndOfQuerying, setIsEndOfQuerying] = useState(false);
+  const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
     const contentFromRelays = async () => {
@@ -173,6 +174,11 @@ const ExploreFeed = ({
 
       const { artsFilter, curationsFilter, videosFilter } = getFilter();
       let ndk = await getNDKInstance(relay);
+      if(!ndk){
+        setIsConnected(false);
+        setIsLoading(false);
+        return;
+      }
       let relayUrls = [relay];
       let [articles, curations, videos] = await Promise.all([
         getSubData(artsFilter, undefined, relayUrls, ndk),
@@ -324,14 +330,34 @@ const ExploreFeed = ({
             </Fragment>
           );
       })}
-      {content.length === 0 && !isLoading && (
+    {content?.length === 0 && !isLoading && isConnected && (
         <div
           className="fit-container fx-centered fx-col"
-          style={{ height: "30vh" }}
+          style={{ height: "40vh" }}
         >
-          <div className="search"></div>
-          <h4>{t("AUrhqmn")}</h4>
-          <p className="gray-c">{t("AtL4qoU")}</p>
+          <div
+            className="yaki-logomark"
+            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+          ></div>
+          <h4>{t("A5BPCrj")}</h4>
+          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+            {t("AB9jjjH")}
+          </p>
+        </div>
+      )}
+      {content?.length === 0 && !isLoading && !isConnected && (
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ height: "40vh" }}
+        >
+          <div
+            className="link"
+            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+          ></div>
+          <h4>{t("AZ826Ej")}</h4>
+          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+            {t("A5ebGh9")}
+          </p>
         </div>
       )}
       <div className="box-pad-v"></div>

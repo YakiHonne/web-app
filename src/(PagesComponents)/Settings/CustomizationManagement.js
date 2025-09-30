@@ -9,8 +9,11 @@ import {
   setRepliesViewSettings,
   updateCustomSettings,
 } from "@/Helpers/ClientHelpers";
-let boxView = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/box-view.png";
-let threadView = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thread-view.png";
+import Select from "@/Components/Select";
+let boxView =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/box-view.png";
+let threadView =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thread-view.png";
 
 export function CustomizationManagement({
   selectedTab,
@@ -19,7 +22,7 @@ export function CustomizationManagement({
   state,
 }) {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const [showFeedSettings, setShowFeedSettings] = useState(false);
   const [userToFollowSuggestion, setUserToFollowSuggestion] = useState(
     localStorage?.getItem("hsuggest1")
   );
@@ -38,29 +41,28 @@ export function CustomizationManagement({
     getCustomSettings().userHoverPreview
   );
   const contentList = getCustomSettings().contentList;
-  const [notification, setNotification] = useState(
-    getCustomSettings().notification || getDefaultSettings("").notification
-  );
+
   const [selectedRepliesView, setSelectedRepliesView] = useState(
     getRepliesViewSettings() ? "thread" : "box"
   );
   const [homeContentSuggestion, setHomeContentSuggestion] = useState(
     localStorage?.getItem("hsuggest")
   );
-  const notificationDN = {
-    mentions: `${t("A8Da0of")} / ${t("AENEcn9")}`,
-    reactions: t("Alz0E9Y"),
-    reposts: t("Aai65RJ"),
-    zaps: "Zaps",
-    following: t("A9TqNxQ"),
-  };
-  const notificationDesc = {
-    mentions: t("AyF6bJf"),
-    reactions: t("AjlJkCH"),
-    reposts: t("A9sfGZo"),
-    zaps: t("Ae82ooM"),
-    following: t("A5HyxxL"),
-  };
+
+  const longPressOptions = [
+    {
+      display_name: t("AYIXG83"),
+      value: "notes",
+    },
+    {
+      display_name: t("AesMg52"),
+      value: "articles",
+    },
+    {
+      display_name: t("A2mdxcf"),
+      value: "sw",
+    },
+  ];
 
   useEffect(() => {
     if (state && state.tab === "customization") {
@@ -162,214 +164,272 @@ export function CustomizationManagement({
     }
   };
 
-  const handleNotification = (index, status) => {
-    let tempArr = structuredClone(notification);
-    tempArr[index].isHidden = status;
-    if (!tempArr.find((item) => !item.isHidden)) {
-      dispatch(
-        setToast({
-          type: 2,
-          desc: t("AHfFgQL"),
-        })
-      );
-      return;
-    }
-    setNotification(tempArr);
-    updateCustomSettings({
-      pubkey: userKeys.pub,
-      userHoverPreview,
-      contentList,
-      collapsedNote,
-      notification: tempArr,
-    });
-  };
-
   const handleRepliesView = (value) => {
     setRepliesViewSettings(value);
     setSelectedRepliesView(value);
   };
 
   return (
+    <>
+      {showFeedSettings && (
+        <FeedSettings
+          exit={() => setShowFeedSettings(false)}
+          handleCollapedNote={handleCollapedNote}
+          handleRepliesView={handleRepliesView}
+          collapsedNote={collapsedNote}
+          selectedRepliesView={selectedRepliesView}
+          homeContentSuggestion={homeContentSuggestion}
+          handleHomeContentSuggestion={handleHomeContentSuggestion}
+          userToFollowSuggestion={userToFollowSuggestion}
+          contentSuggestion={contentSuggestion}
+          interestSuggestion={interestSuggestion}
+          handleUserToFollowSuggestion={handleUserToFollowSuggestion}
+          handleContentSuggestion={handleContentSuggestion}
+          handleInterestSuggestion={handleInterestSuggestion}
+        />
+      )}
+
+      <div
+        className={`fit-container fx-scattered fx-col pointer ${
+          selectedTab === "customization" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+        }`}
+        style={{
+          borderBottom: "1px solid var(--very-dim-gray)",
+          gap: 0,
+          borderColor: "var(--very-dim-gray)",
+          transition: "0.2s ease-in-out",
+        }}
+      >
+        <div
+          className="fx-scattered fit-container  box-pad-h-m box-pad-v-m "
+          onClick={() =>
+            selectedTab === "customization"
+              ? setSelectedTab("")
+              : setSelectedTab("customization")
+          }
+        >
+          <div className="fx-centered fx-start-h fx-start-v">
+            <div className="box-pad-v-s">
+              <div className="custom-24"></div>
+            </div>
+            <div>
+              <p>{t("ARS24Cc")}</p>
+              <p className="p-medium gray-c">{t("AvNq0fB")}</p>
+            </div>
+          </div>
+          <div className="arrow"></div>
+        </div>
+        {selectedTab === "customization" && (
+          <div className="fit-container fx-col fx-centered  box-pad-h-m box-pad-v-m ">
+            <div className="fit-container fx-scattered">
+              <div>
+                <p>{t("AKjfaA8")}</p>
+                <p className="p-medium gray-c">{t("AaaXNqB")}</p>
+              </div>
+              <div
+                className="btn-text-gray"
+                style={{ marginRight: ".75rem" }}
+                onClick={() => setShowFeedSettings(true)}
+              >
+                {t("AsXohpb")}
+              </div>
+            </div>
+            <hr />
+            <div className="fx-scattered fit-container">
+              <div>
+                <p>{t("AnFVDo1")}</p>
+                <p className="p-medium gray-c">{t("A0MTAAN")}</p>
+              </div>
+              <Select options={longPressOptions} value={"notes"} />
+            </div>
+            <hr />
+            <div className="fx-scattered fit-container">
+              <div>
+                <p>{t("AFVPHti")}</p>
+                <p className="p-medium gray-c">{t("A864200")}</p>
+              </div>
+              <div
+                className={`toggle ${
+                  !userHoverPreview ? "toggle-dim-gray" : ""
+                } ${userHoverPreview ? "toggle-c1" : "toggle-dim-gray"}`}
+                onClick={handleUserHoverPreview}
+              ></div>
+            </div>
+            <hr />
+            <div className="fx-scattered fit-container">
+              <div>
+                <p>{t("AKa9x4m")}</p>
+                <p className="p-medium gray-c">{t("AndOZE9")}</p>
+              </div>
+              <div
+                className="sc-s-18 fx-centered option"
+                style={{ width: "45px", aspectRatio: "1/1" }}
+              >
+                <div className="p-big">❤️️</div>
+              </div>
+            </div>
+            <hr />
+            <div className="fx-scattered fit-container">
+              <div>
+                <p>{t("A06GNpE")}</p>
+                <p className="p-medium gray-c">{t("AibLlqg")}</p>
+              </div>
+              <div
+                className={`toggle ${
+                  !userHoverPreview ? "toggle-dim-gray" : ""
+                } ${userHoverPreview ? "toggle-c1" : "toggle-dim-gray"}`}
+                onClick={handleUserHoverPreview}
+              ></div>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+export default CustomizationManagement;
+
+const FeedSettings = ({
+  exit,
+  handleCollapedNote,
+  handleRepliesView,
+  handleHomeContentSuggestion,
+  handleUserToFollowSuggestion,
+  handleContentSuggestion,
+  handleInterestSuggestion,
+  collapsedNote,
+  selectedRepliesView,
+  homeContentSuggestion,
+  userToFollowSuggestion,
+  contentSuggestion,
+  interestSuggestion,
+}) => {
+  const { t } = useTranslation();
+  return (
     <div
-      className="fit-container fx-scattered fx-col pointer"
-      style={{
-        borderBottom: "1px solid var(--very-dim-gray)",
-        gap: 0,
+      className="fixed-container box-pad-h fx-centered"
+      onClick={(e) => {
+        e.stopPropagation();
+        exit();
       }}
     >
       <div
-        className="fx-scattered fit-container  box-pad-h-m box-pad-v-m "
-        onClick={() =>
-          selectedTab === "customization"
-            ? setSelectedTab("")
-            : setSelectedTab("customization")
-        }
+        className="box-pad-h box-pad-v sc-s bg-sp slide-up fx-centered fx-col fx-start-h fx-start-v"
+        style={{
+          width: "min(100%, 500px)",
+          maxHeight: "90vh",
+          overflowY: "scroll",
+          position: "relative",
+          padding: "2rem",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
-        <div className="fx-centered fx-start-h fx-start-v">
-          <div className="box-pad-v-s">
-            <div className="custom-24"></div>
-          </div>
+        <div className="close" onClick={exit}>
+          <div></div>
+        </div>
+        <h4>{t("AKjfaA8")}</h4>
+        <div className="fit-container">
+          <p className="c1-c p-big">{t("AzII4H9")}</p>
+        </div>
+        <div className="fx-scattered fit-container fx-start-v fx-col">
           <div>
-            <p>{t("ARS24Cc")}</p>
-            <p className="p-medium gray-c">{t("AvNq0fB")}</p>
+            <p>{t("ADAM3FJ")}</p>
+            <p className="p-medium gray-c">{t("Ai5Sb3k")}</p>
+          </div>
+          <div className="fit-container fx-centered box-pad-v-s">
+            <div
+              className="fx fx-centered fx-col sc-s-18 bg-sp "
+              style={{
+                borderColor: selectedRepliesView !== "box" ? "" : "var(--c1)",
+              }}
+              onClick={() => handleRepliesView("box")}
+            >
+              <img src={boxView} style={{ width: "100%" }} alt="" />
+              <p className="gray-c box-pad-v-s">{t("ACz8zwo")}</p>
+            </div>
+            <div
+              className="fx fx-centered fx-col sc-s-18 bg-sp "
+              style={{
+                borderColor:
+                  selectedRepliesView !== "thread" ? "" : "var(--c1)",
+              }}
+              onClick={() => handleRepliesView("thread")}
+            >
+              <img src={threadView} style={{ width: "100%" }} alt="" />
+              <p className="gray-c box-pad-v-s">{t("AlwU99D")}</p>
+            </div>
           </div>
         </div>
-        <div className="arrow"></div>
+        <div className="fx-scattered fit-container">
+          <div>
+            <p>{t("AozzmTY")}</p>
+            <p className="p-medium gray-c">{t("A3nTKfp")}</p>
+          </div>
+          <div
+            className={`toggle ${!collapsedNote ? "toggle-dim-gray" : ""} ${
+              collapsedNote ? "toggle-c1" : "toggle-dim-gray"
+            }`}
+            onClick={handleCollapedNote}
+          ></div>
+        </div>
+        <div className="fit-container">
+          <p className="c1-c p-big">{t("Av6mqrU")}</p>
+        </div>
+        <div className="fx-scattered fit-container">
+          <div>
+            <p>{t("AZZ4XLg")}</p>
+            <p className="p-medium gray-c">{t("AgBOrIx")}</p>
+          </div>
+          <div
+            className={`toggle ${
+              homeContentSuggestion ? "toggle-dim-gray" : ""
+            } ${!homeContentSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
+            onClick={handleHomeContentSuggestion}
+          ></div>
+        </div>
+        <hr />
+        <div className="fx-scattered fit-container">
+          <div>
+            <p>{t("AE7aj4C")}</p>
+            <p className="p-medium gray-c">{t("AyBFzxq")}</p>
+          </div>
+          <div
+            className={`toggle ${
+              userToFollowSuggestion ? "toggle-dim-gray" : ""
+            } ${!userToFollowSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
+            onClick={handleUserToFollowSuggestion}
+          ></div>
+        </div>
+        <hr />
+        <div className="fx-scattered fit-container">
+          <div>
+            <p>{t("Ax8NFUb")}</p>
+            <p className="p-medium gray-c">{t("ARDBNh7")}</p>
+          </div>
+          <div
+            className={`toggle ${contentSuggestion ? "toggle-dim-gray" : ""} ${
+              !contentSuggestion ? "toggle-c1" : "toggle-dim-gray"
+            }`}
+            onClick={handleContentSuggestion}
+          ></div>
+        </div>
+        <hr />
+        <div className="fx-scattered fit-container">
+          <div>
+            <p>{t("ANiWe9M")}</p>
+            <p className="p-medium gray-c">{t("AXgwD7C")}</p>
+          </div>
+          <div
+            className={`toggle ${interestSuggestion ? "toggle-dim-gray" : ""} ${
+              !interestSuggestion ? "toggle-c1" : "toggle-dim-gray"
+            }`}
+            onClick={handleInterestSuggestion}
+          ></div>
+        </div>
       </div>
-      {selectedTab === "customization" && (
-        <div className="fit-container fx-col fx-centered  box-pad-h-m box-pad-v-m ">
-          <div className="fit-container">
-            <p className="gray-c">{t("Amm6e0Z")}</p>
-          </div>
-          <div className="fx-scattered fit-container">
-            <div>
-              <p>{t("AozzmTY")}</p>
-              <p className="p-medium gray-c">{t("A3nTKfp")}</p>
-            </div>
-            <div
-              className={`toggle ${!collapsedNote ? "toggle-dim-gray" : ""} ${
-                collapsedNote ? "toggle-c1" : "toggle-dim-gray"
-              }`}
-              onClick={handleCollapedNote}
-            ></div>
-          </div>
-          <div className="fx-scattered fit-container fx-start-v fx-col">
-            <div>
-              <p>{t("ADAM3FJ")}</p>
-              <p className="p-medium gray-c">{t("Ai5Sb3k")}</p>
-            </div>
-            <div className="fit-container fx-centered">
-              <div
-                className="fx fx-centered fx-col sc-s-18 bg-sp "
-                style={{
-                  borderColor: selectedRepliesView !== "box" ? "" : "var(--c1)",
-                }}
-                onClick={() => handleRepliesView("box")}
-              >
-                <img src={boxView} style={{ width: "100%" }} alt="" />
-                <p className="gray-c box-pad-v-s">{t("ACz8zwo")}</p>
-              </div>
-              <div
-                className="fx fx-centered fx-col sc-s-18 bg-sp "
-                style={{
-                  borderColor:
-                    selectedRepliesView !== "thread" ? "" : "var(--c1)",
-                }}
-                onClick={() => handleRepliesView("thread")}
-              >
-                <img src={threadView} style={{ width: "100%" }} alt="" />
-                <p className="gray-c box-pad-v-s">{t("AlwU99D")}</p>
-              </div>
-            </div>
-          </div>
-          <div className="fx-scattered fit-container">
-            <div>
-              <p>{t("AFVPHti")}</p>
-              <p className="p-medium gray-c">{t("A864200")}</p>
-            </div>
-            <div
-              className={`toggle ${
-                !userHoverPreview ? "toggle-dim-gray" : ""
-              } ${userHoverPreview ? "toggle-c1" : "toggle-dim-gray"}`}
-              onClick={handleUserHoverPreview}
-            ></div>
-          </div>
-          <hr />
-          <div className="fit-container">
-            <p className="gray-c">{t("AKjfaA8")}</p>
-            <p className="p-medium gray-c">{t("Am0PvQX")}</p>
-          </div>
-          <div className="fx-scattered fit-container">
-            <div>
-              <p>{t("AZZ4XLg")}</p>
-              <p className="p-medium gray-c">{t("AgBOrIx")}</p>
-            </div>
-            <div
-              className={`toggle ${
-                homeContentSuggestion ? "toggle-dim-gray" : ""
-              } ${!homeContentSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
-              onClick={handleHomeContentSuggestion}
-            ></div>
-          </div>
-          <hr />
-          <div className="fx-scattered fit-container">
-            <div>
-              <p>{t("AE7aj4C")}</p>
-              <p className="p-medium gray-c">{t("AyBFzxq")}</p>
-            </div>
-            <div
-              className={`toggle ${
-                userToFollowSuggestion ? "toggle-dim-gray" : ""
-              } ${!userToFollowSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
-              onClick={handleUserToFollowSuggestion}
-            ></div>
-          </div>
-          <hr />
-          <div className="fx-scattered fit-container">
-            <div>
-              <p>{t("Ax8NFUb")}</p>
-              <p className="p-medium gray-c">{t("ARDBNh7")}</p>
-            </div>
-            <div
-              className={`toggle ${
-                contentSuggestion ? "toggle-dim-gray" : ""
-              } ${!contentSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
-              onClick={handleContentSuggestion}
-            ></div>
-          </div>
-          <hr />
-          <div className="fx-scattered fit-container">
-            <div>
-              <p>{t("ANiWe9M")}</p>
-              <p className="p-medium gray-c">{t("AXgwD7C")}</p>
-            </div>
-            <div
-              className={`toggle ${
-                interestSuggestion ? "toggle-dim-gray" : ""
-              } ${!interestSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
-              onClick={handleInterestSuggestion}
-            ></div>
-          </div>
-          <hr />
-          <div className="fx-scattered fit-container fx-col fx-start-v">
-            <div>
-              <p className="gray-c">{t("ASSFfFZ")}</p>
-              <p className="p-medium gray-c">{t("Aaa8NMg")}</p>
-            </div>
-            <div className="fit-container fx-centered fx-col">
-              {notification.map((item, index) => {
-                return (
-                  <Fragment key={index}>
-                    <div className="fx-scattered fit-container">
-                      <div>
-                        <p className="p-maj">{notificationDN[item.tab]}</p>
-                        <p className="p-medium gray-c">
-                          {notificationDesc[item.tab]}
-                        </p>
-                      </div>
-                      <div className="fx-centered">
-                        <div
-                          className={`toggle ${
-                            item.isHidden ? "toggle-dim-gray" : ""
-                          } ${
-                            !item.isHidden ? "toggle-c1" : "toggle-dim-gray"
-                          }`}
-                          onClick={() =>
-                            handleNotification(index, !item.isHidden)
-                          }
-                        ></div>
-                      </div>
-                    </div>
-                    <hr />
-                  </Fragment>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
-
-export default CustomizationManagement;

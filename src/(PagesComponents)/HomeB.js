@@ -12,10 +12,7 @@ import ArrowUp from "@/Components/ArrowUp";
 import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
 import { getFollowings, saveUsers } from "@/Helpers/DB";
-import {
-  getDefaultFilter,
-  getSubData,
-} from "@/Helpers/Controlers";
+import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import HomeCarouselContentSuggestions from "@/Components/HomeCarouselContentSuggestions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
@@ -167,6 +164,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const [userFollowings, setUserFollowings] = useState(false);
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(true);
   const [notesContentFrom, setNotesContentFrom] = useState(
     getContentFromValue(selectedCategory)
   );
@@ -321,6 +319,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
+      setIsConnected(true);
       let eventsPubkeys = [];
       let events = [];
       let fallBackEvents = [];
@@ -329,6 +328,11 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
           : undefined;
+      if (ndk === false) {
+        setIsConnected(false);
+        setIsLoading(false);
+        return;
+      }
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
       setSubfilter({ filter, relays: algoRelay, ndk });
@@ -409,33 +413,54 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
             <hr />
           </div>
         )}
-      {!selectedFilter.default && notes?.length === 0 && !isLoading && (
+      {!selectedFilter.default &&
+        notes?.length === 0 &&
+        !isLoading &&
+        isConnected && (
+          <div
+            className="fit-container fx-centered fx-col"
+            style={{ height: "40vh" }}
+          >
+            <div
+              className="yaki-logomark"
+              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+            ></div>
+            <h4>{t("A5BPCrj")}</h4>
+            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+              {t("AgEkYer")}
+            </p>
+          </div>
+        )}
+      {selectedFilter.default &&
+        notes?.length === 0 &&
+        !isLoading &&
+        isConnected && (
+          <div
+            className="fit-container fx-centered fx-col"
+            style={{ height: "40vh" }}
+          >
+            <div
+              className="yaki-logomark"
+              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+            ></div>
+            <h4>{t("A5BPCrj")}</h4>
+            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+              {t("ASpI7pT")}
+            </p>
+          </div>
+        )}
+      {notes?.length === 0 && !isLoading && !isConnected && (
         <div
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
           <div
-            className="yaki-logomark"
+            className="link"
             style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
           ></div>
-          <h4>{t("A5BPCrj")}</h4>
+          <h4>{t("AZ826Ej")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-            {t("AgEkYer")}
-          </p>
-        </div>
-      )}
-      {selectedFilter.default && notes?.length === 0 && !isLoading && (
-        <div
-          className="fit-container fx-centered fx-col"
-          style={{ height: "40vh" }}
-        >
-          <div
-            className="yaki-logomark"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
-          <h4>{t("A5BPCrj")}</h4>
-          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-            {t("ASpI7pT")}
+            {t("A5ebGh9")}
           </p>
         </div>
       )}

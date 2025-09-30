@@ -42,10 +42,19 @@ export function MutedList({ exit }) {
   };
   if (!Array.isArray(userMutedList)) return;
   return (
-    <div className="fixed-container box-pad-h fx-centered">
+    <div
+      className="fixed-container box-pad-h fx-centered"
+      onClick={(e) => {
+        e.stopPropagation();
+        exit();
+      }}
+    >
       <div
-        className="box-pad-h-m box-pad-v-m sc-s-18 bg-sp"
+        className="box-pad-h box-pad-v sc-s bg-sp slide-up"
         style={{ width: "min(100%, 500px)", position: "relative" }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -66,6 +75,7 @@ export function MutedList({ exit }) {
                     onClose={() => muteUnmute(index)}
                     close={true}
                     pubkey={pubkey}
+                    custom={t("AKELUbQ")}
                   />
                 </div>
               );
@@ -85,6 +95,6 @@ export function MutedList({ exit }) {
       </div>
     </div>
   );
-};
+}
 
 export default MutedList;

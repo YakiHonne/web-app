@@ -152,10 +152,12 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
         />
       )}
       <div
-        className="fit-container fx-scattered fx-col pointer"
+        className={`fit-container fx-scattered fx-col pointer ${selectedTab === "lang" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
         style={{
           borderBottom: "1px solid var(--very-dim-gray)",
           gap: 0,
+          borderColor: "var(--very-dim-gray)",
+          transition: "0.2s ease-in-out",
         }}
       >
         <div

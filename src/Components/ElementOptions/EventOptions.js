@@ -661,20 +661,40 @@ const BroadcastEvent = ({ event }) => {
             gap: 0,
           }}
           onMouseLeave={() => setShowRelays(false)}
-          className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18  box-pad-h-s box-pad-v-s"
+          className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
         >
           <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
-          {allRelays.map((_) => {
+          {userFavRelays?.relays.map((_) => {
             return (
               <div
                 key={_}
                 className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
                 onClick={() => handleRepublish(_)}
               >
-                <RelayImage url={_} />
+                <div style={{ position: "relative" }}>
+                  <RelayImage url={_} size={40} />
+                  <div style={{position: "absolute", right: "-10px", bottom: "-10px", zIndex: 10, scale: ".65"}}>
+                    <div className="round-icon-small round-icon-tooltip" data-tooltip={t("Ay0vA4Z")} style={{backgroundColor: "var(--white)", border: "none"}}>
+                      <div className="star-24"></div>
+                    </div>
+                  </div>
+                </div>
                 <p className="p-one-line">{_}</p>
               </div>
             );
+          })}
+          {userRelays.map((_) => {
+            if (!userFavRelays?.relays.includes(_))
+              return (
+                <div
+                  key={_}
+                  className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+                  onClick={() => handleRepublish(_)}
+                >
+                  <RelayImage url={_} size={40} />
+                  <p className="p-one-line">{_}</p>
+                </div>
+              );
           })}
         </div>
       )}

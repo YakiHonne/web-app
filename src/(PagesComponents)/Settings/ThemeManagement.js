@@ -8,11 +8,13 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
   const { theme, setTheme } = useTheme();
   return (
     <div
-      className="fit-container fx-scattered fx-col pointer"
-      style={{
-        borderBottom: "1px solid var(--very-dim-gray)",
-        gap: 0,
-      }}
+    className={`fit-container fx-scattered fx-col pointer ${selectedTab === "theme" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
+    style={{
+      borderBottom: "1px solid var(--very-dim-gray)",
+      gap: 0,
+      borderColor: "var(--very-dim-gray)",
+      transition: "0.2s ease-in-out",
+    }}
     >
       <div
         className="fx-scattered fit-container  box-pad-h-m box-pad-v-m "
@@ -35,7 +37,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
         <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m fx-wrap">
           <div className="fx-centered fit-container">
             <div
-              className="fx-centered fx fx-col sc-s-18"
+              className="fx-centered fx fx-col sc-s"
               style={{
                 borderColor: theme === "dark" ? "var(--c1)" : "",
                 backgroundColor: "#000000",
@@ -51,7 +53,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               </div>
             </div>
             <div
-              className="fx-centered fx fx-col sc-s-18"
+              className="fx-centered fx fx-col sc-s"
               style={{
                 borderColor: theme === "gray" ? "var(--c1)" : "",
                 backgroundColor: "#171718",
@@ -69,7 +71,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
           </div>
           <div className="fx-centered fit-container">
             <div
-              className="fx-centered fx fx-col sc-s-18"
+              className="fx-centered fx fx-col sc-s"
               style={{
                 borderColor: theme === "light" ? "var(--c1)" : "",
                 backgroundColor: "#ffffff",
@@ -85,7 +87,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               </div>
             </div>
             <div
-              className="fx-centered fx fx-col sc-s-18"
+              className="fx-centered fx fx-col sc-s"
               style={{
                 borderColor: theme === "creamy" ? "var(--c1)" : "",
                 backgroundColor: "#fff5eb",

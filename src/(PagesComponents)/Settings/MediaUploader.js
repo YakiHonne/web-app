@@ -206,8 +206,8 @@ export function MediaUploader({ exit }) {
         event.content,
         event.tags
       );
-      if(!eventInitEx) {
-        return
+      if (!eventInitEx) {
+        return;
       }
       dispatch(
         setToPublish({
@@ -222,13 +222,22 @@ export function MediaUploader({ exit }) {
   };
 
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <div
+      className="fixed-container fx-centered box-pad-h"
+      onClick={(e) => {
+        e.stopPropagation();
+        exit();
+      }}
+    >
       <div
-        className="box-pad-h-m box-pad-v-m sc-s-18 bg-sp"
+        className="box-pad-h box-pad-v sc-s bg-sp slide-up"
         style={{
           width: "min(100%, 500px)",
           position: "relative",
           overflow: "visible",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
         }}
       >
         <div className="close" onClick={exit}>
@@ -452,6 +461,6 @@ export function MediaUploader({ exit }) {
       </div>
     </div>
   );
-};
+}
 
 export default MediaUploader;

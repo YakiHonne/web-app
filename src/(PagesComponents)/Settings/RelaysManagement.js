@@ -6,10 +6,15 @@ export function RelaysManagement({ selectedTab, setSelectedTab }) {
   const { t } = useTranslation();
   return (
     <div
-      className="fit-container fx-scattered fx-col pointer"
+      className={`fit-container fx-scattered fx-col pointer ${
+        selectedTab === "relays" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+      }`}
       style={{
         overflow: "visible",
         borderBottom: "1px solid var(--very-dim-gray)",
+        borderColor: "var(--very-dim-gray)",
+        transition: "0.2s ease-in-out",
+        overflow: "visible",
         gap: 0,
       }}
     >
@@ -40,6 +45,6 @@ export function RelaysManagement({ selectedTab, setSelectedTab }) {
       )}
     </div>
   );
-};
+}
 
 export default RelaysManagement;

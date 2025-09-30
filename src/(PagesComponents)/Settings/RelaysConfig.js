@@ -102,7 +102,7 @@ export function RelaysConfig() {
         style={{ overflow: "hidden" }}
       >
         <div
-          className="fit-container fx-centered fx-start-h fx-start-v box-pad-v-s"
+          className="fit-container fx-centered fx-start-h fx-start-v box-pad-v-s box-marg-s"
           style={{
             transform: `translateX(${selectedTab ? "-100%" : "0"})`,
             transition: "transform 0.3s ease-in-out",

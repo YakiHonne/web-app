@@ -58,7 +58,6 @@ const notesReducer = (notes, action) => {
 
 export default function NoteSharedRelay() {
   const router = useRouter();
-  const selectedFilter = getDefaultFilter(2);
   const extrasRef = useRef(null);
   const relay = router.query.r;
 
@@ -116,7 +115,7 @@ export default function NoteSharedRelay() {
                         <RelayPreview url={relay} addToFavList={true} />
                       </div>
                     </div>
-                    <HomeFeed selectedFilter={selectedFilter} relay={relay} />
+                    <HomeFeed relay={relay} />
                   </div>
                 </>
               )}
@@ -150,13 +149,14 @@ export default function NoteSharedRelay() {
   );
 }
 
-const HomeFeed = ({ relay, selectedFilter }) => {
+const HomeFeed = ({ relay }) => {
   const { t } = useTranslation();
   const userMutedList = useSelector((state) => state.userMutedList);
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
-
+  const [isConnected, setIsConnected] = useState(true);
+  
   useEffect(() => {
     straightUp();
     dispatchNotes({ type: "remove-events" });
@@ -180,6 +180,11 @@ const HomeFeed = ({ relay, selectedFilter }) => {
       let since = twoDaysPrior;
 
       let ndk = await getNDKInstance(relay);
+      if(!ndk){
+        setIsConnected(false);
+        setIsLoading(false);
+        return;
+      }
       let data = await getSubData(
         [{ kinds: [1], limit: 100, until: notesLastEventTime, since }],
         50,
@@ -231,22 +236,7 @@ const HomeFeed = ({ relay, selectedFilter }) => {
             <hr />
           </div>
         )}
-      {!selectedFilter.default && notes?.length === 0 && !isLoading && (
-        <div
-          className="fit-container fx-centered fx-col"
-          style={{ height: "40vh" }}
-        >
-          <div
-            className="yaki-logomark"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
-          <h4>{t("A5BPCrj")}</h4>
-          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-            {t("AgEkYer")}
-          </p>
-        </div>
-      )}
-      {selectedFilter.default && notes?.length === 0 && !isLoading && (
+      {notes?.length === 0 && !isLoading && isConnected && (
         <div
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
@@ -258,6 +248,21 @@ const HomeFeed = ({ relay, selectedFilter }) => {
           <h4>{t("A5BPCrj")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("AB9jjjH")}
+          </p>
+        </div>
+      )}
+      {notes?.length === 0 && !isLoading && !isConnected && (
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ height: "40vh" }}
+        >
+          <div
+            className="link"
+            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+          ></div>
+          <h4>{t("AZ826Ej")}</h4>
+          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+            {t("A5ebGh9")}
           </p>
         </div>
       )}

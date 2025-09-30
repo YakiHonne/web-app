@@ -1,9 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {
-  getLinkFromAddr,
-  isHex,
-  sortByKeyword,
-} from "@/Helpers/Helpers";
+import { getLinkFromAddr, isHex, sortByKeyword } from "@/Helpers/Helpers";
 import { compactContent } from "@/Helpers/ClientHelpers";
 import { customHistory } from "@/Helpers/History";
 import { useSelector } from "react-redux";
@@ -19,6 +15,11 @@ import SearchContentCard from "@/Components/SearchContentCard";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
 import Slider from "@/Components/Slider";
+
+function isValidUrl(url) {
+  const regex = /^(wss?:\/\/)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:\d+)?(\/.*)?$/;
+  return regex.test(url);
+}
 
 export default function SearchNetwork({ exit }) {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
@@ -285,9 +286,9 @@ export default function SearchNetwork({ exit }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          style={{ overflow: "scroll", height: "100%", paddingBottom: "4rem",  }}
-       className="fit-container"
-       >
+          style={{ overflow: "scroll", height: "100%", paddingBottom: "4rem" }}
+          className="fit-container"
+        >
           <div
             className="sticky fit-container fx-centered fx-start-h box-pad-h"
             style={{
@@ -317,49 +318,54 @@ export default function SearchNetwork({ exit }) {
             )}
           </div>
           <div className="fit-container fx-centered fx-col box-pad-h-s box-pad-v-s">
-
-          {searchKeyword && (
-            <div
-            className="fit-container fx-centered"
-            onClick={() => {
-              customHistory(
-                `/search?keyword=${searchKeyword?.replace("#", "%23")}`
-              );
-              exit();
-            }}
-            >
-              <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18 bg-sp fx-centered fx-start-h pointer">
-                <div className="search"></div>{" "}
-                <p className="p-one-line">
-                  {t("AvpIWa1")}{" "}
-                  <span className="p-bold ">
-                    #{searchKeyword.replaceAll("#", "")}
-                  </span>
-                </p>
+            {searchKeyword && (
+              <div
+                className="fit-container fx-centered"
+                onClick={() => {
+                  customHistory(
+                    `/search?keyword=${searchKeyword?.replace("#", "%23")}`
+                  );
+                  exit();
+                }}
+              >
+                <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18 bg-sp fx-centered fx-start-h pointer">
+                  <div className="search"></div>{" "}
+                  <p className="p-one-line">
+                    {t("AvpIWa1")}{" "}
+                    <span className="p-bold ">
+                      #{searchKeyword.replaceAll("#", "")}
+                    </span>
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
-          {searchKeyword && (
-            <div
-            className="fit-container fx-centered"
-            onClick={() => {
-              customHistory(
-                `/r/notes?r=wss://${searchKeyword?.replace("#", "%23").replace("ws://", "").replace("wss://", "")}`
-              );
-              exit();
-            }}
-            >
-              <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18  bg-sp fx-centered fx-start-h pointer">
-                <div className="server"></div>{" "}
-                <p className="p-one-line">
-                  {t("AlQx13z")}{" "}
-                  <span className="p-bold ">
-                    {searchKeyword.replaceAll("#", "")}
-                  </span>
-                </p>
+            )}
+            {searchKeyword && isValidUrl(searchKeyword) && (
+              <div
+                className="fit-container fx-centered"
+                onClick={() => {
+                  customHistory(
+                    `/r/notes?r=wss://${searchKeyword
+                      ?.replace("#", "%23")
+                      .replace("ws://", "")
+                      .replace("wss://", "")}`
+                  );
+                  exit();
+                }}
+              >
+                <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18  bg-sp fx-centered fx-start-h pointer">
+                  <div className="server"></div>{" "}
+                  <p className="p-one-line">
+                    {t("AlQx13z")}{" "}
+                    <span className="p-bold ">
+                      {`wss://${searchKeyword
+                        ?.replace("#", "%23")
+                        .replace("ws://", "")
+                        .replace("wss://", "")}`}
+                    </span>
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
           </div>
           {userInterestList.length > 0 && (
             <div className="fit-container fx-centered fx-col fx-start-h fx-start-v box-pad-h-m box-pad-v-s">

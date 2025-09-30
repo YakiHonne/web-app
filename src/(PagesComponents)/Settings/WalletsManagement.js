@@ -49,11 +49,15 @@ export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
         />
       )}
       <div
-        className="fit-container fx-scattered fx-col pointer"
-        style={{
-          overflow: "visible",
-          borderBottom: "1px solid var(--very-dim-gray)",
-        }}
+       
+       className={`fit-container fx-scattered fx-col pointer ${selectedTab === "wallets" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
+       style={{
+         borderBottom: "1px solid var(--very-dim-gray)",
+         gap: 0,
+         borderColor: "var(--very-dim-gray)",
+         transition: "0.2s ease-in-out",
+         overflow: "visible",
+       }}
       >
         <div
           className="fx-scattered fit-container  box-pad-h-m box-pad-v-m "
