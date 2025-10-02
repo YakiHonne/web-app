@@ -50,7 +50,6 @@
     "qr-code-styling": "^1.9.2",
     "react": "^19.1.0",
     "react-app-rewired": "^2.2.1",
-    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^19.1.0",
     "react-i18next": "^15.6.1",
     "react-markdown": "^10.1.0",

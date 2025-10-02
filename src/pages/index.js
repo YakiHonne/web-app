@@ -10,7 +10,7 @@ export default function index() {
   
   let data = {
     path: "/",
-    title: "Yakihonne | Home",
+    title: "Home",
     description:
       "A censorship and data ownership free protocol, you'll enjoy a fully decentralized media experience.",
     image:

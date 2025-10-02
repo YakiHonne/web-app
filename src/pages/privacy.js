@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Privacy"), {
 export default function index({ keyword }) {
   let data = {
     path: "privacy",
-    title: "Yakihonne | Yakihonne privacy policies",
+    title: "Yakihonne privacy policies",
     description:
       "Our commitment to protecting your data in a decentralized environment. Transparent privacy practices that prioritize user sovereignty.",
     image:

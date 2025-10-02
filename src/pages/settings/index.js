@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Settings/Setti
 export default function index() {
   let data = {
     path: "settings",
-    title: "Yakihonne | Settings",
+    title: "Settings",
     description: "Configure your Yakihonne experience. Manage your account preferences, privacy settings, content filters, and customize your decentralized social media platform.",
     image:
       "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",

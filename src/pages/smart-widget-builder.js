@@ -12,7 +12,7 @@ const ClientComponent = dynamic(
 export default function index() {
   let data = {
     path: "smart-widget-builder",
-    title: "Yakihonne | Smart Widget Builder",
+    title: "Smart Widget Builder",
     description:
       "Design and code smart widgets with our intuitive editor. Bring your interactive content ideas to life.",
     image:

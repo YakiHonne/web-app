@@ -569,6 +569,7 @@ export default function SidebarComp() {
                                     size={32}
                                     mainAccountUser={false}
                                     img={account.picture}
+                                    user_id={account.userKeys.pub}
                                     allowClick={false}
                                   />
                                 </div>

@@ -89,7 +89,7 @@ const MobileDemo = ({ exit }) => {
           <div className="fx-centered fx-col" style={{ gap: "10px" }}>
             <div className="fx-centered fx-col">
               <h4>{t("AQgPFMM")}</h4>
-              <p className="gray-c p-centered">{t("A2GbLaw")}</p>
+              <p className="gray-c p-centered" style={{maxWidth: "350px"}}>{t("A2GbLaw")}</p>
             </div>
             <div className="fx-centered fx-co fx-start-v">
               <a
@@ -106,6 +106,14 @@ const MobileDemo = ({ exit }) => {
               >
                 <button className="btn btn-gray fx-centered">
                   <div className="google"></div> {t("ArHaw72")}
+                </button>
+              </a>
+              <a
+                href="https://zapstore.dev/apps/naddr1qvzqqqr7pvpzqgycd7urua6ajmgc3jjunhcseekkz0swkljhdzs0pvftxlx6cgdnqqtkxmmd9eukz6mfdphkumn99eukz6mfdphkumn97q8ugj"
+                target="_blank"
+              >
+                <button className="btn btn-gray fx-centered">
+                  <div className="zapstore"></div> {t("Aggp9CS")}
                 </button>
               </a>
             </div>

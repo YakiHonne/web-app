@@ -123,7 +123,7 @@ export default function UserProfilePic({
           >
             <Avatar
               size={size}
-              name={userMetadata.name}
+              name={userKeys.pub}
               square
               variant="marble"
               colors={["#0A0310", "#49007E", "#FF005B", "#FF7D10", "#FFB238"]}

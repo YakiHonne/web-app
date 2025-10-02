@@ -12,7 +12,7 @@ const ClientComponent = dynamic(
 export default function index() {
   let data = {
     path: "sw-playground",
-    title: "Yakihonne | Playground",
+    title: "Playground",
     description:
       "Experiment with Yakihonne features and test new functionality. A sandbox for exploring platform capabilities.",
     image:

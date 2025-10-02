@@ -12,7 +12,7 @@ const ClientComponent = dynamic(
 export default function index({ relayUrl }) {
   let data = {
     path: `r/notes${relayUrl ? `?r=${relayUrl}` : ""}`,
-    title: "Yakihonne | Note from Shared Relay",
+    title: "Note from Shared Relay",
     description:
       "Access notes from shared relays across the Nostr ecosystem. Discover content beyond your usual network.",
     image: relayUrl

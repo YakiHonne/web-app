@@ -12,7 +12,7 @@ const ClientComponent = dynamic(
 export default function index() {
   let data = {
     path: "smart-widget-checker",
-    title: "Yakihonne | Smart Widget Checker",
+    title: "Smart Widget Checker",
     description:
       "Validate and test your smart widgets before deployment. Ensure quality and functionality across different environments.",
     image:

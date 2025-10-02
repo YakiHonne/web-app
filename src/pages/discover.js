@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Discover"), {
 export default function index() {
   let data = {
     path: "discover",
-    title: "Yakihonne | Discover",
+    title: "Discover",
     description:
       "Explore curated content tailored to your interests in the decentralized Nostr ecosystem. Discover new voices and perspectives outside traditional media channels.",
     image:

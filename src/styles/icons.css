@@ -462,7 +462,9 @@
 .orbit,
 .orbit-24,
 .orbit-bold,
-.orbit-bold-24{
+.orbit-bold-24,
+.zapstore,
+.zapstore-24{
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -816,7 +818,9 @@
 .orbit,
 .orbit-24,
 .orbit-bold,
-.orbit-bold-24 {
+.orbit-bold-24,
+.zapstore,
+.zapstore-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -882,7 +886,9 @@
 .orbit,
 .orbit-24,
 .orbit-bold,
-.orbit-bold-24 {
+.orbit-bold-24,
+.zapstore,
+.zapstore-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -1112,7 +1118,8 @@
 .republish,
 .protected-2,
 .orbit,
-.orbit-bold {
+.orbit-bold,
+.zapstore {
     min-width: 16px;
     min-height: 16px;
 }
@@ -1332,7 +1339,8 @@
 .republish-24,
 .protected-2-24,
 .orbit-24,
-.orbit-bold-24 {
+.orbit-bold-24,
+.zapstore-24 {
     min-width: 24px;
     min-height: 24px;
 }
@@ -1353,6 +1361,9 @@
     min-height: 24px;
 }
 
+.zapstore, .zapstore-24 {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/Zapstore.svg');
+}
 .orbit-bold, .orbit-bold-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/relay-orbits-filled.svg');
 }

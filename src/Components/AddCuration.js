@@ -780,7 +780,7 @@ const AddArticlesToCuration = ({
                   setIsLoading(true);
                 }}
               >
-             {t("AxJRrknƒ")}
+             {t("AxJRrkn")}
               </button>
             )}
             <button

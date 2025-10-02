@@ -38,7 +38,6 @@ import AddVideo from "@/Components/AddVideo";
 import InterestSuggestions from "@/Content/InterestSuggestions";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
 import { ndkInstance } from "@/Helpers/NDKInstance";
-import AddArticlesToCuration from "@/Components/AddArticlesToCuration";
 import { customHistory } from "@/Helpers/History";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
@@ -661,7 +660,6 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
   const [contentFrom, setContentFrom] = useState(filter);
   const [isLoading, setIsLoading] = useState(true);
   const [lastEventTime, setLastEventTime] = useState(undefined);
-  const [addArtsToCur, setAddArtsToCur] = useState(false);
   const [editEvent, setEditEvent] = useState(false);
   const [showCurationCreator, setShowCurationCreator] = useState(
     filter === "curations" && init ? true : false
@@ -840,21 +838,6 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
           relaysToPublish={[]}
         />
       )}
-      {addArtsToCur && (
-        <AddArticlesToCuration
-          curation={addArtsToCur}
-          tags={addArtsToCur.tags}
-          relaysToPublish={[]}
-          curationKind={addArtsToCur.kind}
-          postKind={addArtsToCur.kind === 30004 ? 30023 : 34235}
-          exit={() => {
-            setAddArtsToCur(false);
-          }}
-          exitAndRefresh={() => {
-            setAddArtsToCur(false);
-          }}
-        />
-      )}
       <div className="fit-container">
         <div className="fit-container fx-scattered  box-pad-v-m box-pad-h">
           <h4 className="p-caps">
@@ -932,8 +915,6 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
                 key={event.id}
                 refreshAfterDeletion={handleEventDeletion}
                 setPostToNote={setPostToNote}
-                setEditItem={handleEditItem}
-                setAddArtsToCur={setAddArtsToCur}
               />
             );
           })}
@@ -1412,21 +1393,6 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
 
   return (
     <>
-      {addArtsToCur && (
-        <AddArticlesToCuration
-          curation={addArtsToCur}
-          tags={addArtsToCur.tags}
-          relaysToPublish={[]}
-          curationKind={addArtsToCur.kind}
-          postKind={addArtsToCur.kind === 30004 ? 30023 : 34235}
-          exit={() => {
-            setAddArtsToCur(false);
-          }}
-          exitAndRefresh={() => {
-            setAddArtsToCur(false);
-          }}
-        />
-      )}
       {deleteEvent && (
         <ToDeleteGeneral
           eventId={deleteEvent.id}
@@ -1735,9 +1701,6 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                         key={event.id}
                         event={event}
                         setPostToNote={setPostToNote}
-                        setDeleteEvent={setDeleteEvent}
-                        setEditItem={handleEditItem}
-                        setAddArtsToCur={setAddArtsToCur}
                       />
                     );
                   })}
@@ -1814,8 +1777,6 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
 const ContentCard = ({
   event,
   refreshAfterDeletion,
-  setEditItem,
-  setAddArtsToCur,
   setPostToNote,
 }) => {
   return (
@@ -1830,9 +1791,6 @@ const ContentCard = ({
       {[30004, 30005, 30023, 34235, 30033, 21, 22].includes(event.kind) && (
         <RepCard
           event={event}
-          setPostToNote={setPostToNote}
-          setEditItem={setEditItem}
-          setAddArtsToCur={setAddArtsToCur}
           refreshAfterDeletion={refreshAfterDeletion}
         />
       )}

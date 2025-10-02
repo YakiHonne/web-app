@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Login"), {
 export default function index() {
   let data = {
     path: "login",
-    title: "Yakihonne | Login",
+    title: "Login",
     description:
       "Securely access your decentralized Yakihonne identity with cryptographic keys. One login unlocks all features across web and mobile platforms.",
     image:

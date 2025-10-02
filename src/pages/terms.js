@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Terms"), {
 export default function index({ keyword }) {
   let data = {
     path: "terms",
-    title: "Yakihonne | Yakihonne terms",
+    title: "Yakihonne terms",
     description:
       "Clear guidelines for participating in the Yakihonne ecosystem on Nostr. Fair and balanced terms that respect creator rights.",
     image:

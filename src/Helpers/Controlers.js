@@ -830,7 +830,11 @@ const walletWarning = () => {
 
 const saveRelayMetadata = async (relays) => {
   if (!relays || relays.length === 0) return;
-  let onlyUnsavedRelays = relays.filter((relay) => !getRelayMetadata(relay));
+  let onlyUnsavedRelays = relays.filter((relay) => {
+    let metadata = getRelayMetadata(relay);
+    if(metadata?.isEmpty || typeof metadata?.isEmpty === undefined) return true;
+    return false;
+  });
   let relaysMetadata = await Promise.all(
     onlyUnsavedRelays.map((relay) => fetchRelayMetadata(relay))
   );

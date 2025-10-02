@@ -18,7 +18,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
-import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import { generateSecretKey, nip19 } from "nostr-tools";
 import NDK, { NDKEvent, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
 import { Widget } from "smart-widget-previewer";
@@ -33,6 +32,7 @@ import { addWidgetPathToUrl } from "@/Helpers/Helpers";
 import widget from "@/JSONs/widgets.json";
 import { useRouter } from "next/router";
 import { getPostToEdit } from "@/Helpers/ClientHelpers";
+import { DraggableComp } from "@/Components/DraggableComp";
 const SWT_YAKIHONNE = "https://swt.yakihonne.com";
 
 const getLocalSWv2Drafts = () => {
@@ -59,7 +59,7 @@ const getLocalSWv2CDraft = () => {
 export default function SmartWidgetEditor() {
   let { query } = useRouter();
   let { edit, clone } = query || {};
-  let toEdit = edit ? getPostToEdit(edit) : false ;
+  let toEdit = edit ? getPostToEdit(edit) : false;
   let toClone = clone ? getPostToEdit(clone) : clone;
   const userKeys = useSelector((state) => state.userKeys);
   const [buildOption, setBuildOption] = useState("normal");
@@ -67,9 +67,7 @@ export default function SmartWidgetEditor() {
   const [template, setTemplate] = useState(
     toEdit || toClone ? toEdit || toClone : getLocalSWv2CDraft()
   );
-  const [identifier, setIdentifier] = useState(
-    edit ? true : false
-  );
+  const [identifier, setIdentifier] = useState(edit ? true : false);
   const [templates, setTemplates] = useState([]);
 
   useEffect(() => {
@@ -1149,106 +1147,27 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                         <div className="fit-container fx-scattered">
                           <div style={{ minWidth: "16px" }}></div>
                           <div className="fit-container fx-centered fx-col">
-                            <DragDropContext onDragEnd={handleDragEnd}>
-                              <Droppable droppableId="set-carrousel">
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    style={{
-                                      borderRadius: "var(--border-r-18)",
-                                      transition: ".2s ease-in-out",
-                                      height: "100%",
-                                      ...provided.droppableProps.style,
-                                    }}
-                                    className="fit-container fx-centered fx-start-h fx-start-v fx-col"
-                                  >
-                                    {comp.value.map((innerComp, compIndex) => {
-                                      return (
-                                        <Draggable
-                                          key={compIndex}
-                                          draggableId={`${compIndex}`}
-                                          index={compIndex}
-                                        >
-                                          {(provided, snapshot) => (
-                                            <div
-                                              {...provided.draggableProps}
-                                              {...provided.dragHandleProps}
-                                              ref={provided.innerRef}
-                                              style={{
-                                                borderRadius:
-                                                  "var(--border-r-18)",
-                                                boxShadow: snapshot.isDragging
-                                                  ? "14px 12px 105px -41px rgba(0, 0, 0, 0.55)"
-                                                  : "",
-                                                ...provided.draggableProps
-                                                  .style,
-                                                overflow: "visible",
-                                                borderBottom:
-                                                  "1px solid var(--very-dim-gray)",
-                                                gap: 0,
-                                              }}
-                                              className="fit-container"
-                                            >
-                                              <div
-                                                className="fit-container fx-scattered sc-s pointer"
-                                                style={{
-                                                  padding: ".5rem",
-                                                  borderColor:
-                                                    selectedComp ===
-                                                    `button:${compIndex}`
-                                                      ? "var(--c1)"
-                                                      : "",
-                                                  borderRadius:
-                                                    "var(--border-r-6)",
-                                                  backgroundColor:
-                                                    "transparent",
-                                                }}
-                                                key={compIndex}
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  setSelectedComp(
-                                                    selectedComp ===
-                                                      `button:${compIndex}`
-                                                      ? ""
-                                                      : `button:${compIndex}`
-                                                  );
-                                                }}
-                                              >
-                                                <div className="fx-centered fx-start-h">
-                                                  {comp.value.length > 1 && (
-                                                    <div
-                                                      className={`drag-el box-pad-h-s`}
-                                                    ></div>
-                                                  )}
-                                                  <p>
-                                                    button &#x2192;{" "}
-                                                    <span className="c1-c">
-                                                      {innerComp.type}
-                                                    </span>
-                                                  </p>
-                                                </div>
-                                                {comp.value.length > 1 && (
-                                                  <div
-                                                    className="trash"
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      handleRemoveButton(
-                                                        compIndex
-                                                      );
-                                                    }}
-                                                  ></div>
-                                                )}
-                                              </div>
-                                            </div>
-                                          )}
-                                        </Draggable>
-                                      );
-                                    })}
-                                    {provided.placeholder}
-                                  </div>
-                                )}
-                              </Droppable>
-                            </DragDropContext>
+                            <DraggableComp
+                              children={comp.value.map((_) => {
+                                let id = nanoid();
+                                return {
+                                  ..._,
+                                  id,
+                                };
+                              })}
+                              setNewOrderedList={(data) => {
+                                setSwButtons(data);
+                              }}
+                              component={ButtonItem}
+                              props={{
+                                handleRemoveButton,
+                                setSelectedComp,
+                                outterComp: comp,
+                                selectedComp,
+                                setSelectedComp,
+                              }}
+                              background={false}
+                            />
                           </div>
                         </div>
                       )}
@@ -1261,6 +1180,51 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         </div>
       </div>
     </>
+  );
+};
+
+const ButtonItem = ({
+  item,
+  index,
+  handleRemoveButton,
+  outterComp,
+  setSelectedComp,
+  selectedComp,
+}) => {
+  return (
+    <div
+      className="fit-container fx-scattered sc-s pointer"
+      style={{
+        padding: ".5rem",
+        borderColor: selectedComp === `button:${index}` ? "var(--c1)" : "",
+        borderRadius: "var(--border-r-6)",
+        backgroundColor: "transparent",
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        setSelectedComp(
+          selectedComp === `button:${index}` ? "" : `button:${index}`
+        );
+      }}
+    >
+      <div className="fx-centered fx-start-h">
+        {outterComp.value.length > 1 && (
+          <div className={`drag-el box-pad-h-s`}></div>
+        )}
+        <p>
+          button &#x2192; <span className="c1-c">{item.type}</span>
+        </p>
+      </div>
+      {outterComp.value.length > 1 && (
+        <div
+          className="trash"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRemoveButton(index);
+          }}
+        ></div>
+      )}
+    </div>
   );
 };
 

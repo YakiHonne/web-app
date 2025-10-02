@@ -337,7 +337,7 @@ export default function EventOptions({
   );
 
   const muteUser =
-    event.pubkey !== userKeys.pub ? (
+    userKeys && event.pubkey !== userKeys.pub ? (
       <div
         onClick={muteUnmute}
         className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
@@ -673,8 +673,23 @@ const BroadcastEvent = ({ event }) => {
               >
                 <div style={{ position: "relative" }}>
                   <RelayImage url={_} size={40} />
-                  <div style={{position: "absolute", right: "-10px", bottom: "-10px", zIndex: 10, scale: ".65"}}>
-                    <div className="round-icon-small round-icon-tooltip" data-tooltip={t("Ay0vA4Z")} style={{backgroundColor: "var(--white)", border: "none"}}>
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: "-10px",
+                      bottom: "-10px",
+                      zIndex: 10,
+                      scale: ".65",
+                    }}
+                  >
+                    <div
+                      className="round-icon-small round-icon-tooltip"
+                      data-tooltip={t("Ay0vA4Z")}
+                      style={{
+                        backgroundColor: "var(--white)",
+                        border: "none",
+                      }}
+                    >
                       <div className="star-24"></div>
                     </div>
                   </div>

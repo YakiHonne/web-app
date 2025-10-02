@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/WalletNWC"), {
 export default function index() {
   let data =  {
     path: "wallet/nwc",
-    title: "Yakihonne | NWC Wallet",
+    title: "NWC Wallet",
     description: "Use Nostr Wallet Connect for secure Bitcoin Lightning payments. Connect any compatible wallet service.",
     image: "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",
   }

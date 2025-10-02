@@ -120,7 +120,7 @@ const getEmptyRelaysData = (url) => {
   return {
     url,
     name: url.replace("wss://", "").replace("https://", "").replace("/", ""),
-    description: "N/A",
+    description: url,
     pubkey: "",
     contact: "",
     supported_nips: [],
@@ -135,6 +135,7 @@ const getEmptyRelaysData = (url) => {
     fees: {
       admission: [],
     },
+    isEmpty: true,
   };
 };
 

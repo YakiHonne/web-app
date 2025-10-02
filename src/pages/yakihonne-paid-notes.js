@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/YakiFN"), {
 export default function index() {
   let data = {
     path: "yakihonne-paid-notes",
-    title: "Yakihonne | Flash news and uncensored notes introduction",
+    title: "Flash news and uncensored notes introduction",
     description:
       "Monetize your short-form content with Bitcoin Lightning microtransactions. Create premium notes with flexible access models for your audience.",
     image:

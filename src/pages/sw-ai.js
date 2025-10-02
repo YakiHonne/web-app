@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/SWHomeAI"), {
 export default function index() {
   let data = {
     path: "sw-ai",
-    title: "Yakihonne | Smart Widget AI",
+    title: "Smart Widget AI",
     description:
       "Create intelligent widgets powered by AI. Build interactive content that engages your audience in new ways.",
     image:

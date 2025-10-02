@@ -12,7 +12,7 @@ const ClientComponent = dynamic(
 export default function index() {
   let data = {
     path: "settings/profile",
-    title: "Yakihonne | Edit Profile",
+    title: "Edit Profile",
     description:
       "Customize your decentralized identity. Update your profile information and preferences across the Nostr network.",
     image:

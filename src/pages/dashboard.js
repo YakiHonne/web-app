@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Dashboard"), {
 export default function index() {
   let data = {
     path: "dashboard",
-    title: "Yakihonne | Dashboard",
+    title: "Dashboard",
     description:
       "Manage your content, track engagement, and monitor earnings in one intuitive dashboard. Your personal command center for the decentralized publishing world.",
     image:

@@ -11,6 +11,7 @@ import { FilePicker } from "@/Components/FilePicker";
 import { FileUpload } from "@/Helpers/Helpers";
 import Backbar from "@/Components/Backbar";
 import { useTranslation } from "react-i18next";
+import UserProfilePic from "@/Components/UserProfilePic";
 
 export default function ProfileEdit() {
   const dispatch = useDispatch();
@@ -247,15 +248,36 @@ export default function ProfileEdit() {
                                 }}
                                 className="settings-profile-pic"
                               >
+                                <div style={{ position: "relative" }}>
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      left: 0,
+                                      top: 0,
+
+                                      zIndex: 0,
+                                      backgroundColor: "rgba(0,0,0,.8)",
+                                    }}
+                                    className="fx-centered pointer fx-col"
+                                  >
+                                    <UserProfilePic
+                                      size={128}
+                                      mainAccountUser={true}
+                                      allowClick={false}
+                                    />
+                                  </div>
+                                </div>
                                 <div
                                   style={{
+                                    position: "relative",
                                     backgroundImage: `url(${userPicture})`,
                                     border: "none",
                                     minWidth: "128px",
                                     aspectRatio: "1/1",
                                     borderRadius: "50%",
+                                    zIndex: 1,
                                   }}
-                                  className="bg-img cover-bg sc-s"
+                                  className="bg-img cover-bg"
                                 ></div>
                                 <div
                                   style={{

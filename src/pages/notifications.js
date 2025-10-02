@@ -12,7 +12,7 @@ const ClientComponent = dynamic(
 export default function index() {
   let data = {
     path: "notifications",
-    title: "Yakihonne | Notifications",
+    title: "Notifications",
     description:
       "Stay updated with mentions, replies, and interactions. Never miss important conversations in your network.",
     image:

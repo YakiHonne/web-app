@@ -114,21 +114,22 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
       if (!isThere) return [{ url, read: true, write: true }, ...prev];
       return prev;
     });
-    let timeout = setTimeout(() => {
-      if (relaysContainer.current) {
-        relaysContainer.current.scrollTop =
-          relaysContainer.current.scrollHeight;
-      }
-      clearTimeout(timeout);
-    }, 50);
+    // let timeout = setTimeout(() => {
+    //   if (relaysContainer.current) {
+    //     relaysContainer.current.scrollTop =
+    //       relaysContainer.current.scrollHeight;
+    //   }
+    //   clearTimeout(timeout);
+    // }, 50);
   };
 
+  const removePermanently = (index) => {
+    let tempArray = tempUserRelays.filter((_, i) => i !== index);
+    setTempUserRelays(tempArray);
+  };
   return (
     <div className="fit-container box-pad-h-m fx-shrink">
-      <div
-        className="fit-container sc-s-18 "
-        style={{ overflow: "visible" }}
-      >
+      <div className="fit-container sc-s-18 " style={{ overflow: "visible" }}>
         <div className="fx-centered fx-end-h fx-start-v  fit-container box-pad-h-s box-pad-v-s">
           <RelaysPicker
             allRelays={allRelays}
@@ -164,6 +165,7 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
             ref={relaysContainer}
           >
             {tempUserRelays?.map((relay, index) => {
+              let isNew = !userInboxRelays.includes(relay.url);
               return (
                 <div
                   key={`${relay}-${index}`}
@@ -209,24 +211,35 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
                         }}
                       ></div>
                     </div>
-                    <div>
-                      {!relay.toDelete && (
-                        <div
-                          onClick={() => removeRelayFromList(false, index)}
-                          className="round-icon-small"
-                        >
-                          <div className="logout-red"></div>
-                        </div>
-                      )}
-                      {relay.toDelete && (
-                        <div
-                          onClick={() => removeRelayFromList(true, index)}
-                          className="round-icon-small"
-                        >
-                          <div className="undo"></div>
-                        </div>
-                      )}
-                    </div>
+                    {!isNew && (
+                      <div>
+                        {!relay.toDelete && (
+                          <div
+                            onClick={() => removeRelayFromList(false, index)}
+                            className="round-icon-small"
+                          >
+                            <div className="logout-red"></div>
+                          </div>
+                        )}
+                        {relay.toDelete && (
+                          <div
+                            onClick={() => removeRelayFromList(true, index)}
+                            className="round-icon-small"
+                          >
+                            <div className="undo"></div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {isNew && (
+                      <div
+                        onClick={() => removePermanently(index)}
+                        className="round-icon-small"
+                        style={{ borderColor: "var(--red-main)" }}
+                      >
+                        <div className="trash"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
               );

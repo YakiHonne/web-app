@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/YakiMobileApp"
 export default function index() {
   let data = {
     path: "yaki-mobile-app",
-    title: "Yakihonne | Mobile App",
+    title: "Mobile App",
     description: "Access Yakihonne on the go with our mobile application. Full functionality in the palm of your hand.",
     image: "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",
   }

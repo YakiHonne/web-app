@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/UsersLevel"), 
 export default function index() {
   let data = {
     path: "yaki-points",
-    title: "Yakihonne | Yaki Points",
+    title: "Yaki Points",
     description: "Track your progress and achievements on the platform. Level up through engagement and quality contributions.",
     image: "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",
   }

@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/WriteArticle")
 export default function index() {
   let data = {
     path: "write-article",
-    title: "Yakihonne | Write Article",
+    title: "Write Article",
     description: "Create and publish long-form articles on the decentralized web. Share your thoughts with complete editorial freedom.",
     image: "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",
   }

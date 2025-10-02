@@ -12,7 +12,7 @@ const ClientComponent = dynamic(
 export default function index() {
   let data = {
     path: "relays",
-    title: "Yakihonne | Relays",
+    title: "Relays",
     description:
       "Explore relays accross Nostr.",
     image:

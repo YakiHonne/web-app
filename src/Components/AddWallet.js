@@ -22,7 +22,7 @@ export default function AddWallet({ exit, refresh }) {
           e.stopPropagation();
         }}
       >
-        <div className="close">
+        <div className="close" onClick={exit}>
           <div></div>
         </div>
         <h4 className="box-marg-s">{t("A8fEwNq")}</h4>
