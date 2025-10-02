@@ -77,6 +77,16 @@
         linear-gradient(-270deg, rgb(0, 0, 0) 0%, rgba(0, 0, 0, 0)100%) !important
 }
 
+[data-theme='creamy'] .gradient-bg-right {
+    background:
+        linear-gradient(-90deg, rgb(250,247,243) 0%, rgba(23, 23, 24, 0)100%) !important;
+}
+
+[data-theme='creamy'] .gradient-bg-left{
+    background:
+        linear-gradient(-270deg, rgb(250,247,243) 0%, rgba(250,247,243, 0)100%) !important
+}
+
 [data-theme='dark'] .skeleton-container::after, [data-theme='gray'] .skeleton-container::after {
     position: absolute;
     content: "";
@@ -186,11 +196,11 @@
 }
 
 [data-theme='creamy'] {
-    --white: #fff5eb;
+    --white: #FAF7F3;
     /* base background */
-    --white-transparent: #fff5ebed;
+    --white-transparent: #FAF7F3ed;
     /* subtle overlay */
-    --white-high-transparent: #fff5eb7b;
+    --white-high-transparent: #FAF7F37b;
 
     /* Neutrals */
     --black: #000000;
@@ -198,14 +208,14 @@
     --black-high-transparent: #000000a8;
     --dark-gray: #202020;
     --gray: #909090;
-    --pale-gray: #ffe7d2;
-    --dim-gray: #fae7d2;
-    --very-dim-gray: #fff3e5;
+    --pale-gray: #E6E4E2;
+    --dim-gray: #E6E4E2;
+    --very-dim-gray: #f7f4f2;
 
     /* Accent Colors */
     --c1: #ee7700;
     /* orange primary */
-    --c1-side: #fae7d2;
+    --c1-side: #F0ECE8;
     /* soft orange background */
     --c1-transparent: #ee770020;
     --c1-pale: #ffddb8;

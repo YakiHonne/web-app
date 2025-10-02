@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
+  setIsUserFollowingsLoaded,
   setUserAllRelays,
   setUserAppSettings,
   setUserBlossomServers,
@@ -76,6 +77,7 @@ import {
   getParsedAuthor,
   getParsedRepEvent,
   getWOTScoreForPubkey,
+  getWOTScoreForPubkeyLegacy,
   precomputeTrustingCounts,
   unwrapGiftWrap,
 } from "@/Helpers/Encryptions";
@@ -228,6 +230,7 @@ export default function AppInit() {
     ) {
       previousFollowings.current = followings;
       dispatch(setUserFollowings(followings?.followings || []));
+      if (followings?.followings) dispatch(setIsUserFollowingsLoaded(true));
     }
 
     if (
@@ -381,6 +384,8 @@ export default function AppInit() {
       dispatch(setUserMetadata(getMetadataFromCachedAccounts(userKeys.pub)));
       localStorage.setItem("_nostruserkeys", JSON.stringify(userKeys));
     }
+    dispatch(setIsUserFollowingsLoaded(false));
+    dispatch(setUserFollowings([]));
   }, [userKeys]);
 
   useEffect(() => {
@@ -735,14 +740,14 @@ export default function AppInit() {
           };
       if (
         prevData.last_updated &&
-        followings?.followings?.last_timestamp == prevData.last_updated
+        followings?.last_timestamp < prevData.last_updated
       )
         return;
-      let followinglist = followings?.followings.slice(0, 500);
-      let batches = [];
 
-      for (let i = 0; i < followinglist.length; i += 120) {
-        batches.push({ bundled: followinglist.slice(i, i + 120) });
+      let followinglist = followings?.followings.slice(0, 100);
+      let batches = [];
+      for (let i = 0; i < followinglist.length; i += 50) {
+        batches.push({ bundled: followinglist.slice(i, i + 50) });
       }
       let networkData = [];
       for (let b of batches) {
@@ -753,21 +758,11 @@ export default function AppInit() {
               authors: b.bundled,
             },
           ],
-          200
+          100
         );
         networkData.push(d);
       }
       networkData = networkData.map((_) => _.data).flat();
-      // const networkData = await getSubData(
-      //   [
-      //     {
-      //       kinds: [3],
-      //       authors: followinglist,
-      //     },
-      //   ],
-      //   800
-      // );yeh
-
       if (networkData.length === 0) return;
       let network = structuredClone(networkData);
       network = followings?.followings.map((_) => {
@@ -794,16 +789,23 @@ export default function AppInit() {
         };
       });
       saveWotlist(network, userKeys.pub);
-      const trustingCounts = precomputeTrustingCounts(network);
+      // const trustingCounts = precomputeTrustingCounts(network);
       let allPubkeys = [...new Set(network.map((_) => _.followings).flat())];
-      let wotPubkeys = allPubkeys.filter(
-        (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
-      );
+      let wotPubkeys = allPubkeys
+        .map(
+          (_) => {
+            return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
+          }
+          // (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
+        )
+        .sort((a, b) => b.score - a.score)
+        .filter((_) => _.status)
+        .map((_) => _.pubkey)
+        .slice(0, 200);
       localStorage.setItem(
         `network_${userKeys.pub}`,
         JSON.stringify({
-          last_updated: followings?.followings.last_timestamp,
-          // network,
+          last_updated: Math.floor(Date.now() / 1000),
           wotPubkeys,
         })
       );
@@ -829,11 +831,11 @@ export default function AppInit() {
       let followinglist = backupFollowings.data[0].tags
         .filter((_) => _[0] === "p")
         .map((_) => _[1]);
-      followinglist = followinglist.slice(0, 500);
+      followinglist = followinglist.slice(0, 200);
       let batches = [];
 
-      for (let i = 0; i < followinglist.length; i += 120) {
-        batches.push({ bundled: followinglist.slice(i, i + 120) });
+      for (let i = 0; i < followinglist.length; i += 10) {
+        batches.push({ bundled: followinglist.slice(i, i + 10) });
       }
 
       let networkData = [];
@@ -845,21 +847,11 @@ export default function AppInit() {
               authors: b.bundled,
             },
           ],
-          200
+          100
         );
         networkData.push(d);
       }
       networkData = networkData.map((_) => _.data).flat();
-      // const networkData = await getSubData(
-      //   [
-      //     {
-      //       kinds: [3],
-      //       authors: followinglist,
-      //     },
-      //   ],
-      //   800
-      // );
-
       if (networkData.length === 0) return;
       let network = structuredClone(networkData);
       network = followinglist.map((_) => {
@@ -878,14 +870,24 @@ export default function AppInit() {
         };
       });
 
-      const trustingCounts = precomputeTrustingCounts(network);
+      // const trustingCounts = precomputeTrustingCounts(network);
 
       let allPubkeys = [...new Set(network.map((_) => _.followings).flat())];
 
-      let wotPubkeys = allPubkeys.filter(
-        (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
-      );
-
+      // let wotPubkeys = allPubkeys.filter(
+      //   (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
+      // );
+      let wotPubkeys = allPubkeys
+        .map(
+          (_) => {
+            return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
+          }
+          // (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
+        )
+        .sort((a, b) => b.score - a.score)
+        .filter((_) => _.status)
+        .map((_) => _.pubkey)
+        .slice(0, 200);
       localStorage.setItem(
         `backup_wot`,
         JSON.stringify({

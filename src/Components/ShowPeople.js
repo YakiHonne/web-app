@@ -77,6 +77,8 @@ export default function ShowPeople({ exit, list, type = "following" }) {
       console.log(err);
     }
   };
+
+  console.log(bulkList)
   if (!isLoaded) return <LoadingScreen onClick={exit} />;
   return (
     <>
@@ -167,7 +169,7 @@ export default function ShowPeople({ exit, list, type = "following" }) {
             position: "fixed",
             bottom: 0,
             left: "0",
-            zIndex: 10000,
+            zIndex: 100000,
           }}
         >
           <div

@@ -5,8 +5,9 @@ import { useTranslation } from "react-i18next";
 import Global from "./Global";
 import Collections from "./Collections";
 import useFollowingsFavRelays from "@/Hooks/useFollowingsFavRelays";
-import LocalAggregated from "./LocalAggregated";
 import useOutboxRelays from "@/Hooks/useOutboxRelays";
+import Followings from "./Followings";
+import Network from "./Network";
 
 export default function Relays() {
   const { t } = useTranslation();
@@ -19,7 +20,7 @@ export default function Relays() {
   const [outboxRelaysBatch, setOutboxRelaysBatch] = useState([]);
   const [followingsRelaysBatch, setFollowingsRelaysBatch] = useState([]);
   const [relays, setRelays] = useState([]);
-
+  // console.log(followingsFavRelays)
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -107,7 +108,7 @@ export default function Relays() {
           {!isLoading && (
             <>
               {category === 1 && (
-                <LocalAggregated
+                <Network
                   relays={outboxRelays}
                   relaysBatch={outboxRelaysBatch}
                   setRelaysBatch={setOutboxRelaysBatch}
@@ -118,7 +119,7 @@ export default function Relays() {
           {!isLoading && (
             <>
               {category === 2 && (
-                <LocalAggregated
+                <Followings
                   relays={followingsFavRelays}
                   relaysBatch={followingsRelaysBatch}
                   setRelaysBatch={setFollowingsRelaysBatch}

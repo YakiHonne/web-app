@@ -22,6 +22,7 @@ import {
   UserBlossomServersReducer,
   UserInboxRelaysReducer,
   UserFollowingsInboxRelaysReducer,
+  IsUserFollowingsLoadedReducer,
 } from "./Slides/UserData";
 import {
   UserFirstLoginYakiChestReducer,
@@ -90,5 +91,6 @@ export const store = configureStore({
     homeSavedNotes: HomeSavedNotesReducer,
     homeCarouselPosts: HomeCarouselPostsReducer,
     relaysStats: RelaysStatsReducer,
+    isUserFollowingsLoaded: IsUserFollowingsLoadedReducer,
   },
 });

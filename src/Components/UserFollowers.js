@@ -68,9 +68,14 @@ export default function UserFollowers({
           type={showPeople}
         />
       )}
-      <div className="pointer" onClick={() => setShowPeople("followers")}>
+      <div
+        className="pointer"
+        onClick={() =>
+          followersCount && followersCount > 0 && setShowPeople("followers")
+        }
+      >
         <p>
-          <NumberShrink value={followersCount} />{" "}
+          <NumberShrink value={followersCount || 0} />{" "}
           <span className="gray-c">{t("A6huCnT")}</span>
         </p>
       </div>

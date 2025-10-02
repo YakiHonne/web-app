@@ -573,6 +573,9 @@ export function getDefaultSettings(pubkey) {
     pubkey,
     userHoverPreview: true,
     collapsedNote: true,
+    longPress: "notes",
+    defaultReaction: "❤️",
+    oneTapReaction: false,
     contentList: [
       { tab: "recent", isHidden: false },
       { tab: "recent_with_replies", isHidden: false },

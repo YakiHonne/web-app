@@ -158,7 +158,10 @@ const ExploreFeed = ({
   isLoading,
   setIsLoading,
 }) => {
+  const userKeys = useSelector((state) => state.userKeys);
   const userInterestList = useSelector((state) => state.userInterestList);
+  const userMutedList = useSelector((state) => state.userMutedList);
+  const userFollowings = useSelector((state) => state.userFollowings);
   const { t } = useTranslation();
   const [content, setContent] = useState([]);
   const [timestamp, setTimestamp] = useState(false);
@@ -174,6 +177,7 @@ const ExploreFeed = ({
     () => (content.length > 0 ? content[0].created_at + 1 : undefined),
     [content]
   );
+
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
@@ -348,7 +352,7 @@ const ExploreFeed = ({
               {
                 kinds: [16],
                 "#k": ["30023"],
-                limit: 50,
+                limit: 100,
                 until: a_until,
                 since,
               },
@@ -359,7 +363,7 @@ const ExploreFeed = ({
               {
                 kinds: [16],
                 "#k": ["30004", "30005"],
-                limit: 50,
+                limit: 100,
                 until: c_until,
                 since,
               },
@@ -370,16 +374,18 @@ const ExploreFeed = ({
               {
                 kinds: [16],
                 "#k": ["34235", "21", "22"],
-                limit: 50,
+                limit: 100,
                 until: v_until,
                 since,
               },
             ]
           : [],
       };
-    if (selectedCategory.value === "newest") {
+
+    if (selectedCategory.value === "network") {
       let authors_ = authors || getWOTList();
       authors_ = authors_.length > 0 ? authors_ : getBackupWOTList();
+      
       return {
         artsFilter: [0, 1].includes(selectedTab)
           ? [
@@ -488,6 +494,19 @@ const ExploreFeed = ({
 
   return (
     <InfiniteScroll onRefresh={setTimestamp} events={content}>
+      {userKeys && selectedCategory.value === "network" && userFollowings && userFollowings?.length < 5 && (
+        <div className="fit-container ">
+          <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-marg-s">
+            <div>
+              <div className="eye-opened-24"></div>
+            </div>
+            <div>
+              <p>{t("AZKoEWL")}</p>
+              <p className="gray-c">{t("AstvJYT")}</p>
+            </div>
+          </div>
+        </div>
+      )}
       {!["mf"].includes(selectedCategory?.group) && (
         <RecentPosts
           filter={subFilter}
@@ -499,7 +518,7 @@ const ExploreFeed = ({
       )}
       {/* <div className="fit-container fx-centered fx-col " style={{ gap: 0 }}> */}
       {content.map((item, index) => {
-        if (!bannedList.includes(item.pubkey))
+        if (![...bannedList, ...userMutedList].includes(item.pubkey))
           return (
             <Fragment key={item.id}>
               <div className="fit-container fx-centered">

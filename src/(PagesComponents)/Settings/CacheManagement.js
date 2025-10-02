@@ -5,12 +5,16 @@ import { setToast } from "../../Store/Slides/Publishers";
 import { getStorageEstimate, makeReadableNumber } from "../../Helpers/Helpers";
 import { clearDBCache } from "../../Helpers/DB";
 import LoadingDots from "../../Components/LoadingDots";
+import Toggle from "@/Components/Toggle";
 
 export function CacheManagement({ selectedTab, setSelectedTab }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [cacheSize, setCacheSize] = useState(0);
   const [isCacheClearing, setIsCacheClearing] = useState(false);
+  const [autoClearCache, setAutoClearCache] = useState(
+    localStorage.getItem("autoClearCache")
+  );
 
   useEffect(() => {
     const dbSize = async () => {
@@ -38,15 +42,27 @@ export function CacheManagement({ selectedTab, setSelectedTab }) {
     }
   };
 
+  const handleAutoClearCache = () => {
+    if (!autoClearCache) {
+      setAutoClearCache(!autoClearCache);
+      localStorage?.setItem("autoClearCache", `${Date.now()}`);
+    } else {
+      setAutoClearCache(!autoClearCache);
+      localStorage?.removeItem("autoClearCache");
+    }
+  };
+
   return (
     <div
-    className={`fit-container fx-scattered fx-col pointer ${selectedTab === "cache" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
-    style={{
-      borderBottom: "1px solid var(--very-dim-gray)",
-      gap: 0,
-      borderColor: "var(--very-dim-gray)",
-      transition: "0.2s ease-in-out",
-    }}
+      className={`fit-container fx-scattered fx-col pointer ${
+        selectedTab === "cache" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+      }`}
+      style={{
+        borderBottom: "1px solid var(--very-dim-gray)",
+        gap: 0,
+        borderColor: "var(--very-dim-gray)",
+        transition: "0.2s ease-in-out",
+      }}
     >
       <div
         className="fx-scattered fit-container  box-pad-h-m box-pad-v-m "
@@ -67,6 +83,13 @@ export function CacheManagement({ selectedTab, setSelectedTab }) {
       </div>
       {selectedTab === "cache" && (
         <div className="fit-container fx-col fx-centered box-pad-h-m box-pad-v-m">
+          <div className="fit-container fx-scattered">
+            <div>
+              <p>{t("AmtslmY")}</p>
+              <p className="gray-c p-medium">{t("A9Kte8F")}</p>
+            </div>
+            <Toggle status={autoClearCache} setStatus={handleAutoClearCache} />
+          </div>
           <div className="fx-scattered fit-container">
             <p>{t("AfcEwqC")}</p>
             <p className={cacheSize > 4000 ? "red-c" : "gray-c"}>
@@ -91,6 +114,6 @@ export function CacheManagement({ selectedTab, setSelectedTab }) {
       )}
     </div>
   );
-};
+}
 
 export default CacheManagement;

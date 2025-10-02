@@ -166,7 +166,7 @@ export default function Publishing() {
           };
         });
       let ak = getActionKey();
-      let pTag = getOutboxPubkey(kind, tags);
+      let pTag = eventInitEx ? getOutboxPubkey(eventInitEx.kind, eventInitEx.tags) :  getOutboxPubkey(kind, tags);
       let index = publishedEvents.length;
 
       setShowDetails(false);
@@ -174,6 +174,7 @@ export default function Publishing() {
       if (eventInitEx) {
         let ndkEvent = new NDKEvent(ndkInstance, eventInitEx);
         let outboxRelays = pTag ? await getOutboxRelays(pTag) : [];
+        console.log(outboxRelays)
         outboxRelays = outboxRelays.map((relay) => {
           return {
             url: removeRelayLastSlash(relay),

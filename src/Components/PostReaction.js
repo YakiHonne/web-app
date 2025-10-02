@@ -94,26 +94,34 @@ export default function PostReaction({
             </div>
           </div>
         </div>
-        <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
-          <Repost isReposted={isReposted} event={event} actions={postActions} />
-          <div
-            className={`round-icon-tooltip ${isReposted ? "orange-c" : ""}`}
-            data-tooltip={t("Aai65RJ")}
-            onClick={(e) => {
-              e.stopPropagation();
-              postActions.reposts.reposts.length > 0 &&
-                setUsersList({
-                  title: t("Aai65RJ"),
-                  list: postActions.reposts.reposts.map((item) => item.pubkey),
-                  extras: [],
-                });
-            }}
-          >
-            <div className={isReposted ? "" : "opacity-4"}>
-              <NumberShrink value={postActions.reposts.reposts.length} />
+        {event.kind === 1 && (
+          <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
+            <Repost
+              isReposted={isReposted}
+              event={event}
+              actions={postActions}
+            />
+            <div
+              className={`round-icon-tooltip ${isReposted ? "orange-c" : ""}`}
+              data-tooltip={t("Aai65RJ")}
+              onClick={(e) => {
+                e.stopPropagation();
+                postActions.reposts.reposts.length > 0 &&
+                  setUsersList({
+                    title: t("Aai65RJ"),
+                    list: postActions.reposts.reposts.map(
+                      (item) => item.pubkey
+                    ),
+                    extras: [],
+                  });
+              }}
+            >
+              <div className={isReposted ? "" : "opacity-4"}>
+                <NumberShrink value={postActions.reposts.reposts.length} />
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
           <Quote isQuoted={isQuoted} event={event} actions={postActions} />
           <div

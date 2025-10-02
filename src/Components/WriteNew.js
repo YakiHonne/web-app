@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import PostAsNote from "./PostAsNote";
+import { getCustomSettings } from "@/Helpers/ClientHelpers";
 
 export default function WriteNew({ exit }) {
   const { t } = useTranslation();
@@ -12,6 +13,43 @@ export default function WriteNew({ exit }) {
   const [redirectLinks, setRedirectLinks] = useState(false);
   const [showPostNote, setShowPostNote] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
+
+  const timeoutRef = useRef(null);
+
+  const handleLongPress = () => {
+    const settings = getCustomSettings();
+    const longPressOption =
+      settings.longPress && ["notes", "articles", "sw"].includes(settings.longPress)
+        ? settings.longPress
+        : "notes";
+  
+    if (!(userKeys.ext || userKeys.sec || userKeys.bunker)) {
+      setIsLogin(true);
+      return;
+    }
+    if (longPressOption === "notes") {
+      setShowPostNote(true);
+    }
+    if (longPressOption === "articles") {
+      customHistory("/write-article");
+    }
+    if (longPressOption === "sw") {
+      customHistory("/smart-widget-builder");
+    }
+  };
+
+  const handlePressStart = () => {
+    timeoutRef.current = setTimeout(() => {
+      handleLongPress();
+    }, 200); // long-press threshold in ms
+  };
+
+  const handlePressEnd = () => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
 
   return (
     <>
@@ -28,13 +66,18 @@ export default function WriteNew({ exit }) {
       )}
       {showPostNote && <PostAsNote exit={() => setShowPostNote(false)} />}
       <button
-        className="btn btn-full btn-orange fx-centered "
+        className="btn btn-full btn-orange fx-centered"
         style={{ padding: 0 }}
         onClick={() =>
           !(userKeys.ext || userKeys.sec || userKeys.bunker)
             ? setIsLogin(true)
             : setRedirectLinks(true)
         }
+        onMouseDown={handlePressStart}
+        onMouseUp={handlePressEnd}
+        onMouseLeave={handlePressEnd}
+        onTouchStart={handlePressStart}
+        onTouchEnd={handlePressEnd}
       >
         <div className="plus-sign-w"></div>
         <div className="link-label">{t("AAxCaYH")}</div>

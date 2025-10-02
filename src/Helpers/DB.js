@@ -685,9 +685,12 @@ export const clearDBCache = async () => {
   if (db) {
     try {
       if (db) {
-        db.tables.forEach(async (table) => {
-          if (["users", "eventStats"].includes(table.name)) await table.clear();
-        });
+        await Promise.all(
+          db.tables.map(async (table) => {
+            if (["users", "eventStats"].includes(table.name))
+              await table.clear();
+          })
+        );
       }
       if (ndkdb) {
         await Dexie.delete(ndkdb.name);

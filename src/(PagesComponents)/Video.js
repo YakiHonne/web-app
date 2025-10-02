@@ -331,14 +331,17 @@ export default function Video({ event, userProfile }) {
                 />
               </div>
             )}
-            <div className="main-middle fx-scattered box-pad-h-m">
+            <div className="main-middle fx-scattered box-pad-h-m box-marg-s">
               <PostReaction
                 event={video}
                 userProfile={userProfile}
                 postActions={postActions}
                 openComment={showCommentsSection.comment}
-                setShowComments={(status) =>
-                  setShowCommentsSections({ comment: status })
+                setShowComments={() =>
+                  setShowCommentsSections({ comment: false })
+                }
+                setOpenComment={() =>
+                  setShowCommentsSections({ comment: true })
                 }
               />
               <EventOptions

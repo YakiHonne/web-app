@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import { useSelector } from "react-redux";
 import KeysManagement from "./KeysManagement";
@@ -24,6 +24,10 @@ export default function SettingsHome() {
   const userMetadata = useSelector((state) => state.userMetadata);
   const userKeys = useSelector((state) => state.userKeys);
   const [selectedTab, setSelectedTab] = useState(query.tab || "");
+
+  useEffect(() => {
+    if (query.tab) setSelectedTab(query.tab || "");
+  }, [query]);
 
   return (
     <>

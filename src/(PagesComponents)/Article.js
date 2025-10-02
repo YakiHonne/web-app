@@ -624,14 +624,17 @@ export default function Article({ event, userProfile }) {
                   />
                 </div>
               )}
-              <div className="main-middle fx-scattered box-pad-h-m">
+              <div className="main-middle fx-scattered box-pad-h-m box-marg-s">
                 <PostReaction
                   event={post}
                   userProfile={userProfile}
                   postActions={postActions}
                   openComment={showCommentsSection.comment}
-                  setShowComments={(status) =>
-                    setShowCommentsSections({ comment: status })
+                  setShowComments={() =>
+                    setShowCommentsSections({ comment: false })
+                  }
+                  setOpenComment={() =>
+                    setShowCommentsSections({ comment: true })
                   }
                 />
                 <EventOptions

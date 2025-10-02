@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 
-export default function LocalAggregated({
+export default function Followings({
   relays,
   relaysBatch,
   setRelaysBatch,
@@ -12,12 +12,16 @@ export default function LocalAggregated({
 }) {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
+  const userFollowings = useSelector((state) => state.userFollowings);
 
   useEffect(() => {
     if (relaysBatch.length === 0 && relays.length > 0) {
+      console.log(relays)
       setRelaysBatch(relays.slice(0, 8));
     }
   }, [relaysBatch, relays]);
+
+
 
   const handleRelayClick = () => {
     let newRelays = relays.slice(relaysBatch.length, relaysBatch.length + 8);
@@ -48,6 +52,19 @@ export default function LocalAggregated({
   }
   return (
     <div className="fit-container fx-centered fx-col box-pad-v">
+      {userFollowings && userFollowings?.length < 5 && (
+        <div className="fit-container ">
+          <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-marg-s">
+            <div>
+              <div className="eye-opened-24"></div>
+            </div>
+            <div>
+              <p>{t("AZKoEWL")}</p>
+              <p className="gray-c">{t("AstvJYT")}</p>
+            </div>
+          </div>
+        </div>
+      )}
       {relaysBatch.map((relay) => {
         return (
           <RelayPreview

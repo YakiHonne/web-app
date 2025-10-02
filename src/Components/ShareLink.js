@@ -11,6 +11,22 @@ import useSearchUsers from "@/Hooks/useSearchUsers";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import { customHistory } from "@/Helpers/History";
 import QRCodeStyling from "qr-code-styling";
+import { saveUsers } from "@/Helpers/DB";
+
+function shuffleArray(arr) {
+  const a = arr.slice(); // copy
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pick50(arr) {
+  let shuffled = shuffleArray(arr).slice(0, 50);
+  saveUsers(shuffled);
+  return shuffled;
+}
 
 const allColors = [
   "#000000",
@@ -111,6 +127,7 @@ export default function ShareLink({
 const SharingWindow = ({ path, title, description, exit }) => {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
+  const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const userFollowings = useSelector((state) => state.userFollowings);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [successfulSendingTo, setSuccessfullSendingTo] = useState([]);
@@ -118,11 +135,14 @@ const SharingWindow = ({ path, title, description, exit }) => {
   const { users, isSearchLoading } = useSearchUsers(toSearch);
   const [isLoading, setIsLoading] = useState(false);
 
+  const batch = useMemo(() => {
+    return pick50(userFollowings);
+  }, [userFollowings]);
   const contact = useMemo(() => {
-    return userFollowings.map((_) => {
+    return batch.map((_) => {
       return getUser(_);
     });
-  }, [userFollowings]);
+  }, [nostrAuthors, batch]);
 
   const handleSelectedUsers = (metadata) => {
     if (isLoading) return;
@@ -452,7 +472,6 @@ const ShareOnOptions = ({ path, title, description }) => {
       )}
 
       <div className="box-pad-h box-pad-v-m fit-container fx-scattered">
-       
         <a
           className="twitter-share-button  fx-centered fx-col"
           href={`https://twitter.com/intent/tweet?text=${`${fullURL}`}`}
@@ -499,8 +518,14 @@ const ShareOnOptions = ({ path, title, description }) => {
             <p className="gray-c p-medium">Email</p>
           </div>
         </a>
-       
-        <div style={{borderLeft: "1px solid var(--dim-gray)", height: "40px", width: "1px"}}></div>
+
+        <div
+          style={{
+            borderLeft: "1px solid var(--dim-gray)",
+            height: "40px",
+            width: "1px",
+          }}
+        ></div>
         <div
           className="fx-centered fx-col"
           onClick={() => copyText(fullURL, t("AfnTOQk"))}

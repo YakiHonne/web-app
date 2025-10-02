@@ -196,7 +196,7 @@ export default function UserProfilePic({
                 />
               </div>
             )}
-            <p className="p-one-line">{withName}</p>
+            <p className="p-one-line" style={{margin: 0}}>{withName}</p>
           </div>
           {showMetadata && metadata && (
             <div

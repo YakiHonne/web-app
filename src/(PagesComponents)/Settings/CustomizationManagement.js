@@ -10,6 +10,9 @@ import {
   updateCustomSettings,
 } from "@/Helpers/ClientHelpers";
 import Select from "@/Components/Select";
+import EmojiPicker from "emoji-picker-react";
+import { useTheme } from "next-themes";
+import useCloseContainer from "@/Hooks/useCloseContainer";
 let boxView =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/box-view.png";
 let threadView =
@@ -22,6 +25,7 @@ export function CustomizationManagement({
   state,
 }) {
   const { t } = useTranslation();
+  const customSettings = getCustomSettings();
   const [showFeedSettings, setShowFeedSettings] = useState(false);
   const [userToFollowSuggestion, setUserToFollowSuggestion] = useState(
     localStorage?.getItem("hsuggest1")
@@ -33,14 +37,23 @@ export function CustomizationManagement({
     localStorage?.getItem("hsuggest3")
   );
   const [collapsedNote, setCollapsedNote] = useState(
-    getCustomSettings().collapsedNote === undefined
+    customSettings.collapsedNote === undefined
       ? true
-      : getCustomSettings().collapsedNote
+      : customSettings.collapsedNote
   );
   const [userHoverPreview, setUserHoverPreview] = useState(
-    getCustomSettings().userHoverPreview
+    customSettings.userHoverPreview
   );
-  const contentList = getCustomSettings().contentList;
+  const [longPress, setLongPress] = useState(
+    customSettings.longPress || "notes"
+  );
+  const [defaultReaction, setDefaultReaction] = useState(
+    customSettings.defaultReaction || "❤️"
+  );
+  const [oneTapReaction, setOneTapReaction] = useState(
+    customSettings.oneTapReaction || false
+  );
+  const contentList = customSettings.contentList;
 
   const [selectedRepliesView, setSelectedRepliesView] = useState(
     getRepliesViewSettings() ? "thread" : "box"
@@ -48,6 +61,7 @@ export function CustomizationManagement({
   const [homeContentSuggestion, setHomeContentSuggestion] = useState(
     localStorage?.getItem("hsuggest")
   );
+  const notification = customSettings.notification;
 
   const longPressOptions = [
     {
@@ -119,49 +133,69 @@ export function CustomizationManagement({
     }
   };
   const handleCollapedNote = () => {
-    if (collapsedNote) {
-      setCollapsedNote(false);
-      updateCustomSettings({
-        pubkey: userKeys.pub,
-        collapsedNote: false,
-        userHoverPreview,
-        notification,
-        contentList,
-      });
-    }
-    if (!collapsedNote) {
-      setCollapsedNote(true);
-      updateCustomSettings({
-        pubkey: userKeys.pub,
-        collapsedNote: true,
-        userHoverPreview,
-        notification,
-        contentList,
-      });
-    }
+    setCollapsedNote(!collapsedNote);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      collapsedNote: !collapsedNote,
+      userHoverPreview,
+      oneTapReaction,
+      defaultReaction,
+      longPress,
+      notification,
+      contentList,
+    });
   };
-
   const handleUserHoverPreview = () => {
-    if (userHoverPreview) {
-      setUserHoverPreview(false);
-      updateCustomSettings({
-        pubkey: userKeys.pub,
-        userHoverPreview: false,
-        collapsedNote,
-        notification,
-        contentList,
-      });
-    }
-    if (!userHoverPreview) {
-      setUserHoverPreview(true);
-      updateCustomSettings({
-        pubkey: userKeys.pub,
-        userHoverPreview: true,
-        collapsedNote,
-        notification,
-        contentList,
-      });
-    }
+    setUserHoverPreview(!userHoverPreview);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview: !userHoverPreview,
+      oneTapReaction,
+      defaultReaction,
+      longPress,
+      collapsedNote,
+      notification,
+      contentList,
+    });
+  };
+  const handleOneTapReaction = () => {
+    setOneTapReaction(!oneTapReaction);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction: !oneTapReaction,
+      defaultReaction,
+      longPress,
+      collapsedNote,
+      notification,
+      contentList,
+    });
+  };
+  const handleDefaultReaction = (emoji) => {
+    setDefaultReaction(emoji);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      defaultReaction: emoji,
+      longPress,
+      collapsedNote,
+      notification,
+      contentList,
+    });
+  };
+  const handleLongPress = (data) => {
+    setLongPress(data);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      defaultReaction,
+      longPress: data,
+      collapsedNote,
+      notification,
+      contentList,
+    });
   };
 
   const handleRepliesView = (value) => {
@@ -198,6 +232,7 @@ export function CustomizationManagement({
           gap: 0,
           borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
+          overflow: "visible",
         }}
       >
         <div
@@ -240,7 +275,11 @@ export function CustomizationManagement({
                 <p>{t("AnFVDo1")}</p>
                 <p className="p-medium gray-c">{t("A0MTAAN")}</p>
               </div>
-              <Select options={longPressOptions} value={"notes"} />
+              <Select
+                options={longPressOptions}
+                value={longPress}
+                setSelectedValue={handleLongPress}
+              />
             </div>
             <hr />
             <div className="fx-scattered fit-container">
@@ -261,12 +300,10 @@ export function CustomizationManagement({
                 <p>{t("AKa9x4m")}</p>
                 <p className="p-medium gray-c">{t("AndOZE9")}</p>
               </div>
-              <div
-                className="sc-s-18 fx-centered option"
-                style={{ width: "45px", aspectRatio: "1/1" }}
-              >
-                <div className="p-big">❤️️</div>
-              </div>
+              <Reaction
+                defaultReaction={defaultReaction}
+                handleDefaultReaction={handleDefaultReaction}
+              />
             </div>
             <hr />
             <div className="fx-scattered fit-container">
@@ -276,9 +313,9 @@ export function CustomizationManagement({
               </div>
               <div
                 className={`toggle ${
-                  !userHoverPreview ? "toggle-dim-gray" : ""
-                } ${userHoverPreview ? "toggle-c1" : "toggle-dim-gray"}`}
-                onClick={handleUserHoverPreview}
+                  !oneTapReaction ? "toggle-dim-gray" : ""
+                } ${oneTapReaction ? "toggle-c1" : "toggle-dim-gray"}`}
+                onClick={handleOneTapReaction}
               ></div>
             </div>
           </div>
@@ -429,6 +466,52 @@ const FeedSettings = ({
             onClick={handleInterestSuggestion}
           ></div>
         </div>
+      </div>
+    </div>
+  );
+};
+
+const Reaction = ({ defaultReaction, handleDefaultReaction }) => {
+  const { theme } = useTheme();
+  const isDarkMode = ["dark", "gray", "system"].includes(theme);
+  const { open, setOpen, containerRef } = useCloseContainer();
+  return (
+    <div style={{ position: "relative" }} ref={containerRef}>
+      {open && (
+        <div
+          className={"drop-down-r"}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "0",
+            transform: "translateX(-100%) translateY(-50%)",
+            zIndex: 102,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="sc-s fx-centered">
+            <EmojiPicker
+              reactionsDefaultOpen={true}
+              theme={isDarkMode ? "dark" : "light"}
+              previewConfig={{ showPreview: false }}
+              suggestedEmojisMode="recent"
+              skinTonesDisabled={false}
+              searchDisabled={false}
+              height={300}
+              onEmojiClick={(data) => {
+                setOpen(false);
+                handleDefaultReaction(data.emoji);
+              }}
+            />
+          </div>
+        </div>
+      )}
+      <div
+        className="sc-s-18 fx-centered option"
+        style={{ width: "45px", aspectRatio: "1/1" }}
+        onClick={() => setOpen(!open)}
+      >
+        <div className="p-big">{defaultReaction}</div>
       </div>
     </div>
   );

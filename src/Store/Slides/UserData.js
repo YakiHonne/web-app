@@ -82,6 +82,15 @@ const userFollowingsSlice = createSlice({
     },
   },
 });
+const isUserFollowingsLoadedSlice = createSlice({
+  name: "isUserFollowingsLoaded",
+  initialState: false,
+  reducers: {
+    setIsUserFollowingsLoaded(state, action) {
+      return action.payload;
+    },
+  },
+});
 const userMutedListSlice = createSlice({
   name: "userMutedList",
   initialState: [],
@@ -201,6 +210,7 @@ export const { setUserAllRelays } = userAllRelaysSlice.actions;
 export const { setUserChatrooms } = userChatroomsSlice.actions;
 export const { setUserChatContacts } = userChatContactsSlice.actions;
 export const { setUserFollowings } = userFollowingsSlice.actions;
+export const { setIsUserFollowingsLoaded } = isUserFollowingsLoadedSlice.actions;
 export const { setUserMutedList } = userMutedListSlice.actions;
 export const { setUserBalance } = userBalanceSlice.actions;
 export const { setUserFollowingsRelays } = userFollowingsRelaysSlice.actions;
@@ -235,3 +245,4 @@ export const UserInboxRelaysReducer = userInboxRelaysSlice.reducer;
 export const UserFavRelaysReducer = userFavRelaysSlice.reducer;
 export const UserWotListReducer = userWotListSlice.reducer;
 export const UserBlossomServersReducer = userBlossomServersSlice.reducer;
+export const IsUserFollowingsLoadedReducer = isUserFollowingsLoadedSlice.reducer;

@@ -160,8 +160,12 @@ const PostNote = ({ selectedCategory }) => {
 const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const { t } = useTranslation();
   const userMutedList = useSelector((state) => state.userMutedList);
+  const isUserFollowingsLoaded = useSelector(
+    (state) => state.isUserFollowingsLoaded
+  );
+  const userFollowings = useSelector((state) => state.userFollowings);
   const userKeys = useSelector((state) => state.userKeys);
-  const [userFollowings, setUserFollowings] = useState(false);
+  // const [userFollowings, setUserFollowings] = useState(false);
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(true);
@@ -178,7 +182,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
     [notes]
   );
-
   useEffect(() => {
     let contentFromValue = getContentFromValue(selectedCategory);
     if (selectedCategoryValue !== selectedCategory.value) {
@@ -189,7 +192,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       setNotesLastEventTime(undefined);
     }
   }, [selectedCategory]);
-
   useEffect(() => {
     straightUp();
     dispatchNotes({ type: "remove-events" });
@@ -200,7 +202,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     straightUp();
     dispatchNotes({ type: "remove-events" });
     setNotesLastEventTime(undefined);
-    setUserFollowings(false);
     if (notesLastEventTime === undefined) setRerenderTimestamp(Date.now());
   }, [userKeys]);
 
@@ -232,15 +233,15 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       if (tempUserFollowings.length === 0) {
         let userKeys = getKeys();
         if (userKeys) {
-          let followings = await getFollowings(userKeys.pub);
+          // let followings = await getFollowings(userKeys.pub);
           tempUserFollowings =
-            followings?.followings?.length > 0
-              ? [userKeys.pub, ...Array.from(followings.followings)]
+            userFollowings?.length > 0
+              ? [userKeys.pub, ...Array.from(userFollowings)]
               : [userKeys.pub, process.env.NEXT_PUBLIC_YAKI_PUBKEY];
-          setUserFollowings(tempUserFollowings);
+          // setUserFollowings(tempUserFollowings);
         } else {
           tempUserFollowings = [process.env.NEXT_PUBLIC_YAKI_PUBKEY];
-          setUserFollowings(tempUserFollowings);
+          // setUserFollowings(tempUserFollowings);
         }
       }
 
@@ -308,14 +309,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     };
   };
 
-  // useEffect(() => {
-  //   if (notesInitialState) {
-  //     let el = document.querySelector(".main-page-nostr-container");
-  //     if (!el) return;
-  //     el.scrollTop = 2000;
-  //   }
-  // }, [notesInitialState]);
-
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
@@ -324,6 +317,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       let events = [];
       let fallBackEvents = [];
       let { filter } = await getNotesFilter();
+      console.log(filter);
       let ndk =
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
@@ -369,20 +363,27 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       if (tempEvents.length === 0) setIsLoading(false);
     };
 
-    if (notesContentFrom && ["cf", "af"].includes(selectedCategory?.group))
-      contentFromRelays();
+    if (notesContentFrom && ["cf", "af"].includes(selectedCategory?.group)) {
+      if (
+        (["recent", "recent_with_replies"].includes(notesContentFrom) &&
+          isUserFollowingsLoaded) ||
+        !["recent", "recent_with_replies"].includes(notesContentFrom)
+      )
+        contentFromRelays();
+    }
   }, [
     notesLastEventTime,
     selectedCategoryValue,
     rerenderTimestamp,
     selectedFilter,
+    isUserFollowingsLoaded,
   ]);
 
   const handleRecentPostsClick = (notes) => {
     dispatchNotes({ type: notesContentFrom, note: notes });
     straightUp(undefined, "smooth");
   };
-
+  // console.log(userFollowings)
   return (
     <InfiniteScroll onRefresh={setNotesLastEventTime} events={notes}>
       {!["mf"].includes(selectedCategory?.group) && (
@@ -397,6 +398,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       {["recent", "recent_with_replies"].includes(notesContentFrom) &&
         userFollowings &&
         userFollowings?.length < 5 &&
+        isUserFollowingsLoaded &&
         notes?.length > 0 && (
           <div className="fit-container box-pad-h">
             <hr />

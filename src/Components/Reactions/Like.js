@@ -9,6 +9,7 @@ import LoginSignup from "@/Components/LoginSignup";
 import EmojiPicker from "emoji-picker-react";
 import EmojiImg from "@/Components/EmojiImg";
 import { useTheme } from "next-themes";
+import { getCustomSettings } from "@/Helpers/ClientHelpers";
 
 export default function Like({ isLiked, event, actions, tagKind = "e" }) {
   const dispatch = useDispatch();
@@ -23,6 +24,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
   const isDarkMode = ["dark", "gray", "system"].includes(theme);
   const [showEmoji, setShowEmoji] = useState(false);
   const optionsRef = useRef(null);
+
 
   useEffect(() => {
     const handleOffClick = (e) => {
@@ -55,7 +57,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
 
   const reactToNote = async (emoji) => {
     // e.stopPropagation();
-    setShowEmoji(false)
+    setShowEmoji(false);
     if (isLoading) return;
     try {
       if (!userKeys) {
@@ -112,6 +114,58 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
     }
   };
 
+  const handleDefault = (action = "one") => {
+    const settings = getCustomSettings();
+    const defaultReaction = settings.defaultReaction || "+";
+    const oneTapReaction = settings.oneTapReaction || false;
+    if (action === "one") {
+      if (oneTapReaction) {
+        reactToNote(defaultReaction);
+      }
+      if (!oneTapReaction) {
+        setShowEmoji(!showEmoji);
+      }
+      return;
+    }
+    if (action === "double") {
+      if (oneTapReaction) {
+        setShowEmoji(!showEmoji);
+      }
+      if (!oneTapReaction) {
+        reactToNote(defaultReaction);
+      }
+      return;
+    }
+  };
+
+  const clickTimeout = useRef(null);
+
+  const handleClick = () => {
+    if (clickTimeout.current) {
+      clearTimeout(clickTimeout.current);
+    }
+    clickTimeout.current = setTimeout(() => {
+      if (!isLiked) {
+        handleDefault("one");
+      } else {
+        reactToNote(undefined);
+      }
+      clickTimeout.current = null;
+    }, 300); // wait to see if double click occurs
+  };
+
+  const handleDoubleClick = () => {
+    if (clickTimeout.current) {
+      clearTimeout(clickTimeout.current); // cancel single click
+      clickTimeout.current = null;
+    }
+    if (!isLiked) {
+      handleDefault("double");
+    } else {
+      reactToNote(undefined);
+    }
+  };
+
   return (
     <>
       {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
@@ -123,8 +177,8 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
         <div
           className={"round-icon-tooltip pointer"}
           data-tooltip={t("AJW1vH9")}
-          onClick={() => !isLiked ? setShowEmoji(!showEmoji) : reactToNote(undefined)}
-          onDoubleClick={() => reactToNote("+")}
+          onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
         >
           {!isLiked && <div className={"heart-24 opacity-4"}></div>}
           {isLiked && <EmojiImg content={isLiked?.content} />}

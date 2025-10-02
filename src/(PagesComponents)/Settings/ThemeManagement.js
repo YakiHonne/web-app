@@ -1,6 +1,5 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import DtoLToggleButton from "../../Components/DtoLToggleButton";
 import { useTheme } from "next-themes";
 
 export function ThemeManagement({ selectedTab, setSelectedTab }) {
@@ -90,7 +89,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               className="fx-centered fx fx-col sc-s"
               style={{
                 borderColor: theme === "creamy" ? "var(--c1)" : "",
-                backgroundColor: "#fff5eb",
+                backgroundColor: "#FAF7F3",
               }}
               onClick={() => setTheme("creamy")}
             >

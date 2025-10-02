@@ -975,10 +975,11 @@ const getWOTScoreForPubkey = (network, pubkey, minScore = 3, counts) => {
     if (!network?.length || !pubkey) return { score: 0, status: false };
     const totalTrusting = counts.get(pubkey) || 0;
     const score =
-      totalTrusting === 0
-        ? 5
-        : Math.floor((totalTrusting * 10) / network.length);
-
+    totalTrusting === 0
+    ? 5
+    : Math.floor((totalTrusting * 10) / network.length);
+    
+    console.log(score)
     return { score, status: score >= minScore };
   } catch (err) {
     console.error(err);
@@ -997,9 +998,9 @@ const getWOTList = () => {
       return [];
     }
     let network = prevData.wotPubkeys;
-    if (network.length === 0) {
+    if (!network || network?.length === 0) {
       return [];
-    }
+    } 
 
     return network;
   } catch (err) {
@@ -1013,7 +1014,7 @@ const getBackupWOTList = () => {
     prevData = prevData ? JSON.parse(prevData) : { network: [] };
 
     let network = prevData.wotPubkeys;
-    if (network.length === 0) {
+    if (!network || network?.length === 0) {
       return [];
     }
 

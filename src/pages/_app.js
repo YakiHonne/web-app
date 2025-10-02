@@ -35,6 +35,9 @@ const NavbarClient = dynamic(() => import("@/Components/Navbar"), {
 const FloatingDMsClient = dynamic(() => import("@/Components/FloatingDMs"), {
   ssr: false,
 });
+const WarningBarClient = dynamic(() => import("@/Components/WarningBar"), {
+  ssr: false,
+});
 
 const NO_SIDEBAR_PAGES = new Set([
   "/yakihonne-mobile-app",
@@ -78,6 +81,7 @@ function App({ Component, pageProps }) {
         {!shouldHideSidebar && <FloatingDMsClient />}
         <AppInit />
         <NavbarClient />
+        <WarningBarClient />
         <div
           className="page-container fit-container fx-centered fx-start-v"
           style={{ height: "100dvh" }} // parent container no scroll

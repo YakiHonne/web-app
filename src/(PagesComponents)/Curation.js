@@ -401,14 +401,17 @@ export default function Curation({ event, userProfile }) {
                 />
               </div>
             )}
-            <div className="main-middle fx-scattered">
+            <div className="main-middle fx-scattered box-marg-s">
               <PostReaction
                 event={curation}
                 userProfile={userProfile}
                 postActions={postActions}
                 openComment={showCommentsSection.comment}
-                setShowComments={(status) =>
-                  setShowCommentsSections({ comment: status })
+                setShowComments={() =>
+                  setShowCommentsSections({ comment: false })
+                }
+                setOpenComment={() =>
+                  setShowCommentsSections({ comment: true })
                 }
               />
               <EventOptions

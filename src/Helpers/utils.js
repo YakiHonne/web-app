@@ -1,5 +1,6 @@
 import NDK, { NDKNip07Signer, NDKNip46Signer, NDKPrivateKeySigner, NDKRelayAuthPolicies } from "@nostr-dev-kit/ndk";
 import { getKeys } from "./ClientHelpers";
+import { getEmptyRelaysData } from "./Encryptions";
 
 const relayMetadataCache = new Map();
 const ndkInstancesCache = new Map();
@@ -50,7 +51,7 @@ export function setRelayMetadata(key, data) {
 }
 
 export function getRelayMetadata(key) {
-  return relayMetadataCache.get(key);
+  return relayMetadataCache.get(key) || getEmptyRelaysData(key);
 }
 
 export function clearRelayMetadata(key) {
@@ -86,7 +87,7 @@ const initiateNDKInstance = async (relay) => {
     const signer = new NDKNip46Signer(ndkInstance, userKeys.bunker, localKeys);
     ndkInstance.signer = signer;
   }
-  await ndkInstance.connect(1000);
+  await ndkInstance.connect(2000);
   if(!ndkInstance.pool.relays.get(relay.endsWith("/") ? relay : `${relay}/`).connected){
     return false
   }
