@@ -288,13 +288,15 @@
     font-size: 12px;
   } */
 
-  .content-source-and-filter, .sticky{
+  .content-source-and-filter, .sticky {
     top: 80px
   }
-   .page-container{
+
+  .page-container {
     position: relative;
     top: 80px
   }
+
   .user-feed-tab {
     width: 100vw;
   }
@@ -430,7 +432,14 @@
 
 }
 
+@media only screen and (max-width: 600px) {
+  .note-txtarea {
+    height: calc(100% - 90px);
+  }
+}
+
 @media only screen and (max-width: 550px) {
+
   .posts-cards:hover .posts-card {
     transform: initial;
   }

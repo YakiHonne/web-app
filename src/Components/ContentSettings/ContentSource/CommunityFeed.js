@@ -52,9 +52,6 @@ export default function CommunityFeed({
         </button>
       </div>
       {sources.map((_, index) => {
-        {
-          console.log(_.list);
-        }
         if (_.list?.length > 0 && index === 0)
           return (
             <div

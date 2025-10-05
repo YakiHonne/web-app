@@ -16,10 +16,10 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://yakihonne.com/m/maci-poll</loc>
+    <loc>https://yakihonne.com/r/content</loc>
     <lastmod>2025-07-31</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://yakihonne.com/r/notes</loc>
@@ -46,7 +46,7 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://yakihonne.com/articles</loc>
+    <loc>https://yakihonne.com/article</loc>
     <lastmod>2025-07-31</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -115,12 +115,6 @@
     <loc>https://yakihonne.com/settings/profile</loc>
     <lastmod>2025-07-31</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://yakihonne.com/my-notes-hidden</loc>
-    <lastmod>2025-07-31</lastmod>
-    <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>

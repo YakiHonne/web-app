@@ -56,15 +56,15 @@ const getReaction = (reaction) => {
 
 const checkMentionInContent = (note, pubkey) => {
   let matches = note.match(/\b(?:npub1|nprofile1)[0-9a-z]+\b/g);
-  matches = matches?.map((_) => {
-    if(_.startsWith("npub")) return nip19.decode(_).data;
-    if(_.startsWith("nprofile")) return nip19.decode(_).data.pubkey;
-  }) || []
+  matches =
+    matches?.map((_) => {
+      if (_.startsWith("npub")) return nip19.decode(_).data;
+      if (_.startsWith("nprofile")) return nip19.decode(_).data.pubkey;
+    }) || [];
   return matches?.includes(pubkey);
-}
+};
 
 const getRepEventsLink = (pubkey, kind, identifier, id) => {
-  
   let naddr = nip19.naddrEncode({ pubkey, identifier, kind });
   if (kind == 30023) return `/article/${naddr}`;
   if (kind == 30004) return `/curation/${naddr}`;
@@ -118,14 +118,14 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
               });
         let label_2 = event.content;
         let type = "replies";
-              let icon = eventIcons.replies_comments
+        let icon = eventIcons.replies_comments;
         if (isMention) {
           label_1 = t("A1DWKNA", {
             name: username,
           });
           label_2 = event.content;
           type = "mentions";
-          icon = eventIcons.mentions
+          icon = eventIcons.mentions;
         }
 
         return {
@@ -157,14 +157,14 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           ? getRepEventsLink(eventPubkey, eventKind, eventIdentifier)
           : `/note/${nEventEncode(isRoot[1])}`;
         let type = "replies";
-        let icon = eventIcons.replies_comments
-        if(isMention) {
+        let icon = eventIcons.replies_comments;
+        if (isMention) {
           label_1 = t("A1DWKNA", {
             name: username,
           });
           label_2 = event.content;
           type = "mentions";
-          icon = eventIcons.mentions
+          icon = eventIcons.mentions;
         }
         return {
           type,
@@ -184,13 +184,26 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
             : t("ACmLZt3", {
                 name: username,
               });
+        let id = isQuote[1];
         let label_2 = event.content;
+        let aTag = isQuote[1].split(":")[0];
+        let identifier = false;
+        let kinds = false;
+        if (aTag.length > 2) {
+          let kind = parseInt(isQuote[1].split(":")[0])
+          kinds = [kind];
+          label_1 = t(`AbWsTvK_${kind}`, { name: username });
 
+          id = isQuote[1].split(":")[1];
+          identifier = isQuote[1].split(":")[2];
+        }
         return {
           type: "quotes",
           label_1,
           label_2,
-          id: isQuote[1],
+          id,
+          identifier,
+          kinds,
           icon: eventIcons.quotes,
           url: `/note/${nEventEncode(event.id)}`,
         };
@@ -227,7 +240,12 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         label_2,
         icon: eventIcons[eventKinds[event.kind]],
         id: false,
-        url: identifier ? getRepEventsLink(event.pubkey, event.kind,identifier[1]) : `/video/${nip19.neventEncode({id: event.id, pubkey: event.pubkey})}`,
+        url: identifier
+          ? getRepEventsLink(event.pubkey, event.kind, identifier[1])
+          : `/video/${nip19.neventEncode({
+              id: event.id,
+              pubkey: event.pubkey,
+            })}`,
       };
     }
 
@@ -638,7 +656,7 @@ export default function NotificationCenterMain() {
               <div className="setting-24"></div>
             </Link>
           </div>
-          <div className="fit-container fx-even" style={{gap: 0}}>
+          <div className="fit-container fx-even" style={{ gap: 0 }}>
             <div
               className={`list-item-b fx-centered fx  ${
                 contentFrom === "all" ? "selected-list-item-b" : ""
@@ -771,7 +789,13 @@ const Notification = ({ event, filterByType = false }) => {
     if (!type?.id) return;
 
     let filter = type.identifier
-      ? [{ "#d": [type.identifier], authors: [type.id] }]
+      ? [
+          {
+            "#d": [type.identifier],
+            authors: [type.id],
+            kinds: type.kinds ? type.kinds : undefined,
+          },
+        ]
       : [{ ids: [type.id] }];
     const sub = ndkInstance.subscribe(filter, {
       cacheUsage: "ONLY_RELAY",

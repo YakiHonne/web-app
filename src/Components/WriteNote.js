@@ -504,10 +504,9 @@ export default function WriteNote({
           style={{ maxWidth: "calc(100% - 36px)" }}
         >
           <div
-            className="fit-container fx-scattered fx-col"
+            className="fit-container fx-scattered fx-col note-txtarea"
             style={{
               position: "relative",
-              height: "calc(100% - 60px)",
             }}
           >
             <div
@@ -613,8 +612,8 @@ export default function WriteNote({
               </div>
             )}
           </div>
-          <div className="fit-container fx-centered fx-start-v fx-wrap">
-            <div className="fit-container fx-scattered">
+          <div className="fit-container fx-centered fx-start-v">
+            <div className="fit-container fx-scattered fx-wrap">
               <div className="fx-centered" style={{ gap: "12px" }}>
                 <UploadFile
                   setImageURL={handleAddImage}
@@ -660,10 +659,10 @@ export default function WriteNote({
                   <Toggle status={isPaid} setStatus={setIsPaid} small={true} />
                 </div>
               </div>
-              <div className="fx-centered">
+              <div className="fx-centered" style={{ flex: "1 1 100px" }}>
                 {exit && (
                   <button
-                    className="btn btn-gst btn-small"
+                    className="btn btn-gst btn-small fx"
                     disabled={isLoading}
                     onClick={() => (note ? setShowWarningBox(true) : exit())}
                   >
@@ -671,7 +670,7 @@ export default function WriteNote({
                   </button>
                 )}
                 <button
-                  className="btn btn-normal btn-small"
+                  className="btn btn-normal btn-small fx"
                   onClick={publishNote}
                   disabled={isLoading}
                 >

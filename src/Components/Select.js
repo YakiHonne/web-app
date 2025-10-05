@@ -58,18 +58,17 @@ export default function Select({
             zIndex: 1000,
             rowGap: "0",
           }}
-          className="sc-s-18 fx-centered fx-col fx-start-v pointer box-pad-v-s drop-down"
+          className="sc-s-18 fx-centered fx-col fx-start-v pointer box-pad-v-s box-pad-h-s bg-sp drop-down"
         >
           {options.map((option, index) => {
             return (
               <div
                 key={index}
-                className={`option-no-scale fit-container fx-scattered ${option?.left_el ? "fx-start-h" : ""} sc-s-18 pointer box-pad-h-m`}
+                className={`option-no-scale fit-container fx-scattered ${option?.left_el ? "fx-start-h" : ""}  pointer box-pad-h-m`}
                 style={{
                   border: "none",
                   overflow: "visible",
-                  borderRadius: 0,
-                  padding: ".25rem 1rem",
+                  padding: ".5rem",
                   cursor: option.disabled ? "not-allowed" : "pointer",
                   opacity: option.disabled ? 0.5 : 1,
                 }}

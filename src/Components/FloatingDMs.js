@@ -99,6 +99,7 @@ export default function FloatingDMs() {
           bottom: "16px",
           zIndex: "10001",
         }}
+        className="mb-hide-800"
         ref={containerRef}
         onClick={(e) => e.stopPropagation()}
       >

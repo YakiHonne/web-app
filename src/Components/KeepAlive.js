@@ -12,7 +12,6 @@ export default function KeepAlive({ routeKey, children }) {
     setIsClient(true);
   }, []);
 
-  // Purge any keys that should never be cached
   if (isClient) {
     Object.keys(cacheRef.current).forEach((key) => {
       if (ALWAYS_REMOVE.includes(key)) {
@@ -21,7 +20,6 @@ export default function KeepAlive({ routeKey, children }) {
     });
   }
 
-  // If current route should never be cached, render it directly and skip caching
   if (isClient && ALWAYS_REMOVE.includes(routeKey)) {
     if (cacheRef.current[routeKey]) delete cacheRef.current[routeKey];
     return <div style={{ height: "100%" }}>{children}</div>;
