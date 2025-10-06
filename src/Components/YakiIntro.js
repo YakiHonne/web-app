@@ -38,24 +38,24 @@ const content = [
 ];
 
 const updatesList = [
-  " Core migration to SSR for faster performance, improved SEO, and smarter link previews for bots.",
-  " New Relay Orbits page to explore content beyond your network.",
-  " Fresh redesign across the app — including the note editor, parsing, dropdowns, popups, and more.",
-  " Floating chatbox lets you keep conversations going while browsing.",
-  " Scroll and page state restoration for smooth, uninterrupted navigation.",
-  " Seamlessly manage content sources — add favorite relays and switch between them easily.",
-  " Protected event publishing (NIP-70) now supported.",
-  " Republish events to specific relays for better targeting.",
-  " Clickable relay URLs directly within content.",
-  " Instant zaps — paste your LNURL and let others zap you right from your note.",
-  " Customization upgrades — redesigned settings with long-press actions, one-tap reactions, and default reaction preferences.",
-  " New curated themes for a pleasant experience: Noir, Graphite, Neige, and Ivory.",
-  " General bug fixes and performance improvements.",
+  "Core migration to SSR for faster performance, improved SEO, and enhanced link previews.",
+  "New Relay Orbits page to explore content beyond your network.",
+  "Fresh redesign across the app — including the note editor, parsing, dropdowns, popups, and more.",
+  "Floating chatbox lets you keep conversations going while browsing.",
+  "Scroll and page state restoration for smooth, uninterrupted navigation.",
+  "Seamlessly manage content sources — add favorite relays and switch between them easily.",
+  "YakiHonne is now a Progressive Web App (PWA), install it and browse like a native app!",
+  "Protected event publishing (NIP-70) now supported.",
+  "Republish events to specific relays for better targeting.",
+  "Clickable relay URLs directly within content.",
+  "Instant zaps — paste your LNURL and let others zap you right from your note.",
+  "Customization upgrades — redesigned settings with long-press actions, one-tap reactions, and default reaction preferences.",
+  "New curated themes for a pleasant experience: Noir, Graphite, Neige, and Ivory.",
+  "General bug fixes and performance improvements.",
 ];
 
 export default function YakiIntro() {
   const [swipe, setSwipe] = useState(false);
-  const [showMobileAd, setShowMobileAd] = useState(false);
   const [up, setUp] = useState(false);
 
   useEffect(() => {
@@ -72,21 +72,16 @@ export default function YakiIntro() {
   return (
     <>
       {swipe && <Banner exit={() => setSwipe(false)} />}
-      {/* {showMobileAd &&  <MobileAppQR exit={() => setShowMobileAd(false)}/>} */}
       <div
         style={{
           position: "fixed",
           right: "38px",
           bottom: up ? "94px" : "16px",
-          // top: "16px",
           transition: ".2s ease-in-out",
           zIndex: "1000000",
         }}
         className="fx-centered fx-end-h"
       >
-        {/* <button className="btn btn-gray btn-small">Mobile app</button> */}
-        {/* onClick={() => setShowMobileAd(true)} */}
-        {/* <button className="btn btn-gst" style={{backgroundColor: "var(--orange-side)", boxShadow: "0 4px 25px  var(--orange-side)"}}>Mobile app</button> */}
         {!swipe && (
           <div className="slide-right" onClick={() => setSwipe(!swipe)}>
             <div className="info-24"></div>
