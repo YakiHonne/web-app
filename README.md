@@ -1,22 +1,18 @@
-
-
 # What is YakiHonne?
 
-YakiHonne is the 1st Fully Decentralized Social Network on Bitcoin. Connecting 160+ countries globally, YakiHonne attracts 50K+ active Bitcoiners. Check it out at [yakihonne.com](https://yakihonne.com)
+A decentralized social payment client on `Nostr` & `Bitcoin`. Check it out at [yakihonne.com](https://yakihonne.com)
 
-Currently, YakiHonne is partnering with BITMAIN, Bitcoin Magazine, and 30+ programs in BTC ecosystems, and even non-BTC programs. YakiHonne received grants/ supports from Gitcoin, Nostr, DoraHacks etc..
-
-YakiHonne also runs its own relays under [nostr-01.yakihonne.com](https://nostr-01.yakihonne.com) and [nostr-02.yakihonne.com](https://nostr-02.yakihonne.com) for creators to publish their content, it is free of charge (atm). The relay is based on [strfry](https://github.com/hoytech/strfry) and written in cpp if you would like to check it out.
+YakiHonne also runs its own relays under [nostr-01.yakihonne.com](https://nostr-01.yakihonne.com) and [nostr-02.yakihonne.com](https://nostr-02.yakihonne.com) for creators to publish their content, it is free of charge. The relay is based on [strfry](https://github.com/hoytech/strfry) and written in cpp if you would like to check it out.
 
 
-### Gallery
+# Gallery
 
-| <img src="https://github.com/user-attachments/assets/2ae78bf2-ba6a-42b1-8cf0-1717b8d6f701" alt="screen-2" width="320"/> | <img src="https://github.com/user-attachments/assets/1510bbc8-c3c0-41e5-8647-a10721b1f3fb" alt="screen-3" width="320"/> | <img src="https://github.com/user-attachments/assets/ed6c1700-f65f-42bc-9c24-f4495a4a2b5c" alt="screen-4" width="320"/> |
+| <img src="https://github.com/user-attachments/assets/9bf2f6fe-6449-4376-acb0-bb31209d01e6" alt="screen-2" width="320"/> | <img src="https://github.com/user-attachments/assets/e615b20f-2b75-4e51-8d6b-7e5ae1f804e1" alt="screen-3" width="320"/> | <img src="https://github.com/user-attachments/assets/73f5ab22-dc20-4fea-bbad-5bba82a520f7" alt="screen-4" width="320"/> |
 |---|---|---|
-| <img src="https://github.com/user-attachments/assets/a703e035-b5c5-4cb3-95a9-fab94341458a" alt="screen-5" width="320"/> | <img src="https://github.com/user-attachments/assets/1d3964f3-6ebf-4194-9a6e-fac3bb9c8258" alt="screen-6" width="320"/> | <img src="https://github.com/user-attachments/assets/8ad82280-732e-4930-96cb-6051e4e8607f" alt="screen-7" width="320"/> |
-| <img src="https://github.com/user-attachments/assets/ea3013e1-9cbc-4f70-b928-496c1ebc3d44" alt="screen-8" width="320"/> | <img src="https://github.com/user-attachments/assets/2d8ec2e0-bdbc-4c9c-900c-075f1803de26" alt="screen-9" width="320"/> | <img src="https://github.com/user-attachments/assets/3af57a0c-87fc-4ad0-9e8f-df7f3d818ba4" alt="screen-10" width="320"/> |
-| <img src="https://github.com/user-attachments/assets/58b9df81-90dd-4efc-8261-59b6dba1f130" alt="screen-11" width="320"/> | <img src="https://github.com/user-attachments/assets/4a14fb98-a94b-485e-a8d2-b8ff25d2143f" alt="screen-12" width="320"/> | <img src="https://github.com/user-attachments/assets/b8c639d5-950f-49dc-928d-13fe70f238b8" alt="screen-13" width="320"/> |
-| <img src="https://github.com/user-attachments/assets/d2c4545e-53fd-489a-9641-c01c305de78b" alt="screen-14" width="320"/> |  |  |
+| <img src="https://github.com/user-attachments/assets/c38f377a-eba7-42e9-9b69-b073cd2caff8" alt="screen-5" width="320"/> | <img src="https://github.com/user-attachments/assets/1d357c0f-7f50-4d47-8ed1-67d4dadb266c" alt="screen-6" width="320"/> | <img src="https://github.com/user-attachments/assets/4c4690f0-7983-405d-8602-f0a78e8fbcae" alt="screen-7" width="320"/> |
+| <img src="https://github.com/user-attachments/assets/77ec6919-aa9f-45a8-a47c-392056c316f1" alt="screen-8" width="320"/> | <img src="https://github.com/user-attachments/assets/b242a381-2371-421e-acf7-68f0e12ceae3" alt="screen-9" width="320"/> | <img src="https://github.com/user-attachments/assets/3f4971a8-6f89-49ed-8d37-6baa7bda9e87" alt="screen-10" width="320"/> |
+| <img src="https://github.com/user-attachments/assets/78694e2c-26a0-4a34-a49b-7c9e8f4cc955" alt="screen-11" width="320"/> | <img src="https://github.com/user-attachments/assets/8ec258bf-e7d4-4111-8001-90e46e0e68fb" alt="screen-12" width="320"/> | <img src="https://github.com/user-attachments/assets/8567c974-5c20-4198-a0fa-1dab303b2b55" alt="screen-13" width="320"/> |
+| <img src="https://github.com/user-attachments/assets/8576feb7-ab77-45e6-b48e-4624ef970ad8" alt="screen-14" width="320"/> |  |  |
 
 # 1. Features
 
