@@ -31,6 +31,7 @@ YakiHonne also runs its own relays under [nostr-01.yakihonne.com](https://nostr-
 - [x] Lightning zaps: via QR codes or dedicted wallet (NIP-57)
 - [x] Customizable user settings: Keypair, Lightning Addres, relay list
 - [x] Relay list metadata support (NIP-65)
+- [x] And many others feel free to visit or download YakiHonne to explore 
 
 ## 1.2 Relay
 
