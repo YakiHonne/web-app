@@ -12,7 +12,7 @@ export function RelaysConfig() {
   const [showRelaysInfo, setShowRelaysInfo] = useState(false);
   const [allRelays, setAllRelays] = useState([]);
   const [showStatus, setShowStatus] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(query?.relaysTab ? query.relaysTab : 0);
+  const [selectedTab, setSelectedTab] = useState(query?.relaysType ? query.relaysType : 0);
 
   useEffect(() => {
     const fetchData = async () => {

@@ -33,6 +33,7 @@ import { t } from "i18next";
 import { useTranslation } from "react-i18next";
 import Zap from "@/Components/Reactions/Zap";
 import useNoteStats from "@/Hooks/useNoteStats";
+import UsersGroupProfilePicture from "./UsersGroupProfilePicture";
 
 const eventIcons = {
   paid_notes: "not-paid-notes",
@@ -190,7 +191,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         let identifier = false;
         let kinds = false;
         if (aTag.length > 2) {
-          let kind = parseInt(isQuote[1].split(":")[0])
+          let kind = parseInt(isQuote[1].split(":")[0]);
           kinds = [kind];
           label_1 = t(`AbWsTvK_${kind}`, { name: username });
 
@@ -444,13 +445,12 @@ export default function NotificationCenterMain() {
           } else return false;
         })
         .filter((_) => _);
-
       let list = saveNotificationsHistory(userKeys.pub, data);
       setNotifications(list);
       if (data.length)
         saveNotificationLastEventTS(userKeys.pub, data[0]?.created_at);
       setIsLoading(false);
-      saveUsers(tempAuth.flat());
+      saveUsers([...new Set(tempAuth.flat())]);
       filter = getFilter(userFollowings, list[0]?.created_at + 1);
       sub = ndkInstance.subscribe(filter, {
         cacheUsage: "CACHE_FIRST",
@@ -546,7 +546,7 @@ export default function NotificationCenterMain() {
       filter.push({
         kinds: [1],
         "#p": [userKeys.pub],
-        limit: 10,
+        limit: 100,
         since,
       });
     }
@@ -619,17 +619,6 @@ export default function NotificationCenterMain() {
 
   return (
     <>
-      {newNotifications.length > 0 && (
-        <div
-          className="fit-container fx-centered box-pad-v slide-down"
-          style={{ position: "fixed", left: 0, top: "85px", zIndex: 200 }}
-        >
-          <button className="btn btn-normal" onClick={addNewEvents}>
-            {t("AV9Dfnw", { count: newNotifications.length })}
-          </button>
-          <div style={{ width: "42px" }}></div>
-        </div>
-      )}
       <div
         style={{
           width: "min(100%, 600px)",
@@ -642,6 +631,41 @@ export default function NotificationCenterMain() {
           e.stopPropagation();
         }}
       >
+        {newNotifications.length > 0 && (
+          <div
+            className="fit-container fx-centered box-pad-v slide-down"
+            style={{ position: "absolute", left: 0, top: "85px", zIndex: 200 }}
+          >
+            <div
+              className="sc-s  box-pad-h-s box-pad-v-s fx-scattered pointer"
+              style={{
+                backgroundColor: "var(--c1)",
+                border: "none",
+                gap: "10px",
+              }}
+              onClick={addNewEvents}
+            >
+              <UsersGroupProfilePicture
+                pubkeys={[
+                  ...new Set(newNotifications.map((note) => note.pubkey)),
+                ].slice(0, 3)}
+              />
+              <div
+                className="fx-centered"
+                style={{
+                  minWidth: "max-content",
+                  gap: "0",
+                }}
+              >
+                <p className="white-c">
+                  {t("AV9Dfnw", { count: newNotifications.length })}
+                </p>
+                <p className="white-c box-pad-h-s">&#8593;</p>
+              </div>
+            </div>
+            <div style={{ width: "42px" }}></div>
+          </div>
+        )}
         <div
           className="fit-container sticky"
           style={{
@@ -712,7 +736,7 @@ export default function NotificationCenterMain() {
                   width: "100%",
                   position: "absolute",
                   left: 0,
-                  top: "104px",
+                  top: "6.5rem",
                   overflow: "hidden",
                   zIndex: 211,
                   height: "20px",
@@ -830,6 +854,7 @@ const Notification = ({ event, filterByType = false }) => {
             mainAccountUser={false}
             user_id={user.pubkey}
             img={user.picture}
+            metadata={user}
           />
           <div
             className="round-icon"

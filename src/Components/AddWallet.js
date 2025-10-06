@@ -35,6 +35,7 @@ export default function AddWallet({ exit, refresh }) {
           className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"
           style={{ backgroundColor: "transparent" }}
           href={"/wallet/nwc"}
+          onClick={exit}
         >
           <div className="fx-centered">
             <div

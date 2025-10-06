@@ -6,7 +6,7 @@ export default function KeepAlive({ routeKey, children }) {
 
   const MAX_CACHE = 5;
   const ALWAYS_KEEP = ["/", "/discover"]; 
-  const ALWAYS_REMOVE = ["/login"]; 
+  const ALWAYS_REMOVE = ["/login", "/wallet"]; 
 
   useEffect(() => {
     setIsClient(true);

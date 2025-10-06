@@ -41,7 +41,7 @@ export default function DeleteWallet({ exit, handleDelete, wallet }) {
             style={{ borderStyle: "dashed" }}
             onClick={() => copyText(t("A6Pj02S"), wallet.data)}
           >
-            <p>{shortenKey(wallet.data, 40)}</p>
+            <p>{shortenKey(wallet.data, 15)}</p>
             <div className="copy-24"></div>
           </div>
           <p className="c1-c p-medium p-centered box-pad-h-m">{t("AshEtUl")}</p>

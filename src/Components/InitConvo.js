@@ -39,7 +39,13 @@ export default function InitiConvo({ exit, receiver = false }) {
   };
 
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <div
+      className="fixed-container fx-centered box-pad-h"
+      onClick={(e) => {
+        e.stopPropagation();
+        exit();
+      }}
+    >
       <div
         className="box-pad-h box-pad-v sc-s bg-sp"
         style={{

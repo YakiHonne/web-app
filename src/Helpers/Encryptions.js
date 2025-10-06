@@ -397,6 +397,13 @@ const getParsedRepEvent = (event) => {
     };
     content.aTag = `${event.kind}:${event.pubkey}:${content.d}`;
 
+    if ([22, 21].includes(event.kind))
+      content.nEvent = nip19.neventEncode({
+        pubkey: event.pubkey,
+        id: event.id,
+        kind: event.kind,
+      });
+
     return content;
   } catch (err) {
     console.log(err);
@@ -976,11 +983,11 @@ const getWOTScoreForPubkey = (network, pubkey, minScore = 3, counts) => {
     if (!network?.length || !pubkey) return { score: 0, status: false };
     const totalTrusting = counts.get(pubkey) || 0;
     const score =
-    totalTrusting === 0
-    ? 5
-    : Math.floor((totalTrusting * 10) / network.length);
-    
-    console.log(score)
+      totalTrusting === 0
+        ? 5
+        : Math.floor((totalTrusting * 10) / network.length);
+
+    console.log(score);
     return { score, status: score >= minScore };
   } catch (err) {
     console.error(err);
@@ -1001,7 +1008,7 @@ const getWOTList = () => {
     let network = prevData.wotPubkeys;
     if (!network || network?.length === 0) {
       return [];
-    } 
+    }
 
     return network;
   } catch (err) {

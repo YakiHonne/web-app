@@ -6,7 +6,7 @@ import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 
 const useUserProfile = (pubkey, verifyNip05 = true) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
-  const [userProfile, setUserProfile] = useState(getEmptyuserMetadata(pubkey));
+  const [userProfile, setUserProfile] = useState({...getEmptyuserMetadata(pubkey), empty: true});
   const [isNip05Verified, setIsNip05Verified] = useState(false);
 
   useEffect(() => {
@@ -27,8 +27,9 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
         console.log(err);
       }
     };
-    if (nostrAuthors.length > 0 && !isNip05Verified) fetchData();
+    if (nostrAuthors.length > 0 && !isNip05Verified && userProfile.empty) fetchData();
   }, [nostrAuthors, verifyNip05]);
+
   return { isNip05Verified, userProfile };
 };
 

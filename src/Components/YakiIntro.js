@@ -37,6 +37,22 @@ const content = [
   },
 ];
 
+const updatesList = [
+  " Core migration to SSR for faster performance, improved SEO, and smarter link previews for bots.",
+  " New Relay Orbits page to explore content beyond your network.",
+  " Fresh redesign across the app — including the note editor, parsing, dropdowns, popups, and more.",
+  " Floating chatbox lets you keep conversations going while browsing.",
+  " Scroll and page state restoration for smooth, uninterrupted navigation.",
+  " Seamlessly manage content sources — add favorite relays and switch between them easily.",
+  " Protected event publishing (NIP-70) now supported.",
+  " Republish events to specific relays for better targeting.",
+  " Clickable relay URLs directly within content.",
+  " Instant zaps — paste your LNURL and let others zap you right from your note.",
+  " Customization upgrades — redesigned settings with long-press actions, one-tap reactions, and default reaction preferences.",
+  " New curated themes for a pleasant experience: Noir, Graphite, Neige, and Ivory.",
+  " General bug fixes and performance improvements.",
+];
+
 export default function YakiIntro() {
   const [swipe, setSwipe] = useState(false);
   const [showMobileAd, setShowMobileAd] = useState(false);
@@ -182,7 +198,7 @@ const Banner = ({ exit }) => {
               <div>
                 <p>Updates</p>
                 <p className="gray-c p-italic p-medium">
-                  Last updated July 22, 2025
+                  Last updated Oct 6, 2025
                 </p>
               </div>
               <p className="orange-c p-medium">
@@ -192,32 +208,9 @@ const Banner = ({ exit }) => {
             <div className="box-pad-v-s"></div>
 
             <ul>
-              <li>
-                Content source choices are now saved in both Home and Discover
-                for a more consistent browsing experience.
-              </li>
-              <li>
-                More event options added, including copying the pubkey, viewing
-                raw events, and more.
-              </li>
-              <li>
-                Curation and video content can now be edited after publishing.
-              </li>
-              <li>
-                Improved notes rendering for faster and smoother performance.
-              </li>
-              <li>
-                Link previews are now available for better content visibility.
-              </li>
-              <li>
-                Redesigned audio player with a cleaner and more user-friendly
-                interface.
-              </li>
-              <li>
-                Automatic language direction detection when editing and
-                displaying content, supporting both LTR and RTL languages.
-              </li>
-              <li>General improvements and bug fix</li>
+              {updatesList.map((update, index) => {
+                return <li key={index}>{update}</li>;
+              })}
             </ul>
           </div>
           {content.map((card, index) => {

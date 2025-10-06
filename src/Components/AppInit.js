@@ -904,7 +904,7 @@ export default function AppInit() {
     if (followings && followings?.followings?.length >= 5) {
       buildWOTList();
     } else if (followings) {
-    // } else if (followings && followings?.followings?.length < 5) {
+      // } else if (followings && followings?.followings?.length < 5) {
       buildBackupWOTList();
     }
   }, [followings]);

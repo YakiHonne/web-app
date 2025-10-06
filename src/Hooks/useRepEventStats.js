@@ -11,10 +11,10 @@ import { useLiveQuery } from "dexie-react-hooks";
 const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
   const [isLoading, setIsLoading] = useState(true);
   const postActions =
-    useLiveQuery(
-      async () => (aTag ? await getEventStats(aTag) : getEmptyEventStats("")),
-      [aTag]
-    ) || getEmptyEventStats("");
+  useLiveQuery(
+    async () => (aTag ? await getEventStats(aTag) : getEmptyEventStats("")),
+    []
+  ) || getEmptyEventStats("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,6 +61,8 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
             since: actions.zaps.since,
           },
         ]);
+
+        if(response.data.length === 0) return
         for (let event of response.data) {
           if (event.kind === 9735) {
             let zapper = getZapper(event);
@@ -155,8 +157,8 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
     };
 
     if (aTag && supported) fetchData();
-  }, [aTag]);
-
+  }, []);
+  console.log("post");
   return { postActions, isLoading };
 };
 

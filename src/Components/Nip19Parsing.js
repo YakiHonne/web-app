@@ -21,7 +21,7 @@ import ZapPollsComp from "@/Components/SmartWidget/ZapPollsComp";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
 import UserProfilePic from "./UserProfilePic";
 
-export default function Nip19Parsing({ addr, minimal = false }) {
+ function Nip19Parsing({ addr, minimal = false }) {
   const [event, setEvent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isParsed, setIsParsed] = useState(false);
@@ -319,3 +319,9 @@ export default function Nip19Parsing({ addr, minimal = false }) {
       </div>
     );
 }
+
+const areEqual = (prevProps, nextProps) => {
+  return prevProps.addr === nextProps.addr && prevProps.minimal === nextProps.minimal;
+};
+
+export default React.memo(Nip19Parsing, areEqual);

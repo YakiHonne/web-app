@@ -346,7 +346,6 @@ export default function Video({ event, userProfile }) {
               />
               <EventOptions
                 event={video}
-                eventActions={postActions}
                 component="repEvents"
               />
             </div>

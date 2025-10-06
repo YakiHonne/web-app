@@ -228,9 +228,9 @@ export default function Dashboard() {
     const fetchHomeData = async () => {
       try {
         let [userProfile, sats, popularNotes, userContent] = await Promise.all([
-          getUserStats(userKeys.pub),
+          Promise.race([getUserStats(userKeys.pub), sleepTimer(2000)]),
           getNostrBandStats(userKeys.pub),
-          getPopularNotes(userKeys.pub),
+          Promise.race([getPopularNotes(userKeys.pub), sleepTimer(2000)]),
           getSubData([
             {
               kinds: [30023, 30004, 30005, 34235, 21, 22],
@@ -240,9 +240,9 @@ export default function Dashboard() {
             { kinds: [30024], limit: 5, authors: [userKeys.pub] },
           ]),
         ]);
-        userProfile = JSON.parse(
+        userProfile =  userProfile ? JSON.parse(
           userProfile.find((event) => event.kind === 10000105).content
-        );
+        ) : {time_joined: Math.floor(Date.now() / 1000)};
 
         let zaps_sent = sats
           ? sats.data.stats[userKeys.pub].zaps_sent
@@ -260,7 +260,7 @@ export default function Dashboard() {
             ...userProfile,
             zaps_sent,
           },
-          popularNotes: sortEvents(popularNotes.filter((_) => _.kind === 1)),
+          popularNotes: popularNotes ? sortEvents(popularNotes.filter((_) => _.kind === 1)) : [],
           drafts: sortEvents(drafts),
           latestPublished: sortEvents(latestPublished),
           localDraft,
@@ -1774,11 +1774,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
   );
 };
 
-const ContentCard = ({
-  event,
-  refreshAfterDeletion,
-  setPostToNote,
-}) => {
+const ContentCard = ({ event, refreshAfterDeletion, setPostToNote }) => {
   return (
     <>
       {[1, 6].includes(event.kind) && <NoteCard event={event} />}
@@ -1789,10 +1785,7 @@ const ContentCard = ({
         <DraftCard event={event} refreshAfterDeletion={refreshAfterDeletion} />
       )}
       {[30004, 30005, 30023, 34235, 30033, 21, 22].includes(event.kind) && (
-        <RepCard
-          event={event}
-          refreshAfterDeletion={refreshAfterDeletion}
-        />
+        <RepCard event={event} refreshAfterDeletion={refreshAfterDeletion} />
       )}
       {event.kind === 30003 && <BookmarkCard event={event} />}
     </>

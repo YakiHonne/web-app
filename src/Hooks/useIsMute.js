@@ -1,19 +1,17 @@
 import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import useUserProfile from "./useUsersProfile";
 import { InitEvent } from "@/Helpers/Controlers";
 import { setToPublish } from "@/Store/Slides/Publishers";
 
 export default function useIsMute(pubkey) {
   const dispatch = useDispatch();
   const userMutedList = useSelector((state) => state.userMutedList);
-  const { userProfile } = useUserProfile(pubkey);
 
   const isMuted = useMemo(() => {
     let checkProfile = () => {
       if (!Array.isArray(userMutedList)) return false;
       let index = userMutedList.findIndex(
-        (item) => item === userProfile?.pubkey
+        (item) => item === pubkey
       );
       if (index === -1) {
         return false;
@@ -21,7 +19,7 @@ export default function useIsMute(pubkey) {
       return { index };
     };
     return pubkey ? checkProfile() : false;
-  }, [userMutedList, userProfile]);
+  }, [userMutedList]);
 
   const muteUnmute = async () => {
     try {

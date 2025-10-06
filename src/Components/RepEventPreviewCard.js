@@ -23,15 +23,15 @@ const getURL = (item, isNip05Verified) => {
     if (item.kind === 30023) return `/article/${item.naddr}`;
     if ([30004, 30005].includes(item.kind)) return `/curation/${item.naddr}`;
     if ([34235, 34236, 21, 22].includes(item.kind))
-      return `/video/${item.naddr}`;
+      return `/video/${item.nEvent}`;
   }
   if (item.kind === 30023) return `/article/s/${isNip05Verified}/${item.d}`;
   if (item.kind === 30004) return `/curation/a/${isNip05Verified}/${item.d}`;
   if (item.kind === 30005) return `/curation/v/${isNip05Verified}/${item.d}`;
-  if ([34235, 34236, 21, 22].includes(item.kind))
+  if ([34235, 34236].includes(item.kind))
     return `/video/s/${isNip05Verified}/${item.d}`;
+  if ([21, 22].includes(item.kind)) return `/video/${item.nEvent}`;
 };
-
 export default function RepEventPreviewCard({
   item,
   border = true,
@@ -220,6 +220,7 @@ const AuthorPreview = ({ author, item, isNip05Verified }) => {
         mainAccountUser={false}
         user_id={author.pubkey}
         img={author.picture}
+        metadata={author}
       />
       <div>
         <div className="fx-centered fx-start-h" style={{ gap: "3px" }}>
@@ -330,7 +331,6 @@ const Reactions = ({ post, author }) => {
           />
           <EventOptions
             event={post}
-            eventActions={postActions}
             component="repEventsCard"
           />
         </div>

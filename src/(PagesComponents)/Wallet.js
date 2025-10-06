@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { webln } from "@getalby/sdk";
-import ArrowUp from "@/Components/ArrowUp";import axios from "axios";
+import ArrowUp from "@/Components/ArrowUp";
+import axios from "axios";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import * as secp from "@noble/secp256k1";
 import SatsToUSD from "@/Components/SatsToUSD";
@@ -326,24 +327,17 @@ export default function Wallet() {
               wallets.length > 0 && (
                 <div>
                   <div
-                    className="fit-container box-pad-v-m fx-scattered"
+                    className="fit-container box-pad-v-m fx-centered"
                     style={{ position: "relative", zIndex: 100 }}
                   >
-                    <div>
+                    {/* <div>
                       <h4>{t("ARXDO1q")}</h4>
-                    </div>
+                    </div> */}
                     <div className="fx-centered">
-                      <div
-                        className="round-icon round-icon-small round-icon-tooltip"
-                        data-tooltip={t("A8fEwNq")}
-                        onClick={() => setShowAddWallet(true)}
-                      >
-                        <div className="plus-sign"></div>
-                      </div>
                       <div style={{ position: "relative" }} ref={walletListRef}>
                         {selectedWallet && (
                           <div
-                            className="fit-container fx-scattered if option pointer"
+                            className="fit-container fx-scattered if if-no-border option pointer"
                             style={{
                               height: "var(--40)",
                               padding: "1rem",
@@ -361,15 +355,26 @@ export default function Wallet() {
                               width: "400px",
                               backgroundColor: "var(--c1-side)",
                               position: "absolute",
-
+                              // transform: "translateX(-50%)",
+                              // left: "-50%",
                               top: "calc(100% + 5px)",
                               rowGap: 0,
                               overflow: "visible",
                             }}
                           >
-                            <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
-                              {t("AnXYtQy")}
-                            </p>
+                            <div className="fit-container fx-scattered">
+                              <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
+                                {t("AnXYtQy")}
+                              </p>
+                              <div
+                                className="round-icon-tooltip fx-centered btn btn-small btn-gray"
+                                // data-tooltip={t("A8fEwNq")}
+                                onClick={() => setShowAddWallet(true)}
+                              >
+                                <div className="plus-sign"></div>
+                                <p>{t("A8fEwNq")}</p>
+                              </div>
+                            </div>
                             {wallets.map((wallet) => {
                               let isLinked = checkIsLinked(wallet.entitle);
                               return (
@@ -416,7 +421,9 @@ export default function Wallet() {
                                     <EventOptions
                                       event={wallet}
                                       component={"wallet"}
-                                      refreshAfterDeletion={refreshAfterDeletion}
+                                      refreshAfterDeletion={
+                                        refreshAfterDeletion
+                                      }
                                     />
                                   )}
                                 </div>
@@ -449,8 +456,8 @@ export default function Wallet() {
                               onClick={() =>
                                 selectedWallet.entitle.includes("@")
                                   ? copyText(
-                                    selectedWallet.entitle,
-                                    t("ALR84Tq"),
+                                      selectedWallet.entitle,
+                                      t("ALR84Tq")
                                     )
                                   : walletWarning()
                               }

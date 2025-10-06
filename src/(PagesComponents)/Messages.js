@@ -316,7 +316,6 @@ export default function Messages() {
               </div>
             </div>
           )}
-
           {!showSearch && (
             <div
               className="fx-centered fit-container box-marg-s slide-up"
@@ -376,7 +375,7 @@ export default function Messages() {
                   {t("Alxsg82")}{" "}
                   <span className="c1-c">
                     <Link
-                      href={"/settings"}
+                      href={"/settings?tab=relays&relaysType=1"}
                       state={{ relaysTab: 1, tab: "relays" }}
                     >
                       {t("ABtsLBp")}

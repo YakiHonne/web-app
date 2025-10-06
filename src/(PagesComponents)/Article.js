@@ -44,11 +44,9 @@ export default function Article({ event, userProfile }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
-  // const isDarkMode = useSelector((state) => state.isDarkMode);
-  const { theme } = useTheme()
+  const { theme } = useTheme();
   const isDarkMode = ["dark", "gray", "system"].includes(theme);
-  const post = event
-  const [readMore, setReadMore] = useState([]);
+  const post = event;
   const [usersList, setUsersList] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showCommentsSection, setShowCommentsSections] = useState(false);
@@ -58,13 +56,12 @@ export default function Article({ event, userProfile }) {
   const [translatedContent, setTranslatedContent] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
   const [isContentTranslating, setIsContentTranslating] = useState(false);
-  const { postActions } = useRepEventStats(post.aTag, post.pubkey);
   const containerRef = useRef(null);
   const { muteUnmute, isMuted } = useIsMute(post.pubkey);
-
   useEffect(() => {
     const handleScroll = () => {
       if (containerRef.current) {
+        console.log("33")
         setShowPreview(containerRef.current.scrollTop >= 200);
       }
     };
@@ -72,9 +69,8 @@ export default function Article({ event, userProfile }) {
     const observer = new MutationObserver((mutations) => {
       for (let mutation of mutations) {
         if (mutation.type === "childList") {
-          const container = document.querySelector(
-            ".page-container"
-          );
+          const container = document.querySelector(".page-container");
+          console.log(container)
           if (container) {
             containerRef.current = container;
             container.addEventListener("scroll", handleScroll);
@@ -92,38 +88,6 @@ export default function Article({ event, userProfile }) {
       }
       observer.disconnect();
     };
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let tempArray = shuffleArray(TopicsTags);
-        let tempArray_2 = tempArray.splice(0, 5);
-        let tags = shuffleArray(
-          tempArray_2.map((item) => [item.main_tag, ...item.sub_tags]).flat()
-        );
-        let recommendedPosts = await getSubData(
-          [
-            {
-              kinds: [30023],
-              "#t": tags,
-              limit: 5,
-            },
-          ],
-          50,
-          undefined,
-          undefined,
-          5
-        );
-        if (recommendedPosts.data.length > 0) {
-          setReadMore(recommendedPosts.data.map((_) => getParsedRepEvent(_)));
-          saveUsers(recommendedPosts.pubkeys);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchData();
   }, []);
 
   const translateArticle = async () => {
@@ -297,23 +261,26 @@ export default function Article({ event, userProfile }) {
                           </div>
                         )}
                         {userKeys.pub === post.pubkey && (
-                          <Link href={"/write-article?edit=" + post.naddr} onClick={() => {
-                            localStorage.setItem(
-                              post.naddr,
-                              JSON.stringify({
-                                post_pubkey: post.pubkey,
-                                post_id: post.id,
-                                post_kind: post.kind,
-                                post_title: post.title,
-                                post_desc: post.description,
-                                post_thumbnail: post.image,
-                                post_tags: post.items,
-                                post_d: post.d,
-                                post_content: post.content,
-                                post_published_at: post.published_at,
-                              })
-                            );
-                          }}>
+                          <Link
+                            href={"/write-article?edit=" + post.naddr}
+                            onClick={() => {
+                              localStorage.setItem(
+                                post.naddr,
+                                JSON.stringify({
+                                  post_pubkey: post.pubkey,
+                                  post_id: post.id,
+                                  post_kind: post.kind,
+                                  post_title: post.title,
+                                  post_desc: post.description,
+                                  post_thumbnail: post.image,
+                                  post_tags: post.items,
+                                  post_d: post.d,
+                                  post_content: post.content,
+                                  post_published_at: post.published_at,
+                                })
+                              );
+                            }}
+                          >
                             <button className="btn btn-gray">
                               {t("Aig65l1")}
                             </button>
@@ -411,8 +378,7 @@ export default function Article({ event, userProfile }) {
                     >
                       <MarkdownPreview
                         wrapperElement={{
-                          "data-color-mode":
-                            isDarkMode ? "dark" : "light",
+                          "data-color-mode": isDarkMode ? "dark" : "light",
                         }}
                         source={
                           showTranslation ? translatedContent : post.content
@@ -428,7 +394,7 @@ export default function Article({ event, userProfile }) {
                         }}
                         components={{
                           p: ({ children }) => {
-                            return <p>{getComponent(children)}</p>;
+                            return <>{getComponent(children)}</>;
                           },
                           h1: ({ children }) => {
                             return <h1>{children}</h1>;
@@ -510,7 +476,7 @@ export default function Article({ event, userProfile }) {
                         }}
                       />
                     </div>
-                    {readMore.length > 0 && (
+                    {/* {readMore.length > 0 && (
                       <div className="fx-centered fx-start-h fx-wrap fit-container box-marg-s box-pad-v">
                         <hr />
                         <p className="p-big">{t("AArGqN7")}</p>
@@ -549,7 +515,8 @@ export default function Article({ event, userProfile }) {
                             );
                         })}
                       </div>
-                    )}
+                    )} */}
+                    <ReadMore />
                   </div>
                 )}
               </div>
@@ -609,40 +576,12 @@ export default function Article({ event, userProfile }) {
                   </button>
                 )}
               </div>
-              {postActions?.zaps?.zaps?.length > 0 && (
-                <div className="main-middle box-pad-h-m">
-                  <ZapAd
-                    zappers={postActions.zaps.zaps}
-                    onClick={() =>
-                      setUsersList({
-                        title: t("AVDZ5cJ"),
-                        list: postActions.zaps.zaps.map((item) => item.pubkey),
-                        extras: postActions.zaps.zaps,
-                      })
-                    }
-                    margin={false}
-                  />
-                </div>
-              )}
-              <div className="main-middle fx-scattered box-pad-h-m box-marg-s">
-                <PostReaction
-                  event={post}
-                  userProfile={userProfile}
-                  postActions={postActions}
-                  openComment={showCommentsSection.comment}
-                  setShowComments={() =>
-                    setShowCommentsSections({ comment: false })
-                  }
-                  setOpenComment={() =>
-                    setShowCommentsSections({ comment: true })
-                  }
-                />
-                <EventOptions
-                  event={post}
-                  eventActions={postActions}
-                  component="repEvents"
-                />
-              </div>
+              <PostStats
+                post={post}
+                userProfile={userProfile}
+                showCommentsSection={showCommentsSection}
+                setShowCommentsSections={setShowCommentsSections}
+              />
             </div>
           )}
         </>
@@ -727,5 +666,126 @@ const AuthPreview = ({ pubkey }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+const ReadMore = () => {
+  const { t } = useTranslation();
+  const [readMore, setReadMore] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        let tempArray = shuffleArray(TopicsTags);
+        let tempArray_2 = tempArray.splice(0, 5);
+        let tags = shuffleArray(
+          tempArray_2.map((item) => [item.main_tag, ...item.sub_tags]).flat()
+        );
+        let recommendedPosts = await getSubData(
+          [
+            {
+              kinds: [30023],
+              "#t": tags,
+              limit: 5,
+            },
+          ],
+          50,
+          undefined,
+          undefined,
+          5
+        );
+        if (recommendedPosts.data.length > 0) {
+          setReadMore(recommendedPosts.data.map((_) => getParsedRepEvent(_)));
+          saveUsers(recommendedPosts.pubkeys);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  return (
+    <>
+      {readMore.length > 0 && (
+        <div className="fx-centered fx-start-h fx-wrap fit-container box-marg-s box-pad-v">
+          <hr />
+          <p className="p-big">{t("AArGqN7")}</p>
+          {readMore.map((post) => {
+            if (post.image)
+              return (
+                <Link
+                  className="fit-container fx-scattered"
+                  key={post.id}
+                  style={{
+                    textDecoration: "none",
+                    color: "var(--black)",
+                  }}
+                  href={`/article/${post.naddr}`}
+                  target="_blank"
+                >
+                  <div className="fx-centered">
+                    {post.image && (
+                      <div
+                        className=" bg-img cover-bg sc-s-18 "
+                        style={{
+                          backgroundImage: `url(${post.image})`,
+                          minWidth: "48px",
+                          aspectRatio: "1/1",
+                          borderRadius: "var(--border-r-18)",
+                          border: "none",
+                        }}
+                      ></div>
+                    )}
+                    <div>
+                      <p className="p-one-line">{post.title}</p>
+                      <DynamicIndicator item={post} />
+                    </div>
+                  </div>
+                </Link>
+              );
+          })}
+        </div>
+      )}
+    </>
+  );
+};
+
+const PostStats = ({
+  post,
+  userProfile,
+  showCommentsSection,
+  setShowCommentsSections,
+}) => {
+  const { postActions } = useRepEventStats(post.aTag, post.pubkey);
+
+  return (
+    <>
+      {postActions?.zaps?.zaps?.length > 0 && (
+        <div className="main-middle box-pad-h-m">
+          <ZapAd
+            zappers={postActions.zaps.zaps}
+            onClick={() =>
+              setUsersList({
+                title: t("AVDZ5cJ"),
+                list: postActions.zaps.zaps.map((item) => item.pubkey),
+                extras: postActions.zaps.zaps,
+              })
+            }
+            margin={false}
+          />
+        </div>
+      )}
+      <div className="main-middle fx-scattered box-pad-h-m box-marg-s">
+        <PostReaction
+          event={post}
+          userProfile={userProfile}
+          postActions={postActions}
+          openComment={showCommentsSection.comment}
+          setShowComments={() => setShowCommentsSections({ comment: false })}
+          setOpenComment={() => setShowCommentsSections({ comment: true })}
+        />
+        <EventOptions event={post} component="repEvents" />
+      </div>
+    </>
   );
 };

@@ -10,7 +10,13 @@ import {
   getHex,
   hexToUint8Array,
 } from "@/Helpers/Encryptions";
-import { generateSecretKey, getPublicKey, nip04, nip19, nip44 } from "nostr-tools";
+import {
+  generateSecretKey,
+  getPublicKey,
+  nip04,
+  nip19,
+  nip44,
+} from "nostr-tools";
 import * as secp from "@noble/secp256k1";
 import { copyText, FileUpload } from "@/Helpers/Helpers";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
@@ -470,9 +476,13 @@ const LoginScreen = ({ switchScreen, userKeys }) => {
         </div>
         <div className="fit-container  box-pad-v-m fx-scattered">
           <div className="fx-centered pointer">
-            <div className="round-icon-small">
-              <div className="arrow arrow-back"></div>{" "}
-            </div>
+            {isNewAccount ? (
+              <div className="round-icon-small">
+                <div className="arrow arrow-back"></div>
+              </div>
+            ) : (
+              <div className="user-24"></div>
+            )}{" "}
             <p className="gray-c" onClick={() => Router.back()}>
               {isNewAccount ? t("AB4BSCe") : t("AVCdQku")}
             </p>
@@ -678,7 +688,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         };
         updateWallets([nwcNode], userKeys.pub);
       }
-      
+
       Router.back();
     } catch (err) {
       console.log(err);
@@ -773,16 +783,16 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         "wss://nostr-02.yakihonne.com",
         "wss://relay.damus.io",
         "wss://relay.nostr.band",
-      ]
+      ];
       let relaysTags = defaultRelays.map((relay) => ["r", relay]);
 
       let event = {
         kind: 10002,
         content: "",
         tags: relaysTags,
-      }
+      };
 
-      const ndkRelaysEvent = new NDKEvent(ndkInstance, {...event});
+      const ndkRelaysEvent = new NDKEvent(ndkInstance, { ...event });
       let published = await ndkRelaysEvent.publish(undefined, 2000);
 
       return;
@@ -1322,7 +1332,7 @@ const ProfilePreview = ({ pubkeys }) => {
     <div style={{ position: "relative", minWidth: "32px", minHeight: "32px" }}>
       <div style={{ position: "absolute", left: 0, bottom: "0" }}>
         <UserProfilePic
-          user_id={(pubkeys[0])}
+          user_id={pubkeys[0]}
           mainAccountUser={false}
           img={images[0] || ""}
           size={10}

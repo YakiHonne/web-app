@@ -406,7 +406,7 @@ export default function UserFeed({ user }) {
                 <h4>{t("Aezm5AZ")}</h4>
                 <p className="gray-c">{t("A1MlrcU", { name: user?.name })}</p>
                 <div
-                  className="play-24"
+                  className="smart-widget-24"
                   style={{ width: "48px", height: "48px" }}
                 ></div>
               </div>

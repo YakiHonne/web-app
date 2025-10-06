@@ -26,7 +26,6 @@ import RelayImage from "../RelayImage";
 
 export default function EventOptions({
   event,
-  eventActions,
   component,
   border,
   refreshAfterDeletion,
@@ -325,13 +324,6 @@ export default function EventOptions({
         title={event.title || userProfile.display_name || userProfile.name}
         description={event.description || event.about || event.content || ""}
         path={path}
-        kind={event.kind}
-        shareImgData={{
-          post: event,
-          author: userProfile,
-          likes: eventActions ? eventActions.likes.likes.length : null,
-          label: t("Az5ftet"),
-        }}
       />
     </div>
   );

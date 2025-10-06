@@ -416,7 +416,6 @@ export default function Curation({ event, userProfile }) {
               />
               <EventOptions
                 event={curation}
-                eventActions={postActions}
                 component="repEventsCard"
               />
             </div>

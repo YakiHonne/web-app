@@ -50,7 +50,6 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
   //   };
   //   if (event.kind !== 1) fetchData();
   // }, [nostrAuthors]);
-
   const onClick = (e) => {
     e.stopPropagation();
     if (allowClick) {
