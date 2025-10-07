@@ -30,7 +30,7 @@ export default function AddToFavList({ url }) {
     e?.stopPropagation();
     if (isLoading) return;
     setIsLoading(true);
-    let aTags = userFavRelays.tags;
+    let aTags = userFavRelays?.tags || [];
     let tags = isAdded
       ? aTags.filter((_) => (_[1].endsWith("/") ? _[1] : _[1] + "/") !== relay)
       : [...aTags, ["relay", relay]];

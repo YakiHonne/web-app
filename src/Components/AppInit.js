@@ -76,9 +76,7 @@ import {
   getEmptyuserMetadata,
   getParsedAuthor,
   getParsedRepEvent,
-  getWOTScoreForPubkey,
   getWOTScoreForPubkeyLegacy,
-  precomputeTrustingCounts,
   unwrapGiftWrap,
 } from "@/Helpers/Encryptions";
 import axiosInstance from "@/Helpers/HTTP_Client";
@@ -834,8 +832,8 @@ export default function AppInit() {
       followinglist = followinglist.slice(0, 200);
       let batches = [];
 
-      for (let i = 0; i < followinglist.length; i += 10) {
-        batches.push({ bundled: followinglist.slice(i, i + 10) });
+      for (let i = 0; i < followinglist.length; i += 50) {
+        batches.push({ bundled: followinglist.slice(i, i + 50) });
       }
 
       let networkData = [];
@@ -903,8 +901,8 @@ export default function AppInit() {
     }
     if (followings && followings?.followings?.length >= 5) {
       buildWOTList();
-    } else if (followings) {
-      // } else if (followings && followings?.followings?.length < 5) {
+    // } else if (followings) {
+      } else if (followings && followings?.followings?.length < 5) {
       buildBackupWOTList();
     }
   }, [followings]);

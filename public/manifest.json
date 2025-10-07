@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "YakiHonne",
+  "short_name": "YakiHonne",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

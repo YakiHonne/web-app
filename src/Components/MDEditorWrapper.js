@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { getComponent } from "@/Helpers/ClientHelpers";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
   ssr: false,
@@ -378,7 +379,7 @@ const MDEditorWrapper = ({
       previewOptions={{
         components: {
           p: ({ children }) => {
-            return <p>{children}</p>;
+            return <p>{getComponent(children)}</p>;
           },
           h1: ({ children }) => {
             return <h1 dir="auto">{children}</h1>;

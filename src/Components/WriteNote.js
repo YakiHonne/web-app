@@ -484,7 +484,7 @@ export default function WriteNote({
         className="fit-container fx-centered fx-start-v fx-stretch sc-s box-pad-h box-pad-v bg-sp"
         style={{
           overflow: "visible",
-          height: linkedEvent ? "50vh" : "40vh",
+          height: linkedEvent ? "65vh" : "55vh",
           backgroundColor: !border ? "transparent" : "",
           border: border ? "1px solid var(--very-dim-gray)" : "none",
           borderBottom: borderBottom
