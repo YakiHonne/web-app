@@ -235,8 +235,15 @@ export default function KindOne({
         id={event.id}
         style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
       >
-        <p className="box-pad-h p-centered gray-c" style={{maxWidth: "400px"}}>{t("Ao4Segq")}</p>
-        <button className="btn btn-gray btn-small" onClick={() => muteUnmute()}>{t("AKELUbQ")}</button>
+        <p
+          className="box-pad-h p-centered gray-c"
+          style={{ maxWidth: "400px" }}
+        >
+          {t("Ao4Segq")}
+        </p>
+        <button className="btn btn-gray btn-small" onClick={() => muteUnmute()}>
+          {t("AKELUbQ")}
+        </button>
       </div>
     );
   }
@@ -306,13 +313,15 @@ export default function KindOne({
                 <div className="fx-scattered fit-container">
                   <div className="fx-centered" style={{ gap: "3px" }}>
                     <div className="fx-centered" style={{ gap: "3px" }}>
-                      <p className="p-bold p-one-line" style={{margin: 0}}>
+                      <p className="p-bold p-one-line" style={{ margin: 0 }}>
                         {userProfile.display_name || userProfile.name}
                       </p>
                       {isNip05Verified && <div className="checkmark-c1"></div>}
                     </div>
-                    <p className="gray-c p-medium" style={{margin: 0}}>&#8226;</p>
-                    <p className="gray-c p-medium" style={{margin: 0}}>
+                    <p className="gray-c p-medium" style={{ margin: 0 }}>
+                      &#8226;
+                    </p>
+                    <p className="gray-c p-medium" style={{ margin: 0 }}>
                       <Date_
                         toConvert={new Date(event.created_at * 1000)}
                         time={true}
@@ -575,10 +584,7 @@ const RelatedEvent = ({ event, reactions = true }) => {
         )}
       </div>
       {relatedEvent && showNote && (
-        <div
-          style={{ borderLeft: "1px solid var(--c1)" }}
-          className="slide-down"
-        >
+        <div style={{ borderLeft: "1px solid var(--c1)" }}>
           {relatedEvent.kind === 1 && (
             <KindOne event={relatedEvent} reactions={reactions} />
           )}

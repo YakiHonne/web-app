@@ -207,7 +207,12 @@ export default function SidebarComp() {
           <div className="fx-start-h fx-centered fx-col fit-container">
             <div className="fx-centered fx-start-h fit-container box-pad-v-s">
               <div
-                className="yakihonne-logo-128"
+                className="yakihonne-logo-128 mb-hide"
+                onClick={() => customHistory("/", true)}
+              ></div>
+              <div
+                className="yaki-logomark mb-show"
+                style={{minHeight: "70px", minWidth: "70px"}}
                 onClick={() => customHistory("/", true)}
               ></div>
             </div>
@@ -384,6 +389,9 @@ export default function SidebarComp() {
                     setShowSettings(!showSettings);
                   }}
                 >
+                    <div className="mb-show round-icon">
+                      <div className="setting-24"></div>
+                    </div>
                   <div
                     className="fx-centered fx-start-h pointer"
                     style={{ columnGap: "16px" }}
@@ -423,6 +431,7 @@ export default function SidebarComp() {
                       </p>
                     </div>
                   </div>
+                  
                   {isYakiChestLoaded && !yakiChestStats && (
                     <div
                       className="round-icon round-icon-tooltip orange-pulse"
@@ -493,6 +502,7 @@ export default function SidebarComp() {
                       />
                     </div>
                   )}
+                  
                   {!isYakiChestLoaded && <LoadingDots />}
                 </div>
                 {showSettings && (

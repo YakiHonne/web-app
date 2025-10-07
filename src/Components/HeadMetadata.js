@@ -5,6 +5,7 @@ export default function HeadMetadata({data}) {
   return (
     <Head>
       <title>Yakihonne | {data.title}</title>
+      <link rel="manifest" href="/manifest.json" />
       <meta name="description" content={data.description} />
       <meta property="og:description" content={data.description} />
       <meta

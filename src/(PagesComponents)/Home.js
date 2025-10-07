@@ -3,7 +3,7 @@ import React, {
   useState,
   useReducer,
   Fragment,
-  useRef,
+  useMemo,
 } from "react";
 import { useSelector } from "react-redux";
 import { filterContent, getBackupWOTList } from "@/Helpers/Encryptions";
@@ -12,15 +12,11 @@ import ArrowUp from "@/Components/ArrowUp";
 import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
 import { getFollowings, saveUsers } from "@/Helpers/DB";
-import {
-  getDefaultFilter,
-  getDVMJobRequest,
-  getDVMJobResponse,
-  getSubData,
-} from "@/Helpers/Controlers";
+import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import HomeCarouselContentSuggestions from "@/Components/HomeCarouselContentSuggestions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
+import { straightUp } from "@/Helpers/Helpers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import KindOne from "@/Components/KindOne";
 import PostAsNote from "@/Components/PostAsNote";
@@ -30,8 +26,8 @@ import { getKeys } from "@/Helpers/ClientHelpers";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import SuggestionsCards from "@/Components/SuggestionsCards/SuggestionsCards";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
-import { setHomeSavedNotes } from "@/Store/Slides/Extras";
-import { useDispatch } from "react-redux";
+import RecentPosts from "@/Components/RecentPosts";
+import { getNDKInstance } from "@/Helpers/utils";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -44,17 +40,15 @@ const getContentFromValue = (contentSource) => {
 const notesReducer = (notes, action) => {
   switch (action.type) {
     case "empty-recent": {
-      let nextState = { ...notes };
-      nextState["recent"] = [];
-      return nextState;
+      return [];
     }
     case "remove-events": {
-      return notesInitialState;
+      return [];
     }
     default: {
-      let nextState = [...notes];
-      let tempArr = [...nextState, ...action.note];
+      let tempArr = [...notes, ...action.note];
       let sortedNotes = tempArr
+        .sort((note_1, note_2) => note_2.created_at - note_1.created_at)
         .filter((note, index, tempArr) => {
           if (
             tempArr.findIndex(
@@ -69,38 +63,12 @@ const notesReducer = (notes, action) => {
             ) === index
           )
             return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
+        });
+
       return sortedNotes;
     }
   }
 };
-
-const processSavedNotes = (notes, toParse) => {
-  return notes;
-  // if (toParse)
-  //   return notes.map((_) => {
-  //     return {
-  //       ..._,
-  //       note_tree: _.kind === 1 ? getNoteTree(_.content) : [],
-  //       relatedEvent:
-  //         _.kind === 6
-  //           ? {
-  //               ..._.relatedEvent,
-  //               note_tree: getNoteTree(_.relatedEvent.content),
-  //             }
-  //           : {},
-  //     };
-  //   });
-  // return notes.map((_) => {
-  //   return {
-  //     ..._,
-  //     note_tree: [],
-  //     relatedEvent: _.kind === 6 ? { ..._.relatedEvent, note_tree: [] } : {},
-  //   };
-  // });
-};
-let notesInitialState = [];
 
 export default function Home() {
   const [selectedFilter, setSelectedFilter] = useState(getDefaultFilter(2));
@@ -130,7 +98,7 @@ export default function Home() {
               <div style={{ height: "75px" }} className="fit-container"></div>
               <HomeCarouselContentSuggestions />
               <div className="main-middle">
-                <PostNote />
+                <PostNote selectedCategory={selectedCategory} />
                 {selectedCategory !== SUGGESTED_TAGS_VALUE && (
                   <HomeFeed
                     selectedCategory={selectedCategory}
@@ -154,10 +122,13 @@ export default function Home() {
   );
 }
 
-const PostNote = () => {
+const PostNote = ({ selectedCategory }) => {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const [showWriteNote, setShowWriteNote] = useState(false);
+  let protectedRelay =
+    selectedCategory.group === "af" ? selectedCategory.value : false;
+
   return (
     <>
       {userKeys && !showWriteNote && (
@@ -176,7 +147,11 @@ const PostNote = () => {
       )}
 
       {userKeys && showWriteNote && (
-        <PostAsNote content={""} exit={() => setShowWriteNote(false)} />
+        <PostAsNote
+          content={""}
+          exit={() => setShowWriteNote(false)}
+          protectedRelay={protectedRelay}
+        />
       )}
     </>
   );
@@ -184,89 +159,51 @@ const PostNote = () => {
 
 const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
   const userMutedList = useSelector((state) => state.userMutedList);
-  const homeSavedNotes = useSelector((state) => state.homeSavedNotes);
+  const isUserFollowingsLoaded = useSelector(
+    (state) => state.isUserFollowingsLoaded
+  );
+  const userFollowings = useSelector((state) => state.userFollowings);
   const userKeys = useSelector((state) => state.userKeys);
-  const [userFollowings, setUserFollowings] = useState(false);
+  // const [userFollowings, setUserFollowings] = useState(false);
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
-  const [isLoading, setIsLoading] = useState(!(notes.length > 0));
+  const [isLoading, setIsLoading] = useState(true);
+  const [isConnected, setIsConnected] = useState(true);
   const [notesContentFrom, setNotesContentFrom] = useState(
     getContentFromValue(selectedCategory)
   );
   const [selectedCategoryValue, setSelectedCategoryValue] = useState(
     selectedCategory.value
   );
-  const [notesLastEventTime, setNotesLastEventTime] = useState(
-    notes.length > 0 ? notes[notes.length - 1].created_at : undefined
-  );
+  const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
   const [rerenderTimestamp, setRerenderTimestamp] = useState(undefined);
+  const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
+  const since = useMemo(
+    () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
+    [notes]
+  );
   useEffect(() => {
     let contentFromValue = getContentFromValue(selectedCategory);
     if (selectedCategoryValue !== selectedCategory.value) {
-      // straightUp();
-      // dispatchNotes({ type: "remove-events" });
+      straightUp();
+      dispatchNotes({ type: "remove-events" });
       setNotesContentFrom(contentFromValue);
       setSelectedCategoryValue(selectedCategory.value);
       setNotesLastEventTime(undefined);
     }
   }, [selectedCategory]);
   useEffect(() => {
-    // straightUp();
-    // dispatchNotes({ type: "remove-events" });
+    straightUp();
+    dispatchNotes({ type: "remove-events" });
     setNotesLastEventTime(undefined);
   }, [selectedFilter]);
 
   useEffect(() => {
-    // straightUp(homeSavedNotes.scrollTo || 0);
-    // dispatchNotes({ type: "remove-events" });
+    straightUp();
+    dispatchNotes({ type: "remove-events" });
     setNotesLastEventTime(undefined);
-    setUserFollowings(false);
     if (notesLastEventTime === undefined) setRerenderTimestamp(Date.now());
   }, [userKeys]);
-
-  useEffect(() => {
-    if (homeSavedNotes.scrollTo > 0) {
-      const tryRestore = () => {
-        const el = document.querySelector(".page-container");
-        if (el && el.scrollHeight >= homeSavedNotes.scrollTo) {
-          el.scrollTo({ top: homeSavedNotes.scrollTo, behavior: "instant" });
-          return;
-        }
-        requestAnimationFrame(tryRestore);
-      };
-      tryRestore();
-    }
-  }, []);
-
-  const latestNotesRef = useRef(notes);
-  const latestScrollRef = useRef(0);
-
-  useEffect(() => {
-    latestNotesRef.current = notes;
-  }, [notes]);
-
-  useEffect(() => {
-    const el = document.querySelector(".page-container");
-    if (!el) return;
-
-    const handleScroll = () => {
-      latestScrollRef.current = el.scrollTop;
-    };
-
-    el.addEventListener("scroll", handleScroll);
-    return () => {
-      el.removeEventListener("scroll", handleScroll);
-
-      // Save the *latest* value we tracked, not whatever reset value we see at unmount
-      dispatch(
-        setHomeSavedNotes({
-          scrollTo: latestScrollRef.current,
-          notes: [],
-        })
-      );
-    };
-  }, []);
 
   const getNotesFilter = async () => {
     let filter;
@@ -282,7 +219,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     );
     twoDaysPrior = notesLastEventTime
       ? notesLastEventTime - towDaysPeriod
-      : twoDaysPrior;
+      : notesLastEventTime;
     let since =
       selectedFilter.from ||
       (["paid", "widgets"].includes(notesContentFrom)
@@ -296,15 +233,12 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       if (tempUserFollowings.length === 0) {
         let userKeys = getKeys();
         if (userKeys) {
-          let followings = await getFollowings(userKeys.pub);
           tempUserFollowings =
-            followings?.followings?.length > 0
-              ? [userKeys.pub, ...Array.from(followings.followings)]
+            userFollowings?.length > 0
+              ? [userKeys.pub, ...Array.from(userFollowings)]
               : [userKeys.pub, process.env.NEXT_PUBLIC_YAKI_PUBKEY];
-          setUserFollowings(tempUserFollowings);
         } else {
           tempUserFollowings = [process.env.NEXT_PUBLIC_YAKI_PUBKEY];
-          setUserFollowings(tempUserFollowings);
         }
       }
 
@@ -372,26 +306,27 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     };
   };
 
-  // useEffect(() => {
-  //   if (notesInitialState) {
-  //     let el = document.querySelector(".main-page-nostr-container");
-  //     if (!el) return;
-  //     el.scrollTop = 2000;
-  //   }
-  // }, [notesInitialState]);
-
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
+      setIsConnected(true);
       let eventsPubkeys = [];
       let events = [];
       let fallBackEvents = [];
       let { filter } = await getNotesFilter();
-
+      let ndk =
+        selectedCategory.group === "af"
+          ? await getNDKInstance(selectedCategory.value)
+          : undefined;
+      if (ndk === false) {
+        setIsConnected(false);
+        setIsLoading(false);
+        return;
+      }
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
-
-      const data = await getSubData(filter, 50, algoRelay, undefined, 200);
+      setSubfilter({ filter, relays: algoRelay, ndk });
+      const data = await getSubData(filter, 50, algoRelay, ndk, 200);
       events = data.data
         .splice(0, 50)
         .map((event) => {
@@ -415,6 +350,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           }
         })
         .filter((_) => _);
+
       let tempEvents =
         events.length > 0 ? Array.from(events) : Array.from(fallBackEvents);
       tempEvents = filterContent(selectedFilter, tempEvents);
@@ -422,68 +358,42 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       saveUsers(eventsPubkeys);
       if (tempEvents.length === 0) setIsLoading(false);
     };
-    const contentFromDVM = async () => {
-      try {
-        setIsLoading(true);
-        let eventId = await getDVMJobRequest(selectedCategory.value);
-        if (!eventId) {
-          setIsLoading(false);
-          return;
-        }
-        let data = await getDVMJobResponse(eventId, selectedCategory.value);
-        if (data.length > 0) {
-          let events = [];
-          let eventsPubkeys = [];
 
-          const res = await getSubData([{ ids: data }], 50);
-
-          events = res.data
-            .map((event) => {
-              eventsPubkeys.push(event.pubkey);
-              let event_ = getParsedNote(event, true);
-              if (event_) {
-                if (notesContentFrom !== "recent_with_replies") {
-                  if (!event_.isComment) {
-                    if (event.kind === 6) {
-                      eventsPubkeys.push(event_.relatedEvent.pubkey);
-                    }
-                    return event_;
-                  }
-                } else {
-                  if (event.kind === 6) {
-                    eventsPubkeys.push(event_.relatedEvent.pubkey);
-                  }
-                  return event_;
-                }
-              }
-            })
-            .filter((_) => _);
-
-          dispatchNotes({ type: notesContentFrom, note: events });
-          saveUsers(eventsPubkeys);
-          setIsLoading(false);
-        }
-      } catch (err) {
-        console.log(err);
-        setIsLoading(false);
-      }
-    };
-    if (notesContentFrom && ["cf", "af"].includes(selectedCategory?.group))
-      contentFromRelays();
-    if (notesContentFrom && ["mf"].includes(selectedCategory?.group))
-      contentFromDVM();
+    if (notesContentFrom && ["cf", "af"].includes(selectedCategory?.group)) {
+      if (
+        (["recent", "recent_with_replies"].includes(notesContentFrom) &&
+          isUserFollowingsLoaded) ||
+        !["recent", "recent_with_replies"].includes(notesContentFrom)
+      )
+        contentFromRelays();
+    }
   }, [
     notesLastEventTime,
     selectedCategoryValue,
     rerenderTimestamp,
     selectedFilter,
+    isUserFollowingsLoaded,
   ]);
 
+  const handleRecentPostsClick = (notes) => {
+    dispatchNotes({ type: notesContentFrom, note: notes });
+    straightUp(undefined, "smooth");
+  };
   return (
     <InfiniteScroll onRefresh={setNotesLastEventTime} events={notes}>
+      {!["mf"].includes(selectedCategory?.group) && (
+        <RecentPosts
+          filter={subFilter}
+          contentFrom={notesContentFrom}
+          selectedFilter={selectedFilter}
+          since={since}
+          onClick={handleRecentPostsClick}
+        />
+      )}
       {["recent", "recent_with_replies"].includes(notesContentFrom) &&
         userFollowings &&
         userFollowings?.length < 5 &&
+        isUserFollowingsLoaded &&
         notes?.length > 0 && (
           <div className="fit-container box-pad-h">
             <hr />
@@ -500,33 +410,54 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
             <hr />
           </div>
         )}
-      {!selectedFilter.default && notes?.length === 0 && !isLoading && (
+      {!selectedFilter.default &&
+        notes?.length === 0 &&
+        !isLoading &&
+        isConnected && (
+          <div
+            className="fit-container fx-centered fx-col"
+            style={{ height: "40vh" }}
+          >
+            <div
+              className="yaki-logomark"
+              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+            ></div>
+            <h4>{t("A5BPCrj")}</h4>
+            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+              {t("AgEkYer")}
+            </p>
+          </div>
+        )}
+      {selectedFilter.default &&
+        notes?.length === 0 &&
+        !isLoading &&
+        isConnected && (
+          <div
+            className="fit-container fx-centered fx-col"
+            style={{ height: "40vh" }}
+          >
+            <div
+              className="yaki-logomark"
+              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+            ></div>
+            <h4>{t("A5BPCrj")}</h4>
+            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+              {t("ASpI7pT")}
+            </p>
+          </div>
+        )}
+      {notes?.length === 0 && !isLoading && !isConnected && (
         <div
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
           <div
-            className="yaki-logomark"
+            className="link"
             style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
           ></div>
-          <h4>{t("A5BPCrj")}</h4>
+          <h4>{t("AZ826Ej")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-            {t("AgEkYer")}
-          </p>
-        </div>
-      )}
-      {selectedFilter.default && notes?.length === 0 && !isLoading && (
-        <div
-          className="fit-container fx-centered fx-col"
-          style={{ height: "40vh" }}
-        >
-          <div
-            className="yaki-logomark"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
-          <h4>{t("A5BPCrj")}</h4>
-          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-            {t("ASpI7pT")}
+            {t("A5ebGh9")}
           </p>
         </div>
       )}

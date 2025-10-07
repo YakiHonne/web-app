@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic'
 import React from 'react'
 import HeadMetadata from '@/Components/HeadMetadata';
 
-const ClientComponent = dynamic(() => import("@/(PagesComponents)/HomeB"), {
+const ClientComponent = dynamic(() => import("@/(PagesComponents)/Home"), {
   ssr: false,
 });
 

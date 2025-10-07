@@ -158,7 +158,6 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
 
     if (aTag && supported) fetchData();
   }, []);
-  console.log("post");
   return { postActions, isLoading };
 };
 
