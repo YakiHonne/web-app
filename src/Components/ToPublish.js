@@ -66,7 +66,7 @@ export default function ToPublish({
     setThumbnail("");
     setThumbnailPrev("");
     setThumbnailUrl("");
-  };
+  }; 679
 
   const Submit = async (kind = 30023) => {
     try {
@@ -92,7 +92,7 @@ export default function ToPublish({
         ["title", postTitle],
         ["summary", desc],
       ];
-      if (zapSplit) tags = [...tags, ...zapSplit];
+      if (zapSplitEnabled) tags = [...tags, ...zapSplit];
       for (let cat of selectedCategories) {
         tags.push(["t", cat]);
       }
