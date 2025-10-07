@@ -396,7 +396,7 @@ export default function EventOptions({
       case "repEventsCard":
         return [
           postAsNote,
-          copyNaddr,
+          event.kind >= 30000 ? copyNaddr : copyID,
           copyPubkey,
           showRawEventContent,
           broadcastEvent,
