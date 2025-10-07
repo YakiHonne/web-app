@@ -21,6 +21,8 @@ import PostReaction from "@/Components/PostReaction";
 import Backbar from "@/Components/Backbar";
 import { straightUp } from "@/Helpers/Helpers";
 import ShowUsersList from "@/Components/ShowUsersList";
+import { customHistory } from "@/Helpers/History";
+import { nip19 } from "nostr-tools";
 
 export default function Note({ event }) {
   const { state } = {};
@@ -95,6 +97,10 @@ export default function Note({ event }) {
     }
   };
 
+  if (event?.kind !== 1)
+    return customHistory(
+      "/unsupported/" + nip19.neventEncode({ id: event?.id })
+    );
   return (
     <div>
       <ArrowUp />

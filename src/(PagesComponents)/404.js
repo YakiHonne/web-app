@@ -12,6 +12,8 @@ export default function FourOFour() {
       const url = getLinkFromAddr(nevent);
       if (url !== nevent) {
         customHistory(url);
+      } else {
+        customHistory("/unsupported/" + nevent);
       }
     }
   }, [nevent]);
