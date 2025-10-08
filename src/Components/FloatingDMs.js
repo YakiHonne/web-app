@@ -83,9 +83,9 @@ export default function FloatingDMs() {
   useEffect(() => {
     if (selectedConvo) {
       setSelectedConvo(false);
-      setOpen(false)
+      setOpen(false);
     }
-  }, [userKeys])
+  }, [userKeys]);
 
   if (router.pathname.includes("/messages")) return null;
   if (!userKeys.sec && !userKeys?.ext) return null;
@@ -239,92 +239,116 @@ export default function FloatingDMs() {
                 </div>
               </div>
             </div>
+
             <div
               className="fit-container fx-scattered fx-col fx-start-h fx-start-v fit-container box-pad-h-s box-pad-v-s bg-sp"
-              style={{ height: selectedConvo ? "calc(100% - 75px)" : "auto" }}
+              style={{
+                height: selectedConvo ? "calc(100% - 75px)" : "auto",
+                position: "relative",
+              }}
             >
-              {!initDMS && (
-                <>
-                  {!selectedConvo &&
-                    !isConvoLoading &&
-                    sortedInbox.map((convo) => {
-                      return (
-                        <div
-                          className="fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale pointer slide-up"
-                          key={convo.id}
-                          onClick={() =>
-                            handleSelectedConversation({ ...convo })
-                          }
-                        >
-                          <div className="fx-centered">
-                            <div>
-                              <UserProfilePic
-                                img={convo.picture}
-                                size={40}
-                                user_id={convo.pubkey}
-                                mainAccountUser={false}
-                                allowClick={false}
-                              />
-                            </div>
-                            <div>
-                              <p>
-                                {convo.display_name ||
-                                  convo.name ||
-                                  convo.pubkey.substring(0, 10)}
+              {" "}
+              {initDMS && (
+                <div>
+                  <div
+                    className="fit-container sc-s-18"
+                    style={{
+                      width: "100%",
+                      position: "absolute",
+                      left: 0,
+                      top: "0",
+                      overflow: "hidden",
+                      zIndex: 211,
+                      height: "20px",
+                      border: "none",
+                      backgroundColor: "transparent",
+                    }}
+                  >
+                    <div
+                      style={{ height: "3px", backgroundColor: "var(--c1)" }}
+                      className="v-bounce"
+                    ></div>
+                  </div>
+                </div>
+              )}
+              <>
+                {!selectedConvo &&
+                  !isConvoLoading &&
+                  sortedInbox.map((convo) => {
+                    return (
+                      <div
+                        className="fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale pointer slide-up"
+                        key={convo.id}
+                        onClick={() => handleSelectedConversation({ ...convo })}
+                      >
+                        <div className="fx-centered">
+                          <div>
+                            <UserProfilePic
+                              img={convo.picture}
+                              size={40}
+                              user_id={convo.pubkey}
+                              mainAccountUser={false}
+                              allowClick={false}
+                            />
+                          </div>
+                          <div>
+                            <p>
+                              {convo.display_name ||
+                                convo.name ||
+                                convo.pubkey.substring(0, 10)}
+                            </p>
+                            <div className="fx-centered fx-start-h">
+                              {convo.convo[convo.convo.length - 1].peer && (
+                                <p className="p-medium p-one-line">
+                                  {t("ARrkukw")}
+                                </p>
+                              )}
+                              <p
+                                className="gray-c p-medium p-one-line"
+                                style={{ maxWidth: "100px" }}
+                              >
+                                {convo.convo[convo.convo.length - 1].content}
                               </p>
-                              <div className="fx-centered fx-start-h">
-                                {convo.convo[convo.convo.length - 1].peer && (
-                                  <p className="p-medium p-one-line">
-                                    {t("ARrkukw")}
-                                  </p>
-                                )}
-                                <p
-                                  className="gray-c p-medium p-one-line"
-                                  style={{ maxWidth: "100px" }}
-                                >
-                                  {convo.convo[convo.convo.length - 1].content}
-                                </p>
-                                <p className="orange-c p-medium">
-                                  <Date_
-                                    toConvert={
-                                      new Date(convo.last_message * 1000)
-                                    }
-                                  />
-                                </p>
-                              </div>
+                              <p className="orange-c p-medium">
+                                <Date_
+                                  toConvert={
+                                    new Date(convo.last_message * 1000)
+                                  }
+                                />
+                              </p>
                             </div>
                           </div>
-                          {!convo.checked && (
-                            <div
-                              style={{
-                                minWidth: "8px",
-                                aspectRatio: "1/1",
-                                backgroundColor: "var(--red-main)",
-                                borderRadius: "var(--border-r-50)",
-                              }}
-                            ></div>
-                          )}
                         </div>
-                      );
-                    })}
-                  {isConvoLoading && (
-                    <div
-                      className="fit-container fx-centered"
-                      style={{ height: "100%" }}
-                    >
-                      <span className="loader"></span>
-                    </div>
-                  )}
+                        {!convo.checked && (
+                          <div
+                            style={{
+                              minWidth: "8px",
+                              aspectRatio: "1/1",
+                              backgroundColor: "var(--red-main)",
+                              borderRadius: "var(--border-r-50)",
+                            }}
+                          ></div>
+                        )}
+                      </div>
+                    );
+                  })}
+                {isConvoLoading && (
+                  <div
+                    className="fit-container fx-centered"
+                    style={{ height: "100%" }}
+                  >
+                    <span className="loader"></span>
+                  </div>
+                )}
 
-                  {selectedConvo && (
-                    <ConversationBox
-                      convo={selectedConvo}
-                      back={() => setSelectedConvo(false)}
-                      noHeader={true}
-                    />
-                  )}
-                </>
-              )}
+                {selectedConvo && (
+                  <ConversationBox
+                    convo={selectedConvo}
+                    back={() => setSelectedConvo(false)}
+                    noHeader={true}
+                  />
+                )}
+              </>
               {!initDMS && sortedInbox.length === 0 && (
                 <div
                   className="fit-container fx-centered fx-col"
@@ -346,14 +370,14 @@ export default function FloatingDMs() {
                   </button>
                 </div>
               )}
-              {initDMS && (
+              {/* {initDMS && (
                 <div
                   className="fit-container fx-centered"
                   style={{ height: "300px" }}
                 >
                   <LoadingDots />
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         )}

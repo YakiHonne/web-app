@@ -4,10 +4,8 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import InitiConvo from "@/Components/InitConvo";
-import {  useSelector } from "react-redux";
-import {
-  checkAllConvo,
-} from "@/Helpers/DB";
+import { useSelector } from "react-redux";
+import { checkAllConvo } from "@/Helpers/DB";
 import { useTranslation } from "react-i18next";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import Link from "next/link";
@@ -209,12 +207,12 @@ export default function Messages() {
       </div>
     );
 
-  if (initDMS)
-    return (
-      <div>
-        <PagePlaceholder page={"nostr-DMS-waiting"} />
-      </div>
-    );
+  // if (initDMS)
+  //   return (
+  //     <div>
+  //       <PagePlaceholder page={"nostr-DMS-waiting"} />
+  //     </div>
+  //   );
 
   return (
     <div>
@@ -319,7 +317,7 @@ export default function Messages() {
           {!showSearch && (
             <div
               className="fx-centered fit-container box-marg-s slide-up"
-              style={{ columnGap: 0 }}
+              style={{ columnGap: 0, position: "relative" }}
             >
               <div
                 style={{
@@ -365,6 +363,29 @@ export default function Messages() {
                   {t("ANAOuTj", { count: msgsCount.unknown })}
                 </span>
               </div>
+              {initDMS && (
+                <div>
+                  <div
+                    className="fit-container sc-s-18"
+                    style={{
+                      width: "100%",
+                      position: "absolute",
+                      left: 0,
+                      top: "calc(100% - 3px)",
+                      overflow: "hidden",
+                      zIndex: 211,
+                      height: "20px",
+                      border: "none",
+                      backgroundColor: "transparent",
+                    }}
+                  >
+                    <div
+                      style={{ height: "3px", backgroundColor: "var(--c1)" }}
+                      className="v-bounce"
+                    ></div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           {userInboxRelays.length === 0 && (

@@ -311,7 +311,7 @@ export const getRelaysStats = async (relay) => {
 //     }
 //   } else return [];
 // };
-export const saveChatrooms = async (inbox, authors, pubkey) => {
+export const saveChatrooms = async (inbox, pubkey) => {
   if (db) {
     let usersPubkeys = inbox.map((inbox) => inbox.pubkey);
     saveUsers(usersPubkeys);

@@ -15,6 +15,7 @@ import relaysOnPlatform from "@/Content/Relays";
 import { getKeys } from "./ClientHelpers";
 import { ndkInstance } from "./NDKInstance";
 import axiosInstance from "./HTTP_Client";
+import { getNDKInstanceForDMs } from "./utils";
 
 export const sendMessage = async (selectedPerson, message) => {
   let userKeys = getKeys();
@@ -75,6 +76,7 @@ export const sendMessage = async (selectedPerson, message) => {
     if (!(sender_event && receiver_event)) return false;
 
     let response = await initPublishing(
+      `${userKeys.pub}:${selectedPerson}`,
       relaysToPublish,
       sender_event,
       receiver_event
@@ -113,13 +115,13 @@ const getGiftWrap = async (selectedPerson, userKeys, message) => {
     nip44.v2.utils.getConversationKey(g_sk_2, userKeys.pub)
   );
   let event_1 = {
-    created_at: Math.floor(Date.now() / 1000) - 432000,
+    created_at: Math.floor(Date.now() / 1000) - 172800,
     kind: 1059,
     tags: [["p", selectedPerson]],
     content: content_1,
   };
   let event_2 = {
-    created_at: Math.floor(Date.now() / 1000) - 432000,
+    created_at: Math.floor(Date.now() / 1000) - 172800,
     kind: 1059,
     tags: [["p", userKeys.pub]],
     content: content_2,
@@ -170,18 +172,13 @@ const getEventKind13 = async (pubkey, userKeys, selectedPerson, message) => {
   return event;
 };
 
-const initPublishing = async (relays, event1, event2) => {
+const initPublishing = async (name, relays, event1, event2) => {
   try {
-    let ev1 = new NDKEvent(ndkInstance, event1);
-    let ev2 = new NDKEvent(ndkInstance, event2);
-    const ndkRelays = relays.map((_) => {
-      return new NDKRelay(_, undefined, ndkInstance);
-    });
-    const ndkRelaysSet = new NDKRelaySet(ndkRelays, ndkInstance);
-    let [res1, res2] = await Promise.race([
-      ev1.publish(ndkRelaysSet),
-      ev2.publish(ndkRelaysSet),
-    ]);
+    let ndkInstanceForDM = await getNDKInstanceForDMs(name, relays);
+    let ev1 = new NDKEvent(ndkInstanceForDM, event1);
+    let ev2 = new NDKEvent(ndkInstanceForDM, event2);
+
+    let [res1, res2] = await Promise.race([ev1.publish(), ev2.publish()]);
 
     store.dispatch(
       setToast({

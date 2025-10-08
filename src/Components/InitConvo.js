@@ -54,6 +54,9 @@ export default function InitiConvo({ exit, receiver = false }) {
           borderColor: !legacy ? "var(--green-main)" : "",
           transition: ".2s ease-in-out",
         }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
         <div className="close" onClick={exit}>
           <div></div>
