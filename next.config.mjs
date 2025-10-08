@@ -1,12 +1,12 @@
 import withPWAInit from "next-pwa";
-import runtimeCaching from "next-pwa/cache.js";
+// import runtimeCaching from "next-pwa/cache.js";
 
 const withPWA = withPWAInit({
   dest: "public",
   register: true,
   skipWaiting: true,
-  runtimeCaching,
-  buildExcludes: [/middleware-manifest\.json$/],
+  // runtimeCaching,
+  // buildExcludes: [/middleware-manifest\.json$/],
 });
 
 /** @type {import('next').NextConfig} */
