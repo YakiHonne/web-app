@@ -13,6 +13,7 @@ import { getCustomSettings, getWotConfig } from "@/Helpers/ClientHelpers";
 import { getWOTScoreForPubkeyLegacy, removeDuplicants } from "@/Helpers/Encryptions";
 import { setToast } from "@/Store/Slides/Publishers";
 import { localStorage_ } from "@/Helpers/utils";
+import { SidebarNavItem } from "./SidebarNavItem";
 
 export default function NotificationCenter({
   icon = false,
@@ -66,8 +67,8 @@ export default function NotificationCenter({
             let checkForLabel = event.tags.find((tag) => tag[0] === "l");
             let isUncensored = checkForLabel
               ? ["UNCENSORED NOTE RATING", "UNCENSORED NOTE"].includes(
-                  checkForLabel[1]
-                )
+                checkForLabel[1]
+              )
               : false;
             if (!isUncensored && event.pubkey !== userKeys.pub) {
               events.push(event);
@@ -179,36 +180,33 @@ export default function NotificationCenter({
   };
 
   return (
-    <>
-      <div
-        className={
-          icon
-            ? "round-icon"
-            : `pointer fit-container fx-scattered  box-pad-h-s box-pad-v-s  ${
-                isCurrent ? "active-link" : "inactive-link"
-              }`
-        }
-        style={{ position: "relative" }}
-        onClick={handleOnClick}
-      >
-        <div className="fx-centered">
-          {!isCurrent && <div className="ringbell-24"></div>}
-          {isCurrent && <div className="ringbell-bold-24"></div>}
-          {!icon && (
-            <div className={`link-label ${mobile ? "p-big" : ""}`}>
-              {t("ASSFfFZ")}
-            </div>
-          )}
-        </div>
-        {notifications !== 0 && (
-          <div className="sticker sticker-small sticker-red link-label">
-            {notifications > 99 ? `+99` : notifications}
+    <SidebarNavItem
+      className={
+        icon
+          ? "round-icon"
+          : `pointer fit-container fx-scattered  box-pad-h-s box-pad-v-s  ${isCurrent ? "active-link" : "inactive-link"
+          }`
+      }
+      style={{ position: "relative" }}
+      onClick={handleOnClick}
+    >
+      <div className="fx-centered">
+        {!isCurrent && <div className="ringbell-24"></div>}
+        {isCurrent && <div className="ringbell-bold-24"></div>}
+        {!icon && (
+          <div className={`link-label ${mobile ? "p-big" : ""}`}>
+            {t("ASSFfFZ")}
           </div>
         )}
-        {notifications !== 0 && (
-          <div className="notification-dot desk-hide-1200"></div>
-        )}
       </div>
-    </>
+      {notifications !== 0 && (
+        <div className="sticker sticker-small sticker-red link-label">
+          {notifications > 99 ? `+99` : notifications}
+        </div>
+      )}
+      {notifications !== 0 && (
+        <div className="notification-dot desk-hide-1200"></div>
+      )}
+    </SidebarNavItem>
   );
 }
