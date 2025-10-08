@@ -443,27 +443,27 @@ export default function AppInit() {
       let eose = false;
       subscription = ndkInstance.subscribe(
         [
-          {
-            kinds: [4],
-            authors: [userKeys.pub],
-            since: lastMessageTimestamp
-              ? lastMessageTimestamp + 1
-              : lastMessageTimestamp,
-          },
-          {
-            kinds: [4],
-            "#p": [userKeys.pub],
-            since: lastMessageTimestamp
-              ? lastMessageTimestamp + 1
-              : lastMessageTimestamp,
-          },
-          {
-            kinds: [1059],
-            "#p": [userKeys.pub],
-            since: lastMessageTimestamp
-              ? lastMessageTimestamp - 604800
-              : lastMessageTimestamp,
-          },
+          // {
+          //   kinds: [4],
+          //   authors: [userKeys.pub],
+          //   since: lastMessageTimestamp
+          //     ? lastMessageTimestamp + 1
+          //     : lastMessageTimestamp,
+          // },
+          // {
+          //   kinds: [4],
+          //   "#p": [userKeys.pub],
+          //   since: lastMessageTimestamp
+          //     ? lastMessageTimestamp + 1
+          //     : lastMessageTimestamp,
+          // },
+          // {
+          //   kinds: [1059],
+          //   "#p": [userKeys.pub],
+          //   since: lastMessageTimestamp
+          //     ? lastMessageTimestamp - 604800
+          //     : lastMessageTimestamp,
+          // },
           {
             kinds: [3],
             authors: [userKeys.pub],
