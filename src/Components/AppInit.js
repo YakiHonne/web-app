@@ -50,6 +50,7 @@ import {
   saveInboxRelays,
   getFollowingsInboxRelays,
   getRelaysStats,
+  saveUsers,
 } from "@/Helpers/DB";
 import {
   addConnectedAccounts,
@@ -390,7 +391,6 @@ export default function AppInit() {
     let subscription = null;
     const fetchData = async () => {
       let [
-        INBOX,
         RELAYS,
         FOLLOWINGS,
         MUTEDLIST,
@@ -400,7 +400,6 @@ export default function AppInit() {
         BLOSSOMSERVERS,
         INBOXRELAYS,
       ] = await Promise.all([
-        getChatrooms(userKeys.pub),
         getRelays(userKeys.pub),
         getFollowings(userKeys.pub),
         getMutedlist(userKeys.pub),
@@ -410,12 +409,6 @@ export default function AppInit() {
         getBlossomServers(userKeys.pub),
         getInboxRelays(userKeys.pub),
       ]);
-      let lastMessageTimestamp =
-        INBOX.length > 0
-          ? INBOX.sort(
-              (conv_1, conv_2) => conv_2.last_message - conv_1.last_message
-            )[0].last_message
-          : undefined;
       let lastRelaysTimestamp = RELAYS?.last_timestamp || undefined;
       let lastFollowingsTimestamp = FOLLOWINGS?.last_timestamp || undefined;
       let lastInterestsTimestamp = INTERESTSLIST?.last_timestamp || undefined;
@@ -428,8 +421,6 @@ export default function AppInit() {
       let lastUserMetadataTimestamp =
         getMetadataFromCachedAccounts(userKeys.pub).created_at || undefined;
       dispatch(setInitDMS(true));
-      let tempInbox = [];
-      let tempAuthors = [];
       let tempUserFollowings;
       let tempUserInterests;
       let tempBlossomServers;
@@ -443,27 +434,6 @@ export default function AppInit() {
       let eose = false;
       subscription = ndkInstance.subscribe(
         [
-          {
-            kinds: [4],
-            authors: [userKeys.pub],
-            since: lastMessageTimestamp
-              ? lastMessageTimestamp + 1
-              : lastMessageTimestamp,
-          },
-          {
-            kinds: [4],
-            "#p": [userKeys.pub],
-            since: lastMessageTimestamp
-              ? lastMessageTimestamp + 1
-              : lastMessageTimestamp,
-          },
-          {
-            kinds: [1059],
-            "#p": [userKeys.pub],
-            since: lastMessageTimestamp
-              ? lastMessageTimestamp - 604800
-              : lastMessageTimestamp,
-          },
           {
             kinds: [3],
             authors: [userKeys.pub],
@@ -542,63 +512,6 @@ export default function AppInit() {
         }
       );
       subscription.on("event", async (event) => {
-        if (event.kind === 4 && !userKeys.bunker) {
-          let decryptedMessage = "";
-          tempAuthors = [...new Set([...tempAuthors, event.pubkey])];
-          let peer =
-            event.pubkey === userKeys.pub
-              ? event.tags.find((tag) => tag[0] === "p" && tag[1])[1]
-              : "";
-          let reply = event.tags.find((tag) => tag[0] === "e");
-          let replyID = reply ? reply[1] : "";
-
-          decryptedMessage = await decrypt04(event, userKeys);
-          let tempEvent = {
-            id: event.id,
-            created_at: event.created_at,
-            content: decryptedMessage,
-            pubkey: event.pubkey,
-            kind: event.kind,
-            peer,
-            replyID,
-          };
-          tempInbox.push(tempEvent);
-          if (eose) saveChatrooms(tempInbox, [event.pubkey], userKeys.pub);
-        }
-        if (
-          event.kind === 1059 &&
-          (userKeys.sec || window?.nostr?.nip44) &&
-          !userKeys.bunker
-        ) {
-          try {
-            let unwrappedEvent = await unwrapGiftWrap(event, userKeys);
-            if (unwrappedEvent && unwrappedEvent.kind === 14) {
-              tempAuthors = [
-                ...new Set([...tempAuthors, unwrappedEvent.pubkey]),
-              ];
-              let peer =
-                unwrappedEvent.pubkey === userKeys.pub
-                  ? unwrappedEvent.tags.find((tag) => tag[0] === "p")[1]
-                  : "";
-              let reply = unwrappedEvent.tags.find((tag) => tag[0] === "e");
-              let replyID = reply ? reply[1] : "";
-              let tempEvent = {
-                id: unwrappedEvent.id,
-                created_at: unwrappedEvent.created_at,
-                content: unwrappedEvent.content,
-                pubkey: unwrappedEvent.pubkey,
-                kind: unwrappedEvent.kind,
-                peer,
-                replyID,
-              };
-              tempInbox.push(tempEvent);
-              if (eose)
-                saveChatrooms(tempInbox, [unwrappedEvent.pubkey], userKeys.pub);
-            }
-          } catch (err) {
-            console.log(err);
-          }
-        }
         if (event.kind === 3) {
           tempUserFollowings = { ...event };
           if (eose) saveFollowings(event, userKeys.pub);
@@ -655,7 +568,6 @@ export default function AppInit() {
         }
       });
       subscription.on("eose", () => {
-        saveChatrooms(tempInbox, tempAuthors, userKeys.pub);
         saveFollowings(
           tempUserFollowings,
           userKeys.pub,
@@ -692,7 +604,7 @@ export default function AppInit() {
           addConnectedAccounts(emptyMetadata, userKeys);
         }
         eose = true;
-        dispatch(setInitDMS(false));
+     
       });
     };
 
@@ -701,6 +613,278 @@ export default function AppInit() {
     }
     return () => {
       subscription && subscription.stop();
+    };
+  }, [userKeys]);
+
+  useEffect(() => {
+    let subscription = null;
+    const fetchData = async () => {
+      let INBOX = await getChatrooms(userKeys.pub);
+      let lastMessageTimestamp =
+        INBOX.length > 0
+          ? INBOX.sort(
+              (conv_1, conv_2) => conv_2.last_message - conv_1.last_message
+            )[0].last_message
+          : Math.floor(Date.now() / 1000);
+
+      let tempInbox = [];
+      let tempAuthors = [];
+      let eose = false;
+      subscription = ndkInstance.subscribe(
+        [
+          {
+            kinds: [4],
+            authors: [userKeys.pub],
+            since: lastMessageTimestamp
+              ? lastMessageTimestamp + 1
+              : lastMessageTimestamp,
+          },
+          {
+            kinds: [4],
+            "#p": [userKeys.pub],
+            since: lastMessageTimestamp
+              ? lastMessageTimestamp + 1
+              : lastMessageTimestamp,
+          },
+          {
+            kinds: [1059],
+            "#p": [userKeys.pub],
+            since: lastMessageTimestamp
+              ? lastMessageTimestamp - 432000
+              : lastMessageTimestamp,
+          },
+        ],
+        {
+          cacheUsage: "CACHE_FIRST",
+          groupable: false,
+          skipVerification: false,
+          skipValidation: false,
+          subId: "user-essentials",
+        }
+      );
+      subscription.on("event", async (event) => {
+        if (event.kind === 4 && !userKeys.bunker) {
+          let decryptedMessage = "";
+          tempAuthors = [...new Set([...tempAuthors, event.pubkey])];
+          let peer =
+            event.pubkey === userKeys.pub
+              ? event.tags.find((tag) => tag[0] === "p" && tag[1])[1]
+              : "";
+          let reply = event.tags.find((tag) => tag[0] === "e");
+          let replyID = reply ? reply[1] : "";
+
+          decryptedMessage = await decrypt04(event, userKeys);
+          let tempEvent = {
+            id: event.id,
+            created_at: event.created_at,
+            content: decryptedMessage,
+            pubkey: event.pubkey,
+            kind: event.kind,
+            peer,
+            replyID,
+          };
+          tempInbox.push(tempEvent);
+          if (eose) saveChatrooms(tempInbox, userKeys.pub);
+        }
+        if (
+          event.kind === 1059 &&
+          (userKeys.sec || window?.nostr?.nip44) &&
+          !userKeys.bunker
+        ) {
+          try {
+            let unwrappedEvent = await unwrapGiftWrap(event, userKeys);
+            if (unwrappedEvent && unwrappedEvent.kind === 14) {
+              tempAuthors = [
+                ...new Set([...tempAuthors, unwrappedEvent.pubkey]),
+              ];
+              let peer =
+                unwrappedEvent.pubkey === userKeys.pub
+                  ? unwrappedEvent.tags.find((tag) => tag[0] === "p")[1]
+                  : "";
+              let reply = unwrappedEvent.tags.find((tag) => tag[0] === "e");
+              let replyID = reply ? reply[1] : "";
+              let tempEvent = {
+                id: unwrappedEvent.id,
+                created_at: unwrappedEvent.created_at,
+                content: unwrappedEvent.content,
+                pubkey: unwrappedEvent.pubkey,
+                kind: unwrappedEvent.kind,
+                peer,
+                replyID,
+              };
+              tempInbox.push(tempEvent);
+              if (eose) saveChatrooms(tempInbox, userKeys.pub);
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        }
+      });
+      subscription.on("eose", () => {
+        saveChatrooms(tempInbox, userKeys.pub);
+        eose = true;
+      });
+    };
+
+    if (userKeys && (userKeys.ext || userKeys.sec)) {
+      fetchData();
+    }
+    return () => {
+      subscription && subscription.stop();
+    };
+  }, [userKeys]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     let timeFrames = [604800, 1209600, 2592000, 7776000, 15552000, 31536000];
+  //     let INBOX = await getChatrooms(userKeys.pub);
+  //     let until =
+  //       INBOX.length > 0
+  //         ? INBOX.map((convo) => {
+  //             if (convo.convo.length > 0) {
+  //               return convo.convo[0].created_at;
+  //             }
+  //           }).sort((a, b) => b - a)[0] - 1
+  //         : undefined;
+  //     let since = until ? until - 604800 : until;
+  //     dispatch(setInitDMS(true));
+  //     let timePeriodIndex = 0;
+  //     let endOfData = false;
+  //     while (!endOfData) {
+  //       console.log(endOfData)
+  //       let dmsData = await getSubData([
+  //         {
+  //           kinds: [4],
+  //           authors: [userKeys.pub],
+  //           until,
+  //           since: since,
+  //           limit: 10,
+  //         },
+  //         { kinds: [4], "#p": [userKeys.pub], until, since: since, limit: 10 },
+  //         {
+  //           kinds: [1059],
+  //           "#p": [userKeys.pub],
+  //           until: until ? until - 432000 : until,
+  //           since: since ? since - 432000 : since,
+  //           limit: 10,
+  //         },
+  //       ]);
+  //       console.log(dmsData)
+  //       if (dmsData.data.length > 0) {
+  //         let tempInbox = await decryptDMS(dmsData.data, userKeys);
+  //         await saveChatrooms(tempInbox.inbox, userKeys.pub);
+  //         saveUsers(tempInbox.authors);
+  //         until = tempInbox.until ? tempInbox.until - timeFrames[0] : until;
+  //         since = until ? until - 604800 : since;
+  //         timePeriodIndex = 0;
+  //       } else if (
+  //         dmsData.data.length === 0 &&
+  //         timePeriodIndex < timeFrames.length - 1
+  //       ) {
+  //         timePeriodIndex++;
+  //         until = until ? until - timeFrames[timePeriodIndex] : until;
+  //         since = until ? until - 604800 : since;
+  //       } else {
+  //         endOfData = true;
+  //       }
+
+  //     }
+  //   };
+  //   if (userKeys && (userKeys.ext || userKeys.sec)) {
+  //     fetchData();
+  //   }
+  // }, [userKeys]);
+
+  useEffect(() => {
+    if (!userKeys || (!userKeys.ext && !userKeys.sec)) return;
+
+    let isCancelled = false; // cancellation flag
+
+    const fetchData = async () => {
+      const timeFrames = [
+        604800, 1209600, 2592000, 7776000, 15552000, 31536000,
+      ];
+      dispatch(setInitDMS(true));
+      try {
+        const INBOX = await getChatrooms(userKeys.pub);
+        if (isCancelled) return; //
+
+        let until =
+          INBOX.length > 0
+            ? INBOX.map((convo) => {
+                if (convo.convo.length > 0) {
+                  return convo.convo[0].created_at;
+                } else Math.floor(Date.now() / 1000);
+              }).sort((a, b) => a - b)[0] - 1
+            : undefined;
+
+        let since = until ? until - 604800 : until;
+
+        dispatch(setInitDMS(true));
+
+        let timePeriodIndex = 0;
+        let endOfData = false;
+
+        while (!endOfData) {
+          if (isCancelled) return; 
+          const dmsData = await getSubData([
+            {
+              kinds: [4],
+              authors: [userKeys.pub],
+              until,
+              since,
+              limit: 100,
+            },
+            {
+              kinds: [4],
+              "#p": [userKeys.pub],
+              until,
+              since,
+              limit: 100,
+            },
+            {
+              kinds: [1059],
+              "#p": [userKeys.pub],
+              until: until ? until - 432000 : until,
+              since: since ? since - 432000 : since,
+              limit: 100,
+            },
+          ]);
+
+          if (isCancelled) return;
+
+          if (dmsData.data.length > 0) {
+            const tempInbox = await decryptDMS(dmsData.data, userKeys);
+            if (isCancelled) return;
+            await saveChatrooms(tempInbox.inbox, userKeys.pub);
+            // await saveUsers(tempInbox.authors);
+            console.log(tempInbox)
+            until = tempInbox.until ? tempInbox.until : until;
+            // until = tempInbox.until ? tempInbox.until - timeFrames[0] : until;
+            since = until ? until - 604800 : since;
+            timePeriodIndex = 0;
+          } else if (
+            dmsData.data.length === 0 &&
+            timePeriodIndex < timeFrames.length - 1
+          ) {
+            timePeriodIndex++;
+            until = until ? until - timeFrames[timePeriodIndex] : until;
+            since = until ? until - 604800 : since;
+          } else {
+            endOfData = true;
+            dispatch(setInitDMS(false));
+          }
+        }
+      } catch (err) {
+        if (!isCancelled) console.error("fetchData failed:", err);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      
+      isCancelled = true;
     };
   }, [userKeys]);
 
@@ -901,11 +1085,78 @@ export default function AppInit() {
     }
     if (followings && followings?.followings?.length >= 5) {
       buildWOTList();
-    // } else if (followings) {
-      } else if (followings && followings?.followings?.length < 5) {
+      // } else if (followings) {
+    } else if (followings && followings?.followings?.length < 5) {
       buildBackupWOTList();
     }
   }, [followings]);
+
+  const decryptDMS = async (inbox, userKeys) => {
+    let authors = [];
+    let until = Math.floor(Date.now() / 1000);
+    let tempInbox = await Promise.all(
+      inbox.map(async (event) => {
+        if (event.kind === 4 && !userKeys.bunker) {
+          let decryptedMessage = "";
+          authors = [...new Set([...authors, event.pubkey])];
+          let peer =
+            event.pubkey === userKeys.pub
+              ? event.tags.find((tag) => tag[0] === "p" && tag[1])[1]
+              : "";
+          let reply = event.tags.find((tag) => tag[0] === "e");
+          let replyID = reply ? reply[1] : "";
+
+          decryptedMessage = await decrypt04(event, userKeys);
+          let tempEvent = {
+            id: event.id,
+            created_at: event.created_at,
+            content: decryptedMessage,
+            pubkey: event.pubkey,
+            kind: event.kind,
+            peer,
+            replyID,
+          };
+          until = until > event.created_at ? event.created_at : until;
+          return tempEvent;
+        }
+
+        if (
+          event.kind === 1059 &&
+          (userKeys.sec || window?.nostr?.nip44) &&
+          !userKeys.bunker
+        ) {
+          try {
+            let unwrappedEvent = await unwrapGiftWrap(event, userKeys);
+
+            if (unwrappedEvent && unwrappedEvent.kind === 14) {
+              authors = [...new Set([...authors, unwrappedEvent.pubkey])];
+              let peer =
+                unwrappedEvent.pubkey === userKeys.pub
+                  ? unwrappedEvent.tags.find((tag) => tag[0] === "p")[1]
+                  : "";
+              let reply = unwrappedEvent.tags.find((tag) => tag[0] === "e");
+              let replyID = reply ? reply[1] : "";
+              let tempEvent = {
+                id: unwrappedEvent.id,
+                created_at: unwrappedEvent.created_at,
+                content: unwrappedEvent.content,
+                pubkey: unwrappedEvent.pubkey,
+                kind: unwrappedEvent.kind,
+                peer,
+                replyID,
+              };
+              until = until > event.created_at ? event.created_at : until;
+              return tempEvent;
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        }
+      })
+    );
+    await saveUsers(authors);
+    return { inbox: tempInbox.filter((_) => _), authors, until: until - 1 };
+  };
 
   const getTrendingProfiles = async () => {
     try {

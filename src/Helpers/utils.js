@@ -1,10 +1,15 @@
-import NDK, { NDKNip07Signer, NDKNip46Signer, NDKPrivateKeySigner, NDKRelayAuthPolicies } from "@nostr-dev-kit/ndk";
+import NDK, {
+  NDKNip07Signer,
+  NDKNip46Signer,
+  NDKPrivateKeySigner,
+  NDKRelayAuthPolicies,
+} from "@nostr-dev-kit/ndk";
 import { getKeys } from "./ClientHelpers";
 import { getEmptyRelaysData } from "./Encryptions";
 
 const relayMetadataCache = new Map();
 const ndkInstancesCache = new Map();
-
+const ndkInstancesForDMsCache = new Map();
 
 export const localStorage_ = {
   getItem(key) {
@@ -88,8 +93,11 @@ const initiateNDKInstance = async (relay) => {
     ndkInstance.signer = signer;
   }
   await ndkInstance.connect(2000);
-  if(!ndkInstance.pool.relays.get(relay.endsWith("/") ? relay : `${relay}/`).connected){
-    return false
+  if (
+    !ndkInstance.pool.relays.get(relay.endsWith("/") ? relay : `${relay}/`)
+      .connected
+  ) {
+    return false;
   }
   ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
     ndk: ndkInstance,
@@ -98,3 +106,39 @@ const initiateNDKInstance = async (relay) => {
   return ndkInstance;
 };
 
+export async function getNDKInstanceForDMs(key, relays) {
+  let instance = ndkInstancesForDMsCache.get(key);
+  if (instance) return instance;
+  let newInstance = await initiateNDKInstanceForDMs(key, relays);
+  return newInstance;
+}
+export function setNDKInstanceForDMs(key, instance) {
+  ndkInstancesForDMsCache.set(key, instance);
+}
+
+const initiateNDKInstanceForDMs = async (key, relays) => {
+  let userKeys = getKeys();
+  const ndkInstance = new NDK({
+    explicitRelayUrls: relays,
+  });
+
+  if (userKeys?.ext) {
+    const signer = new NDKNip07Signer(undefined, ndkInstance);
+    ndkInstance.signer = signer;
+  }
+  if (userKeys?.sec) {
+    const signer = new NDKPrivateKeySigner(userKeys.sec);
+    ndkInstance.signer = signer;
+  }
+  if (userKeys?.bunker) {
+    const localKeys = new NDKPrivateKeySigner(userKeys.localKeys.sec);
+    const signer = new NDKNip46Signer(ndkInstance, userKeys.bunker, localKeys);
+    ndkInstance.signer = signer;
+  }
+  await ndkInstance.connect(2000);
+  ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
+    ndk: ndkInstance,
+  });
+  setNDKInstanceForDMs(key, ndkInstance);
+  return ndkInstance;
+};
