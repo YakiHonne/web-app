@@ -13,6 +13,7 @@ import Select from "@/Components/Select";
 import EmojiPicker from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import useCloseContainer from "@/Hooks/useCloseContainer";
+import { DraggableComp } from "@/Components/DraggableComp";
 let boxView =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/box-view.png";
 let threadView =
@@ -49,6 +50,15 @@ export function CustomizationManagement({
   );
   const [defaultReaction, setDefaultReaction] = useState(
     customSettings.defaultReaction || "❤️"
+  );
+  const [reactionsOrder, setReactionsOrder] = useState(
+    customSettings.reactionsOrder || [
+      "likes",
+      "replies",
+      "repost",
+      "quote",
+      "zap",
+    ]
   );
   const [oneTapReaction, setOneTapReaction] = useState(
     customSettings.oneTapReaction || false
@@ -140,6 +150,7 @@ export function CustomizationManagement({
       userHoverPreview,
       oneTapReaction,
       defaultReaction,
+      reactionsOrder,
       longPress,
       notification,
       contentList,
@@ -152,6 +163,7 @@ export function CustomizationManagement({
       userHoverPreview: !userHoverPreview,
       oneTapReaction,
       defaultReaction,
+      reactionsOrder,
       longPress,
       collapsedNote,
       notification,
@@ -165,6 +177,7 @@ export function CustomizationManagement({
       userHoverPreview,
       oneTapReaction: !oneTapReaction,
       defaultReaction,
+      reactionsOrder,
       longPress,
       collapsedNote,
       notification,
@@ -178,6 +191,7 @@ export function CustomizationManagement({
       userHoverPreview,
       oneTapReaction,
       defaultReaction: emoji,
+      reactionsOrder,
       longPress,
       collapsedNote,
       notification,
@@ -191,7 +205,23 @@ export function CustomizationManagement({
       userHoverPreview,
       oneTapReaction,
       defaultReaction,
+      reactionsOrder,
       longPress: data,
+      collapsedNote,
+      notification,
+      contentList,
+    });
+  };
+  const handleReactionsOrder = (data) => {
+    let newList = data.map((item) => item.value);
+    setReactionsOrder(newList);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      defaultReaction,
+      reactionsOrder: newList,
+      longPress,
       collapsedNote,
       notification,
       contentList,
@@ -220,6 +250,8 @@ export function CustomizationManagement({
           handleUserToFollowSuggestion={handleUserToFollowSuggestion}
           handleContentSuggestion={handleContentSuggestion}
           handleInterestSuggestion={handleInterestSuggestion}
+          reactionsOrder={reactionsOrder}
+          handleReactionsOrder={handleReactionsOrder}
         />
       )}
 
@@ -341,6 +373,8 @@ const FeedSettings = ({
   userToFollowSuggestion,
   contentSuggestion,
   interestSuggestion,
+  reactionsOrder,
+  handleReactionsOrder,
 }) => {
   const { t } = useTranslation();
   return (
@@ -411,6 +445,23 @@ const FeedSettings = ({
             }`}
             onClick={handleCollapedNote}
           ></div>
+        </div>
+        <div className="fx-centered fx-col fx-start-h fx-start-v fit-container">
+          <div>
+            <p>{t("AsxiVow")}</p>
+            <p className="p-medium gray-c">{t("AZiqDAt")}</p>
+          </div>
+          <DraggableComp
+            children={reactionsOrder.map((_) => {
+              return {
+                value: _,
+                id: _,
+              };
+            })}
+            setNewOrderedList={handleReactionsOrder}
+            component={ReactionItem}
+            background={false}
+          />
         </div>
         <div className="fit-container">
           <p className="c1-c p-big">{t("Av6mqrU")}</p>
@@ -513,6 +564,58 @@ const Reaction = ({ defaultReaction, handleDefaultReaction }) => {
       >
         <div className="p-big">{defaultReaction}</div>
       </div>
+    </div>
+  );
+};
+
+const ReactionItem = ({ item, index }) => {
+  const { t } = useTranslation();
+  const elements = {
+    likes: (
+      <div className="fx-centered">
+        <div className="heart"></div>
+        <p>{t("Alz0E9Y")}</p>
+      </div>
+    ),
+    replies: (
+      <div className="fx-centered">
+        <div className="comment-icon"></div>
+        <p>{t("AENEcn9")}</p>
+      </div>
+    ),
+    repost: (
+      <div className="fx-centered">
+        <div className="switch-arrows"></div>
+        <p>{t("Aai65RJ")}</p>
+      </div>
+    ),
+    quote: (
+      <div className="fx-centered">
+        <div className="quote"></div>
+        <p>{t("AuafJAx")}</p>
+      </div>
+    ),
+    zap: (
+      <div className="fx-centered">
+        <div className="bolt"></div>
+        <p>Zaps</p>
+      </div>
+    ),
+  };
+  if (!elements[item.value]) return null;
+  return (
+    <div
+      className="sc-s-18 fx-scattered box-pad-v-s box-pad-h-s"
+      style={{ cursor: "grab" }}
+    >
+      {elements[item.value]}
+      <div
+        className="drag-el"
+        style={{
+          minWidth: "16px",
+          aspectRatio: "1/1",
+        }}
+      ></div>
     </div>
   );
 };

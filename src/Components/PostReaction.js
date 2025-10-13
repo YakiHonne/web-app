@@ -7,6 +7,7 @@ import Like from "./Reactions/Like";
 import Repost from "./Reactions/Repost";
 import Quote from "./Reactions/Quote";
 import Zap from "./Reactions/Zap";
+import { getCustomSettings } from "@/Helpers/ClientHelpers";
 
 export default function PostReaction({
   event,
@@ -18,6 +19,23 @@ export default function PostReaction({
 }) {
   const userKeys = useSelector((state) => state.userKeys);
   const [usersList, setUsersList] = useState(false);
+  const customSettings = getCustomSettings();
+  const reactionsOrder = customSettings.reactionsOrder || [
+    "likes",
+    "replies",
+    "repost",
+    "quote",
+    "zap",
+  ];
+
+  const order = {
+    likes: reactionsOrder.indexOf("likes") + 1,
+    replies: reactionsOrder.indexOf("replies") + 1,
+    repost: reactionsOrder.indexOf("repost") + 1,
+    quote: reactionsOrder.indexOf("quote") + 1,
+    zap: reactionsOrder.indexOf("zap") + 1,
+  };
+
   const { t } = useTranslation();
 
   const isLiked = useMemo(() => {
@@ -55,7 +73,7 @@ export default function PostReaction({
         />
       )}
       <div className="fx-centered" style={{ columnGap: "20px" }}>
-        <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
+        <div className={`fx-centered pointer `} style={{ columnGap: "8px", order: order.likes }}>
           <Like
             isLiked={isLiked}
             event={event}
@@ -81,7 +99,7 @@ export default function PostReaction({
             </div>
           </div>
         </div>
-        <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
+        <div className={`fx-centered pointer `} style={{ columnGap: "8px" , order: order.replies }}>
           <div className="round-icon-tooltip" data-tooltip={t("ADHdLfJ")}>
             <div
               className="comment-24 opacity-4"
@@ -95,7 +113,7 @@ export default function PostReaction({
           </div>
         </div>
         {event.kind === 1 && (
-          <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
+          <div className={`fx-centered pointer `} style={{ columnGap: "8px", order: order.repost }}>
             <Repost
               isReposted={isReposted}
               event={event}
@@ -122,7 +140,7 @@ export default function PostReaction({
             </div>
           </div>
         )}
-        <div className={`fx-centered pointer `} style={{ columnGap: "8px" }}>
+        <div className={`fx-centered pointer `} style={{ columnGap: "8px", order: order.quote }}>
           <Quote isQuoted={isQuoted} event={event} actions={postActions} />
           <div
             className={`round-icon-tooltip ${isQuoted ? "orange-c" : ""}`}
@@ -142,7 +160,7 @@ export default function PostReaction({
             </div>
           </div>
         </div>
-        <div className="fx-centered" style={{ columnGap: "8px" }}>
+        <div className="fx-centered" style={{ columnGap: "8px" , order: order.zap}}>
           <div className="round-icon-tooltip" data-tooltip="Tip note">
             <Zap
               user={userProfile}

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  getBech32,
   getEmptyuserMetadata,
   getHex,
   getParsedAuthor,
@@ -20,11 +19,13 @@ import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import ZapPollsComp from "@/Components/SmartWidget/ZapPollsComp";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
 import UserProfilePic from "./UserProfilePic";
+import { copyText } from "@/Helpers/Helpers";
 
- function Nip19Parsing({ addr, minimal = false }) {
+function Nip19Parsing({ addr, minimal = false }) {
   const [event, setEvent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isParsed, setIsParsed] = useState(false);
+  const [isUnsupported, setIsUnsupported] = useState(false);
   const [url, setUrl] = useState("/");
   const { t } = useTranslation();
 
@@ -38,7 +39,6 @@ import UserProfilePic from "./UserProfilePic";
         .replaceAll(".", "");
       if (addr_.startsWith("naddr")) {
         let data = nip19.decode(addr_);
-
         filter.push({
           kinds: [data.data.kind],
           "#d": [data.data.identifier],
@@ -99,8 +99,10 @@ import UserProfilePic from "./UserProfilePic";
     sub.on("event", (event) => {
       if (event.id) {
         if (event.kind === 0) {
-          let content = getParsedAuthor(event.rawEvent()) || getEmptyuserMetadata(event.pubkey);
-          setEvent({...content, kind: 0});
+          let content =
+            getParsedAuthor(event.rawEvent()) ||
+            getEmptyuserMetadata(event.pubkey);
+          setEvent({ ...content, kind: 0 });
         }
         if (event.kind === 1) {
           let parsedEvent = getParsedNote(event, true);
@@ -125,7 +127,7 @@ import UserProfilePic from "./UserProfilePic";
           saveUsers([event.pubkey]);
           setIsLoading(false);
         }
-        if ([30004, 30005, 30023, 34235, 21, 22].includes(event.kind)) {
+        if ([30004, 30005, 30023, 34235, 22, 21].includes(event.kind)) {
           let parsedContent = getParsedRepEvent(event);
           let title = parsedContent.title;
           if (!title) {
@@ -133,11 +135,17 @@ import UserProfilePic from "./UserProfilePic";
             if ([30023].includes(event.kind)) title = t("Aqw9gzk");
             if ([34235, 21, 22].includes(event.kind)) title = t("A3vFdLd");
           }
-
           setEvent({
             ...parsedContent,
             title,
           });
+        }
+        if (
+          ![
+            0, 1, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21,
+          ].includes(event.kind)
+        ) {
+          setIsUnsupported(true);
         }
         saveUsers([event.pubkey]);
         setIsLoading(false);
@@ -156,6 +164,40 @@ import UserProfilePic from "./UserProfilePic";
     };
   }, []);
 
+  if (!event && !isUnsupported)
+    return (
+      <>
+        {isParsed && (
+          <Link
+            href={`/${addr}`}
+            className="btn-text-gray"
+            target={"_blank"}
+            onClick={(e) => e.stopPropagation()}
+            style={{ color: "var(--orange-main)" }}
+          >
+            @{addr.substring(0, 10)}
+          </Link>
+        )}
+        {!isParsed && <p>{addr}</p>}
+      </>
+    );
+  if (!event && isUnsupported)
+    return (
+      <>
+        {isParsed && (
+          <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m sc-s-18">
+            <div>
+              <p className="gray-c">{t("AcFjmGe")}</p>
+              <p>{addr}</p>
+            </div>
+            <div onClick={() => copyText(addr, t("AxBmdge"))}>
+              <div className="copy"></div>
+            </div>
+          </div>
+        )}
+        {!isParsed && <p>{addr}</p>}
+      </>
+    );
   if (
     event?.kind === 1 ||
     ((addr.startsWith("nevent") || addr.startsWith("note")) && addr.length > 20)
@@ -170,7 +212,6 @@ import UserProfilePic from "./UserProfilePic";
                 style={{
                   marginTop: ".5rem",
                   backgroundColor: "var(--c1-side)",
-                  // border: "none",
                 }}
               >
                 <KindOne event={event} reactions={false} minimal={true} />
@@ -238,52 +279,20 @@ import UserProfilePic from "./UserProfilePic";
       </>
     );
 
-  if (!event)
-    return (
-      <>
-        {isParsed && (
-          <Link
-            href={`/${addr}`}
-            className="btn-text-gray"
-            target={"_blank"}
-            onClick={(e) => e.stopPropagation()}
-            style={{ color: "var(--orange-main)" }}
-          >
-            @{addr.substring(0, 10)}
-          </Link>
-        )}
-        {!isParsed && <p>{addr}</p>}
-      </>
-    );
   if (event.kind === 0)
     return (
-      // <Link
-      //   href={url}
-      //   className="btn-text-gray"
-      //   target={"_blank"}
-      //   onClick={(e) => e.stopPropagation()}
-      //   style={{ color: "var(--orange-main)" }}
-      // >
-      //   @{event.display_name}
-      // </Link>
       <UserProfilePic
         user_id={event.pubkey}
         size={16}
         mainAccountUser={false}
         withName={event.display_name || event.name}
         img={event.picture}
-        // metadata={event}
       />
     );
   if (event.kind === 30031)
     return (
       <div className="fit-container box-pad-v-s">
-        {/* {!minimal && (
-          <WidgetCard widget={event} deleteWidget={null} options={false} />
-        
-        )} */}
         <MinimalPreviewWidget widget={event} />
-        {/* {minimal && <MinimalPreviewWidget widget={event} />} */}
       </div>
     );
   if (event.kind === 30033)
@@ -297,7 +306,6 @@ import UserProfilePic from "./UserProfilePic";
           }}
           header={false}
         />
-        {/* <SWCard widget={event} /> */}
       </div>
     );
 
@@ -321,7 +329,9 @@ import UserProfilePic from "./UserProfilePic";
 }
 
 const areEqual = (prevProps, nextProps) => {
-  return prevProps.addr === nextProps.addr && prevProps.minimal === nextProps.minimal;
+  return (
+    prevProps.addr === nextProps.addr && prevProps.minimal === nextProps.minimal
+  );
 };
 
 export default React.memo(Nip19Parsing, areEqual);

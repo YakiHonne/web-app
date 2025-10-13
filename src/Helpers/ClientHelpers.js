@@ -25,7 +25,6 @@ export function getNoteTree(
   pubkey
 ) {
   if (!note) return "";
-
   let tree = note
     .trim()
     .split(/(\n)/)
@@ -53,42 +52,20 @@ export function getNoteTree(
       !el.includes("https://vota.dorafactory.org/round/") &&
       !el.includes("https://vota-test.dorafactory.org/round/")
     ) {
-      const isURLVid = isVid(el);
+      const isURLCommonPlatformVid = isVid(el);
       if (!minimal) {
-        if (isURLVid) {
-          if (isURLVid.isYT) {
-            finalTree.push(
-              <iframe
-                loading="lazy"
-                key={key}
-                style={{
-                  width: "100%",
-                  aspectRatio: "16/9",
-                  borderRadius: "var(--border-r-18)",
-                }}
-                src={`https://www.youtube.com/embed/${isURLVid.videoId}`}
-                frameBorder="0"
-                allowFullScreen
-              ></iframe>
-            );
-          }
-          if (!isURLVid.isYT)
-            finalTree.push(
-              <iframe
-                loading="lazy"
-                key={key}
-                style={{
-                  width: "100%",
-                  aspectRatio: "16/9",
-                  borderRadius: "var(--border-r-18)",
-                }}
-                src={`https://player.vimeo.com/video/${isURLVid.videoId}`}
-                frameBorder="0"
-                allowFullScreen
-              ></iframe>
-            );
+        if (isURLCommonPlatformVid) {
+          finalTree.push(
+            <VideoLoader
+              pubkey={pubkey}
+              key={key}
+              isCommonPlatform={isURLCommonPlatformVid.isYT ? "yt" : "vm"}
+              src={isURLCommonPlatformVid.videoId}
+              poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
+            />
+          );
         }
-        if (!isURLVid) {
+        if (!isURLCommonPlatformVid) {
           const checkURL = isImageUrl(el);
           if (checkURL) {
             if (checkURL.type === "image") {
@@ -96,6 +73,7 @@ export function getNoteTree(
             } else if (checkURL.type === "video") {
               finalTree.push(
                 <VideoLoader
+                  pubkey={pubkey}
                   key={key}
                   src={el}
                   poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
@@ -211,7 +189,7 @@ export function getNoteTree(
       );
     } else if (el?.startsWith("lnbc") && el.length > 30) {
       finalTree.push(<LNBCInvoice lnbc={el} key={key} />);
-    }else if (el?.startsWith("lnurl") && el.length > 30) {
+    } else if (el?.startsWith("lnurl") && el.length > 30) {
       finalTree.push(<LNURLParsing lnurl={el} key={key} />);
     } else if (el?.startsWith("#")) {
       const match = el.match(/(#+)([\w-+]+)/);
@@ -387,7 +365,7 @@ export function getParsedNote(event, isCollapsedNote = false) {
     }
 
     let nEvent = nEventEncode(event.id);
-    
+
     let rawEvent =
       typeof event.rawEvent === "function" ? event.rawEvent() : event;
     let isProtected = event.tags.find((tag) => tag[0] === "-");
@@ -411,7 +389,7 @@ export function getParsedNote(event, isCollapsedNote = false) {
         isPaidNote,
         isCollapsedNote: isCollapsedNote_,
         nEvent,
-        isProtected
+        isProtected,
       };
     }
 
@@ -585,6 +563,7 @@ export function getDefaultSettings(pubkey) {
     longPress: "notes",
     defaultReaction: "❤️",
     oneTapReaction: false,
+    reactionsOrder: ["likes", "replies", "repost", "quote", "zap"],
     contentList: [
       { tab: "recent", isHidden: false },
       { tab: "recent_with_replies", isHidden: false },
@@ -939,7 +918,6 @@ const mergeConsecutivePElements = (arr, pubkey) => {
   const result = [];
   let currentTextElement = null;
   let currentImages = [];
-
   // Helpers
   const isImage = (el) =>
     el &&
