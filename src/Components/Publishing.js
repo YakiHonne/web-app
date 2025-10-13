@@ -694,7 +694,7 @@ export default function Publishing() {
         </div>
       </div>
       <div
-        className="sc-s-18 fit-container fx-centered box-marg-s pointer option link-label"
+        className="sc-s-18 fit-container fx-centered pointer option link-label"
         style={{
           backgroundColor: "transparent",
           border: failedEvents > 0 ? "1px solid var(--red-main)" : "",
