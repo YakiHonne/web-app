@@ -18,6 +18,7 @@ import Date_ from "./Date_";
 export default function LinkRepEventPreview({ event, allowClick = true }) {
   // const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
+  console.log(event)
   let url = getLinkFromAddr(event.naddr || event.nEvent);
 
   const { t } = useTranslation();

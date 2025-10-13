@@ -390,7 +390,6 @@ export function getParsedNote(event, isCollapsedNote = false) {
     
     let rawEvent =
       typeof event.rawEvent === "function" ? event.rawEvent() : event;
-    let stringifiedEvent = JSON.stringify(rawEvent);
     let isProtected = event.tags.find((tag) => tag[0] === "-");
     if (event.kind === 1) {
       let note_tree = getNoteTree(
@@ -404,7 +403,6 @@ export function getParsedNote(event, isCollapsedNote = false) {
       return {
         ...rawEvent,
         note_tree,
-        stringifiedEvent,
         isQuote: isQuote ? isQuote[1] : "",
         isComment: isReply ? isReply[1] : isComment ? isComment[1] : false,
         isRoot: !isNotRoot ? true : false,
@@ -549,6 +547,17 @@ export function getKeys() {
     return false;
   }
 }
+
+export const getMetadataFromCachedAccounts = (pubkey) => {
+  let accounts = getConnectedAccounts();
+  let account = accounts.find((account) => account.pubkey === pubkey);
+  if (account) {
+    let metadata = { ...account };
+    delete metadata.userKeys;
+    return metadata;
+  }
+  return false;
+};
 
 export function getCustomSettings() {
   let nostkeys = getKeys();

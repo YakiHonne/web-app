@@ -6,6 +6,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import relaysOnPlatform from "@/Content/Relays";
+import { InitEvent } from "@/Helpers/Controlers";
 
 const FOLLOWING = <div className="user-followed-w-24"></div>;
 const FOLLOW = <div className="user-to-follow-24"></div>;
@@ -105,13 +106,15 @@ const FollowText = ({
       } else {
         tempTags.push(toFollowKey);
       }
+      const eventInitEx = await InitEvent(
+        3,
+        "",
+        tempTags.map((p) => ["p", p])
+      );
+      if(!eventInitEx) return;
       dispatch(
         setToPublish({
-          userKeys: userKeys,
-          kind: 3,
-          content: "",
-          tags: tempTags.map((p) => ["p", p]),
-          // allRelays: [...filterRelays(relaysOnPlatform, userRelays)],
+          eventInitEx,
         })
       );
       // setTags(tempTags);å
@@ -300,7 +303,7 @@ const FollowIcon = ({
   if (!userMetadata)
     return (
       <>
-      {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
+        {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
         <div
           className={`round-icon round-icon-tooltip btn-gst  ${
             size === "small" ? "round-icon-small" : ""

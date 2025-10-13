@@ -39,7 +39,6 @@ export default function Note({ event }) {
   const [openComment, setOpenComment] = useState(false);
   const unsupportedKind = event?.kind !== 1;
   const note = getParsedNote(event);
-
   useEffect(() => {
     if (state) {
       let { triggerTranslation } = state;
@@ -211,7 +210,7 @@ export default function Note({ event }) {
                 )}
                 <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m">
                   <PostReaction
-                    event={event}
+                    event={note}
                     setOpenComment={setOpenComment}
                     openComment={openComment}
                     postActions={postActions}

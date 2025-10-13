@@ -48,7 +48,6 @@ export async function getStaticProps({ params }) {
   );
   let event = {
     ...res.data[0],
-    sig: "si",
   };
   const author = await getSubData(
     [{ authors: [event.pubkey], kinds: [0] }],
