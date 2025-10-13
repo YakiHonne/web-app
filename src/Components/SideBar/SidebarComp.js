@@ -34,6 +34,7 @@ import SearchSidebar from "@/Components/SearchSidebar";
 import { usePathname } from "next/navigation";
 import { customHistory } from "@/Helpers/History";
 import useDirectMessages from "@/Hooks/useDirectMessages";
+import { SidebarNavItem } from "@/Components/SideBar/SidebarNavItem";
 
 export default function SidebarComp() {
   const { t } = useTranslation();
@@ -192,7 +193,7 @@ export default function SidebarComp() {
           handleOnClick={handleLogout}
         />
       )}
-      <div
+      <aside
         className="fx-scattered fx-end-v nostr-sidebar-container fx-col "
         style={{
           zIndex: isActive ? 1000 : 200,
@@ -201,10 +202,10 @@ export default function SidebarComp() {
         ref={mainFrame}
       >
         <div
-          className="nostr-sidebar fx-scattered fx-start-v fx-col fit-container"
+          className="nostr-sidebar fx-centered fx-start-h fx-col fit-container"
           style={{ height: "100%" }}
         >
-          <div className="fx-start-h fx-centered fx-col fit-container">
+          <div style={{ position: "sticky", top: 0, width: "100%" }}>
             <div className="fx-centered fx-start-h fit-container box-pad-v-s">
               <div
                 className="yakihonne-logo-128 mb-hide"
@@ -212,169 +213,133 @@ export default function SidebarComp() {
               ></div>
               <div
                 className="yaki-logomark mb-show"
-                style={{minHeight: "70px", minWidth: "70px"}}
+                style={{ minHeight: "70px", minWidth: "70px" }}
                 onClick={() => customHistory("/", true)}
               ></div>
             </div>
-            <div className="mb-show" style={{ height: "200px" }}></div>
             <UserBalance />
-            <div
-              className="fit-container link-items fx-scattered fx-col fx-start-v "
-              style={{ rowGap: 0, maxHeight: "71vh" }}
+          </div>
+          <nav
+            className="fit-container link-items fx-col fx-start-v "
+            style={{ flex: 1, overflow: "auto", overscrollBehavior: "contain", paddingBottom: '2rem' }}
+          >
+            <SidebarNavItem
+              onClick={() => {
+                customHistory("/", true);
+              }}
+              isActive={isPage("/")}
+            >
+              <div className={isPage("/") ? "home-bold-24" : "home-24"}></div>
+              <div className="link-label">{t("AJDdA3h")}</div>
+            </SidebarNavItem>
+            <SidebarNavItem
+              onClick={() => {
+                customHistory("/relay-orbits", true);
+              }}
+              isActive={isPage("/relay-orbits")}
             >
               <div
-                onClick={() => {
-                  customHistory("/", true);
-                }}
-                className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
-                  isPage("/") ? "active-link" : "inactive-link"
-                }`}
-              >
-                <div className={isPage("/") ? "home-bold-24" : "home-24"}></div>
-                <div className="link-label">{t("AJDdA3h")}</div>
-              </div>
-              <div
-                onClick={() => {
-                  customHistory("/relay-orbits", true);
-                }}
-                className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
-                  isPage("/relay-orbits") ? "active-link" : "inactive-link"
-                }`}
-              >
-                <div
-                  className={
-                    isPage("/relay-orbits") ? "orbit-bold-24" : "orbit-24"
-                  }
-                ></div>
-                <div className="link-label">{t("AjGFut6")}</div>
-              </div>
+                className={
+                  isPage("/relay-orbits") ? "orbit-bold-24" : "orbit-24"
+                }
+              ></div>
+              <div className="link-label">{t("AjGFut6")}</div>
+            </SidebarNavItem>
 
+            <SidebarNavItem
+              onClick={() => {
+                customHistory("/discover", true);
+              }}
+              isActive={isPage("/discover")}
+            >
               <div
-                onClick={() => {
-                  customHistory("/discover", true);
-                }}
-                // href={"/discover"}
-                className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
-                  isPage("/discover") ? "active-link" : "inactive-link"
-                }`}
+                className={
+                  isPage("/discover") ? "discover-bold-24" : "discover-24"
+                }
+              ></div>
+              <div className="link-label">{t("ABSoIm9")}</div>
+            </SidebarNavItem>
+            <SidebarNavItem
+              onClick={() => {
+                customHistory("/smart-widgets");
+              }}
+              isActive={isPage("/smart-widgets")}
+            >
+              <div
+                className={
+                  isPage("/smart-widgets")
+                    ? "smart-widget-bold-24"
+                    : "smart-widget-24"
+                }
+              ></div>
+              <div className="link-label">{t("A2mdxcf")}</div>
+            </SidebarNavItem>
+            <SidebarNavItem
+              style={{ position: "relative" }}
+              isActive={isPage("/messages")}
+              onClick={() => customHistory("/messages")}
+            >
+              <div className="fx-centered">
+                <div
+                  className={isPage("/messages") ? "env-bold-24" : "env-24"}
+                ></div>
+                <div className="link-label">{t("As2zi6P")}</div>
+              </div>
+              {isNewMsg && <div className="notification-dot"></div>}
+            </SidebarNavItem>
+            <NotificationCenter isCurrent={isPage("/notifications")} />
+            <SearchSidebar />
+            {userKeys && (
+              <SidebarNavItem
+                isActive={isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
+                  isPage("/profile/" + nip19.nprofileEncode({ pubkey: userKeys.pub })) ||
+                  isPage("/profile/" + userMetadata.nip05)}
+                onClick={handleProfileLink}
               >
                 <div
                   className={
-                    isPage("/discover") ? "discover-bold-24" : "discover-24"
-                  }
-                ></div>
-                <div className="link-label">{t("ABSoIm9")}</div>
-              </div>
-              <div
-                onClick={() => {
-                  customHistory("/smart-widgets");
-                }}
-                className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s ${
-                  isPage("/smart-widgets") ? "active-link" : "inactive-link"
-                }`}
-              >
-                <div
-                  className={
-                    isPage("/smart-widgets")
-                      ? "smart-widget-bold-24"
-                      : "smart-widget-24"
-                  }
-                ></div>
-                <div className="link-label">{t("A2mdxcf")}</div>
-              </div>
-              <div
-                style={{ position: "relative" }}
-                onClick={() => customHistory("/messages")}
-                className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s ${
-                  isPage("/messages") ? "active-link" : "inactive-link"
-                }`}
-              >
-                <div className="fx-centered">
-                  <div
-                    className={isPage("/messages") ? "env-bold-24" : "env-24"}
-                  ></div>
-                  <div className="link-label">{t("As2zi6P")}</div>
-                </div>
-                {isNewMsg && <div className="notification-dot"></div>}
-              </div>
-              <NotificationCenter isCurrent={isPage("/notifications")} />
-              <SearchSidebar />
-              {userKeys && (
-                <div
-                  className="fit-container fx-centered fx-col fx-end-v"
-                  style={{
-                    position: "relative",
-                  }}
-                >
-                  <div
-                    className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s ${
-                      isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
-                      isPage(
-                        "/profile/" +
-                          nip19.nprofileEncode({ pubkey: userKeys.pub })
-                      ) ||
+                    isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
+                      isPage("/profile/" + nip19.nprofileEncode({ pubkey: userKeys.pub })) ||
                       isPage("/profile/" + userMetadata.nip05)
-                        ? "active-link"
-                        : "inactive-link"
-                    }`}
-                    onClick={handleProfileLink}
-                  >
-                    <div className="fx-centered">
-                      <div
-                        className={
-                          isPage(
-                            "/profile/" + getBech32("npub", userKeys.pub)
-                          ) ||
-                          isPage(
-                            "/profile/" +
-                              nip19.nprofileEncode({ pubkey: userKeys.pub })
-                          ) ||
-                          isPage("/profile/" + userMetadata.nip05)
-                            ? "user-bold-24"
-                            : "user-24"
-                        }
-                      ></div>
-                      <div className="link-label">{t("AyBBPWE")}</div>
-                    </div>
-                  </div>
-                  <div
-                    className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s ${
-                      isPage("/dashboard") ? "active-link" : "inactive-link"
-                    }`}
-                    onClick={() => {
-                      customHistory("/dashboard");
-                    }}
-                  >
-                    <div className="fx-centered">
-                      <div
-                        className={
-                          isPage("/dashboard")
-                            ? "dashboard-bold-24"
-                            : "dashboard-24"
-                        }
-                      ></div>
-                      <div className="link-label">{t("ALBhi3j")}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <YakiMobileappSidebar />
-              {/* {!userKeys && (
+                      ? "user-bold-24"
+                      : "user-24"
+                  }
+                ></div>
+                <div className="link-label">{t("AyBBPWE")}</div>
+              </SidebarNavItem>
+            )}
+            {userKeys && (
+              <SidebarNavItem
+                isActive={isPage("/dashboard")}
+                onClick={() => {
+                  customHistory("/dashboard");
+                }}
+              >
+                <div
+                  className={
+                    isPage("/dashboard")
+                      ? "dashboard-bold-24"
+                      : "dashboard-24"
+                  }
+                ></div>
+                <div className="link-label">{t("ALBhi3j")}</div>
+              </SidebarNavItem>
+            )}
+            <YakiMobileappSidebar />
+            {/* {!userKeys && (
                 <div>
                   <div className="pointer fx-centered inactive-link">
                     <DtoLToggleButton />
                   </div>
                 </div>
               )} */}
-              <div style={{ height: ".5rem" }}></div>
-              {/* {window.location.pathname !== "/dashboard" && ( */}
-              <WriteNew exit={() => null} />
-              {/* )} */}
-            </div>
-          </div>
-          <div className="fit-container">
-            <Publishing />
-            {userKeys && (
+          </nav>
+
+          <WriteNew exit={() => null} />
+
+          <Publishing />
+          <div style={{ position: "sticky", bottom: 0, width: "100%" }}>
+            {userKeys ? (
               <div
                 className="fx-scattered fx-col fit-container sidebar-user-settings "
                 style={{ position: "relative" }}
@@ -389,9 +354,9 @@ export default function SidebarComp() {
                     setShowSettings(!showSettings);
                   }}
                 >
-                    <div className="mb-show round-icon">
-                      <div className="setting-24"></div>
-                    </div>
+                  <div className="mb-show round-icon">
+                    <div className="setting-24"></div>
+                  </div>
                   <div
                     className="fx-centered fx-start-h pointer"
                     style={{ columnGap: "16px" }}
@@ -431,7 +396,7 @@ export default function SidebarComp() {
                       </p>
                     </div>
                   </div>
-                  
+
                   {isYakiChestLoaded && !yakiChestStats && (
                     <div
                       className="round-icon round-icon-tooltip orange-pulse"
@@ -502,7 +467,7 @@ export default function SidebarComp() {
                       />
                     </div>
                   )}
-                  
+
                   {!isYakiChestLoaded && <LoadingDots />}
                 </div>
                 {showSettings && (
@@ -691,23 +656,25 @@ export default function SidebarComp() {
                   </div>
                 )}
               </div>
+            ) : (
+              <button
+                className="btn btn-normal btn-full fx-centered"
+                // onClick={() => customHistory("/login")}
+                onClick={() => redirectToLogin()}
+              >
+                <div className="link-label">{t("AmOtzoL")}</div>
+                <div className="connect-24"></div>
+              </button>
             )}
           </div>
-          {!userKeys && (
-            <button
-              className="btn btn-normal btn-full fx-centered"
-              // onClick={() => customHistory("/login")}
-              onClick={() => redirectToLogin()}
-            >
-              <div className="link-label">{t("AmOtzoL")}</div>
-              <div className="connect-24"></div>
-            </button>
-          )}
+
         </div>
-      </div>
+      </aside>
     </>
   );
 }
+
+
 
 const AccountSwitching = ({ exit }) => {
   const { t } = useTranslation();
