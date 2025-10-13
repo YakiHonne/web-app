@@ -16,7 +16,7 @@ export default function Page({ event, author }) {
     description: event.content,
     image:
       extractFirstImage(event.content) || author?.picture || author?.banner,
-    path: `notes/${nip19.neventEncode({ id: event.id })}`,
+    path: `note/${nip19.neventEncode({ id: event.id })}`,
   };
   if (event)
     return (
@@ -33,7 +33,6 @@ export async function getStaticProps({ params }) {
   const res = await getSubData([{ ids: [id] }], 1000, undefined, undefined, 1);
   let event = {
     ...res.data[0],
-    sig: "si",
   };
   const author = await getSubData(
     [{ authors: [event.pubkey], kinds: [0] }],

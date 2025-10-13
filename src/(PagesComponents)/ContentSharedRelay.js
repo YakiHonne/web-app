@@ -190,7 +190,6 @@ const HomeFeed = ({ relay }) => {
       if (contentFrom === "videos") kinds = [34235, 21, 22];
 
       let ndk = await getNDKInstance(relay);
-      console.log(ndk)
       if (!ndk) {
         setIsConnected(false);
         setIsLoading(false);

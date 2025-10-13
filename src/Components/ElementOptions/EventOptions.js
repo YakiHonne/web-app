@@ -55,9 +55,9 @@ export default function EventOptions({
     content: event.content,
     sig: event.sig,
   };
-
-  let path = window.location.pathname;
-
+  let path = getLinkFromAddr(
+    event.naddr || event.nEvent || nip19.npubEncode(event.pubkey)
+  );
   const postAsNote = (
     <div
       onClick={(e) => {

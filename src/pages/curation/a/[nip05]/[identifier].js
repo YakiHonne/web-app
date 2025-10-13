@@ -1,7 +1,11 @@
 import React from "react";
 import { getSubData } from "@/Helpers/Controlers";
 import dynamic from "next/dynamic";
-import { getEmptyuserMetadata, getParsedAuthor, getParsedRepEvent } from "@/Helpers/Encryptions";
+import {
+  getEmptyuserMetadata,
+  getParsedAuthor,
+  getParsedRepEvent,
+} from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
@@ -11,13 +15,17 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Curation"), {
 });
 
 export default function Page({ event, author }) {
-    let parsedEvent = getParsedRepEvent(event)
+  let parsedEvent = getParsedRepEvent(event);
   let data = {
     title: parsedEvent.title || author?.display_name || author?.name,
-    description: parsedEvent.description || parsedEvent.content.substring(0, 100),
+    description:
+      parsedEvent.description || parsedEvent.content.substring(0, 100),
     image:
-    parsedEvent.image || extractFirstImage(parsedEvent.content) || author?.picture || author?.banner,
-    path: `article/${parsedEvent.naddr}`,
+      parsedEvent.image ||
+      extractFirstImage(parsedEvent.content) ||
+      author?.picture ||
+      author?.banner,
+    path: `curation/${parsedEvent.naddr}`,
   };
   if (event)
     return (
@@ -30,9 +38,15 @@ export default function Page({ event, author }) {
 
 export async function getStaticProps({ params }) {
   const { nip05, identifier } = params;
-  let pubkey = await getAuthPubkeyFromNip05(decodeURIComponent(nip05))
+  let pubkey = await getAuthPubkeyFromNip05(decodeURIComponent(nip05));
   const res = await getSubData(
-    [{ authors: [pubkey], kinds: [30004], "#d": [decodeURIComponent(identifier)] }],
+    [
+      {
+        authors: [pubkey],
+        kinds: [30004],
+        "#d": [decodeURIComponent(identifier)],
+      },
+    ],
     1000,
     undefined,
     undefined,
@@ -40,7 +54,6 @@ export async function getStaticProps({ params }) {
   );
   let event = {
     ...res.data[0],
-    sig: "si",
   };
   const author = await getSubData(
     [{ authors: [event.pubkey], kinds: [0] }],

@@ -80,22 +80,30 @@ const initiateNDKInstance = async (relay) => {
   });
 
   if (userKeys?.ext) {
-    const signer = new NDKNip07Signer(undefined, ndkInstance);
+    const signer = new NDKNip07Signer(10000, ndkInstance);
     ndkInstance.signer = signer;
   }
   if (userKeys?.sec) {
     const signer = new NDKPrivateKeySigner(userKeys.sec);
+
     ndkInstance.signer = signer;
   }
   if (userKeys?.bunker) {
-    const localKeys = new NDKPrivateKeySigner(userKeys.localKeys.sec);
-    const signer = new NDKNip46Signer(ndkInstance, userKeys.bunker, localKeys);
+    let userNip05OrConnection = userKeys?.bunker.replace(
+      /([&?])?secret=[^&]+/,
+      ""
+    ); // The NDK does not accept a url with a secret assigned
+    const signer = NDKNip46Signer.bunker(ndkInstance, userNip05OrConnection);
+    signer.on("authUrl", (url) => {
+      window.open(url, "auth", "width=600,height=600");
+    });
+    await signer.blockUntilReady();
     ndkInstance.signer = signer;
   }
   await ndkInstance.connect(2000);
   if (
     !ndkInstance.pool.relays.get(relay.endsWith("/") ? relay : `${relay}/`)
-      .connected
+      ?.connected
   ) {
     return false;
   }

@@ -37,13 +37,12 @@ export default function Repost({ isReposted, event, actions }) {
     };
     if (eventID) updateDb();
   }, [eventID]);
-
   const reactToNote = async (e) => {
     e.stopPropagation();
     if (isLoading) return;
     try {
       if (!userKeys) {
-        setIsLogin(true)
+        setIsLogin(true);
         return false;
       }
       if (isReposted) {
@@ -66,9 +65,17 @@ export default function Repost({ isReposted, event, actions }) {
         setIsLoading(false);
         return false;
       }
-
       setIsLoading(true);
-      let content = event.stringifiedEvent;
+      let toRepost = {
+        id: event.id,
+        pubkey: event.pubkey,
+        content: event.content,
+        tags: event.tags,
+        created_at: event.created_at,
+        kind: event.kind,
+        sig: event.sig,
+      };
+      let content = JSON.stringify(toRepost);
       let tags = [
         ["e", event.id],
         ["p", event.pubkey],
@@ -95,14 +102,16 @@ export default function Repost({ isReposted, event, actions }) {
 
   return (
     <>
-    {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
+      {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
       <div
         className={"round-icon-tooltip"}
         data-tooltip={t("AUvmzyU")}
         onClick={reactToNote}
       >
         <div
-          className={isReposted ? "switch-arrows-bold-24" : "switch-arrows-24 opacity-4"}
+          className={
+            isReposted ? "switch-arrows-bold-24" : "switch-arrows-24 opacity-4"
+          }
         ></div>
       </div>
     </>

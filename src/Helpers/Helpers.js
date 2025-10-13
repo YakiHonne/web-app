@@ -97,7 +97,7 @@ const getLinkFromAddr = (addr_) => {
       if (!data.data.identifier) return `/video/${addr}`;
       if (data.data.kind === 30023) return `/article/${addr}`;
       if ([30004, 30005].includes(data.data.kind)) return `/curation/${addr}`;
-      if ([34236].includes(data.data.kind)) return `/video/${addr}`;
+      if ([34236, 34235].includes(data.data.kind)) return `/video/${addr}`;
       if (data.data.kind === 30033) return `/smart-widget/${addr}`;
     }
     if (addr.startsWith("nprofile")) {

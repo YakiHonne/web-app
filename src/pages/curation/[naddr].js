@@ -2,7 +2,11 @@ import React from "react";
 import { getSubData } from "@/Helpers/Controlers";
 import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";
-import { getEmptyuserMetadata, getParsedAuthor, getParsedRepEvent } from "@/Helpers/Encryptions";
+import {
+  getEmptyuserMetadata,
+  getParsedAuthor,
+  getParsedRepEvent,
+} from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 
@@ -11,12 +15,16 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Curation"), {
 });
 
 export default function Page({ event, author }) {
-    let parsedEvent = getParsedRepEvent(event)
+  let parsedEvent = getParsedRepEvent(event);
   let data = {
     title: parsedEvent.title || author?.display_name || author?.name,
-    description: parsedEvent.description || parsedEvent.content.substring(0, 100),
+    description:
+      parsedEvent.description || parsedEvent.content.substring(0, 100),
     image:
-    parsedEvent.image || extractFirstImage(parsedEvent.content) || author?.picture || author?.banner,
+      parsedEvent.image ||
+      extractFirstImage(parsedEvent.content) ||
+      author?.picture ||
+      author?.banner,
     path: `curation/${parsedEvent.naddr}`,
   };
   if (event)
@@ -40,7 +48,6 @@ export async function getStaticProps({ params }) {
   );
   let event = {
     ...res.data[0],
-    sig: "si",
   };
   const author = await getSubData(
     [{ authors: [event.pubkey], kinds: [0] }],
