@@ -2,19 +2,21 @@ import React, { useEffect, useState } from "react";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 
 export default function NotePreview({
   content,
   linkedEvent,
   viewPort = false,
 }) {
+  const userKeys = useSelector((state) => state.userKeys);
   const [parsedContent, setParsedContent] = useState("");
   const { t } = useTranslation();
 
   useEffect(() => {
     const parseNote = () => {
       try {
-        let parsedNote = getNoteTree(content);
+        let parsedNote = getNoteTree(content, false, false, undefined, userKeys?.pub);
         setParsedContent(parsedNote);
       } catch (err) {
         console.log(err);

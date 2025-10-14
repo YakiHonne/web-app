@@ -3,11 +3,12 @@ import { useSelector } from "react-redux";
 
 export default function useToBlurMedia({ pubkey }) {
   const [isOpened, setIsOpened] = useState(false);
+  const userKeys = useSelector((state) => state.userKeys);
   const userFollowings = useSelector((state) => state.userFollowings);
   const toBlur = useMemo(() => {
-    let isFollowed = userFollowings.includes(pubkey);
+    let isFollowed = [...userFollowings, userKeys?.pub].includes(pubkey);
     return isFollowed ? false : !isOpened;
-  }, [userFollowings, isOpened]);
+  }, [userFollowings, isOpened, userKeys]);
 
   return {
     toBlur,

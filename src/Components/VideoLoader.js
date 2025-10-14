@@ -31,10 +31,9 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
     e.stopPropagation();
     setIsOpened(true);
   };
-  console.log(toBlur);
   if (isCommonPlatform === "yt") {
     return (
-      <div className="blur-box fit-container" onClick={handleVideoClick}>
+      <div className="blur-box fit-container" style={{minWidth: "100%"}} onClick={handleVideoClick}>
         <iframe
           loading="lazy"
           style={{
@@ -52,7 +51,7 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   }
   if (isCommonPlatform === "vm") {
     return (
-      <div className="blur-box fit-container" onClick={handleVideoClick}>
+      <div className="blur-box fit-container" style={{minWidth: "100%"}} onClick={handleVideoClick}>
         <iframe
           loading="lazy"
           style={{
