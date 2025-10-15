@@ -619,7 +619,7 @@ const InitEvent = async (
       }
     } else if (userKeys.bunker) {
       const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-      const bunker = new BunkerSigner(userKeys.localKeys.sec, bunkerPointer, {
+      const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
         onauth: (url) => {
           window.open(
             url,

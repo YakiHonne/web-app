@@ -678,7 +678,7 @@ const getClaimingData = async (pubkey, event_id, kind, t = null) => {
 const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-    const bunker = new BunkerSigner(userKeys.localKeys.sec, bunkerPointer, {
+    const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
       onauth: (url) => {
         window.open(
           url,
@@ -699,7 +699,7 @@ const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
 const encrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-    const bunker = new BunkerSigner(userKeys.localKeys.sec, bunkerPointer, {
+    const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
       onauth: (url) => {
         window.open(
           url,
@@ -721,7 +721,7 @@ const encrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
 const encrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-    const bunker = new BunkerSigner(userKeys.localKeys.sec, bunkerPointer, {
+    const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
       onauth: (url) => {
         window.open(
           url,
@@ -743,7 +743,7 @@ const encrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
 const decrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-    const bunker = new BunkerSigner(userKeys.localKeys.sec, bunkerPointer, {
+    const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
       onauth: (url) => {
         window.open(
           url,

@@ -13,7 +13,6 @@ export default function Quote({ isQuoted, event, actions }) {
   const [eventID, setEventID] = useState(false);
   const [showQuoteBox, setShowQuoteBox] = useState(false);
 const [isLogin, setIsLogin] = useState(false);
-
   useEffect(() => {
     const updateDb = async () => {
       let subscription = ndkInstance.subscribe([{ ids: [eventID] }], {

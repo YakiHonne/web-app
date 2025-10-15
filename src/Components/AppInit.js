@@ -70,7 +70,7 @@ import {
 } from "@/Store/Slides/Extras";
 import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
 import { toggleColorScheme } from "@/Helpers/Helpers";
-import { getConnectedAccounts, getKeys } from "@/Helpers/ClientHelpers";
+import { getConnectedAccounts, getKeys, getMetadataFromCachedAccounts } from "@/Helpers/ClientHelpers";
 import { setNostrAuthors, setNostrClients } from "@/Store/Slides/Profiles";
 import {
   decrypt04,
@@ -1165,17 +1165,6 @@ export default function AppInit() {
     } catch (err) {
       console.log(err);
     }
-  };
-
-  const getMetadataFromCachedAccounts = (pubkey) => {
-    let accounts = getConnectedAccounts();
-    let account = accounts.find((account) => account.pubkey === pubkey);
-    if (account) {
-      let metadata = { ...account };
-      delete metadata.userKeys;
-      return metadata;
-    }
-    return false;
   };
 
   return null;

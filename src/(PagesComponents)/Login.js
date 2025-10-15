@@ -31,7 +31,6 @@ import {
   NDKNip46Signer,
   NDKPrivateKeySigner,
 } from "@nostr-dev-kit/ndk";
-import relaysOnPlatform from "@/Content/Relays";
 import { FilePicker } from "@/Components/FilePicker";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
@@ -174,7 +173,7 @@ const Bunker = () => {
       if (!bunkerPointer) {
         return;
       }
-      const bunker = BunkerSigner.fromBunker(localKeys.privateKey, bunkerPointer, {
+      const bunker =  BunkerSigner.fromBunker(localKeys.privateKey, bunkerPointer, {
         onauth: (url) => {
           window.open(
             url,
@@ -215,7 +214,7 @@ const Bunker = () => {
       throw new Error("Invalid bunker input");
     }
     setIsLoading(true);
-    const bunker = new BunkerSigner(localKeys.privateKey, bunkerPointer, {
+    const bunker =  BunkerSigner.fromBunker(localKeys.privateKey, bunkerPointer, {
       onauth: (url) => {
         window.open(
           url,
