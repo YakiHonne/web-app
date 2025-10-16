@@ -56,7 +56,9 @@ export default function EventOptions({
     sig: event.sig,
   };
   let path = getLinkFromAddr(
-    event.naddr || event.nEvent || nip19.npubEncode(event.pubkey)
+    event.naddr ||
+      event.nEvent ||
+      (event.pubkey && nip19.npubEncode(event.pubkey))
   );
   const postAsNote = (
     <div
