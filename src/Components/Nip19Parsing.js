@@ -5,6 +5,7 @@ import {
   getParsedAuthor,
   getParsedRepEvent,
   getParsedSW,
+  shortenKey,
 } from "@/Helpers/Encryptions";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
 import { nip19 } from "nostr-tools";
@@ -185,13 +186,30 @@ function Nip19Parsing({ addr, minimal = false }) {
     return (
       <>
         {isParsed && (
-          <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m sc-s-18">
+          <div
+            className="fit-container fx-scattered box-pad-h-m box-pad-v-s sc-s-18"
+            style={{ margin: ".5rem 0", overflow: "visible" }}
+          >
             <div>
               <p className="gray-c">{t("AcFjmGe")}</p>
-              <p>{addr}</p>
+              <p>{shortenKey(addr, 20)}</p>
             </div>
-            <div onClick={() => copyText(addr, t("AxBmdge"))}>
-              <div className="copy"></div>
+            <div className="fx-centered">
+              <div
+                className="round-icon-small round-icon-tooltip"
+                data-tooltip={t("ArCMp34")}
+                onClick={() => copyText(addr, t("AQf5QYH"))}
+              >
+                <div className="copy"></div>
+              </div>
+              <a href={`https://njump.me/${addr}`} target="_blank">
+                <div
+                  className="round-icon-small round-icon-tooltip"
+                  data-tooltip={t("Aaa3apb")}
+                >
+                  <div className="share-icon"></div>
+                </div>
+              </a>
             </div>
           </div>
         )}

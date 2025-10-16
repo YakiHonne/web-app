@@ -1297,7 +1297,6 @@
   "A0isRl7": "Reload app",
   "AwHZ4t1": "Developed by",
   "AHhMsNx": "Republish",
-
   "ACSIT4p": "Sending to",
   "Afhjw7K": "Your followings list and friends will appear here for faster sharing experience",
   "AhOnn0t": "Try again",
@@ -1340,10 +1339,24 @@
   "AmtslmY": "Automatic cache purge",
   "A9Kte8F": "Auto-clear app cache when it reaches 1GB. Maintains performance and prevents excessive storage usage.",
   "Aggp9CS": "Zapstore",
+
   "AsxiVow": "Content actions order",
   "AZiqDAt": "Easily rearrange your post interactions to match your preferred order.",
   "AuafJAx": "Quotes",
-  "AOEEyh3": "",
-  "AfkaQwa": "",
-  "AJbVpAT": ""
+  "AOEEyh3": "Blur non-followed media",
+  "AfkaQwa": "Automatically blur images and videos from non-followed users until you tap to reveal.",
+  "AJbVpAT": "Relays feed list is empty",
+  "AyV6Rei": "Add more relays to your list to enjoy a tailored feed",
+  "A0zZsLz": "Add relays",
+  "Aaa3apb": "Open in njump.me",
+  "AQf5QYH": "The address was copied",
+  "AJj3cLI": "Share your thoughts on this relay",
+  "ABMZqcX": "",
+  "AfTjNox": "",
+  "A6xxSyJ": "",
+  "A77m0JH": "",
+  "ADnwK2N": "",
+  "AFurzsv": "",
+  "AhxozEk": "",
+  "ANBz1p0": ""
 }

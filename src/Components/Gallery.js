@@ -165,16 +165,19 @@ export default function Gallery({ imgs, pubkey }) {
         />
       )}
       {carouselItems.length === 1 && (
-        <div className="image-grid blur-box" onClick={handleUnblur}>
+        <div
+          className="image-grid blur-box"
+          style={{ margin: ".5rem 0 .5rem 0" }}
+          onClick={handleUnblur}
+        >
           <img
             onClick={(e) => {
               handleOpenImage(e, 0);
             }}
             className={!toBlur ? "sc-s-18" : "blurred sc-s-18"}
             style={{
-              margin: ".5rem 0 .5rem 0",
               cursor: "zoom-in",
-              maxWidth: "95%",
+              maxWidth: "100%",
               objectFit: "fit",
               maxHeight: "600px",
               pointerEvents: toBlur ? "none" : "auto",

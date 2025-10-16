@@ -1311,7 +1311,7 @@ main {
     position: fixed;
     top: 80px;
     left: 0;
-    z-index: 100;
+    z-index: 101;
 }
 
 .menu-toggle {
@@ -2363,7 +2363,8 @@ h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] {
     border-radius: var(--border-r-18);
     display: inline-block;
     cursor: pointer;
-    max-width: max-content;
+    max-width: 95%;
+    width: fit-content;
     display: flex;
     justify-content: flex-start;
     /* max-width: 100%; */

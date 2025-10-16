@@ -33,7 +33,11 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   };
   if (isCommonPlatform === "yt") {
     return (
-      <div className="blur-box fit-container" style={{minWidth: "100%"}} onClick={handleVideoClick}>
+      <div
+        className="blur-box fit-container"
+        style={{ minWidth: "100%", margin: ".5rem auto" }}
+        onClick={handleVideoClick}
+      >
         <iframe
           loading="lazy"
           style={{
@@ -51,7 +55,11 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   }
   if (isCommonPlatform === "vm") {
     return (
-      <div className="blur-box fit-container" style={{minWidth: "100%"}} onClick={handleVideoClick}>
+      <div
+        className="blur-box fit-container"
+        style={{ minWidth: "100%", margin: ".5rem auto" }}
+        onClick={handleVideoClick}
+      >
         <iframe
           loading="lazy"
           style={{
@@ -68,7 +76,11 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
     );
   }
   return (
-    <div className="blur-box fit-container" onClick={handleVideoClick}>
+    <div
+      className="blur-box fit-container"
+      style={{ margin: ".5rem auto", minWidth: "100%" }}
+      onClick={handleVideoClick}
+    >
       <video
         ref={videoRef}
         controls={true}
@@ -79,7 +91,6 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
         width={"100%"}
         className={`sc-s-18 ${toBlur ? "blurred" : ""}`}
         style={{
-          margin: ".5rem auto",
           aspectRatio: "16/9",
           pointerEvents: toBlur ? "none" : "auto",
         }}

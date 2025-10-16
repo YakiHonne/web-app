@@ -202,15 +202,16 @@ export function getNoteTree(
           <React.Fragment key={key}>
             {hashes.slice(1)}
             <Link
-              style={{ wordBreak: "break-word", color: "var(--orange-main)" }}
+              style={{ position: "relative", display: "inline-flex" }}
+              className="fx-centered pointer sticker sticker-normal sticker-blue-side"
               href={{
                 pathname: `/search`,
                 query: { tab: "notes", keyword: text },
               }}
-              className="btn-text-gray"
               onClick={(e) => e.stopPropagation()}
             >
-              {`${hashes.slice(-1)}${text}`}
+              <p>{`${hashes.slice(-1)}${text}`}</p>
+              <div className="share-icon"></div>
             </Link>{" "}
           </React.Fragment>
         );
@@ -563,6 +564,7 @@ export function getDefaultSettings(pubkey) {
     longPress: "notes",
     defaultReaction: "❤️",
     oneTapReaction: false,
+    blurNonFollowedMedia: false,
     reactionsOrder: ["likes", "replies", "repost", "quote", "zap"],
     contentList: [
       { tab: "recent", isHidden: false },

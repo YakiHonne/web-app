@@ -242,6 +242,7 @@ export default function Note({ event }) {
                   </div>
                 </div>
                 <CommentsSection
+                  tagKind={note.rootData ? note.rootData[0] : "e"}
                   noteTags={note.tags}
                   id={note.id}
                   eventPubkey={note.pubkey}

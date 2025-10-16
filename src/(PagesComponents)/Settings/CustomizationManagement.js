@@ -1,10 +1,7 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useDispatch } from "react-redux";
-import { setToast } from "../../Store/Slides/Publishers";
 import {
   getCustomSettings,
-  getDefaultSettings,
   getRepliesViewSettings,
   setRepliesViewSettings,
   updateCustomSettings,
@@ -14,6 +11,7 @@ import EmojiPicker from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import useCloseContainer from "@/Hooks/useCloseContainer";
 import { DraggableComp } from "@/Components/DraggableComp";
+import Toggle from "@/Components/Toggle";
 let boxView =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/box-view.png";
 let threadView =
@@ -41,6 +39,11 @@ export function CustomizationManagement({
     customSettings.collapsedNote === undefined
       ? true
       : customSettings.collapsedNote
+  );
+  const [blurNonFollowedMedia, setBlurNonFollowedMedia] = useState(
+    customSettings.blurNonFollowedMedia === undefined
+      ? true
+      : customSettings.blurNonFollowedMedia
   );
   const [userHoverPreview, setUserHoverPreview] = useState(
     customSettings.userHoverPreview
@@ -149,6 +152,7 @@ export function CustomizationManagement({
       collapsedNote: !collapsedNote,
       userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
       reactionsOrder,
       longPress,
@@ -162,6 +166,7 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview: !userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
       reactionsOrder,
       longPress,
@@ -176,6 +181,7 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview,
       oneTapReaction: !oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
       reactionsOrder,
       longPress,
@@ -190,6 +196,7 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction: emoji,
       reactionsOrder,
       longPress,
@@ -204,6 +211,7 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
       reactionsOrder,
       longPress: data,
@@ -219,8 +227,24 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
       reactionsOrder: newList,
+      longPress,
+      collapsedNote,
+      notification,
+      contentList,
+    });
+  };
+  const handleBlurNonFollowedMedia = () => {
+    setBlurNonFollowedMedia(!blurNonFollowedMedia);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      blurNonFollowedMedia: !blurNonFollowedMedia,
+      defaultReaction,
+      reactionsOrder,
       longPress,
       collapsedNote,
       notification,
@@ -238,20 +262,22 @@ export function CustomizationManagement({
       {showFeedSettings && (
         <FeedSettings
           exit={() => setShowFeedSettings(false)}
-          handleCollapedNote={handleCollapedNote}
-          handleRepliesView={handleRepliesView}
           collapsedNote={collapsedNote}
           selectedRepliesView={selectedRepliesView}
           homeContentSuggestion={homeContentSuggestion}
-          handleHomeContentSuggestion={handleHomeContentSuggestion}
           userToFollowSuggestion={userToFollowSuggestion}
           contentSuggestion={contentSuggestion}
           interestSuggestion={interestSuggestion}
+          reactionsOrder={reactionsOrder}
+          blurNonFollowedMedia={blurNonFollowedMedia}
+          handleCollapedNote={handleCollapedNote}
+          handleRepliesView={handleRepliesView}
+          handleHomeContentSuggestion={handleHomeContentSuggestion}
           handleUserToFollowSuggestion={handleUserToFollowSuggestion}
           handleContentSuggestion={handleContentSuggestion}
           handleInterestSuggestion={handleInterestSuggestion}
-          reactionsOrder={reactionsOrder}
           handleReactionsOrder={handleReactionsOrder}
+          handleBlurNonFollowedMedia={handleBlurNonFollowedMedia}
         />
       )}
 
@@ -319,12 +345,10 @@ export function CustomizationManagement({
                 <p>{t("AFVPHti")}</p>
                 <p className="p-medium gray-c">{t("A864200")}</p>
               </div>
-              <div
-                className={`toggle ${
-                  !userHoverPreview ? "toggle-dim-gray" : ""
-                } ${userHoverPreview ? "toggle-c1" : "toggle-dim-gray"}`}
-                onClick={handleUserHoverPreview}
-              ></div>
+              <Toggle
+                status={userHoverPreview}
+                setStatus={handleUserHoverPreview}
+              />
             </div>
             <hr />
             <div className="fx-scattered fit-container">
@@ -343,12 +367,10 @@ export function CustomizationManagement({
                 <p>{t("A06GNpE")}</p>
                 <p className="p-medium gray-c">{t("AibLlqg")}</p>
               </div>
-              <div
-                className={`toggle ${
-                  !oneTapReaction ? "toggle-dim-gray" : ""
-                } ${oneTapReaction ? "toggle-c1" : "toggle-dim-gray"}`}
-                onClick={handleOneTapReaction}
-              ></div>
+              <Toggle
+                status={oneTapReaction}
+                setStatus={handleOneTapReaction}
+              />
             </div>
           </div>
         )}
@@ -375,6 +397,8 @@ const FeedSettings = ({
   interestSuggestion,
   reactionsOrder,
   handleReactionsOrder,
+  blurNonFollowedMedia,
+  handleBlurNonFollowedMedia,
 }) => {
   const { t } = useTranslation();
   return (
@@ -439,12 +463,14 @@ const FeedSettings = ({
             <p>{t("AozzmTY")}</p>
             <p className="p-medium gray-c">{t("A3nTKfp")}</p>
           </div>
-          <div
-            className={`toggle ${!collapsedNote ? "toggle-dim-gray" : ""} ${
-              collapsedNote ? "toggle-c1" : "toggle-dim-gray"
-            }`}
-            onClick={handleCollapedNote}
-          ></div>
+          <Toggle status={collapsedNote} setStatus={handleCollapedNote} />
+        </div>
+        <div className="fx-scattered fit-container">
+          <div>
+            <p>{t("AOEEyh3")}</p>
+            <p className="p-medium gray-c">{t("AfkaQwa")}</p>
+          </div>
+          <Toggle status={blurNonFollowedMedia} setStatus={handleBlurNonFollowedMedia} />
         </div>
         <div className="fx-centered fx-col fx-start-h fx-start-v fit-container">
           <div>
@@ -471,12 +497,10 @@ const FeedSettings = ({
             <p>{t("AZZ4XLg")}</p>
             <p className="p-medium gray-c">{t("AgBOrIx")}</p>
           </div>
-          <div
-            className={`toggle ${
-              homeContentSuggestion ? "toggle-dim-gray" : ""
-            } ${!homeContentSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
-            onClick={handleHomeContentSuggestion}
-          ></div>
+          <Toggle
+            status={homeContentSuggestion}
+            setStatus={handleHomeContentSuggestion}
+          />
         </div>
         <hr />
         <div className="fx-scattered fit-container">
@@ -484,12 +508,10 @@ const FeedSettings = ({
             <p>{t("AE7aj4C")}</p>
             <p className="p-medium gray-c">{t("AyBFzxq")}</p>
           </div>
-          <div
-            className={`toggle ${
-              userToFollowSuggestion ? "toggle-dim-gray" : ""
-            } ${!userToFollowSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
-            onClick={handleUserToFollowSuggestion}
-          ></div>
+          <Toggle
+            status={userToFollowSuggestion}
+            setStatus={handleUserToFollowSuggestion}
+          />
         </div>
         <hr />
         <div className="fx-scattered fit-container">
@@ -497,12 +519,10 @@ const FeedSettings = ({
             <p>{t("Ax8NFUb")}</p>
             <p className="p-medium gray-c">{t("ARDBNh7")}</p>
           </div>
-          <div
-            className={`toggle ${contentSuggestion ? "toggle-dim-gray" : ""} ${
-              !contentSuggestion ? "toggle-c1" : "toggle-dim-gray"
-            }`}
-            onClick={handleContentSuggestion}
-          ></div>
+          <Toggle
+            status={contentSuggestion}
+            setStatus={handleContentSuggestion}
+          />
         </div>
         <hr />
         <div className="fx-scattered fit-container">
@@ -510,12 +530,10 @@ const FeedSettings = ({
             <p>{t("ANiWe9M")}</p>
             <p className="p-medium gray-c">{t("AXgwD7C")}</p>
           </div>
-          <div
-            className={`toggle ${interestSuggestion ? "toggle-dim-gray" : ""} ${
-              !interestSuggestion ? "toggle-c1" : "toggle-dim-gray"
-            }`}
-            onClick={handleInterestSuggestion}
-          ></div>
+          <Toggle
+            status={interestSuggestion}
+            setStatus={handleInterestSuggestion}
+          />
         </div>
       </div>
     </div>
@@ -568,7 +586,7 @@ const Reaction = ({ defaultReaction, handleDefaultReaction }) => {
   );
 };
 
-const ReactionItem = ({ item, index }) => {
+const ReactionItem = ({ item }) => {
   const { t } = useTranslation();
   const elements = {
     likes: (

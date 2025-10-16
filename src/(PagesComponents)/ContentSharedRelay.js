@@ -26,6 +26,7 @@ import { getNDKInstance } from "@/Helpers/utils";
 import Slider from "@/Components/Slider";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
+import PostNotePortal from "@/Components/PostNotePortal";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -61,6 +62,7 @@ const notesReducer = (notes, action) => {
 
 export default function ContentSharedRelay() {
   const router = useRouter();
+  const { t } = useTranslation();
   //   const selectedFilter = getDefaultFilter(2);
   const extrasRef = useRef(null);
   const relay = router.query.r;
@@ -119,6 +121,10 @@ export default function ContentSharedRelay() {
                         <RelayPreview url={relay} addToFavList={true} />
                       </div>
                     </div>
+                    <PostNotePortal
+                      protectedRelay={relay}
+                      label={t("AJj3cLI")}
+                    />
                     <HomeFeed relay={relay} />
                   </div>
                 </>

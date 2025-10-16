@@ -215,7 +215,12 @@ export default function ContentSource({
       <div style={{ position: "relative" }} ref={optionsRef}>
         <div
           className="fx-scattered if option pointer"
-          style={{ height: "40px", padding: "0 .5rem", maxWidth: "300px", border: "none" }}
+          style={{
+            height: "40px",
+            padding: "0 .5rem",
+            maxWidth: "300px",
+            border: "none",
+          }}
           onClick={(e) => {
             e.stopPropagation();
             setShowOptions(!showOptions);
@@ -232,7 +237,7 @@ export default function ContentSource({
               top: "110%",
               backgroundColor: "var(--dim-gray)",
               width: "350px",
-              maxHeight: "40vh",
+              maxHeight: userFavRelays.relays?.length === 0 ? "100vh" : "40vh",
               overflowY: "scroll",
               zIndex: 1000,
             }}
@@ -322,6 +327,24 @@ export default function ContentSource({
                     </div>
                   );
               })}
+              {userFavRelays.relays?.length === 0 && (
+                <div className="box-pad-h-m fit-container box-marg-s fx-centered">
+                  <div className="sc-s-18 box-pad-v fit-container bg-sp fx-centered fx-col">
+                    <p className="p-centered box-pad-h">{t("AJbVpAT")}</p>
+                    <p className="p-centered box-pad-h gray-c p-medium">
+                      {t("AyV6Rei")}
+                    </p>
+                    <button
+                      className="btn btn-normal btn-small"
+                      onClick={() =>
+                        setShowFeedMarketPlace(!showFeedMarketplace)
+                      }
+                    >
+                      {t("A0zZsLz")}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

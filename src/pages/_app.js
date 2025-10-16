@@ -84,7 +84,7 @@ function App({ Component, pageProps }) {
         <WarningBarClient />
         <div
           className="page-container fit-container fx-centered fx-start-v"
-          style={{ height: "100dvh" }} // parent container no scroll
+          style={{ height: "100dvh" }}
         >
           <div className="main-container">
             <main className="fit-container fx-centered fx-end-h fx-start-v">

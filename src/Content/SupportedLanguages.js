@@ -8,6 +8,7 @@ const supportedLanguageKeys = [
   "th",
   "ja",
   "ar",
+  "hi",
 ];
 const supportedLanguage = [
   {
@@ -62,6 +63,12 @@ const supportedLanguage = [
     display_name: "العربية",
     value: "ar",
     left_el: <div className="flag-ar"></div>,
+    disabled: false,
+  },
+  {
+    display_name: "भारतीय",
+    value: "hi",
+    left_el: <div className="flag-hi"></div>,
     disabled: false,
   },
 ];

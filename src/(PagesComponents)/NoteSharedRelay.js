@@ -6,7 +6,7 @@ import React, {
   Fragment,
 } from "react";
 import { useSelector } from "react-redux";
-import {  getParsedNote } from "@/Helpers/ClientHelpers";
+import { getParsedNote } from "@/Helpers/ClientHelpers";
 import ArrowUp from "@/Components/ArrowUp";
 import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
@@ -23,6 +23,7 @@ import RelayPreview from "./Relays/RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
 import Backbar from "@/Components/Backbar";
 import { getNDKInstance } from "@/Helpers/utils";
+import PostNotePortal from "@/Components/PostNotePortal";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -57,6 +58,7 @@ const notesReducer = (notes, action) => {
 };
 
 export default function NoteSharedRelay() {
+  const { t } = useTranslation();
   const router = useRouter();
   const extrasRef = useRef(null);
   const relay = router.query.r;
@@ -115,6 +117,10 @@ export default function NoteSharedRelay() {
                         <RelayPreview url={relay} addToFavList={true} />
                       </div>
                     </div>
+                    <PostNotePortal
+                      protectedRelay={relay}
+                      label={t("AJj3cLI")}
+                    />
                     <HomeFeed relay={relay} />
                   </div>
                 </>
@@ -156,7 +162,7 @@ const HomeFeed = ({ relay }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
   const [isConnected, setIsConnected] = useState(true);
-  
+
   useEffect(() => {
     straightUp();
     dispatchNotes({ type: "remove-events" });
@@ -180,7 +186,7 @@ const HomeFeed = ({ relay }) => {
       let since = twoDaysPrior;
 
       let ndk = await getNDKInstance(relay);
-      if(!ndk){
+      if (!ndk) {
         setIsConnected(false);
         setIsLoading(false);
         return;

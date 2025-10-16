@@ -11,15 +11,13 @@ import { getParsedNote } from "@/Helpers/ClientHelpers";
 import ArrowUp from "@/Components/ArrowUp";
 import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
-import { getFollowings, saveUsers } from "@/Helpers/DB";
+import { saveUsers } from "@/Helpers/DB";
 import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import HomeCarouselContentSuggestions from "@/Components/HomeCarouselContentSuggestions";
-import UserProfilePic from "@/Components/UserProfilePic";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
 import { straightUp } from "@/Helpers/Helpers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import KindOne from "@/Components/KindOne";
-import PostAsNote from "@/Components/PostAsNote";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
 import { getKeys } from "@/Helpers/ClientHelpers";
@@ -28,6 +26,7 @@ import SuggestionsCards from "@/Components/SuggestionsCards/SuggestionsCards";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import RecentPosts from "@/Components/RecentPosts";
 import { getNDKInstance } from "@/Helpers/utils";
+import PostNotePortal from "@/Components/PostNotePortal";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -98,7 +97,13 @@ export default function Home() {
               <div style={{ height: "75px" }} className="fit-container"></div>
               <HomeCarouselContentSuggestions />
               <div className="main-middle">
-                <PostNote selectedCategory={selectedCategory} />
+                <PostNotePortal
+                  protectedRelay={
+                    selectedCategory.group === "af"
+                      ? selectedCategory.value
+                      : false
+                  }
+                />
                 {selectedCategory !== SUGGESTED_TAGS_VALUE && (
                   <HomeFeed
                     selectedCategory={selectedCategory}
@@ -121,42 +126,6 @@ export default function Home() {
     </>
   );
 }
-
-const PostNote = ({ selectedCategory }) => {
-  const { t } = useTranslation();
-  const userKeys = useSelector((state) => state.userKeys);
-  const [showWriteNote, setShowWriteNote] = useState(false);
-  let protectedRelay =
-    selectedCategory.group === "af" ? selectedCategory.value : false;
-
-  return (
-    <>
-      {userKeys && !showWriteNote && (
-        <div
-          className="fit-container fx-centered fx-start-h  box-pad-h-m box-pad-v-m pointer"
-          style={{
-            overflow: "visible",
-          }}
-          onClick={() => setShowWriteNote(true)}
-        >
-          <UserProfilePic size={40} mainAccountUser={true} />
-          <div className="sc-s-18 box-pad-h-s box-pad-v-s fit-container">
-            <p className="gray-c p-big">{t("AGAXMQ3")}</p>
-          </div>
-        </div>
-      )}
-
-      {userKeys && showWriteNote && (
-        <PostAsNote
-          content={""}
-          exit={() => setShowWriteNote(false)}
-          protectedRelay={protectedRelay}
-        />
-      )}
-    </>
-  );
-};
-
 const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const { t } = useTranslation();
   const userMutedList = useSelector((state) => state.userMutedList);
@@ -165,7 +134,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   );
   const userFollowings = useSelector((state) => state.userFollowings);
   const userKeys = useSelector((state) => state.userKeys);
-  // const [userFollowings, setUserFollowings] = useState(false);
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(true);

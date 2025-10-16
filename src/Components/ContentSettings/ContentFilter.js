@@ -826,8 +826,8 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-        <div className="fit-container fx-centered">
-          <div className=" fx">
+        <div className="fit-container fx-centered fx-wrap">
+          <div style={{flex: "1 1 100px"}}>
             <p className="gray-c">{t("AZFMiVf")}</p>
             <input
               type="date"
@@ -838,7 +838,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
               className="if ifs-full"
             />
           </div>
-          <div className=" fx">
+          <div style={{flex: "1 1 100px"}}>
             <p className="gray-c">{t("AWUmU6P")}</p>
             <input
               type="date"

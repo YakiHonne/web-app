@@ -294,6 +294,7 @@ export default function SearchNetwork({ exit }) {
             style={{
               borderBottom: "1px solid var(--very-dim-gray)",
               padding: ".5rem 1rem",
+              top: 0
             }}
           >
             <div className="search-24"></div>
