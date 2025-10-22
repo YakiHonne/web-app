@@ -81,11 +81,12 @@ const initiateNDKInstance = async (relay) => {
 
   if (userKeys?.ext) {
     const signer = new NDKNip07Signer(10000, ndkInstance);
+    await signer.blockUntilReady();
     ndkInstance.signer = signer;
   }
   if (userKeys?.sec) {
     const signer = new NDKPrivateKeySigner(userKeys.sec);
-
+    await signer.blockUntilReady();
     ndkInstance.signer = signer;
   }
   if (userKeys?.bunker) {
@@ -100,7 +101,7 @@ const initiateNDKInstance = async (relay) => {
     await signer.blockUntilReady();
     ndkInstance.signer = signer;
   }
-  await ndkInstance.connect(2000);
+  await ndkInstance.connect(4000);
   if (
     !ndkInstance.pool.relays.get(relay.endsWith("/") ? relay : `${relay}/`)
       ?.connected

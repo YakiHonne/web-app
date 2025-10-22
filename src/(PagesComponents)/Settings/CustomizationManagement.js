@@ -1,18 +1,19 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { useDispatch } from "react-redux";
-import { setToast } from "../../Store/Slides/Publishers";
 import {
   getCustomSettings,
-  getDefaultSettings,
-  getRepliesViewSettings,
-  setRepliesViewSettings,
   updateCustomSettings,
 } from "@/Helpers/ClientHelpers";
 import Select from "@/Components/Select";
 import EmojiPicker from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import useCloseContainer from "@/Hooks/useCloseContainer";
+import { DraggableComp } from "@/Components/DraggableComp";
+import Toggle from "@/Components/Toggle";
+import { useRouter } from "next/router";
+import { localStorage_ } from "@/Helpers/utils";
+import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+// import PostReactionsPreview from "@/Components/PostReactionsPreview";
 let boxView =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/box-view.png";
 let threadView =
@@ -25,21 +26,32 @@ export function CustomizationManagement({
   state,
 }) {
   const { t } = useTranslation();
+  const { query } = useRouter();
   const customSettings = getCustomSettings();
-  const [showFeedSettings, setShowFeedSettings] = useState(false);
+  const [showFeedSettings, setShowFeedSettings] = useState(
+    query.tab === "customization" ? true : false
+  );
+  const [homeContentSuggestion, setHomeContentSuggestion] = useState(
+    localStorage_?.getItem("hsuggest")
+  );
   const [userToFollowSuggestion, setUserToFollowSuggestion] = useState(
-    localStorage?.getItem("hsuggest1")
+    localStorage_?.getItem("hsuggest1")
   );
   const [contentSuggestion, setContentSuggestion] = useState(
-    localStorage?.getItem("hsuggest2")
+    localStorage_?.getItem("hsuggest2")
   );
   const [interestSuggestion, setInterestSuggestion] = useState(
-    localStorage?.getItem("hsuggest3")
+    localStorage_?.getItem("hsuggest3")
   );
   const [collapsedNote, setCollapsedNote] = useState(
     customSettings.collapsedNote === undefined
       ? true
       : customSettings.collapsedNote
+  );
+  const [blurNonFollowedMedia, setBlurNonFollowedMedia] = useState(
+    customSettings.blurNonFollowedMedia === undefined
+      ? true
+      : customSettings.blurNonFollowedMedia
   );
   const [userHoverPreview, setUserHoverPreview] = useState(
     customSettings.userHoverPreview
@@ -50,17 +62,24 @@ export function CustomizationManagement({
   const [defaultReaction, setDefaultReaction] = useState(
     customSettings.defaultReaction || "❤️"
   );
+  const [reactionsSettings, setReactionsSettings] = useState(
+    customSettings.reactionsSettings || [
+      { reaction: "likes", status: true },
+      { reaction: "replies", status: true },
+      { reaction: "repost", status: true },
+      { reaction: "quote", status: true },
+      { reaction: "zap", status: true },
+    ]
+  );
   const [oneTapReaction, setOneTapReaction] = useState(
     customSettings.oneTapReaction || false
   );
-  const contentList = customSettings.contentList;
-
   const [selectedRepliesView, setSelectedRepliesView] = useState(
-    getRepliesViewSettings() ? "thread" : "box"
+    ["thread", "box"].includes(customSettings.repliesView)
+      ? customSettings.repliesView
+      : "thread"
   );
-  const [homeContentSuggestion, setHomeContentSuggestion] = useState(
-    localStorage?.getItem("hsuggest")
-  );
+
   const notification = customSettings.notification;
 
   const longPressOptions = [
@@ -86,6 +105,11 @@ export function CustomizationManagement({
       }
     }
   }, [state]);
+  useEffect(() => {
+    if (query.tab === "customization") {
+      setShowFeedSettings(true);
+    }
+  }, [query]);
 
   const handleHomeContentSuggestion = () => {
     if (homeContentSuggestion) {
@@ -139,10 +163,11 @@ export function CustomizationManagement({
       collapsedNote: !collapsedNote,
       userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
+      reactionsSettings,
       longPress,
       notification,
-      contentList,
     });
   };
   const handleUserHoverPreview = () => {
@@ -151,11 +176,12 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview: !userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
+      reactionsSettings,
       longPress,
       collapsedNote,
       notification,
-      contentList,
     });
   };
   const handleOneTapReaction = () => {
@@ -164,11 +190,12 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview,
       oneTapReaction: !oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
+      reactionsSettings,
       longPress,
       collapsedNote,
       notification,
-      contentList,
     });
   };
   const handleDefaultReaction = (emoji) => {
@@ -177,11 +204,12 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction: emoji,
+      reactionsSettings,
       longPress,
       collapsedNote,
       notification,
-      contentList,
     });
   };
   const handleLongPress = (data) => {
@@ -190,17 +218,73 @@ export function CustomizationManagement({
       pubkey: userKeys.pub,
       userHoverPreview,
       oneTapReaction,
+      blurNonFollowedMedia,
       defaultReaction,
+      reactionsSettings,
       longPress: data,
       collapsedNote,
       notification,
-      contentList,
+    });
+  };
+  const handleReactionsSettings = (data) => {
+    setReactionsSettings(data);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      blurNonFollowedMedia,
+      defaultReaction,
+      reactionsSettings: data,
+      longPress,
+      collapsedNote,
+      notification,
+    });
+  };
+  const handleChangeReactionStatus = (index, status) => {
+    let newList = structuredClone(reactionsSettings);
+    newList[index].status = status;
+    setReactionsSettings(newList);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      blurNonFollowedMedia,
+      defaultReaction,
+      reactionsSettings: newList,
+      longPress,
+      collapsedNote,
+      notification,
+    });
+  };
+  const handleBlurNonFollowedMedia = () => {
+    setBlurNonFollowedMedia(!blurNonFollowedMedia);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      blurNonFollowedMedia: !blurNonFollowedMedia,
+      defaultReaction,
+      reactionsSettings,
+      longPress,
+      collapsedNote,
+      notification,
     });
   };
 
   const handleRepliesView = (value) => {
-    setRepliesViewSettings(value);
     setSelectedRepliesView(value);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      blurNonFollowedMedia,
+      repliesView: value,
+      defaultReaction,
+      reactionsSettings,
+      longPress,
+      collapsedNote,
+      notification,
+    });
   };
 
   return (
@@ -208,18 +292,23 @@ export function CustomizationManagement({
       {showFeedSettings && (
         <FeedSettings
           exit={() => setShowFeedSettings(false)}
-          handleCollapedNote={handleCollapedNote}
-          handleRepliesView={handleRepliesView}
           collapsedNote={collapsedNote}
           selectedRepliesView={selectedRepliesView}
           homeContentSuggestion={homeContentSuggestion}
-          handleHomeContentSuggestion={handleHomeContentSuggestion}
           userToFollowSuggestion={userToFollowSuggestion}
           contentSuggestion={contentSuggestion}
           interestSuggestion={interestSuggestion}
+          reactionsSettings={reactionsSettings}
+          blurNonFollowedMedia={blurNonFollowedMedia}
+          handleCollapedNote={handleCollapedNote}
+          handleRepliesView={handleRepliesView}
+          handleHomeContentSuggestion={handleHomeContentSuggestion}
           handleUserToFollowSuggestion={handleUserToFollowSuggestion}
           handleContentSuggestion={handleContentSuggestion}
           handleInterestSuggestion={handleInterestSuggestion}
+          handleReactionsSettings={handleReactionsSettings}
+          handleBlurNonFollowedMedia={handleBlurNonFollowedMedia}
+          handleChangeReactionStatus={handleChangeReactionStatus}
         />
       )}
 
@@ -287,12 +376,10 @@ export function CustomizationManagement({
                 <p>{t("AFVPHti")}</p>
                 <p className="p-medium gray-c">{t("A864200")}</p>
               </div>
-              <div
-                className={`toggle ${
-                  !userHoverPreview ? "toggle-dim-gray" : ""
-                } ${userHoverPreview ? "toggle-c1" : "toggle-dim-gray"}`}
-                onClick={handleUserHoverPreview}
-              ></div>
+              <Toggle
+                status={userHoverPreview}
+                setStatus={handleUserHoverPreview}
+              />
             </div>
             <hr />
             <div className="fx-scattered fit-container">
@@ -311,12 +398,10 @@ export function CustomizationManagement({
                 <p>{t("A06GNpE")}</p>
                 <p className="p-medium gray-c">{t("AibLlqg")}</p>
               </div>
-              <div
-                className={`toggle ${
-                  !oneTapReaction ? "toggle-dim-gray" : ""
-                } ${oneTapReaction ? "toggle-c1" : "toggle-dim-gray"}`}
-                onClick={handleOneTapReaction}
-              ></div>
+              <Toggle
+                status={oneTapReaction}
+                setStatus={handleOneTapReaction}
+              />
             </div>
           </div>
         )}
@@ -341,6 +426,11 @@ const FeedSettings = ({
   userToFollowSuggestion,
   contentSuggestion,
   interestSuggestion,
+  reactionsSettings,
+  handleReactionsSettings,
+  blurNonFollowedMedia,
+  handleBlurNonFollowedMedia,
+  handleChangeReactionStatus,
 }) => {
   const { t } = useTranslation();
   return (
@@ -380,16 +470,6 @@ const FeedSettings = ({
             <div
               className="fx fx-centered fx-col sc-s-18 bg-sp "
               style={{
-                borderColor: selectedRepliesView !== "box" ? "" : "var(--c1)",
-              }}
-              onClick={() => handleRepliesView("box")}
-            >
-              <img src={boxView} style={{ width: "100%" }} alt="" />
-              <p className="gray-c box-pad-v-s">{t("ACz8zwo")}</p>
-            </div>
-            <div
-              className="fx fx-centered fx-col sc-s-18 bg-sp "
-              style={{
                 borderColor:
                   selectedRepliesView !== "thread" ? "" : "var(--c1)",
               }}
@@ -398,6 +478,16 @@ const FeedSettings = ({
               <img src={threadView} style={{ width: "100%" }} alt="" />
               <p className="gray-c box-pad-v-s">{t("AlwU99D")}</p>
             </div>
+            <div
+              className="fx fx-centered fx-col sc-s-18 bg-sp "
+              style={{
+                borderColor: selectedRepliesView !== "box" ? "" : "var(--c1)",
+              }}
+              onClick={() => handleRepliesView("box")}
+            >
+              <img src={boxView} style={{ width: "100%" }} alt="" />
+              <p className="gray-c box-pad-v-s">{t("ACz8zwo")}</p>
+            </div>
           </div>
         </div>
         <div className="fx-scattered fit-container">
@@ -405,12 +495,39 @@ const FeedSettings = ({
             <p>{t("AozzmTY")}</p>
             <p className="p-medium gray-c">{t("A3nTKfp")}</p>
           </div>
-          <div
-            className={`toggle ${!collapsedNote ? "toggle-dim-gray" : ""} ${
-              collapsedNote ? "toggle-c1" : "toggle-dim-gray"
-            }`}
-            onClick={handleCollapedNote}
-          ></div>
+          <Toggle status={collapsedNote} setStatus={handleCollapedNote} />
+        </div>
+        <div className="fx-scattered fit-container">
+          <div>
+            <p>{t("AOEEyh3")}</p>
+            <p className="p-medium gray-c">{t("AfkaQwa")}</p>
+          </div>
+          <Toggle
+            status={blurNonFollowedMedia}
+            setStatus={handleBlurNonFollowedMedia}
+          />
+        </div>
+        <div className="fx-centered fx-col fx-start-h fx-start-v fit-container">
+          <div>
+            <p>{t("AsxiVow")}</p>
+            <p className="p-medium gray-c">{t("AZiqDAt")}</p>
+          </div>
+          <DraggableComp
+            children={reactionsSettings.map((_) => {
+              return {
+                ..._,
+                id: _.reaction,
+              };
+            })}
+            setNewOrderedList={handleReactionsSettings}
+            props={{
+              handleChangeReactionStatus,
+            }}
+            component={ReactionItem}
+            background={false}
+          />
+          <p className="gray-c p-medium">{t("Ao1TlO5")}</p>
+          <PostReactionsPreview />
         </div>
         <div className="fit-container">
           <p className="c1-c p-big">{t("Av6mqrU")}</p>
@@ -420,12 +537,10 @@ const FeedSettings = ({
             <p>{t("AZZ4XLg")}</p>
             <p className="p-medium gray-c">{t("AgBOrIx")}</p>
           </div>
-          <div
-            className={`toggle ${
-              homeContentSuggestion ? "toggle-dim-gray" : ""
-            } ${!homeContentSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
-            onClick={handleHomeContentSuggestion}
-          ></div>
+          <Toggle
+            status={homeContentSuggestion}
+            setStatus={handleHomeContentSuggestion}
+          />
         </div>
         <hr />
         <div className="fx-scattered fit-container">
@@ -433,12 +548,10 @@ const FeedSettings = ({
             <p>{t("AE7aj4C")}</p>
             <p className="p-medium gray-c">{t("AyBFzxq")}</p>
           </div>
-          <div
-            className={`toggle ${
-              userToFollowSuggestion ? "toggle-dim-gray" : ""
-            } ${!userToFollowSuggestion ? "toggle-c1" : "toggle-dim-gray"}`}
-            onClick={handleUserToFollowSuggestion}
-          ></div>
+          <Toggle
+            status={userToFollowSuggestion}
+            setStatus={handleUserToFollowSuggestion}
+          />
         </div>
         <hr />
         <div className="fx-scattered fit-container">
@@ -446,12 +559,10 @@ const FeedSettings = ({
             <p>{t("Ax8NFUb")}</p>
             <p className="p-medium gray-c">{t("ARDBNh7")}</p>
           </div>
-          <div
-            className={`toggle ${contentSuggestion ? "toggle-dim-gray" : ""} ${
-              !contentSuggestion ? "toggle-c1" : "toggle-dim-gray"
-            }`}
-            onClick={handleContentSuggestion}
-          ></div>
+          <Toggle
+            status={contentSuggestion}
+            setStatus={handleContentSuggestion}
+          />
         </div>
         <hr />
         <div className="fx-scattered fit-container">
@@ -459,12 +570,10 @@ const FeedSettings = ({
             <p>{t("ANiWe9M")}</p>
             <p className="p-medium gray-c">{t("AXgwD7C")}</p>
           </div>
-          <div
-            className={`toggle ${interestSuggestion ? "toggle-dim-gray" : ""} ${
-              !interestSuggestion ? "toggle-c1" : "toggle-dim-gray"
-            }`}
-            onClick={handleInterestSuggestion}
-          ></div>
+          <Toggle
+            status={interestSuggestion}
+            setStatus={handleInterestSuggestion}
+          />
         </div>
       </div>
     </div>
@@ -512,6 +621,127 @@ const Reaction = ({ defaultReaction, handleDefaultReaction }) => {
         onClick={() => setOpen(!open)}
       >
         <div className="p-big">{defaultReaction}</div>
+      </div>
+    </div>
+  );
+};
+
+const ReactionItem = ({ item, index, handleChangeReactionStatus }) => {
+  const { t } = useTranslation();
+  const elements = {
+    likes: (
+      <div className="fx-centered">
+        <div className="heart"></div>
+        <p>{t("Alz0E9Y")}</p>
+      </div>
+    ),
+    replies: (
+      <div className="fx-centered">
+        <div className="comment-icon"></div>
+        <p>{t("AENEcn9")}</p>
+      </div>
+    ),
+    repost: (
+      <div className="fx-centered">
+        <div className="switch-arrows"></div>
+        <p>{t("Aai65RJ")}</p>
+      </div>
+    ),
+    quote: (
+      <div className="fx-centered">
+        <div className="quote"></div>
+        <p>{t("AuafJAx")}</p>
+      </div>
+    ),
+    zap: (
+      <div className="fx-centered">
+        <div className="bolt"></div>
+        <p>Zaps</p>
+      </div>
+    ),
+  };
+  if (!elements[item.reaction]) return null;
+  return (
+    <div
+      className="sc-s-18 fx-scattered box-pad-v-s box-pad-h-s"
+      style={{ cursor: "grab" }}
+    >
+      {elements[item.reaction]}
+      <div className="fx-centered">
+        <Toggle
+          status={item.status}
+          setStatus={(status) => handleChangeReactionStatus(index, status)}
+        />
+        <div
+          className="drag-el"
+          style={{
+            minWidth: "16px",
+            aspectRatio: "1/1",
+          }}
+        ></div>
+      </div>
+    </div>
+  );
+};
+
+const PostReactionsPreview = () => {
+  const { reactionsSettings } = useCustomizationSettings();
+  const order = useMemo(() => {
+    const reactionsOrder = reactionsSettings.reduce(
+      (acc, { reaction, status }, index) => {
+        acc[reaction] = { index, status };
+        return acc;
+      },
+      {}
+    );
+    return {
+      likes: reactionsOrder.likes.status ? reactionsOrder.likes.index + 1 : -1,
+      replies: reactionsOrder.replies.status
+        ? reactionsOrder.replies.index + 1
+        : -1,
+      repost: reactionsOrder.repost.status
+        ? reactionsOrder.repost.index + 1
+        : -1,
+      quote: reactionsOrder.quote.status ? reactionsOrder.quote.index + 1 : -1,
+      zap: reactionsOrder.zap.status ? reactionsOrder.zap.index + 1 : -1,
+    };
+  }, [reactionsSettings]);
+  return (
+    <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m sc-s-18">
+      <div className="fx-centered" style={{ gap: "20px" }}>
+        {order.likes > -1 && (
+          <div className="fx-centered" style={{ order: order.likes }}>
+            <div className="heart opacity-4"></div>
+            <p className="gray-c">0</p>
+          </div>
+        )}
+        {order.replies > -1 && (
+          <div className="fx-centered" style={{ order: order.replies }}>
+            <div className="comment-icon opacity-4"></div>
+            <p className="gray-c">0</p>
+          </div>
+        )}
+        {order.repost > -1 && (
+          <div className="fx-centered" style={{ order: order.repost }}>
+            <div className="switch-arrows opacity-4"></div>
+            <p className="gray-c">0</p>
+          </div>
+        )}
+        {order.quote > -1 && (
+          <div className="fx-centered" style={{ order: order.quote }}>
+            <div className="quote opacity-4"></div>
+            <p className="gray-c">0</p>
+          </div>
+        )}
+        {order.zap > -1 && (
+          <div className="fx-centered" style={{ order: order.zap }}>
+            <div className="bolt opacity-4"></div>
+            <p className="gray-c">0</p>
+          </div>
+        )}
+      </div>
+      <div className="fx-centered">
+        <div className="translate-24 opacity-4"></div>
       </div>
     </div>
   );

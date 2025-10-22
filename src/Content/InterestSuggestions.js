@@ -391,6 +391,7 @@ export default [
       "npub192klhzk86sav5mgkfmveyjq50ygqfqnfvq0lvr2yv0zdtvatlhxskg43u7",
       "npub1apzt88v9pt9mzwa6rgsq2ujsle4nmml478kvjkm2n8wrttd0k63q6zfqk7",
       "npub1hr0x0gm9ksmvuvqwkyzfjuczv9pln83axuftxfhnq2maday69ypqtf2ktj",
+      "npub1f4uyypghstsd8l4sxng4ptwzk6awfm3mf9ux0yallfrgkm6mj6es50r407"
     ],
     sub_tags: [
       "Politics",

@@ -21,22 +21,58 @@ import EventOptions from "@/Components/ElementOptions/EventOptions";
 import useIsMute from "@/Hooks/useIsMute";
 import Link from "next/link";
 import PostReaction from "@/Components/PostReaction";
+import useUserProfile from "@/Hooks/useUsersProfile";
+import LoadingLogo from "@/Components/LoadingLogo";
 
-export default function Video({ event, userProfile }) {
+export default function Video({ event, userProfile, naddrData }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
-  const nostrAuthors = useSelector((state) => state.nostrAuthors);
-
-  const video = event;
+  const [isLoading, setIsLoading] = useState(event ? false : true);
+  const [video, setVideo] = useState(event);
   const [expandDescription, setExpandDescription] = useState(false);
   const [videoViews, setVideoViews] = useState(0);
   const [usersList, setUsersList] = useState(false);
   const [morePosts, setMorePosts] = useState([]);
   const [showAddArticleToCuration, setShowArticleToCuration] = useState(false);
   const [showCommentsSection, setShowCommentsSections] = useState(false);
-  const { postActions } = useRepEventStats(video.aTag, video.pubkey);
-  const { muteUnmute, isMuted } = useIsMute(video.pubkey);
+  const { postActions } = useRepEventStats(video?.aTag, video?.pubkey);
+  const { muteUnmute, isMuted } = useIsMute(video?.pubkey);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      setIsLoading(true);
+      const res = await await getSubData(
+        [
+          {
+            authors: naddrData.pubkey ? [naddrData.pubkey] : undefined,
+            kinds: !naddrData.identifier ? [22, 21] : [34235, 34236],
+            "#d": naddrData.identifier
+              ? [decodeURIComponent(naddrData.identifier)]
+              : undefined,
+            ids: !naddrData.identifier ? [naddrData.id] : undefined,
+          },
+        ],
+        1000,
+        undefined,
+        undefined,
+        1
+      );
+      if (res.data.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+      let post_ = {
+        ...res.data[0],
+      };
+      let parsedPost = getVideoContent(post_);
+      saveUsers([post_.pubkey]);
+      setVideo(parsedPost);
+      setIsLoading(false);
+    };
+    if (!event && naddrData) fetchPost();
+    if (!event && !naddrData) setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -55,8 +91,8 @@ export default function Video({ event, userProfile }) {
         console.log(err);
       }
     };
-    fetchData();
-  }, []);
+    if (video) fetchData();
+  }, [video]);
 
   useEffect(() => {
     const fetchMoreVideosAuthors = async () => {
@@ -80,20 +116,8 @@ export default function Video({ event, userProfile }) {
         console.log(err);
       }
     };
-    fetchMoreVideosAuthors();
-  }, []);
-
-  useEffect(() => {
-    try {
-      let auth = getUser(video.pubkey);
-
-      if (auth) {
-        setAuthor(auth);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }, [nostrAuthors, video]);
+    if (video) fetchMoreVideosAuthors();
+  }, [video]);
 
   useEffect(() => {
     if (
@@ -116,6 +140,29 @@ export default function Video({ event, userProfile }) {
     }
   }, [video, userKeys]);
 
+  if (isLoading)
+    return (
+      <div
+        className="fit-container fx-centered fx-col"
+        style={{ height: "100vh" }}
+      >
+        <LoadingLogo />
+      </div>
+    );
+
+  if (!video && !isLoading)
+    return (
+      <div
+        className="fit-container fx-centered fx-col"
+        style={{ height: "100vh" }}
+      >
+        <h4>{t("AQIAfYS")}</h4>
+        <p className="gray-c p-centered">{t("Agge1Vg")}</p>
+        <Link href="/">
+          <button className="btn btn-normal btn-small">{t("AWroZQj")}</button>
+        </Link>
+      </div>
+    );
   return (
     <>
       {usersList && (
@@ -344,10 +391,7 @@ export default function Video({ event, userProfile }) {
                   setShowCommentsSections({ comment: true })
                 }
               />
-              <EventOptions
-                event={video}
-                component="repEvents"
-              />
+              <EventOptions event={video} component="repEvents" />
             </div>
           </div>
         )}
@@ -357,38 +401,19 @@ export default function Video({ event, userProfile }) {
 }
 
 const AuthorPreviewExtra = ({ authorPubkey }) => {
-  const nostrAuthors = useSelector((state) => state.nostrAuthors);
-  const [authorData, setAuthorData] = useState(
-    getEmptyuserMetadata(authorPubkey)
-  );
-  
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        let auth = getUser(authorPubkey);
-
-        if (auth) {
-          setAuthorData(auth);
-        }
-        return;
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchData();
-  }, [nostrAuthors]);
+  const { userProfile } = useUserProfile(authorPubkey);
 
   return (
     <div className="fx-centered fx-start-h">
       <UserProfilePic
         size={16}
-        img={authorData.picture}
+        img={userProfile.picture}
         mainAccountUser={false}
-        user_id={authorData.pubkey}
+        user_id={userProfile.pubkey}
       />
 
       <p className="p-one-line p-medium">
-        {authorData.display_name || authorData.name}
+        {userProfile.display_name || userProfile.name}
       </p>
     </div>
   );

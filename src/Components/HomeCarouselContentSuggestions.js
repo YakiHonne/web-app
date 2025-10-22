@@ -17,10 +17,10 @@ import { useDispatch } from "react-redux";
 
 export default function HomeCarouselContentSuggestions() {
   const { t } = useTranslation();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const homeCarouselPosts = useSelector((state) => state.homeCarouselPosts);
-  const [hide, setHide] = useState(localStorage_.getItem("hsuggest"));
+  const [hide, setHide] = useState(!localStorage_.getItem("hsuggest"));
   const [content, setContentSuggestions] = useState(homeCarouselPosts);
 
   useEffect(() => {
@@ -61,7 +61,6 @@ export default function HomeCarouselContentSuggestions() {
   };
 
   if (hide) return null;
-
   let items = getItems();
   if (content.length === 0)
     return (

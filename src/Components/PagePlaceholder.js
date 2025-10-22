@@ -3,20 +3,34 @@ import { useSelector } from "react-redux";
 import { userLogout } from "@/Helpers/Controlers";
 import { redirectToLogin } from "@/Helpers/Helpers";
 import { useTranslation } from "react-i18next";
-let Hero404 = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/404-hero.png";
-let HeroNostrNotConnected = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/nostr-not-connected.png";
-let HeroNostrunauthorized = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/nostr-unauthorized.png";
-let HeroNostrNoUN = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/un-hero.png";
-let HeroNostrunauthorizedMessages = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/unauthorized-messages.png";
-let HeroDMS = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/DMS.png";
-let HeroDMSWaiting = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/DMS-waiting.gif";
-let HeroYakiChest = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/trophy.png";
-let HeroWallet = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/wallet.png";
-let HeroWidgets = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/widgets.png";
-let HeroWidgetsDraft = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/draft.png";
-let HeroUnsupported = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/unsupported.png";
-let HeroMutedUser = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/muted-user.png";
-let HeroMaintenance = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/maintenance.png";
+let Hero404 =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/404-hero.png";
+let HeroNostrNotConnected =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/nostr-not-connected.png";
+let HeroNostrunauthorized =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/nostr-unauthorized.png";
+let HeroNostrNoUN =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/un-hero.png";
+let HeroNostrunauthorizedMessages =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/unauthorized-messages.png";
+let HeroDMS =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/DMS.png";
+let HeroDMSWaiting =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/DMS-waiting.gif";
+let HeroYakiChest =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/trophy.png";
+let HeroWallet =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/wallet.png";
+let HeroWidgets =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/widgets.png";
+let HeroWidgetsDraft =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/draft.png";
+let HeroUnsupported =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/unsupported.png";
+let HeroMutedUser =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/muted-user.png";
+let HeroMaintenance =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/maintenance.png";
 let HeroAI = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ai.png";
 import LoginWithAPI from "@/Components/LoginWithAPI";
 import AddWallet from "@/Components/AddWallet";
@@ -456,6 +470,27 @@ export default function PagePlaceholder({ page, onClick = null }) {
             <p className="p-centered gray-c" style={{ maxWidth: "450px" }}>
               {t("AtQ0dJT")}
             </p>
+          </div>
+        </div>
+      </>
+    );
+  if (page === "user-not-found")
+    return (
+      <>
+        <div className="fit-container">
+          <div className="fx-centered fx-col" style={{ height: "80vh" }}>
+            <div
+              className="fx-centered box-marg-s"
+              style={{
+                minWidth: "54px",
+                minHeight: "54px",
+                borderRadius: "var(--border-r-50)",
+                backgroundColor: "var(--red-main)",
+              }}
+            >
+              <div className="warning-24"></div>
+            </div>
+            <h4>{t("AawvPaR")}</h4>
           </div>
         </div>
       </>

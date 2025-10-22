@@ -19,7 +19,7 @@ export default function ContentSuggestionsCards({
   tag,
 }) {
   const userKeys = useSelector((state) => state.userKeys);
-  const [hide, setHide] = useState(localStorage.getItem("hsuggest2"));
+  const [hide, setHide] = useState(!localStorage.getItem("hsuggest2"));
   const { t } = useTranslation();
 
   const handleHideSuggestion = () => {

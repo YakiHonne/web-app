@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import PostAsNote from "./PostAsNote";
 import { getCustomSettings } from "@/Helpers/ClientHelpers";
+import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 
 export default function WriteNew({ exit }) {
   const { t } = useTranslation();
@@ -13,16 +14,15 @@ export default function WriteNew({ exit }) {
   const [redirectLinks, setRedirectLinks] = useState(false);
   const [showPostNote, setShowPostNote] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
-
+  const { longPress } = useCustomizationSettings();
   const timeoutRef = useRef(null);
 
   const handleLongPress = () => {
-    const settings = getCustomSettings();
     const longPressOption =
-      settings.longPress && ["notes", "articles", "sw"].includes(settings.longPress)
-        ? settings.longPress
+      longPress && ["notes", "articles", "sw"].includes(longPress)
+        ? longPress
         : "notes";
-  
+
     if (!(userKeys.ext || userKeys.sec || userKeys.bunker)) {
       setIsLogin(true);
       return;

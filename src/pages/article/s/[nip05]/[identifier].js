@@ -14,61 +14,76 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Article"), {
   ssr: false,
 });
 
-export default function Page({ event, author }) {
+export default function Page({ event, author, naddrData, naddr }) {
   let parsedEvent = getParsedRepEvent(event);
   let data = {
-    title: parsedEvent.title || author?.display_name || author?.name,
+    title:
+      parsedEvent?.title || author?.display_name || author?.name || "Untitled",
     description:
-      parsedEvent.description || parsedEvent.content.substring(0, 100),
+      parsedEvent?.description || parsedEvent?.content?.substring(0, 100) || "",
     image:
-      parsedEvent.image ||
-      extractFirstImage(parsedEvent.content) ||
+      parsedEvent?.image ||
+      extractFirstImage(parsedEvent?.content) ||
       author?.picture ||
       author?.banner,
-    path: `article/${parsedEvent.naddr}`,
+    path: `article/${parsedEvent?.naddr || naddr}`,
   };
-  if (event)
-    return (
-      <div>
-        <HeadMetadata data={data} />
-        <ClientComponent event={parsedEvent} userProfile={author} />
-      </div>
-    );
+  // if (event)
+  return (
+    <div>
+      <HeadMetadata data={data} />
+      <ClientComponent
+        event={parsedEvent}
+        naddrData={naddrData}
+        userProfile={author}
+      />
+    </div>
+  );
 }
 
 export async function getStaticProps({ params }) {
   const { nip05, identifier } = params;
   let pubkey = await getAuthPubkeyFromNip05(decodeURIComponent(nip05));
-  const res = await getSubData(
-    [
-      {
-        authors: [pubkey],
-        kinds: [30023],
-        "#d": [decodeURIComponent(identifier)],
-      },
-    ],
-    1000,
-    undefined,
-    undefined,
-    1
-  );
-  let event = {
-    ...res.data[0],
-  };
-  const author = await getSubData(
-    [{ authors: [event.pubkey], kinds: [0] }],
-    1000,
-    undefined,
-    undefined,
-    1
-  );
+  const res = pubkey
+    ? await getSubData(
+        [
+          {
+            authors: [pubkey],
+            kinds: [30023],
+            "#d": [decodeURIComponent(identifier)],
+          },
+        ],
+        5000,
+        undefined,
+        undefined,
+        1
+      )
+    : null;
+  let event =
+    pubkey && res?.data?.length > 0
+      ? {
+          ...res.data[0],
+        }
+      : null;
+  const author = pubkey
+    ? await getSubData(
+        [{ authors: [pubkey], kinds: [0] }],
+        1000,
+        undefined,
+        undefined,
+        1
+      )
+    : getEmptyuserMetadata(pubkey);
   return {
     props: {
-      event: event,
+      event,
+      naddrData: { pubkey, identifier, kind: 30023 },
+      // naddrData: pubkey ? { pubkey, identifier, kind: 30023 } : null,
+      naddr: `${nip05}/${identifier}`,
       author:
-        author.data.length > 0
+        author.data?.length > 0
           ? getParsedAuthor(author.data[0])
-          : getEmptyuserMetadata(event.pubkey),
+          : { ...author },
     },
   };
 }
