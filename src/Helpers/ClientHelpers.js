@@ -13,6 +13,8 @@ import React from "react";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
 import LNURLParsing from "@/Components/LNURLParsing";
 import { customHistory } from "./History";
+import { store } from "@/Store/Store";
+import { setRefreshAppSettings } from "@/Store/Slides/Extras";
 
 const nostrSchemaRegex =
   /\b(naddr1|note1|nevent1|npub1|nprofile1|nsec1|nrelay1)[a-zA-Z0-9]+\b/;
@@ -22,7 +24,8 @@ export function getNoteTree(
   minimal = false,
   isCollapsedNote = false,
   wordsCount = 150,
-  pubkey
+  pubkey,
+  noBlur = false
 ) {
   if (!note) return "";
   let tree = note
@@ -231,7 +234,7 @@ export function getNoteTree(
     }
   }
 
-  return mergeConsecutivePElements(finalTree, pubkey);
+  return mergeConsecutivePElements(finalTree, pubkey, noBlur);
 }
 
 export function getComponent(children) {
@@ -337,6 +340,7 @@ export function getComponent(children) {
 
 export function getParsedNote(event, isCollapsedNote = false) {
   try {
+    if (!event) return;
     let isNoteLong = event.content.split(" ").length > 150;
     let isCollapsedNoteEnabled = getCustomSettings().collapsedNote;
     isCollapsedNoteEnabled =
@@ -504,7 +508,7 @@ export function isVid(url) {
     if (platform === "YouTube") {
       return {
         isYT: true,
-        videoId,
+        videoId: videoId.replace("shorts/", ""),
       };
     }
     if (platform === "Vimeo") {
@@ -538,6 +542,59 @@ export const getMetadataFromCachedAccounts = (pubkey) => {
   return false;
 };
 
+const checkForNewAddedSettings = (prevSettings) => {
+  let settings = {
+    pubkey: prevSettings.pubkey,
+    userHoverPreview:
+      prevSettings.userHoverPreview !== undefined
+        ? prevSettings.userHoverPreview
+        : true,
+    collapsedNote:
+      prevSettings.collapsedNote !== undefined
+        ? prevSettings.collapsedNote
+        : true,
+    longPress:
+      prevSettings.longPress !== undefined ? prevSettings.longPress : "notes",
+    defaultReaction:
+      prevSettings.defaultReaction !== undefined
+        ? prevSettings.defaultReaction
+        : "❤️",
+    repliesView:
+      prevSettings.repliesView !== undefined
+        ? prevSettings.repliesView
+        : "thread",
+    oneTapReaction:
+      prevSettings.oneTapReaction !== undefined
+        ? prevSettings.oneTapReaction
+        : false,
+    blurNonFollowedMedia:
+      prevSettings.blurNonFollowedMedia !== undefined
+        ? prevSettings.blurNonFollowedMedia
+        : true,
+    reactionsSettings:
+      prevSettings.reactionsSettings !== undefined
+        ? prevSettings.reactionsSettings
+        : [
+            { reaction: "likes", status: true },
+            { reaction: "replies", status: true },
+            { reaction: "repost", status: true },
+            { reaction: "quote", status: true },
+            { reaction: "zap", status: true },
+          ],
+    notification:
+      prevSettings.notification !== undefined
+        ? prevSettings.notification
+        : [
+            { tab: "mentions", isHidden: false },
+            { tab: "reactions", isHidden: false },
+            { tab: "reposts", isHidden: false },
+            { tab: "zaps", isHidden: false },
+            { tab: "following", isHidden: false },
+          ],
+  };
+  return settings
+};
+
 export function getCustomSettings() {
   let nostkeys = getKeys();
   let customHomeSettings = localStorage_.getItem("chsettings");
@@ -549,7 +606,7 @@ export function getCustomSettings() {
       (settings) => settings?.pubkey === nostkeys.pub
     );
     return customHomeSettings_
-      ? customHomeSettings_
+      ? checkForNewAddedSettings(customHomeSettings_)
       : getDefaultSettings(nostkeys.pub);
   } catch (err) {
     return getDefaultSettings("");
@@ -563,16 +620,15 @@ export function getDefaultSettings(pubkey) {
     collapsedNote: true,
     longPress: "notes",
     defaultReaction: "❤️",
+    repliesView: "thread",
     oneTapReaction: false,
-    blurNonFollowedMedia: false,
-    reactionsOrder: ["likes", "replies", "repost", "quote", "zap"],
-    contentList: [
-      { tab: "recent", isHidden: false },
-      { tab: "recent_with_replies", isHidden: false },
-      { tab: "trending", isHidden: false },
-      { tab: "highlights", isHidden: false },
-      { tab: "paid", isHidden: false },
-      { tab: "widgets", isHidden: false },
+    blurNonFollowedMedia: true,
+    reactionsSettings: [
+      { reaction: "likes", status: true },
+      { reaction: "replies", status: true },
+      { reaction: "repost", status: true },
+      { reaction: "quote", status: true },
+      { reaction: "zap", status: true },
     ],
     notification: [
       { tab: "mentions", isHidden: false },
@@ -799,9 +855,11 @@ export function updateCustomSettings(settings, pubkey_) {
       customHomeSettings.push(settings);
     }
     localStorage_.setItem("chsettings", JSON.stringify(customHomeSettings));
+    store.dispatch(setRefreshAppSettings(Date.now()));
   } catch (err) {
     console.log(err);
     localStorage_.removeItem("chsettings");
+    store.dispatch(setRefreshAppSettings(Date.now()));
   }
 }
 
@@ -916,7 +974,7 @@ export function getPostToEdit(naddr) {
   }
 }
 
-const mergeConsecutivePElements = (arr, pubkey) => {
+const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
   const result = [];
   let currentTextElement = null;
   let currentImages = [];
@@ -1035,7 +1093,7 @@ const mergeConsecutivePElements = (arr, pubkey) => {
         currentTextElement = null;
       }
       if (currentImages.length > 0) {
-        result.push(createImageGrid(currentImages, pubkey));
+        result.push(createImageGrid(currentImages, pubkey, noBlur));
         currentImages = [];
       }
       result.push(element);
@@ -1045,7 +1103,7 @@ const mergeConsecutivePElements = (arr, pubkey) => {
   // Flush leftovers
   if (currentTextElement) result.push(currentTextElement);
   if (currentImages.length > 0)
-    result.push(createImageGrid(currentImages, pubkey));
+    result.push(createImageGrid(currentImages, pubkey, noBlur));
 
   return result;
 };
@@ -1409,13 +1467,13 @@ function isRelayUrl(value) {
 //   return result;
 // };
 
-const createImageGrid = (images, pubkey) => {
+const createImageGrid = (images, pubkey, noBlur) => {
   let images_ = images.map((image) => image.props.src);
   // Create a unique key based on the first image URL and number of images
   const key = `gallery-${images_.length}-${
     images_[0]?.substring(0, 20) || "empty"
   }`;
-  return <Gallery key={key} imgs={images_} pubkey={pubkey} />;
+  return <Gallery key={key} imgs={images_} pubkey={pubkey} noBlur={noBlur} />;
 };
 
 const getWotConfigDefault = () => {

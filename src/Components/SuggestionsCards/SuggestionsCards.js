@@ -46,7 +46,7 @@ export default function SuggestionsCards({ index }) {
         }
       }
     };
-    if (!checkHiddenSuggestions) fetchContentSuggestions();
+    if (checkHiddenSuggestions) fetchContentSuggestions();
   }, []);
 
   const getContentCard = () => {

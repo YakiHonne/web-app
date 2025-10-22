@@ -310,6 +310,7 @@ const getParsedSW = (event) => {
 
 const getParsedRepEvent = (event) => {
   try {
+    if (!event) return false;
     let imeta_url = "";
     let content = {
       id: event.id,
@@ -354,7 +355,7 @@ const getParsedRepEvent = (event) => {
       if (tag[0] === "zap") {
         content.zapSplit.push(tag);
       }
-      if (tag[0] === "published_at") {
+      if (tag[0] === "published_at" && tag[1]) {
         content.published_at =
           parseInt(tag[1]) !== NaN ? parseInt(tag[1]) : event.created_at;
       }
@@ -678,15 +679,19 @@ const getClaimingData = async (pubkey, event_id, kind, t = null) => {
 const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-    const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
-      onauth: (url) => {
-        window.open(
-          url,
-          "_blank",
-          "width=600,height=650,scrollbars=yes,resizable=yes"
-        );
-      },
-    });
+    const bunker = BunkerSigner.fromBunker(
+      userKeys.localKeys.sec,
+      bunkerPointer,
+      {
+        onauth: (url) => {
+          window.open(
+            url,
+            "_blank",
+            "width=600,height=650,scrollbars=yes,resizable=yes"
+          );
+        },
+      }
+    );
     await bunker.connect();
     let data = await bunker.nip04Decrypt(otherPartyPubkey, content);
     return data;
@@ -699,15 +704,19 @@ const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
 const encrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-    const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
-      onauth: (url) => {
-        window.open(
-          url,
-          "_blank",
-          "width=600,height=650,scrollbars=yes,resizable=yes"
-        );
-      },
-    });
+    const bunker = BunkerSigner.fromBunker(
+      userKeys.localKeys.sec,
+      bunkerPointer,
+      {
+        onauth: (url) => {
+          window.open(
+            url,
+            "_blank",
+            "width=600,height=650,scrollbars=yes,resizable=yes"
+          );
+        },
+      }
+    );
     await bunker.connect();
 
     let data = await bunker.nip04Encrypt(otherPartyPubkey, content);
@@ -721,15 +730,19 @@ const encrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
 const encrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-    const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
-      onauth: (url) => {
-        window.open(
-          url,
-          "_blank",
-          "width=600,height=650,scrollbars=yes,resizable=yes"
-        );
-      },
-    });
+    const bunker = BunkerSigner.fromBunker(
+      userKeys.localKeys.sec,
+      bunkerPointer,
+      {
+        onauth: (url) => {
+          window.open(
+            url,
+            "_blank",
+            "width=600,height=650,scrollbars=yes,resizable=yes"
+          );
+        },
+      }
+    );
     await bunker.connect();
 
     let data = await bunker.nip44Encrypt(otherPartyPubkey, content);
@@ -743,15 +756,19 @@ const encrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
 const decrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-    const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
-      onauth: (url) => {
-        window.open(
-          url,
-          "_blank",
-          "width=600,height=650,scrollbars=yes,resizable=yes"
-        );
-      },
-    });
+    const bunker = BunkerSigner.fromBunker(
+      userKeys.localKeys.sec,
+      bunkerPointer,
+      {
+        onauth: (url) => {
+          window.open(
+            url,
+            "_blank",
+            "width=600,height=650,scrollbars=yes,resizable=yes"
+          );
+        },
+      }
+    );
     await bunker.connect();
 
     let data = await bunker.nip44Decrypt(otherPartyPubkey, content);

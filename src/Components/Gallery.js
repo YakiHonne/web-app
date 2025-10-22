@@ -1,17 +1,17 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getSubData } from "@/Helpers/Controlers";
 import { bytesTohex, encodeBase64URL } from "@/Helpers/Encryptions";
 import { finalizeEvent, generateSecretKey } from "nostr-tools";
 import axios from "axios";
 import Carousel from "@/Components/Carousel";
-import { useSelector } from "react-redux";
 import useToBlurMedia from "@/Hooks/useToBlurMedia";
+import BlurredContentDesc from "./BlurredContentDesc";
 
-export default function Gallery({ imgs, pubkey }) {
+export default function Gallery({ imgs, pubkey, noBlur = false }) {
   const [carouselItems, setCarouselItems] = useState(imgs);
   const [currentImg, setCurrentImg] = useState(0);
   const [showCarousel, setShowCarousel] = useState(false);
-  const { toBlur, setIsOpened } = useToBlurMedia({ pubkey });
+  const { toBlur, setIsOpened } = useToBlurMedia({ pubkey, noBlur });
 
   useEffect(() => {
     const checkImages = async () => {
@@ -145,7 +145,7 @@ export default function Gallery({ imgs, pubkey }) {
 
   const handleUnblur = (e) => {
     e.stopPropagation();
-    setIsOpened(true);
+    // setIsOpened(true);
   };
   const handleOpenImage = (e, index) => {
     e.stopPropagation();
@@ -159,7 +159,7 @@ export default function Gallery({ imgs, pubkey }) {
           imgs={carouselItems}
           selectedImage={currentImg}
           back={(e) => {
-            e.stopPropagation();
+            e.stopPropagation();  
             setShowCarousel(false);
           }}
         />
@@ -167,8 +167,11 @@ export default function Gallery({ imgs, pubkey }) {
       {carouselItems.length === 1 && (
         <div
           className="image-grid blur-box"
-          style={{ margin: ".5rem 0 .5rem 0" }}
-          onClick={handleUnblur}
+          style={{ margin: ".5rem 0 .5rem 0", maxWidth: "95%" }}
+          // onClick={handleUnblur}
+          onClick={(e) => {
+            handleOpenImage(e, 0);
+          }}
         >
           <img
             onClick={(e) => {
@@ -180,12 +183,13 @@ export default function Gallery({ imgs, pubkey }) {
               maxWidth: "100%",
               objectFit: "fit",
               maxHeight: "600px",
-              pointerEvents: toBlur ? "none" : "auto",
+              // pointerEvents: toBlur ? "none" : "auto",
             }}
             src={carouselItems[0]}
             alt="el"
             loading="lazy"
           />
+          <BlurredContentDesc toBlur={toBlur} />
         </div>
       )}
       {carouselItems.length > 1 && (
@@ -197,34 +201,35 @@ export default function Gallery({ imgs, pubkey }) {
             gap: "4px",
             border: "none",
           }}
-          onClick={handleUnblur}
+          // onClick={handleUnblur}
         >
           {carouselItems.map((item, index) => {
             if (index < 5)
               return (
                 <div
-                  className="blur-box "
+                  className="blur-box"
                   style={{
-                    flex: "1 1 170px",
+                    flex: "1 1 250px",
                     border: "none",
                     aspectRatio: "16/9",
                     position: "relative",
-                    pointerEvents: toBlur ? "none" : "auto",
+                    // pointerEvents: toBlur ? "none" : "auto",
+                  }}
+                  onClick={(e) => {
+                    handleOpenImage(e, index);
                   }}
                 >
                   <div
                     key={
                       typeof item === "string" ? item : item.fileName || index
                     }
-                    className={`bg-img cover-bg pointer fit-height ${
+                    className={`bg-img cover-bg pointer fit-container fit-height ${
                       !toBlur ? "" : "blurred"
                     }`}
                     style={{
                       backgroundImage: `url(${item})`,
                     }}
-                    onClick={(e) => {
-                      handleOpenImage(e, index);
-                    }}
+                  
                   >
                     {index === 4 && carouselItems.length > 5 && (
                       <div
@@ -245,6 +250,7 @@ export default function Gallery({ imgs, pubkey }) {
                       </div>
                     )}
                   </div>
+                  <BlurredContentDesc toBlur={toBlur} label={false} />
                 </div>
               );
           })}

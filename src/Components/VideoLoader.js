@@ -1,11 +1,12 @@
 import useToBlurMedia from "@/Hooks/useToBlurMedia";
 import React, { useRef, useEffect, useState } from "react";
+import BlurredContentDesc from "./BlurredContentDesc";
 
 const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   const videoRef = useRef();
   const [isLoaded, setIsLoaded] = useState(false);
-  const { toBlur, setIsOpened } = useToBlurMedia({ pubkey });
-
+  // const { toBlur, setIsOpened } = useToBlurMedia({ pubkey });
+const toBlur = false;
   useEffect(() => {
     const observer = new window.IntersectionObserver(
       ([entry]) => {
@@ -29,7 +30,7 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
 
   const handleVideoClick = (e) => {
     e.stopPropagation();
-    setIsOpened(true);
+    // setIsOpened(true);
   };
   if (isCommonPlatform === "yt") {
     return (
@@ -50,6 +51,7 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
           className={`sc-s-18 ${toBlur ? "blurred" : ""}`}
           allowFullScreen
         ></iframe>
+         <BlurredContentDesc toBlur={toBlur} />
       </div>
     );
   }
@@ -72,6 +74,8 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
           className={`sc-s-18 ${toBlur ? "blurred" : ""}`}
           allowFullScreen
         ></iframe>
+              <BlurredContentDesc toBlur={toBlur} />
+
       </div>
     );
   }
@@ -97,6 +101,7 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
       >
         <source src={src} type="video/mp4" />
       </video>
+      <BlurredContentDesc toBlur={toBlur} />
     </div>
   );
 };

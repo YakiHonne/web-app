@@ -8,6 +8,7 @@ export default function Select({
   defaultLabel = "-- Options --",
   revert = false,
   fullWidth = false,
+  noBorder = false,
 }) {
   const [showOptions, setShowOptions] = useState(false);
   const selectedValue = useMemo(() => {
@@ -36,7 +37,12 @@ export default function Select({
     >
       <div
         className="fit-container fx-scattered if option pointer"
-        style={{ height: "var(--40)", padding: "1rem", minWidth: "max-content" }}
+        style={{
+          height: "var(--40)",
+          padding: "1rem",
+          minWidth: "max-content",
+          border: noBorder ? "none" : "",
+        }}
         onClick={() => (disabled ? null : setShowOptions(!showOptions))}
       >
         <div className="fx-centered">
@@ -64,7 +70,9 @@ export default function Select({
             return (
               <div
                 key={index}
-                className={`option-no-scale fit-container fx-scattered ${option?.left_el ? "fx-start-h" : ""}  pointer box-pad-h-m`}
+                className={`option-no-scale fit-container fx-scattered ${
+                  option?.left_el ? "fx-start-h" : ""
+                }  pointer box-pad-h-m`}
                 style={{
                   border: "none",
                   overflow: "visible",

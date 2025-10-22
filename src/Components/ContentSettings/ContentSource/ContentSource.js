@@ -272,11 +272,11 @@ export default function ContentSource({
               style={{ gap: 0, padding: ".25rem .45rem" }}
             >
               {optionsList.map((option, index) => {
-                let checkVisibility = !(
-                  option.list.length === 0 ||
-                  !option.list.find((_) => _.enabled)
-                );
-                if (checkVisibility)
+                // let checkVisibility = !(
+                //   option.list.length === 0 ||
+                //   !option.list.find((_) => _.enabled)
+                // );
+                // if (checkVisibility)
                   return (
                     <div
                       key={index}

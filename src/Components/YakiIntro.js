@@ -38,20 +38,17 @@ const content = [
 ];
 
 const updatesList = [
-  "Core migration to SSR for faster performance, improved SEO, and enhanced link previews.",
-  "New Relay Orbits page to explore content beyond your network.",
-  "Fresh redesign across the app — including the note editor, parsing, dropdowns, popups, and more.",
-  "Floating chatbox lets you keep conversations going while browsing.",
-  "Scroll and page state restoration for smooth, uninterrupted navigation.",
-  "Seamlessly manage content sources — add favorite relays and switch between them easily.",
-  "YakiHonne is now a Progressive Web App (PWA), install it and browse like a native app!",
-  "Protected event publishing (NIP-70) now supported.",
-  "Republish events to specific relays for better targeting.",
-  "Clickable relay URLs directly within content.",
-  "Instant zaps — paste your LNURL and let others zap you right from your note.",
-  "Customization upgrades — redesigned settings with long-press actions, one-tap reactions, and default reaction preferences.",
-  "New curated themes for a pleasant experience: Noir, Graphite, Neige, and Ivory.",
-  "General bug fixes and performance improvements.",
+  "Customize your post actions — reorder, enable, or disable them to match your style",
+  "Media blur for posts from non-followed users (enabled by default, adjustable in settings)",
+  "Post directly within Relay Orbits for each relay",
+  "Redesigned hashtags for a fresher look",
+  "Fixed layout issues on mobile devices",
+  "Fixed authentication errors when publishing protected events",
+  "Fixed YouTube Shorts not displaying properly",
+  "Fixed wallet switch crashes",
+  "Fixed occasional “Error 500” when browsing posts",
+  "Added support for Indian languages",
+  "General performance and stability improvements",
 ];
 
 export default function YakiIntro() {
@@ -193,7 +190,7 @@ const Banner = ({ exit }) => {
               <div>
                 <p>Updates</p>
                 <p className="gray-c p-italic p-medium">
-                  Last updated Oct 6, 2025
+                  Last updated Oct 21, 2025
                 </p>
               </div>
               <p className="orange-c p-medium">

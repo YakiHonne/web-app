@@ -30,6 +30,7 @@ import EventOptions from "@/Components/ElementOptions/EventOptions";
 import { customHistory } from "@/Helpers/History";
 import PostReaction from "./PostReaction";
 import useIsMute from "@/Hooks/useIsMute";
+import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 
 export default function KindOne({
   event,
@@ -49,7 +50,10 @@ export default function KindOne({
   const [translatedNote, setTranslatedNote] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const isThread = useMemo(() => getRepliesViewSettings(), []);
+  const { repliesView } = useCustomizationSettings();
+  const isThread = useMemo(() => {
+    return repliesView === undefined || repliesView === "thread";
+  }, [repliesView]);
   const [isClamped, setIsClamped] = useState(10000);
   const noteRef = React.useRef(null);
   const { isMuted, muteUnmute } = useIsMute(event?.pubkey);
@@ -266,7 +270,11 @@ export default function KindOne({
         style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
       >
         {event.isComment && isThread && (
-          <RelatedEvent event={event.isComment} reactions={reactions} />
+          <RelatedEvent
+            event={event.isComment}
+            reactions={reactions}
+            isThread={isThread}
+          />
         )}
         <div
           className={`fit-container box-pad-h-m fx-centered fx-col`}
@@ -338,7 +346,7 @@ export default function KindOne({
                   </div>
                 </div>
                 {event.isComment && !isThread && (
-                  <RelatedEvent event={event.isComment} />
+                  <RelatedEvent event={event.isComment} isThread={isThread} />
                 )}
                 <div className="fx-centered fx-col fit-container">
                   <div className="fit-container" onClick={onClick} dir="auto">
@@ -443,7 +451,7 @@ export default function KindOne({
   );
 }
 
-const RelatedEvent = ({ event, reactions = true }) => {
+const RelatedEvent = ({ event, reactions = true, isThread }) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const { t } = useTranslation();
   const [user, setUser] = useState(false);
@@ -451,8 +459,6 @@ const RelatedEvent = ({ event, reactions = true }) => {
   const [isRelatedEventPubkey, setIsRelatedEventPubkey] = useState(false);
   const [isRelatedEventLoaded, setIsRelatedEventLoaded] = useState(false);
   const [showNote, setShowNote] = useState(false);
-  const isThread = getRepliesViewSettings();
-
   useEffect(() => {
     const fetchAuthor = async () => {
       try {
@@ -505,7 +511,7 @@ const RelatedEvent = ({ event, reactions = true }) => {
       let checkEventKind = event.split(":");
       if (checkEventKind.length > 2) {
         saveUsers([checkEventKind[1]]);
-        fetchData(checkEventKind[0], {
+        fetchData(parseInt(checkEventKind[0]), {
           pubkey: checkEventKind[1],
           identifier: checkEventKind[2],
         });

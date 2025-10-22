@@ -289,6 +289,7 @@ const getFlashnewsContent = (news) => {
 };
 
 const getVideoContent = (video) => {
+  if (!video) return false;
   let tags = video.tags;
   let keywords = [];
   let published_at = video.created_at;
@@ -666,10 +667,9 @@ const FileUpload = async (file, userKeys, cb) => {
 const blossomServerFileUpload = async (file, userKeys, cb) => {
   let mirror = localStorage_.getItem(`${userKeys.pub}_mirror_blossom_servers`);
   let servers = store.getState().userBlossomServers;
-  let endpoint =
-    servers.length > 0
-      ? `${servers[0]}/upload`
-      : "https://blossom.yakihonne.com/upload";
+  let serverURL =
+    servers.length > 0 ? `${servers[0]}` : "https://blossom.yakihonne.com";
+  let endpoint = serverURL + "/upload";
 
   const arrayBuffer = await file.arrayBuffer();
   const blob = new Blob([arrayBuffer], {
@@ -691,6 +691,7 @@ const blossomServerFileUpload = async (file, userKeys, cb) => {
       ["t", "upload"],
       ["x", x],
       ["expiration", expiration],
+      ["u", serverURL],
     ],
   };
   event = await InitEvent(

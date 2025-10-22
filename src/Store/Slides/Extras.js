@@ -88,6 +88,15 @@ const relaysStatsSlice = createSlice({
     },
   },
 });
+const refreshAppSettingsSlice = createSlice({
+  name: "refreshAppSettings",
+  initialState: Date.now(),
+  reducers: {
+    setRefreshAppSettings(state, action) {
+      return action.payload;
+    },
+  },
+});
 
 export const { setInitDMS } = initDMSSlice.actions;
 export const { setIsDarkMode } = isDarkModeSlice.actions;
@@ -98,6 +107,7 @@ export const { setRecentTags } = recentTagsSlice.actions;
 export const { setHomeSavedNotes } = homeSavedNotesSlice.actions;
 export const { setHomeCarouselPosts } = homeCarouselPostsSlice.actions;
 export const { setRelaysStats } = relaysStatsSlice.actions;
+export const { setRefreshAppSettings } = refreshAppSettingsSlice.actions;
 
 export const InitDMSReducer = initDMSSlice.reducer;
 export const IsDarkModeReducer = isDarkModeSlice.reducer;
@@ -108,3 +118,4 @@ export const RecentTagsReducer = recentTagsSlice.reducer;
 export const HomeSavedNotesReducer = homeSavedNotesSlice.reducer;
 export const HomeCarouselPostsReducer = homeCarouselPostsSlice.reducer;
 export const RelaysStatsReducer = relaysStatsSlice.reducer;
+export const RefreshAppSettingsReducer = refreshAppSettingsSlice.reducer;

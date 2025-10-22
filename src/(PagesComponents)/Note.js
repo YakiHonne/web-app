@@ -5,7 +5,7 @@ import Date_ from "@/Components/Date_";
 import LoadingDots from "@/Components/LoadingDots";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
-import { translate } from "@/Helpers/Controlers";
+import { getSubData, translate } from "@/Helpers/Controlers";
 import useNoteStats from "@/Hooks/useNoteStats";
 import CommentsSection from "@/Components/CommentsSection";
 import HistorySection from "@/Components/HistorySection";
@@ -23,23 +23,45 @@ import { straightUp } from "@/Helpers/Helpers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
+import LoadingScreen from "@/Components/LoadingScreen";
+import LoadingLogo from "@/Components/LoadingLogo";
+import { saveUsers } from "@/Helpers/DB";
 
-export default function Note({ event }) {
+export default function Note({ event, nevent }) {
   const { state } = {};
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { muteUnmute, isMuted } = useIsMute(event?.pubkey);
-  const { userProfile, isNip05Verified } = useUserProfile(event?.pubkey);
   const { postActions } = useNoteStats(event?.id, event?.pubkey);
   const [showHistory, setShowHistory] = useState(false);
+  const [isLoading, setIsLoading] = useState(event ? false : true);
   const [usersList, setUsersList] = useState(false);
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
   const [translatedNote, setTranslatedNote] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
   const [openComment, setOpenComment] = useState(false);
   const unsupportedKind = event?.kind !== 1;
-  const note = getParsedNote(event);
+  const [note, setNote] = useState(getParsedNote(event));
+  const { userProfile, isNip05Verified } = useUserProfile(note?.pubkey);
+  
   useEffect(() => {
+    const fetchNote = async () => {
+      setIsLoading(true);
+      let id = nip19.decode(nevent)?.data.id || nip19.decode(nevent)?.data;
+      const res = await getSubData([{ ids: [id] }], 5000, undefined, undefined, 1);
+      if(res.data.length === 0) {
+        setIsLoading(false);
+        return
+      }
+      let note_ = {
+        ...res.data[0],
+      };
+      let parsedNote = getParsedNote(note_);
+      setNote(parsedNote);
+      saveUsers([parsedNote.pubkey]);
+      setIsLoading(false);
+    }
+    if(!event) fetchNote();
     if (state) {
       let { triggerTranslation } = state;
       if (triggerTranslation) translateNote();
@@ -96,7 +118,30 @@ export default function Note({ event }) {
     }
   };
 
-  if (event?.kind !== 1)
+  if (isLoading)
+    return (
+      <div
+        className="fit-container fx-centered fx-col"
+        style={{ height: "100vh" }}
+      >
+        <LoadingLogo />
+      </div>
+    );
+
+  if (!note && !isLoading)
+    return (
+      <div
+        className="fit-container fx-centered fx-col"
+        style={{ height: "100vh" }}
+      >
+        <h4>{t("AAbA1Xn")}</h4>
+        <p className="gray-c p-centered">{t("Agge1Vg")}</p>
+        <Link href="/">
+          <button className="btn btn-normal btn-small">{t("AWroZQj")}</button>
+        </Link>
+      </div>
+    );
+  if (note?.kind !== 1)
     return customHistory(
       "/unsupported/" + nip19.neventEncode({ id: event?.id })
     );

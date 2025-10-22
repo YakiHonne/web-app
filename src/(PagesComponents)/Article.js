@@ -39,14 +39,16 @@ import Link from "next/link";
 import { customHistory } from "@/Helpers/History";
 import PostReaction from "@/Components/PostReaction";
 import { useTheme } from "next-themes";
+import LoadingLogo from "@/Components/LoadingLogo";
 
-export default function Article({ event, userProfile }) {
+export default function Article({ event, userProfile, naddrData }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const { theme } = useTheme();
   const isDarkMode = ["dark", "gray", "system"].includes(theme);
-  const post = event;
+  const [isLoading, setIsLoading] = useState(event ? false : true);
+  const [post, setPost] = useState(event);
   const [usersList, setUsersList] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showCommentsSection, setShowCommentsSections] = useState(false);
@@ -56,12 +58,15 @@ export default function Article({ event, userProfile }) {
   const [translatedContent, setTranslatedContent] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
   const [isContentTranslating, setIsContentTranslating] = useState(false);
+
   const containerRef = useRef(null);
-  const { muteUnmute, isMuted } = useIsMute(post.pubkey);
+  const { muteUnmute, isMuted } = useIsMute(
+    naddrData ? naddrData.pubkey : null
+  );
+
   useEffect(() => {
     const handleScroll = () => {
       if (containerRef.current) {
-        console.log("33")
         setShowPreview(containerRef.current.scrollTop >= 200);
       }
     };
@@ -70,7 +75,6 @@ export default function Article({ event, userProfile }) {
       for (let mutation of mutations) {
         if (mutation.type === "childList") {
           const container = document.querySelector(".page-container");
-          console.log(container)
           if (container) {
             containerRef.current = container;
             container.addEventListener("scroll", handleScroll);
@@ -88,6 +92,38 @@ export default function Article({ event, userProfile }) {
       }
       observer.disconnect();
     };
+  }, []);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      setIsLoading(true);
+      const res = await getSubData(
+        [
+          {
+            authors: naddrData.pubkey ? [naddrData.pubkey] : undefined,
+            kinds: [naddrData.kind],
+            "#d": [naddrData.identifier],
+          },
+        ],
+        5000,
+        undefined,
+        undefined,
+        1
+      );
+      if (res.data.length === 0) {
+        setIsLoading(false);
+        return;
+      }
+      let post_ = {
+        ...res.data[0],
+      };
+      let parsedPost = getParsedRepEvent(post_);
+      saveUsers([post_.pubkey]);
+      setPost(parsedPost);
+      setIsLoading(false);
+    };
+    if (!event && naddrData) fetchPost();
+    if (!event && !naddrData) setIsLoading(false);
   }, []);
 
   const translateArticle = async () => {
@@ -137,10 +173,33 @@ export default function Article({ event, userProfile }) {
     }
   };
 
-  if (bannedList.includes(post.pubkey)) {
+  if (bannedList.includes(post?.pubkey)) {
     customHistory("/");
     return;
   }
+  if (isLoading)
+    return (
+      <div
+        className="fit-container fx-centered fx-col"
+        style={{ height: "100vh" }}
+      >
+        <LoadingLogo />
+      </div>
+    );
+
+  if (!post && !isLoading)
+    return (
+      <div
+        className="fit-container fx-centered fx-col"
+        style={{ height: "100vh" }}
+      >
+        <h4>{t("AH90wGL")}</h4>
+        <p className="gray-c p-centered">{t("Agge1Vg")}</p>
+        <Link href="/">
+          <button className="btn btn-normal btn-small">{t("AWroZQj")}</button>
+        </Link>
+      </div>
+    );
   return (
     <div>
       {usersList && (
@@ -647,7 +706,8 @@ const ReaderIndicator = () => {
 
 const AuthPreview = ({ pubkey }) => {
   const { t } = useTranslation();
-  const { userProfile } = useUserProfile(pubkey);
+  const { userProfile, isNip05Verified } = useUserProfile(pubkey);
+
   return (
     <div className="fx-centered">
       <UserProfilePic
@@ -660,9 +720,12 @@ const AuthPreview = ({ pubkey }) => {
       <div className="fx-centered fx-col fx-start-v">
         <div>
           <p className="gray-c">{t("AVG3Uga")}</p>
-          <p className="p-big p-caps">
-            {userProfile.display_name || userProfile.name}
-          </p>
+          <div className="fx-centered" style={{ gap: "3px" }}>
+            <p className="p-big p-caps">
+              {userProfile.display_name || userProfile.name}
+            </p>
+            {isNip05Verified && <div className="checkmark-c1-24"></div>}
+          </div>
         </div>
       </div>
     </div>

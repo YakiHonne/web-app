@@ -1,61 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { getLinkFromAddr } from "@/Helpers/Helpers";
 import { customHistory } from "@/Helpers/History";
-import KindOne from "@/Components/KindOne";
 import { useTranslation } from "react-i18next";
 import DynamicIndicator from "@/Components/DynamicIndicator";
-import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
-import { useSelector } from "react-redux";
-import { NDKUser } from "@nostr-dev-kit/ndk";
-import { getUser } from "@/Helpers/Controlers";
-import { ndkInstance } from "@/Helpers/NDKInstance";
 import UserProfilePic from "@/Components/UserProfilePic";
-import { saveUsers } from "@/Helpers/DB";
 import MinimalPreviewWidget from "@/Components/SmartWidget/MinimalPreviewWidget";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import Date_ from "./Date_";
 
 export default function LinkRepEventPreview({ event, allowClick = true }) {
-  // const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
-  console.log(event)
   let url = getLinkFromAddr(event.naddr || event.nEvent);
 
   const { t } = useTranslation();
-  // const [user, setUser] = useState(getEmptyuserMetadata(event.pubkey));
-  // const [userFirstCheck, setUserFirstcheck] = useState(false);
-  // const [isNip05Verified, setIsNip05Verified] = useState(false);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       let tempPubkey = event.pubkey;
-  //       let auth = getUser(tempPubkey);
-
-  //       if (auth) {
-  //         setUser(auth);
-  //         let ndkUser = new NDKUser({ pubkey: event.pubkey });
-  //         ndkUser.ndk = ndkInstance;
-  //         let checknip05 = auth.nip05
-  //           ? await ndkUser.validateNip05(auth.nip05)
-  //           : false;
-
-  //         if (checknip05) setIsNip05Verified(true);
-  //       } else if (!userFirstCheck) {
-  //         saveUsers([event.pubkey]);
-  //         setUserFirstcheck(true);
-  //       }
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   };
-  //   if (event.kind !== 1) fetchData();
-  // }, [nostrAuthors]);
   const onClick = (e) => {
     e.stopPropagation();
     if (allowClick) {
       if (isNip05Verified) {
-        let nip05Url = `/${url.split("/")[1]}/s/${userProfile.nip05}/${event.d}`;
+        let nip05Url = `/${url.split("/")[1]}/s/${userProfile.nip05}/${
+          event.d
+        }`;
         customHistory(nip05Url);
       }
       if (!isNip05Verified) {
@@ -114,7 +78,12 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
 
             <div className="fx-centered fx-col fit-container">
               <div className="fit-container" onClick={onClick} dir="auto">
-                <div className="p-two-lines" style={{wordBreak: "break-word"}}>{event.content}</div>
+                <div
+                  className="p-two-lines"
+                  style={{ wordBreak: "break-word" }}
+                >
+                  {event.content}
+                </div>
               </div>
             </div>
           </div>
