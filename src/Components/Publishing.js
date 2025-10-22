@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateYakiChestStats } from "@/Helpers/Controlers";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { setUpdatedActionFromYakiChest } from "@/Store/Slides/YakiChest";
-import { NDKEvent } from "@nostr-dev-kit/ndk";
+import { NDKEvent, NDKRelay } from "@nostr-dev-kit/ndk";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import {
   getOutboxRelays,
@@ -20,7 +20,7 @@ import {
 import Date_ from "./Date_";
 import ProgressCirc from "./ProgressCirc";
 import { useTranslation } from "react-i18next";
-import { localStorage_ } from "@/Helpers/utils";
+import { getNDKInstance, localStorage_ } from "@/Helpers/utils";
 import { eventKinds } from "@/Content/Extra";
 
 const PUBLISHING_TIMEOUT = 3000;
@@ -145,19 +145,20 @@ export default function Publishing() {
   useEffect(() => {
     const publishPost = async () => {
       let { kind, content, tags, eventInitEx, allRelays } = toPublish;
-      let relaysToPublish = allRelays?.length > 0 
-        ? allRelays.map((relay) => {
-            return {
-              url: relay,
-              status: 0,
-            };
-          })
-        : userRelays.map((relay) => {
-            return {
-              url: relay,
-              status: 0,
-            };
-          }) || [];
+      let relaysToPublish =
+        allRelays?.length > 0
+          ? allRelays.map((relay) => {
+              return {
+                url: relay,
+                status: 0,
+              };
+            })
+          : userRelays.map((relay) => {
+              return {
+                url: relay,
+                status: 0,
+              };
+            }) || [];
       if (relaysToPublish.length === 0)
         relaysToPublish = relaysOnPlatform.map((relay) => {
           return {
@@ -166,7 +167,9 @@ export default function Publishing() {
           };
         });
       let ak = getActionKey();
-      let pTag = eventInitEx ? getOutboxPubkey(eventInitEx.kind, eventInitEx.tags) :  getOutboxPubkey(kind, tags);
+      let pTag = eventInitEx
+        ? getOutboxPubkey(eventInitEx.kind, eventInitEx.tags)
+        : getOutboxPubkey(kind, tags);
       let index = publishedEvents.length;
 
       setShowDetails(false);
@@ -174,7 +177,6 @@ export default function Publishing() {
       if (eventInitEx) {
         let ndkEvent = new NDKEvent(ndkInstance, eventInitEx);
         let outboxRelays = pTag ? await getOutboxRelays(pTag) : [];
-        console.log(outboxRelays)
         outboxRelays = outboxRelays.map((relay) => {
           return {
             url: removeRelayLastSlash(relay),
@@ -266,28 +268,46 @@ export default function Publishing() {
           }
         })
         .catch((err) => {
-          setPublishedEvents((prev) => {
-            let tempArray = Array.from(prev);
+          if (err.toString().includes("auth-required")) {
+            relay.authPolicy = ndkInstance.relayAuthDefaultPolicy;
+            relay.on("authed", () => {
+              setShowToast(true);
+              let timer = setTimeout(() => {
+                setShowToast(false);
+                clearTimeout(timer);
+              }, [2500]);
+              publish();
+            });
+          } else
+            setPublishedEvents((prev) => {
+              let tempArray = Array.from(prev);
 
-            let index_ = tempArray[index].relaysToPublish.findIndex(
-              (_) => _.url === removeRelayLastSlash(relay.url)
-            );
+              let index_ = tempArray[index].relaysToPublish.findIndex(
+                (_) => _.url === removeRelayLastSlash(relay.url)
+              );
 
-            if (index_ !== -1) {
-              tempArray[index].relaysToPublish[index_].status = 2;
-              tempArray[index].relaysToPublish[index_].msg = err.message;
-            }
-            return tempArray;
-          });
+              if (index_ !== -1) {
+                tempArray[index].relaysToPublish[index_].status = 2;
+                tempArray[index].relaysToPublish[index_].msg = err.message;
+              }
+              return tempArray;
+            });
         });
     };
-    if (relay.connected) {
-      publish();
-    } else {
-      relay.connect().then((res) => {
-        publish();
-      });
-    }
+    publish();
+    // if (relay.connected) {
+    //   publish();
+    // } else {
+    //   console.log(relay);
+    //   let ndkFromFav = await getNDKInstance(relay.url);
+    //   let relay_ = ndkFromFav.pool.getRelay(relay.url);
+    //   console.log(relay_)
+    //   publish(relay_);
+    //   // relay.connect().then((res) => {
+    //   //   console.log(res)
+    //   //   publish();
+    //   // });
+    // }
   };
   const initPublishing = async (relays, event, index, action_key) => {
     try {

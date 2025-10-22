@@ -4,11 +4,14 @@ import { bytesTohex, encodeBase64URL } from "@/Helpers/Encryptions";
 import { finalizeEvent, generateSecretKey } from "nostr-tools";
 import axios from "axios";
 import Carousel from "@/Components/Carousel";
+import useToBlurMedia from "@/Hooks/useToBlurMedia";
+import BlurredContentDesc from "./BlurredContentDesc";
 
-export default function Gallery({ imgs, pubkey }) {
+export default function Gallery({ imgs, pubkey, noBlur = false }) {
   const [carouselItems, setCarouselItems] = useState(imgs);
   const [currentImg, setCurrentImg] = useState(0);
   const [showCarousel, setShowCarousel] = useState(false);
+  const { toBlur, setIsOpened } = useToBlurMedia({ pubkey, noBlur });
 
   useEffect(() => {
     const checkImages = async () => {
@@ -140,6 +143,15 @@ export default function Gallery({ imgs, pubkey }) {
     return encodeB64;
   };
 
+  const handleUnblur = (e) => {
+    e.stopPropagation();
+    // setIsOpened(true);
+  };
+  const handleOpenImage = (e, index) => {
+    e.stopPropagation();
+    setCurrentImg(index);
+    setShowCarousel(true);
+  };
   return (
     <>
       {showCarousel && (
@@ -147,78 +159,98 @@ export default function Gallery({ imgs, pubkey }) {
           imgs={carouselItems}
           selectedImage={currentImg}
           back={(e) => {
-            e.stopPropagation();
+            e.stopPropagation();  
             setShowCarousel(false);
           }}
         />
       )}
       {carouselItems.length === 1 && (
-        <div className="image-grid">
+        <div
+          className="image-grid blur-box"
+          style={{ margin: ".5rem 0 .5rem 0", maxWidth: "95%" }}
+          // onClick={handleUnblur}
+          onClick={(e) => {
+            handleOpenImage(e, 0);
+          }}
+        >
           <img
             onClick={(e) => {
-              e.stopPropagation();
-              setCurrentImg(0);
-              setShowCarousel(true);
+              handleOpenImage(e, 0);
             }}
-            className="sc-s-18"
+            className={!toBlur ? "sc-s-18" : "blurred sc-s-18"}
             style={{
-              margin: ".5rem 0 .5rem 0",
               cursor: "zoom-in",
-              maxWidth: "95%",
+              maxWidth: "100%",
               objectFit: "fit",
               maxHeight: "600px",
+              // pointerEvents: toBlur ? "none" : "auto",
             }}
             src={carouselItems[0]}
             alt="el"
             loading="lazy"
           />
+          <BlurredContentDesc toBlur={toBlur} />
         </div>
       )}
       {carouselItems.length > 1 && (
         <div
-          className="fx-centered fx-start-h fx-wrap fit-container sc-s-18"
+          className="fx-centered fx-start-h fx-wrap fit-container sc-s-18 bg-sp"
           style={{
             overflow: "hidden",
             marginTop: ".5rem",
             gap: "4px",
             border: "none",
           }}
+          // onClick={handleUnblur}
         >
           {carouselItems.map((item, index) => {
             if (index < 5)
               return (
                 <div
-                  key={typeof item === "string" ? item : item.fileName || index}
-                  className={`bg-img cover-bg pointer fit-height `}
+                  className="blur-box"
                   style={{
-                    backgroundImage: `url(${item})`,
-                    flex: "1 1 170px",
+                    flex: "1 1 250px",
                     border: "none",
                     aspectRatio: "16/9",
                     position: "relative",
+                    // pointerEvents: toBlur ? "none" : "auto",
                   }}
                   onClick={(e) => {
-                    e.stopPropagation();
-                    setCurrentImg(index);
-                    setShowCarousel(true);
+                    handleOpenImage(e, index);
                   }}
                 >
-                  {index === 4 && carouselItems.length > 5 && (
-                    <div
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        top: 0,
-                        width: "100%",
-                        height: "100%",
-                        zIndex: 1,
-                        backgroundColor: "rgba(0,0,0,.8)",
-                      }}
-                      className="fx-centered"
-                    >
-                      <h2 style={{ color: "white" }}>+{carouselItems.length - 5}</h2>
-                    </div>
-                  )}
+                  <div
+                    key={
+                      typeof item === "string" ? item : item.fileName || index
+                    }
+                    className={`bg-img cover-bg pointer fit-container fit-height ${
+                      !toBlur ? "" : "blurred"
+                    }`}
+                    style={{
+                      backgroundImage: `url(${item})`,
+                    }}
+                  
+                  >
+                    {index === 4 && carouselItems.length > 5 && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          left: 0,
+                          top: 0,
+                          width: "100%",
+                          height: "100%",
+                          zIndex: 1,
+                          backgroundColor: "rgba(0,0,0,.8)",
+                        }}
+                        className="fx-centered"
+                      >
+                        <h2 style={{ color: "white" }}>
+                          +{carouselItems.length - 5}
+                        </h2>
+                      </div>
+                    )}
+                  </div>
+                  <BlurredContentDesc toBlur={toBlur} label={false} />
                 </div>
               );
           })}

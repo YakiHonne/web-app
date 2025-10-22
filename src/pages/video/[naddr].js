@@ -11,26 +11,30 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Video"), {
   ssr: false,
 });
 
-export default function Page({ event, author }) {
+export default function Page({ event, author, naddrData, naddr }) {
   let parsedEvent = getVideoContent(event);
   let data = {
-    title: parsedEvent.title || author?.display_name || author?.name,
+    title: parsedEvent?.title || author?.display_name || author?.name,
     description:
-      parsedEvent.description || parsedEvent.content.substring(0, 100),
+      parsedEvent?.description || parsedEvent?.content?.substring(0, 100),
     image:
-      parsedEvent.image ||
-      extractFirstImage(parsedEvent.content) ||
+      parsedEvent?.image ||
+      extractFirstImage(parsedEvent?.content) ||
       author?.picture ||
       author?.banner,
-    path: `video/${parsedEvent.naddr}`,
+    path: `video/${parsedEvent?.naddr || naddr}`,
   };
-  if (event)
-    return (
-      <div>
-        <HeadMetadata data={data} />
-        <ClientComponent event={parsedEvent} userProfile={author} />
-      </div>
-    );
+  // if (event)
+  return (
+    <div>
+      <HeadMetadata data={data} />
+      <ClientComponent
+        event={parsedEvent}
+        userProfile={author}
+        naddrData={naddrData}
+      />
+    </div>
+  );
 }
 
 export async function getStaticProps({ params }) {
@@ -40,33 +44,41 @@ export async function getStaticProps({ params }) {
     identifier
       ? [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }]
       : [{ ids: [id] }],
-    1000,
+    5000,
     undefined,
     undefined,
     1
   );
-  let event = {
-    ...res.data[0],
-  };
-  const author = await getSubData(
-    [{ authors: [event.pubkey], kinds: [0] }],
-    1000,
-    undefined,
-    undefined,
-    1
-  );
+  let event =
+    res.data.length > 0
+      ? {
+          ...res.data[0],
+        }
+      : null;
+
+  const author = event
+    ? await getSubData(
+        [{ authors: [event.pubkey], kinds: [0] }],
+        1000,
+        undefined,
+        undefined,
+        1
+      )
+    : getEmptyuserMetadata(pubkey);
   return {
     props: {
-      event: event,
-      // ...(await serverSideTranslations(
-      //   locale ?? "en",
-      //   ["common"],
-      //   nextI18nextConfig
-      // )),
+      event,
+      naddrData: {
+        pubkey: pubkey || false,
+        identifier: identifier || false,
+        kind,
+        id: id || false,
+      },
+      naddr,
       author:
-        author.data.length > 0
+        author.data?.length > 0
           ? getParsedAuthor(author.data[0])
-          : getEmptyuserMetadata(event.pubkey),
+          : { ...author },
     },
   };
 }

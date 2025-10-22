@@ -25,6 +25,7 @@ import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
 import LinkRepEventPreview from "./LinkRepEventPreview";
 import { customHistory } from "@/Helpers/History";
+import { getNDKInstance } from "@/Helpers/utils";
 
 export default function WriteNote({
   exit,
@@ -182,10 +183,12 @@ export default function WriteNote({
       setIsLoading(false);
       return;
     }
+
     dispatch(
       setToPublish({
         eventInitEx,
         allRelays: relay ? [relay] : [],
+        isFavRelay: relay ? relay : false,
       })
     );
     updateNoteDraft("root", "");

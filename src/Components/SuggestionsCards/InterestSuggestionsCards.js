@@ -18,7 +18,7 @@ export default function InterestSuggestionsCards({
   const userInterestList = useSelector((state) => state.userInterestList);
   const [tempInterestList, setTempInterestList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [hide, setHide] = useState(localStorage.getItem("hsuggest3"));
+  const [hide, setHide] = useState(!localStorage.getItem("hsuggest3"));
   const isChanged = useMemo(() => {
     return JSON.stringify(list) !== JSON.stringify(tempInterestList);
   }, [list, tempInterestList]);

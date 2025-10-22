@@ -308,6 +308,7 @@ export default function Search() {
               style={{
                 padding: ".5rem",
                 borderBottom: "1px solid var(--very-dim-gray)",
+                top: 0
               }}
             >
               <div

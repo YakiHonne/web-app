@@ -666,7 +666,7 @@ const BroadcastEvent = ({ event }) => {
                 onClick={() => handleRepublish(_)}
               >
                 <div style={{ position: "relative" }}>
-                  <RelayImage url={_} size={40} />
+                  <RelayImage url={_} size={30} />
                   <div
                     style={{
                       position: "absolute",
@@ -700,7 +700,7 @@ const BroadcastEvent = ({ event }) => {
                   className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
                   onClick={() => handleRepublish(_)}
                 >
-                  <RelayImage url={_} size={40} />
+                  <RelayImage url={_} size={30} />
                   <p className="p-one-line">{_}</p>
                 </div>
               );

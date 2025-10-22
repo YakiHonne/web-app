@@ -1311,7 +1311,7 @@ main {
     position: fixed;
     top: 80px;
     left: 0;
-    z-index: 100;
+    z-index: 101;
 }
 
 .menu-toggle {
@@ -2159,10 +2159,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     border-bottom-left-radius: var(--border-r-18);
 }
 
-.relay-item .round-icon-small{
+.relay-item .round-icon-small {
     display: none;
 }
-.relay-item:hover .round-icon-small{
+
+.relay-item:hover .round-icon-small {
     display: flex;
 }
 
@@ -2355,4 +2356,23 @@ h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] {
 
 .note-txtarea {
     height: calc(100% - 60px);
+}
+
+.blur-box {
+    overflow: hidden;
+    border-radius: var(--border-r-18);
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    
+    width: fit-content;
+    display: flex;
+    justify-content: flex-start;
+    /* max-width: 100%; */
+}
+
+.blurred {
+    filter: blur(20px) brightness(80%);
+    transform-origin: left top;
+    transform: scale(1.01);
 }

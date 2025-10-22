@@ -204,9 +204,6 @@ export default function NotificationCenter({
           {notifications > 99 ? `+99` : notifications}
         </div>
       )}
-      {notifications !== 0 && (
-        <div className="notification-dot desk-hide-1200"></div>
-      )}
     </SidebarNavItem>
   );
 }

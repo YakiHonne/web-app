@@ -47,6 +47,7 @@ import {
   HomeSavedNotesReducer,
   HomeCarouselPostsReducer,
   RelaysStatsReducer,
+  RefreshAppSettingsReducer,
 } from "./Slides/Extras";
 
 export const store = configureStore({
@@ -92,5 +93,6 @@ export const store = configureStore({
     homeCarouselPosts: HomeCarouselPostsReducer,
     relaysStats: RelaysStatsReducer,
     isUserFollowingsLoaded: IsUserFollowingsLoadedReducer,
+    refreshAppSettings: RefreshAppSettingsReducer,  
   },
 });

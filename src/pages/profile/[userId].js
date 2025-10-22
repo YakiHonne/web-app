@@ -13,12 +13,12 @@ const ClientComponent = dynamic(
   }
 );
 
-export default function Page({ event }) {
+export default function Page({ event, nprofile }) {
   let data = {
     title: event?.display_name || event?.name,
     description: event.about || "N/A",
     image: event?.picture || event?.banner,
-    path: `profile/${nip19.nprofileEncode({ pubkey: event.pubkey })}`,
+    path: `profile/${nprofile}`,
   };
 
   if (event)
@@ -34,12 +34,23 @@ export async function getStaticProps({ locale, params }) {
   const { userId } = params;
   let pubkey = userId.includes("@")
     ? await getAuthPubkeyFromNip05(userId)
-    : nip19.decode(userId).data.pubkey || nip19.decode(userId).data;
+    : decodePubkey(userId);
   if (pubkey) {
     pubkey =
       pubkey.startsWith("npub") || pubkey.startsWith("nprofile")
-        ? nip19.decode(pubkey).data.pubkey || nip19.decode(pubkey).data
+        ? decodePubkey(pubkey)
         : pubkey;
+  }
+  if (!pubkey) {
+    return {
+      props: {
+        event: {
+          ...getEmptyuserMetadata(""),
+          followings: [],
+          nprofile: userId,
+        },
+      },
+    };
   }
   const [resMetaData, resFollowings] = await Promise.all([
     getSubData([{ authors: [pubkey], kinds: [0] }], 400),
@@ -60,10 +71,22 @@ export async function getStaticProps({ locale, params }) {
       event: {
         ...metadata,
         followings,
+        nprofile: nip19.nprofileEncode({ pubkey: pubkey }),
       },
     },
   };
 }
+
+const decodePubkey = (pubkey) => {
+  try {
+    let hexPubkey =
+      nip19.decode(pubkey).data.pubkey || nip19.decode(pubkey).data;
+    return hexPubkey;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
 
 export async function getStaticPaths() {
   return {

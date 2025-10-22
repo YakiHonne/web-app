@@ -856,6 +856,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
                 ]}
                 value={contentFrom}
                 setSelectedValue={switchContentType}
+                noBorder={true}
               />
             )}
             {["articles", "drafts", "notes"].includes(contentFrom) && (
@@ -1118,6 +1119,7 @@ const Widgets = ({ setPostToNote, localDraft }) => {
               options={SWSets}
               value={selectedSWSet}
               setSelectedValue={setSelectedSWSet}
+              noBorder={true}
             />
           </div>
           {selectedSWSet === 0 && (
@@ -1666,7 +1668,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
           }}
         >
           <div
-            className={`list-item-b fx-centered fx-shrink ${
+            className={`list-item-b fx-centered fx ${
               selectedCategory === 0 ? "selected-list-item-b" : ""
             }`}
             onClick={() => setSelectedCategory(0)}
@@ -1674,7 +1676,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
             {t("At9t6yz")}
           </div>
           <div
-            className={`list-item-b fx-centered fx-shrink ${
+            className={`list-item-b fx-centered fx ${
               selectedCategory === 1 ? "selected-list-item-b" : ""
             }`}
             onClick={() => setSelectedCategory(1)}
@@ -1682,7 +1684,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
             {t("Ayh5F4w")}
           </div>
           <div
-            className={`list-item-b fx-centered fx-shrink ${
+            className={`list-item-b fx-centered fx ${
               selectedCategory === 2 ? "selected-list-item-b" : ""
             }`}
             onClick={() => setSelectedCategory(2)}

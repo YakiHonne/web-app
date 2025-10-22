@@ -221,7 +221,12 @@ export default function SidebarComp() {
           </div>
           <nav
             className="fit-container link-items fx-col fx-start-v "
-            style={{ flex: 1, overflow: "auto", overscrollBehavior: "contain", paddingBottom: '2rem' }}
+            style={{
+              flex: 1,
+              overflow: "auto",
+              overscrollBehavior: "contain",
+              paddingBottom: "2rem",
+            }}
           >
             <SidebarNavItem
               onClick={() => {
@@ -291,16 +296,23 @@ export default function SidebarComp() {
             <SearchSidebar />
             {userKeys && (
               <SidebarNavItem
-                isActive={isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
-                  isPage("/profile/" + nip19.nprofileEncode({ pubkey: userKeys.pub })) ||
-                  isPage("/profile/" + userMetadata.nip05)}
+                isActive={
+                  isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
+                  isPage(
+                    "/profile/" + nip19.nprofileEncode({ pubkey: userKeys.pub })
+                  ) ||
+                  isPage("/profile/" + userMetadata.nip05)
+                }
                 onClick={handleProfileLink}
               >
                 <div
                   className={
                     isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
-                      isPage("/profile/" + nip19.nprofileEncode({ pubkey: userKeys.pub })) ||
-                      isPage("/profile/" + userMetadata.nip05)
+                    isPage(
+                      "/profile/" +
+                        nip19.nprofileEncode({ pubkey: userKeys.pub })
+                    ) ||
+                    isPage("/profile/" + userMetadata.nip05)
                       ? "user-bold-24"
                       : "user-24"
                   }
@@ -317,22 +329,13 @@ export default function SidebarComp() {
               >
                 <div
                   className={
-                    isPage("/dashboard")
-                      ? "dashboard-bold-24"
-                      : "dashboard-24"
+                    isPage("/dashboard") ? "dashboard-bold-24" : "dashboard-24"
                   }
                 ></div>
                 <div className="link-label">{t("ALBhi3j")}</div>
               </SidebarNavItem>
             )}
             <YakiMobileappSidebar />
-            {/* {!userKeys && (
-                <div>
-                  <div className="pointer fx-centered inactive-link">
-                    <DtoLToggleButton />
-                  </div>
-                </div>
-              )} */}
           </nav>
 
           <WriteNew exit={() => null} />
@@ -667,14 +670,11 @@ export default function SidebarComp() {
               </button>
             )}
           </div>
-
         </div>
       </aside>
     </>
   );
 }
-
-
 
 const AccountSwitching = ({ exit }) => {
   const { t } = useTranslation();

@@ -59,11 +59,6 @@ export async function getStaticProps({ params }) {
   return {
     props: {
       event: event,
-      // ...(await serverSideTranslations(
-      //   locale ?? "en",
-      //   ["common"],
-      //   nextI18nextConfig
-      // )),
       author:
         author.data.length > 0
           ? getParsedAuthor(author.data[0])
