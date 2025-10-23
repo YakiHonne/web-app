@@ -8,9 +8,10 @@ export default function FourOFour() {
   const router = useRouter();
   const { nevent } = router.query;
   useEffect(() => {
-    if (nevent) {
-      const url = getLinkFromAddr(nevent);
-      if (url !== nevent) {
+    let trimmedNEvent = nevent?.trim().replaceAll("nostr:", "");
+    if (trimmedNEvent) {
+      const url = getLinkFromAddr(trimmedNEvent);
+      if (url !== trimmedNEvent) {
         customHistory(url);
       } else {
         customHistory("/unsupported/" + nevent);
