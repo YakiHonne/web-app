@@ -88,6 +88,7 @@ const getAnswerFromAIRemoteAPI = async (pubkey_, input) => {
 const getLinkFromAddr = (addr_) => {
   try {
     let addr = addr_
+      .replaceAll("nostr:", "")
       .replaceAll(",", "")
       .replaceAll(":", "")
       .replaceAll(";", "")
