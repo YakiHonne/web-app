@@ -31,6 +31,7 @@ import { customHistory } from "@/Helpers/History";
 import PostReaction from "./PostReaction";
 import useIsMute from "@/Hooks/useIsMute";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import UnsupportedKindPreview from "./UnsupportedKindPreview";
 
 export default function KindOne({
   event,
@@ -458,6 +459,7 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
   const [relatedEvent, setRelatedEvent] = useState(false);
   const [isRelatedEventPubkey, setIsRelatedEventPubkey] = useState(false);
   const [isRelatedEventLoaded, setIsRelatedEventLoaded] = useState(false);
+  const [isUnsupported, setIsUnsupported] = useState(false);
   const [showNote, setShowNote] = useState(false);
   useEffect(() => {
     const fetchAuthor = async () => {
@@ -497,6 +499,13 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
           } else {
             parsedEvent = getParsedRepEvent(event_.data[0]);
           }
+          if (
+            ![
+              0, 1, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21,
+            ].includes(parsedEvent.kind)
+          ) {
+            setIsUnsupported(true);
+          }
           setRelatedEvent(parsedEvent);
           setIsRelatedEventPubkey(event_.data[0].pubkey);
           setUser(getEmptyuserMetadata(event_.data[0].pubkey));
@@ -515,9 +524,6 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
           pubkey: checkEventKind[1],
           identifier: checkEventKind[2],
         });
-        // setRelatedEvent(checkEventKind[1]);
-        // setIsRelatedEventPubkey(checkEventKind[1]);
-        // setUser(getEmptyuserMetadata(checkEventKind[1]));
         return;
       }
       fetchData(1, event);
@@ -532,15 +538,26 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
   if (isThread)
     return relatedEvent ? (
       <div className=" fit-container">
-        {relatedEvent.kind === 1 && (
-          <NotesComment
-            event={relatedEvent}
-            hasReplies={true}
-            isHistory={true}
-            noReactions={!reactions}
+        {!isUnsupported && (
+          <>
+            {relatedEvent.kind === 1 && (
+              <NotesComment
+                event={relatedEvent}
+                hasReplies={true}
+                isHistory={true}
+                noReactions={!reactions}
+              />
+            )}
+            {relatedEvent.kind !== 1 && (
+              <RepEventPreviewCard item={relatedEvent} />
+            )}
+          </>
+        )}
+        {isUnsupported && (
+          <UnsupportedKindPreview
+            addr={relatedEvent.nEvent || relatedEvent.naddr}
           />
         )}
-        {relatedEvent.kind !== 1 && <RepEventPreviewCard item={relatedEvent} />}
       </div>
     ) : (
       <div
@@ -591,11 +608,20 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
       </div>
       {relatedEvent && showNote && (
         <div style={{ borderLeft: "1px solid var(--c1)" }}>
-          {relatedEvent.kind === 1 && (
-            <KindOne event={relatedEvent} reactions={reactions} />
+          {!isUnsupported && (
+            <>
+              {relatedEvent.kind === 1 && (
+                <KindOne event={relatedEvent} reactions={reactions} />
+              )}
+              {relatedEvent.kind !== 1 && (
+                <RepEventPreviewCard item={relatedEvent} />
+              )}
+            </>
           )}
-          {relatedEvent.kind !== 1 && (
-            <RepEventPreviewCard item={relatedEvent} />
+          {isUnsupported && (
+            <UnsupportedKindPreview
+              addr={relatedEvent.nEvent || relatedEvent.naddr}
+            />
           )}
         </div>
       )}

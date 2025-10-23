@@ -183,14 +183,8 @@ const ExploreFeed = ({
       setIsLoading(true);
       setIsConnected(true);
       let dateCheckerArts = lastEventsTimestamps.articles;
-      // ? lastEventsTimestamps.articles - 86400
-      // : Math.floor(Date.now() / 1000) - 86400;
       let dateCheckerCurations = lastEventsTimestamps.curations;
-      // ? lastEventsTimestamps.curations - 86400
-      // : Math.floor(Date.now() / 1000) - 86400;
       let dateCheckerVideos = lastEventsTimestamps.videos;
-      // ? lastEventsTimestamps.videos - 86400
-      // : Math.floor(Date.now() / 1000) - 86400;
       let extraPubkeys = [];
       const { artsFilter, curationsFilter, videosFilter } = getFilter();
       const algoRelay =
@@ -211,9 +205,9 @@ const ExploreFeed = ({
       });
 
       let [articles, curations, videos] = await Promise.all([
-        getSubData(artsFilter, 200, algoRelay, ndk, 20),
-        getSubData(curationsFilter, 200, algoRelay, ndk, 20),
-        getSubData(videosFilter, 200, algoRelay, ndk, 20),
+        getSubData(artsFilter, 300, algoRelay, ndk, 300),
+        getSubData(curationsFilter, 300, algoRelay, ndk, 300),
+        getSubData(videosFilter, 300, algoRelay, ndk, 300),
       ]);
       let articles_ = sortEvents(articles.data).filter(
         (_) => _.created_at > dateCheckerArts
@@ -428,7 +422,7 @@ const ExploreFeed = ({
         ? [
             {
               kinds: [30023],
-              limit: 50,
+              limit: 100,
               authors,
               until: a_until,
               since,
@@ -439,7 +433,7 @@ const ExploreFeed = ({
         ? [
             {
               kinds: [30004, 30005],
-              limit: 50,
+              limit: 100,
               authors,
               until: c_until,
               since,
@@ -449,8 +443,8 @@ const ExploreFeed = ({
       videosFilter: [0, 3].includes(selectedTab)
         ? [
             {
-              kinds: [34235, 21, 22],
-              limit: 50,
+              kinds: [34235, 34236, 21, 22],
+              limit: 100,
               authors,
               until: v_until,
               since,

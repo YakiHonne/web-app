@@ -67,7 +67,7 @@ export default function Search() {
       return;
     }
     setIsLoading(true);
-    let tempKeyword = value.replace("nostr:");
+    let tempKeyword = value.replaceAll("nostr:", "");
     if (
       (tempKeyword.startsWith("naddr") ||
         tempKeyword.startsWith("nprofile") ||

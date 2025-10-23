@@ -21,7 +21,6 @@ export default function PostReaction({
   const userKeys = useSelector((state) => state.userKeys);
   const [usersList, setUsersList] = useState(false);
   const { reactionsSettings } = useCustomizationSettings();
-console.log(reactionsSettings)
   const order = useMemo(() => {
     const reactionsOrder = reactionsSettings.reduce(
       (acc, { reaction, status }, index) => {

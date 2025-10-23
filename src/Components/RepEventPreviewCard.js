@@ -22,8 +22,8 @@ const getURL = (item, isNip05Verified) => {
   if (!isNip05Verified) {
     if (item.kind === 30023) return `/article/${item.naddr}`;
     if ([30004, 30005].includes(item.kind)) return `/curation/${item.naddr}`;
-    if ([34235, 34236, 21, 22].includes(item.kind))
-      return `/video/${item.nEvent}`;
+    if ([34235, 34236].includes(item.kind)) return `/video/${item.naddr}`;
+    if ([21, 22].includes(item.kind)) return `/video/${item.nEvent}`;
   }
   if (item.kind === 30023) return `/article/s/${isNip05Verified}/${item.d}`;
   if (item.kind === 30004) return `/curation/a/${isNip05Verified}/${item.d}`;
@@ -47,7 +47,6 @@ export default function RepEventPreviewCard({
   const url = useMemo(() => {
     return getURL(item, userProfile.nip05);
   }, [isNip05Verified]);
-
   if (minimal)
     return (
       <>
@@ -329,10 +328,7 @@ const Reactions = ({ post, author }) => {
             postActions={postActions}
             userProfile={author}
           />
-          <EventOptions
-            event={post}
-            component="repEventsCard"
-          />
+          <EventOptions event={post} component="repEventsCard" />
         </div>
       </div>
     </>
