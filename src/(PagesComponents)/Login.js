@@ -43,6 +43,7 @@ import { NostrConnect } from "nostr-tools/kinds";
 import QRCode from "react-qr-code";
 import Link from "next/link";
 import Router from "next/router";
+import { SparkWalletSetup } from "@/Components/Spark";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 let s8e =
@@ -517,6 +518,9 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
   const [showInvalidMessage, setShowInvalidMessage] = useState(false);
   const [userName, setUserName] = useState("");
   const [enableWalletLinking, setEnablingWalletLinking] = useState(true);
+  const [walletType, setWalletType] = useState(null); // 'nwc' or 'spark'
+  const [sparkWalletCreated, setSparkWalletCreated] = useState(false);
+  const [sparkLightningAddress, setSparkLightningAddress] = useState("");
 
   const handleNextSteps = () => {
     if (step == 1) {
@@ -537,6 +541,16 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
       return;
     }
     if (step == 3) {
+      // Check if wallet was created before proceeding
+      if (!NWCURL && !sparkWalletCreated) {
+        dispatch(
+          setToast({
+            type: 2,
+            desc: "Please create a wallet to continue",
+          })
+        );
+        return;
+      }
       setStep(4);
       return;
     }
@@ -547,6 +561,11 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
       return;
     }
     if (step == 3) {
+      // Reset wallet selection when going back from Step 3
+      if (walletType && !NWCURL && !sparkWalletCreated) {
+        setWalletType(null);
+        return;
+      }
       setStep(2);
       return;
     }
@@ -688,6 +707,30 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         updateWallets([nwcNode], userKeys.pub);
       }
 
+      // Add Spark wallet to wallet list if created during onboarding
+      if (sparkWalletCreated) {
+        let sparkNode = {
+          id: Date.now(),
+          kind: 4,
+          entitle: sparkLightningAddress,
+          active: true,
+          data: 'spark-self-custodial',
+        };
+        // If NWC wallet also exists, add both
+        if (NWAddr) {
+          let nwcNode = {
+            id: Date.now() + 1,
+            kind: 3,
+            entitle: NWAddr,
+            active: false, // Spark is active
+            data: NWCURL,
+          };
+          updateWallets([sparkNode, nwcNode], userKeys.pub);
+        } else {
+          updateWallets([sparkNode], userKeys.pub);
+        }
+      }
+
       Router.back();
     } catch (err) {
       console.log(err);
@@ -713,6 +756,9 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
       metadata.picture = profilePicture || "";
       metadata.banner = bannerPicture || "";
       if (NWAddr && enableWalletLinking) metadata.lud16 = NWAddr;
+      if (sparkWalletCreated && sparkLightningAddress && sparkLightningAddress !== 'Spark Wallet') {
+        metadata.lud16 = sparkLightningAddress;
+      }
       ndkEvent.kind = 0;
       ndkEvent.content = JSON.stringify(metadata);
 
@@ -1030,96 +1076,171 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         )}
         {step === 3 && (
           <>
-            <div className="box-pad-h box-pad-v fx-centered  fx-col">
-              {!NWCURL && (
+            <div className="box-pad-h box-pad-v fx-centered fx-col">
+              {/* Wallet Type Selection - Show if no wallet created yet */}
+              {!walletType && !NWCURL && !sparkWalletCreated && (
                 <>
-                  <h4>{t("AqBdu7X")}</h4>
-                  <p
-                    className="p-centered gray-c"
-                    style={{ maxWidth: "400px" }}
-                  >
-                    {t("AOxmFz5")}
+                  <h4>Choose your wallet type</h4>
+                  <p className="p-centered gray-c" style={{ maxWidth: "400px" }}>
+                    Select the type of Lightning wallet you'd like to create
                   </p>
-                </>
-              )}
-              {NWCURL && <h4>{t("AimqDYY")}</h4>}
 
-              <WalletIllustration
-                isLoading={isCreatingWalletLoading}
-                isCreated={NWCURL}
-              />
-              {!NWCURL && (
-                <div className="fit-container fit-container fx-centered fx-col slide-up">
-                  <div className="fit-container fx-centered">
-                    <input
-                      type="text"
-                      className="ifs-full if"
-                      placeholder={t("ALCpv2S")}
-                      value={userName}
-                      onChange={handleInputField}
+                  <div className="fit-container fx-centered fx-col" style={{ gap: "16px", marginTop: "24px" }}>
+                    {/* NWC Wallet Option */}
+                    <div
+                      className="fit-container fx-scattered box-pad-h box-pad-v sc-s pointer"
+                      onClick={() => setWalletType('nwc')}
                       style={{
-                        borderColor:
-                          showErrorMessage ||
-                            showEmptyUNMessage ||
-                            showInvalidMessage
-                            ? "var(--red-main)"
-                            : "",
+                        border: "1px solid var(--very-dim-gray)",
+                        borderRadius: "var(--border-r-8)",
+                        transition: "all 0.2s ease"
                       }}
-                    />
-                    <p
-                      className="gray-c p-big"
-                      style={{ minWidth: "max-content" }}
                     >
-                      @wallet.yakihonne.com
-                    </p>
+                      <div className="fx-start fx-col" style={{ gap: "4px" }}>
+                        <div className="fx-centered" style={{ gap: "8px" }}>
+                          <div className="bolt"></div>
+                          <p className="p-big bold-text">Yaki Wallet (Custodial)</p>
+                        </div>
+                        <p className="p-medium gray-c">Hosted wallet with automatic setup</p>
+                      </div>
+                      <div className="round-icon-small" style={{ backgroundColor: "var(--c1)" }}>
+                        <div className="arrow-right" style={{ transform: "rotate(-45deg)" }}></div>
+                      </div>
+                    </div>
+
+                    {/* Spark Wallet Option */}
+                    <div
+                      className="fit-container fx-scattered box-pad-h box-pad-v sc-s pointer"
+                      onClick={() => setWalletType('spark')}
+                      style={{
+                        border: "1px solid var(--very-dim-gray)",
+                        borderRadius: "var(--border-r-8)",
+                        transition: "all 0.2s ease"
+                      }}
+                    >
+                      <div className="fx-start fx-col" style={{ gap: "4px" }}>
+                        <div className="fx-centered" style={{ gap: "8px" }}>
+                          <p style={{ fontSize: "20px" }}>⚡</p>
+                          <p className="p-big bold-text">Spark Wallet (Self-Custodial)</p>
+                        </div>
+                        <p className="p-medium gray-c">Full control with Breez SDK</p>
+                      </div>
+                      <div className="round-icon-small" style={{ backgroundColor: "var(--c1)" }}>
+                        <div className="arrow-right" style={{ transform: "rotate(-45deg)" }}></div>
+                      </div>
+                    </div>
                   </div>
-                  {showErrorMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AgrHddv")}</p>
-                    </div>
-                  )}
-                  {showEmptyUNMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AhQtS0K")}</p>
-                    </div>
-                  )}
-                  {showInvalidMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AqSxggD")}</p>
-                    </div>
-                  )}
-                  <button
-                    className="btn btn-normal btn-full"
-                    onClick={handleCreateWallet}
-                    disabled={isCreatingWalletLoading}
-                  >
-                    {isCreatingWalletLoading ? <LoadingDots /> : t("AvjCl1G")}
-                  </button>
-                </div>
-              )}
-              {NWCURL && (
-                <div className="fx-centered sc-s-18 box-pad-h-s box-pad-v-s">
-                  <div className="bolt"></div>
-                  {NWAddr}
-                </div>
-              )}
-              {NWCURL && (
-                <>
-                  <label className=" fx-centered" htmlFor="wallet-checkbox">
-                    <input
-                      type="checkbox"
-                      value={enableWalletLinking}
-                      onChange={() =>
-                        setEnablingWalletLinking(!enableWalletLinking)
-                      }
-                      checked={enableWalletLinking}
-                      name="wallet-checkbox"
-                      id="wallet-checkbox"
-                    />
-                    {t("AoR0AIr")}
-                  </label>
-                  <p className="p-centered gray-c">{t("Ag7XtTn")}</p>
                 </>
+              )}
+
+              {/* NWC Wallet Creation Flow */}
+              {walletType === 'nwc' && (
+                <>
+                  {!NWCURL && (
+                    <>
+                      <h4>{t("AqBdu7X")}</h4>
+                      <p
+                        className="p-centered gray-c"
+                        style={{ maxWidth: "400px" }}
+                      >
+                        {t("AOxmFz5")}
+                      </p>
+                    </>
+                  )}
+                  {NWCURL && <h4>{t("AimqDYY")}</h4>}
+
+                  <WalletIllustration
+                    isLoading={isCreatingWalletLoading}
+                    isCreated={NWCURL}
+                  />
+                  {!NWCURL && (
+                    <div className="fit-container fit-container fx-centered fx-col slide-up">
+                      <div className="fit-container fx-centered">
+                        <input
+                          type="text"
+                          className="ifs-full if"
+                          placeholder={t("ALCpv2S")}
+                          value={userName}
+                          onChange={handleInputField}
+                          style={{
+                            borderColor:
+                              showErrorMessage ||
+                                showEmptyUNMessage ||
+                                showInvalidMessage
+                                ? "var(--red-main)"
+                                : "",
+                          }}
+                        />
+                        <p
+                          className="gray-c p-big"
+                          style={{ minWidth: "max-content" }}
+                        >
+                          @wallet.yakihonne.com
+                        </p>
+                      </div>
+                      {showErrorMessage && (
+                        <div className="fit-container box-pad-h-m">
+                          <p className="red-c p-medium">{t("AgrHddv")}</p>
+                        </div>
+                      )}
+                      {showEmptyUNMessage && (
+                        <div className="fit-container box-pad-h-m">
+                          <p className="red-c p-medium">{t("AhQtS0K")}</p>
+                        </div>
+                      )}
+                      {showInvalidMessage && (
+                        <div className="fit-container box-pad-h-m">
+                          <p className="red-c p-medium">{t("AqSxggD")}</p>
+                        </div>
+                      )}
+                      <button
+                        className="btn btn-normal btn-full"
+                        onClick={handleCreateWallet}
+                        disabled={isCreatingWalletLoading}
+                      >
+                        {isCreatingWalletLoading ? <LoadingDots /> : t("AvjCl1G")}
+                      </button>
+                    </div>
+                  )}
+                  {NWCURL && (
+                    <div className="fx-centered sc-s-18 box-pad-h-s box-pad-v-s">
+                      <div className="bolt"></div>
+                      {NWAddr}
+                    </div>
+                  )}
+                  {NWCURL && (
+                    <>
+                      <label className=" fx-centered" htmlFor="wallet-checkbox">
+                        <input
+                          type="checkbox"
+                          value={enableWalletLinking}
+                          onChange={() =>
+                            setEnablingWalletLinking(!enableWalletLinking)
+                          }
+                          checked={enableWalletLinking}
+                          name="wallet-checkbox"
+                          id="wallet-checkbox"
+                        />
+                        {t("AoR0AIr")}
+                      </label>
+                      <p className="p-centered gray-c">{t("Ag7XtTn")}</p>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* Spark Wallet Creation Flow */}
+              {walletType === 'spark' && (
+                <div className="fit-container">
+                  <SparkWalletSetup
+                    onComplete={(lightningAddress) => {
+                      setSparkWalletCreated(true);
+                      setSparkLightningAddress(lightningAddress || 'Spark Wallet');
+                    }}
+                    onCancel={() => setWalletType(null)}
+                    isOnboarding={true}
+                  />
+                </div>
               )}
             </div>
           </>
@@ -1184,7 +1305,8 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                 </div>
                 <p className="c1-c">
                   {NWAddr && t("AZfj4DI")}
-                  {!NWAddr && t("AxGSiUc")}
+                  {sparkWalletCreated && "Spark Wallet created successfully"}
+                  {!NWAddr && !sparkWalletCreated && t("AxGSiUc")}
                 </p>
               </div>
             </div>

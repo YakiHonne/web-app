@@ -200,6 +200,21 @@ export default function EventOptions({
     </div>
   );
 
+  const sparkSettings = (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        // Trigger settings view for Spark wallet
+        // This will be handled by opening the wallet manager in settings mode
+        window.dispatchEvent(new CustomEvent('spark-open-settings'));
+      }}
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
+    >
+      <div className="edit-24"></div>
+      <span>{t("Settings")}</span>
+    </div>
+  );
+
   const removeWallet = (
     <div
       onClick={(e) => {
@@ -463,6 +478,7 @@ export default function EventOptions({
           event.kind === 3 && copyNWC,
           event.kind !== 1 && copyAddress,
           exportOneWallet,
+          event.kind === 4 && sparkSettings,
           HR,
           removeWallet,
         ];

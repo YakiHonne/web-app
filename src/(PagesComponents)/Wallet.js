@@ -33,6 +33,8 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import { walletWarning } from "@/Helpers/Controlers";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
+import SparkWalletManager from "@/Components/Spark/SparkWalletManager";
+import sparkWalletManager from "@/Helpers/Spark/spark-wallet-manager";
 
 export default function Wallet() {
   const dispatch = useDispatch();
@@ -41,6 +43,10 @@ export default function Wallet() {
   const userBalance = useSelector((state) => state.userBalance);
   const userMetadata = useSelector((state) => state.userMetadata);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
+  const sparkBalance = useSelector((state) => state.sparkBalance);
+  const sparkConnected = useSelector((state) => state.sparkConnected);
+  const sparkPayments = useSelector((state) => state.sparkPayments);
+  const sparkLightningAddress = useSelector((state) => state.sparkLightningAddress);
 
   const { t } = useTranslation();
   const [transactions, setTransactions] = useState([]);
@@ -58,27 +64,35 @@ export default function Wallet() {
   const [timestamp, setTimestamp] = useState(Date.now());
   const walletListRef = useRef(null);
 
-  const checkIsLinked = (addr) => {
-    if (userMetadata) {
-      if (!(userMetadata.lud16 && userMetadata.lud06)) return false;
-      if (userMetadata.lud16 && userMetadata.lud16 === addr) return true;
-      if (userMetadata.lud06) {
-        let decoded = decodeUrlOrAddress(userMetadata.lud06);
-        if (decoded && decoded === addr) return true;
-      }
-      return false;
+  const checkIsLinked = (wallet) => {
+    if (!userMetadata) return false;
+
+    // For Spark wallets (kind 4), check the Lightning address from Redux state
+    if (wallet.kind === 4) {
+      if (!sparkLightningAddress || !userMetadata.lud16) return false;
+      return userMetadata.lud16 === sparkLightningAddress;
     }
+
+    // For other wallets, check the entitle field
+    const addr = wallet.entitle;
+    if (!(userMetadata.lud16 || userMetadata.lud06)) return false;
+    if (userMetadata.lud16 && userMetadata.lud16 === addr) return true;
+    if (userMetadata.lud06) {
+      let decoded = decodeUrlOrAddress(userMetadata.lud06);
+      if (decoded && decoded === addr) return true;
+    }
+    return false;
   };
   const profileHasWallet = useMemo(() => {
     let hasWallet = userMetadata.lud06 || userMetadata.lud16;
-    let isWalletLinked = wallets.find((wallet) => checkIsLinked(wallet.entitle))
+    let isWalletLinked = wallets.find((wallet) => checkIsLinked(wallet))
       ? true
       : false;
     return {
       hasWallet,
       isWalletLinked,
     };
-  }, [userMetadata, wallets]);
+  }, [userMetadata, wallets, sparkLightningAddress]);
 
   useEffect(() => {
     let timeout = null;
@@ -145,6 +159,39 @@ export default function Wallet() {
         if (selectedWallet_.kind === 3) {
           getNWCData(selectedWallet_);
         }
+        if (selectedWallet_.kind === 4) {
+          // Spark wallet - restore if not connected
+          if (!sparkConnected) {
+            console.log('[Wallet.js] Spark wallet not connected, restoring...');
+            setIsLoading(true);
+            sparkWalletManager.restoreWallet()
+              .then(() => {
+                console.log('[Wallet.js] Spark wallet restored, refreshing state...');
+                return sparkWalletManager.refreshWalletState();
+              })
+              .then(() => {
+                console.log('[Wallet.js] Spark wallet state refreshed');
+                setIsLoading(false);
+              })
+              .catch(err => {
+                console.error('[Wallet.js] Failed to restore Spark wallet:', err);
+                setIsLoading(false);
+              });
+          } else {
+            // Refresh balance if already connected
+            console.log('[Wallet.js] Spark wallet already connected, refreshing state...');
+            setIsLoading(true);
+            sparkWalletManager.refreshWalletState()
+              .then(() => {
+                console.log('[Wallet.js] Spark wallet state refreshed');
+                setIsLoading(false);
+              })
+              .catch(err => {
+                console.error('[Wallet.js] Failed to refresh Spark wallet:', err);
+                setIsLoading(false);
+              });
+          }
+        }
       } else {
         setWallets([]);
         setSelectedWallet(false);
@@ -162,9 +209,15 @@ export default function Wallet() {
       }
     };
 
+    let handleSparkSettings = () => {
+      setOps("settings");
+    };
+
     document.addEventListener("mousedown", handleOffClick);
+    window.addEventListener("spark-open-settings", handleSparkSettings);
     return () => {
       document.removeEventListener("mousedown", handleOffClick);
+      window.removeEventListener("spark-open-settings", handleSparkSettings);
     };
   }, [walletListRef]);
 
@@ -376,7 +429,7 @@ export default function Wallet() {
                               </div>
                             </div>
                             {wallets.map((wallet) => {
-                              let isLinked = checkIsLinked(wallet.entitle);
+                              let isLinked = checkIsLinked(wallet);
                               return (
                                 <div
                                   key={wallet.id}
@@ -445,10 +498,10 @@ export default function Wallet() {
                       <div className="fx-centered fx-col box-pad-v">
                         <h5>{t("AbcY4ef")}</h5>
                         <div className="fx-centered">
-                          <h2 className="orange-c">{userBalance}</h2>
+                          <h2 className="orange-c">{selectedWallet && selectedWallet.kind === 4 ? (sparkBalance !== null ? sparkBalance : 'N/A') : userBalance}</h2>
                           <p className="gray-c">Sats</p>
                         </div>
-                        <SatsToUSD sats={userBalance} />
+                        <SatsToUSD sats={selectedWallet && selectedWallet.kind === 4 ? sparkBalance : userBalance} />
                         {selectedWallet.kind !== 1 &&
                           selectedWallet.entitle.includes("@") && (
                             <div
@@ -474,12 +527,12 @@ export default function Wallet() {
                         profileHasWallet.isWalletLinked
                       ) && (
                         <div className="box-pad-h box-pad-v fit-container sc-s-18 fx-centered fx-centered fx-col gray-c p-centered">
-                          {!profileHasWallet.hasWallet && <>{t("AAPZe91")}</>}
+                          {!profileHasWallet.hasWallet && <>{t("AAPZe91")}. </>}
                           {profileHasWallet.hasWallet &&
                             !profileHasWallet.isWalletLinked && (
-                              <>{t("AHKiPjO")}</>
-                            )}{" "}
-                          {t("AHTCsEO")}
+                              <>{t("AHKiPjO")}. </>
+                            )}
+                          {t("AHTCsEO").charAt(0).toUpperCase() + t("AHTCsEO").slice(1)}.
                         </div>
                       )}
                     {isLoading && (
@@ -521,7 +574,7 @@ export default function Wallet() {
                       </button>
                     </div>
                   </div>
-                  {ops === "send" && (
+                  {ops === "send" && selectedWallet && selectedWallet.kind !== 4 && (
                     <SendPayment
                       exit={() => setOps("")}
                       wallets={wallets}
@@ -530,13 +583,18 @@ export default function Wallet() {
                       refreshTransactions={() => setTimestamp(Date.now())}
                     />
                   )}
-                  {ops === "receive" && (
+                  {ops === "receive" && selectedWallet && selectedWallet.kind !== 4 && (
                     <ReceivePayment
                       exit={() => setOps("")}
                       wallets={wallets}
                       selectedWallet={selectedWallet}
                       setWallets={setWallets}
                     />
+                  )}
+                  {selectedWallet && selectedWallet.kind === 4 && (
+                    <div className="fit-container box-pad-v">
+                      <SparkWalletManager inlineMode={true} externalOps={ops} setExternalOps={setOps} />
+                    </div>
                   )}
                   {isLoading && (
                     <div

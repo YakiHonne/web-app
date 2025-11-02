@@ -1,11 +1,46 @@
 'use client';
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import AddYakiWallet from "@/Components/AddYakiWallet";
+import { SparkWalletSetup } from "@/Components/Spark";
 import { useTranslation } from "react-i18next";
 
 export default function AddWallet({ exit, refresh }) {
   const { t } = useTranslation();
+  const [showSparkSetup, setShowSparkSetup] = useState(false);
+
+  if (showSparkSetup) {
+    return (
+      <div
+        className="fixed-container fx-centered box-pad-h"
+        style={{ zIndex: "1000" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          exit();
+        }}
+      >
+        <div
+          className="sc-s box-pad-h box-pad-v fx-centered fx-col bg-sp"
+          style={{ width: "min(100%, 700px)", position: "relative", maxHeight: "90vh", overflowY: "auto" }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <div className="close" onClick={exit}>
+            <div></div>
+          </div>
+          <SparkWalletSetup
+            onComplete={() => {
+              refresh();
+              exit();
+            }}
+            onCancel={() => setShowSparkSetup(false)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="fixed-container fx-centered box-pad-h"
@@ -30,6 +65,27 @@ export default function AddWallet({ exit, refresh }) {
         <AddYakiWallet refresh={refresh} />
         <div className="fit-container fx-centered">
           <p>{t("AvVawBi")}</p>
+        </div>
+        <div
+          className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"
+          style={{ backgroundColor: "transparent" }}
+          onClick={() => setShowSparkSetup(true)}
+        >
+          <div className="fx-centered">
+            <div
+              className="fx-centered"
+              style={{ width: "48px", height: "48px", fontSize: "24px" }}
+            >
+              ⚡
+            </div>
+            <div>
+              <p>Spark Wallet (Self-Custodial)</p>
+              <p className="gray-c p-medium">Breez SDK Lightning Wallet</p>
+            </div>
+          </div>
+          <div className="box-pad-h-s">
+            <div className="plus-sign"></div>
+          </div>
         </div>
         <Link
           className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"

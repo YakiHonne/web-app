@@ -16,6 +16,8 @@ export default function UserBalance() {
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const userBalance = useSelector((state) => state.userBalance);
+  const sparkBalance = useSelector((state) => state.sparkBalance);
+  const sparkConnected = useSelector((state) => state.sparkConnected);
   const [wallets, setWallets] = useState(getWallets());
   const [selectedWallet, setSelectedWallet] = useState(
     wallets.find((wallet) => wallet.active)
@@ -145,6 +147,11 @@ export default function UserBalance() {
         <p>{t("A8fEwNq")}</p>
       </Link>
     );
+  // Determine which balance to display based on wallet type
+  const displayBalance = selectedWallet?.kind === 4
+    ? (sparkBalance !== null ? sparkBalance : 'N/A')
+    : userBalance;
+
   return (
     <div
       className="fit-container fx-scattered box-pad-h-s userBalance-container mb-hide pointer"
@@ -162,13 +169,13 @@ export default function UserBalance() {
           <p className="gray-c p-medium">Sats</p>
           {!isHidden && (
             <h4 style={{ minWidth: "max-content" }}>
-              <NumberShrink value={userBalance} />
+              <NumberShrink value={displayBalance} />
             </h4>
           )}
           {isHidden && <h4>***</h4>}
         </div>
         <p className="gray-c">&#8596;</p>
-        <SatsToUSD sats={userBalance} isHidden={isHidden} />
+        <SatsToUSD sats={displayBalance} isHidden={isHidden} />
       </div>
       {!isHidden && (
         <div className="eye-closed-24" onClick={handleSatsDisplay}></div>

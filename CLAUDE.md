@@ -1,0 +1,1 @@
+- do not add claude as a coauthor on github
