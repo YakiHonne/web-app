@@ -109,12 +109,10 @@ const getLinkFromAddr = (addr_) => {
       return `/profile/${nip19.nprofileEncode({ pubkey: hex })}`;
     }
     if (addr.startsWith("nevent")) {
-      let data = nip19.decode(addr);
-      return `/note/${nEventEncode(data.data.id)}`;
+      return `/note/${addr}`;
     }
     if (addr.startsWith("note")) {
-      let data = nip19.decode(addr);
-      return `/note/${nEventEncode(data.data)}`;
+      return `/note/${addr}`;
     }
 
     return addr;
@@ -1223,6 +1221,10 @@ const addWidgetPathToUrl = (url) => {
   }
 };
 
+const trimRelay = (relay) => {
+  return relay.endsWith("/") ? relay.slice(0, -1) : relay
+}
+
 export {
   getLinkFromAddr,
   getAuthPubkeyFromNip05,
@@ -1259,4 +1261,5 @@ export {
   extractRootDomain,
   addWidgetPathToUrl,
   getAnswerFromAIRemoteAPI,
+  trimRelay,
 };

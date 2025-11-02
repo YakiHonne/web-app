@@ -5,9 +5,6 @@ const relaysOnPlatform = [
   "wss://relay.nostr.band",
   "wss://relay.nsec.app",
   "wss://monitorlizard.nostr1.com/"
-  // "wss://nos.lol",
-  // "wss://relay.primal.net",
-
 ];
 
 export default relaysOnPlatform;

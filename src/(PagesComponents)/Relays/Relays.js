@@ -20,7 +20,7 @@ export default function Relays() {
   const [outboxRelaysBatch, setOutboxRelaysBatch] = useState([]);
   const [followingsRelaysBatch, setFollowingsRelaysBatch] = useState([]);
   const [relays, setRelays] = useState([]);
-  // console.log(followingsFavRelays)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -112,6 +112,7 @@ export default function Relays() {
                   relays={outboxRelays}
                   relaysBatch={outboxRelaysBatch}
                   setRelaysBatch={setOutboxRelaysBatch}
+                  favoredList={followingsFavRelays}
                 />
               )}
             </>
@@ -131,7 +132,10 @@ export default function Relays() {
           {!isLoading && (
             <>
               {category === 3 && (
-                <Collections collections={relaysCollections} />
+                <Collections
+                  collections={relaysCollections}
+                  favoredList={followingsFavRelays}
+                />
               )}
             </>
           )}
@@ -142,6 +146,7 @@ export default function Relays() {
                   relays={relays}
                   relaysBatch={globalRelaysBatch}
                   setRelaysBatch={setGlobalRelaysBatch}
+                  favoredList={followingsFavRelays}
                 />
               )}
             </>

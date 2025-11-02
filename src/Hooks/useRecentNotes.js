@@ -9,22 +9,23 @@ export default function useRecentNotes(
   filter,
   contentFrom,
   since,
-  selectedFilter
+  selectedFilter,
+  kind = "notes"
 ) {
   const userMutedList = useSelector((state) => state.userMutedList);
   const [recentNotes, setRecentNotes] = useState([]);
 
   const getPubkey = (event) => {
-    if(event.kind === 6) {
+    if (event.kind === 6) {
       try {
         let parsedNote = JSON.parse(event.content);
         return [...new Set([parsedNote.pubkey, event.pubkey])];
-      } catch(err) {
+      } catch (err) {
         return false;
       }
     }
     return event.pubkey;
-  }
+  };
 
   useEffect(() => {
     let interval;
@@ -38,8 +39,9 @@ export default function useRecentNotes(
         filter.relays,
         filter.ndk
       );
-      if (data.data.length > 0) {
-        let posts = data.data
+      let filteredData = data.data.filter((_) => [1, 6].includes(_.kind));
+      if (filteredData.length > 0) {
+        let posts = filteredData
           .map((_) => {
             if (_.content) {
               let parsedNote = getParsedNote(_);
@@ -55,11 +57,16 @@ export default function useRecentNotes(
             return false;
           })
           .filter((_) => _ && !userMutedList.includes(_.pubkey));
-        posts = filterContent(selectedFilter, posts);
+        posts = selectedFilter ? filterContent(selectedFilter, posts) : posts;
         setRecentNotes((_) => [..._, ...posts]);
         if (posts.length > 0) {
           newSince = posts[0].created_at + 1;
-          pubkeys = [...new Set([...pubkeys, ...data.data.map(_ => getPubkey(_)).flat()])];
+          pubkeys = [
+            ...new Set([
+              ...pubkeys,
+              ...filteredData.map((_) => getPubkey(_)).flat(),
+            ]),
+          ];
           if (!isUsersSaved) {
             saveUsers(pubkeys.slice(0, 3));
             if (pubkeys.length > 3) {
@@ -72,7 +79,7 @@ export default function useRecentNotes(
     };
 
     setRecentNotes([]);
-    if (filter.filter.length > 0 && typeof since !== "undefined") {
+    if (filter.filter.length > 0 && typeof since !== "undefined" && ["all", "notes"].includes(kind)) {
       fetchData();
       interval = setInterval(() => {
         fetchData();
@@ -83,29 +90,6 @@ export default function useRecentNotes(
       if (interval) clearInterval(interval);
     };
   }, [since, contentFrom]);
-
-  //   useEffect(() => {
-  //     let sub;
-  //     setRecentNotes([]);
-  //     if (filter.filter.length > 0 && typeof since !== "undefined") {
-  //       sub = ndkInstance.subscribe([{ ...filter.filter[0], since }], {
-  //         relayUrls:
-  //           filter.relays.length > 0
-  //             ? filter.relays
-  //             : [...new Set([...userRelays, ...relaysOnPlatform])],
-  //       });
-  //       sub.on("event", (event) => {
-  //         if (!userMutedList.includes(event.pubkey)) {
-  //           let parsedNote = getParsedNote(event.rawEvent());
-  //           if (parsedNote) setRecentNotes((prev) => [...prev, parsedNote]);
-  //         }
-  //       });
-  //     }
-
-  //     return () => {
-  //       if (sub) sub.stop();
-  //     };
-  //   }, [since]);
 
   return { recentNotes };
 }

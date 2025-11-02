@@ -60,6 +60,7 @@ export function Notifications({ selectedTab, setSelectedTab }) {
       gap: 0,
       borderColor: "var(--very-dim-gray)",
       transition: "0.2s ease-in-out",
+      borderRadius: 0
     }}
     >
       <div

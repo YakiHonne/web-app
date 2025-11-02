@@ -48,8 +48,8 @@ export default function WritingArticle() {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   // const isDarkMode = useSelector((state) => state.isDarkMode);
-  const { theme } = useTheme();
-  const isDarkMode = ["dark", "gray", "system"].includes(theme);
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = ["dark", "gray", "system"].includes(resolvedTheme);
   const [draftData, setDraftData] = useState({});
 
   const [content, setContent] = useState(post_content);
@@ -242,16 +242,10 @@ export default function WritingArticle() {
       {showClearEditPopup && (
         <ClearEditPopup handleClearOptions={handleClearOptions} />
       )}
-      <div >
+      <div>
         <div className="fit-container fx-centered">
-          <div
-            className="fit-container"
-       
-          >
-            <main
-              className="fit-container"
-              style={{ overflow: "visible" }}
-            >
+          <div className="fit-container">
+            <main className="fit-container" style={{ overflow: "visible" }}>
               <div className="fx-centered fit-container fx-start-h fx-start-v">
                 <div className="box-pad-h-m fit-container">
                   {userKeys && (
@@ -495,77 +489,6 @@ const UploadHistoryList = ({ exit, list = [] }) => {
           );
         })}
       </section>
-    </div>
-  );
-};
-
-const ChatGPTConvo = () => {
-  const dummy = [
-    {
-      user: true,
-      context: "A question from the user",
-    },
-    {
-      user: false,
-      context: "Context from AI",
-    },
-  ];
-  return (
-    <div
-      className="sc-s-18 fx-centered "
-      style={{
-        backgroundColor: "var(--white)",
-        position: "absolute",
-        right: 0,
-        bottom: "-100%",
-        width: "min(90vw, 500px)",
-        height: "min(70vh, 800px)",
-        border: "none",
-      }}
-    >
-      <div
-        className=" fx-scattered fit-container fx-col"
-        style={{ backgroundColor: "var(--c1-side)", height: "100%" }}
-      >
-        <div className="fx-centered fx-start-h fit-container box-pad-h box-pad-v">
-          <h4>How can we help you today?</h4>
-        </div>
-        <div
-          style={{ height: "calc(100% - 130px)", overflow: "scroll" }}
-          className="fit-container box-pad-h-m fx-centered fx-col fx-start-h fx-start-v"
-        >
-          {dummy.map((msg) => {
-            return (
-              <div
-                className={`fx-centered fit-container ${
-                  msg.user ? "fx-end-h" : "fx-start-h"
-                }`}
-              >
-                <div className="fx-centered fx-start-v">
-                  <div className="box-pad-h-m box-pad-v-m sc-s-18">
-                    {msg.context}
-                  </div>
-                  {msg.user && (
-                    <div className="fx-centered box-pad-v-s">
-                      <UserProfilePic mainAccountUser={true} size={32} />
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="fx-centered fit-container box-pad-h-m box-pad-v-m">
-          <input
-            type="text"
-            placeholder="type a question"
-            className="if ifs-full"
-          />
-          <div className="round-icon">
-            <p style={{ rotate: "-45deg" }}>&#x27A4;</p>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

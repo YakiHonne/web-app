@@ -69,8 +69,12 @@ import {
   setTrendingUsers,
 } from "@/Store/Slides/Extras";
 import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
-import { toggleColorScheme } from "@/Helpers/Helpers";
-import { getConnectedAccounts, getKeys, getMetadataFromCachedAccounts } from "@/Helpers/ClientHelpers";
+import { handleAppDirection, toggleColorScheme } from "@/Helpers/Helpers";
+import {
+  getConnectedAccounts,
+  getKeys,
+  getMetadataFromCachedAccounts,
+} from "@/Helpers/ClientHelpers";
 import { setNostrAuthors, setNostrClients } from "@/Store/Slides/Profiles";
 import {
   decrypt04,
@@ -324,6 +328,7 @@ export default function AppInit() {
 
   useEffect(() => {
     let previousDarkMode = localStorage.getItem("yaki-theme");
+    let previousAppLang = localStorage.getItem("app-lang");
     let previousIsConnectedToYaki = localStorage?.getItem("connect_yc")
       ? true
       : false;
@@ -340,6 +345,8 @@ export default function AppInit() {
     }
     saveNostrClients();
     getTrendingProfiles();
+    handleAppDirection(previousAppLang);
+
     let keys = getKeys();
     if (keys) {
       dispatch(setUserMetadata(getMetadataFromCachedAccounts(keys.pub)));
@@ -506,8 +513,7 @@ export default function AppInit() {
         {
           cacheUsage: "CACHE_FIRST",
           groupable: false,
-          skipVerification: false,
-          skipValidation: false,
+
           subId: "user-essentials",
         }
       );
@@ -604,7 +610,6 @@ export default function AppInit() {
           addConnectedAccounts(emptyMetadata, userKeys);
         }
         eose = true;
-     
       });
     };
 
@@ -734,71 +739,10 @@ export default function AppInit() {
     };
   }, [userKeys]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     let timeFrames = [604800, 1209600, 2592000, 7776000, 15552000, 31536000];
-  //     let INBOX = await getChatrooms(userKeys.pub);
-  //     let until =
-  //       INBOX.length > 0
-  //         ? INBOX.map((convo) => {
-  //             if (convo.convo.length > 0) {
-  //               return convo.convo[0].created_at;
-  //             }
-  //           }).sort((a, b) => b - a)[0] - 1
-  //         : undefined;
-  //     let since = until ? until - 604800 : until;
-  //     dispatch(setInitDMS(true));
-  //     let timePeriodIndex = 0;
-  //     let endOfData = false;
-  //     while (!endOfData) {
-  //       console.log(endOfData)
-  //       let dmsData = await getSubData([
-  //         {
-  //           kinds: [4],
-  //           authors: [userKeys.pub],
-  //           until,
-  //           since: since,
-  //           limit: 10,
-  //         },
-  //         { kinds: [4], "#p": [userKeys.pub], until, since: since, limit: 10 },
-  //         {
-  //           kinds: [1059],
-  //           "#p": [userKeys.pub],
-  //           until: until ? until - 432000 : until,
-  //           since: since ? since - 432000 : since,
-  //           limit: 10,
-  //         },
-  //       ]);
-  //       console.log(dmsData)
-  //       if (dmsData.data.length > 0) {
-  //         let tempInbox = await decryptDMS(dmsData.data, userKeys);
-  //         await saveChatrooms(tempInbox.inbox, userKeys.pub);
-  //         saveUsers(tempInbox.authors);
-  //         until = tempInbox.until ? tempInbox.until - timeFrames[0] : until;
-  //         since = until ? until - 604800 : since;
-  //         timePeriodIndex = 0;
-  //       } else if (
-  //         dmsData.data.length === 0 &&
-  //         timePeriodIndex < timeFrames.length - 1
-  //       ) {
-  //         timePeriodIndex++;
-  //         until = until ? until - timeFrames[timePeriodIndex] : until;
-  //         since = until ? until - 604800 : since;
-  //       } else {
-  //         endOfData = true;
-  //       }
-
-  //     }
-  //   };
-  //   if (userKeys && (userKeys.ext || userKeys.sec)) {
-  //     fetchData();
-  //   }
-  // }, [userKeys]);
-
   useEffect(() => {
     if (!userKeys || (!userKeys.ext && !userKeys.sec)) return;
 
-    let isCancelled = false; // cancellation flag
+    let isCancelled = false;
 
     const fetchData = async () => {
       const timeFrames = [
@@ -807,7 +751,7 @@ export default function AppInit() {
       dispatch(setInitDMS(true));
       try {
         const INBOX = await getChatrooms(userKeys.pub);
-        if (isCancelled) return; //
+        if (isCancelled) return;
 
         let until =
           INBOX.length > 0
@@ -826,7 +770,7 @@ export default function AppInit() {
         let endOfData = false;
 
         while (!endOfData) {
-          if (isCancelled) return; 
+          if (isCancelled) return;
           const dmsData = await getSubData([
             {
               kinds: [4],
@@ -857,10 +801,7 @@ export default function AppInit() {
             const tempInbox = await decryptDMS(dmsData.data, userKeys);
             if (isCancelled) return;
             await saveChatrooms(tempInbox.inbox, userKeys.pub);
-            // await saveUsers(tempInbox.authors);
-            console.log(tempInbox)
             until = tempInbox.until ? tempInbox.until : until;
-            // until = tempInbox.until ? tempInbox.until - timeFrames[0] : until;
             since = until ? until - 604800 : since;
             timePeriodIndex = 0;
           } else if (
@@ -883,7 +824,6 @@ export default function AppInit() {
     fetchData();
 
     return () => {
-      
       isCancelled = true;
     };
   }, [userKeys]);
@@ -940,7 +880,11 @@ export default function AppInit() {
               authors: b.bundled,
             },
           ],
-          100
+          100,
+          undefined,
+          undefined,
+          undefined,
+          true,
         );
         networkData.push(d);
       }
@@ -971,15 +915,12 @@ export default function AppInit() {
         };
       });
       saveWotlist(network, userKeys.pub);
-      // const trustingCounts = precomputeTrustingCounts(network);
+
       let allPubkeys = [...new Set(network.map((_) => _.followings).flat())];
       let wotPubkeys = allPubkeys
-        .map(
-          (_) => {
-            return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
-          }
-          // (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
-        )
+        .map((_) => {
+          return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
+        })
         .sort((a, b) => b.score - a.score)
         .filter((_) => _.status)
         .map((_) => _.pubkey)
@@ -1007,7 +948,11 @@ export default function AppInit() {
             until: prevData.last_updated,
           },
         ],
-        800
+        800,
+        undefined,
+        undefined,
+        undefined,
+        true,
       );
       if (backupFollowings.data.length === 0) return;
       let followinglist = backupFollowings.data[0].tags
@@ -1029,7 +974,11 @@ export default function AppInit() {
               authors: b.bundled,
             },
           ],
-          100
+          100,
+          undefined,
+          undefined,
+          undefined,
+          true,
         );
         networkData.push(d);
       }
@@ -1052,20 +1001,12 @@ export default function AppInit() {
         };
       });
 
-      // const trustingCounts = precomputeTrustingCounts(network);
-
       let allPubkeys = [...new Set(network.map((_) => _.followings).flat())];
 
-      // let wotPubkeys = allPubkeys.filter(
-      //   (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
-      // );
       let wotPubkeys = allPubkeys
-        .map(
-          (_) => {
-            return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
-          }
-          // (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
-        )
+        .map((_) => {
+          return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
+        })
         .sort((a, b) => b.score - a.score)
         .filter((_) => _.status)
         .map((_) => _.pubkey)
@@ -1085,7 +1026,6 @@ export default function AppInit() {
     }
     if (followings && followings?.followings?.length >= 5) {
       buildWOTList();
-      // } else if (followings) {
     } else if (followings && followings?.followings?.length < 5) {
       buildBackupWOTList();
     }

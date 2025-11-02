@@ -6,6 +6,7 @@ import axios from "axios";
 import Carousel from "@/Components/Carousel";
 import useToBlurMedia from "@/Hooks/useToBlurMedia";
 import BlurredContentDesc from "./BlurredContentDesc";
+import Link from "next/link";
 
 export default function Gallery({ imgs, pubkey, noBlur = false }) {
   const [carouselItems, setCarouselItems] = useState(imgs);
@@ -149,6 +150,7 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
   };
   const handleOpenImage = (e, index) => {
     e.stopPropagation();
+    e.preventDefault();
     setCurrentImg(index);
     setShowCarousel(true);
   };
@@ -159,7 +161,8 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
           imgs={carouselItems}
           selectedImage={currentImg}
           back={(e) => {
-            e.stopPropagation();  
+            e.stopPropagation();
+            e.preventDefault();
             setShowCarousel(false);
           }}
         />
@@ -167,9 +170,10 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
       {carouselItems.length === 1 && (
         <div
           className="image-grid blur-box"
-          style={{ margin: ".5rem 0 .5rem 0", maxWidth: "95%" }}
+          style={{ margin: ".5rem 0 .5rem 0", maxWidth: "95%", opacity: 1 }}
           // onClick={handleUnblur}
           onClick={(e) => {
+            e.preventDefault();
             handleOpenImage(e, 0);
           }}
         >
@@ -229,7 +233,6 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
                     style={{
                       backgroundImage: `url(${item})`,
                     }}
-                  
                   >
                     {index === 4 && carouselItems.length > 5 && (
                       <div

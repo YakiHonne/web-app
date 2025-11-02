@@ -9,6 +9,10 @@ export default function UnsupportedKindPreview({ addr }) {
     <div
       className="fit-container fx-scattered box-pad-h-m box-pad-v-s sc-s-18"
       style={{ margin: ".5rem 0", overflow: "visible" }}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
     >
       <div>
         <p className="gray-c">{t("AcFjmGe")}</p>
@@ -18,7 +22,11 @@ export default function UnsupportedKindPreview({ addr }) {
         <div
           className="round-icon-small round-icon-tooltip"
           data-tooltip={t("ArCMp34")}
-          onClick={() => copyText(addr, t("AQf5QYH"))}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            copyText(addr, t("AQf5QYH"));
+          }}
         >
           <div className="copy"></div>
         </div>

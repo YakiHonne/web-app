@@ -36,7 +36,6 @@ export default function ZapTip({
   isZapped = false,
 }) {
   const [showCashier, setCashier] = useState(false);
-  const [lnbcAmount, setLnbcAmount] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const nostrEventIDEncode = useMemo(
     () => getNostrEventIDEncode(aTag, eTag),
@@ -195,6 +194,7 @@ export default function ZapTip({
           data-tooltip="Zap"
           onClick={(e) => {
             e.stopPropagation();
+            e.preventDefault();
             setCashier(true);
           }}
         >

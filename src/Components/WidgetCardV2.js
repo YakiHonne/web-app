@@ -121,7 +121,10 @@ export default function WidgetCardV2({
           flexWrap: authPreviewPosition === "bottom" ? "wrap" : "wrap-reverse",
           gap: "5px",
         }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
       >
         {header && (
           <div className="fit-container fx-scattered">

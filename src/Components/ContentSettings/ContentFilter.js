@@ -630,7 +630,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
               type="range"
               className="ifs-full"
               value={artMinWord}
-              onChange={(e) => setArtMinWord(e.target.value)}
+              onChange={(e) => setArtMinWord(parseInt(e.target.value))}
               max={1000}
             />
             <div className="round-icon-small">
@@ -683,7 +683,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
               type="range"
               className="ifs-full"
               value={curtItemCount}
-              onChange={(e) => setCurtItemCount(e.target.value)}
+              onChange={(e) => setCurtItemCount(parseInt(e.target.value))}
               max={10}
             />
             <div className="round-icon-small">

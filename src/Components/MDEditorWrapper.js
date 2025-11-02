@@ -379,7 +379,7 @@ const MDEditorWrapper = ({
       previewOptions={{
         components: {
           p: ({ children }) => {
-            return <p>{getComponent(children)}</p>;
+            return <div className="box-marg-s">{getComponent(children)}</div>;
           },
           h1: ({ children }) => {
             return <h1 dir="auto">{children}</h1>;
@@ -401,6 +401,53 @@ const MDEditorWrapper = ({
           },
           li: ({ children }) => {
             return <li dir="auto">{children}</li>;
+          },
+          code: ({ inline, children, className, ...props }) => {
+            if (!children) return;
+            const txt = children[0] || "";
+
+            if (inline) {
+              if (typeof txt === "string" && /^\$\$(.*)\$\$/.test(txt)) {
+                const html = katex.renderToString(
+                  txt.replace(/^\$\$(.*)\$\$/, "$1"),
+                  {
+                    throwOnError: false,
+                  }
+                );
+                return (
+                  <code
+                    dangerouslySetInnerHTML={{
+                      __html: html,
+                    }}
+                  />
+                );
+              }
+              return (
+                <code
+                  dangerouslySetInnerHTML={{
+                    __html: txt,
+                  }}
+                />
+              );
+            }
+            if (
+              typeof txt === "string" &&
+              typeof className === "string" &&
+              /^language-katex/.test(className.toLocaleLowerCase())
+            ) {
+              const html = katex.renderToString(txt, {
+                throwOnError: false,
+              });
+              return (
+                <code
+                  dangerouslySetInnerHTML={{
+                    __html: html,
+                  }}
+                />
+              );
+            }
+
+            return <code className={String(className)}>{children}</code>;
           },
         },
       }}

@@ -344,7 +344,10 @@ export default function ZapPollsComp({
         />
       )}
       {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
-      <div className="fit-container fx-centered fx-col">
+      <div className="fit-container fx-centered fx-col" onClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}>
         <div
           className="fit-container poll-content-box"
           style={{ "--p-color": content_text_color }}

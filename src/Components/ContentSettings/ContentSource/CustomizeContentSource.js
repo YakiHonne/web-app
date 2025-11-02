@@ -161,7 +161,6 @@ export default function CustomizeContentSource({
       content: "",
       tags: tags,
     };
-    console.log(event);
     let eventInitEx = await InitEvent(
       event.kind,
       event.content,
@@ -193,7 +192,7 @@ export default function CustomizeContentSource({
         style={{
           maxHeight: "70vh",
           minHeight: "30vh",
-          overflow: "scroll",
+          overflow: selectedRelaysFeed.length > 4 ? "scroll" : "visible",
           position: "relative",
           marginTop: "3rem",
           width: "min(100%, 500px)",
@@ -201,7 +200,7 @@ export default function CustomizeContentSource({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky fit-container" style={{ padding: 0 }}>
+        <div className="sticky fit-container" style={{ padding: 0, borderRadius: "var(--border-r-32)" }}>
           <div className="fit-container fx-scattered box-pad-h box-pad-v-m">
             <h4>{t("AH4Mub1")}</h4>
             <div className="fx-centered">
