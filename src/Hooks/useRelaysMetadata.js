@@ -1,6 +1,7 @@
 import { saveRelayMetadata } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { getEmptyRelaysData } from "@/Helpers/Encryptions";
+import { isHex } from "@/Helpers/Helpers";
 import { getRelayMetadata } from "@/Helpers/utils";
 import { useEffect, useState } from "react";
 
@@ -11,7 +12,8 @@ export default function useRelaysMetadata(url) {
     const fetchData = async () => {
       try {
         let data = getRelayMetadata(url);
-        if (!data) {
+
+        if (!data || data.isEmpty) {
           data = await saveRelayMetadata([url]);
           if (data && data.length > 0) {
             data = data[0];
@@ -20,7 +22,7 @@ export default function useRelaysMetadata(url) {
           }
         }
         setRelayMetadata(data);
-        if (data.pubkey) saveUsers([data.pubkey]);
+        if (isHex(data.pubkey)) saveUsers([data.pubkey]);
       } catch (err) {
         console.log(err);
       }

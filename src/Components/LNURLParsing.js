@@ -53,7 +53,11 @@ export default function LNURLParsing({ lnurl }) {
         </div>
         <div
           className="copy-24"
-          onClick={() => copyText(address, t("ALR84Tq"))}
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            copyText(address, t("ALR84Tq"))
+          }}
         ></div>
       </div>
       <ZapTip

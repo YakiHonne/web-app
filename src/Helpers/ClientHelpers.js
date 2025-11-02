@@ -16,8 +16,38 @@ import { customHistory } from "./History";
 import { store } from "@/Store/Store";
 import { setRefreshAppSettings } from "@/Store/Slides/Extras";
 
+let nostrClients = [
+  "nstart.me",
+  "yakihonne.com",
+  "njump.me",
+  "nostr.com",
+  "nostr.band",
+  "iris.to",
+  "primal.net",
+  "jumble.social",
+  "coracle.social",
+  "nostrudel.ninja",
+  "phoenix.social",
+  "habla.news",
+  "nosotros.app",
+  "nostter.app",
+  "lumilumi.app",
+  "fevela.me",
+  "jumblekat.com",
+];
+
 const nostrSchemaRegex =
   /\b(naddr1|note1|nevent1|npub1|nprofile1|nsec1|nrelay1)[a-zA-Z0-9]+\b/;
+
+const doesContainNostrSchema = (url) => {
+  const url_ = new URL(url);
+  const domain = url_.hostname.replace(/^www\./, "");
+  const isWhitelisted = nostrClients.some((allowed) =>
+    domain.endsWith(allowed)
+  );
+  if (!isWhitelisted) return false;
+  return nostrSchemaRegex.test(url);
+};
 
 export function getNoteTree(
   note,
@@ -37,7 +67,7 @@ export function getNoteTree(
   let finalTree = [];
   let maxChar = isCollapsedNote ? wordsCount : tree.length;
   for (let i = 0; i < maxChar; i++) {
-    const el = tree[i];
+    const el = tree[i].replaceAll("nostr:", "");
 
     const key = `${el}-${i}`;
     if (!el) {
@@ -51,9 +81,7 @@ export function getNoteTree(
       }
     } else if (
       (/(https?:\/\/)/i.test(el) || el.startsWith("data:image")) &&
-      !el.includes("https://yakihonne.com/smart-widget-checker?naddr=") &&
-      !el.includes("https://vota.dorafactory.org/round/") &&
-      !el.includes("https://vota-test.dorafactory.org/round/")
+      !el.includes("https://yakihonne.com/smart-widget-checker?naddr=")
     ) {
       const isURLCommonPlatformVid = isVid(el);
       if (!minimal) {
@@ -89,7 +117,7 @@ export function getNoteTree(
             el.includes(".wav")
           ) {
             finalTree.push(<AudioLoader audioSrc={el} key={key} />);
-          } else if (nostrSchemaRegex.test(el)) {
+          } else if (doesContainNostrSchema(el)) {
             let cleanPart = el.match(nostrSchemaRegex)?.[0];
             if (cleanPart) {
               finalTree.push(
@@ -369,10 +397,9 @@ export function getParsedNote(event, isCollapsedNote = false) {
       isPaidNote = true;
     }
 
-    let nEvent = nEventEncode(event.id);
+    let nEvent = event?.encode ? event.encode() : nEventEncode(event.id);
 
-    let rawEvent =
-      typeof event.rawEvent === "function" ? event.rawEvent() : event;
+    let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
     let isProtected = event.tags.find((tag) => tag[0] === "-");
     if (event.kind === 1) {
       let note_tree = getNoteTree(
@@ -567,6 +594,8 @@ const checkForNewAddedSettings = (prevSettings) => {
       prevSettings.oneTapReaction !== undefined
         ? prevSettings.oneTapReaction
         : false,
+    currency:
+      prevSettings.currency !== undefined ? prevSettings.currency : "usd",
     blurNonFollowedMedia:
       prevSettings.blurNonFollowedMedia !== undefined
         ? prevSettings.blurNonFollowedMedia
@@ -592,7 +621,7 @@ const checkForNewAddedSettings = (prevSettings) => {
             { tab: "following", isHidden: false },
           ],
   };
-  return settings
+  return settings;
 };
 
 export function getCustomSettings() {
@@ -620,6 +649,7 @@ export function getDefaultSettings(pubkey) {
     collapsedNote: true,
     longPress: "notes",
     defaultReaction: "❤️",
+    currency: "usd",
     repliesView: "thread",
     oneTapReaction: false,
     blurNonFollowedMedia: true,

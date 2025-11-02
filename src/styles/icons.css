@@ -460,13 +460,15 @@
 .republish,
 .republish-24,
 .protected-2,
-.protected-2-24 ,
+.protected-2-24,
 .orbit,
 .orbit-24,
 .orbit-bold,
 .orbit-bold-24,
 .zapstore,
-.zapstore-24{
+.zapstore-24,
+.bug,
+.bug-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -822,7 +824,9 @@
 .orbit-bold,
 .orbit-bold-24,
 .zapstore,
-.zapstore-24 {
+.zapstore-24 ,
+.bug,
+.bug-24{
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -890,7 +894,9 @@
 .orbit-bold,
 .orbit-bold-24,
 .zapstore,
-.zapstore-24 {
+.zapstore-24,
+.bug,
+.bug-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -1122,7 +1128,8 @@
 .protected-2,
 .orbit,
 .orbit-bold,
-.zapstore {
+.zapstore,
+.bug {
     min-width: 16px;
     min-height: 16px;
 }
@@ -1344,7 +1351,8 @@
 .protected-2-24,
 .orbit-24,
 .orbit-bold-24,
-.zapstore-24 {
+.zapstore-24,
+.bug-24 {
     min-width: 24px;
     min-height: 24px;
 }
@@ -1365,21 +1373,29 @@
     min-height: 24px;
 }
 
+.bug, .bug-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bug.svg")
+}
 .zapstore, .zapstore-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/Zapstore.svg');
 }
+
 .orbit-bold, .orbit-bold-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/relay-orbits-filled.svg');
 }
+
 .orbit, .orbit-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/relay-orbits-mono.svg');
 }
+
 .protected-2, .protected-2-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/secure-mono.svg');
 }
+
 .republish, .republish-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/republish-2-mono.svg');
 }
+
 .recent-wr, .recent-wr-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/recent-with-replies-mono.svg');
 }
@@ -1453,6 +1469,7 @@
 .flag-fr-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-fr.svg');
 }
+
 .flag-hi,
 .flag-hi-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-hi.svg');

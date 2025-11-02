@@ -50,7 +50,11 @@ export default function UserProfilePic({
 
   const handleClick = async (e) => {
     try {
-      if (!allowPropagation) e.stopPropagation();
+      if (!allowPropagation) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+
       if (allowClick) {
         let pubkey = nip19.nprofileEncode({
           pubkey: mainAccountUser ? userMetadata.pubkey : user_id,
@@ -196,7 +200,9 @@ export default function UserProfilePic({
                 />
               </div>
             )}
-            <p className="p-one-line" style={{margin: 0}}>{withName}</p>
+            <p className="p-one-line" style={{ margin: 0 }}>
+              {withName}
+            </p>
           </div>
           {showMetadata && metadata && (
             <div

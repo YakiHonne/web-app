@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import ArrowUp from "@/Components/ArrowUp";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
@@ -23,7 +23,6 @@ import { straightUp } from "@/Helpers/Helpers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
-import LoadingScreen from "@/Components/LoadingScreen";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { saveUsers } from "@/Helpers/DB";
 
@@ -32,7 +31,6 @@ export default function Note({ event, nevent }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { muteUnmute, isMuted } = useIsMute(event?.pubkey);
-  const { postActions } = useNoteStats(event?.id, event?.pubkey);
   const [showHistory, setShowHistory] = useState(false);
   const [isLoading, setIsLoading] = useState(event ? false : true);
   const [usersList, setUsersList] = useState(false);
@@ -40,28 +38,34 @@ export default function Note({ event, nevent }) {
   const [translatedNote, setTranslatedNote] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
   const [openComment, setOpenComment] = useState(false);
-  const unsupportedKind = event?.kind !== 1;
   const [note, setNote] = useState(getParsedNote(event));
   const { userProfile, isNip05Verified } = useUserProfile(note?.pubkey);
-  
+  const { postActions } = useNoteStats(note?.id, note?.pubkey);
+  const unsupportedKind = useMemo(() => {
+    return note?.kind !== 1;
+  }, [note]);
   useEffect(() => {
     const fetchNote = async () => {
       setIsLoading(true);
       let id = nip19.decode(nevent)?.data.id || nip19.decode(nevent)?.data;
-      const res = await getSubData([{ ids: [id] }], 5000, undefined, undefined, 1);
-      if(res.data.length === 0) {
+      let relays = nip19.decode(nevent)?.data.relays || []
+      const res = await getSubData(
+        [{ ids: [id] }],
+        2000,
+        relays,
+        undefined,
+        1
+      );
+      if (res.data.length === 0) {
         setIsLoading(false);
-        return
+        return;
       }
-      let note_ = {
-        ...res.data[0],
-      };
-      let parsedNote = getParsedNote(note_);
+      let parsedNote = getParsedNote(res.data[0]);
       setNote(parsedNote);
       saveUsers([parsedNote.pubkey]);
       setIsLoading(false);
-    }
-    if(!event) fetchNote();
+    };
+    if (!event) fetchNote();
     if (state) {
       let { triggerTranslation } = state;
       if (triggerTranslation) translateNote();
@@ -117,7 +121,6 @@ export default function Note({ event, nevent }) {
       );
     }
   };
-
   if (isLoading)
     return (
       <div

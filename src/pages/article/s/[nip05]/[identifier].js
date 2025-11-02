@@ -1,5 +1,4 @@
 import React from "react";
-import { getSubData } from "@/Helpers/Controlers";
 import dynamic from "next/dynamic";
 import {
   getEmptyuserMetadata,
@@ -9,6 +8,7 @@ import {
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
+import getDataForSSG from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Article"), {
   ssr: false,
@@ -45,7 +45,7 @@ export async function getStaticProps({ params }) {
   const { nip05, identifier } = params;
   let pubkey = await getAuthPubkeyFromNip05(decodeURIComponent(nip05));
   const res = pubkey
-    ? await getSubData(
+    ? await getDataForSSG(
         [
           {
             authors: [pubkey],
@@ -54,8 +54,6 @@ export async function getStaticProps({ params }) {
           },
         ],
         5000,
-        undefined,
-        undefined,
         1
       )
     : null;
@@ -66,11 +64,9 @@ export async function getStaticProps({ params }) {
         }
       : null;
   const author = pubkey
-    ? await getSubData(
+    ? await getDataForSSG(
         [{ authors: [pubkey], kinds: [0] }],
         1000,
-        undefined,
-        undefined,
         1
       )
     : getEmptyuserMetadata(pubkey);

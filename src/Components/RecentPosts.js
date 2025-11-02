@@ -10,27 +10,32 @@ export default function RecentPosts({
   onClick,
   selectedFilter,
   kind = "notes",
+  position = "top",
 }) {
-  const { recentNotes } =
-    kind === "notes"
-      ? useRecentNotes(filter, contentFrom, since, selectedFilter)
-      : useRecentPosts(filter, since, selectedFilter);
+  const { recentNotes } = useRecentNotes(filter, contentFrom, since, selectedFilter, kind);
+  const { recentPosts } = useRecentPosts(filter, since, selectedFilter, kind);
   const pubkeys = useMemo(() => {
-    return [...new Set(recentNotes.map((note) => note.pubkey))];
-  }, [recentNotes]);
-  if (recentNotes.length === 0) return null;
+    return [
+      ...new Set([
+        ...recentNotes.map((note) => note.pubkey),
+        ...recentPosts.map((note) => note.pubkey),
+      ]),
+    ];
+  }, [recentNotes, recentPosts]);
+  if (recentNotes.length === 0 && recentPosts.length === 0) return null;
   return (
     <RecentPostsContent
       pubkeys={pubkeys}
-      notesLength={recentNotes.length}
-      onClick={() => onClick(recentNotes)}
+      notesLength={recentNotes.length + recentPosts.length}
+      onClick={() => onClick([...recentNotes, ...recentPosts])}
+      position={position}
     />
   );
 }
 
-const RecentPostsContent = ({ pubkeys, notesLength, onClick }) => {
+const RecentPostsContent = ({ pubkeys, notesLength, onClick, position = "top" }) => {
   return (
-    <div className="fit-container fx-centered recent-post-container">
+    <div className={`fit-container fx-centered recent-post-${position}-container`}>
       <div className="main-container">
         <main
           style={{ height: "auto" }}

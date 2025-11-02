@@ -322,6 +322,7 @@ export function CustomizationManagement({
           borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
           overflow: "visible",
+          borderRadius: 0
         }}
       >
         <div
@@ -581,8 +582,8 @@ const FeedSettings = ({
 };
 
 const Reaction = ({ defaultReaction, handleDefaultReaction }) => {
-  const { theme } = useTheme();
-  const isDarkMode = ["dark", "gray", "system"].includes(theme);
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = ["dark", "gray", "system"].includes(resolvedTheme);
   const { open, setOpen, containerRef } = useCloseContainer();
   return (
     <div style={{ position: "relative" }} ref={containerRef}>

@@ -45,8 +45,8 @@ export default function Article({ event, userProfile, naddrData }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
-  const { theme } = useTheme();
-  const isDarkMode = ["dark", "gray", "system"].includes(theme);
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = ["dark", "gray", "system"].includes(resolvedTheme);
   const [isLoading, setIsLoading] = useState(event ? false : true);
   const [post, setPost] = useState(event);
   const [usersList, setUsersList] = useState(false);
@@ -58,7 +58,6 @@ export default function Article({ event, userProfile, naddrData }) {
   const [translatedContent, setTranslatedContent] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
   const [isContentTranslating, setIsContentTranslating] = useState(false);
-
   const containerRef = useRef(null);
   const { muteUnmute, isMuted } = useIsMute(
     naddrData ? naddrData.pubkey : null
@@ -106,7 +105,7 @@ export default function Article({ event, userProfile, naddrData }) {
           },
         ],
         5000,
-        undefined,
+        naddrData.relays || undefined,
         undefined,
         1
       );
@@ -453,7 +452,7 @@ export default function Article({ event, userProfile, naddrData }) {
                         }}
                         components={{
                           p: ({ children }) => {
-                            return <>{getComponent(children)}</>;
+                            return <div className="box-marg-s">{getComponent(children)}</div>;
                           },
                           h1: ({ children }) => {
                             return <h1>{children}</h1>;
@@ -535,46 +534,6 @@ export default function Article({ event, userProfile, naddrData }) {
                         }}
                       />
                     </div>
-                    {/* {readMore.length > 0 && (
-                      <div className="fx-centered fx-start-h fx-wrap fit-container box-marg-s box-pad-v">
-                        <hr />
-                        <p className="p-big">{t("AArGqN7")}</p>
-                        {readMore.map((post) => {
-                          if (post.image)
-                            return (
-                              <Link
-                                className="fit-container fx-scattered"
-                                key={post.id}
-                                style={{
-                                  textDecoration: "none",
-                                  color: "var(--black)",
-                                }}
-                                href={`/article/${post.naddr}`}
-                                target="_blank"
-                              >
-                                <div className="fx-centered">
-                                  {post.image && (
-                                    <div
-                                      className=" bg-img cover-bg sc-s-18 "
-                                      style={{
-                                        backgroundImage: `url(${post.image})`,
-                                        minWidth: "48px",
-                                        aspectRatio: "1/1",
-                                        borderRadius: "var(--border-r-18)",
-                                        border: "none",
-                                      }}
-                                    ></div>
-                                  )}
-                                  <div>
-                                    <p className="p-one-line">{post.title}</p>
-                                    <DynamicIndicator item={post} />
-                                  </div>
-                                </div>
-                              </Link>
-                            );
-                        })}
-                      </div>
-                    )} */}
                     <ReadMore />
                   </div>
                 )}

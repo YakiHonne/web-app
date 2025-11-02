@@ -32,6 +32,7 @@ import PostReaction from "./PostReaction";
 import useIsMute from "@/Hooks/useIsMute";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
+import Link from "next/link";
 
 export default function KindOne({
   event,
@@ -116,6 +117,7 @@ export default function KindOne({
   }, [postActions]);
 
   const onClick = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     if (isNavigating) {
       console.log("Click ignored - already navigating");
@@ -143,38 +145,6 @@ export default function KindOne({
     } catch (error) {
       console.error("Error in onClick handler:", error);
       setIsNavigating(false);
-    }
-  };
-
-  const redirect = (e) => {
-    e.stopPropagation();
-
-    try {
-      if (!event?.nEvent) {
-        console.error("Missing nEvent in redirect:", event);
-        return;
-      }
-
-      console.log(
-        "Redirect function called, current path:",
-        window.location.pathname
-      );
-
-      if (window.location.pathname.includes("/note/")) {
-        console.log(
-          "Using customHistory for redirect to:",
-          `/note/${event.nEvent}`
-        );
-        customHistory(`/note/${event.nEvent}`);
-      } else {
-        console.log(
-          "Using window.location for redirect to:",
-          `/note/${event.nEvent}`
-        );
-        window.location = `/note/${event.nEvent}`;
-      }
-    } catch (error) {
-      console.error("Error in redirect function:", error);
     }
   };
 
@@ -265,6 +235,15 @@ export default function KindOne({
           isRoot={event.isComment ? false : true}
         />
       )}
+      {usersList && (
+        <ShowUsersList
+          exit={() => setUsersList(false)}
+          title={usersList.title}
+          list={usersList.list}
+          extras={usersList.extras}
+          extrasType={usersList?.extrasType}
+        />
+      )}
       <div
         className="box-pad-v-m fit-container note-item"
         id={event.id}
@@ -285,22 +264,12 @@ export default function KindOne({
             overflow: "visible",
           }}
         >
-          {usersList && (
-            <ShowUsersList
-              exit={() => setUsersList(false)}
-              title={usersList.title}
-              list={usersList.list}
-              extras={usersList.extras}
-              extrasType={usersList?.extrasType}
-            />
-          )}
           <div
             className=" fit-container pointer"
             style={{
               transition: ".2s ease-in-out",
               overflow: "visible",
             }}
-            onClick={reactions ? null : redirect}
           >
             <div className="fit-container fx-centered fx-start-h fx-start-v">
               <div>
@@ -317,7 +286,6 @@ export default function KindOne({
                   "fit-container fx-centered fx-start-h fx-start-v fx-col"
                 }
                 style={{ gap: "6px" }}
-                onClick={onClick}
               >
                 <div className="fx-scattered fit-container">
                   <div className="fx-centered" style={{ gap: "3px" }}>
@@ -349,25 +317,30 @@ export default function KindOne({
                 {event.isComment && !isThread && (
                   <RelatedEvent event={event.isComment} isThread={isThread} />
                 )}
-                <div className="fx-centered fx-col fit-container">
-                  <div className="fit-container" onClick={onClick} dir="auto">
-                    {!minimal ? (
-                      <div
-                        className="p-n-lines"
-                        style={{
-                          "--lines": isClamped ? isClamped : "unset",
-                        }}
-                        ref={noteRef}
-                      >
-                        {showTranslation ? translatedNote : event.note_tree}
-                      </div>
-                    ) : (
-                      <div className="p-six-lines" ref={noteRef}>
-                        {compactContent(event.content, event.pubkey)}
-                      </div>
-                    )}
+                <Link
+                  href={`/note/${event.nEvent}`}
+                  className="fit-container pointer no-hover"
+                >
+                  <div className="fx-centered fx-col fit-container">
+                    <div className="fit-container" dir="auto">
+                      {!minimal ? (
+                        <div
+                          className="p-n-lines"
+                          style={{
+                            "--lines": isClamped ? isClamped : "unset",
+                          }}
+                          ref={noteRef}
+                        >
+                          {showTranslation ? translatedNote : event.note_tree}
+                        </div>
+                      ) : (
+                        <div className="p-six-lines" ref={noteRef}>
+                          {compactContent(event.content, event.pubkey)}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                </Link>
               </div>
             </div>
             {isClamped !== 10000 && (

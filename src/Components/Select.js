@@ -55,7 +55,8 @@ export default function Select({
         <div
           style={{
             position: "absolute",
-
+            maxHeight: "350px",
+            overflow: "scroll",
             top: revert ? 0 : "110%",
             transform: revert ? "translateY(calc(-100% - 5px))" : "none",
             // border: "none",
@@ -64,7 +65,7 @@ export default function Select({
             zIndex: 1000,
             rowGap: "0",
           }}
-          className="sc-s-18 fx-centered fx-col fx-start-v pointer box-pad-v-s box-pad-h-s bg-sp drop-down"
+          className="sc-s-18 fx-centered fx-col fx-start-v fx-start-h pointer box-pad-v-s box-pad-h-s bg-sp drop-down"
         >
           {options.map((option, index) => {
             return (

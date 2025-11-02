@@ -1,10 +1,10 @@
 import React from "react";
-import { getSubData } from "@/Helpers/Controlers";
 import dynamic from "next/dynamic";
 import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 import { nip19 } from "nostr-tools";
+import getDataForSSG from "@/Helpers/lib";
 
 const ClientComponent = dynamic(
   () => import("@/(PagesComponents)/User/UserHome"),
@@ -53,9 +53,10 @@ export async function getStaticProps({ locale, params }) {
     };
   }
   const [resMetaData, resFollowings] = await Promise.all([
-    getSubData([{ authors: [pubkey], kinds: [0] }], 400),
-    getSubData([{ authors: [pubkey], kinds: [3] }], 50),
+    getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 1),
+    getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 1),
   ]);
+
   let metadata = getEmptyuserMetadata(pubkey);
   let followings = [];
 
@@ -74,6 +75,7 @@ export async function getStaticProps({ locale, params }) {
         nprofile: nip19.nprofileEncode({ pubkey: pubkey }),
       },
     },
+    revalidate: 3600,
   };
 }
 

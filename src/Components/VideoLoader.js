@@ -30,6 +30,7 @@ const toBlur = false;
 
   const handleVideoClick = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     // setIsOpened(true);
   };
   if (isCommonPlatform === "yt") {

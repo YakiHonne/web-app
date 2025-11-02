@@ -20,11 +20,10 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
   const [isLogin, setIsLogin] = useState(false);
 
   // const isDarkMode = useSelector((state) => state.isDarkMode);
-  const { theme } = useTheme();
-  const isDarkMode = ["dark", "gray", "system"].includes(theme);
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = ["dark", "gray", "system"].includes(resolvedTheme);
   const [showEmoji, setShowEmoji] = useState(false);
   const optionsRef = useRef(null);
-
 
   useEffect(() => {
     const handleOffClick = (e) => {
@@ -42,8 +41,8 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
     const updateDb = async () => {
       let subscription = ndkInstance.subscribe([{ ids: [eventID] }], {
         groupable: false,
-        skipVerification: true,
-        skipValidation: true,
+        // skipVerification: true,
+        // skipValidation: true,
       });
       subscription.on("event", (event_) => {
         let stats = getEventStatAfterEOSE(event_, "likes", actions, undefined);

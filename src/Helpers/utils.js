@@ -56,7 +56,8 @@ export function setRelayMetadata(key, data) {
 }
 
 export function getRelayMetadata(key) {
-  return relayMetadataCache.get(key) || getEmptyRelaysData(key);
+  let cleanURL = !key.endsWith("/") ? key : key.slice(0, -1);
+  return relayMetadataCache.get(cleanURL) || relayMetadataCache.get(key) || getEmptyRelaysData(cleanURL);
 }
 
 export function clearRelayMetadata(key) {

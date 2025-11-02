@@ -308,7 +308,7 @@ export default function Search() {
               style={{
                 padding: ".5rem",
                 borderBottom: "1px solid var(--very-dim-gray)",
-                top: 0
+                top: 0,
               }}
             >
               <div
@@ -316,7 +316,7 @@ export default function Search() {
                 style={{
                   position: "relative",
                   borderBottom: "1px solid var(--very-dim-gray)",
-                  height: "50px"
+                  height: "50px",
                 }}
               >
                 <div className="search-24"></div>
@@ -333,7 +333,7 @@ export default function Search() {
                   <div
                     className="close"
                     onClick={() => {
-                     setSearchKeyword("");
+                      setSearchKeyword("");
                     }}
                   >
                     <div></div>
@@ -342,7 +342,7 @@ export default function Search() {
               </div>
               <Slider
                 items={[
-                  ...["people", "all-media", "notes", "articles",  "videos"].map(
+                  ...["people", "all-media", "notes", "articles", "videos"].map(
                     (tag, index) => {
                       return (
                         <div
@@ -399,8 +399,8 @@ export default function Search() {
             {userInterestList.length > 0 && (
               <div className="fit-container fx-centered fx-col fx-start-h fx-start-v box-pad-v-m">
                 <p className="gray-c">{t("AvcFYqP")}</p>
-                <div className="fx-centered fx-wrap">
-                  {userInterestList?.map((interest, index) => {
+                <Slider
+                  items={userInterestList?.map((interest, index) => {
                     return (
                       <div
                         onClick={() => {
@@ -419,7 +419,8 @@ export default function Search() {
                       </div>
                     );
                   })}
-                </div>
+                  slideBy={200}
+                />
               </div>
             )}
             {selectedTab === "people" &&

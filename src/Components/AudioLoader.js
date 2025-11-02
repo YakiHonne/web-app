@@ -99,8 +99,13 @@ export default function AudioLoader({ audioSrc }) {
         pointerEvents: isLoading ? "none" : "auto",
         borderRadius: "16px",
         border: "none",
+        maxHeight: "80px",
+        marginTop: ".5rem"
       }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}
     >
       <PlayPauseButton
         isPlaying={isPlaying}

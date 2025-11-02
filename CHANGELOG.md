@@ -1,3 +1,25 @@
+# (v5.2.0) 02/11/2025
+* Expanded sats-to-fiat conversion to support more currencies
+* Added real-time note updates in Relay Orbits
+* Added curations tab to Relay Orbit feeds
+* Included relay data in note address encoding for more accurate fetching
+* Fixed icon color issues when using the system theme
+* Settings footer repositioned to the right on desktop view
+* Added support for parsing nostr:-prefixed lnbc invoices
+* Fixed missing reaction stats in notes
+* Fixed issues with republishing events
+* Events in the manager are now sorted by actual publish time
+* Fixed home feed timeline fetching
+* Fixed parsed URLs with the nostr: schema
+* Improved self-profile search and general search accuracy
+* Fixed relay metadata display in Relay Orbits
+* Added “Favored By” stats across all Relay Orbit tabs
+* Added Web of Trust explanation to Settings
+* Notes can now be opened in separate tabs
+* Fixed inconsistent article previews before and after publishing
+* Fixed relay list overflow in Relay Feeds settings
+* General improvements
+
 # (v5.1.0) 21/10/2025
 * Customize your post actions — reorder, enable, or disable them to match your style
 * Media blur for posts from non-followed users (enabled by default, adjustable in settings)

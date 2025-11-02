@@ -2,8 +2,14 @@ import React, { useEffect, useState } from "react";
 import RelayPreview from "./RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
 import LoadingDots from "@/Components/LoadingDots";
+import { trimRelay } from "@/Helpers/Helpers";
 
-export default function Global({ relays, relaysBatch, setRelaysBatch }) {
+export default function Global({
+  relays,
+  relaysBatch,
+  setRelaysBatch,
+  favoredList = [],
+}) {
   const { t } = useTranslation();
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -11,8 +17,8 @@ export default function Global({ relays, relaysBatch, setRelaysBatch }) {
 
   useEffect(() => {
     if (!search) {
-        setSearchResults([]);
-        return;
+      setSearchResults([]);
+      return;
     }
     setIsLoading(true);
     let timer = setTimeout(() => {
@@ -51,7 +57,13 @@ export default function Global({ relays, relaysBatch, setRelaysBatch }) {
             <h4>{relays.length} relays</h4>
           </div>
           {relaysBatch.map((relay) => {
-            return <RelayPreview url={relay} key={relay} />;
+            let pubkeys = favoredList.find(
+              (_) => trimRelay(_.url) === trimRelay(relay)
+            );
+            pubkeys = pubkeys ? pubkeys.pubkeys : [];
+            return (
+              <RelayPreview url={relay} key={relay} favoredList={pubkeys} />
+            );
           })}
           <button className="btn btn-normal" onClick={handleRelayClick}>
             {t("AxJRrkn")}
@@ -61,7 +73,13 @@ export default function Global({ relays, relaysBatch, setRelaysBatch }) {
       {search && (
         <>
           {searchResults.map((relay) => {
-            return <RelayPreview url={relay} key={relay} />;
+            let pubkeys = favoredList.find(
+              (_) => trimRelay(_.url) === trimRelay(relay)
+            );
+            pubkeys = pubkeys ? pubkeys.pubkeys : [];
+            return (
+              <RelayPreview url={relay} key={relay} favoredList={pubkeys} />
+            );
           })}
         </>
       )}

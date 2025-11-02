@@ -160,6 +160,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       setNotesLastEventTime(undefined);
     }
   }, [selectedCategory]);
+  
   useEffect(() => {
     straightUp();
     dispatchNotes({ type: "remove-events" });
@@ -216,7 +217,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           : tempUserFollowings.length < 5
           ? [...tempUserFollowings, ...getBackupWOTList()]
           : tempUserFollowings;
-      filter = [{ authors, kinds: [1, 6], until, since, limit: 20 }];
+      filter = [{ authors, kinds: [1, 6], until, since, limit: 100 }];
       return {
         filter,
       };
@@ -226,7 +227,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         {
           kinds: [1],
           "#l": ["smart-widget"],
-          limit: 20,
+          limit: 100,
           authors:
             selectedFilter.posted_by?.length > 0
               ? selectedFilter.posted_by
@@ -244,7 +245,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         {
           kinds: [1],
           "#l": ["FLASH NEWS"],
-          limit: 20,
+          limit: 100,
           authors:
             selectedFilter.posted_by?.length > 0
               ? selectedFilter.posted_by
@@ -262,7 +263,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       filter: [
         {
           kinds: [1, 6],
-          limit: 20,
+          limit: 100,
           authors:
             selectedFilter.posted_by?.length > 0
               ? selectedFilter.posted_by
@@ -293,16 +294,19 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       }
       const algoRelay =
         selectedCategory.group === "af" ? [selectedCategory.value] : [];
+      const data = await getSubData(filter, 50, algoRelay, ndk);
       setSubfilter({ filter, relays: algoRelay, ndk });
-      const data = await getSubData(filter, 50, algoRelay, ndk, 200);
       events = data.data
-        .splice(0, 50)
+        .splice(0, 200)
         .map((event) => {
           eventsPubkeys.push(event.pubkey);
           let event_ = getParsedNote(event, true);
           if (event_) fallBackEvents.push(event_);
           if (event_) {
-            if (notesContentFrom !== "recent_with_replies") {
+            if (
+              notesContentFrom !== "recent_with_replies" &&
+              algoRelay.length === 0
+            ) {
               if (!event_.isComment) {
                 if (event.kind === 6) {
                   eventsPubkeys.push(event_.relatedEvent.pubkey);
