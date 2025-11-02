@@ -1,8 +1,4 @@
-// import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import React from "react";
-// import nextI18nextConfig from "../../../next-i18next.config";
-import { getSubData } from "@/Helpers/Controlers";
-import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";
 import {
   getEmptyuserMetadata,
@@ -12,6 +8,7 @@ import {
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
+import getDataForSSG from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Curation"), {
   ssr: false,
@@ -42,7 +39,7 @@ export default function Page({ event, author }) {
 export async function getStaticProps({ params }) {
   const { nip05, identifier } = params;
   let pubkey = await getAuthPubkeyFromNip05(decodeURIComponent(nip05));
-  const res = await getSubData(
+  const res = await getDataForSSG(
     [
       {
         authors: [pubkey],
@@ -51,28 +48,19 @@ export async function getStaticProps({ params }) {
       },
     ],
     1000,
-    undefined,
-    undefined,
     1
   );
   let event = {
     ...res.data[0],
   };
-  const author = await getSubData(
+  const author = await getDataForSSG(
     [{ authors: [event.pubkey], kinds: [0] }],
     1000,
-    undefined,
-    undefined,
     1
   );
   return {
     props: {
       event: event,
-      // ...(await serverSideTranslations(
-      //   locale ?? "en",
-      //   ["common"],
-      //   nextI18nextConfig
-      // )),
       author:
         author.data.length > 0
           ? getParsedAuthor(author.data[0])

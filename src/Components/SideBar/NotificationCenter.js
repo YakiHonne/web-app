@@ -52,8 +52,8 @@ export default function NotificationCenter({
       const sub = ndkInstance.subscribe(filter, {
         cacheUsage: "CACHE_FIRST",
         groupable: false,
-        skipValidation: true,
-        skipVerification: true,
+        // skipValidation: true,
+        // skipVerification: true,
       });
 
       sub.on("event", (event) => {

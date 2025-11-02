@@ -241,7 +241,12 @@ const encodeLud06 = (url) => {
 };
 
 const getParsedAuthor = (data) => {
-  let content = data.content ? JSON.parse(data.content) : {};
+  let content = {};
+  try {
+    content = data.content ? JSON.parse(data.content) : {};
+  } catch (err) {
+    console.log(err);
+  }
   let tempAuthor = {
     display_name:
       content?.display_name || content?.name || data.pubkey.substring(0, 10),
@@ -319,6 +324,7 @@ const getParsedRepEvent = (event) => {
       content: event.content,
       created_at: event.created_at,
       tags: event.tags,
+      sig: event.sig,
       author: getEmptyuserMetadata(event.pubkey),
       title: [34235, 34236, 30033, 21, 22].includes(event.kind)
         ? event.content
@@ -383,9 +389,9 @@ const getParsedRepEvent = (event) => {
       if (tag[0] === "imeta") imeta_url = tag.find((_) => _.includes("url"));
     }
     if (imeta_url) content.vUrl = imeta_url.split(" ")[1];
-
     content.naddr = content.d
-      ? nip19.naddrEncode({
+      ? (event.encode && event.encode()) ||
+        nip19.naddrEncode({
           pubkey: event.pubkey,
           identifier: content.d,
           kind: event.kind,
@@ -1004,7 +1010,6 @@ const getWOTScoreForPubkey = (network, pubkey, minScore = 3, counts) => {
         ? 5
         : Math.floor((totalTrusting * 10) / network.length);
 
-    console.log(score);
     return { score, status: score >= minScore };
   } catch (err) {
     console.error(err);

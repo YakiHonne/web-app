@@ -81,7 +81,7 @@ export default function SearchContentCard({ event, exit, userProfile = true }) {
             className="round-icon"
             style={{ minWidth: "48px", aspectRatio: "1/1" }}
           >
-            {[30004, 30003].includes(event.kind) && (
+            {[30004, 30005].includes(event.kind) && (
               <div className="curation-24"></div>
             )}
             {[30023].includes(event.kind) && <div className="posts-24"></div>}

@@ -4,8 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 
 export default function Emojis({ setEmoji, position = "left" }) {
   // const isDarkMode = useSelector((state) => state.isDarkMode);
-  const { theme } = useTheme();
-  const isDarkMode = ["dark", "gray", "system"].includes(theme);
+  const { resolvedTheme } = useTheme();
+  const isDarkMode = ["dark", "gray", "system"].includes(resolvedTheme);
   const [showEmoji, setShowEmoji] = useState(false);
   const optionsRef = useRef(null);
 

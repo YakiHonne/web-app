@@ -27,6 +27,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
             }}
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               currentImg > 0 ?  setCurrentImg(currentImg - 1) : setCurrentImg(imgs.length - 1);
             }}
           >
@@ -80,6 +81,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
             className="pointer "
             onClick={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               currentImg + 1 < imgs.length
                 ? setCurrentImg(currentImg + 1)
                 : setCurrentImg(0);

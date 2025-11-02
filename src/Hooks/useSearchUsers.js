@@ -8,15 +8,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function useSearchUsers(keyword) {
+  const userKeys = useSelector((state) => state.userKeys);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const userFollowings = useSelector((state) => state.userFollowings);
   const [users, setUsers] = useState(false);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const userFollowingsMetadata = useMemo(() => {
-    return userFollowings
+    return [...userFollowings, ...(userKeys ? [userKeys.pub] : [])]
       .map((_) => nostrAuthors.find((__) => __.pubkey === _))
       .filter((_) => _);
-  }, []);
+  }, [userKeys]);
   useEffect(() => {
     var timer = setTimeout(null);
     if (keyword) {
@@ -96,7 +97,7 @@ export default function useSearchUsers(keyword) {
       if (checkFollowings.length > 0) {
         filteredUsers = structuredClone(checkFollowings);
       }
-      if (checkFollowings.length < 5) {
+      if (checkFollowings.length < 10) {
         let filterPubkeys = filteredUsers.map((_) => _.pubkey);
 
         filteredUsers = [
@@ -130,7 +131,7 @@ export default function useSearchUsers(keyword) {
     }
 
     setUsers(filteredUsers);
-    if (filteredUsers.length < 5) getUsersFromCache();
+    if (filteredUsers.length < 10) getUsersFromCache();
   };
   const getUserByPubkey = async (keyword) => {
     let hexPubkey =

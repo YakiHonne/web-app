@@ -4,9 +4,9 @@ import { filterContent, getParsedRepEvent } from "@/Helpers/Encryptions";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-export default function useRecentPosts(filter, since, selectedFilter) {
+export default function useRecentPosts(filter, since, selectedFilter, kind = "posts") {
   const userMutedList = useSelector((state) => state.userMutedList);
-  const [recentNotes, setRecentNotes] = useState([]);
+  const [recentPosts, setRecentPosts] = useState([]);
 
   useEffect(() => {
     let interval;
@@ -25,8 +25,9 @@ export default function useRecentPosts(filter, since, selectedFilter) {
         filter.relays,
         filter.ndk
       );
-      if (data.data.length > 0) {
-        let posts = data.data
+      let filteredData = data.data.filter((_) => ![1, 6].includes(_.kind));
+      if (filteredData.length > 0) {
+        let posts = filteredData
           .map((_) => {
             if (_.content) {
               let parsedNote = getParsedRepEvent(_);
@@ -35,8 +36,8 @@ export default function useRecentPosts(filter, since, selectedFilter) {
             return false;
           })
           .filter((_) => _ && !userMutedList.includes(_.pubkey));
-        posts = filterContent(selectedFilter, posts);
-        setRecentNotes((_) => [..._, ...posts]);
+        posts = selectedFilter ? filterContent(selectedFilter, posts) : posts;
+        setRecentPosts((_) => [..._, ...posts]);
         if (posts.length > 0) {
           newSince = posts[0].created_at + 1;
           pubkeys = [...new Set([...pubkeys, ...data.pubkeys])];
@@ -51,8 +52,8 @@ export default function useRecentPosts(filter, since, selectedFilter) {
       }
     };
 
-    setRecentNotes([]);
-    if (filter.filter.length > 0 && typeof since !== "undefined") {
+    setRecentPosts([]);
+    if (filter.filter.length > 0 && typeof since !== "undefined" && kind !== "notes") {
       fetchData();
       interval = setInterval(() => {
         fetchData();
@@ -66,7 +67,7 @@ export default function useRecentPosts(filter, since, selectedFilter) {
 
   //   useEffect(() => {
   //     let sub;
-  //     setRecentNotes([]);
+  //     setRecentPosts([]);
   //     if (filter.filter.length > 0 && typeof since !== "undefined") {
   //       sub = ndkInstance.subscribe([{ ...filter.filter[0], since }], {
   //         relayUrls:
@@ -77,7 +78,7 @@ export default function useRecentPosts(filter, since, selectedFilter) {
   //       sub.on("event", (event) => {
   //         if (!userMutedList.includes(event.pubkey)) {
   //           let parsedNote = getParsedNote(event.rawEvent());
-  //           if (parsedNote) setRecentNotes((prev) => [...prev, parsedNote]);
+  //           if (parsedNote) setRecentPosts((prev) => [...prev, parsedNote]);
   //         }
   //       });
   //     }
@@ -87,5 +88,5 @@ export default function useRecentPosts(filter, since, selectedFilter) {
   //     };
   //   }, [since]);
 
-  return { recentNotes };
+  return { recentPosts };
 }

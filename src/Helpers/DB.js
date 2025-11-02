@@ -89,7 +89,12 @@ export const getInterestsList = async (pubkey) => {
   if (db) {
     try {
       let interests = await db.table("interests").get(pubkey);
-      return interests || [];
+      return {
+        ...interests,
+        interestsList: interests?.interestsList?.map((interest) =>
+          interest.replaceAll("#", "")
+        ) || [],
+      } || [];
     } catch (err) {
       console.log(err);
       return [];
@@ -392,7 +397,7 @@ export const saveInterests = async (event, pubkey, lastTimestamp) => {
     if (event) {
       let interestsList = event.tags
         .filter((tag) => tag[0] === "t")
-        .map((tag) => tag[1]);
+        .map((tag) => tag[1].replaceAll("#", ""));
       eventToStore = { last_timestamp: event.created_at, interestsList };
     }
 

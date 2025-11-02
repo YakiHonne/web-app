@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import BookmarkEvent from "@/Components/BookmarkEvent";
 import ShareLink from "@/Components/ShareLink";
@@ -596,6 +596,153 @@ export default function EventOptions({
   );
 }
 
+// const BroadcastEvent = ({ event }) => {
+//   const { t } = useTranslation();
+//   const dispatch = useDispatch();
+//   const userRelays = useSelector((state) => state.userRelays);
+//   const userKeys = useSelector((state) => state.userKeys);
+//   const isProtected = event.isProtected && userKeys.pub !== event.pubkey;
+//   const userFavRelays = useSelector((state) => state.userFavRelays);
+//   const [showRelays, setShowRelays] = useState(false);
+//   const allRelays = useMemo(() => {
+//     return [...new Set([...userRelays, ...(userFavRelays?.relays || [])])];
+//   }, [userRelays, userFavRelays]);
+
+//   const handleRepublish = async (relay) => {
+//     let rawEvent = {
+//       id: event.id,
+//       pubkey: event.pubkey,
+//       created_at: event.created_at,
+//       kind: event.kind,
+//       tags: event.tags,
+//       content: event.content,
+//       sig: event.sig,
+//     };
+//     dispatch(
+//       setToPublish({
+//         eventInitEx: rawEvent,
+//         allRelays: [relay],
+//       })
+//     );
+//     setShowRelays(false);
+//   };
+
+//   if (allRelays.length === 0) return null;
+//   return (
+//     <div
+//       onClick={(e) => {
+//         e.stopPropagation();
+//         setShowRelays(!showRelays);
+//       }}
+//       style={{
+//         position: "relative",
+//         cursor: isProtected ? "not-allowed" : "pointer",
+//       }}
+//       className="pointer fx-scattered fit-container box-pad-h-s box-pad-v-s option-no-scale"
+//       onMouseEnter={() => setShowRelays(true)}
+//       onMouseLeave={() => setShowRelays(false)}
+//     >
+//       {showRelays && !isProtected && (
+//         <div
+//           style={{
+//             position: "absolute",
+//             top: "50%",
+//             left: "-5px",
+//             minWidth: "max-content",
+//             transform: "translate(-100%, -50%)",
+//             maxHeight: "400px",
+//             overflow: "scroll",
+//             gap: 0,
+//           }}
+//           onMouseLeave={() => setShowRelays(false)}
+//           className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
+//         >
+//           <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
+//           {userFavRelays?.relays.map((_) => {
+//             return (
+//               <div
+//                 key={_}
+//                 className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+//                 onClick={() => handleRepublish(_)}
+//               >
+//                 <div style={{ position: "relative" }}>
+//                   <RelayImage url={_} size={30} />
+//                   <div
+//                     style={{
+//                       position: "absolute",
+//                       right: "-10px",
+//                       bottom: "-10px",
+//                       zIndex: 10,
+//                       scale: ".65",
+//                     }}
+//                   >
+//                     <div
+//                       className="round-icon-small round-icon-tooltip"
+//                       data-tooltip={t("Ay0vA4Z")}
+//                       style={{
+//                         backgroundColor: "var(--white)",
+//                         border: "none",
+//                       }}
+//                     >
+//                       <div className="star-24"></div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <p className="p-one-line">{_}</p>
+//               </div>
+//             );
+//           })}
+//           {userRelays.map((_) => {
+//             if (!userFavRelays?.relays.includes(_))
+//               return (
+//                 <div
+//                   key={_}
+//                   className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+//                   onClick={() => handleRepublish(_)}
+//                 >
+//                   <RelayImage url={_} size={30} />
+//                   <p className="p-one-line">{_}</p>
+//                 </div>
+//               );
+//           })}
+//         </div>
+//       )}
+//       {showRelays && isProtected && (
+//         <div
+//           style={{
+//             position: "absolute",
+//             top: "50%",
+//             left: "-5px",
+//             width: "200px",
+//             transform: "translate(-100%, -50%)",
+//             maxHeight: "600px",
+//             overflow: "scroll",
+//             gap: 0,
+//           }}
+//           onMouseLeave={() => setShowRelays(false)}
+//           className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-m"
+//         >
+//           <div className="fx-centered fx-centered fx-col">
+//             <div className="protected-2-24"></div>
+//             <p className="gray-c p-centered">{t("AqqpEOw")}</p>
+//           </div>
+//         </div>
+//       )}
+//       <div className="fx-centered">
+//         <div
+//           className="republish-24"
+//           style={{ opacity: isProtected ? 0.5 : 1 }}
+//         ></div>
+//         <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
+//       </div>
+//       <div
+//         className="arrow"
+//         style={{ rotate: "-90deg", opacity: isProtected ? 0.5 : 1 }}
+//       ></div>
+//     </div>
+//   );
+// };
+
 const BroadcastEvent = ({ event }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -604,6 +751,8 @@ const BroadcastEvent = ({ event }) => {
   const isProtected = event.isProtected && userKeys.pub !== event.pubkey;
   const userFavRelays = useSelector((state) => state.userFavRelays);
   const [showRelays, setShowRelays] = useState(false);
+  const hideTimeout = useRef(null);
+
   const allRelays = useMemo(() => {
     return [...new Set([...userRelays, ...(userFavRelays?.relays || [])])];
   }, [userRelays, userFavRelays]);
@@ -627,21 +776,32 @@ const BroadcastEvent = ({ event }) => {
     setShowRelays(false);
   };
 
+  const handleMouseEnter = () => {
+    clearTimeout(hideTimeout.current);
+    setShowRelays(true);
+  };
+
+  const handleMouseLeave = () => {
+    hideTimeout.current = setTimeout(() => setShowRelays(false), 150);
+  };
+
   if (allRelays.length === 0) return null;
+
   return (
     <div
-      onClick={(e) => {
-        e.stopPropagation();
-        setShowRelays(!showRelays);
-      }}
       style={{
         position: "relative",
         cursor: isProtected ? "not-allowed" : "pointer",
       }}
       className="pointer fx-scattered fit-container box-pad-h-s box-pad-v-s option-no-scale"
-      onMouseEnter={() => setShowRelays(true)}
-      onMouseLeave={() => setShowRelays(false)}
+      onClick={(e) => {
+        e.stopPropagation();
+        setShowRelays((prev) => !prev);
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
+      {/* Dropdown */}
       {showRelays && !isProtected && (
         <div
           style={{
@@ -651,53 +811,64 @@ const BroadcastEvent = ({ event }) => {
             minWidth: "max-content",
             transform: "translate(-100%, -50%)",
             maxHeight: "400px",
-            overflow: "scroll",
+            overflowY: "auto",
             gap: 0,
+            zIndex: 100,
           }}
-          onMouseLeave={() => setShowRelays(false)}
-          className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
+          className="fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s hover-bridge"
         >
+          {/* Hover bridge */}
+          <div
+            style={{
+              position: "absolute",
+              right: "-10px",
+              top: 0,
+              width: "10px",
+              height: "100%",
+            }}
+          ></div>
+
           <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
-          {userFavRelays?.relays.map((_) => {
-            return (
-              <div
-                key={_}
-                className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
-                onClick={() => handleRepublish(_)}
-              >
-                <div style={{ position: "relative" }}>
-                  <RelayImage url={_} size={30} />
+
+          {userFavRelays?.relays.map((_) => (
+            <div
+              key={_}
+              className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+              onClick={() => handleRepublish(_)}
+            >
+              <div style={{ position: "relative" }}>
+                <RelayImage url={_} size={30} />
+                <div
+                  style={{
+                    position: "absolute",
+                    right: "-10px",
+                    bottom: "-10px",
+                    zIndex: 10,
+                    scale: ".65",
+                  }}
+                >
                   <div
+                    className="round-icon-small round-icon-tooltip"
+                    data-tooltip={t("Ay0vA4Z")}
                     style={{
-                      position: "absolute",
-                      right: "-10px",
-                      bottom: "-10px",
-                      zIndex: 10,
-                      scale: ".65",
+                      backgroundColor: "var(--white)",
+                      border: "none",
                     }}
                   >
-                    <div
-                      className="round-icon-small round-icon-tooltip"
-                      data-tooltip={t("Ay0vA4Z")}
-                      style={{
-                        backgroundColor: "var(--white)",
-                        border: "none",
-                      }}
-                    >
-                      <div className="star-24"></div>
-                    </div>
+                    <div className="star-24"></div>
                   </div>
                 </div>
-                <p className="p-one-line">{_}</p>
               </div>
-            );
-          })}
+              <p className="p-one-line">{_}</p>
+            </div>
+          ))}
+
           {userRelays.map((_) => {
             if (!userFavRelays?.relays.includes(_))
               return (
                 <div
                   key={_}
-                  className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+                  className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
                   onClick={() => handleRepublish(_)}
                 >
                   <RelayImage url={_} size={30} />
@@ -707,6 +878,8 @@ const BroadcastEvent = ({ event }) => {
           })}
         </div>
       )}
+
+      {/* Protected state */}
       {showRelays && isProtected && (
         <div
           style={{
@@ -716,18 +889,20 @@ const BroadcastEvent = ({ event }) => {
             width: "200px",
             transform: "translate(-100%, -50%)",
             maxHeight: "600px",
-            overflow: "scroll",
+            overflow: "auto",
             gap: 0,
+            zIndex: 100,
           }}
-          onMouseLeave={() => setShowRelays(false)}
-          className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-m"
+          className="fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-m"
         >
-          <div className="fx-centered fx-centered fx-col">
+          <div className="fx-centered fx-col">
             <div className="protected-2-24"></div>
             <p className="gray-c p-centered">{t("AqqpEOw")}</p>
           </div>
         </div>
       )}
+
+      {/* Main button */}
       <div className="fx-centered">
         <div
           className="republish-24"
@@ -735,6 +910,7 @@ const BroadcastEvent = ({ event }) => {
         ></div>
         <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
       </div>
+
       <div
         className="arrow"
         style={{ rotate: "-90deg", opacity: isProtected ? 0.5 : 1 }}

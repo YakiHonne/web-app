@@ -1986,13 +1986,12 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
       onClick={(e) => {
         e.stopPropagation();
         customHistory(getLinkFromAddr(event.naddr));
-        // customHistory(`/${event.naddr}`);
       }}
     >
       <div className="fx-centered fx-start-v">
         {!event.image && (
           <div className="round-icon">
-            {[30004, 30003].includes(event.kind) && (
+            {[30004, 30005].includes(event.kind) && (
               <div className="curation-24"></div>
             )}
             {[30023].includes(event.kind) && <div className="posts-24"></div>}

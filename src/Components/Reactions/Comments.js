@@ -54,8 +54,8 @@ export default function Comments({
     const updateDb = async () => {
       let subscription = ndkInstance.subscribe([{ ids: [eventID] }], {
         groupable: false,
-        skipVerification: true,
-        skipValidation: true,
+        // skipVerification: true,
+        // skipValidation: true,
       });
       subscription.on("event", (event_) => {
         let stats = getEventStatAfterEOSE(

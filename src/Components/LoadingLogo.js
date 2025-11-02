@@ -5,8 +5,8 @@ import loadingB from "@/JSONs/loading-b.json";
 import { useTheme } from "next-themes";
 
 export default function LoadingLogo({ size = 64 }) {
-  const { theme } = useTheme();
-  let isDarkMode = ["dark", "gray", "system"].includes(theme)
+  const { resolvedTheme } = useTheme();
+  let isDarkMode = ["dark", "gray", "system"].includes(resolvedTheme)
     ? "dark"
     : "light";
   return (

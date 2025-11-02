@@ -397,7 +397,8 @@ export default function NotificationCenterMain() {
       );
       let data = await getSubData(filter);
       data = data.data
-        .map((event) => {
+        .map((event_) => {
+          let event = event_.rawEvent();
           let scoreStatus = getWOTScoreForPubkeyLegacy(
             event.pubkey,
             notifications,

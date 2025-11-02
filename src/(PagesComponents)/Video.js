@@ -54,7 +54,7 @@ export default function Video({ event, userProfile, naddrData }) {
           },
         ],
         1000,
-        undefined,
+        naddrData.replace || undefined,
         undefined,
         1
       );
