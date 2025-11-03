@@ -395,7 +395,10 @@ export default function NotificationCenterMain() {
             : undefined
           : undefined
       );
-      let data = await getSubData(filter);
+      let data = await getSubData(
+        filter,
+      );
+      console.log(data, filter)
       data = data.data
         .map((event_) => {
           let event = event_.rawEvent();
