@@ -53,15 +53,20 @@ export async function getStaticProps({ locale, params }) {
     };
   }
   const [resMetaData, resFollowings] = await Promise.all([
-    getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 1),
-    getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 1),
+    getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 5),
+    getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 5),
   ]);
 
   let metadata = getEmptyuserMetadata(pubkey);
   let followings = [];
-
-  let metadata_ = resMetaData.data.find((_) => _.kind === 0);
-  let followings_ = resFollowings.data.find((_) => _.kind === 3);
+  let metadata_ =
+    resMetaData.data.length > 0
+      ? resMetaData.data.sort((a, b) => b.created_at - a.created_at)[0]
+      : null;
+  let followings_ =
+    resFollowings.data.length > 0
+      ? resFollowings.data.sort((a, b) => b.created_at - a.created_at)[0]
+      : null;
 
   if (metadata_) metadata = getParsedAuthor(metadata_);
   if (followings_)
