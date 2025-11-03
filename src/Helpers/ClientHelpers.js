@@ -40,13 +40,18 @@ const nostrSchemaRegex =
   /\b(naddr1|note1|nevent1|npub1|nprofile1|nsec1|nrelay1)[a-zA-Z0-9]+\b/;
 
 const doesContainNostrSchema = (url) => {
-  const url_ = new URL(url);
-  const domain = url_.hostname.replace(/^www\./, "");
-  const isWhitelisted = nostrClients.some((allowed) =>
-    domain.endsWith(allowed)
+  try {
+
+    const url_ = new URL(url);
+    const domain = url_.hostname.replace(/^www\./, "");
+    const isWhitelisted = nostrClients.some((allowed) =>
+      domain.endsWith(allowed)
   );
   if (!isWhitelisted) return false;
   return nostrSchemaRegex.test(url);
+} catch {
+  return false;
+}
 };
 
 export function getNoteTree(
