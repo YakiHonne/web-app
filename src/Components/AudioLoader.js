@@ -99,7 +99,7 @@ export default function AudioLoader({ audioSrc }) {
         pointerEvents: isLoading ? "none" : "auto",
         borderRadius: "16px",
         border: "none",
-        maxHeight: "80px",
+        height: "80px",
         marginTop: ".5rem"
       }}
       onClick={(e) => {

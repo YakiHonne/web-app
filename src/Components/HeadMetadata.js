@@ -12,7 +12,7 @@ export default function HeadMetadata({ data }) {
         property="og:image"
         content={
           data.image ||
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/mobile-app-download.png"
         }
       />
       <meta property="og:image:width" content="1200" />
@@ -27,7 +27,7 @@ export default function HeadMetadata({ data }) {
         property="twitter:image"
         content={
           data.image ||
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/mobile-app-download.png"
         }
       />
       <script
