@@ -18,7 +18,7 @@ const nextConfig = {
     dirs: ["src"],
     ignoreDuringBuilds: true,
   },
-  transpilePackages: ["@uiw/react-md-editor", "@uiw/react-markdown-preview"],
+  transpilePackages: ["@uiw/react-md-editor", "@uiw/react-markdown-preview", "@breeztech/breez-sdk-spark"],
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -31,12 +31,17 @@ const nextConfig = {
     config.experiments = {
       ...config.experiments,
       asyncWebAssembly: true,
+      layers: true,
     };
 
+    // Handle WASM files
     config.module.rules.push({
       test: /\.wasm$/,
       type: 'webassembly/async',
     });
+
+    // Resolve WASM imports from Breez SDK
+    config.resolve.extensions = [...(config.resolve.extensions || []), '.wasm'];
 
     return config;
   },

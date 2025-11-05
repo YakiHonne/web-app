@@ -1,8 +1,3 @@
-import initBreezSDK, {
-  connect,
-  defaultConfig
-} from '@breeztech/breez-sdk-spark/web'
-
 /**
  * SparkService - Wrapper for Breez Spark SDK
  *
@@ -20,12 +15,30 @@ class SparkService {
   currentMnemonic = '' // Store for the session
   eventListenerId = null
   eventCallbacks = []
+  breezSDK = null // Store dynamically loaded SDK
 
   constructor() {
     if (!SparkService.instance) {
       SparkService.instance = this
     }
     return SparkService.instance
+  }
+
+  /**
+   * Dynamically load the Breez SDK (client-side only)
+   */
+  async loadSDK() {
+    if (this.breezSDK) return this.breezSDK
+
+    try {
+      // Dynamic import to avoid SSR issues with WASM
+      const module = await import('@breeztech/breez-sdk-spark/web')
+      this.breezSDK = module
+      return module
+    } catch (error) {
+      console.error('[SparkService] Failed to load Breez SDK:', error)
+      throw new Error('Failed to load Breez Spark SDK')
+    }
   }
 
   /**
@@ -37,6 +50,7 @@ class SparkService {
 
     try {
       console.log('[SparkService] Initializing Breez SDK WebAssembly...')
+      const { default: initBreezSDK } = await this.loadSDK()
       await initBreezSDK()
       this.initialized = true
       console.log('[SparkService] WebAssembly initialized successfully')
@@ -82,6 +96,9 @@ class SparkService {
       console.log('[SparkService] Starting connection process...')
       console.log('[SparkService] Network:', network)
       console.log('[SparkService] API Key present:', !!apiKey)
+
+      // Load SDK functions
+      const { defaultConfig, connect } = await this.loadSDK()
 
       console.log('[SparkService] Creating configuration...')
       this.config = defaultConfig(network)
