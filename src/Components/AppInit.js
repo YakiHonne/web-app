@@ -259,8 +259,8 @@ export default function AppInit() {
     ) {
       previousMutedList.current = mutedlist;
       dispatch(setUserMutedList(mutedlist.mutedlist));
-      if (mutedlist.mutedlist) {
-        for (let p of mutedlist.mutedlist) ndkInstance.mutedIds.set([p], ["p"]);
+      if (mutedlist.mutedlist && ndkInstance.mutedIds) {
+        for (let p of mutedlist.mutedlist) ndkInstance.mutedIds.set(p, "p");
       }
     }
     if (
@@ -345,6 +345,32 @@ export default function AppInit() {
       dispatch(setUserMetadata(getMetadataFromCachedAccounts(keys.pub)));
       dispatch(setUserKeys(keys));
     }
+
+    // Add global error handler for NDK relay errors
+    const handleGlobalError = (event) => {
+      const error = event.error || event.reason;
+      if (error && typeof error === 'object') {
+        const errorMsg = error.message || String(error);
+        // Suppress common relay errors that shouldn't break the app
+        if (errorMsg.includes('already authenticated') ||
+            errorMsg.includes('user unauthorized') ||
+            errorMsg.includes('restricted') ||
+            (errorMsg.includes('Relay') && errorMsg.includes('disconnected')) ||
+            (errorMsg.includes('WebSocket') && errorMsg.includes('closed'))) {
+          console.warn('[AppInit] Suppressing NDK relay error:', errorMsg);
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleGlobalError);
+
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleGlobalError);
+    };
   }, []);
 
   useEffect(() => {
@@ -374,9 +400,28 @@ export default function AppInit() {
         }
       }
 
-      ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
-        ndk: ndkInstance,
-      });
+      // Custom auth policy that doesn't throw on authentication errors
+      ndkInstance.relayAuthDefaultPolicy = async (relay) => {
+        try {
+          // Attempt standard sign-in
+          const policy = NDKRelayAuthPolicies.signIn({ ndk: ndkInstance });
+          if (typeof policy === 'function') {
+            await policy(relay);
+          }
+        } catch (error) {
+          // Suppress auth errors silently
+          const errorMsg = error?.message || String(error);
+          if (errorMsg.includes('already authenticated') ||
+              errorMsg.includes('user unauthorized') ||
+              errorMsg.includes('restricted')) {
+            console.warn('[NDK Auth] Suppressing relay auth error:', relay.url, errorMsg);
+            // Don't throw - just continue without auth
+            return;
+          }
+          // Re-throw other errors
+          throw error;
+        }
+      };
     };
     if (userKeys) {
       handleUseRKeys();

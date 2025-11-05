@@ -733,7 +733,30 @@ export function getWallets() {
   try {
     wallets = JSON.parse(wallets);
     let wallets_ = wallets.find((wallet) => wallet?.pubkey === nostkeys.pub);
-    return wallets_ ? wallets_.wallets : [];
+
+    if (!wallets_ || !wallets_.wallets) return [];
+
+    // Filter out Spark wallets (kind 4) that don't have backups
+    const validWallets = wallets_.wallets.filter(wallet => {
+      if (wallet.kind === 4) {
+        // Check if there's a backup for this Spark wallet
+        const storageKey = `spark_wallet_${nostkeys.pub}`;
+        const hasBackup = localStorage.getItem(storageKey) !== null;
+        if (!hasBackup) {
+          console.log('[getWallets] Filtering out phantom Spark wallet - no backup found');
+        }
+        return hasBackup;
+      }
+      // Non-Spark wallets are always valid
+      return true;
+    });
+
+    // Update localStorage if we filtered out any wallets
+    if (validWallets.length !== wallets_.wallets.length) {
+      updateWallets(validWallets, nostkeys.pub);
+    }
+
+    return validWallets;
   } catch (err) {
     return [];
   }

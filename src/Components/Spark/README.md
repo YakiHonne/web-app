@@ -80,10 +80,11 @@ import { SparkWalletSetup } from '@/Components/Spark'
 
 - **Settings Tab**
   - **Lightning Address Management**
-    - Register new Lightning address (@breez.tips)
+    - Register new Lightning address (default: @breez.tips)
     - Real-time username availability checking
     - Display current Lightning address
     - Delete Lightning address option
+    - **Note**: Domain can be customized to use Yakihonne's own domain (see Lightning Address Configuration)
 
   - **Backup Section**
     - Download encrypted backup button
@@ -423,6 +424,78 @@ export default function WalletPage() {
   )
 }
 ```
+
+---
+
+## Lightning Address Configuration
+
+### Custom Domain Setup
+
+By default, Spark wallet uses **@breez.tips** for Lightning addresses. However, **Yakihonne can configure their own custom domain** to provide branded Lightning addresses to users (e.g., `username@yakihonne.com`).
+
+### How It Works
+
+The Lightning address domain is configured in the Breez SDK initialization. The SDK supports custom Lightning address domains through its configuration.
+
+### Configuration Location
+
+The domain configuration should be set in the Breez SDK config when initializing the wallet:
+
+**File**: `src/Helpers/Spark/spark.service.js`
+
+```javascript
+// Example configuration with custom domain
+const config = defaultConfig(network);
+config.apiKey = apiKey;
+
+// Add custom Lightning address configuration (if supported by Breez SDK)
+// Note: Check Breez SDK documentation for exact configuration options
+config.lightningAddressDomain = 'yakihonne.com'; // Custom domain
+```
+
+### Requirements for Custom Domain
+
+To use a custom Lightning address domain, you need:
+
+1. **Domain Ownership**: Own and control the domain (e.g., yakihonne.com)
+
+2. **DNS Configuration**: Set up proper DNS records for Lightning address routing
+   - LNURL-pay endpoint configuration
+   - Proper HTTPS certificates
+
+3. **Breez SDK Support**: Verify that the current Breez SDK version supports custom domains
+   - Check [Breez SDK Documentation](https://sdk-doc-spark.breez.technology/)
+   - Contact Breez support if custom domain setup is needed
+
+4. **Backend Integration**: May require backend services to handle:
+   - Username registration/lookup
+   - LNURL-pay request handling
+   - Invoice generation routing
+
+### Implementation Steps
+
+1. **Contact Breez**: Reach out to Breez team to enable custom domain support
+2. **DNS Setup**: Configure DNS records as specified by Breez
+3. **Update Configuration**: Modify `spark.service.js` with custom domain settings
+4. **Test Registration**: Verify username registration works with new domain
+5. **Update UI**: Update any hardcoded references to `@breez.tips` in UI components
+
+### Benefits of Custom Domain
+
+- **Branding**: Users get `username@yakihonne.com` instead of `username@breez.tips`
+- **Trust**: Custom domain builds brand recognition and user trust
+- **Control**: Full control over username policies and registration
+- **Integration**: Better integration with Yakihonne's existing infrastructure
+
+### Fallback to breez.tips
+
+If custom domain is not configured, the wallet will default to `@breez.tips`, which is fully functional and requires no additional setup.
+
+### Related Documentation
+
+- [Breez SDK Configuration](https://sdk-doc-spark.breez.technology/guide/configuration.html)
+- Lightning Address Specification: [LUD-16](https://github.com/lnurl/luds/blob/luds/16.md)
+- LNURL-pay Specification: [LUD-06](https://github.com/lnurl/luds/blob/luds/06.md)
 
 ---
 

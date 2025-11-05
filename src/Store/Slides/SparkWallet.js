@@ -4,7 +4,7 @@ import { createSlice } from "@reduxjs/toolkit";
 /**
  * Spark Wallet Redux State
  *
- * Manages state for the Breez Spark self-custodial Lightning wallet
+ * Manages state for the Breez Spark non-custodial Lightning wallet
  */
 
 // Connection status slice

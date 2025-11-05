@@ -4,15 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import sparkWalletManager from '@/Helpers/Spark/spark-wallet-manager';
 import sparkService from '@/Helpers/Spark/spark.service';
+import sparkStorage from '@/Helpers/Spark/spark-storage.service';
 import { setToast } from '@/Store/Slides/Publishers';
 import LoadingDots from '@/Components/LoadingDots';
 import QRCode from 'react-qr-code';
 import SparkPaymentsList from './SparkPaymentsList';
+import { shortenKey } from '@/Helpers/Encryptions';
 
 export default function SparkWalletManager({ onClose, inlineMode = false, externalOps = null, setExternalOps = null }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const sparkConnected = useSelector((state) => state.sparkConnected);
+  const sparkConnecting = useSelector((state) => state.sparkConnecting);
   const sparkBalance = useSelector((state) => state.sparkBalance);
   const sparkLightningAddress = useSelector((state) => state.sparkLightningAddress);
   const sparkLastSync = useSelector((state) => state.sparkLastSync);
@@ -40,9 +43,13 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
   const [usernameAvailable, setUsernameAvailable] = useState(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
 
+  // Seed phrase reveal state
+  const [seedPhrase, setSeedPhrase] = useState('');
+  const [showSeedPhrase, setShowSeedPhrase] = useState(false);
+  const [loadingSeedPhrase, setLoadingSeedPhrase] = useState(false);
+
   useEffect(() => {
     if (sparkConnected) {
-      console.log('[SparkWalletManager Component] Wallet connected, refreshing...');
       refreshWallet();
     }
   }, [sparkConnected]);
@@ -50,7 +57,6 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
   // Also refresh on mount if already connected
   useEffect(() => {
     if (sparkConnected) {
-      console.log('[SparkWalletManager Component] Component mounted with connected wallet, refreshing...');
       refreshWallet();
     }
   }, []);
@@ -70,9 +76,8 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
   const handleSendPayment = async () => {
     if (!sendInput.trim()) {
       dispatch(setToast({
-        show: true,
-        message: t('Please enter an invoice or Lightning address'),
-        type: 'error'
+        desc: t('Please enter an invoice or Lightning address'),
+        type: 2
       }));
       return;
     }
@@ -80,9 +85,8 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
     // Check if it's a Lightning address (not using invoice) and needs amount
     if (!useInvoice && !sendAmount) {
       dispatch(setToast({
-        show: true,
-        message: t('Please enter an amount'),
-        type: 'error'
+        desc: t('Please enter an amount'),
+        type: 2
       }));
       return;
     }
@@ -91,9 +95,8 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
     const amount = sendAmount ? parseInt(sendAmount) : undefined;
     if (amount && amount > sparkBalance) {
       dispatch(setToast({
-        show: true,
-        message: t('Insufficient balance'),
-        type: 'error'
+        type: 2,
+        desc: t('Insufficient balance')
       }));
       return;
     }
@@ -102,23 +105,28 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
       setLoading(true);
       await sparkService.sendPayment(sendInput, amount);
       dispatch(setToast({
-        show: true,
-        message: t('Payment sent successfully'),
-        type: 'success'
+        type: 1,
+        desc: t('Payment sent successfully')
       }));
       setSendInput('');
       setSendAmount('');
       await refreshWallet();
       setActiveTab('transactions');
     } catch (error) {
-      console.error('Failed to send payment:', error);
+      console.warn('Failed to send payment (handled):', error);
 
       // Parse error message for common issues
       let errorMessage = error.message || t('Failed to send payment');
 
-      if (errorMessage.toLowerCase().includes('insufficient') ||
+      if (errorMessage === 'INSUFFICIENT_FUNDS' ||
+          errorMessage.toLowerCase().includes('insufficient') ||
           errorMessage.toLowerCase().includes('balance')) {
         errorMessage = t('Insufficient balance for this payment');
+      } else if (errorMessage === 'USER_REJECTED' ||
+          errorMessage.toLowerCase().includes('user rejected')) {
+        // Don't show toast for user rejection
+        setLoading(false);
+        return;
       } else if (errorMessage.toLowerCase().includes('invalid invoice')) {
         errorMessage = t('Invalid Lightning invoice');
       } else if (errorMessage.toLowerCase().includes('expired')) {
@@ -126,9 +134,8 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
       }
 
       dispatch(setToast({
-        show: true,
-        message: errorMessage,
-        type: 'error'
+        type: 2,
+        desc: errorMessage
       }));
     } finally {
       setLoading(false);
@@ -138,9 +145,8 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
   const handleGenerateInvoice = async () => {
     if (!receiveAmount || parseInt(receiveAmount) <= 0) {
       dispatch(setToast({
-        show: true,
-        message: t('Please enter a valid amount'),
-        type: 'error'
+        desc: t('Please enter a valid amount'),
+        type: 2
       }));
       return;
     }
@@ -153,16 +159,14 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
       );
       setGeneratedInvoice(response.paymentRequest);
       dispatch(setToast({
-        show: true,
-        message: t('Invoice generated'),
-        type: 'success'
+        desc: t('Invoice generated'),
+        type: 1
       }));
     } catch (error) {
       console.error('Failed to generate invoice:', error);
       dispatch(setToast({
-        show: true,
-        message: error.message || t('Failed to generate invoice'),
-        type: 'error'
+        desc: error.message || t('Failed to generate invoice'),
+        type: 2
       }));
     } finally {
       setLoading(false);
@@ -174,7 +178,7 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
     dispatch(setToast({
       show: true,
       message: t('Invoice copied to clipboard'),
-      type: 'success'
+      type: 1
     }));
   };
 
@@ -183,7 +187,7 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
     dispatch(setToast({
       show: true,
       message: t('Lightning address copied'),
-      type: 'success'
+      type: 1
     }));
   };
 
@@ -205,18 +209,16 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
   const handleRegisterLightningAddress = async () => {
     if (!lightningUsername.trim()) {
       dispatch(setToast({
-        show: true,
-        message: t('Please enter a username'),
-        type: 'error'
+        desc: t('Please enter a username'),
+        type: 2
       }));
       return;
     }
 
     if (usernameAvailable === false) {
       dispatch(setToast({
-        show: true,
-        message: t('Username not available'),
-        type: 'error'
+        desc: t('Username not available'),
+        type: 2
       }));
       return;
     }
@@ -225,18 +227,16 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
       setLoading(true);
       await sparkWalletManager.registerLightningAddress(lightningUsername);
       dispatch(setToast({
-        show: true,
-        message: t('Lightning address registered'),
-        type: 'success'
+        desc: t('Lightning address registered'),
+        type: 1
       }));
       setLightningUsername('');
       setUsernameAvailable(null);
     } catch (error) {
       console.error('Failed to register Lightning address:', error);
       dispatch(setToast({
-        show: true,
-        message: error.message || t('Failed to register Lightning address'),
-        type: 'error'
+        desc: error.message || t('Failed to register Lightning address'),
+        type: 2
       }));
     } finally {
       setLoading(false);
@@ -252,16 +252,14 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
       setLoading(true);
       await sparkWalletManager.deleteLightningAddress();
       dispatch(setToast({
-        show: true,
-        message: t('Lightning address deleted'),
-        type: 'success'
+        desc: t('Lightning address deleted'),
+        type: 1
       }));
     } catch (error) {
       console.error('Failed to delete Lightning address:', error);
       dispatch(setToast({
-        show: true,
-        message: error.message || t('Failed to delete Lightning address'),
-        type: 'error'
+        desc: error.message || t('Failed to delete Lightning address'),
+        type: 2
       }));
     } finally {
       setLoading(false);
@@ -272,44 +270,55 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
     try {
       await sparkWalletManager.downloadBackup();
       dispatch(setToast({
-        show: true,
-        message: t('Backup downloaded'),
-        type: 'success'
+        desc: t('Backup downloaded'),
+        type: 1
       }));
     } catch (error) {
       console.error('Failed to download backup:', error);
       dispatch(setToast({
-        show: true,
-        message: error.message || t('Failed to download backup'),
-        type: 'error'
+        desc: error.message || t('Failed to download backup'),
+        type: 2
       }));
     }
   };
 
-  const handleDeleteWallet = async () => {
-    if (!confirm(t('Are you sure you want to delete your wallet? Make sure you have a backup!'))) {
+  const handleRevealSeedPhrase = async () => {
+    if (showSeedPhrase) {
+      // Hide seed phrase
+      setShowSeedPhrase(false);
+      setSeedPhrase('');
       return;
     }
 
     try {
-      setLoading(true);
-      await sparkWalletManager.deleteWallet(true);
-      dispatch(setToast({
-        show: true,
-        message: t('Wallet deleted'),
-        type: 'success'
-      }));
-      if (onClose) onClose();
+      setLoadingSeedPhrase(true);
+      const pubkey = sparkWalletManager.getUserPubkey();
+      const mnemonic = await sparkStorage.loadMnemonic(pubkey);
+
+      if (!mnemonic) {
+        throw new Error('No seed phrase found');
+      }
+
+      setSeedPhrase(mnemonic);
+      setShowSeedPhrase(true);
     } catch (error) {
-      console.error('Failed to delete wallet:', error);
+      console.error('Failed to load seed phrase:', error);
       dispatch(setToast({
-        show: true,
-        message: error.message || t('Failed to delete wallet'),
-        type: 'error'
+        desc: error.message || t('Failed to load seed phrase'),
+        type: 2
       }));
     } finally {
-      setLoading(false);
+      setLoadingSeedPhrase(false);
     }
+  };
+
+  const handleCopySeedPhrase = () => {
+    navigator.clipboard.writeText(seedPhrase);
+    dispatch(setToast({
+      show: true,
+      message: t('Seed phrase copied to clipboard'),
+      type: 1
+    }));
   };
 
   const formatSats = (sats) => {
@@ -334,6 +343,17 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
     { id: 'settings', label: t('Settings'), icon: '⚙️' }
   ];
 
+  // Show loading state while wallet is connecting
+  if (sparkConnecting) {
+    return (
+      <div className="fx-centered fit-container fx-col box-pad-h box-pad-v">
+        <LoadingDots />
+        <p className="gray-c" style={{ marginTop: '1rem' }}>{t('Connecting wallet...')}</p>
+      </div>
+    );
+  }
+
+  // Show not connected message only if wallet is truly not connected (not in connecting state)
   if (!sparkConnected) {
     return (
       <div className="fx-centered fit-container fx-col box-pad-h box-pad-v">
@@ -506,27 +526,26 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
                   <QRCode value={generatedInvoice} size={256} />
                 </div>
 
-                <div
-                  className="fit-container fx-scattered pointer option box-pad-h box-pad-v"
-                  onClick={handleCopyInvoice}
-                  style={{ borderRadius: 'var(--border-r-6)', border: '2px dashed var(--pale-gray)' }}
-                >
-                  <p className="p-small" style={{ wordBreak: 'break-all' }}>
-                    {generatedInvoice.substring(0, 50)}...
-                  </p>
-                  <div className="copy-24"></div>
+                <div className="fx-centered fit-container">
+                  <div
+                    className="fx-scattered if pointer dashed-onH fit-container"
+                    style={{ borderStyle: 'dashed' }}
+                    onClick={handleCopyInvoice}
+                  >
+                    <p>{shortenKey(generatedInvoice)}</p>
+                    <div className="copy-24"></div>
+                  </div>
+                  <button
+                    className="btn btn-normal"
+                    onClick={() => {
+                      setGeneratedInvoice('');
+                      setReceiveAmount('');
+                      setReceiveDescription('');
+                    }}
+                  >
+                    {t('Exit')}
+                  </button>
                 </div>
-
-                <button
-                  className="btn btn-gray fit-container"
-                  onClick={() => {
-                    setGeneratedInvoice('');
-                    setReceiveAmount('');
-                    setReceiveDescription('');
-                  }}
-                >
-                  {t('New Invoice')}
-                </button>
               </div>
             )}
           </div>
@@ -541,10 +560,22 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
 
         {/* Settings Tab */}
         {activeTab === 'settings' && (
-          <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--32)' }}>
+          <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--24)' }}>
+            {/* Settings Header */}
+            <div className="fit-container fx-scattered">
+              <h4>{t('Settings')}</h4>
+              <div
+                className="close"
+                style={{ position: 'static' }}
+                onClick={() => setActiveTab(inlineMode ? '' : 'transactions')}
+              >
+                <div></div>
+              </div>
+            </div>
+
             {/* Lightning Address Section */}
-            <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--16)' }}>
-              <h4>{t('Lightning Address')}</h4>
+            <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--16)', paddingTop: 'var(--8)' }}>
+              <h5 className="fit-container">{t('Lightning Address')}</h5>
 
               {sparkLightningAddress ? (
                 <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--16)' }}>
@@ -596,35 +627,77 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
               )}
             </div>
 
-            {/* Backup Section */}
-            <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--16)' }}>
-              <h4>{t('Backup')}</h4>
-              <p className="gray-c p-small p-centered">
-                {t('Download an encrypted backup of your wallet')}
-              </p>
-              <button
-                className="btn btn-gray fit-container"
-                onClick={handleDownloadBackup}
-              >
-                {t('Download Backup')}
-              </button>
+            {/* Divider */}
+            <div className="fit-container" style={{ height: '1px', backgroundColor: 'var(--pale-gray)' }}></div>
+
+            {/* Wallet Recovery Section */}
+            <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--16)', paddingBottom: 'var(--8)' }}>
+              <h5 className="fit-container">{t('Wallet Recovery')}</h5>
+
+              <div className="fx-centered fit-container" style={{ gap: 'var(--24)' }}>
+                <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
+                  <p className="gray-c p-medium p-centered">
+                    {t('Your encrypted backup is tied to your Nostr account. You can only decrypt it when signed in with this account.')}
+                  </p>
+                  <button
+                    className="btn btn-gray"
+                    onClick={handleDownloadBackup}
+                  >
+                    {t('Download Backup')}
+                  </button>
+                </div>
+
+                <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
+                  <p className="gray-c p-medium p-centered">
+                    {t('Never share your seed phrase with anyone. Anyone with access to your seed phrase can steal your funds.')}
+                  </p>
+                  <button
+                    className="btn btn-gray"
+                    onClick={handleRevealSeedPhrase}
+                    disabled={loadingSeedPhrase}
+                  >
+                    {loadingSeedPhrase ? (
+                      <LoadingDots />
+                    ) : showSeedPhrase ? (
+                      t('Hide Seed Phrase')
+                    ) : (
+                      t('Reveal Seed Phrase')
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {showSeedPhrase && seedPhrase && (
+                <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--16)' }}>
+                  <div
+                    className="fit-container box-pad-h box-pad-v"
+                    style={{
+                      backgroundColor: 'var(--bg-main)',
+                      borderRadius: 'var(--border-r-6)',
+                      border: '2px dashed var(--pale-gray)'
+                    }}
+                  >
+                    <p
+                      className="p-medium p-centered"
+                      style={{
+                        fontFamily: 'monospace',
+                        wordBreak: 'break-word',
+                        lineHeight: '1.8'
+                      }}
+                    >
+                      {seedPhrase}
+                    </p>
+                  </div>
+                  <button
+                    className="btn btn-gray fit-container"
+                    onClick={handleCopySeedPhrase}
+                  >
+                    {t('Copy Seed Phrase')}
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Danger Zone */}
-            <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--16)' }}>
-              <h4 className="red-c">{t('Danger Zone')}</h4>
-              <p className="gray-c p-small p-centered">
-                {t('Permanently delete your wallet. Make sure you have a backup!')}
-              </p>
-              <button
-                className="btn fit-container"
-                onClick={handleDeleteWallet}
-                disabled={loading}
-                style={{ backgroundColor: 'var(--red-main)', color: 'white' }}
-              >
-                {loading ? <LoadingDots /> : t('Delete Wallet')}
-              </button>
-            </div>
           </div>
         )}
       </div>

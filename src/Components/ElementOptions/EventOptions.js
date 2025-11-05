@@ -18,11 +18,12 @@ import AddCuration from "@/Components/AddCuration";
 import LinkWallet from "@/Components/LinkWallet";
 import { exportWallet, InitEvent, walletWarning } from "@/Helpers/Controlers";
 import { decodeUrlOrAddress, encodeLud06 } from "@/Helpers/Encryptions";
-import { setToPublish } from "@/Store/Slides/Publishers";
+import { setToPublish, setToast } from "@/Store/Slides/Publishers";
 import DeleteWallet from "@/Components/DeleteWallet";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import RelayImage from "../RelayImage";
+import sparkWalletManager from "@/Helpers/Spark/spark-wallet-manager";
 
 export default function EventOptions({
   event,
@@ -174,12 +175,35 @@ export default function EventOptions({
   );
   const broadcastEvent = <BroadcastEvent event={event} />;
 
+  const handleExportWallet = async (e) => {
+    e.stopPropagation();
+
+    // Check if this is a Spark wallet (kind 4)
+    if (event.kind === 4) {
+      try {
+        await sparkWalletManager.downloadBackup(false); // Don't require connected, just check if backup exists
+        dispatch(setToast({
+          show: true,
+          message: t('Backup downloaded successfully'),
+          type: 'success'
+        }));
+      } catch (error) {
+        console.error('Failed to download backup:', error);
+        dispatch(setToast({
+          show: true,
+          message: error.message || t('Failed to download backup'),
+          type: 'error'
+        }));
+      }
+    } else {
+      // For other wallet types (NWC, etc.), use the original export function
+      exportWallet(event.data, event.entitle);
+    }
+  };
+
   const exportOneWallet = (
     <div
-      onClick={(e) => {
-        e.stopPropagation();
-        exportWallet(event.data, event.entitle);
-      }}
+      onClick={handleExportWallet}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
       <div className="share-icon-24"></div>
@@ -197,6 +221,17 @@ export default function EventOptions({
     >
       <div className="link-24"></div>
       <span>{t("AmQVpu4")}</span>
+    </div>
+  );
+
+  const linkWalletDisabled = (
+    <div
+      className="fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale round-icon-tooltip"
+      style={{ opacity: 0.5, cursor: 'not-allowed' }}
+      data-tooltip={t('Register a Lightning address first')}
+    >
+      <div className="link-24"></div>
+      <span className="gray-c">{t("AmQVpu4")}</span>
     </div>
   );
 
@@ -474,7 +509,11 @@ export default function EventOptions({
         ];
       case "wallet":
         return [
-          !checkIsLinked(event.entitle) && linkWalletWithUser,
+          // Show link button logic:
+          // - If already linked, don't show
+          // - If has lightning address (@), show enabled link button
+          // - If no lightning address, show disabled link button
+          !checkIsLinked(event.entitle) && (event.entitle.includes("@") ? linkWalletWithUser : linkWalletDisabled),
           event.kind === 3 && copyNWC,
           event.kind !== 1 && copyAddress,
           exportOneWallet,
@@ -492,7 +531,20 @@ export default function EventOptions({
 
   const linkWallet = async () => {
     if (!selectWalletToLink.includes("@")) {
-      walletWarning();
+      // Check if this is a Spark wallet (kind 4)
+      if (event.kind === 4) {
+        dispatch(setToast({
+          show: true,
+          type: 'warning',
+          message: t('You need to register a Lightning address first. Go to Wallet → Settings → Lightning Address to register.'),
+        }));
+        // Redirect to wallet page after a short delay
+        setTimeout(() => {
+          navigate.push('/wallet');
+        }, 2000);
+      } else {
+        walletWarning();
+      }
       return;
     }
     let content = { ...userMetadata };
@@ -528,9 +580,29 @@ export default function EventOptions({
     }
   };
 
-  const handleDeleteWallet = (e) => {
+  const handleDeleteWallet = async (e) => {
     e?.stopPropagation();
     try {
+      // If this is a Spark wallet (kind 4), clean up its data first
+      if (event.kind === 4) {
+        try {
+          // Disconnect and delete mnemonic, but don't update wallet list yet
+          // (we'll do that below with the rest of the wallets)
+          await sparkWalletManager.disconnect();
+
+          const pubkey = userKeys?.pub;
+          if (pubkey) {
+            // Import sparkStorage to delete mnemonic
+            const sparkStorage = (await import('@/Helpers/Spark/spark-storage.service')).default;
+            await sparkStorage.deleteMnemonic(pubkey, true);
+            console.log('[EventOptions] Spark wallet data cleaned up');
+          }
+        } catch (error) {
+          console.error('[EventOptions] Error cleaning up Spark wallet:', error);
+          // Continue with wallet list removal even if cleanup fails
+        }
+      }
+
       let wallets = getWallets();
       let tempWallets = wallets.filter((wallet) => wallet.id !== event.id);
       if (tempWallets.length > 0 && event.active) {

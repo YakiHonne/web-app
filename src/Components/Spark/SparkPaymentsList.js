@@ -136,12 +136,12 @@ export default function SparkPaymentsList() {
 
   if (!sparkPayments || sparkPayments.length === 0) {
     return (
-      <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--16)' }}>
-        <div style={{ fontSize: '64px', opacity: 0.5 }}>📭</div>
-        <h4 className="gray-c">{t('No transactions yet')}</h4>
-        <p className="gray-c p-medium p-centered">
-          {t('Your payment history will appear here')}
-        </p>
+      <div
+        className="fit-container fx-centered fx-col"
+        style={{ height: "30vh" }}
+      >
+        <h4>{t("Ag3spMM")}</h4>
+        <p className="gray-c p-centered">{t("AgaoyPx")}</p>
       </div>
     );
   }

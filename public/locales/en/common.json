@@ -518,7 +518,7 @@
   "A4G4OJ7": "Incoming",
   "AYMJ2uj": "Invoice message",
   "AkPQ73T": "Outgoing",
-  "AS0m8W5": "The LNURL was copied!",
+  "AS0m8W5": "Copied to clipboard!",
   "A7ggsnQ": "Could not found the article",
   "AzAG7f8": "Could not found the video",
   "AuF5ZyB": "No article belong to this curation",
@@ -1358,5 +1358,15 @@
   "ADnwK2N": "",
   "AFurzsv": "",
   "AhxozEk": "",
-  "ANBz1p0": ""
+  "ANBz1p0": "",
+
+  "SparkBackupInvalidJson": "Invalid backup file format. Please select a valid Spark wallet backup file (.json).",
+  "SparkBackupWrongAccount": "This backup belongs to a different account. Please sign in with the correct account to restore this backup.\n\nBackup account: {{backupAccount}}\nCurrent account: {{currentAccount}}",
+  "SparkBackupInvalidFormat": "Invalid backup file. Please select a valid Spark wallet backup file.",
+  "SparkBackupUnsupportedVersion": "This backup file version is not supported. Please update the app or use a different backup.",
+  "SparkBackupDecryptFailed": "Failed to decrypt backup. Please ensure you are signed in with the correct account.",
+  "SparkWalletUnableReceive": "Unable to receive. Try adding a new wallet.",
+  "SparkWalletUnableSend": "Unable to send. Try adding a new wallet.",
+  "Wallet not connected": "Wallet not connected",
+  "Connecting wallet...": "Connecting wallet..."
 }

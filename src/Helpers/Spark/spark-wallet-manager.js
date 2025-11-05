@@ -63,11 +63,15 @@ class SparkWalletManager {
 
   /**
    * Get current user's public key from Redux
+   * @param required - If true, throws error when not logged in (default: true)
    */
-  getUserPubkey() {
+  getUserPubkey(required = true) {
     const userKeys = store.getState().userKeys
     if (!userKeys || !userKeys.pub) {
-      throw new Error('User not logged in')
+      if (required) {
+        throw new Error('User not logged in')
+      }
+      return null
     }
     return userKeys.pub
   }
@@ -121,6 +125,12 @@ class SparkWalletManager {
    */
   removeFromWalletList() {
     try {
+      const pubkey = this.getUserPubkey(false) // Don't require login
+      if (!pubkey) {
+        console.warn('[SparkWalletManager] Cannot remove from wallet list: no pubkey')
+        return
+      }
+
       let wallets = getWallets() || []
 
       // Remove Spark wallet
@@ -131,7 +141,7 @@ class SparkWalletManager {
         wallets[0].active = true
       }
 
-      updateWallets(wallets)
+      updateWallets(wallets, pubkey)
       console.log('[SparkWalletManager] Removed from wallet list')
     } catch (error) {
       console.error('[SparkWalletManager] Failed to remove from wallet list:', error)
@@ -147,7 +157,7 @@ class SparkWalletManager {
     try {
       store.dispatch(setSparkConnecting(true))
 
-      const pubkey = this.getUserPubkey()
+      const pubkey = this.getUserPubkey(false) // Don't require login (for onboarding)
       const apiKey = process.env.NEXT_PUBLIC_BREEZ_SPARK_API_KEY
 
       if (!apiKey) {
@@ -162,17 +172,23 @@ class SparkWalletManager {
       console.log('[SparkWalletManager] Connecting to Spark SDK...')
       const { sdk } = await sparkService.connect(apiKey, mnemonic)
 
-      // Save encrypted mnemonic
-      console.log('[SparkWalletManager] Saving encrypted mnemonic...')
-      await sparkStorage.saveMnemonic(pubkey, mnemonic, syncToNostr)
+      // Save encrypted mnemonic only if user is logged in
+      if (pubkey) {
+        console.log('[SparkWalletManager] Saving encrypted mnemonic...')
+        await sparkStorage.saveMnemonic(pubkey, mnemonic, syncToNostr)
+      } else {
+        console.log('[SparkWalletManager] Skipping backup - user not logged in yet (onboarding)')
+      }
 
       // Update state
       await this.refreshWalletState()
       store.dispatch(setSparkConnected(true))
       store.dispatch(setSparkConnecting(false))
 
-      // Add to Yakihonne wallet list
-      this.addToWalletList()
+      // Add to Yakihonne wallet list only if logged in
+      if (pubkey) {
+        this.addToWalletList()
+      }
 
       console.log('[SparkWalletManager] ✅ Wallet created successfully')
       return { mnemonic, sdk }
@@ -181,6 +197,21 @@ class SparkWalletManager {
       store.dispatch(setSparkConnecting(false))
       store.dispatch(setSparkConnected(false))
       throw error
+    }
+  }
+
+  /**
+   * Check if a wallet backup exists (local or Nostr)
+   * @returns {Promise<boolean>} true if backup exists
+   */
+  async hasBackup() {
+    try {
+      const pubkey = this.getUserPubkey()
+      const mnemonic = await sparkStorage.loadMnemonic(pubkey)
+      return !!mnemonic
+    } catch (error) {
+      console.error('[SparkWalletManager] Error checking for backup:', error)
+      return false
     }
   }
 
@@ -257,11 +288,10 @@ class SparkWalletManager {
       console.log('[SparkWalletManager] Connecting to Spark SDK with provided seed...')
       const { sdk } = await sparkService.connect(apiKey, cleanMnemonic)
 
-      // Save encrypted mnemonic if requested
-      if (saveBackup) {
-        console.log('[SparkWalletManager] Saving encrypted backup...')
-        await sparkStorage.saveMnemonic(pubkey, cleanMnemonic, true)
-      }
+      // Always save to local storage for wallet to persist
+      // Only sync to Nostr if requested (to avoid relay auth errors during onboarding)
+      console.log('[SparkWalletManager] Saving encrypted backup locally...')
+      await sparkStorage.saveMnemonic(pubkey, cleanMnemonic, saveBackup)
 
       // Update state
       await this.refreshWalletState()
@@ -298,7 +328,7 @@ class SparkWalletManager {
 
       // Read and decrypt file
       console.log('[SparkWalletManager] Reading backup file...')
-      const mnemonic = await sparkBackup.restoreFromFile(file)
+      const mnemonic = await sparkBackup.restoreFromSelectedFile(file, pubkey)
 
       // Connect to Spark SDK
       console.log('[SparkWalletManager] Connecting to Spark SDK...')
@@ -319,7 +349,7 @@ class SparkWalletManager {
       console.log('[SparkWalletManager] ✅ Wallet restored from file successfully')
       return { sdk }
     } catch (error) {
-      console.error('[SparkWalletManager] Failed to restore from file:', error)
+      console.warn('[SparkWalletManager] Failed to restore from file (handled):', error)
       store.dispatch(setSparkConnecting(false))
       store.dispatch(setSparkConnected(false))
       throw error
@@ -465,6 +495,10 @@ class SparkWalletManager {
     try {
       const result = await sparkService.registerLightningAddress(username)
       store.dispatch(setSparkLightningAddress(result.lightningAddress))
+
+      // Update wallet list with new lightning address
+      this.addToWalletList()
+
       console.log('[SparkWalletManager] Lightning address registered:', result.lightningAddress)
       return result
     } catch (error) {
@@ -480,6 +514,10 @@ class SparkWalletManager {
     try {
       await sparkService.deleteLightningAddress()
       store.dispatch(setSparkLightningAddress(null))
+
+      // Update wallet list to remove lightning address
+      this.addToWalletList()
+
       console.log('[SparkWalletManager] Lightning address deleted')
     } catch (error) {
       console.error('[SparkWalletManager] Failed to delete Lightning address:', error)
@@ -523,16 +561,34 @@ class SparkWalletManager {
 
   /**
    * Download encrypted backup file
+   * @param {boolean} requireConnected - If true, requires wallet to be connected. Default true for user-initiated downloads.
    */
-  async downloadBackup() {
-    try {
-      const pubkey = this.getUserPubkey()
-      await sparkBackup.downloadEncryptedBackup(pubkey)
-      console.log('[SparkWalletManager] Backup downloaded')
-    } catch (error) {
-      console.error('[SparkWalletManager] Failed to download backup:', error)
-      throw error
+  async downloadBackup(requireConnected = true) {
+    const pubkey = this.getUserPubkey(false)
+
+    // Check if user is logged in
+    if (!pubkey) {
+      throw new Error('Please log in to download backup')
     }
+
+    // For user-initiated downloads, require wallet to be connected
+    // For auto-exports (e.g., logout), check if backup exists in storage
+    if (requireConnected) {
+      const sparkConnected = store.getState().sparkConnected
+      if (!sparkConnected) {
+        throw new Error('Spark wallet is not connected. Please set up your wallet first.')
+      }
+    } else {
+      // Check if backup exists in storage
+      const hasBackup = await this.hasBackup()
+      if (!hasBackup) {
+        console.log('[SparkWalletManager] No backup found to download during auto-export')
+        return // Silently skip if no backup exists
+      }
+    }
+
+    await sparkBackup.downloadEncryptedBackup(pubkey)
+    console.log('[SparkWalletManager] Backup downloaded')
   }
 }
 

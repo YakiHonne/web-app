@@ -745,7 +745,7 @@
   "A2eNUTw": "O arquivo encontrado não é um vídeo",
   "ANFYp9V": "O tamanho da imagem excedeu o limite exigido, o tamanho máximo permitido é 1Mb.",
   "ALR84Tq": "O endereço lightning foi copiado",
-  "AS0m8W5": "O LNURL foi copiado!",
+  "AS0m8W5": "Copiado para a área de transferência!",
   "ABcXmEu": "O máximo de satoshis deve ser maior que o mínimo de satochis",
   "Ap5S8lY": "A lista silenciada está vazia",
   "AHAP58g": "O Naddr foi copiado!",
@@ -1335,5 +1335,13 @@
   "ABMZqcX": "Clique para ver",
   "AfTjNox": "Conteúdo oculto",
   "A6xxSyJ": "Ocultamos este conteúdo porque você não segue esta conta",
-  "A77m0JH": "Alterar configurações"
+  "A77m0JH": "Alterar configurações",
+
+  "SparkBackupInvalidJson": "Formato de arquivo de backup inválido. Selecione um arquivo de backup válido do Spark Wallet (.json).",
+  "SparkBackupWrongAccount": "Este backup pertence a uma conta diferente. Faça login com a conta correta para restaurar este backup.\n\nConta de backup: {{backupAccount}}\nConta atual: {{currentAccount}}",
+  "SparkBackupInvalidFormat": "Arquivo de backup inválido. Selecione um arquivo de backup válido do Spark Wallet.",
+  "SparkBackupUnsupportedVersion": "Esta versão do arquivo de backup não é suportada. Atualize o aplicativo ou use um backup diferente.",
+  "SparkBackupDecryptFailed": "Falha ao descriptografar o backup. Certifique-se de estar conectado com a conta correta.",
+  "SparkWalletUnableReceive": "Não é possível receber. Tente adicionar uma nova carteira.",
+  "SparkWalletUnableSend": "Não é possível enviar. Tente adicionar uma nova carteira."
 }

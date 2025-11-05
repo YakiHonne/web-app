@@ -16,18 +16,21 @@ export default function ToastMessages() {
       clearTimeout(timer);
     }
 
-    const newTimer = setTimeout(() => {
-      dispatch(setToast(false));
-    }, 4000);
+    // Only auto-dismiss success toasts (type 1), keep error/warning toasts until manually dismissed
+    if (type === 1) {
+      const newTimer = setTimeout(() => {
+        dispatch(setToast(false));
+      }, 4000);
 
-    setTimer(newTimer);
+      setTimer(newTimer);
 
-    return () => {
-      if (newTimer) {
-        clearTimeout(newTimer);
-      }
-    };
-  }, [desc, dispatch]);
+      return () => {
+        if (newTimer) {
+          clearTimeout(newTimer);
+        }
+      };
+    }
+  }, [desc, type, dispatch]);
 
   const close = () => {
     if (timer) clearTimeout(timer);
@@ -55,8 +58,7 @@ export default function ToastMessages() {
   if (type === 2)
     return (
       <div
-        className={`toast-message warning-toast fx-scattered slide-up-down`}
-        style={{ animationDuration: "4s" }}
+        className={`toast-message warning-toast fx-scattered`}
       >
         <div className="fx-centered">
           <div className="icon">
@@ -72,8 +74,7 @@ export default function ToastMessages() {
   if (type === 3)
     return (
       <div
-        className={`toast-message warning-toast fx-scattered slide-up-down`}
-        style={{ animationDuration: "4s" }}
+        className={`toast-message warning-toast fx-scattered`}
       >
         <div className="fx-centered">
           <div className="icon">

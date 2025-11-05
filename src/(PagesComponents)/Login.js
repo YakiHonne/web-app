@@ -541,16 +541,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
       return;
     }
     if (step == 3) {
-      // Check if wallet was created before proceeding
-      if (!NWCURL && !sparkWalletCreated) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: "Please create a wallet to continue",
-          })
-        );
-        return;
-      }
+      // Allow users to skip wallet creation - they can set up later
       setStep(4);
       return;
     }
@@ -690,7 +681,6 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
       ndkInstance.signer = signer;
 
       await Promise.all([
-        warmup(),
         metadataEvent(picture_, banner_),
         interestsEvents(),
         relaysEvent(),
@@ -738,13 +728,6 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
     }
   };
 
-  const warmup = () => {
-    const tempEvent = new NDKEvent(ndkInstance);
-    tempEvent.kind = 0;
-    tempEvent.content = "";
-    tempEvent.publish();
-    return;
-  };
   const metadataEvent = async (profilePicture, bannerPicture) => {
     try {
       const ndkEvent = new NDKEvent(ndkInstance);
@@ -1082,7 +1065,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                 <>
                   <h4>Choose your wallet type</h4>
                   <p className="p-centered gray-c" style={{ maxWidth: "400px" }}>
-                    Select the type of Lightning wallet you'd like to create
+                    Select the type of Lightning wallet you'd like to create. You can always change it later.
                   </p>
 
                   <div className="fit-container fx-centered fx-col" style={{ gap: "16px", marginTop: "24px" }}>
@@ -1098,14 +1081,16 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                     >
                       <div className="fx-start fx-col" style={{ gap: "4px" }}>
                         <div className="fx-centered" style={{ gap: "8px" }}>
-                          <div className="bolt"></div>
-                          <p className="p-big bold-text">Yaki Wallet (Custodial)</p>
+                          <div className="yaki-logomark" style={{ width: "24px", height: "24px" }}></div>
+                          <p className="p-big bold-text">
+                            YakiHonne's NWC <span className="p-medium gray-c" style={{ fontWeight: 'normal' }}>(Custodial)</span>
+                          </p>
                         </div>
                         <p className="p-medium gray-c">Hosted wallet with automatic setup</p>
                       </div>
-                      <div className="round-icon-small" style={{ backgroundColor: "var(--c1)" }}>
-                        <div className="arrow-right" style={{ transform: "rotate(-45deg)" }}></div>
-                      </div>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 18l6-6-6-6" stroke="var(--orange-main)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </div>
 
                     {/* Spark Wallet Option */}
@@ -1120,14 +1105,18 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                     >
                       <div className="fx-start fx-col" style={{ gap: "4px" }}>
                         <div className="fx-centered" style={{ gap: "8px" }}>
-                          <p style={{ fontSize: "20px" }}>⚡</p>
-                          <p className="p-big bold-text">Spark Wallet (Self-Custodial)</p>
+                          <svg width="24" height="24" viewBox="0 0 52 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M30.968.273l-.494 18.251 17.358-5.994 3.205 9.905-17.625 5.17 11.172 14.64-8.63 5.891-10.33-14.95-10.488 14.97-8.471-6.12 11.206-14.48-17.59-5.284 3.266-9.884 17.322 6.105-.377-18.24 10.476.02z" fill="currentColor"></path>
+                          </svg>
+                          <p className="p-big bold-text">
+                            Spark Wallet <span className="p-medium gray-c" style={{ fontWeight: 'normal' }}>(Non-Custodial)</span>
+                          </p>
                         </div>
                         <p className="p-medium gray-c">Full control with Breez SDK</p>
                       </div>
-                      <div className="round-icon-small" style={{ backgroundColor: "var(--c1)" }}>
-                        <div className="arrow-right" style={{ transform: "rotate(-45deg)" }}></div>
-                      </div>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 18l6-6-6-6" stroke="var(--orange-main)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </div>
                   </div>
                 </>
@@ -1239,6 +1228,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                     }}
                     onCancel={() => setWalletType(null)}
                     isOnboarding={true}
+                    onboardingUserKeys={userKeys}
                   />
                 </div>
               )}

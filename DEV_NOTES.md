@@ -15,11 +15,13 @@ This document captures the complete workflow for integrating **Breez Spark Light
 - ✅ BIP39 mnemonic seed phrase support (12/24 words)
 - ✅ Multiple wallet restoration methods (auto-restore, Nostr backup, file upload, manual seed)
 - ✅ Encrypted backup to Nostr relays (NIP-78)
-- ✅ Lightning address registration (@breez.tips)
+- ✅ Lightning address registration (default: @breez.tips, customizable to @yakihonne.com)
 - ✅ Send/receive Lightning payments
 - ✅ Transaction history
 - ✅ Wallet onboarding during new user signup
 - ✅ Wallet management UI (connected wallets list)
+
+**Note**: Yakihonne can replace @breez.tips with their own custom domain (e.g., @yakihonne.com) by configuring the Breez SDK. See `src/Components/Spark/README.md` for detailed instructions on custom domain setup.
 
 ---
 
@@ -534,18 +536,97 @@ When integrating similar wallet providers (e.g., Mutiny, Zeus, Blink):
 5. **Multiple Restoration Methods**: Users appreciated flexibility
 
 ### What Could Be Improved
-1. **Complete UI Updates**: Need checklist for all balance display locations
+1. **Complete UI Updates**: Need checklist for all balance display locations ✅ (Addressed 2025-11-04)
 2. **Testing Coverage**: Should test all wallet types together
 3. **Documentation**: In-code comments for complex encryption/backup logic
-4. **Error Messages**: More user-friendly error messages
+4. **Error Messages**: More user-friendly error messages ✅ (Addressed 2025-11-04)
 5. **Type Safety**: Consider TypeScript for better type checking
 
 ### Key Takeaways
 1. **Always check multiple display locations** - Balance, addresses, etc. appear in many places
-2. **Log everything** - `console.log` with service prefixes is invaluable
+2. **Log everything** - `console.log` with service prefixes is invaluable (but clean up for production!)
 3. **Test restoration thoroughly** - Users care most about not losing funds
 4. **State management is critical** - Redux makes wallet state predictable
 5. **Reference implementations** - Don't reinvent the wheel, learn from working code
+6. **Error handling is UX** - User-friendly error messages prevent support tickets
+7. **Loading states matter** - Eliminate UI flashes with proper connection state checks
+8. **Mobile-first design** - Always test responsive behavior with narrow viewports
+9. **Translation from the start** - Add i18n keys immediately, not as an afterthought
+10. **Production cleanup** - Remove debug code and optimize logging before deployment
+
+---
+
+## Production Deployment Checklist
+
+Before deploying Spark wallet features to production:
+
+### Code Quality
+- [x] Remove all debug `console.log` statements
+- [x] Convert informational logs to `console.warn` with `(handled)` annotation
+- [x] Keep `console.error` only for actual errors
+- [x] Remove TODO/FIXME comments or address them
+- [x] Clean up temporary debugging code
+
+### Error Handling
+- [x] All wallet operations wrapped in try-catch
+- [x] User-friendly error messages for common failures
+- [x] Toast notifications instead of runtime errors
+- [x] Prevent Next.js error overlay on handled errors
+- [x] Specific error messages for network issues, insufficient funds, etc.
+
+### UX Polish
+- [x] No "N/A" or "Wallet not connected" flashes on page load
+- [x] Loading states for all async operations
+- [x] Proper wallet connection state checks
+- [x] Balance displays handle large numbers gracefully
+- [x] Mobile responsive design tested
+- [x] All text translated to supported languages
+
+### State Management
+- [x] Redux state properly initialized
+- [x] No memory leaks from event listeners
+- [x] Cleanup functions in useEffect hooks
+- [x] State properly reset on wallet disconnect
+- [x] Loading/connecting states properly toggled
+
+### Testing Checklist
+- [ ] Test new wallet creation
+- [ ] Test all 4 restoration methods
+- [ ] Test send/receive payments
+- [ ] Test wallet switching (Spark ↔ NWC ↔ Alby)
+- [ ] Test page refresh with active wallet
+- [ ] Test mobile viewport
+- [ ] Test with large balances (formatting)
+- [ ] Test error scenarios (wrong backup, insufficient funds, network issues)
+- [ ] Test in different browsers (Chrome, Firefox, Safari)
+- [ ] Test onboarding flow for new users
+
+### Environment Variables
+- [ ] `NEXT_PUBLIC_BREEZ_SPARK_API_KEY` set in production
+- [ ] Verify API key is valid and not rate-limited
+- [ ] Check relay URLs are accessible from production
+
+### Lightning Address Domain (Optional Customization)
+- [ ] Decide if using default @breez.tips or custom domain (@yakihonne.com)
+- [ ] If custom domain: Contact Breez team for domain setup
+- [ ] If custom domain: Configure DNS records as specified
+- [ ] If custom domain: Update `spark.service.js` configuration
+- [ ] If custom domain: Test username registration with new domain
+- [ ] Default @breez.tips works out-of-the-box with no additional setup
+
+### Performance
+- [ ] WASM module loads efficiently
+- [ ] No excessive re-renders
+- [ ] Event listeners properly cleaned up
+- [ ] LocalStorage not bloated with old data
+- [ ] Reasonable sync intervals configured
+
+### Security
+- [ ] Mnemonics encrypted before storage
+- [ ] Never log sensitive data (mnemonics, private keys)
+- [ ] HTTPS enforced for all operations
+- [ ] Proper CORS configuration for relays
+- [ ] Input validation on all user inputs
 
 ---
 
@@ -569,6 +650,47 @@ When integrating similar wallet providers (e.g., Mutiny, Zeus, Blink):
 ---
 
 ## Changelog
+
+### 2025-11-04 - Production Hardening & UX Improvements
+- ✅ **Comprehensive Error Handling**
+  - Converted all wallet connection errors to user-friendly toast notifications
+  - Added specific error messages for NWC relay failures and authorization issues
+  - Changed `console.log` to `console.warn` for handled errors to prevent Next.js error overlay
+  - Users never see technical runtime errors - all errors gracefully handled
+  - Added INSUFFICIENT_FUNDS detection with user-friendly message
+- ✅ **Wallet Linking Logic Fix**
+  - Fixed "None of connected wallets are linked" appearing incorrectly
+  - Now checks ALL wallets against profile address, not just selected wallet
+  - Users can switch between wallets without seeing false warnings
+  - Spark Lightning addresses properly recognized when viewing other wallet types
+- ✅ **Loading State Improvements**
+  - Eliminated "Wallet not connected" flash on page refresh
+  - Added proper loading states showing "Connecting wallet..." with animation
+  - Balance display hidden during Spark wallet connection
+  - Sidebar balance hides gracefully when Spark not connected
+  - Smooth user experience with no jarring N/A or error messages
+- ✅ **Wallet Display Layout Fixes**
+  - Fixed overflow issue where eyeball icon was pushed out by large USD values
+  - Added text truncation with ellipsis for very large numbers
+  - Improved number formatting with thousand separators (e.g., $65,758.10)
+  - Added mobile wallet icon for narrow viewports
+  - Proper flexbox layout prevents UI breaking with large balances
+- ✅ **Translation Integration**
+  - Added 9 new translation keys across all 11 languages
+  - "Wallet not connected", "Connecting wallet..."
+  - SparkBackupInvalidJson, SparkBackupWrongAccount, SparkBackupInvalidFormat
+  - SparkBackupUnsupportedVersion, SparkBackupDecryptFailed
+  - SparkWalletUnableReceive, SparkWalletUnableSend
+  - Updated generic copy message to "Copied to clipboard!"
+- ✅ **Code Cleanup for Production**
+  - Removed all debug `console.log` statements
+  - Cleaned up temporary debugging code
+  - Maintained only `console.error` for actual failures and `console.warn` for handled errors
+  - Production-ready logging with descriptive labels
+- ✅ **Mobile UX Enhancement**
+  - Added wallet icon in sidebar for mobile/narrow viewports
+  - Users can access wallet page when balance display is hidden
+  - Responsive design accommodates all viewport sizes
 
 ### 2025-11-02 - UI Polish & Payment History Enhancements
 - ✅ Fixed profile link warning - Spark wallet Lightning address now properly recognized

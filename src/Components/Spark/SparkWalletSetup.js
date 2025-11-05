@@ -6,11 +6,14 @@ import sparkWalletManager from '@/Helpers/Spark/spark-wallet-manager';
 import { setToast } from '@/Store/Slides/Publishers';
 import LoadingDots from '@/Components/LoadingDots';
 import sparkBackup from '@/Helpers/Spark/spark-backup.service';
+import { shortenKey } from '@/Helpers/Encryptions';
+import { nip19 } from 'nostr-tools';
 
-export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = false }) {
+export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = false, onboardingUserKeys = null }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const userKeys = useSelector((state) => state.userKeys);
+  const reduxUserKeys = useSelector((state) => state.userKeys);
+  const userKeys = isOnboarding && onboardingUserKeys ? onboardingUserKeys : reduxUserKeys;
   const userMetadata = useSelector((state) => state.userMetadata);
   const sparkLightningAddress = useSelector((state) => state.sparkLightningAddress);
   const [activeTab, setActiveTab] = useState('create');
@@ -20,14 +23,27 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [backupFile, setBackupFile] = useState(null);
   const [mnemonicCopied, setMnemonicCopied] = useState(false);
-  const [saveToNostr, setSaveToNostr] = useState(true);
+  const [showSeedWords, setShowSeedWords] = useState(false);
+  const [showLightningAddressPrompt, setShowLightningAddressPrompt] = useState(false);
+  const [lightningUsername, setLightningUsername] = useState('');
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState(null);
 
   const handleCreateWallet = async () => {
     try {
       setLoading(true);
-      const { mnemonic } = await sparkWalletManager.createWallet(saveToNostr);
+
+      // If onboarding with userKeys, temporarily set them in Redux so wallet manager can access
+      if (isOnboarding && onboardingUserKeys && !reduxUserKeys) {
+        const { setUserKeys } = await import('@/Store/Slides/UserData');
+        dispatch(setUserKeys(onboardingUserKeys));
+      }
+
+      // Never save to Nostr relays - only use downloadable backups
+      const { mnemonic } = await sparkWalletManager.createWallet(false);
       setGeneratedMnemonic(mnemonic);
       setShowMnemonic(true);
+      setShowSeedWords(false); // Start with seed phrase hidden
       dispatch(setToast({
         show: true,
         message: t('Spark wallet created successfully'),
@@ -38,28 +54,6 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
       dispatch(setToast({
         show: true,
         message: error.message || t('Failed to create wallet'),
-        type: 'error'
-      }));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRestoreFromNostr = async () => {
-    try {
-      setLoading(true);
-      await sparkWalletManager.restoreWallet();
-      dispatch(setToast({
-        show: true,
-        message: t('Wallet restored from Nostr'),
-        type: 'success'
-      }));
-      if (onComplete) onComplete(sparkLightningAddress);
-    } catch (error) {
-      console.error('Failed to restore from Nostr:', error);
-      dispatch(setToast({
-        show: true,
-        message: error.message || t('No backup found on Nostr'),
         type: 'error'
       }));
     } finally {
@@ -79,6 +73,13 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
 
     try {
       setLoading(true);
+
+      // If onboarding with userKeys, temporarily set them in Redux so wallet manager can access
+      if (isOnboarding && onboardingUserKeys && !reduxUserKeys) {
+        const { setUserKeys } = await import('@/Store/Slides/UserData');
+        dispatch(setUserKeys(onboardingUserKeys));
+      }
+
       await sparkWalletManager.restoreFromFile(backupFile);
       dispatch(setToast({
         show: true,
@@ -87,11 +88,40 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
       }));
       if (onComplete) onComplete(sparkLightningAddress);
     } catch (error) {
-      console.error('Failed to restore from file:', error);
+      console.warn('Failed to restore from file (handled):', error);
+
+      let errorMessage = error.message || t('Failed to restore from file');
+
+      // Handle JSON parsing errors
+      if (error.message?.includes('Unexpected token') || error.message?.includes('JSON')) {
+        errorMessage = t('SparkBackupInvalidJson');
+      }
+      // Handle "wrong account" error with helpful details
+      else if (error.message?.startsWith('WRONG_ACCOUNT:')) {
+        const parts = error.message.split(':');
+        const backupPubkey = parts[1];
+        const currentPubkey = parts[2];
+
+        // Convert hex pubkeys to npub format
+        const backupNpub = nip19.npubEncode(backupPubkey);
+        const currentNpub = nip19.npubEncode(currentPubkey);
+        const backupShort = shortenKey(backupNpub, 8);
+        const currentShort = shortenKey(currentNpub, 8);
+        errorMessage = t('SparkBackupWrongAccount', {
+          backupAccount: backupShort,
+          currentAccount: currentShort
+        });
+      } else if (error.message?.includes('Invalid backup file format')) {
+        errorMessage = t('SparkBackupInvalidFormat');
+      } else if (error.message?.includes('Unsupported backup version')) {
+        errorMessage = t('SparkBackupUnsupportedVersion');
+      } else if (error.message?.includes('decrypt') || error.message?.includes('encryption')) {
+        errorMessage = t('SparkBackupDecryptFailed');
+      }
+
       dispatch(setToast({
-        show: true,
-        message: error.message || t('Failed to restore from file'),
-        type: 'error'
+        type: 2,
+        desc: errorMessage
       }));
     } finally {
       setLoading(false);
@@ -110,7 +140,16 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
 
     try {
       setLoading(true);
-      await sparkWalletManager.restoreFromSeed(seedPhrase, true);
+
+      // If onboarding with userKeys, temporarily set them in Redux so wallet manager can access
+      if (isOnboarding && onboardingUserKeys && !reduxUserKeys) {
+        const { setUserKeys } = await import('@/Store/Slides/UserData');
+        dispatch(setUserKeys(onboardingUserKeys));
+      }
+
+      // Don't sync to Nostr during restore to avoid relay auth errors
+      // Local backup is always saved, but Nostr sync can be done later from wallet settings
+      await sparkWalletManager.restoreFromSeed(seedPhrase, false);
       dispatch(setToast({
         show: true,
         message: t('Wallet restored successfully'),
@@ -165,145 +204,186 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
     }
   };
 
+  const handleCheckUsername = async () => {
+    if (!lightningUsername || lightningUsername.length < 3) return;
+
+    try {
+      setCheckingUsername(true);
+      const available = await sparkWalletManager.checkUsernameAvailability(lightningUsername);
+      setUsernameAvailable(available);
+    } catch (error) {
+      console.error('Failed to check username:', error);
+      setUsernameAvailable(false);
+    } finally {
+      setCheckingUsername(false);
+    }
+  };
+
+  const handleRegisterLightningAddress = async () => {
+    if (!lightningUsername || usernameAvailable === false) return;
+
+    try {
+      setLoading(true);
+      await sparkWalletManager.registerLightningAddress(lightningUsername);
+      dispatch(setToast({
+        show: true,
+        message: t('Lightning address registered successfully!'),
+        type: 'success'
+      }));
+      // Complete onboarding
+      if (onComplete) onComplete(sparkLightningAddress || `${lightningUsername}@breez.tips`);
+    } catch (error) {
+      console.error('Failed to register lightning address:', error);
+      dispatch(setToast({
+        show: true,
+        message: error.message || t('Failed to register lightning address'),
+        type: 'error'
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSkipLightningAddress = () => {
+    if (onComplete) onComplete('Spark Wallet');
+  };
+
+  const handleContinueToLightningAddress = () => {
+    setShowLightningAddressPrompt(true);
+    setShowMnemonic(false);
+  };
+
   const tabs = [
-    { id: 'create', label: t('Create New') },
-    { id: 'nostr', label: t('Restore from Nostr') },
-    { id: 'file', label: t('Restore from File') },
-    { id: 'seed', label: t('Enter Seed Phrase') }
+    { id: 'create', label: t('Create') },
+    { id: 'file', label: t('From Backup File') },
+    { id: 'seed', label: t('Seed Phrase') }
   ];
 
   return (
     <div className="fx-centered fit-container fx-col box-pad-h box-pad-v">
       <div className="fx-centered fx-col" style={{ maxWidth: '600px', width: '100%' }}>
-        <h2 style={{ marginBottom: 'var(--16)' }}>Spark Wallet Setup</h2>
-        <p className="gray-c p-centered box-pad-h" style={{ marginBottom: 'var(--24)' }}>
-          {t('Set up your self-custodial Lightning wallet')}
-        </p>
+        <h4 style={{ marginBottom: showMnemonic ? 'var(--24)' : 'var(--16)' }}>Spark Wallet</h4>
 
-        {/* Tabs */}
-        <div className="fx-centered fit-container" style={{ gap: 'var(--16)', marginBottom: 'var(--32)', flexWrap: 'wrap' }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={`btn btn-small ${activeTab === tab.id ? 'btn-orange' : 'btn-gray'}`}
-              onClick={() => {
-                setActiveTab(tab.id);
-                setShowMnemonic(false);
-                setMnemonicCopied(false);
-              }}
-              disabled={loading}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* Only show description and tabs when not showing mnemonic */}
+        {!showMnemonic && (
+          <>
+            <p className="gray-c p-centered" style={{ marginBottom: 'var(--24)' }}>
+              {t('Create or restore a wallet to send and receive zaps!')}
+            </p>
+
+            {/* Tabs */}
+            <div className="fx-centered fit-container" style={{ gap: 'var(--12)', marginBottom: 'var(--24)' }}>
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  className={`btn btn-small ${activeTab === tab.id ? 'btn-orange' : 'btn-gray'}`}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setShowMnemonic(false);
+                    setMnemonicCopied(false);
+                  }}
+                  disabled={loading}
+                  style={{ flex: 1, whiteSpace: 'nowrap' }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
         {/* Create New Wallet */}
         {activeTab === 'create' && !showMnemonic && (
-          <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--24)' }}>
-            <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
-              <div className="fx-centered fx-col">
-                <h4>{t('Create New Wallet')}</h4>
-                <p className="gray-c p-centered p-medium box-pad-h" style={{ marginTop: 'var(--16)' }}>
-                  {t('A new 12-word seed phrase will be generated. You must save it securely to recover your wallet.')}
-                </p>
-              </div>
-
-              <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--16)', marginTop: 'var(--16)' }}>
-                <label className="fx-centered pointer" style={{ gap: 'var(--16)' }}>
-                  <input
-                    type="checkbox"
-                    checked={saveToNostr}
-                    onChange={(e) => setSaveToNostr(e.target.checked)}
-                    style={{ width: '20px', height: '20px', cursor: 'pointer' }}
-                  />
-                  <span className="p-medium">{t('Backup to Nostr (encrypted)')}</span>
-                </label>
-                <p className="gray-c p-small box-pad-h p-centered">
-                  {t('Your seed will be encrypted with your Nostr keys and stored on relays for easy recovery.')}
-                </p>
-              </div>
-            </div>
-
-            <div className="fx-centered fit-container" style={{ gap: 'var(--16)' }}>
-              {onCancel && (
-                <button
-                  className="btn btn-gray fx"
-                  onClick={onCancel}
-                  disabled={loading}
-                >
-                  {t('Cancel')}
-                </button>
-              )}
-              <button
-                className="btn btn-orange fx"
-                onClick={handleCreateWallet}
-                disabled={loading}
-              >
-                {loading ? <LoadingDots /> : t('Create Wallet')}
-              </button>
-            </div>
+          <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--24)' }}>
+            <button
+              className="btn btn-orange fit-container"
+              onClick={handleCreateWallet}
+              disabled={loading}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {loading ? <LoadingDots /> : t('Create Wallet')}
+            </button>
           </div>
         )}
 
         {/* Show Generated Mnemonic */}
         {activeTab === 'create' && showMnemonic && (
-          <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--24)' }}>
+          <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--24)' }}>
             <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
-              <h4>{t('Your Seed Phrase')}</h4>
-              <p className="gray-c p-centered p-medium box-pad-h">
-                {t('Write down these 12 words in order and store them securely. Anyone with access to these words can access your funds.')}
+              <p className="gray-c p-centered p-medium">
+                {t('Write down these 12 words in order and store them securely.')}
               </p>
 
               <div
-                className="fit-container box-pad-h box-pad-v"
+                className="fit-container"
                 style={{
                   backgroundColor: 'var(--c1-side)',
                   borderRadius: 'var(--border-r-18)',
-                  border: '2px solid var(--orange-main)'
+                  border: '2px solid var(--orange-main)',
+                  padding: 'var(--16)'
                 }}
               >
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(3, 1fr)',
-                  gap: 'var(--16)',
-                  width: '100%'
-                }}>
-                  {generatedMnemonic.split(' ').map((word, index) => (
-                    <div
-                      key={index}
-                      className="fx-centered"
-                      style={{
-                        padding: 'var(--16)',
-                        backgroundColor: 'var(--bg-main)',
-                        borderRadius: 'var(--border-r-6)'
-                      }}
+                {showSeedWords ? (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(3, 1fr)',
+                    gap: 'var(--12)',
+                    width: '100%'
+                  }}>
+                    {generatedMnemonic.split(' ').map((word, index) => (
+                      <div
+                        key={index}
+                        className="fx-centered"
+                        style={{
+                          padding: 'var(--12)',
+                          backgroundColor: 'var(--bg-main)',
+                          borderRadius: 'var(--border-r-6)'
+                        }}
+                      >
+                        <span className="gray-c p-small" style={{ marginRight: '6px' }}>{index + 1}.</span>
+                        <span className="p-medium">{word}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="fx-centered fx-col" style={{ minHeight: '200px', gap: 'var(--12)' }}>
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    <button
+                      className="btn btn-gray btn-small"
+                      onClick={() => setShowSeedWords(true)}
                     >
-                      <span className="gray-c p-small" style={{ marginRight: '8px' }}>{index + 1}.</span>
-                      <span className="p-bold">{word}</span>
-                    </div>
-                  ))}
-                </div>
+                      {t('Reveal Seed Phrase')}
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <div className="fx-centered fit-container" style={{ gap: 'var(--16)', flexWrap: 'wrap' }}>
-                <button
-                  className="btn btn-small btn-gray fx"
-                  onClick={handleCopyMnemonic}
-                >
-                  <div className="copy-24"></div>
-                  <span>{mnemonicCopied ? t('Copied!') : t('Copy')}</span>
-                </button>
-                <button
-                  className="btn btn-small btn-gray fx"
-                  onClick={handleDownloadBackup}
-                >
-                  <span>{t('Download Backup')}</span>
-                </button>
-              </div>
+              {showSeedWords && (
+                <div className="fx-centered fit-container" style={{ gap: 'var(--12)' }}>
+                  <button
+                    className="btn btn-small btn-gray fit-container"
+                    onClick={handleCopyMnemonic}
+                    style={{ whiteSpace: 'nowrap' }}
+                  >
+                    {mnemonicCopied ? t('Copied!') : t('Copy Seed Phrase')}
+                  </button>
+                  {/* Only show Download Backup if user is logged in */}
+                  {userKeys?.pub && (
+                    <button
+                      className="btn btn-small btn-gray fit-container"
+                      onClick={handleDownloadBackup}
+                      style={{ whiteSpace: 'nowrap' }}
+                    >
+                      {t('Download Backup')}
+                    </button>
+                  )}
+                </div>
+              )}
 
               {mnemonicCopied && (
-                <div className="fx-centered fx-col" style={{ gap: 'var(--16)', marginTop: 'var(--16)' }}>
+                <>
                   <div
                     className="fit-container box-pad-h-s box-pad-v-s"
                     style={{
@@ -318,149 +398,146 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
                   </div>
                   <button
                     className="btn btn-orange fit-container"
-                    onClick={() => onComplete && onComplete(sparkLightningAddress)}
+                    onClick={handleContinueToLightningAddress}
+                    style={{ whiteSpace: 'nowrap' }}
                   >
-                    {t('I have saved my seed phrase')}
+                    {t('Continue')}
                   </button>
-                </div>
+                </>
               )}
             </div>
           </div>
         )}
 
-        {/* Restore from Nostr */}
-        {activeTab === 'nostr' && (
-          <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--24)' }}>
+        {/* Lightning Address Registration Prompt */}
+        {showLightningAddressPrompt && (
+          <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--24)' }}>
             <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
-              <h4>{t('Restore from Nostr')}</h4>
-              <p className="gray-c p-centered p-medium box-pad-h">
-                {t('Automatically detect and restore your wallet backup from Nostr relays.')}
+              <h4>{t('Register Lightning Address')}</h4>
+              <p className="gray-c p-centered p-medium">
+                {t('Register a Lightning address to receive zaps. You can skip this and do it later from wallet settings.')}
               </p>
-            </div>
 
-            <div className="fx-centered fit-container" style={{ gap: 'var(--16)' }}>
-              {onCancel && (
-                <button
-                  className="btn btn-gray fx"
-                  onClick={onCancel}
-                  disabled={loading}
-                >
-                  {t('Cancel')}
-                </button>
+              <div className="fx-centered fit-container" style={{ gap: 'var(--16)' }}>
+                <input
+                  type="text"
+                  className="if fx"
+                  placeholder={t('username')}
+                  value={lightningUsername}
+                  onChange={(e) => {
+                    setLightningUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''));
+                    setUsernameAvailable(null);
+                  }}
+                  onBlur={handleCheckUsername}
+                  disabled={loading || checkingUsername}
+                  style={{ flex: 1 }}
+                />
+                <span className="gray-c p-medium">@breez.tips</span>
+              </div>
+
+              {checkingUsername && (
+                <p className="gray-c p-small">{t('Checking availability...')}</p>
               )}
-              <button
-                className="btn btn-orange fx"
-                onClick={handleRestoreFromNostr}
-                disabled={loading}
-              >
-                {loading ? <LoadingDots /> : t('Restore from Nostr')}
-              </button>
+
+              {usernameAvailable !== null && (
+                <p className={`p-small ${usernameAvailable ? 'green-c' : 'red-c'}`}>
+                  {usernameAvailable ? t('Username available') : t('Username not available')}
+                </p>
+              )}
+
+              <div className="fx-centered fit-container" style={{ gap: 'var(--12)' }}>
+                <button
+                  className="btn btn-gray fit-container"
+                  onClick={handleSkipLightningAddress}
+                  disabled={loading}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  {t('Skip for Now')}
+                </button>
+                <button
+                  className="btn btn-orange fit-container"
+                  onClick={handleRegisterLightningAddress}
+                  disabled={loading || checkingUsername || !lightningUsername || usernameAvailable === false}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  {loading ? <LoadingDots /> : t('Register Address')}
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Restore from File */}
         {activeTab === 'file' && (
-          <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--24)' }}>
-            <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
-              <h4>{t('Restore from File')}</h4>
-              <p className="gray-c p-centered p-medium box-pad-h">
-                {t('Upload your encrypted backup file to restore your wallet.')}
-              </p>
+          <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--24)' }}>
+            <label
+              className="fit-container fx-centered fx-col pointer"
+              style={{
+                border: '2px dashed var(--pale-gray)',
+                borderRadius: 'var(--border-r-12)',
+                padding: 'var(--32)',
+                cursor: 'pointer'
+              }}
+            >
+              <input
+                type="file"
+                accept=".json,.txt"
+                onChange={handleFileChange}
+                style={{ display: 'none' }}
+                disabled={loading}
+              />
+              <div className="fx-centered fx-col" style={{ gap: 'var(--12)' }}>
+                <svg width="48" height="48" viewBox="0 0 75 69.81" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M62.14,7.77h-26.73l-2.38-2.96C30.57,1.75,26.91,0,22.99,0h-10.12C5.77,0,0,5.77,0,12.87v44.07c0,7.1,5.77,12.87,12.87,12.87h49.26c7.1,0,12.87-5.77,12.87-12.87V20.64c0-7.1-5.77-12.87-12.87-12.87h0ZM12.88,4.99h10.12c2.4,0,4.64,1.07,6.14,2.94l3.13,3.9c.47.59,1.19.94,1.95.94h27.93c4.34,0,7.87,3.53,7.87,7.87v2.8c-2.18-1.69-4.9-2.71-7.87-2.71H12.88c-2.97,0-5.69,1.02-7.87,2.71v-10.58c0-4.34,3.53-7.87,7.87-7.87h0ZM70.01,56.94c0,4.34-3.53,7.87-7.87,7.87H12.88c-4.34,0-7.87-3.53-7.87-7.87v-23.33c0-4.34,3.53-7.87,7.87-7.87h49.26c4.34,0,7.87,3.53,7.87,7.87v23.33h0Z" fill="currentColor"/>
+                </svg>
+                {backupFile ? (
+                  <p className="p-medium">{backupFile.name}</p>
+                ) : (
+                  <p className="gray-c p-medium">{t('Click to select backup file')}</p>
+                )}
+              </div>
+            </label>
 
-              <label
-                className="fit-container fx-centered fx-col pointer option box-pad-h box-pad-v"
-                style={{
-                  border: '2px dashed var(--pale-gray)',
-                  borderRadius: 'var(--border-r-18)',
-                  minHeight: '120px'
-                }}
-              >
-                <input
-                  type="file"
-                  accept=".json,.txt"
-                  onChange={handleFileChange}
-                  style={{ display: 'none' }}
-                  disabled={loading}
-                />
-                <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
-                  <div style={{ fontSize: '48px' }}>📁</div>
-                  {backupFile ? (
-                    <p className="p-bold">{backupFile.name}</p>
-                  ) : (
-                    <p className="gray-c">{t('Click to select backup file')}</p>
-                  )}
-                </div>
-              </label>
-            </div>
-
-            <div className="fx-centered fit-container" style={{ gap: 'var(--16)' }}>
-              {onCancel && (
-                <button
-                  className="btn btn-gray fx"
-                  onClick={onCancel}
-                  disabled={loading}
-                >
-                  {t('Cancel')}
-                </button>
-              )}
-              <button
-                className="btn btn-orange fx"
-                onClick={handleRestoreFromFile}
-                disabled={loading || !backupFile}
-              >
-                {loading ? <LoadingDots /> : t('Restore from File')}
-              </button>
-            </div>
+            <button
+              className="btn btn-orange fit-container"
+              onClick={handleRestoreFromFile}
+              disabled={loading || !backupFile}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {loading ? <LoadingDots /> : t('Restore from File')}
+            </button>
           </div>
         )}
 
         {/* Restore from Seed Phrase */}
         {activeTab === 'seed' && (
-          <div className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v" style={{ gap: 'var(--24)' }}>
-            <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--16)' }}>
-              <h4>{t('Enter Seed Phrase')}</h4>
-              <p className="gray-c p-centered p-medium box-pad-h">
-                {t('Enter your 12 or 24 word seed phrase to restore your wallet.')}
-              </p>
+          <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--24)' }}>
+            <textarea
+              className="if ifs-full"
+              placeholder={t('Enter your seed phrase (12 words most common, 24 also supported)')}
+              value={seedPhrase}
+              onChange={(e) => setSeedPhrase(e.target.value)}
+              rows={3}
+              style={{
+                fontFamily: 'DM Sans',
+                resize: 'vertical',
+                minHeight: '80px'
+              }}
+              disabled={loading}
+            />
 
-              <textarea
-                className="if ifs-full"
-                placeholder={t('Enter your seed phrase (12 or 24 words)')}
-                value={seedPhrase}
-                onChange={(e) => setSeedPhrase(e.target.value)}
-                rows={6}
-                style={{
-                  fontFamily: 'DM Sans',
-                  resize: 'vertical',
-                  minHeight: '120px'
-                }}
-                disabled={loading}
-              />
+            <p className="gray-c p-small p-centered">
+              {t('Word count')}: {seedPhrase.trim().split(/\s+/).filter(Boolean).length}
+            </p>
 
-              <p className="gray-c p-small p-centered">
-                {t('Word count')}: {seedPhrase.trim().split(/\s+/).filter(Boolean).length}
-              </p>
-            </div>
-
-            <div className="fx-centered fit-container" style={{ gap: 'var(--16)' }}>
-              {onCancel && (
-                <button
-                  className="btn btn-gray fx"
-                  onClick={onCancel}
-                  disabled={loading}
-                >
-                  {t('Cancel')}
-                </button>
-              )}
-              <button
-                className="btn btn-orange fx"
-                onClick={handleRestoreFromSeed}
-                disabled={loading || !seedPhrase.trim()}
-              >
-                {loading ? <LoadingDots /> : t('Restore Wallet')}
-              </button>
-            </div>
+            <button
+              className="btn btn-orange fit-container"
+              onClick={handleRestoreFromSeed}
+              disabled={loading || !seedPhrase.trim()}
+              style={{ whiteSpace: 'nowrap' }}
+            >
+              {loading ? <LoadingDots /> : t('Restore Wallet')}
+            </button>
           </div>
         )}
       </div>

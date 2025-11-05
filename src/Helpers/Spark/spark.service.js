@@ -387,7 +387,17 @@ class SparkService {
         return response
       }
     } catch (error) {
-      console.error('[SparkService] Payment failed:', error)
+      console.warn('[SparkService] Payment failed (handled):', error)
+
+      // Convert SDK errors to user-friendly messages
+      const errorMessage = error.message || error.toString()
+
+      if (errorMessage.includes('insufficient funds')) {
+        throw new Error('INSUFFICIENT_FUNDS')
+      } else if (errorMessage.includes('User rejected')) {
+        throw new Error('USER_REJECTED')
+      }
+
       throw error
     }
   }

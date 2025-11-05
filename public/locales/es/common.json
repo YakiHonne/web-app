@@ -1335,5 +1335,13 @@
   "ABMZqcX": "Haga clic para ver",
   "AfTjNox": "Contenido oculto",
   "A6xxSyJ": "Hemos ocultado este contenido porque no sigues esta cuenta.",
-  "A77m0JH": "Cambiar configuración"
+  "A77m0JH": "Cambiar configuración",
+
+  "SparkBackupInvalidJson": "Formato de archivo de respaldo inválido. Seleccione un archivo de respaldo válido de Spark Wallet (.json).",
+  "SparkBackupWrongAccount": "Este respaldo pertenece a una cuenta diferente. Inicie sesión con la cuenta correcta para restaurar este respaldo.\n\nCuenta de respaldo: {{backupAccount}}\nCuenta actual: {{currentAccount}}",
+  "SparkBackupInvalidFormat": "Archivo de respaldo inválido. Seleccione un archivo de respaldo válido de Spark Wallet.",
+  "SparkBackupUnsupportedVersion": "Esta versión de archivo de respaldo no es compatible. Actualice la aplicación o use un respaldo diferente.",
+  "SparkBackupDecryptFailed": "No se pudo descifrar el respaldo. Asegúrese de haber iniciado sesión con la cuenta correcta.",
+  "SparkWalletUnableReceive": "No se puede recibir. Intente agregar una nueva billetera.",
+  "SparkWalletUnableSend": "No se puede enviar. Intente agregar una nueva billetera."
 }
