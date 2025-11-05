@@ -80,6 +80,7 @@
     "@eslint/eslintrc": "^3",
     "assert": "^2.1.0",
     "buffer": "^6.0.3",
+    "copy-webpack-plugin": "^13.0.1",
     "eslint": "^9",
     "process": "^0.11.10"
   }
