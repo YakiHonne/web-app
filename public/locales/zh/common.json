@@ -745,7 +745,7 @@
   "A2eNUTw": "不是视频文件",
   "ANFYp9V": "图片大小超出了规定限制，最大允许大小为 1MB",
   "ALR84Tq": "\nLN地址已被复制",
-  "AS0m8W5": "LN地址已被复制",
+  "AS0m8W5": "已复制到剪贴板！",
   "ABcXmEu": "最大 Sats数必须大于最小 Sas数",
   "Ap5S8lY": "静音列表为空",
   "AHAP58g": "Nostr地址已被复制",
@@ -1336,5 +1336,13 @@
   "ABMZqcX": "点击查看",
   "AfTjNox": "隐藏内容",
   "A6xxSyJ": "我们隐藏了此内容，因为您没有关注此帐户",
-  "A77m0JH": "更改设置"
+  "A77m0JH": "更改设置",
+
+  "SparkBackupInvalidJson": "备份文件格式无效。请选择有效的 Spark 钱包备份文件（.json）。",
+  "SparkBackupWrongAccount": "此备份属于不同的账户。请使用正确的账户登录以恢复此备份。\n\n备份账户：{{backupAccount}}\n当前账户：{{currentAccount}}",
+  "SparkBackupInvalidFormat": "备份文件无效。请选择有效的 Spark 钱包备份文件。",
+  "SparkBackupUnsupportedVersion": "不支持此备份文件版本。请更新应用程序或使用其他备份。",
+  "SparkBackupDecryptFailed": "无法解密备份。请确保您已使用正确的账户登录。",
+  "SparkWalletUnableReceive": "无法接收。请尝试添加新钱包。",
+  "SparkWalletUnableSend": "无法发送。请尝试添加新钱包。"
 }

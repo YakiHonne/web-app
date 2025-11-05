@@ -518,7 +518,7 @@
   "A4G4OJ7": "Entrant",
   "AYMJ2uj": "Message de facture",
   "AkPQ73T": "Sortant",
-  "AS0m8W5": "Le LNURL a été copié !",
+  "AS0m8W5": "Copié dans le presse-papier !",
   "A7ggsnQ": "Impossible de trouver l'article",
   "AzAG7f8": "Impossible de trouver la vidéo",
   "AuF5ZyB": "Aucun article n'appartient à cette curation",
@@ -1342,5 +1342,13 @@
   "ABMZqcX": "Cliquez pour voir",
   "AfTjNox": "Contenu caché",
   "A6xxSyJ": "Nous avons masqué ce contenu car vous ne suivez pas ce compte",
-  "A77m0JH": "Modifier les paramètres"
+  "A77m0JH": "Modifier les paramètres",
+
+  "SparkBackupInvalidJson": "Format de fichier de sauvegarde invalide. Veuillez sélectionner un fichier de sauvegarde Spark valide (.json).",
+  "SparkBackupWrongAccount": "Cette sauvegarde appartient à un compte différent. Veuillez vous connecter avec le compte approprié pour restaurer cette sauvegarde.\n\nCompte de sauvegarde : {{backupAccount}}\nCompte actuel : {{currentAccount}}",
+  "SparkBackupInvalidFormat": "Fichier de sauvegarde invalide. Veuillez sélectionner un fichier de sauvegarde Spark valide.",
+  "SparkBackupUnsupportedVersion": "Cette version de fichier de sauvegarde n'est pas prise en charge. Veuillez mettre à jour l'application ou utiliser une autre sauvegarde.",
+  "SparkBackupDecryptFailed": "Échec du déchiffrement de la sauvegarde. Veuillez vous assurer que vous êtes connecté avec le bon compte.",
+  "SparkWalletUnableReceive": "Impossible de recevoir. Essayez d'ajouter un nouveau portefeuille.",
+  "SparkWalletUnableSend": "Impossible d'envoyer. Essayez d'ajouter un nouveau portefeuille."
 }

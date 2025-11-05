@@ -1336,5 +1336,13 @@
   "ABMZqcX": "Fare clic per visualizzare",
   "AfTjNox": "Contenuti nascosti",
   "A6xxSyJ": "Abbiamo nascosto questo contenuto perché non segui questo account",
-  "A77m0JH": "Modificare le impostazioni"
+  "A77m0JH": "Modificare le impostazioni",
+
+  "SparkBackupInvalidJson": "Formato del file di backup non valido. Seleziona un file di backup Spark Wallet valido (.json).",
+  "SparkBackupWrongAccount": "Questo backup appartiene a un account diverso. Accedi con l'account corretto per ripristinare questo backup.\n\nAccount di backup: {{backupAccount}}\nAccount corrente: {{currentAccount}}",
+  "SparkBackupInvalidFormat": "File di backup non valido. Seleziona un file di backup Spark Wallet valido.",
+  "SparkBackupUnsupportedVersion": "Questa versione del file di backup non è supportata. Aggiorna l'app o utilizza un backup diverso.",
+  "SparkBackupDecryptFailed": "Impossibile decrittografare il backup. Assicurati di aver effettuato l'accesso con l'account corretto.",
+  "SparkWalletUnableReceive": "Impossibile ricevere. Prova ad aggiungere un nuovo portafoglio.",
+  "SparkWalletUnableSend": "Impossibile inviare. Prova ad aggiungere un nuovo portafoglio."
 }

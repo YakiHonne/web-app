@@ -7,6 +7,7 @@ import "@/styles/essentials.css";
 import "@/styles/custom.css";
 import "@/styles/mobile.css";
 import "@/styles/chatAI.css";
+import "@/styles/spark-wallet.css";
 import "katex/dist/katex.css";
 import "highlight.js/styles/github.css";
 import "highlight.js/styles/github-dark.css";

@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@breeztech/breez-sdk-spark": "^0.3.4",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
@@ -16,10 +17,13 @@
     "@giphy/js-fetch-api": "^5.7.0",
     "@giphy/react-components": "^10.1.0",
     "@hugocxl/react-to-image": "^0.0.9",
+    "@noble/ciphers": "^2.0.1",
+    "@noble/hashes": "^1.8.0",
     "@noble/secp256k1": "^2.3.0",
     "@nostr-dev-kit/ndk": "^2.14.33",
     "@nostr-dev-kit/ndk-cache-dexie": "^2.6.34",
     "@reduxjs/toolkit": "^2.8.2",
+    "@scure/bip39": "^2.0.1",
     "@uiw/react-markdown-preview": "^4.2.2",
     "@uiw/react-md-editor": "^3.25.6",
     "@wavesurfer/react": "^1.0.11",
@@ -76,6 +80,7 @@
     "@eslint/eslintrc": "^3",
     "assert": "^2.1.0",
     "buffer": "^6.0.3",
+    "copy-webpack-plugin": "^13.0.1",
     "eslint": "^9",
     "process": "^0.11.10"
   }

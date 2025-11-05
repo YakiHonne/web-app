@@ -49,6 +49,15 @@ import {
   RelaysStatsReducer,
   RefreshAppSettingsReducer,
 } from "./Slides/Extras";
+import {
+  SparkConnectedReducer,
+  SparkConnectingReducer,
+  SparkBalanceReducer,
+  SparkLightningAddressReducer,
+  SparkWalletInfoReducer,
+  SparkLastSyncReducer,
+  SparkPaymentsReducer,
+} from "./Slides/SparkWallet";
 
 export const store = configureStore({
   reducer: {
@@ -93,6 +102,14 @@ export const store = configureStore({
     homeCarouselPosts: HomeCarouselPostsReducer,
     relaysStats: RelaysStatsReducer,
     isUserFollowingsLoaded: IsUserFollowingsLoadedReducer,
-    refreshAppSettings: RefreshAppSettingsReducer,  
+    refreshAppSettings: RefreshAppSettingsReducer,
+    // Spark Wallet state
+    sparkConnected: SparkConnectedReducer,
+    sparkConnecting: SparkConnectingReducer,
+    sparkBalance: SparkBalanceReducer,
+    sparkLightningAddress: SparkLightningAddressReducer,
+    sparkWalletInfo: SparkWalletInfoReducer,
+    sparkLastSync: SparkLastSyncReducer,
+    sparkPayments: SparkPaymentsReducer,
   },
 });

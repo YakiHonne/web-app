@@ -33,6 +33,8 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import { walletWarning } from "@/Helpers/Controlers";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
+import SparkWalletManager from "@/Components/Spark/SparkWalletManager";
+import sparkWalletManager from "@/Helpers/Spark/spark-wallet-manager";
 
 export default function Wallet() {
   const dispatch = useDispatch();
@@ -41,6 +43,10 @@ export default function Wallet() {
   const userBalance = useSelector((state) => state.userBalance);
   const userMetadata = useSelector((state) => state.userMetadata);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
+  const sparkBalance = useSelector((state) => state.sparkBalance);
+  const sparkConnected = useSelector((state) => state.sparkConnected);
+  const sparkPayments = useSelector((state) => state.sparkPayments);
+  const sparkLightningAddress = useSelector((state) => state.sparkLightningAddress);
 
   const { t } = useTranslation();
   const [transactions, setTransactions] = useState([]);
@@ -50,28 +56,36 @@ export default function Wallet() {
   const [ops, setOps] = useState("");
   const [wallets, setWallets] = useState(getWallets());
   const [selectedWallet, setSelectedWallet] = useState(
-    wallets.find((wallet) => wallet.active)
+    wallets.find((wallet) => wallet && wallet.active)
   );
   const [isLoading, setIsLoading] = useState(false);
   const [showAddWallet, setShowAddWallet] = useState(false);
   const [showWalletsList, setShowWalletList] = useState(false);
   const [timestamp, setTimestamp] = useState(Date.now());
+  const [showBackupPrompt, setShowBackupPrompt] = useState(false);
   const walletListRef = useRef(null);
 
-  const checkIsLinked = (addr) => {
-    if (userMetadata) {
-      if (!(userMetadata.lud16 && userMetadata.lud06)) return false;
-      if (userMetadata.lud16 && userMetadata.lud16 === addr) return true;
-      if (userMetadata.lud06) {
-        let decoded = decodeUrlOrAddress(userMetadata.lud06);
-        if (decoded && decoded === addr) return true;
-      }
-      return false;
+  const checkIsLinked = (wallet) => {
+    if (!userMetadata || !wallet) return false;
+
+    // For all wallets, check the entitle field against profile address
+    const addr = wallet.entitle;
+    if (!(userMetadata.lud16 || userMetadata.lud06)) return false;
+
+    // Check lud16 (Lightning address)
+    if (userMetadata.lud16 && userMetadata.lud16 === addr) return true;
+
+    // Check lud06 (LNURL)
+    if (userMetadata.lud06) {
+      let decoded = decodeUrlOrAddress(userMetadata.lud06);
+      if (decoded && decoded === addr) return true;
     }
+
+    return false;
   };
   const profileHasWallet = useMemo(() => {
     let hasWallet = userMetadata.lud06 || userMetadata.lud16;
-    let isWalletLinked = wallets.find((wallet) => checkIsLinked(wallet.entitle))
+    let isWalletLinked = wallets.find((wallet) => checkIsLinked(wallet))
       ? true
       : false;
     return {
@@ -94,7 +108,7 @@ export default function Wallet() {
         let tempWallets = getWallets();
 
         setWallets(tempWallets);
-        setSelectedWallet(tempWallets.find((wallet) => wallet.active));
+        setSelectedWallet(tempWallets.find((wallet) => wallet && wallet.active));
 
         let authors = [];
         sub = ndkInstance.subscribe(
@@ -121,7 +135,7 @@ export default function Wallet() {
         });
       }, 1000);
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] Failed to subscribe to zap events (handled):', err);
     }
     return () => {
       if (sub) sub.stop();
@@ -134,7 +148,14 @@ export default function Wallet() {
     if (userKeys && (userKeys?.ext || userKeys?.sec || userKeys?.bunker)) {
       let tempWallets = getWallets();
 
-      let selectedWallet_ = tempWallets.find((wallet) => wallet.active);
+      // Check if Spark wallet is connected but not in wallet list (happens after onboarding)
+      if (sparkConnected && !tempWallets.some(w => w && w.kind === 4)) {
+        sparkWalletManager.addToWalletList();
+        tempWallets = getWallets();
+        setWallets(tempWallets);
+      }
+
+      let selectedWallet_ = tempWallets.find((wallet) => wallet && wallet.active);
       if (selectedWallet_) {
         if (selectedWallet_.kind === 1) {
           getBalancWebLN();
@@ -144,6 +165,56 @@ export default function Wallet() {
         }
         if (selectedWallet_.kind === 3) {
           getNWCData(selectedWallet_);
+        }
+        if (selectedWallet_.kind === 4) {
+          // Spark wallet - check if backup exists before attempting restore
+          if (!sparkConnected) {
+            setIsLoading(true);
+
+            // First check if there's a backup to restore
+            sparkWalletManager.hasBackup()
+              .then((hasBackup) => {
+                if (!hasBackup) {
+                  setIsLoading(false);
+                  dispatch(setToast({
+                    show: true,
+                    message: t('Please set up your Spark wallet'),
+                    type: 'error'
+                  }));
+                  setShowAddWallet(true);
+                  return;
+                }
+
+                // Backup exists, restore it
+                return sparkWalletManager.restoreWallet()
+                  .then(() => {
+                    return sparkWalletManager.refreshWalletState();
+                  })
+                  .then(() => {
+                    setIsLoading(false);
+                  });
+              })
+              .catch(err => {
+                console.error('[Wallet.js] Failed to restore Spark wallet:', err);
+                setIsLoading(false);
+                dispatch(setToast({
+                  show: true,
+                  message: t('Failed to restore wallet. Please try again.'),
+                  type: 'error'
+                }));
+              });
+          } else {
+            // Refresh balance if already connected
+            setIsLoading(true);
+            sparkWalletManager.refreshWalletState()
+              .then(() => {
+                setIsLoading(false);
+              })
+              .catch(err => {
+                console.error('[Wallet.js] Failed to refresh Spark wallet:', err);
+                setIsLoading(false);
+              });
+          }
         }
       } else {
         setWallets([]);
@@ -162,11 +233,65 @@ export default function Wallet() {
       }
     };
 
+    let handleSparkSettings = () => {
+      setOps("settings");
+    };
+
     document.addEventListener("mousedown", handleOffClick);
+    window.addEventListener("spark-open-settings", handleSparkSettings);
     return () => {
       document.removeEventListener("mousedown", handleOffClick);
+      window.removeEventListener("spark-open-settings", handleSparkSettings);
     };
   }, [walletListRef]);
+
+  // Check if Spark wallet backup prompt should be shown
+  useEffect(() => {
+    if (!userKeys?.pub || !sparkConnected) return;
+
+    // Check if user has dismissed the prompt before
+    const dismissed = localStorage.getItem(`spark-backup-prompt-dismissed-${userKeys.pub}`);
+    if (dismissed) return;
+
+    // Check if user has a Spark wallet
+    const hasSparkWallet = wallets.some(w => w && w.kind === 4);
+    if (!hasSparkWallet) return;
+
+    // Check if backup file exists in storage
+    const storageKey = `spark_wallet_${userKeys.pub}`;
+    const hasBackup = localStorage.getItem(storageKey);
+
+    // Show prompt if no backup exists
+    if (!hasBackup) {
+      setShowBackupPrompt(true);
+    }
+  }, [userKeys, sparkConnected, wallets]);
+
+  const handleDismissBackupPrompt = () => {
+    if (userKeys?.pub) {
+      localStorage.setItem(`spark-backup-prompt-dismissed-${userKeys.pub}`, 'true');
+    }
+    setShowBackupPrompt(false);
+  };
+
+  const handleDownloadBackup = async () => {
+    try {
+      await sparkWalletManager.downloadBackup();
+      dispatch(setToast({
+        show: true,
+        message: t('Backup downloaded successfully'),
+        type: 'success'
+      }));
+      handleDismissBackupPrompt();
+    } catch (error) {
+      console.error('Failed to download backup:', error);
+      dispatch(setToast({
+        show: true,
+        message: error.message || t('Failed to download backup'),
+        type: 'error'
+      }));
+    }
+  };
 
   const getBalancWebLN = async () => {
     try {
@@ -178,8 +303,13 @@ export default function Wallet() {
 
       dispatch(setUserBalance(data.balance));
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] WebLN connection failed (handled):', err);
       setIsLoading(false);
+      dispatch(setUserBalance("N/A"));
+      dispatch(setToast({
+        type: 2,
+        desc: t('Failed to connect to WebLN wallet. Please check your extension.')
+      }));
     }
   };
   const getAlbyData = async (activeWallet) => {
@@ -197,8 +327,13 @@ export default function Wallet() {
       setWalletTransactions(t);
       setIsLoading(false);
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] Alby connection failed (handled):', err);
       setIsLoading(false);
+      dispatch(setUserBalance("N/A"));
+      dispatch(setToast({
+        type: 2,
+        desc: t('Failed to connect to Alby wallet. Please check your connection.')
+      }));
     }
   };
   const getBalanceAlbyAPI = async (code) => {
@@ -210,7 +345,7 @@ export default function Wallet() {
       });
       return data.data.balance;
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] Failed to get Alby balance (handled):', err);
       return 0;
     }
   };
@@ -233,7 +368,7 @@ export default function Wallet() {
 
       return data.data;
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] Failed to get Alby transactions (handled):', err);
       return 0;
     }
   };
@@ -265,16 +400,31 @@ export default function Wallet() {
       setIsLoading(false);
       nwc.close();
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] NWC connection failed (handled):', err);
       setIsLoading(false);
+      dispatch(setUserBalance("N/A"));
+
+      // Provide user-friendly error message
+      let errorMessage = t('Failed to connect to NWC wallet.');
+
+      if (err.message?.includes('relay') || err.message?.includes('wss://')) {
+        errorMessage = t('Failed to connect to wallet relay. Please check your NWC connection string.');
+      } else if (err.message?.includes('unauthorized') || err.message?.includes('permission')) {
+        errorMessage = t('Wallet connection unauthorized. Please check your NWC permissions.');
+      }
+
+      dispatch(setToast({
+        type: 2,
+        desc: errorMessage
+      }));
     }
   };
 
   const handleSelectWallet = (walletID) => {
-    let index = wallets.findIndex((wallet) => wallet.id == walletID);
+    let index = wallets.findIndex((wallet) => wallet && wallet.id == walletID);
 
     let tempWallets = Array.from(wallets);
-    tempWallets = tempWallets.map((wallet) => {
+    tempWallets = tempWallets.filter(wallet => wallet).map((wallet) => {
       let w = { ...wallet };
       w.active = false;
       return w;
@@ -295,7 +445,7 @@ export default function Wallet() {
 
   let handleAddWallet = () => {
     let tempWallets = getWallets();
-    let selectedWallet_ = tempWallets.find((wallet) => wallet.active);
+    let selectedWallet_ = tempWallets.find((wallet) => wallet && wallet.active);
     setWallets(tempWallets);
     setSelectedWallet(selectedWallet_);
     setShowAddWallet(false);
@@ -326,6 +476,43 @@ export default function Wallet() {
             {(userKeys.ext || userKeys.sec || userKeys.bunker) &&
               wallets.length > 0 && (
                 <div>
+                  {/* Spark Wallet Backup Prompt */}
+                  {showBackupPrompt && (
+                    <div className="fit-container box-pad-h box-pad-v" style={{ marginBottom: 'var(--24)' }}>
+                      <div
+                        className="fit-container box-pad-h box-pad-v sc-s"
+                        style={{
+                          backgroundColor: 'rgba(238, 119, 0, 0.1)',
+                          border: '1px solid var(--orange-main)',
+                          borderRadius: 'var(--border-r-12)'
+                        }}
+                      >
+                        <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
+                          <div className="fx-centered fx-col" style={{ gap: 'var(--8)' }}>
+                            <h4 className="orange-c">{t('Backup Your Spark Wallet')}</h4>
+                            <p className="p-centered p-medium">
+                              {t('Download an encrypted backup file to secure your wallet. You\'ll need this to recover your funds if you lose access.')}
+                            </p>
+                          </div>
+                          <div className="fx-centered" style={{ gap: 'var(--12)' }}>
+                            <button
+                              className="btn btn-orange btn-small"
+                              onClick={handleDownloadBackup}
+                            >
+                              {t('Download Backup')}
+                            </button>
+                            <button
+                              className="btn btn-gray btn-small"
+                              onClick={handleDismissBackupPrompt}
+                            >
+                              {t('Remind Me Later')}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div
                     className="fit-container box-pad-v-m fx-centered"
                     style={{ position: "relative", zIndex: 100 }}
@@ -375,8 +562,8 @@ export default function Wallet() {
                                 <p>{t("A8fEwNq")}</p>
                               </div>
                             </div>
-                            {wallets.map((wallet) => {
-                              let isLinked = checkIsLinked(wallet.entitle);
+                            {wallets.filter(wallet => wallet).map((wallet) => {
+                              let isLinked = checkIsLinked(wallet);
                               return (
                                 <div
                                   key={wallet.id}
@@ -390,19 +577,28 @@ export default function Wallet() {
                                     overflow: "visible",
                                   }}
                                 >
-                                  <div className="fx-centered">
+                                  <div className="fx-centered" style={{ flex: 1, minWidth: 0 }}>
                                     {wallet.active && (
                                       <div
                                         style={{
                                           minWidth: "8px",
+                                          width: "8px",
                                           aspectRatio: "1/1",
                                           backgroundColor: "var(--green-main)",
                                           borderRadius: "var(--border-r-50)",
+                                          flexShrink: 0,
                                         }}
                                       ></div>
                                     )}
                                     <p
                                       className={wallet.active ? "green-c" : ""}
+                                      style={{
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                        flex: 1,
+                                        minWidth: 0,
+                                      }}
                                     >
                                       {wallet.entitle}
                                     </p>
@@ -410,6 +606,7 @@ export default function Wallet() {
                                       <div
                                         className="round-icon-tooltip"
                                         data-tooltip={t("ANExIY1")}
+                                        style={{ flexShrink: 0 }}
                                       >
                                         <div className="sticker sticker-small sticker-green-pale">
                                           {t("AqlBPla")}
@@ -434,6 +631,32 @@ export default function Wallet() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Lightning Address Required Banner for Spark Wallet */}
+                  {selectedWallet && selectedWallet.kind === 4 && sparkConnected && !sparkLightningAddress && (
+                    <div className="fit-container box-pad-h box-pad-v" style={{ marginBottom: 'var(--24)' }}>
+                      <div
+                        className="fit-container box-pad-h box-pad-v sc-s-18 bg-sp fx-centered fx-col"
+                        style={{
+                          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                          border: '2px solid rgb(59, 130, 246)',
+                        }}
+                      >
+                        <h4 style={{ color: 'rgb(59, 130, 246)' }}>{t('Set Up Your Lightning Address')}</h4>
+                        <p className="gray-c p-centered">
+                          {t('To link this wallet to your profile and receive payments, you need to register a Lightning address first.')}
+                        </p>
+                        <button
+                          className="btn btn-orange"
+                          onClick={() => setOps('settings')}
+                          style={{ marginTop: 'var(--16)' }}
+                        >
+                          {t('Register Lightning Address')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <div
                     className="fx-scattered box-pad-h fit-container fx-col fx-wrap"
                     style={{
@@ -441,15 +664,15 @@ export default function Wallet() {
                       padding: "1rem",
                     }}
                   >
-                    {!isLoading && (
+                    {!isLoading && !(selectedWallet?.kind === 4 && !sparkConnected) && (
                       <div className="fx-centered fx-col box-pad-v">
                         <h5>{t("AbcY4ef")}</h5>
                         <div className="fx-centered">
-                          <h2 className="orange-c">{userBalance}</h2>
+                          <h2 className="orange-c">{selectedWallet && selectedWallet.kind === 4 ? (sparkBalance !== null ? sparkBalance : 'N/A') : userBalance}</h2>
                           <p className="gray-c">Sats</p>
                         </div>
-                        <SatsToUSD sats={userBalance} />
-                        {selectedWallet.kind !== 1 &&
+                        <SatsToUSD sats={selectedWallet && selectedWallet.kind === 4 ? sparkBalance : userBalance} />
+                        {selectedWallet && selectedWallet.kind !== 1 &&
                           selectedWallet.entitle.includes("@") && (
                             <div
                               className="btn btn-gray btn-small fx-centered"
@@ -468,18 +691,18 @@ export default function Wallet() {
                           )}
                       </div>
                     )}
-                    {!isLoading &&
+                    {!isLoading && !(selectedWallet?.kind === 4 && !sparkConnected) &&
                       !(
                         profileHasWallet.hasWallet &&
                         profileHasWallet.isWalletLinked
                       ) && (
                         <div className="box-pad-h box-pad-v fit-container sc-s-18 fx-centered fx-centered fx-col gray-c p-centered">
-                          {!profileHasWallet.hasWallet && <>{t("AAPZe91")}</>}
+                          {!profileHasWallet.hasWallet && <>{t("AAPZe91")}. </>}
                           {profileHasWallet.hasWallet &&
                             !profileHasWallet.isWalletLinked && (
-                              <>{t("AHKiPjO")}</>
-                            )}{" "}
-                          {t("AHTCsEO")}
+                              <>{t("AHKiPjO")}. </>
+                            )}
+                          {t("AHTCsEO").charAt(0).toUpperCase() + t("AHTCsEO").slice(1)}.
                         </div>
                       )}
                     {isLoading && (
@@ -521,7 +744,7 @@ export default function Wallet() {
                       </button>
                     </div>
                   </div>
-                  {ops === "send" && (
+                  {ops === "send" && selectedWallet && selectedWallet.kind !== 4 && (
                     <SendPayment
                       exit={() => setOps("")}
                       wallets={wallets}
@@ -530,13 +753,18 @@ export default function Wallet() {
                       refreshTransactions={() => setTimestamp(Date.now())}
                     />
                   )}
-                  {ops === "receive" && (
+                  {ops === "receive" && selectedWallet && selectedWallet.kind !== 4 && (
                     <ReceivePayment
                       exit={() => setOps("")}
                       wallets={wallets}
                       selectedWallet={selectedWallet}
                       setWallets={setWallets}
                     />
+                  )}
+                  {selectedWallet && selectedWallet.kind === 4 && (
+                    <div className="fit-container box-pad-v">
+                      <SparkWalletManager inlineMode={true} externalOps={ops} setExternalOps={setOps} />
+                    </div>
                   )}
                   {isLoading && (
                     <div
@@ -1070,13 +1298,13 @@ const SendPayment = ({
       reInitParams();
       setIsLoading(false);
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] WebLN payment failed (handled):', err);
       setIsLoading(false);
-      if (err.includes("User rejected")) return;
+      if (err.message?.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,
-          desc: t("Acr4Slu"),
+          desc: t("SparkWalletUnableSend"),
         })
       );
     }
@@ -1098,13 +1326,13 @@ const SendPayment = ({
       setIsLoading(false);
       nwc.close();
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] NWC payment failed (handled):', err);
       setIsLoading(false);
-      if (err.includes("User rejected")) return;
+      if (err.message?.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,
-          desc: t("Acr4Slu"),
+          desc: t("SparkWalletUnableSend"),
         })
       );
     }
@@ -1135,7 +1363,7 @@ const SendPayment = ({
       );
       return data.data;
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] Alby payment failed (handled):', err);
       setIsLoading(false);
       dispatch(
         setToast({
@@ -1217,7 +1445,7 @@ const SendPayment = ({
           sendWithNWC(res.data.pr);
         }
       } catch (err) {
-        console.log(err);
+        console.warn('[Wallet.js] Failed to handle zap payment (handled):', err);
         dispatch(
           setToast({
             type: 2,
@@ -1378,13 +1606,13 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
       setIsLoading(false);
       setInvoiceRequest(invoice.paymentRequest);
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] WebLN invoice generation failed (handled):', err);
       setIsLoading(false);
-      if (err.includes("User rejected")) return;
+      if (err.message?.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,
-          desc: t("Acr4Slu"),
+          desc: t("SparkWalletUnableReceive"),
         })
       );
     }
@@ -1402,13 +1630,13 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
       setInvoiceRequest(invoice.paymentRequest);
       nwc.close();
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] NWC invoice generation failed (handled):', err);
       setIsLoading(false);
-      if (err.includes("User rejected")) return;
+      if (err.message?.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,
-          desc: t("Acr4Slu"),
+          desc: t("SparkWalletUnableReceive"),
         })
       );
     }
@@ -1430,8 +1658,12 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
       setInvoiceRequest(data.data.payment_request);
       return data.data;
     } catch (err) {
-      console.log(err);
+      console.warn('[Wallet.js] Alby invoice generation failed (handled):', err);
       setIsLoading(false);
+      dispatch(setToast({
+        type: 2,
+        desc: t("SparkWalletUnableReceive"),
+      }));
       return 0;
     }
   };
@@ -1560,7 +1792,7 @@ const checkAlbyToken = async (wallets, activeWallet) => {
       created_at: Math.floor(Date.now() / 1000),
     };
     let tempWallets = Array.from(wallets);
-    let index = wallets.findIndex((item) => item.id === activeWallet.id);
+    let index = wallets.findIndex((item) => item && item.id === activeWallet.id);
     tempWallets[index] = tempWallet;
     updateWallets(tempWallets);
     return {
@@ -1568,7 +1800,7 @@ const checkAlbyToken = async (wallets, activeWallet) => {
       activeWallet: tempWallet,
     };
   } catch (err) {
-    console.log(err);
+    console.warn('[Wallet.js] Failed to refresh Alby token (handled):', err);
     return {
       wallets,
       activeWallet,
