@@ -1,4 +1,9 @@
 import withPWAInit from "next-pwa";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // import runtimeCaching from "next-pwa/cache.js";
 
@@ -20,7 +25,7 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   transpilePackages: ["@uiw/react-md-editor", "@uiw/react-markdown-preview"],
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -38,6 +43,14 @@ const nextConfig = {
         test: /\.wasm$/,
         type: "webassembly/async",
       });
+
+      // Replace 'wbg' imports with stub (WASM internal bindings)
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /^wbg$/,
+          path.resolve(__dirname, 'src/Helpers/Spark/wbg-stub.js')
+        )
+      );
     } else {
       // Exclude Breez SDK from server-side builds completely
       config.externals = config.externals || [];
