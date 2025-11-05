@@ -6,7 +6,8 @@
     "dev": "next dev --turbo -p 3400",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "mkdir -p public/wasm && cp node_modules/@breeztech/breez-sdk-spark/web/breez_sdk_spark_wasm_bg.wasm public/wasm/"
   },
   "dependencies": {
     "@breeztech/breez-sdk-spark": "^0.3.4",
