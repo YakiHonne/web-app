@@ -38,18 +38,27 @@ const nextConfig = {
         asyncWebAssembly: true,
       };
 
-      // Handle WASM files
+      // Ignore WASM files from Breez SDK - let them load at runtime
+      config.module.rules.push({
+        test: /breez_sdk_spark_wasm_bg\.wasm$/,
+        type: "asset/resource",
+        generator: {
+          filename: "static/wasm/[name].[hash][ext]",
+        },
+      });
+
+      // Handle other WASM files normally
       config.module.rules.push({
         test: /\.wasm$/,
+        exclude: /breez_sdk_spark_wasm_bg\.wasm$/,
         type: "webassembly/async",
       });
 
-      // Replace 'wbg' imports with stub (WASM internal bindings)
+      // Ignore wbg imports - they're internal to the WASM module
       config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /^wbg$/,
-          path.resolve(__dirname, 'src/Helpers/Spark/wbg-stub.js')
-        )
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^wbg$/,
+        })
       );
     } else {
       // Exclude Breez SDK from server-side builds completely

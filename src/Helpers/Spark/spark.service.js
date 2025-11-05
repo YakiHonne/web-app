@@ -52,10 +52,14 @@ class SparkService {
       console.log('[SparkService] Initializing Breez SDK WebAssembly...')
       const { default: initBreezSDK } = await this.loadSDK()
 
-      // Initialize WASM with explicit path to avoid import.meta.url issues in bundlers
       console.log('[SparkService] Calling initBreezSDK()...')
-      // Pass the public WASM file path to avoid import.meta.url resolution issues
-      await initBreezSDK('/wasm/breez_sdk_spark_wasm_bg.wasm')
+
+      // Import the WASM file to get webpack's bundled path
+      const wasmModule = await import('@breeztech/breez-sdk-spark/web/breez_sdk_spark_wasm_bg.wasm')
+      console.log('[SparkService] WASM module path:', wasmModule.default)
+
+      // Pass the webpack-resolved WASM path
+      await initBreezSDK(wasmModule.default)
 
       this.initialized = true
       console.log('[SparkService] WebAssembly initialized successfully')
