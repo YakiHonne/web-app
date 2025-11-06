@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import katex from "katex";
 import { getComponent } from "@/Helpers/ClientHelpers";
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), {
