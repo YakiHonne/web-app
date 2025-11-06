@@ -82,7 +82,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
         dispatch(setUserKeys(onboardingUserKeys));
       }
 
-      setLoadingMessage(t('Initializing Lightning Network...'));
+      setLoadingMessage(t('Restoring your wallet...'));
       await new Promise(resolve => setTimeout(resolve, 100)); // Let UI update
 
       await sparkWalletManager.restoreFromFile(backupFile);
@@ -156,7 +156,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
         dispatch(setUserKeys(onboardingUserKeys));
       }
 
-      setLoadingMessage(t('Initializing Lightning Network...'));
+      setLoadingMessage(t('Restoring your wallet...'));
       await new Promise(resolve => setTimeout(resolve, 100)); // Let UI update
 
       // Don't sync to Nostr during restore to avoid relay auth errors
