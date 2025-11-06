@@ -18,6 +18,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
   const sparkLightningAddress = useSelector((state) => state.sparkLightningAddress);
   const [activeTab, setActiveTab] = useState('create');
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
   const [showMnemonic, setShowMnemonic] = useState(false);
   const [generatedMnemonic, setGeneratedMnemonic] = useState('');
   const [seedPhrase, setSeedPhrase] = useState('');
@@ -73,6 +74,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
 
     try {
       setLoading(true);
+      setLoadingMessage(t('Reading backup file...'));
 
       // If onboarding with userKeys, temporarily set them in Redux so wallet manager can access
       if (isOnboarding && onboardingUserKeys && !reduxUserKeys) {
@@ -80,7 +82,12 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
         dispatch(setUserKeys(onboardingUserKeys));
       }
 
+      setLoadingMessage(t('Initializing Lightning Network...'));
+      await new Promise(resolve => setTimeout(resolve, 100)); // Let UI update
+
       await sparkWalletManager.restoreFromFile(backupFile);
+
+      setLoadingMessage(t('Syncing wallet...'));
       dispatch(setToast({
         show: true,
         message: t('Wallet restored from file'),
@@ -125,6 +132,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
       }));
     } finally {
       setLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -140,6 +148,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
 
     try {
       setLoading(true);
+      setLoadingMessage(t('Validating seed phrase...'));
 
       // If onboarding with userKeys, temporarily set them in Redux so wallet manager can access
       if (isOnboarding && onboardingUserKeys && !reduxUserKeys) {
@@ -147,9 +156,14 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
         dispatch(setUserKeys(onboardingUserKeys));
       }
 
+      setLoadingMessage(t('Initializing Lightning Network...'));
+      await new Promise(resolve => setTimeout(resolve, 100)); // Let UI update
+
       // Don't sync to Nostr during restore to avoid relay auth errors
       // Local backup is always saved, but Nostr sync can be done later from wallet settings
       await sparkWalletManager.restoreFromSeed(seedPhrase, false);
+
+      setLoadingMessage(t('Syncing wallet...'));
       dispatch(setToast({
         show: true,
         message: t('Wallet restored successfully'),
@@ -165,6 +179,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
       }));
     } finally {
       setLoading(false);
+      setLoadingMessage('');
     }
   };
 
@@ -260,8 +275,46 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
   ];
 
   return (
-    <div className="fx-centered fit-container fx-col box-pad-h box-pad-v">
-      <div className="fx-centered fx-col" style={{ maxWidth: '600px', width: '100%' }}>
+    <>
+      {/* Full-screen loading overlay */}
+      {loading && loadingMessage && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            gap: 'var(--24)'
+          }}
+        >
+          <div className="fx-centered fx-col" style={{ gap: 'var(--16)' }}>
+            <div style={{
+              width: '80px',
+              height: '80px',
+              border: '4px solid var(--c1-side)',
+              borderTop: '4px solid var(--orange-main)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite'
+            }} />
+            <h3 style={{ color: 'var(--text-main)', textAlign: 'center' }}>
+              {loadingMessage}
+            </h3>
+            <p className="gray-c p-centered" style={{ maxWidth: '400px' }}>
+              {t('This may take up to a minute. Please wait...')}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <div className="fx-centered fit-container fx-col box-pad-h box-pad-v">
+        <div className="fx-centered fx-col" style={{ maxWidth: '600px', width: '100%' }}>
         <h4 style={{ marginBottom: showMnemonic ? 'var(--24)' : 'var(--16)' }}>Spark Wallet</h4>
 
         {/* Only show description and tabs when not showing mnemonic */}
@@ -542,5 +595,6 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
         )}
       </div>
     </div>
+    </>
   );
 }
