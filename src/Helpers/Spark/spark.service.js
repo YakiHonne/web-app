@@ -51,12 +51,23 @@ class SparkService {
     try {
       console.log('[SparkService] Initializing Breez SDK WebAssembly...')
       const { default: initBreezSDK } = await this.loadSDK()
+
+      console.log('[SparkService] Calling initBreezSDK()...')
+
+      // Let the SDK handle WASM loading itself
+      // The SDK will use import.meta.url which works in both dev and production
       await initBreezSDK()
+
       this.initialized = true
       console.log('[SparkService] WebAssembly initialized successfully')
     } catch (error) {
       console.error('[SparkService] Failed to initialize WebAssembly:', error)
-      throw new Error('Failed to initialize Breez Spark SDK')
+      console.error('[SparkService] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
+      throw new Error(`Failed to initialize Breez Spark SDK: ${error.message}`)
     }
   }
 

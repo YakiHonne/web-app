@@ -1,5 +1,4 @@
 import withPWAInit from "next-pwa";
-import CopyPlugin from "copy-webpack-plugin";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -33,38 +32,47 @@ const nextConfig = {
         fs: false,
       };
 
-      // Configure WASM experiments
+      // Enable WASM support
       config.experiments = {
         ...config.experiments,
         asyncWebAssembly: true,
-        syncWebAssembly: true,
-        layers: true,
       };
 
-      // Add WASM rule
+      // Ignore WASM files from Breez SDK - let them load at runtime
+      config.module.rules.push({
+        test: /breez_sdk_spark_wasm_bg\.wasm$/,
+        type: "asset/resource",
+        generator: {
+          filename: "static/wasm/[name].[hash][ext]",
+        },
+      });
+
+      // Handle other WASM files normally
       config.module.rules.push({
         test: /\.wasm$/,
+        exclude: /breez_sdk_spark_wasm_bg\.wasm$/,
         type: "webassembly/async",
       });
 
-      // Add NormalModuleReplacementPlugin to handle wbg imports
+      // Ignore wbg imports - they're internal to the WASM module
       config.plugins.push(
-        new webpack.NormalModuleReplacementPlugin(
-          /^wbg$/,
-          (resource) => {
-            // Ignore the wbg import - it's internal to WASM
-            resource.request = path.resolve(__dirname, 'src/Helpers/Spark/wbg-shim.js');
-          }
-        )
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^wbg$/,
+        })
       );
     } else {
       // Exclude Breez SDK from server-side builds completely
       config.externals = config.externals || [];
       if (Array.isArray(config.externals)) {
         config.externals.push('@breeztech/breez-sdk-spark');
+        config.externals.push('@breeztech/breez-sdk-spark/web');
       } else {
         const existingExternals = config.externals;
-        config.externals = [existingExternals, '@breeztech/breez-sdk-spark'];
+        config.externals = [
+          existingExternals,
+          '@breeztech/breez-sdk-spark',
+          '@breeztech/breez-sdk-spark/web'
+        ];
       }
     }
 

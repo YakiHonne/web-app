@@ -424,6 +424,7 @@ export function compactContent(note, pubkey) {
   let compactedContent = [];
   let index = 0;
   for (let word of content) {
+    if (!word || typeof word !== 'string') continue;
     let replacedNostrPrefix = word
       .trim()
       .replaceAll("nostr:", "")
