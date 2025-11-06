@@ -1242,6 +1242,40 @@ const filterContent = (selectedFilter, list) => {
   });
 };
 
+/**
+ * Extract amount and description from a bolt11 invoice
+ * @param {string} bolt11 - Lightning invoice string
+ * @returns {Object} Object containing amount (in sats) and description (memo)
+ */
+const getInvoiceDetails = (bolt11) => {
+  try {
+    const decoded = decode(bolt11);
+
+    // Extract amount
+    const amountSection = decoded.sections.find((_) => _.name === "amount");
+    const amount = amountSection
+      ? Math.floor(parseInt(amountSection.value) / 1000)
+      : null;
+
+    // Extract description/memo
+    const descriptionSection = decoded.sections.find(
+      (_) => _.name === "description"
+    );
+    const description = descriptionSection?.value || null;
+
+    return {
+      amount,
+      description,
+    };
+  } catch (err) {
+    console.error("Failed to decode invoice:", err);
+    return {
+      amount: null,
+      description: null,
+    };
+  }
+};
+
 export {
   getBech32,
   shortenKey,
@@ -1287,4 +1321,5 @@ export {
   getWOTScoreForPubkeyLegacy,
   getEmptyRelaysData,
   getEmptyRelaysStats,
+  getInvoiceDetails,
 };
