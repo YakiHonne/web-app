@@ -307,7 +307,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
               {loadingMessage}
             </h3>
             <p className="gray-c p-centered" style={{ maxWidth: '400px' }}>
-              {t('This may take up to a minute. Please wait...')}
+              {t('This may take up to a minute. Please wait.')}
             </p>
           </div>
         </div>
