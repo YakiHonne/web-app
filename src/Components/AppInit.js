@@ -262,7 +262,13 @@ export default function AppInit() {
       JSON.stringify(previousMutedList.current) !== JSON.stringify(mutedlist)
     ) {
       previousMutedList.current = mutedlist;
-      dispatch(setUserMutedList(mutedlist.mutedlist));
+      dispatch(
+        setUserMutedList({
+          userMutedList: mutedlist.mutedlist,
+          allTags: mutedlist.allTags || [],
+        })
+      );
+      saveUsers(mutedlist.mutedlist)
       if (mutedlist.mutedlist) {
         for (let p of mutedlist.mutedlist) ndkInstance.mutedIds.set([p], ["p"]);
       }
@@ -884,7 +890,7 @@ export default function AppInit() {
           undefined,
           undefined,
           undefined,
-          true,
+          true
         );
         networkData.push(d);
       }
@@ -952,7 +958,7 @@ export default function AppInit() {
         undefined,
         undefined,
         undefined,
-        true,
+        true
       );
       if (backupFollowings.data.length === 0) return;
       let followinglist = backupFollowings.data[0].tags
@@ -978,7 +984,7 @@ export default function AppInit() {
           undefined,
           undefined,
           undefined,
-          true,
+          true
         );
         networkData.push(d);
       }

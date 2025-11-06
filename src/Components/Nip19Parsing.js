@@ -22,6 +22,7 @@ import WidgetCardV2 from "@/Components/WidgetCardV2";
 import UserProfilePic from "./UserProfilePic";
 import { copyText } from "@/Helpers/Helpers";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
+import { getSubData } from "@/Helpers/Controlers";
 
 function Nip19Parsing({ addr, minimal = false }) {
   const [event, setEvent] = useState(false);

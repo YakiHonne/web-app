@@ -240,9 +240,11 @@ export default function Dashboard() {
             { kinds: [30024], limit: 5, authors: [userKeys.pub] },
           ]),
         ]);
-        userProfile =  userProfile ? JSON.parse(
-          userProfile.find((event) => event.kind === 10000105).content
-        ) : {time_joined: Math.floor(Date.now() / 1000)};
+        userProfile = userProfile
+          ? JSON.parse(
+              userProfile.find((event) => event.kind === 10000105).content
+            )
+          : { time_joined: Math.floor(Date.now() / 1000) };
 
         let zaps_sent = sats
           ? sats.data.stats[userKeys.pub].zaps_sent
@@ -260,7 +262,9 @@ export default function Dashboard() {
             ...userProfile,
             zaps_sent,
           },
-          popularNotes: popularNotes ? sortEvents(popularNotes.filter((_) => _.kind === 1)) : [],
+          popularNotes: popularNotes
+            ? sortEvents(popularNotes.filter((_) => _.kind === 1))
+            : [],
           drafts: sortEvents(drafts),
           latestPublished: sortEvents(latestPublished),
           localDraft,
@@ -314,80 +318,69 @@ export default function Dashboard() {
                 selectedTab={selectedTab}
                 setSelectedTab={setSelectedTab}
               />
-              {selectedTab === 0 && isLoading && (
-                <div
-                  className="fit-container fx-centered"
-                  style={{ height: "100vh" }}
-                >
-                  <div className="fx-centered">
-                    <LoadingLogo />
-                  </div>
-                </div>
-              )}
-              {selectedTab === 0 && userPreview && !isLoading && (
-                <HomeTab
-                  data={userPreview}
-                  setPostToNote={setPostToNote}
-                  setSelectedTab={setSelectedTab}
-                  handleUpdate={handleUpdate}
-                />
-              )}
-              {selectedTab === 1 && (
-                <Content
-                  filter={"notes"}
-                  localDraft={userPreview.localDraft}
-                  init={postToNote || false}
-                  setPostToNote={setPostToNote}
-                />
-              )}
-              {selectedTab === 2 && (
-                <Content
-                  filter={query?.filter || "articles"}
-                  localDraft={userPreview.localDraft}
-                  init={postToNote || false}
-                  setPostToNote={setPostToNote}
-                />
-              )}
-              {selectedTab === 3 && (
-                <Content
-                  filter={"curations"}
-                  localDraft={userPreview.localDraft}
-                  init={postToNote || false}
-                  setPostToNote={setPostToNote}
-                />
-              )}
-              {selectedTab === 4 && (
-                <Content
-                  filter={"videos"}
-                  localDraft={userPreview.localDraft}
-                  init={postToNote || false}
-                  setPostToNote={setPostToNote}
-                />
-              )}
-              {selectedTab === 5 && (
-                <Widgets
-                  setPostToNote={setPostToNote}
-                  localDraft={userPreview.localDraft}
-                />
-              )}
-              {selectedTab === 6 && <Bookmarks />}
-              {selectedTab === 7 && <Interests />}
-              {/* <div style={{ padding: "3rem" }}></div> */}
-            </div>
-            {/* <div
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                    }}
-                    className="fit-container fx-centered box-pad-v"
+              <div className="fit-container">
+                {selectedTab === 0 && isLoading && (
+                  <div
+                    className="fit-container fx-centered"
+                    style={{ height: "100vh" }}
                   >
-                    <SelectTabs
-                      selectedTab={selectedTab}
-                      setSelectedTab={setSelectedTab}
-                      tabs={tabs}
-                    />
-                  </div> */}
+                    <div className="fx-centered">
+                      <LoadingLogo />
+                    </div>
+                  </div>
+                )}
+
+                {selectedTab === 0 && userPreview && !isLoading && (
+                  <HomeTab
+                    data={userPreview}
+                    setPostToNote={setPostToNote}
+                    setSelectedTab={setSelectedTab}
+                    handleUpdate={handleUpdate}
+                  />
+                )}
+                {selectedTab === 1 && (
+                  <Content
+                    filter={"notes"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 2 && (
+                  <Content
+                    filter={query?.filter || "articles"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 3 && (
+                  <Content
+                    filter={"curations"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 4 && (
+                  <Content
+                    filter={"videos"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 5 && (
+                  <Widgets
+                    setPostToNote={setPostToNote}
+                    localDraft={userPreview.localDraft}
+                  />
+                )}
+                {selectedTab === 6 && <Bookmarks />}
+                {selectedTab === 7 && <Interests />}
+                <div style={{ marginBottom: "100px" }}></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -2211,20 +2204,22 @@ const BookmarkCard = ({ event, showDetails, deleteEvent, editEvent }) => {
         <OptionsDropdown
           options={[
             <div
-              className="fit-container"
+              className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
               onClick={(e) => {
                 e.stopPropagation();
                 editEvent(event);
               }}
+              style={{ width: "100px" }}
             >
               <p>{t("AsXohpb")}</p>
             </div>,
             <div
-              className="fit-container"
+              className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
               onClick={(e) => {
                 e.stopPropagation();
                 deleteEvent(event);
               }}
+              style={{ width: "100px" }}
             >
               <p className="red-c">{t("Almq94P")}</p>
             </div>,

@@ -389,6 +389,7 @@ hr:last-child {
     background: #ff9c081b;
     color: var(--orange-main)
 }
+
 .sticker-blue-side {
     background: #79c0ff1b;
     color: var(--blue-main)
@@ -629,6 +630,10 @@ hr:last-child {
 .btn-gst-red:hover {
     background-color: var(--red-main);
     color: white;
+}
+
+.btn-gst-red:hover div {
+    filter: brightness(0) invert();
 }
 
 .btn-disabled {

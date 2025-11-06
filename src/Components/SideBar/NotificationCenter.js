@@ -14,6 +14,7 @@ import { getWOTScoreForPubkeyLegacy, removeDuplicants } from "@/Helpers/Encrypti
 import { setToast } from "@/Store/Slides/Publishers";
 import { localStorage_ } from "@/Helpers/utils";
 import { SidebarNavItem } from "./SidebarNavItem";
+import { isNoteMuted } from "@/Helpers/Helpers";
 
 export default function NotificationCenter({
   icon = false,
@@ -63,7 +64,11 @@ export default function NotificationCenter({
             notifications,
             score
           ).status;
-          if (!(userMutedList || []).includes(event.pubkey) && scoreStatus) {
+          if (
+            !(userMutedList || []).includes(event.pubkey) &&
+            !isNoteMuted(event, userMutedList) &&
+            scoreStatus
+          ) {
             let checkForLabel = event.tags.find((tag) => tag[0] === "l");
             let isUncensored = checkForLabel
               ? ["UNCENSORED NOTE RATING", "UNCENSORED NOTE"].includes(

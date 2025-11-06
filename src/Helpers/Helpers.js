@@ -22,6 +22,7 @@ import { localStorage_ } from "./utils";
 import { supportedLanguageKeys } from "@/Content/SupportedLanguages";
 import {
   getMediaUploader,
+  getParsedNote,
   getSelectedServer,
   isVid,
   nEventEncode,
@@ -555,6 +556,17 @@ const getContentTranslationConfig = () => {
   } catch (err) {
     return defaultService;
   }
+};
+
+const isNoteMuted = (event, userMutedList) => {
+  if (event.kind !== 1) return false;
+  let parsedNote = getParsedNote(event, undefined, false);
+  const isMutedId = userMutedList.includes(parsedNote.id);
+  const isMutedComment = userMutedList.includes(parsedNote?.isComment);
+  const isMutedRoot = userMutedList.includes(
+    parsedNote.rootData ? parsedNote.rootData[1] : false
+  );
+  return isMutedId || isMutedComment || isMutedRoot;
 };
 
 const updateContentTranslationConfig = (
@@ -1262,4 +1274,5 @@ export {
   addWidgetPathToUrl,
   getAnswerFromAIRemoteAPI,
   trimRelay,
+  isNoteMuted
 };

@@ -32,7 +32,7 @@ export default function Search() {
   const urlKeyword = getKeyword();
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const userKeys = useSelector((state) => state.userKeys);
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const userInterestList = useSelector((state) => state.userInterestList);
   const userFollowings = useSelector((state) => state.userFollowings);
   const userFollowingsMetadata = useMemo(() => {
@@ -371,27 +371,26 @@ export default function Search() {
                 <div className="fx-scattered fit-container box-pad-v-s box-pad-h-m">
                   <h3>#{searchKeyword.replaceAll("#", "")}</h3>
                   {userKeys && (
-                    <button
-                      className={`btn ${
-                        followed ? "btn-normal" : "btn-gray"
-                      } fx-centered`}
-                      onClick={saveInterestList}
-                    >
-                      {!followed && (
-                        <>
-                          {t("APkD8MP")} <div className="plus-sign"></div>
-                        </>
-                      )}
-                      {followed && (
-                        <>
-                          {t("AiKpDYn")}
-                          <div
-                            className="check-24"
-                            style={{ filter: "brightness(0) invert()" }}
-                          ></div>
-                        </>
-                      )}
-                    </button>
+                    <div className="round-icon-tooltip" data-tooltip={followed ? t("AydCXSh") : t("AdT5mza")}>
+                      <button
+                        className={`btn btn-small ${
+                          followed ? "btn-red" : "btn-normal"
+                        } fx-centered`}
+                        onClick={saveInterestList}
+                      >
+                        {!followed && (
+                          <>
+                            {t("ARWeWgJ")} <div className="plus-sign"></div>
+                          </>
+                        )}
+                        {followed && (
+                          <>
+                            {t("AzkTxuy")}
+                            <span className="p-big">-</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   )}
                 </div>
               )}

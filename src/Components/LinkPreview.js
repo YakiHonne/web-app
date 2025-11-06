@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getLinkPreview } from "@/Helpers/Helpers";
+import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 
 export default function LinkPreview({ url, minimal }) {
   const { t } = useTranslation();
+  const { linkPreview } = useCustomizationSettings();
   const [metadata, setMetadata] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -15,9 +17,13 @@ export default function LinkPreview({ url, minimal }) {
       }
       setIsLoading(false);
     };
-    if (!minimal) getMetadata();
-    if (minimal) setIsLoading();
-  }, []);
+    if (!minimal && linkPreview) getMetadata();
+    if (minimal) setIsLoading(false);
+    if (!linkPreview) {
+      setIsLoading(false);
+      setMetadata(false);
+    }
+  }, [linkPreview]);
 
   if (isLoading)
     return (
@@ -67,16 +73,17 @@ export default function LinkPreview({ url, minimal }) {
         style={{ gap: "4px" }}
       >
         <div className="fx-centered" style={{ gap: "6px" }}>
-          {metadata.favicon && <div
-            style={{
-              width: "16px",
-              height: "16px",
-              borderRadius: "4px",
-              backgroundImage: `url(${metadata.favicon})`,
-            
-            }}
-            className="cover-bg bg-img"
-          ></div>}
+          {metadata.favicon && (
+            <div
+              style={{
+                width: "16px",
+                height: "16px",
+                borderRadius: "4px",
+                backgroundImage: `url(${metadata.favicon})`,
+              }}
+              className="cover-bg bg-img"
+            ></div>
+          )}
           <p className="gray-c">{metadata.domain}</p>
         </div>
         <p className="p-two-lines">{metadata.title || "Untitled"}</p>

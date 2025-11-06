@@ -89,12 +89,15 @@ export const getInterestsList = async (pubkey) => {
   if (db) {
     try {
       let interests = await db.table("interests").get(pubkey);
-      return {
-        ...interests,
-        interestsList: interests?.interestsList?.map((interest) =>
-          interest.replaceAll("#", "")
-        ) || [],
-      } || [];
+      return (
+        {
+          ...interests,
+          interestsList:
+            interests?.interestsList?.map((interest) =>
+              interest.replaceAll("#", "")
+            ) || [],
+        } || []
+      );
     } catch (err) {
       console.log(err);
       return [];
@@ -486,12 +489,20 @@ export const savefollowingsInboxRelays = async (followingsRelays) => {
 export const saveMutedlist = async (event, pubkey, lastTimestamp) => {
   if (db) {
     if (!event && lastTimestamp) return;
-    let eventToStore = { last_timestamp: undefined, mutedlist: [] };
+    let eventToStore = {
+      last_timestamp: undefined,
+      mutedlist: [],
+      allTags: [],
+    };
     if (event) {
       let mutedlist = event.tags
-        .filter((tag) => tag[0] === "p")
+        .filter((tag) => ["p", "e"].includes(tag[0]))
         .map((tag) => tag[1]);
-      eventToStore = { last_timestamp: event.created_at, mutedlist };
+      eventToStore = {
+        last_timestamp: event.created_at,
+        mutedlist,
+        allTags: event.tags.filter((tag) => tag.length > 1),
+      };
     }
 
     try {

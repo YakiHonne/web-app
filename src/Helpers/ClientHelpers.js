@@ -41,17 +41,16 @@ const nostrSchemaRegex =
 
 const doesContainNostrSchema = (url) => {
   try {
-
     const url_ = new URL(url);
     const domain = url_.hostname.replace(/^www\./, "");
     const isWhitelisted = nostrClients.some((allowed) =>
       domain.endsWith(allowed)
-  );
-  if (!isWhitelisted) return false;
-  return nostrSchemaRegex.test(url);
-} catch {
-  return false;
-}
+    );
+    if (!isWhitelisted) return false;
+    return nostrSchemaRegex.test(url);
+  } catch {
+    return false;
+  }
 };
 
 export function getNoteTree(
@@ -371,7 +370,11 @@ export function getComponent(children) {
   return <div className="fit-container">{mergeConsecutivePElements(res)}</div>;
 }
 
-export function getParsedNote(event, isCollapsedNote = false) {
+export function getParsedNote(
+  event,
+  isCollapsedNote = false,
+  parseContent = true
+) {
   try {
     if (!event) return;
     let isNoteLong = event.content.split(" ").length > 150;
@@ -407,13 +410,15 @@ export function getParsedNote(event, isCollapsedNote = false) {
     let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
     let isProtected = event.tags.find((tag) => tag[0] === "-");
     if (event.kind === 1) {
-      let note_tree = getNoteTree(
-        event.content,
-        undefined,
-        isCollapsedNote_,
-        undefined,
-        event.pubkey
-      );
+      let note_tree = parseContent
+        ? getNoteTree(
+            event.content,
+            undefined,
+            isCollapsedNote_,
+            undefined,
+            event.pubkey
+          )
+        : event.content;
 
       return {
         ...rawEvent,
@@ -605,6 +610,8 @@ const checkForNewAddedSettings = (prevSettings) => {
       prevSettings.blurNonFollowedMedia !== undefined
         ? prevSettings.blurNonFollowedMedia
         : true,
+    linkPreview:
+      prevSettings.linkPreview !== undefined ? prevSettings.linkPreview : true,
     reactionsSettings:
       prevSettings.reactionsSettings !== undefined
         ? prevSettings.reactionsSettings
@@ -658,6 +665,7 @@ export function getDefaultSettings(pubkey) {
     repliesView: "thread",
     oneTapReaction: false,
     blurNonFollowedMedia: true,
+    linkPreview: true,
     reactionsSettings: [
       { reaction: "likes", status: true },
       { reaction: "replies", status: true },

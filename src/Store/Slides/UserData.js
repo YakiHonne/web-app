@@ -93,7 +93,7 @@ const isUserFollowingsLoadedSlice = createSlice({
 });
 const userMutedListSlice = createSlice({
   name: "userMutedList",
-  initialState: [],
+  initialState: { userMutedList: [], allTags: [] },
   reducers: {
     setUserMutedList(state, action) {
       return action.payload;

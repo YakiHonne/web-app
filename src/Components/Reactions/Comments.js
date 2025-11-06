@@ -175,7 +175,7 @@ export default function Comments({
   useEffect(() => {
     const handleOffClick = (e) => {
       e.stopPropagation();
-      if (ref.current && !ref.current.contains(e.target) && !showWarningBox) {
+      if (e.target.classList.contains("comment-24") && !showWarningBox) {
         if (!comment) {
           exit();
         } else {

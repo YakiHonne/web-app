@@ -169,7 +169,7 @@ export default function Publishing() {
         });
       let ak = getActionKey();
       let pTag =
-        allRelays.length > 1
+        allRelays?.length > 1
           ? eventInitEx
             ? getOutboxPubkey(eventInitEx.kind, eventInitEx.tags)
             : getOutboxPubkey(kind, tags)

@@ -5,7 +5,6 @@ const SSGRelays = [
     "wss://relay.nostr.band",
     "wss://nos.lol",
     "wss://relay.primal.net",
-  
   ];
   
   export default SSGRelays;

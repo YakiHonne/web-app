@@ -860,6 +860,11 @@ main {
     background-color: var(--dim-gray);
 }
 
+.keyboard-active {
+    border-radius: var(--border-r-18);
+    background-color: var(--dim-gray);
+}
+
 .heatmap-item:nth-child(even) {
     cursor: pointer;
     transition: .3s ease-in-out;
@@ -2159,6 +2164,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .reply-tail {
     position: absolute;
+    /* left: 0.99rem; */
     left: -.0625rem;
     top: 0;
     height: 44px;

@@ -19,7 +19,7 @@ import {
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { nip19, sortEvents } from "nostr-tools";
 import Link from "next/link";
-import { straightUp } from "@/Helpers/Helpers";
+import { isNoteMuted, straightUp } from "@/Helpers/Helpers";
 import {
   getCustomSettings,
   getNoteTree,
@@ -395,10 +395,7 @@ export default function NotificationCenterMain() {
             : undefined
           : undefined
       );
-      let data = await getSubData(
-        filter,
-      );
-      console.log(data, filter)
+      let data = await getSubData(filter);
       data = data.data
         .map((event_) => {
           let event = event_.rawEvent();
@@ -407,7 +404,11 @@ export default function NotificationCenterMain() {
             notifications,
             score
           ).status;
-          if (!userMutedList?.includes(event.pubkey) && scoreStatus) {
+          if (
+            !userMutedList?.includes(event.pubkey) &&
+            !isNoteMuted(event, userMutedList) &&
+            scoreStatus
+          ) {
             if (event.kind === 9735) {
               let description = JSON.parse(
                 event.tags.find((tag) => tag[0] === "description")[1]
@@ -466,7 +467,12 @@ export default function NotificationCenterMain() {
           notifications,
           score
         ).status;
-        if (!userMutedList.includes(event.pubkey) && scoreStatus) {
+        if (
+          event.pubkey !== userKeys.pub &&
+          !userMutedList.includes(event.pubkey) &&
+          !isNoteMuted(event, userMutedList) &&
+          scoreStatus
+        ) {
           if (event.kind === 9735) {
             let description = JSON.parse(
               event.tags.find((tag) => tag[0] === "description")[1]
