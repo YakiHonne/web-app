@@ -120,7 +120,7 @@ export default function CommentsSection({
   const [netComments, setNetComments] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
   const isCommentsMuted = useMemo(() => {
-    return !netComments.find((_) => !userMutedList.includes(_.pubkey));
+    return !netComments.find((_) => !userMutedList?.includes(_.pubkey));
   }, [netComments, userMutedList]);
 
   useEffect(() => {

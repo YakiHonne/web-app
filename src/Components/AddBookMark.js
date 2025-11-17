@@ -61,6 +61,7 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
       tempTags.push(["title", title]);
       tempTags.push(["description", description]);
       tempTags.push(["image", image]);
+
       return tempTags;
     }
     for (let i = 0; i < tempTags.length; i++) {
@@ -74,7 +75,6 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
         tempTags[i][1] = image;
       }
     }
-
     return tempTags;
   };
 

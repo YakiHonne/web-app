@@ -58,6 +58,7 @@ export default function Comments({
         // skipValidation: true,
       });
       subscription.on("event", (event_) => {
+        subscription.stop();
         let stats = getEventStatAfterEOSE(
           event_,
           "replies",
@@ -67,7 +68,6 @@ export default function Comments({
         updateNoteDraft(replyId, "");
         saveEventStats(replyId, stats);
         setEventID(false);
-        subscription.stop();
         exit();
       });
     };

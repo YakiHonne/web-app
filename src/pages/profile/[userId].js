@@ -4,7 +4,7 @@ import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 import { nip19 } from "nostr-tools";
-import getDataForSSG from "@/Helpers/lib";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(
   () => import("@/(PagesComponents)/User/UserHome"),

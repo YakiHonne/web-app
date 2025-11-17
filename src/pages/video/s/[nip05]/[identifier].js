@@ -4,7 +4,7 @@ import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getAuthPubkeyFromNip05, getVideoContent } from "@/Helpers/Helpers";
-import getDataForSSG from "@/Helpers/lib";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Video"), {
   ssr: false,

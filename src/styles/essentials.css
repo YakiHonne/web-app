@@ -386,7 +386,7 @@ hr:last-child {
 }
 
 .sticker-orange-side {
-    background: #ff9c081b;
+    background: var(--orange-side);
     color: var(--orange-main)
 }
 
@@ -1370,9 +1370,16 @@ a:not(.no-hover):hover {
     background-color: var(--white);
     transition: .2s ease-in-out;
 }
+.sc-s-d-18 {
+    overflow: hidden;
+    border-radius: var(--border-r-18);
+    border: 1px dashed var(--pale-gray);
+    background-color: var(--white);
+    transition: .2s ease-in-out;
+}
 
-.sc-s-d:hover {
-    border-color: var(--primary);
+.sc-s-d:hover, .sc-s-d-18:hover {
+    border-color: var(--c1);
 }
 
 .v-separator {

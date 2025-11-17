@@ -38,6 +38,9 @@ const FloatingDMsClient = dynamic(() => import("@/Components/FloatingDMs"), {
 const WarningBarClient = dynamic(() => import("@/Components/WarningBar"), {
   ssr: false,
 });
+const PublishingClient = dynamic(() => import("@/Components/Publishing"), {
+  ssr: false,
+});
 
 const NO_SIDEBAR_PAGES = new Set([
   "/yakihonne-mobile-app",
@@ -79,6 +82,7 @@ function App({ Component, pageProps }) {
       <ThemeProvider>
         <ToastMessages />
         {!shouldHideSidebar && <FloatingDMsClient />}
+        {shouldHideSidebar && <PublishingClient displayOff={true}/>}
         <AppInit />
         <NavbarClient />
         <WarningBarClient />

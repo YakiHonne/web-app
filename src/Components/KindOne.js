@@ -33,8 +33,9 @@ import useIsMute from "@/Hooks/useIsMute";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
 import Link from "next/link";
+import LinkRepEventPreview from "./LinkRepEventPreview";
 
-export default function KindOne({
+function KindOne({
   event,
   reactions = true,
   border = false,
@@ -70,7 +71,6 @@ export default function KindOne({
     event.rootData ? event.rootData[1] : false,
     "e"
   );
-
   const checkNotes = useMemo(() => {
     const NOTE_PREFIXES = ["note1", "nevent", "naddr"];
     const MAX_COMPONENTS = 5;
@@ -481,7 +481,9 @@ export default function KindOne({
   );
 }
 
-const RelatedEvent = ({ event, reactions = true, isThread }) => {
+export default React.memo(KindOne);
+
+const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const { t } = useTranslation();
   const [user, setUser] = useState(false);
@@ -507,8 +509,8 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
       try {
         setIsRelatedEventLoaded(false);
         let event_ =
-          kind === 1
-            ? await getSubData([{ kinds: [kind], ids: [ids] }], 500)
+          kind === 0
+            ? await getSubData([{ ids: [ids] }], 500)
             : await getSubData(
                 [
                   {
@@ -522,7 +524,7 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
         if (event_.data.length > 0) {
           saveUsers([event_.data[0].pubkey]);
           let parsedEvent;
-          if (kind === 1) {
+          if (event_.data[0].kind === 1) {
             parsedEvent = getParsedNote(event_.data[0]);
             parsedEvent = { ...parsedEvent, isComment: false };
           } else {
@@ -555,7 +557,7 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
         });
         return;
       }
-      fetchData(1, event);
+      fetchData(0, event);
     }
   }, [event]);
   const handleOnClick = (e) => {
@@ -578,7 +580,15 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
               />
             )}
             {relatedEvent.kind !== 1 && (
-              <RepEventPreviewCard item={relatedEvent} />
+              <div className="box-pad-h-m">
+                <div>
+                  <LinkRepEventPreview event={relatedEvent} />
+                </div>
+                <div
+                  className="reply-side-border-2"
+                  style={{ paddingBottom: "1.5rem" }}
+                ></div>
+              </div>
             )}
           </>
         )}
@@ -636,14 +646,19 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
         )}
       </div>
       {relatedEvent && showNote && (
-        <div style={{ borderLeft: "1px solid var(--c1)" }}>
+        <div
+          className="fit-container"
+          style={{ borderLeft: "1px solid var(--c1)" }}
+        >
           {!isUnsupported && (
             <>
               {relatedEvent.kind === 1 && (
                 <KindOne event={relatedEvent} reactions={reactions} />
               )}
               {relatedEvent.kind !== 1 && (
-                <RepEventPreviewCard item={relatedEvent} />
+                <div className="fit-container box-pad-h-m">
+                  <LinkRepEventPreview event={relatedEvent} />
+                </div>
               )}
             </>
           )}
@@ -656,7 +671,7 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
       )}
     </>
   );
-};
+});
 
 const FastAccessCS = ({
   id,

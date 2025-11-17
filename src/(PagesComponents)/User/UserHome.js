@@ -15,7 +15,7 @@ export default function UserHome({ user }) {
         >
           <div
             style={{
-              zIndex: "11",
+              zIndex: 11,
               position: "relative",
             }}
             className="main-middle"

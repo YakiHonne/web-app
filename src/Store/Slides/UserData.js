@@ -182,6 +182,15 @@ const userFavRelaysSlice = createSlice({
     },
   },
 });
+const userSearchRelaysSlice = createSlice({
+  name: "userSearchRelays",
+  initialState: [],
+  reducers: {
+    setUserSearchRelays(state, action) {
+      return action.payload;
+    },
+  },
+});
 const userWotListSlice = createSlice({
   name: "userWotList",
   initialState: [],
@@ -223,6 +232,7 @@ export const { setUserInboxRelays } = userInboxRelaysSlice.actions;
 export const { setUserFavRelays } = userFavRelaysSlice.actions;
 export const { setUserWotList } = userWotListSlice.actions;
 export const { setUserBlossomServers } = userBlossomServersSlice.actions;
+export const { setUserSearchRelays } = userSearchRelaysSlice.actions;
 
 export const UserMetadataReducer = userMetadataSlice.reducer;
 export const UserKeysReducer = userKeysSlice.reducer;
@@ -245,4 +255,5 @@ export const UserInboxRelaysReducer = userInboxRelaysSlice.reducer;
 export const UserFavRelaysReducer = userFavRelaysSlice.reducer;
 export const UserWotListReducer = userWotListSlice.reducer;
 export const UserBlossomServersReducer = userBlossomServersSlice.reducer;
+export const UserSearchRelaysReducer = userSearchRelaysSlice.reducer;
 export const IsUserFollowingsLoadedReducer = isUserFollowingsLoadedSlice.reducer;

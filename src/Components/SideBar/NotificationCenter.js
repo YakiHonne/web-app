@@ -67,6 +67,7 @@ export default function NotificationCenter({
           if (
             !(userMutedList || []).includes(event.pubkey) &&
             !isNoteMuted(event, userMutedList) &&
+            event.pubkey !== userKeys.pub &&
             scoreStatus
           ) {
             let checkForLabel = event.tags.find((tag) => tag[0] === "l");

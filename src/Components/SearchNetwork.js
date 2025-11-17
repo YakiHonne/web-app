@@ -417,7 +417,7 @@ export default function SearchNetwork({ exit }) {
           {results.length === 0 && !isLoading && (
             <div
               className="fit-container fx-col fx-centered"
-              style={{ height: "500px" }}
+              style={{ height: "300px" }}
             >
               <div className="search-24"></div>
               <h4>{t("AjlW15t")}</h4>
@@ -427,7 +427,7 @@ export default function SearchNetwork({ exit }) {
           {isLoading && results.length === 0 && (
             <div
               className="fit-container fx-centered"
-              style={{ height: "500px" }}
+              style={{ height: "300px" }}
             >
               <p className="gray-c p-medium">{t("APAkDF0")}</p> <LoadingDots />
             </div>

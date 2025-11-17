@@ -37,6 +37,7 @@ if (typeof window !== "undefined") {
     appSettings: "",
     relays: "",
     inboxRelays: "",
+    searchRelays: "",
     favrelays: "",
     bookmarks: "",
     users: "",
@@ -109,12 +110,12 @@ export const getMutedlist = async (pubkey) => {
   if (db) {
     try {
       let mutedlist = await db.table("muted").get(pubkey);
-      return mutedlist || [];
+      return mutedlist || { mutedlist: [], allTags: [] };
     } catch (err) {
       console.log(err);
-      return [];
+      return { mutedlist: [], allTags: [] };
     }
-  } else return [];
+  } else return { mutedlist: [], allTags: [] };
 };
 export const getWotlist = async (pubkey) => {
   if (db) {
@@ -156,6 +157,17 @@ export const getInboxRelays = async (pubkey) => {
     try {
       let inboxRelays = await db.table("inboxRelays").get(pubkey);
       return inboxRelays || [];
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
+  } else return [];
+};
+export const getSearchRelays = async (pubkey) => {
+  if (db) {
+    try {
+      let searchRelays = await db.table("searchRelays").get(pubkey);
+      return searchRelays || [];
     } catch (err) {
       console.log(err);
       return [];
@@ -565,6 +577,28 @@ export const saveInboxRelays = async (event, pubkey, lastTimestamp) => {
       await Dexie.ignoreTransaction(async () => {
         await db.transaction("rw", db.inboxRelays, async () => {
           await db.inboxRelays.put(eventToStore, pubkey);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+export const saveSearchRelays = async (event, pubkey, lastTimestamp) => {
+  if (db) {
+    if (!event && lastTimestamp) return;
+    let eventToStore = { last_timestamp: undefined, relays: [] };
+    if (event) {
+      let relays = event.tags
+        .filter((tag) => tag[0] === "relay")
+        .map((tag) => tag[1]);
+      eventToStore = { last_timestamp: event.created_at, relays };
+    }
+
+    try {
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.searchRelays, async () => {
+          await db.searchRelays.put(eventToStore, pubkey);
         });
       });
     } catch (err) {

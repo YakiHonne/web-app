@@ -38,25 +38,26 @@ const content = [
 ];
 
 const updatesList = [
-  "Expanded sats-to-fiat conversion to support more currencies",
-  "Added real-time note updates in Relay Orbits",
-  "Added curations tab to Relay Orbit feeds",
-  "Included relay data in note address encoding for more accurate fetching",
-  "Fixed icon color issues when using the system theme",
-  "Settings footer repositioned to the right on desktop view",
-  "Added support for parsing nostr:-prefixed lnbc invoices",
-  "Fixed missing reaction stats in notes",
-  "Fixed issues with republishing events",
-  "Events in the manager are now sorted by actual publish time",
-  "Fixed home feed timeline fetching",
-  "Fixed parsed URLs with the nostr: schema",
-  "Improved self-profile search and general search accuracy",
-  "Fixed relay metadata display in Relay Orbits",
-  "Added “Favored By” stats across all Relay Orbit tabs",
-  "Added Web of Trust explanation to Settings",
-  "Notes can now be opened in separate tabs",
-  "Fixed inconsistent article previews before and after publishing",
-  "Fixed relay list overflow in Relay Feeds settings",
+  "Ability to choose a primary color for the interface.",
+  "Muting note threads now prevents all unwanted replies, reposts, and notifications from that thread.",
+  "Arrow-key navigation added for selecting tagged users in the mentions list.",
+  "Cmd/Ctrl + Enter support for quick publishing in the editor.",
+  "Added NIP-50 search support for enhanced discovery.",
+  "Added Search Relays set.",
+  "Added a hard-refresh mechanism to ensure notifications always stay up-to-date.",
+  "Bookmark improvements: redesigned cards, added covers, added tags/URLs display and filtering, fixed missing notes in filters, and resolved floating message overlay issues.",
+  "Toggle link previews on or off as needed.",
+  "Redesigned the muting list in settings.",
+  "NIP-71 videos now fall back to secondary URLs if the main source fails.",
+  "Removed the warning box that appeared when selecting text outside the comment field.",
+  "Videos are now parsed correctly from URLs inside articles.",
+  "Optimized the relay list picker for smoother interaction.",
+  "Improved the emoji picker with a faster and larger window.",
+  "Page titles now set correctly in SSR for better SEO and link previews.",
+  "Fixed comment sections not closing after posting in articles, curations, and videos.",
+  "Fixed draft articles not publishing when using “publish with deletion.”",
+  "Fixed reply previews when the main post is an article, curation, or video.",
+  "Fixed Relay Orbit becoming stuck when no data is returned.",
   "General improvements",
 ];
 
@@ -199,7 +200,7 @@ const Banner = ({ exit }) => {
               <div>
                 <p>Updates</p>
                 <p className="gray-c p-italic p-medium">
-                  Last updated Nov 02, 2025
+                  (Updated: {process.env.NEXT_PUBLIC_UPDATE_DATE})
                 </p>
               </div>
               <p className="orange-c p-medium">

@@ -8,7 +8,7 @@ import {
   removeObjDuplicants,
 } from "./Encryptions";
 import axios from "axios";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { getImagePlaceholder } from "@/Content/NostrPPPlaceholder";
 import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
@@ -27,6 +27,8 @@ import {
   isVid,
   nEventEncode,
 } from "./ClientHelpers";
+import VideoWithFallback from "@/Components/VideoWithFallbacks";
+import { primaryColors } from "@/Content/PrimaryColors";
 
 const LoginToAPI = async (publicKey, userKeys) => {
   try {
@@ -299,6 +301,7 @@ const getVideoContent = (video) => {
   let image = "";
   let imeta_url = "";
   let imeta_image = "";
+  let fallbacks = [];
   let duration = 0;
 
   for (let tag of tags) {
@@ -308,7 +311,12 @@ const getVideoContent = (video) => {
     if (tag[0] === "d") d = tag[1];
     if (tag[0] === "url") url = tag[1];
     if (tag[0] === "r") url = tag[1];
-    if (tag[0] === "imeta") imeta_url = tag.find((_) => _.includes("url"));
+    if (tag[0] === "imeta") {
+      imeta_url = tag.find((_) => _.includes("url"));
+      fallbacks = tag
+        .filter((_) => _.includes("fallback"))
+        .map((_) => _.replace("fallback", "").trim());
+    }
     if (tag[0] === "imeta") imeta_image = tag.find((_) => _.includes("image"));
     if (tag[0] === "title") title = tag[1];
     if ((tag[0] === "thumb" || tag[0] === "image") && tag[1]) image = tag[1];
@@ -343,10 +351,11 @@ const getVideoContent = (video) => {
           pubkey: video.pubkey,
         }),
     aTag: d ? `${video.kind}:${video.pubkey}:${d}` : video.id,
+    fallbacks,
   };
 };
 
-const getVideoFromURL = (url) => {
+const getVideoFromURL = (url, fallbacks = []) => {
   const isURLVid = isVid(url);
 
   if (isURLVid) {
@@ -378,7 +387,7 @@ const getVideoFromURL = (url) => {
         ></iframe>
       );
   }
-  if (!isURLVid) {
+  if (!isURLVid && fallbacks.length === 0) {
     return (
       <video
         controls={true}
@@ -390,6 +399,19 @@ const getVideoFromURL = (url) => {
       >
         <source src={url} type="video/mp4" />
       </video>
+    );
+  }
+  if (!isURLVid && fallbacks.length > 0) {
+    return (
+      <VideoWithFallback
+        sources={[url, ...fallbacks]}
+        controls={true}
+        autoPlay={false}
+        name="media"
+        width={"100%"}
+        className="sc-s-18"
+        style={{ border: "none", aspectRatio: "16/9" }}
+      />
     );
   }
 };
@@ -1234,8 +1256,23 @@ const addWidgetPathToUrl = (url) => {
 };
 
 const trimRelay = (relay) => {
-  return relay.endsWith("/") ? relay.slice(0, -1) : relay
-}
+  return relay.endsWith("/") ? relay.slice(0, -1) : relay;
+};
+
+const changePrimary = (color = getPrimaryColor()) => {
+  document.documentElement.style.setProperty("--c1", color);
+  document.documentElement.style.setProperty("--orange-main", color);
+  document.documentElement.style.setProperty("--orange-side", color + "26");
+  localStorage.setItem("yaki-primary-color", color);
+};
+
+const getPrimaryColor = () => {
+  let primaryColor = localStorage.getItem("yaki-primary-color");
+  if (!primaryColors.includes(primaryColor)) {
+    primaryColor = primaryColors[0];
+  }
+  return primaryColor;
+};
 
 export {
   getLinkFromAddr,
@@ -1274,5 +1311,7 @@ export {
   addWidgetPathToUrl,
   getAnswerFromAIRemoteAPI,
   trimRelay,
-  isNoteMuted
+  isNoteMuted,
+  changePrimary,
+  getPrimaryColor
 };

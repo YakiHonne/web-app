@@ -160,7 +160,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       setNotesLastEventTime(undefined);
     }
   }, [selectedCategory]);
-  
+
   useEffect(() => {
     straightUp();
     dispatchNotes({ type: "remove-events" });
@@ -457,7 +457,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
               );
           }
         })}
-
       <div className="box-marg-full"></div>
       {isLoading && (
         <div

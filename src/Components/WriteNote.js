@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import UploadFile from "@/Components/UploadFile";
 import LoadingDots from "@/Components/LoadingDots";
 import MentionSuggestions from "@/Components/MentionSuggestions";
@@ -25,7 +25,6 @@ import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
 import LinkRepEventPreview from "./LinkRepEventPreview";
 import { customHistory } from "@/Helpers/History";
-import { getNDKInstance } from "@/Helpers/utils";
 
 export default function WriteNote({
   exit,
@@ -42,7 +41,6 @@ export default function WriteNote({
   const userMetadata = useSelector((state) => state.userMetadata);
   const userRelays = useSelector((state) => state.userRelays);
   const { t } = useTranslation();
-
   const [note, setNote] = useState(content);
   const [mention, setMention] = useState("");
   const [showGIFs, setShowGIFs] = useState(false);
@@ -344,6 +342,13 @@ export default function WriteNote({
     }, 0);
   };
 
+  const handleKeyDown = useCallback((e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      publishNote();
+    }
+  }, [publishNote]);
+
   const copyKey = (key) => {
     navigator.clipboard.writeText(key);
     dispatch(
@@ -590,6 +595,7 @@ export default function WriteNote({
                     placeholder={t("AGAXMQ3")}
                     ref={textareaRef}
                     onChange={handleChange}
+                    onKeyDown={handleKeyDown}
                     autoFocus
                     dir="auto"
                   />

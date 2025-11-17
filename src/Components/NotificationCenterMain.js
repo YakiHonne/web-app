@@ -50,7 +50,7 @@ const eventIcons = {
 };
 
 const getReaction = (reaction) => {
-  if (reaction === "+") return "👍";
+  if (reaction === "+" || !reaction) return "👍";
   if (reaction === "-") return "👎";
   return reaction;
 };
@@ -352,6 +352,7 @@ export default function NotificationCenterMain() {
   const [notifications, setNotifications] = useState([]);
   const [newNotifications, setNewNotifications] = useState([]);
   const [contentFrom, setContentFrom] = useState("all");
+  const [refresh, setRefresh] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const notificationsRef = useRef(null);
   const notificationSettings = (() => {
@@ -407,6 +408,7 @@ export default function NotificationCenterMain() {
           if (
             !userMutedList?.includes(event.pubkey) &&
             !isNoteMuted(event, userMutedList) &&
+            event.pubkey !== userKeys.pub &&
             scoreStatus
           ) {
             if (event.kind === 9735) {
@@ -514,7 +516,7 @@ export default function NotificationCenterMain() {
     return () => {
       if (sub) sub.stop();
     };
-  }, [userKeys]);
+  }, [userKeys, refresh]);
 
   const switchContentSource = (source) => {
     if (source === contentFrom) return;
@@ -627,6 +629,16 @@ export default function NotificationCenterMain() {
     }
   };
 
+  const hardRefresh = () => {
+    if (isLoading) return;
+    localStorage.removeItem(`notificationsSet_${userKeys.pub}`);
+    setNotifications([]);
+    setNewNotifications([]);
+    straightUp();
+    setIsLoading(true)
+    setRefresh(Date.now());
+  };
+
   return (
     <>
       <div
@@ -686,9 +698,18 @@ export default function NotificationCenterMain() {
         >
           <div className="fit-container fx-scattered box-pad-h box-pad-v-m">
             <h3>{t("ASSFfFZ")}</h3>
-            <Link href={"/settings?tab=notifications"}>
-              <div className="setting-24"></div>
-            </Link>
+            <div className="fx-centered">
+              <div
+                className={`round-icon-small round-icon-tooltip ${isLoading ? "if-disabled" : ""}`}
+                data-tooltip={t("AkQpkMC")}
+                onClick={hardRefresh}
+              >
+                <div className="switch-arrows-v2" style={{ cursor: isLoading ? "not-allowed" : "pointer" }}></div>
+              </div>
+              <Link href={"/settings?tab=notifications"}>
+                <div className="setting-24"></div>
+              </Link>
+            </div>
           </div>
           <div className="fit-container fx-even" style={{ gap: 0 }}>
             <div

@@ -8,6 +8,7 @@ import useFollowingsFavRelays from "@/Hooks/useFollowingsFavRelays";
 import useOutboxRelays from "@/Hooks/useOutboxRelays";
 import Followings from "./Followings";
 import Network from "./Network";
+import { sleepTimer } from "@/Helpers/Helpers";
 
 export default function Relays() {
   const { t } = useTranslation();
@@ -24,15 +25,8 @@ export default function Relays() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [allRelays, relaysCollections] = await Promise.all([
-          axios.get("https://api.nostr.watch/v1/online"),
-          axios.get(
-            "https://raw.githubusercontent.com/CodyTseng/awesome-nostr-relays/master/dist/collections.json"
-          ),
-        ]);
-        setRelaysCollections(relaysCollections.data?.collections);
-        setRelays(allRelays.data);
-        setGlobalRelaysBatch(allRelays.data.slice(0, 8));
+       await fetchGlobalRelays();
+       await fetchCollectionsRelays();
         setIsLoading(false);
       } catch (err) {
         console.log(err);
@@ -40,6 +34,34 @@ export default function Relays() {
     };
     fetchData();
   }, []);
+
+  const fetchGlobalRelays = async () => {
+    try {
+      const relaysList = await Promise.race([
+        axios.get("https://cache-v2.yakihonne.com/api/v1/relays"),
+        sleepTimer(2000),
+      ]);
+      setRelays(relaysList ? relaysList.data : []);
+      setGlobalRelaysBatch(relaysList ? relaysList.data.slice(0, 8) : []);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchCollectionsRelays = async () => {
+    try {
+      const relaysList = await Promise.race([
+        axios.get(
+          "https://raw.githubusercontent.com/CodyTseng/awesome-nostr-relays/master/dist/collections.json"
+        ),
+        sleepTimer(2000),
+      ]);
+      setRelaysCollections(relaysList ? relaysList.data?.collections : []);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div>
       <div
