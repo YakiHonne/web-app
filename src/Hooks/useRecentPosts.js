@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function useRecentPosts(filter, since, selectedFilter, kind = "posts") {
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const [recentPosts, setRecentPosts] = useState([]);
 
   useEffect(() => {

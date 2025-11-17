@@ -128,7 +128,7 @@ export default function Home() {
 }
 const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const { t } = useTranslation();
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const isUserFollowingsLoaded = useSelector(
     (state) => state.isUserFollowingsLoaded
   );
@@ -160,7 +160,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       setNotesLastEventTime(undefined);
     }
   }, [selectedCategory]);
-  
+
   useEffect(() => {
     straightUp();
     dispatchNotes({ type: "remove-events" });
@@ -457,7 +457,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
               );
           }
         })}
-
       <div className="box-marg-full"></div>
       {isLoading && (
         <div

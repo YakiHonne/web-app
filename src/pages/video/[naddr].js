@@ -5,7 +5,7 @@ import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getVideoContent } from "@/Helpers/Helpers";
-import getDataForSSG from "@/Helpers/lib";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Video"), {
   ssr: false,
@@ -64,7 +64,7 @@ export async function getStaticProps({ params }) {
       naddrData: {
         pubkey: pubkey || false,
         identifier: identifier || false,
-        kind,
+        kind: kind || false,
         id: id || false,
         relays: relays || [],
       },

@@ -41,17 +41,16 @@ const nostrSchemaRegex =
 
 const doesContainNostrSchema = (url) => {
   try {
-
     const url_ = new URL(url);
     const domain = url_.hostname.replace(/^www\./, "");
     const isWhitelisted = nostrClients.some((allowed) =>
       domain.endsWith(allowed)
-  );
-  if (!isWhitelisted) return false;
-  return nostrSchemaRegex.test(url);
-} catch {
-  return false;
-}
+    );
+    if (!isWhitelisted) return false;
+    return nostrSchemaRegex.test(url);
+  } catch {
+    return false;
+  }
 };
 
 export function getNoteTree(
@@ -342,18 +341,49 @@ export function getComponent(children) {
     }
     if (typeof children[i] !== "string") {
       let key = `${i}-${Date.now()}`;
-      if (children[i].type === "a" && isImageUrlSync(children[i].props?.href)) {
-        res.push(
-          <img
-            className="sc-s-18"
-            style={{ margin: "1rem auto" }}
-            width={"100%"}
-            src={children[i].props?.href}
-            alt="el"
-            loading="lazy"
-            key={key}
-          />
-        );
+      if (children[i].type === "a") {
+        const checkURL = isImageUrl(children[i].props?.href);
+        if (checkURL) {
+          if (checkURL.type === "image") {
+            res.push(
+              <img
+                className="sc-s-18"
+                style={{ margin: "1rem auto" }}
+                width={"100%"}
+                src={children[i].props?.href}
+                alt="el"
+                loading="lazy"
+                key={key}
+              />
+            );
+          }
+          if (checkURL.type === "video") {
+            res.push(
+              <VideoLoader
+                key={key}
+                src={children[i].props?.href}
+                poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
+              />
+            );
+          }
+        }
+        if (!checkURL) {
+          res.push(
+            <a
+              key={key}
+              style={{
+                wordBreak: "break-word",
+                color: "var(--orange-main)",
+              }}
+              href={children[i].props?.href}
+              target="_blank"
+              className="btn-text-gray"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {children[i].props?.href}
+            </a>
+          );
+        }
       } else
         res.push(
           <span
@@ -371,7 +401,11 @@ export function getComponent(children) {
   return <div className="fit-container">{mergeConsecutivePElements(res)}</div>;
 }
 
-export function getParsedNote(event, isCollapsedNote = false) {
+export function getParsedNote(
+  event,
+  isCollapsedNote = false,
+  parseContent = true
+) {
   try {
     if (!event) return;
     let isNoteLong = event.content.split(" ").length > 150;
@@ -407,13 +441,15 @@ export function getParsedNote(event, isCollapsedNote = false) {
     let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
     let isProtected = event.tags.find((tag) => tag[0] === "-");
     if (event.kind === 1) {
-      let note_tree = getNoteTree(
-        event.content,
-        undefined,
-        isCollapsedNote_,
-        undefined,
-        event.pubkey
-      );
+      let note_tree = parseContent
+        ? getNoteTree(
+            event.content,
+            undefined,
+            isCollapsedNote_,
+            undefined,
+            event.pubkey
+          )
+        : event.content;
 
       return {
         ...rawEvent,
@@ -605,6 +641,8 @@ const checkForNewAddedSettings = (prevSettings) => {
       prevSettings.blurNonFollowedMedia !== undefined
         ? prevSettings.blurNonFollowedMedia
         : true,
+    linkPreview:
+      prevSettings.linkPreview !== undefined ? prevSettings.linkPreview : true,
     reactionsSettings:
       prevSettings.reactionsSettings !== undefined
         ? prevSettings.reactionsSettings
@@ -658,6 +696,7 @@ export function getDefaultSettings(pubkey) {
     repliesView: "thread",
     oneTapReaction: false,
     blurNonFollowedMedia: true,
+    linkPreview: true,
     reactionsSettings: [
       { reaction: "likes", status: true },
       { reaction: "replies", status: true },

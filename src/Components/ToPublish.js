@@ -7,8 +7,8 @@ import UserSearchBar from "@/Components/UserSearchBar";
 import NProfilePreviewer from "@/Components/NProfilePreviewer";
 import { useDispatch } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
-import { extractNip19} from "@/Helpers/Helpers";
-import {removeArticleDraft } from "@/Helpers/ClientHelpers";
+import { extractNip19 } from "@/Helpers/Helpers";
+import { removeArticleDraft } from "@/Helpers/ClientHelpers";
 import UploadFile from "@/Components/UploadFile";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
@@ -66,7 +66,8 @@ export default function ToPublish({
     setThumbnail("");
     setThumbnailPrev("");
     setThumbnailUrl("");
-  }; 679
+  };
+  679;
 
   const Submit = async (kind = 30023) => {
     try {
@@ -127,7 +128,6 @@ export default function ToPublish({
           allRelays: [],
         })
       );
-
       if (deleteDraft) {
         setTimeout(async () => {
           let tempEvent = {
@@ -147,7 +147,7 @@ export default function ToPublish({
           if (!eventInitEx) {
             router.push({
               pathname: "/dashboard",
-              query: { tabNumber: 2, filter: "articles" }
+              query: { tabNumber: 2, filter: "articles" },
             });
             exit();
             setIsLoading(false);
@@ -159,23 +159,25 @@ export default function ToPublish({
               allRelays: [],
             })
           );
+          removeArticleDraft();
           setIsLoading(false);
           router.push({
             pathname: "/dashboard",
-            query: { tabNumber: 2, filter: "articles" }
+            query: { tabNumber: 2, filter: "articles" },
           });
           exit();
-        }, 5000);
+        }, 1000);
+      } else {
+        removeArticleDraft();
+        router.push({
+          pathname: "/dashboard",
+          query: { tabNumber: 2, filter: "articles" },
+        });
+        exit();
         return;
       }
-      removeArticleDraft();
-      router.push({
-        pathname: "/dashboard",
-        query: { tabNumber: 2, filter: "articles" }
-      });
-      exit();
-      return;
     } catch (err) {
+      console.log(err)
       dispatch(
         setToast({
           type: 2,
@@ -236,6 +238,7 @@ export default function ToPublish({
       zapSplit.reduce((total, item) => (total += parseInt(item[3])), 0) || 1;
     return Math.floor((amount * 100) / allAmount);
   };
+
   return (
     <section className="fixed-container fx-centered box-pad-h">
       <div

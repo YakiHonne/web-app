@@ -1,10 +1,17 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import RelayImage from "./RelayImage";
 import LoadingDots from "./LoadingDots";
 import { saveRelayMetadata } from "@/Helpers/Controlers";
 import { getRelayMetadata } from "@/Helpers/utils";
 import RelayMetadataPreview from "./RelayMetadataPreview";
+import { Virtuoso } from "react-virtuoso";
 
 export default function RelaysPicker({
   allRelays,
@@ -20,20 +27,18 @@ export default function RelaysPicker({
     let tempRelay = allRelays.filter((relay) => {
       if (
         !userAllRelays.map((_) => _.url).includes(relay) &&
+        !excludedRelays.includes(relay) &&
         relay.includes(searchedRelay)
       )
         return relay;
     });
     return tempRelay;
-  }, [userAllRelays, searchedRelay, allRelays]);
+  }, [userAllRelays, searchedRelay, allRelays, excludedRelays]);
   const optionsRef = useRef(null);
-  const [selectedRelay, setSelectedRelay] = useState(false);
-
   useEffect(() => {
     const handleOffClick = (e) => {
       if (optionsRef.current && !optionsRef.current.contains(e.target))
         setShowList(false);
-      // setSelectedRelay(false);
     };
     document.addEventListener("mousedown", handleOffClick);
     return () => {
@@ -72,7 +77,8 @@ export default function RelaysPicker({
             position: "absolute",
             left: 0,
             top: "calc(100% + 5px)",
-            height: selectedRelay ? "600px" : "300px",
+            // height: selectedRelay ? "600px" : "300px",
+            height: "300px",
             // maxHeight: "600px",
             overflow: "scroll",
             zIndex: "200",
@@ -90,7 +96,22 @@ export default function RelaysPicker({
             <hr />
             <hr />
           </div>
-          {searchedRelays.map((relay) => {
+          {searchedRelays.length > 0 && <div className="fit-container fit-height">
+            <Virtuoso
+              style={{ height: "100%" }}
+              totalCount={searchedRelays.length}
+              itemContent={(index) => (
+                <RelayItem
+                  relayList={searchedRelays}
+                  index={index}
+                  addRelay={addRelay}
+                  setShowList={setShowList}
+                  setSearchedRelay={setSearchedRelay}
+                />
+              )}
+            />
+          </div>}
+          {/* {searchedRelays.map((relay) => {
             if (!excludedRelays.includes(relay))
               return (
                 <div
@@ -135,39 +156,14 @@ export default function RelaysPicker({
                       >
                         <div className="arrow "></div>
                       </div>
-
-                      {/* <div className="sticker sticker-gray-black">
-                      {t("ARWeWgJ")}
-                    </div> */}
                     </div>
                   </div>
                   {selectedRelay === relay && (
                     <SelectedRelayPreview url={relay} />
                   )}
-                  {/* <div
-                  style={{
-                    position: "absolute",
-                    left: "50%",
-                    bottom: "20px",
-                    transform: "translateX(-50%) translateY(100%)",
-                  }}
-                >
-                  <div
-                    className="round-icon-small slide-down"
-                    style={{ backgroundColor: "var(--dim-gray)" }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      selectedRelay === relay
-                        ? setSelectedRelay(false)
-                        : setSelectedRelay(relay);
-                    }}
-                  >
-                    <div className="arrow "></div>
-                  </div>
-                </div> */}
                 </div>
               );
-          })}
+          })} */}
           {searchedRelays.length === 0 && searchedRelay && (
             <div
               className="fx-scattered fit-container pointer"
@@ -221,3 +217,54 @@ const SelectedRelayPreview = ({ url }) => {
 
   return <RelayMetadataPreview metadata={metadata} />;
 };
+
+const RelayItem = React.memo(
+  ({ relayList, index, addRelay, setShowList, setSearchedRelay }) => {
+    const [open, setOpen] = useState(false);
+    return (
+      <div
+        className={`pointer fit-container fx-scattered fx-col box-pad-h-s box-pad-v-s option-no-scale relay-item`}
+        style={{
+          position: "relative",
+          backgroundColor: open ? "var(--c1-side)" : "",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          addRelay(relayList[index]);
+          setShowList(false);
+          setSearchedRelay("");
+          setOpen(!open);
+        }}
+      >
+        <div
+          className="fit-container fx-scattered"
+          style={{ position: "relative" }}
+        >
+          <div className="fx-centered ">
+            <RelayImage url={relayList[index]} size={16} />
+            <p>{relayList[index]}</p>
+          </div>
+          <div className="fx-centered">
+            <div
+              className="round-icon-small"
+              style={{ backgroundColor: "var(--dim-gray)" }}
+            >
+              <div className="plus-sign"></div>
+            </div>
+            <div
+              className="round-icon-small slide-down"
+              style={{ backgroundColor: "var(--dim-gray)" }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen(!open);
+              }}
+            >
+              <div className="arrow "></div>
+            </div>
+          </div>
+        </div>
+        {open && <SelectedRelayPreview url={relayList[index]} />}
+      </div>
+    );
+  }
+);

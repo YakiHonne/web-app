@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
-import getDataForSSG from "@/Helpers/lib";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Note"), {
   ssr: false,

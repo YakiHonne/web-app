@@ -150,7 +150,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
         reactToNote(undefined);
       }
       clickTimeout.current = null;
-    }, 300); // wait to see if double click occurs
+    }, 0); // wait to see if double click occurs
   };
 
   const handleDoubleClick = () => {
@@ -198,7 +198,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
               suggestedEmojisMode="recent"
               skinTonesDisabled={false}
               searchDisabled={false}
-              height={250}
+              height={350}
               onEmojiClick={(data) => reactToNote(data.emoji)}
             />
           </div>

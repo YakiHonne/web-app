@@ -1,3 +1,25 @@
+# (v5.3.0) 17/11/2025
+* Ability to choose a primary color for the interface.
+* Muting note threads now prevents all unwanted replies, reposts, and notifications from that thread.
+* Arrow-key navigation added for selecting tagged users in the mentions list.
+* Cmd/Ctrl + Enter support for quick publishing in the editor.
+* Added NIP-50 search support for enhanced discovery.
+* Added Search Relays set.
+* Added a hard-refresh mechanism to ensure notifications always stay up-to-date.
+* Bookmark improvements: redesigned cards, added covers, added tags/URLs display and filtering, fixed missing notes in filters, and resolved floating message overlay issues.
+* Toggle link previews on or off as needed.
+* Redesigned the muting list in settings.
+* NIP-71 videos now fall back to secondary URLs if the main source fails.
+* Removed the warning box that appeared when selecting text outside the comment field.
+* Videos are now parsed correctly from URLs inside articles.
+* Optimized the relay list picker for smoother interaction.
+* Improved the emoji picker with a faster and larger window.
+* Page titles now set correctly in SSR for better SEO and link previews.
+* Fixed comment sections not closing after posting in articles, curations, and videos.
+* Fixed draft articles not publishing when using “publish with deletion.”
+* Fixed reply previews when the main post is an article, curation, or video.
+* Fixed Relay Orbit becoming stuck when no data is returned.
+
 # (v5.2.0) 02/11/2025
 * Expanded sats-to-fiat conversion to support more currencies
 * Added real-time note updates in Relay Orbits

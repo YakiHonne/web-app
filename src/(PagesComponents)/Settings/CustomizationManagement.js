@@ -74,7 +74,10 @@ export function CustomizationManagement({
   const [oneTapReaction, setOneTapReaction] = useState(
     customSettings.oneTapReaction || false
   );
-  const [selectedRepliesView, setSelectedRepliesView] = useState(
+  const [linkPreview, setLinkPreview] = useState(
+    customSettings.linkPreview
+  );
+  const [repliesView, setRepliesView] = useState(
     ["thread", "box"].includes(customSettings.repliesView)
       ? customSettings.repliesView
       : "thread"
@@ -166,6 +169,8 @@ export function CustomizationManagement({
       blurNonFollowedMedia,
       defaultReaction,
       reactionsSettings,
+      repliesView,
+      linkPreview,
       longPress,
       notification,
     });
@@ -179,6 +184,8 @@ export function CustomizationManagement({
       blurNonFollowedMedia,
       defaultReaction,
       reactionsSettings,
+      repliesView,
+      linkPreview,
       longPress,
       collapsedNote,
       notification,
@@ -192,6 +199,8 @@ export function CustomizationManagement({
       oneTapReaction: !oneTapReaction,
       blurNonFollowedMedia,
       defaultReaction,
+      repliesView,
+      linkPreview,
       reactionsSettings,
       longPress,
       collapsedNote,
@@ -207,6 +216,8 @@ export function CustomizationManagement({
       blurNonFollowedMedia,
       defaultReaction: emoji,
       reactionsSettings,
+      repliesView,
+      linkPreview,
       longPress,
       collapsedNote,
       notification,
@@ -221,6 +232,8 @@ export function CustomizationManagement({
       blurNonFollowedMedia,
       defaultReaction,
       reactionsSettings,
+      repliesView,
+      linkPreview,
       longPress: data,
       collapsedNote,
       notification,
@@ -236,6 +249,8 @@ export function CustomizationManagement({
       defaultReaction,
       reactionsSettings: data,
       longPress,
+      repliesView,
+      linkPreview,
       collapsedNote,
       notification,
     });
@@ -252,6 +267,8 @@ export function CustomizationManagement({
       defaultReaction,
       reactionsSettings: newList,
       longPress,
+      repliesView,
+      linkPreview,
       collapsedNote,
       notification,
     });
@@ -264,6 +281,8 @@ export function CustomizationManagement({
       oneTapReaction,
       blurNonFollowedMedia: !blurNonFollowedMedia,
       defaultReaction,
+      repliesView,
+      linkPreview,
       reactionsSettings,
       longPress,
       collapsedNote,
@@ -272,13 +291,30 @@ export function CustomizationManagement({
   };
 
   const handleRepliesView = (value) => {
-    setSelectedRepliesView(value);
+    setRepliesView(value);
     updateCustomSettings({
       pubkey: userKeys.pub,
       userHoverPreview,
       oneTapReaction,
       blurNonFollowedMedia,
       repliesView: value,
+      defaultReaction,
+      linkPreview,
+      reactionsSettings,
+      longPress,
+      collapsedNote,
+      notification,
+    });
+  };
+  const handleLinkPreview = (value) => {
+    setLinkPreview(value);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      userHoverPreview,
+      oneTapReaction,
+      blurNonFollowedMedia,
+      repliesView,
+      linkPreview: value,
       defaultReaction,
       reactionsSettings,
       longPress,
@@ -293,13 +329,14 @@ export function CustomizationManagement({
         <FeedSettings
           exit={() => setShowFeedSettings(false)}
           collapsedNote={collapsedNote}
-          selectedRepliesView={selectedRepliesView}
+          repliesView={repliesView}
           homeContentSuggestion={homeContentSuggestion}
           userToFollowSuggestion={userToFollowSuggestion}
           contentSuggestion={contentSuggestion}
           interestSuggestion={interestSuggestion}
           reactionsSettings={reactionsSettings}
           blurNonFollowedMedia={blurNonFollowedMedia}
+          linkPreview={linkPreview}
           handleCollapedNote={handleCollapedNote}
           handleRepliesView={handleRepliesView}
           handleHomeContentSuggestion={handleHomeContentSuggestion}
@@ -309,6 +346,7 @@ export function CustomizationManagement({
           handleReactionsSettings={handleReactionsSettings}
           handleBlurNonFollowedMedia={handleBlurNonFollowedMedia}
           handleChangeReactionStatus={handleChangeReactionStatus}
+          handleLinkPreview={handleLinkPreview}
         />
       )}
 
@@ -322,7 +360,7 @@ export function CustomizationManagement({
           borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
           overflow: "visible",
-          borderRadius: 0
+          borderRadius: 0,
         }}
       >
         <div
@@ -422,12 +460,14 @@ const FeedSettings = ({
   handleContentSuggestion,
   handleInterestSuggestion,
   collapsedNote,
-  selectedRepliesView,
+  repliesView,
   homeContentSuggestion,
   userToFollowSuggestion,
   contentSuggestion,
   interestSuggestion,
   reactionsSettings,
+  linkPreview,
+  handleLinkPreview,
   handleReactionsSettings,
   blurNonFollowedMedia,
   handleBlurNonFollowedMedia,
@@ -472,7 +512,7 @@ const FeedSettings = ({
               className="fx fx-centered fx-col sc-s-18 bg-sp "
               style={{
                 borderColor:
-                  selectedRepliesView !== "thread" ? "" : "var(--c1)",
+                  repliesView !== "thread" ? "" : "var(--c1)",
               }}
               onClick={() => handleRepliesView("thread")}
             >
@@ -482,7 +522,7 @@ const FeedSettings = ({
             <div
               className="fx fx-centered fx-col sc-s-18 bg-sp "
               style={{
-                borderColor: selectedRepliesView !== "box" ? "" : "var(--c1)",
+                borderColor: repliesView !== "box" ? "" : "var(--c1)",
               }}
               onClick={() => handleRepliesView("box")}
             >
@@ -506,6 +546,16 @@ const FeedSettings = ({
           <Toggle
             status={blurNonFollowedMedia}
             setStatus={handleBlurNonFollowedMedia}
+          />
+        </div>
+        <div className="fx-scattered fit-container">
+          <div>
+            <p>{t("AOk5664")}</p>
+            <p className="p-medium gray-c">{t("Adyp37d")}</p>
+          </div>
+          <Toggle
+            status={linkPreview}
+            setStatus={handleLinkPreview}
           />
         </div>
         <div className="fx-centered fx-col fx-start-h fx-start-v fit-container">

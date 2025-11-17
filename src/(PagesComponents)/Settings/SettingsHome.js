@@ -16,6 +16,7 @@ import YakiChestManagement from "./YakiChestManagement";
 import UserLogout from "./UserLogout";
 import { useRouter } from "next/router";
 import Notifications from "./Notifications";
+import { getSubData } from "@/Helpers/Controlers";
 
 export default function SettingsHome() {
   const router = useRouter();
@@ -32,7 +33,10 @@ export default function SettingsHome() {
   return (
     <>
       <div>
-        <div className="fx-centered fit-container fx-start-v" style={{gap: 0}}>
+        <div
+          className="fx-centered fit-container fx-start-v"
+          style={{ gap: 0 }}
+        >
           <div className="main-middle">
             {userMetadata &&
               (userKeys.sec || userKeys.ext || userKeys.bunker) && (

@@ -4,7 +4,7 @@ import Head from "next/head";
 export default function HeadMetadata({ data }) {
   return (
     <Head>
-      <title>Yakihonne | {data.title}</title>
+      <title>{`Yakihonne | ${data.title}`}</title>
       <link rel="manifest" href="/manifest.json" />
       <meta name="description" content={data.description} />
       <meta property="og:description" content={data.description} />
@@ -12,7 +12,7 @@ export default function HeadMetadata({ data }) {
         property="og:image"
         content={
           data.image ||
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/mobile-app-download.png"
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
         }
       />
       <meta property="og:image:width" content="1200" />
@@ -27,7 +27,7 @@ export default function HeadMetadata({ data }) {
         property="twitter:image"
         content={
           data.image ||
-          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/mobile-app-download.png"
+          "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png"
         }
       />
       <script

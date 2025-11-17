@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { getUser } from "@/Helpers/Controlers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { useTranslation } from "react-i18next";
+import useIsMute from "@/Hooks/useIsMute";
 
 export default function KindSix({ event }) {
   const { t } = useTranslation();
@@ -13,14 +14,24 @@ export default function KindSix({ event }) {
   const [user, setUser] = useState(getEmptyuserMetadata(event.pubkey));
   const [reposts, setResposts] = useState([]);
   const [showReposts, setShowReposts] = useState(false);
-
+  const { isMuted: isMutedId } = useIsMute(event.relatedEvent?.id, "e");
+  const { isMuted: isMutedComment } = useIsMute(
+    event.relatedEvent?.isComment,
+    "e"
+  );
+  const { isMuted: isMutedRoot } = useIsMute(
+    event.relatedEvent.rootData ? event.relatedEvent.rootData[1] : false,
+    "e"
+  );
   useEffect(() => {
     let auth = getUser(event.pubkey);
     if (auth) {
       setUser(auth);
     }
   }, [nostrAuthors]);
-  
+
+  if (isMutedId || isMutedComment || isMutedRoot) return null;
+
   return (
     <>
       {showReposts && (

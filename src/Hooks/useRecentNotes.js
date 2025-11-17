@@ -12,7 +12,7 @@ export default function useRecentNotes(
   selectedFilter,
   kind = "notes"
 ) {
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const [recentNotes, setRecentNotes] = useState([]);
 
   const getPubkey = (event) => {

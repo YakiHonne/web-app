@@ -579,7 +579,7 @@ export default function SidebarComp() {
                                     className="sticker sticker-small sticker-red-side"
                                     style={{ minWidth: "max-content" }}
                                   >
-                                    nSec
+                                    Private Key
                                   </div>
                                 )}
                                 {account.userKeys.bunker && (
@@ -587,7 +587,7 @@ export default function SidebarComp() {
                                     className="sticker sticker-small sticker-green-side"
                                     style={{ minWidth: "max-content" }}
                                   >
-                                    Bunker
+                                    Remote
                                   </div>
                                 )}
                                 {userKeys.pub !== account.pubkey && (

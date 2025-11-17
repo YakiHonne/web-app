@@ -20,7 +20,8 @@ export default function   BookmarkEvent({
   const itemTypes = {
     a: `${kind}:${pubkey}:${d}`,
     e: pubkey,
-    t: extraData,
+    r: pubkey,
+    t: pubkey,
   };
 
   const isBookmarked = useMemo(() => {

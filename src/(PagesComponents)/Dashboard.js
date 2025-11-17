@@ -22,6 +22,7 @@ import {
   nEventEncode,
   getNoteDraft,
   getParsedNote,
+  getNoteTree,
 } from "@/Helpers/ClientHelpers";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { nip19 } from "nostr-tools";
@@ -240,9 +241,11 @@ export default function Dashboard() {
             { kinds: [30024], limit: 5, authors: [userKeys.pub] },
           ]),
         ]);
-        userProfile =  userProfile ? JSON.parse(
-          userProfile.find((event) => event.kind === 10000105).content
-        ) : {time_joined: Math.floor(Date.now() / 1000)};
+        userProfile = userProfile
+          ? JSON.parse(
+              userProfile.find((event) => event.kind === 10000105).content
+            )
+          : { time_joined: Math.floor(Date.now() / 1000) };
 
         let zaps_sent = sats
           ? sats.data.stats[userKeys.pub].zaps_sent
@@ -260,7 +263,9 @@ export default function Dashboard() {
             ...userProfile,
             zaps_sent,
           },
-          popularNotes: popularNotes ? sortEvents(popularNotes.filter((_) => _.kind === 1)) : [],
+          popularNotes: popularNotes
+            ? sortEvents(popularNotes.filter((_) => _.kind === 1))
+            : [],
           drafts: sortEvents(drafts),
           latestPublished: sortEvents(latestPublished),
           localDraft,
@@ -314,80 +319,69 @@ export default function Dashboard() {
                 selectedTab={selectedTab}
                 setSelectedTab={setSelectedTab}
               />
-              {selectedTab === 0 && isLoading && (
-                <div
-                  className="fit-container fx-centered"
-                  style={{ height: "100vh" }}
-                >
-                  <div className="fx-centered">
-                    <LoadingLogo />
-                  </div>
-                </div>
-              )}
-              {selectedTab === 0 && userPreview && !isLoading && (
-                <HomeTab
-                  data={userPreview}
-                  setPostToNote={setPostToNote}
-                  setSelectedTab={setSelectedTab}
-                  handleUpdate={handleUpdate}
-                />
-              )}
-              {selectedTab === 1 && (
-                <Content
-                  filter={"notes"}
-                  localDraft={userPreview.localDraft}
-                  init={postToNote || false}
-                  setPostToNote={setPostToNote}
-                />
-              )}
-              {selectedTab === 2 && (
-                <Content
-                  filter={query?.filter || "articles"}
-                  localDraft={userPreview.localDraft}
-                  init={postToNote || false}
-                  setPostToNote={setPostToNote}
-                />
-              )}
-              {selectedTab === 3 && (
-                <Content
-                  filter={"curations"}
-                  localDraft={userPreview.localDraft}
-                  init={postToNote || false}
-                  setPostToNote={setPostToNote}
-                />
-              )}
-              {selectedTab === 4 && (
-                <Content
-                  filter={"videos"}
-                  localDraft={userPreview.localDraft}
-                  init={postToNote || false}
-                  setPostToNote={setPostToNote}
-                />
-              )}
-              {selectedTab === 5 && (
-                <Widgets
-                  setPostToNote={setPostToNote}
-                  localDraft={userPreview.localDraft}
-                />
-              )}
-              {selectedTab === 6 && <Bookmarks />}
-              {selectedTab === 7 && <Interests />}
-              {/* <div style={{ padding: "3rem" }}></div> */}
-            </div>
-            {/* <div
-                    style={{
-                      position: "absolute",
-                      bottom: 0,
-                      left: 0,
-                    }}
-                    className="fit-container fx-centered box-pad-v"
+              <div className="fit-container">
+                {selectedTab === 0 && isLoading && (
+                  <div
+                    className="fit-container fx-centered"
+                    style={{ height: "100vh" }}
                   >
-                    <SelectTabs
-                      selectedTab={selectedTab}
-                      setSelectedTab={setSelectedTab}
-                      tabs={tabs}
-                    />
-                  </div> */}
+                    <div className="fx-centered">
+                      <LoadingLogo />
+                    </div>
+                  </div>
+                )}
+
+                {selectedTab === 0 && userPreview && !isLoading && (
+                  <HomeTab
+                    data={userPreview}
+                    setPostToNote={setPostToNote}
+                    setSelectedTab={setSelectedTab}
+                    handleUpdate={handleUpdate}
+                  />
+                )}
+                {selectedTab === 1 && (
+                  <Content
+                    filter={"notes"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 2 && (
+                  <Content
+                    filter={query?.filter || "articles"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 3 && (
+                  <Content
+                    filter={"curations"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 4 && (
+                  <Content
+                    filter={"videos"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 5 && (
+                  <Widgets
+                    setPostToNote={setPostToNote}
+                    localDraft={userPreview.localDraft}
+                  />
+                )}
+                {selectedTab === 6 && <Bookmarks />}
+                {selectedTab === 7 && <Interests />}
+                <div style={{ marginBottom: "100px" }}></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -728,6 +722,9 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
     dispatchEvents({ type: "remove-events" });
     setLastEventTime(undefined);
   }, [userKeys]);
+  useEffect(() => {
+    setContentFrom(filter);
+  }, [filter]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -1240,6 +1237,7 @@ const Bookmarks = () => {
           refresh={handleBookmarkDeletion}
           cancel={() => setDeleteBookmark(false)}
           aTag={deleteBookmark.aTag}
+          description={t("AaTanJf")}
         />
       )}
       <div className="fit-container">
@@ -1370,7 +1368,6 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
   const userFollowings = useSelector((state) => state.userFollowings);
   const { t } = useTranslation();
   const [deleteEvent, setDeleteEvent] = useState(false);
-  const [addArtsToCur, setAddArtsToCur] = useState(false);
   const [showCurationCreator, setShowCurationCreator] = useState(false);
   const [editEvent, setEditEvent] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(0);
@@ -1807,9 +1804,12 @@ const DraftCard = ({ event, refreshAfterDeletion }) => {
       }}
       onClick={(e) => {
         e.stopPropagation();
-        event.local
-          ? customHistory("/write-article")
-          : customHistory("/write-article", {
+        if (event.local) {
+          customHistory("/write-article");
+        } else {
+          localStorage.setItem(
+            event.naddr,
+            JSON.stringify({
               post_pubkey: event.pubkey,
               post_id: event.id,
               post_kind: event.kind,
@@ -1820,7 +1820,10 @@ const DraftCard = ({ event, refreshAfterDeletion }) => {
               post_d: event.d,
               post_content: event.content,
               post_published_at: event.published_at,
-            });
+            })
+          );
+          customHistory("/write-article?edit=" + event.naddr);
+        }
       }}
     >
       <div className="fx-centered fx-start-v">
@@ -2211,20 +2214,22 @@ const BookmarkCard = ({ event, showDetails, deleteEvent, editEvent }) => {
         <OptionsDropdown
           options={[
             <div
-              className="fit-container"
+              className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
               onClick={(e) => {
                 e.stopPropagation();
                 editEvent(event);
               }}
+              style={{ width: "100px" }}
             >
               <p>{t("AsXohpb")}</p>
             </div>,
             <div
-              className="fit-container"
+              className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
               onClick={(e) => {
                 e.stopPropagation();
                 deleteEvent(event);
               }}
+              style={{ width: "100px" }}
             >
               <p className="red-c">{t("Almq94P")}</p>
             </div>,
@@ -2241,14 +2246,38 @@ const BookmarkContent = ({ bookmark, exit }) => {
   const [showFilter, setShowFilter] = useState(false);
   const [postKind, setPostKind] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const bookmarkTags = useMemo(() => {
+    return bookmark.tags
+      .filter((tag) => ["r", "t"].includes(tag[0]))
+      .map((tag) => ({ value: tag, kind: tag[0] === "r" ? 2 : 3 }));
+  }, [bookmark]);
   const itemsNumber = useMemo(() => {
+    let allCount = bookmarkTags.length + content.length;
     if (postKind === 0)
-      return content.length >= 10 || content.length === 0
-        ? content.length
-        : `0${content.length}`;
-    let num = content.filter((item) => item.kind === postKind).length;
+      return allCount >= 10 || allCount === 0 ? allCount : `0${allCount}`;
+    let num =
+      content.filter((item) => item.kind === postKind).length +
+      bookmarkTags.filter((tag) => tag.kind === postKind).length;
     return num >= 10 || num === 0 ? num : `0${num}`;
-  }, [postKind, content]);
+  }, [postKind, content, bookmarkTags]);
+  const eventKindsDisplayName = {
+    1: t("Az5ftet"),
+    11: t("Az5ftet"),
+    7: t("Alz0E9Y"),
+    6: t("Aai65RJ"),
+    30023: t("AyYkCrS"),
+    30024: t("AsQyoY0"),
+    30004: t("Ac6UnVb"),
+    30005: t("Ac6UnVb"),
+    34235: t("AVdmifm"),
+    22: t("AVdmifm"),
+    21: t("AVdmifm"),
+    34236: t("AVdmifm"),
+    300331: t("AkvXmyz"),
+    30033: t("AkvXmyz"),
+    2: t("ArBFIr1"),
+    3: t("AUupZYw"),
+  };
   const bookmarkFilterOptions = [
     {
       display_name: "All content",
@@ -2271,12 +2300,16 @@ const BookmarkContent = ({ bookmark, exit }) => {
       value: 1,
     },
     {
-      display_name: "Paid notes",
-      value: 11,
-    },
-    {
       display_name: "Videos",
       value: 34235,
+    },
+    {
+      display_name: "Links",
+      value: 2,
+    },
+    {
+      display_name: "Hashtags",
+      value: 3,
     },
   ];
   useEffect(() => {
@@ -2304,23 +2337,14 @@ const BookmarkContent = ({ bookmark, exit }) => {
           let parsedEvent = getParsedRepEvent(event);
           return parsedEvent;
         }
-
-        let l = event.tags.find((tag) => tag[0] === "l" && tag[1]);
-        let kind = l
-          ? event.kind === 1 && l[1] === "FLASH NEWS"
-            ? 1
-            : 11
-          : 111;
-        let tempEvent = { ...event };
-        tempEvent.kind = kind;
-        return tempEvent;
+        let parsedEvent = getParsedNote(event, undefined, false);
+        return parsedEvent;
       });
       setContent(events);
       setIsLoading(false);
     };
     fetchData();
   }, []);
-
   return (
     <div
       className="fit-container fx-centered"
@@ -2363,15 +2387,15 @@ const BookmarkContent = ({ bookmark, exit }) => {
             </p>
           </div>
         </div>
-        {content.length > 0 && !isLoading && (
+        {!isLoading && (
           <div className="fx-centered fx-col" style={{ marginTop: "1rem" }}>
             <div className="box-marg-s fit-container fx-scattered">
               <h4 className="gray-c fx-start-h">List</h4>
-
               <Select
                 options={bookmarkFilterOptions}
                 setSelectedValue={setPostKind}
                 value={postKind}
+                revert={true}
               />
             </div>
             {itemsNumber === 0 && (
@@ -2386,125 +2410,50 @@ const BookmarkContent = ({ bookmark, exit }) => {
               </div>
             )}
             {content.map((item) => {
-              let content = getParsedRepEvent(item);
-              let naddr = [30004, 30023, 30005, 34235, 21, 22].includes(
-                item.kind
-              )
-                ? nip19.naddrEncode({
-                    identifier: content.d,
-                    pubkey: item.pubkey,
-                    kind: item.kind,
-                  })
-                : "";
-              let nEvent = [1, 11, 111].includes(item.kind)
-                ? nip19.neventEncode({
-                    author: item.pubkey,
-                    id: item.id,
-                  })
-                : "";
               if (
                 !postKind &&
                 [30004, 30023, 30005, 34235, 21, 22].includes(item.kind)
               )
                 return (
                   <div
-                    className="sc-s-18 fit-container fx-scattered box-pad-h-s box-pad-v-s"
+                    className="sc-s-18 bg-sp fit-container fx-scattered box-pad-h-s box-pad-v-s"
                     style={{ position: "relative" }}
                     key={item.id}
                   >
-                    {[30004].includes(item.kind) && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          padding: "0 1rem",
-                          left: "-2rem",
-                          top: "50%",
-                          transform: "translateY(-50%) rotate(-90deg)",
-                          transformOrigin: "center",
-                          backgroundColor: "var(--green-main)",
-                          color: "white",
-                          borderRadius: "var(--border-r-18)",
-                        }}
-                      >
-                        <p className="p-small">{t("Ac6UnVb")}</p>
-                      </div>
-                    )}
-                    {[30005].includes(item.kind) && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          padding: "0 1rem",
-                          left: "-2rem",
-                          top: "50%",
-                          transform: "translateY(-50%) rotate(-90deg)",
-                          transformOrigin: "center",
-                          backgroundColor: "var(--orange-main)",
-                          color: "white",
-                          borderRadius: "var(--border-r-18)",
-                        }}
-                      >
-                        <p className="p-small">{t("Ac6UnVb")}</p>
-                      </div>
-                    )}
-                    {[34235, 21, 22].includes(item.kind) && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          padding: "0 1rem",
-                          left: "-1.65rem",
-                          top: "50%",
-                          transform: "translateY(-50%) rotate(-90deg)",
-                          transformOrigin: "center",
-                          backgroundColor: "var(--blue-main)",
-                          color: "white",
-                          borderRadius: "var(--border-r-18)",
-                        }}
-                      >
-                        <p className="p-small">{t("AVdmifm")}</p>
-                      </div>
-                    )}
-                    <div
-                      className={`fx-centered ${
-                        [30004, 30005, 34235].includes(item.kind) &&
-                        "box-pad-h-m"
-                      }`}
-                    >
+                    <div className={`fx-centered `}>
                       <div
                         className="bg-img cover-bg sc-s-18"
                         style={{
                           aspectRatio: "1 / 1",
                           minWidth: "64px",
-                          backgroundImage: `url(${content.image})`,
+                          backgroundImage: `url(${item.image})`,
                           backgroundColor: "var(--dim-gray)",
                         }}
                       ></div>
                       <div>
-                        <p className="p-one-line">{content.title}</p>
                         <p className="p-medium gray-c">
-                          {t("A65LO6w", {
-                            date: timeAgo(new Date(item.created_at * 1000)),
+                          {t("AHhPGax", {
+                            date: convertDate(new Date(item.created_at * 1000)),
                           })}
                         </p>
+                        <p className="p-one-line">{item.title}</p>
+                        <div className="sticker sticker-normal sticker-gray-black">
+                          {eventKindsDisplayName[item.kind]}
+                        </div>
                       </div>
                     </div>
                     <div className="box-pad-h-s fx-centered">
                       <Link
                         target={"_blank"}
-                        href={
-                          (item.kind === 30023 && `/article/${naddr}`) ||
-                          ([30005, 30004].includes(item.kind) &&
-                            `/curation/${naddr}`) ||
-                          ([34235, 21, 22].includes(item.kind) &&
-                            `/video/${naddr}`)
-                        }
+                        href={`/${item.naddr || item.nevent}`}
                       >
                         <div className="share-icon-24"></div>
                       </Link>
                       <BookmarkEvent
                         pubkey={item.pubkey}
                         kind={item.kind}
-                        d={content.d}
-                        image={content.image}
+                        d={item.d}
+                        image={item.image}
                       />
                     </div>
                   </div>
@@ -2515,26 +2464,11 @@ const BookmarkContent = ({ bookmark, exit }) => {
               )
                 return (
                   <div
-                    className="sc-s-18 fit-container fx-scattered box-pad-h-s box-pad-v-s"
+                    className="sc-s-18 bg-sp fit-container fx-scattered box-pad-h-s box-pad-v-s"
                     style={{ position: "relative" }}
                     key={item.id}
                   >
-                    <div
-                      style={{
-                        position: "absolute",
-                        padding: "0 1rem",
-                        left: "-2.5rem",
-                        top: "50%",
-                        transform: "translateY(-50%) rotate(-90deg)",
-                        transformOrigin: "center",
-                        backgroundColor: "var(--black)",
-                        color: "var(--white)",
-                        borderRadius: "var(--border-r-18)",
-                      }}
-                    >
-                      <p className="p-small">{t("AV5f3lP")}</p>
-                    </div>
-                    <div className="fx-centered box-pad-h-m">
+                    <div className="fx-centered">
                       <div
                         className="sc-s-18 fx-centered"
                         style={{
@@ -2542,21 +2476,27 @@ const BookmarkContent = ({ bookmark, exit }) => {
                           minWidth: "64px",
                         }}
                       >
-                        <div className="news-24"></div>
+                        <div className="note-24"></div>
                       </div>
                       <div>
-                        <p className="p-one-line">
-                          {item.content.substring(0, 100)}
-                        </p>
                         <p className="p-medium gray-c">
-                          {t("A1jhS42", {
+                          {t("AHhPGax", {
                             date: convertDate(new Date(item.created_at * 1000)),
                           })}
                         </p>
+                        <p className="p-one-line">
+                          {item.content.substring(0, 100)}
+                        </p>
+                        <div className="sticker sticker-normal sticker-gray-black">
+                          {eventKindsDisplayName[item.kind]}
+                        </div>
                       </div>
                     </div>
                     <div className="box-pad-h-s fx-centered">
-                      <Link target={"_blank"} href={`/flash-news/${nEvent}`}>
+                      <Link
+                        target={"_blank"}
+                        href={`/${item.naddr || item.nevent}`}
+                      >
                         <div className="share-icon-24"></div>
                       </Link>
                       <BookmarkEvent
@@ -2567,124 +2507,107 @@ const BookmarkContent = ({ bookmark, exit }) => {
                     </div>
                   </div>
                 );
-
-              if (
-                (!postKind && item.kind === 111) ||
-                (postKind && postKind === 111 && item.kind === 111)
-              )
-                return (
-                  <div
-                    className="sc-s-18 fit-container fx-scattered box-pad-h-s box-pad-v-s"
-                    style={{ position: "relative" }}
-                    key={item.id}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        padding: "0 1rem",
-                        left: "-1.4rem",
-                        top: "50%",
-                        transform: "translateY(-50%) rotate(-90deg)",
-                        transformOrigin: "center",
-                        backgroundColor: "var(--blue-main)",
-                        color: "white",
-                        borderRadius: "var(--border-r-18)",
-                      }}
-                    >
-                      <p className="p-small">{t("Az5ftet")}</p>
-                    </div>
-                    <div className="fx-centered box-pad-h-m">
-                      <div
-                        className="bg-img cover-bg sc-s-18"
-                        style={{
-                          aspectRatio: "1 / 1",
-                          minWidth: "64px",
-                          backgroundImage: `url(${content.image})`,
-                          backgroundColor: "var(--dim-gray)",
-                        }}
-                      ></div>
-                      <div>
-                        <p className="p-one-line">
-                          {item.content.substring(0, 100)}
-                        </p>
-                        <p className="p-medium gray-c">
-                          {t("A1jhS42", {
-                            date: convertDate(new Date(item.created_at * 1000)),
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="box-pad-h-s fx-centered">
-                      <Link target={"_blank"} href={`/note/${nEvent}`}>
-                        <div className="share-icon-24"></div>
-                      </Link>
-                      <BookmarkEvent pubkey={item.id} kind={1} itemType="e" />
-                    </div>
-                  </div>
-                );
               if (item.kind === postKind)
                 return (
                   <div
-                    className="sc-s-18 fit-container fx-scattered box-pad-h-s box-pad-v-s"
+                    className="sc-s-18 bg-sp fit-container fx-scattered box-pad-h-s box-pad-v-s"
                     style={{ position: "relative" }}
                     key={item.id}
                   >
-                    {[30004].includes(item.kind) && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          padding: "0 1rem",
-                          left: "-2rem",
-                          top: "50%",
-                          transform: "translateY(-50%) rotate(-90deg)",
-                          transformOrigin: "center",
-                          backgroundColor: "var(--c1)",
-                          color: "var(--white)",
-                          borderRadius: "var(--border-r-18)",
-                        }}
-                      >
-                        <p className="p-small">{t("Ac6UnVb")}</p>
-                      </div>
-                    )}
-                    <div
-                      className={`fx-centered ${
-                        [30004].includes(item.kind) && "box-pad-h-m"
-                      }`}
-                    >
+                    <div className={`fx-centered`}>
                       <div
                         className="bg-img cover-bg sc-s-18"
                         style={{
                           aspectRatio: "1 / 1",
                           minWidth: "64px",
-                          backgroundImage: `url(${content.image})`,
+                          backgroundImage: `url(${item.image})`,
                           backgroundColor: "var(--dim-gray)",
                         }}
                       ></div>
                       <div>
-                        <p className="p-one-line">{content.title}</p>
                         <p className="p-medium gray-c">
-                          {t("A1jhS42", {
+                          {t("AHhPGax", {
                             date: convertDate(new Date(item.created_at * 1000)),
                           })}
                         </p>
+                        <p className="p-one-line">{item.title}</p>
+                        <div className="sticker sticker-normal sticker-gray-black">
+                          {eventKindsDisplayName[item.kind]}
+                        </div>
                       </div>
                     </div>
                     <div className="box-pad-h-s fx-centered">
                       <Link
                         target={"_blank"}
-                        href={
-                          item.kind === 30023
-                            ? `/article/${naddr}`
-                            : `/curation/${naddr}`
-                        }
+                        href={`/${item.naddr || item.nevent}`}
                       >
                         <div className="share-icon-24"></div>
                       </Link>
                       <BookmarkEvent
                         pubkey={item.pubkey}
                         kind={item.kind}
-                        d={content.d}
-                        image={content.image}
+                        d={item.d}
+                        image={item.image}
+                      />
+                    </div>
+                  </div>
+                );
+            })}
+            {bookmarkTags.map((tag) => {
+              if (!postKind || postKind === tag.kind)
+                return (
+                  <div
+                    className="sc-s-18 bg-sp fit-container fx-scattered box-pad-h-s box-pad-v-s"
+                    style={{ position: "relative" }}
+                    key={tag.value[1]}
+                  >
+                    <div className={`fx-centered`}>
+                      <div
+                        className="sc-s-18 fx-centered"
+                        style={{
+                          aspectRatio: "1 / 1",
+                          minWidth: "64px",
+                        }}
+                      >
+                        {tag.kind === 2 ? (
+                          <div className="link-24"></div>
+                        ) : (
+                          <div className="hashtag-24"></div>
+                        )}
+                      </div>
+                      <div>
+                        {tag.kind === 2 && (
+                          <div>
+                            <p className="p-one-line">{tag.value[2]}</p>
+                            {tag.value.length > 2 && (
+                              <p className="blue-c">{tag.value[1]}</p>
+                            )}
+                          </div>
+                        )}
+                        {tag.kind === 3 && (
+                          <div>
+                            <p className="p-one-line">{tag.value[1]}</p>
+                          </div>
+                        )}
+                        <div className="sticker sticker-normal sticker-gray-black">
+                          {eventKindsDisplayName[tag.kind]}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="box-pad-h-s fx-centered">
+                      <Link
+                        target={"_blank"}
+                        href={
+                          tag.kind === 2
+                            ? tag.value[1]
+                            : `/search?keyword=${tag.value[1]}`
+                        }
+                      >
+                        <div className="share-icon-24"></div>
+                      </Link>
+                      <BookmarkEvent
+                        pubkey={tag.value[1]}
+                        itemType={tag.value[0]}
                       />
                     </div>
                   </div>
@@ -2692,7 +2615,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
             })}
           </div>
         )}
-        {content.length === 0 && !isLoading && (
+        {(content.length === 0 || bookmarkTags.length === 0) && !isLoading && (
           <div
             className="fx-centered fx-col fit-container"
             style={{ height: "30vh" }}

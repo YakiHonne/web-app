@@ -1,4 +1,5 @@
 import bannedList from "@/Content/BannedList";
+import { getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { getParsedAuthor } from "@/Helpers/Encryptions";
 import { isHex, sortByKeyword } from "@/Helpers/Helpers";
@@ -36,13 +37,13 @@ export default function useSearchUsers(keyword) {
     try {
       setIsSearchLoading(true);
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_CACHE_BASE_URL;
-
       let data = await axios.get(
         `${API_BASE_URL}/api/v1/users/search/${keyword}`
       );
+      data = data.data;
 
       setUsers((prev) => {
-        let tempData = [...prev, ...data.data];
+        let tempData = [...prev, ...data];
         tempData = tempData.filter((user, index, tempData) => {
           if (
             !bannedList.includes(user.pubkey) &&

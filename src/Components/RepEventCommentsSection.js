@@ -3,6 +3,7 @@ import CommentsSection from "@/Components/CommentsSection";
 import { eventKinds } from "@/Content/Extra";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import { useTranslation } from "react-i18next";
+import useRepEventStats from "@/Hooks/useRepEventStats";
 
 export default function RepEventCommentsSection({
   event,
@@ -14,6 +15,8 @@ export default function RepEventCommentsSection({
   kind,
 }) {
   const { t } = useTranslation();
+  const { postActions } = useRepEventStats(event.aTag || event.id, event.pubkey);
+
   return (
     <div
       className="fit-container fx-centered fx-start-h fx-col"
@@ -52,6 +55,7 @@ export default function RepEventCommentsSection({
           isRoot={true}
           tagKind={"a"}
           kind={eventKinds[kind]}
+          postActions={postActions}
         />
       </div>
     </div>

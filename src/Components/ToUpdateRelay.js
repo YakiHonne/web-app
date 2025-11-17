@@ -24,7 +24,7 @@ export default function ToUpdateRelay({ exit }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await axios.get("https://api.nostr.watch/v1/online");
+        const data = await axios.get("https://cache-v2.yakihonne.com/api/v1/relays");
         setAllRelays(data.data);
         setIsLoaded(true);
       } catch {
