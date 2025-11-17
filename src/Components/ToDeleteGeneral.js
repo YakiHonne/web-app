@@ -7,6 +7,7 @@ import { InitEvent } from "@/Helpers/Controlers";
 
 export default function ToDeleteGeneral({
   title,
+  description,
   aTag = "",
   eventId,
   refresh,
@@ -87,7 +88,7 @@ export default function ToDeleteGeneral({
             {t("AQ9Wcw7")}
           </h3>
         )}
-        <p className="p-centered gray-c box-pad-v-m">{t("A2QosxI")}</p>
+        <p className="p-centered gray-c box-pad-v-m">{description || t("A2QosxI")}</p>
         <div className="fx-centered fit-container">
           <button
             className="fx btn btn-gst-red"

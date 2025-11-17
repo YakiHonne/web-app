@@ -1,14 +1,38 @@
-import { getSSGNdkInstance } from "@/Helpers/SSGNDKInstance";
+import {
+  getSearchNdkInstance,
+  getSSGNdkInstance,
+} from "@/Helpers/SSGNDKInstance";
+import { sortEvents } from "nostr-tools";
+import { sleepTimer } from "./Helpers";
 
-export default async function getDataForSSG(
+export async function getDataForSSG(
   filter,
   timeout = 1000,
   maxEvents = 1,
   relays = []
 ) {
-  const SSGNdkInstance = getSSGNdkInstance(relays);
+  const ndkInstance = getSSGNdkInstance(relays);
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
+  let data = await launchDataFetching(filter, timeout, maxEvents, ndkInstance);
+  return data;
+}
 
+export async function getDataForSearch(filter, timeout = 1000, maxEvents = 1, relays = []) {
+  const ndkInstance = getSearchNdkInstance(relays);
+  if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
+  let data = await Promise.race([
+    launchDataFetching(filter, timeout, maxEvents, ndkInstance),
+    sleepTimer(3000),
+  ]);
+  return data || { data: [], pubkeys: [] };
+}
+
+const launchDataFetching = async (
+  filter,
+  timeout = 1000,
+  maxEvents = 1,
+  ndkInstance
+) => {
   return new Promise((resolve) => {
     let events = [];
     let pubkeys = [];
@@ -26,19 +50,17 @@ export default async function getDataForSSG(
       resolve({ data: [], pubkeys: [] });
       return;
     }
-    let sub = SSGNdkInstance.subscribe(filter_, {
+    let sub = ndkInstance.subscribe(filter_, {
       groupable: false,
-      // skipVerification: true,
-      // skipValidation: true,
+      // cacheUsage: "ONLY_RELAY",
     });
     let timer;
     const startTimer = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
-        // sub.removeAllListeners();
         sub.stop();
         resolve({
-          data: events,
+          data: sortEvents(events),
           pubkeys: [...new Set(pubkeys)],
         });
       }, timeout);
@@ -49,7 +71,6 @@ export default async function getDataForSSG(
         pubkeys.push(event.pubkey);
         if (event.id) events.push(event.rawEvent());
         if (maxEvents === 1) {
-          // sub.removeAllListeners();
           sub.stop();
           resolve({
             data: events,
@@ -63,4 +84,4 @@ export default async function getDataForSSG(
       if (events.length === 0) startTimer();
     });
   });
-}
+};

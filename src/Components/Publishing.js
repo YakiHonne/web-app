@@ -12,7 +12,7 @@ import {
   removeEventStats,
   removeRecordFromNDKStore,
 } from "@/Helpers/DB";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import {
   removeDuplicatedRelays,
   removeRelayLastSlash,
@@ -73,7 +73,7 @@ const getPublishedEvents = () => {
   }
 };
 
-export default function Publishing() {
+export default function Publishing({ displayOff = false }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const toPublish = useSelector((state) => state.toPublish);
@@ -144,6 +144,7 @@ export default function Publishing() {
 
   useEffect(() => {
     const publishPost = async () => {
+      console.log(toPublish);
       let { kind, content, tags, eventInitEx, allRelays } = toPublish;
       let relaysToPublish =
         allRelays?.length > 0
@@ -169,7 +170,7 @@ export default function Publishing() {
         });
       let ak = getActionKey();
       let pTag =
-        allRelays.length > 1
+        allRelays?.length > 1
           ? eventInitEx
             ? getOutboxPubkey(eventInitEx.kind, eventInitEx.tags)
             : getOutboxPubkey(kind, tags)
@@ -507,6 +508,8 @@ export default function Publishing() {
   };
 
   if (!userMetadata) return;
+  if (displayOff) return null;
+
   return (
     <>
       {showDetails && (

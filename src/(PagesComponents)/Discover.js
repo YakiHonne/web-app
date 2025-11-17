@@ -161,7 +161,7 @@ const ExploreFeed = ({
 }) => {
   const userKeys = useSelector((state) => state.userKeys);
   const userInterestList = useSelector((state) => state.userInterestList);
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const userFollowings = useSelector((state) => state.userFollowings);
   const { t } = useTranslation();
   const [content, setContent] = useState([]);

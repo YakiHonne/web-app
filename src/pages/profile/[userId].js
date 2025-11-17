@@ -4,7 +4,7 @@ import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 import { nip19 } from "nostr-tools";
-import getDataForSSG from "@/Helpers/lib";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(
   () => import("@/(PagesComponents)/User/UserHome"),
@@ -53,8 +53,8 @@ export async function getStaticProps({ locale, params }) {
     };
   }
   const [resMetaData, resFollowings] = await Promise.all([
-    getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 5),
-    getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 5),
+    getDataForSSG([{ authors: [pubkey], kinds: [0] }], 500, 3),
+    getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 3),
   ]);
 
   let metadata = getEmptyuserMetadata(pubkey);
@@ -80,7 +80,7 @@ export async function getStaticProps({ locale, params }) {
         nprofile: nip19.nprofileEncode({ pubkey: pubkey }),
       },
     },
-    revalidate: 3600,
+    revalidate: metadata_ ? 2 : 3600,
   };
 }
 

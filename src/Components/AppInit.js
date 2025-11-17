@@ -19,6 +19,7 @@ import {
   setUserMutedList,
   setUserRelays,
   setUserSavedTools,
+  setUserSearchRelays,
   setUserWotList,
 } from "@/Store/Slides/UserData";
 import {
@@ -51,6 +52,8 @@ import {
   getFollowingsInboxRelays,
   getRelaysStats,
   saveUsers,
+  getSearchRelays,
+  saveSearchRelays,
 } from "@/Helpers/DB";
 import {
   addConnectedAccounts,
@@ -69,7 +72,11 @@ import {
   setTrendingUsers,
 } from "@/Store/Slides/Extras";
 import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
-import { handleAppDirection, toggleColorScheme } from "@/Helpers/Helpers";
+import {
+  changePrimary,
+  handleAppDirection,
+  toggleColorScheme,
+} from "@/Helpers/Helpers";
 import {
   getConnectedAccounts,
   getKeys,
@@ -89,7 +96,7 @@ import {
   setIsConnectedToYaki,
   setIsYakiChestLoaded,
 } from "@/Store/Slides/YakiChest";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import {
   NDKNip07Signer,
   NDKNip46Signer,
@@ -98,6 +105,7 @@ import {
 } from "@nostr-dev-kit/ndk";
 import { getTrendingUsers24h } from "@/Helpers/WSInstance";
 import { savedToolsIdentifier } from "@/Content/Extras";
+import { primaryColors } from "@/Content/PrimaryColors";
 
 export default function AppInit() {
   const dispatch = useDispatch();
@@ -149,6 +157,11 @@ export default function AppInit() {
       async () => (userKeys ? await getInboxRelays(userKeys.pub) : []),
       [userKeys]
     ) || [];
+  const searchRelays =
+    useLiveQuery(
+      async () => (userKeys ? await getSearchRelays(userKeys.pub) : []),
+      [userKeys]
+    ) || [];
   const wotList =
     useLiveQuery(
       async () => (userKeys ? await getWotlist(userKeys.pub) : []),
@@ -169,6 +182,7 @@ export default function AppInit() {
 
   const previousChatrooms = useRef([]);
   const previousRelays = useRef([]);
+  const previousSearchRelays = useRef([]);
   const previousAppSettings = useRef(false);
   const previousInterests = useRef([]);
   const previousFollowings = useRef([]);
@@ -217,6 +231,14 @@ export default function AppInit() {
       saveRelayMetadata(favRelays.relays || []);
     }
     if (
+      JSON.stringify(previousSearchRelays.current) !==
+      JSON.stringify(searchRelays)
+    ) {
+      previousSearchRelays.current = searchRelays;
+      dispatch(setUserSearchRelays(searchRelays.relays));
+      saveRelayMetadata(searchRelays.relays || []);
+    }
+    if (
       JSON.stringify(previousInboxRelays.current) !==
       JSON.stringify(inboxRelays)
     ) {
@@ -262,10 +284,17 @@ export default function AppInit() {
       JSON.stringify(previousMutedList.current) !== JSON.stringify(mutedlist)
     ) {
       previousMutedList.current = mutedlist;
-      dispatch(setUserMutedList(mutedlist.mutedlist));
-      if (mutedlist.mutedlist) {
-        for (let p of mutedlist.mutedlist) ndkInstance.mutedIds.set([p], ["p"]);
-      }
+      dispatch(
+        setUserMutedList({
+          userMutedList: mutedlist?.mutedlist || [],
+          allTags: mutedlist?.allTags || [],
+        })
+      );
+      saveUsers(mutedlist?.mutedlist || []);
+      ndkInstance.muteFilter = (event) => {
+        if (mutedlist?.mutedlist?.includes(event.pubkey)) return true;
+        return false;
+      };
     }
     if (
       JSON.stringify(previousBookmarks.current) !== JSON.stringify(bookmarks)
@@ -324,14 +353,16 @@ export default function AppInit() {
     inboxRelays,
     relaysStats,
     favRelays,
+    searchRelays,
   ]);
 
   useEffect(() => {
     let previousDarkMode = localStorage.getItem("yaki-theme");
     let previousAppLang = localStorage.getItem("app-lang");
-    let previousIsConnectedToYaki = localStorage?.getItem("connect_yc")
+    let previousIsConnectedToYaki = localStorage.getItem("connect_yc")
       ? true
       : false;
+
     if (previousDarkMode === "0") {
       setIsDarkMode("1");
       toggleColorScheme(false);
@@ -346,6 +377,7 @@ export default function AppInit() {
     saveNostrClients();
     getTrendingProfiles();
     handleAppDirection(previousAppLang);
+    changePrimary();
 
     let keys = getKeys();
     if (keys) {
@@ -406,6 +438,7 @@ export default function AppInit() {
         FAVRELAYS,
         BLOSSOMSERVERS,
         INBOXRELAYS,
+        SEARCHRELAYS,
       ] = await Promise.all([
         getRelays(userKeys.pub),
         getFollowings(userKeys.pub),
@@ -415,6 +448,7 @@ export default function AppInit() {
         getFavRelays(userKeys.pub),
         getBlossomServers(userKeys.pub),
         getInboxRelays(userKeys.pub),
+        getSearchRelays(userKeys.pub),
       ]);
       let lastRelaysTimestamp = RELAYS?.last_timestamp || undefined;
       let lastFollowingsTimestamp = FOLLOWINGS?.last_timestamp || undefined;
@@ -423,6 +457,7 @@ export default function AppInit() {
       let lastAppSettingsTimestamp = APPSETTINGS?.last_timestamp || undefined;
       let lastInboxRelaysTimestamp = INBOXRELAYS?.last_timestamp || undefined;
       let lastFavRelaysTimestamp = FAVRELAYS?.last_timestamp || undefined;
+      let lastSearchRelaysTimestamp = SEARCHRELAYS?.last_timestamp || undefined;
       let lastBlossomServersTimestamp =
         BLOSSOMSERVERS?.last_timestamp || undefined;
       let lastUserMetadataTimestamp =
@@ -433,6 +468,7 @@ export default function AppInit() {
       let tempBlossomServers;
       let tempMutedList;
       let tempRelays;
+      let tempSearchRelays;
       let tempInboxRelays;
       let tempFavRelays;
       let tempAppSettings;
@@ -468,6 +504,13 @@ export default function AppInit() {
             since: lastRelaysTimestamp
               ? lastRelaysTimestamp + 1
               : lastRelaysTimestamp,
+          },
+          {
+            kinds: [10007],
+            authors: [userKeys.pub],
+            since: lastSearchRelaysTimestamp
+              ? lastSearchRelaysTimestamp + 1
+              : lastSearchRelaysTimestamp,
           },
           {
             kinds: [10050],
@@ -538,6 +581,10 @@ export default function AppInit() {
           tempRelays = { ...event };
           if (eose) saveRelays(event, userKeys.pub);
         }
+        if (event.kind === 10007) {
+          tempSearchRelays = { ...event };
+          if (eose) saveSearchRelays(event, userKeys.pub);
+        }
         if (event.kind === 10050) {
           tempInboxRelays = { ...event };
           if (eose) saveInboxRelays(event, userKeys.pub);
@@ -588,6 +635,11 @@ export default function AppInit() {
           lastInboxRelaysTimestamp
         );
         saveFavRelays(tempFavRelays, userKeys.pub, lastFavRelaysTimestamp);
+        saveSearchRelays(
+          tempSearchRelays,
+          userKeys.pub,
+          lastSearchRelaysTimestamp
+        );
         saveBlossomServers(
           tempBlossomServers,
           userKeys.pub,
@@ -884,7 +936,7 @@ export default function AppInit() {
           undefined,
           undefined,
           undefined,
-          true,
+          true
         );
         networkData.push(d);
       }
@@ -952,7 +1004,7 @@ export default function AppInit() {
         undefined,
         undefined,
         undefined,
-        true,
+        true
       );
       if (backupFollowings.data.length === 0) return;
       let followinglist = backupFollowings.data[0].tags
@@ -978,7 +1030,7 @@ export default function AppInit() {
           undefined,
           undefined,
           undefined,
-          true,
+          true
         );
         networkData.push(d);
       }

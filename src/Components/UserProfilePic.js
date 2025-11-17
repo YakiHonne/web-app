@@ -372,7 +372,7 @@ export default function UserProfilePic({
             >
               <div className="fx-centered fx-start-h">
                 <div className="nip05"></div>
-                <p>{metadata.nip05 || "N/A"}</p>
+                <p>{metadata.nip05 && typeof metadata.nip05 === "string" ? metadata.nip05 : "N/A"}</p>
               </div>
               {metadata.website && (
                 <div className="fx-centered fx-start-h">

@@ -11,7 +11,7 @@ import { store } from "@/Store/Store";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { t } from "i18next";
 import { checkCurrentConvo, getInboxRelaysForUser } from "./DB";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { getKeys } from "./ClientHelpers";
 import { ndkInstance } from "./NDKInstance";
 import axiosInstance from "./HTTP_Client";

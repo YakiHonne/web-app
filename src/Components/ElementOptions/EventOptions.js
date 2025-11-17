@@ -36,7 +36,14 @@ export default function EventOptions({
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
-  const { muteUnmute, isMuted } = useIsMute(event.pubkey);
+  const { isMuted: isMutedPubkey, muteUnmute: muteUnmutePubkey } = useIsMute(
+    event?.pubkey
+  );
+  const { isMuted: isMutedId, muteUnmute: muteUnmuteId } = useIsMute(
+    event?.id,
+    "e"
+  );
+
   const [showRawEvent, setShowRawEvent] = useState(false);
   const [showAddArticleToCuration, setShowArticleToCuration] = useState(false);
   const [deleteEvent, setDeleteEvent] = useState(false);
@@ -333,10 +340,10 @@ export default function EventOptions({
   const muteUser =
     userKeys && event.pubkey !== userKeys.pub ? (
       <div
-        onClick={muteUnmute}
+        onClick={muteUnmutePubkey}
         className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       >
-        {isMuted ? (
+        {isMutedPubkey ? (
           <>
             <div className="unmute-24"></div>
             <p className="red-c">{t("AKELUbQ")}</p>
@@ -351,6 +358,26 @@ export default function EventOptions({
     ) : (
       ""
     );
+  const muteThread = userKeys ? (
+    <div
+      onClick={muteUnmuteId}
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+    >
+      {isMutedId ? (
+        <>
+          <div className="unmute-24"></div>
+          <p className="red-c">{t("AnddeNp")}</p>
+        </>
+      ) : (
+        <>
+          <div className="mute-24"></div>
+          <p className="red-c">{t("AydqZTl")}</p>
+        </>
+      )}
+    </div>
+  ) : (
+    ""
+  );
 
   const toDeleteEvent = (
     <div
@@ -380,6 +407,7 @@ export default function EventOptions({
           noteBookmark,
           shareLink,
           HR,
+          muteThread,
           muteUser,
         ];
       case "repEvents":

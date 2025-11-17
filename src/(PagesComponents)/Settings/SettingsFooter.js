@@ -14,7 +14,7 @@ export function SettingsFooter({ userKeys }) {
         <span className="c1-c p-bold">
           v{process.env.NEXT_PUBLIC_APP_VERSION}
         </span>{" "}
-        (Updated: 02/11/2025)
+        (Updated: {process.env.NEXT_PUBLIC_UPDATE_DATE})
       </p>
       <p className="gray-c" style={{ maxWidth: "400px" }}>
         {t("AFZ1jAD")}

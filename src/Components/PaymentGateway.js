@@ -6,7 +6,7 @@ import {
   shortenKey,
 } from "@/Helpers/Encryptions";
 import QRCode from "react-qr-code";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { getZapEventRequest } from "@/Helpers/NostrPublisher";
 import LoadingDots from "@/Components/LoadingDots";
 import { webln } from "@getalby/sdk";
@@ -633,7 +633,7 @@ const Cashier = ({
                   </div>
                 </>
               )}
-              {(isLNBC || paymentAmount !== 0) && (
+              {(isLNBC || (paymentAmount !== 0 && paymentAmount !== undefined)) && (
                 <div className="fx-centered fx-col box-pad-v-m">
                   <div className="fx-centered fx-col">
                     <p className="gray-c p-big">{t("A82pzWN")}</p>

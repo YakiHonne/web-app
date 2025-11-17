@@ -207,7 +207,7 @@ export default function Video({ event, userProfile, naddrData }) {
                 <>
                   <Backbar />
                   <div>
-                    {getVideoFromURL(video.url)}
+                    {getVideoFromURL(video.url, video.fallbacks)}
                     <div
                       className="fx-centered fx-col fx-start-h fx-start-v"
                       style={{ marginTop: ".5rem" }}

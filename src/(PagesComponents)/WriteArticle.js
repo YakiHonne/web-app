@@ -11,7 +11,6 @@ import {
   getPostToEdit,
   updateArticleDraft,
 } from "@/Helpers/ClientHelpers";
-import UserProfilePic from "@/Components/UserProfilePic";
 import LoadingDots from "@/Components/LoadingDots";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";

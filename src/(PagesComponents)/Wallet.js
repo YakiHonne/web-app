@@ -14,7 +14,7 @@ import {
   getZapper,
   shortenKey,
 } from "@/Helpers/Encryptions";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
 import QRCode from "react-qr-code";

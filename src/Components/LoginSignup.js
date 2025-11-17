@@ -18,7 +18,7 @@ import { FileUpload } from "@/Helpers/Helpers";
 import { updateWallets } from "@/Helpers/ClientHelpers";
 import { setUserKeys } from "@/Store/Slides/UserData";
 import { ndkInstance } from "@/Helpers/NDKInstance";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import LoadingDots from "@/Components/LoadingDots";
 import { getUser, getUserFromNOSTR } from "@/Helpers/Controlers";
 let profilePlaceholder = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";

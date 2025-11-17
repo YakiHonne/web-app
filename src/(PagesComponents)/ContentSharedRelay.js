@@ -163,7 +163,7 @@ export default function ContentSharedRelay() {
 
 const HomeFeed = ({ relay }) => {
   const { t } = useTranslation();
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);

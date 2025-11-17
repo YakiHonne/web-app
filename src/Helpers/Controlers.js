@@ -37,7 +37,7 @@ import {
 import { getCustomServices, getKeys, getWallets } from "./ClientHelpers";
 import { finalizeEvent } from "nostr-tools";
 import axios from "axios";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
 import { t } from "i18next";
 import {
@@ -532,7 +532,8 @@ const getSubData = async (
   relayUrls = [],
   ndk = ndkInstance,
   maxEvents = 1000,
-  raw = false
+  raw = false,
+  cacheUsage = "RELAY_FIRST"
 ) => {
   const userRelays = relaysOnPlatform;
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
@@ -561,6 +562,7 @@ const getSubData = async (
         skipVerification: false,
         skipValidation: false,
         relayUrls: relayUrls.length > 0 ? relayUrls : userRelays,
+        cacheUsage: "ONLY_RELAY",
       },
       {
         onEvent(event) {
@@ -694,10 +696,11 @@ const getEventStatAfterEOSE = (
     stats[kind][kind] = removeObjDuplicants(stats[kind][kind], [
       { id: reaction.id, pubkey: reaction.pubkey, content },
     ]);
-  } else
+  } else {
     stats[kind][kind] = removeObjDuplicants(stats[kind][kind], [
       { id: reaction.id, pubkey: reaction.pubkey },
     ]);
+  }
   stats[kind].since = zapsCreatedAt
     ? zapsCreatedAt + 1
     : reaction.created_at + 1;

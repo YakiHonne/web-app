@@ -23,6 +23,7 @@ import {
   UserInboxRelaysReducer,
   UserFollowingsInboxRelaysReducer,
   IsUserFollowingsLoadedReducer,
+  UserSearchRelaysReducer,
 } from "./Slides/UserData";
 import {
   UserFirstLoginYakiChestReducer,
@@ -94,5 +95,6 @@ export const store = configureStore({
     relaysStats: RelaysStatsReducer,
     isUserFollowingsLoaded: IsUserFollowingsLoadedReducer,
     refreshAppSettings: RefreshAppSettingsReducer,  
+    userSearchRelays: UserSearchRelaysReducer,
   },
 });
