@@ -90,7 +90,7 @@ export default function HistorySection({
         });
       } else {
         filter.push({
-          kinds: [1],
+          // kinds: [1],
           ids: [id],
         });
       }
