@@ -962,6 +962,6 @@ const ActivateNotification = () => {
 
 const MinimalNoteView = ({ note, pubkey }) => {
   return (
-    <>{getNoteTree(note, undefined, undefined, undefined, pubkey, true)}</>
+    <>{getNoteTree(note, undefined, undefined, undefined, pubkey)}</>
   );
 };
