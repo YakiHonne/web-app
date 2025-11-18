@@ -118,6 +118,9 @@ export default function Note({ event, nevent }) {
       );
     }
   };
+  if ([21, 22].includes(event?.kind)) {
+    return customHistory("/video/" + nevent);
+  }
   if (isLoading)
     return (
       <div
@@ -346,7 +349,9 @@ const MutedThreadWarning = ({ event }) => {
       <div className="fx-centered">
         <div className="mute-24"></div>
         {isMutedId && <p className="red-c">{t("AYDVAzA")}</p>}
-        {!isMutedId && (isMutedComment || isMutedRoot) && <p className="red-c">{t("AjbaFuf")}</p>}
+        {!isMutedId && (isMutedComment || isMutedRoot) && (
+          <p className="red-c">{t("AjbaFuf")}</p>
+        )}
       </div>
     </div>
   );
