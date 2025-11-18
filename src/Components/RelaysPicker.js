@@ -54,14 +54,15 @@ export default function RelaysPicker({
   return (
     <div
       style={{ position: "relative" }}
-      className="fit-container"
+      className="fit-container fx-centered fx-start-h if ifs-full"
       ref={optionsRef}
       onClick={() => setShowList(true)}
     >
+      <div className="search"> </div>
       <input
         placeholder={t("ALPrAZz")}
-        className="if ifs-full"
-        style={{ height: "var(--40)" }}
+        className="if if-no-border ifs-full"
+        style={{ height: "var(--40)", paddingLeft: "0" }}
         value={searchedRelay}
         onChange={handleOnChange}
       />
@@ -96,74 +97,23 @@ export default function RelaysPicker({
             <hr />
             <hr />
           </div>
-          {searchedRelays.length > 0 && <div className="fit-container fit-height">
-            <Virtuoso
-              style={{ height: "100%" }}
-              totalCount={searchedRelays.length}
-              itemContent={(index) => (
-                <RelayItem
-                  relayList={searchedRelays}
-                  index={index}
-                  addRelay={addRelay}
-                  setShowList={setShowList}
-                  setSearchedRelay={setSearchedRelay}
-                />
-              )}
-            />
-          </div>}
-          {/* {searchedRelays.map((relay) => {
-            if (!excludedRelays.includes(relay))
-              return (
-                <div
-                  className={`pointer fit-container fx-scattered fx-col ${
-                    selectedRelay !== relay
-                      ? "box-pad-h-s box-pad-v-s"
-                      : "box-pad-h-m box-pad-v-m"
-                  } option-no-scale relay-item`}
-                  style={{ position: "relative" }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addRelay(relay);
-                    setShowList(false);
-                    setSearchedRelay("");
-                    setSelectedRelay(false);
-                  }}
-                >
-                  <div
-                    className="fit-container fx-scattered"
-                    style={{ position: "relative" }}
-                  >
-                    <div className="fx-centered ">
-                      <RelayImage url={relay} size={16} />
-                      <p>{relay}</p>
-                    </div>
-                    <div className="fx-centered">
-                      <div
-                        className="round-icon-small"
-                        style={{ backgroundColor: "var(--dim-gray)" }}
-                      >
-                        <div className="plus-sign"></div>
-                      </div>
-                      <div
-                        className="round-icon-small slide-down"
-                        style={{ backgroundColor: "var(--dim-gray)" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          selectedRelay === relay
-                            ? setSelectedRelay(false)
-                            : setSelectedRelay(relay);
-                        }}
-                      >
-                        <div className="arrow "></div>
-                      </div>
-                    </div>
-                  </div>
-                  {selectedRelay === relay && (
-                    <SelectedRelayPreview url={relay} />
-                  )}
-                </div>
-              );
-          })} */}
+          {searchedRelays.length > 0 && (
+            <div className="fit-container fit-height">
+              <Virtuoso
+                style={{ height: "100%" }}
+                totalCount={searchedRelays.length}
+                itemContent={(index) => (
+                  <RelayItem
+                    relayList={searchedRelays}
+                    index={index}
+                    addRelay={addRelay}
+                    setShowList={setShowList}
+                    setSearchedRelay={setSearchedRelay}
+                  />
+                )}
+              />
+            </div>
+          )}
           {searchedRelays.length === 0 && searchedRelay && (
             <div
               className="fx-scattered fit-container pointer"

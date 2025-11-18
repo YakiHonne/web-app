@@ -18,6 +18,7 @@ import {
   setUserMetadata,
   setUserMutedList,
   setUserRelays,
+  setUserRelaysSet,
   setUserSavedTools,
   setUserSearchRelays,
   setUserWotList,
@@ -54,6 +55,8 @@ import {
   saveUsers,
   getSearchRelays,
   saveSearchRelays,
+  getRelaysSet,
+  saveRelaysSet,
 } from "@/Helpers/DB";
 import {
   addConnectedAccounts,
@@ -157,6 +160,10 @@ export default function AppInit() {
       async () => (userKeys ? await getInboxRelays(userKeys.pub) : []),
       [userKeys]
     ) || [];
+  const relaysSet = useLiveQuery(
+    async () => (userKeys ? await getRelaysSet(userKeys.pub) : []),
+    [userKeys]
+  ) || { last_timestamp: undefined };
   const searchRelays =
     useLiveQuery(
       async () => (userKeys ? await getSearchRelays(userKeys.pub) : []),
@@ -197,6 +204,7 @@ export default function AppInit() {
   const previousInboxRelays = useRef([]);
   const previousRelaysStats = useRef([]);
   const previousFavRelays = useRef({ relays: [] });
+  const previousRelaysSet = useRef({ last_timestamp: undefined });
 
   useEffect(() => {
     if (
@@ -272,6 +280,13 @@ export default function AppInit() {
     ) {
       previousAppSettings.current = appSettings;
       dispatch(setUserAppSettings(appSettings || false));
+    }
+    if (
+      JSON.stringify(previousRelaysSet.current) !==
+      JSON.stringify(relaysSet)
+    ) {
+      previousRelaysSet.current = relaysSet;
+      dispatch(setUserRelaysSet(relaysSet));
     }
     if (
       JSON.stringify(previousInterests.current) !==
@@ -354,6 +369,7 @@ export default function AppInit() {
     relaysStats,
     favRelays,
     searchRelays,
+    relaysSet,
   ]);
 
   useEffect(() => {
@@ -439,6 +455,7 @@ export default function AppInit() {
         BLOSSOMSERVERS,
         INBOXRELAYS,
         SEARCHRELAYS,
+        RELAYSSET,
       ] = await Promise.all([
         getRelays(userKeys.pub),
         getFollowings(userKeys.pub),
@@ -449,10 +466,12 @@ export default function AppInit() {
         getBlossomServers(userKeys.pub),
         getInboxRelays(userKeys.pub),
         getSearchRelays(userKeys.pub),
+        getRelaysSet(userKeys.pub),
       ]);
       let lastRelaysTimestamp = RELAYS?.last_timestamp || undefined;
       let lastFollowingsTimestamp = FOLLOWINGS?.last_timestamp || undefined;
       let lastInterestsTimestamp = INTERESTSLIST?.last_timestamp || undefined;
+      let lastRelaysSetTimestamp = RELAYSSET?.last_timestamp || undefined;
       let lastMutedTimestamp = MUTEDLIST?.last_timestamp || undefined;
       let lastAppSettingsTimestamp = APPSETTINGS?.last_timestamp || undefined;
       let lastInboxRelaysTimestamp = INBOXRELAYS?.last_timestamp || undefined;
@@ -473,6 +492,7 @@ export default function AppInit() {
       let tempFavRelays;
       let tempAppSettings;
       let tempBookmarks = [];
+      let tempRelaysSet = [];
       let tempAuthMetadata = false;
       let eose = false;
       subscription = ndkInstance.subscribe(
@@ -532,6 +552,13 @@ export default function AppInit() {
             since: lastFavRelaysTimestamp
               ? lastFavRelaysTimestamp + 1
               : lastFavRelaysTimestamp,
+          },
+          {
+            kinds: [30002],
+            authors: [userKeys.pub],
+            since: lastRelaysSetTimestamp
+              ? lastRelaysSetTimestamp + 1
+              : lastRelaysSetTimestamp,
           },
           {
             kinds: [30078],
@@ -606,6 +633,11 @@ export default function AppInit() {
           else tempBookmarks.splice(index, 1, parsedEvent);
           if (eose) saveBookmarks(tempBookmarks, userKeys.pub);
         }
+        if (event.kind === 30002) {
+          let tempEvent = { ...event.rawEvent() };
+          tempRelaysSet.push(tempEvent);
+          if (eose) saveRelaysSet(tempRelaysSet, userKeys.pub);
+        }
         if (event.kind === 0) {
           if (
             (lastUserMetadataTimestamp &&
@@ -656,6 +688,7 @@ export default function AppInit() {
           lastAppSettingsTimestamp
         );
         saveBookmarks(tempBookmarks, userKeys.pub);
+        saveRelaysSet(tempRelaysSet, userKeys.pub);
         if (!(tempAuthMetadata && lastUserMetadataTimestamp)) {
           let emptyMetadata = getEmptyuserMetadata(userKeys.pub);
           dispatch(setUserMetadata(emptyMetadata));

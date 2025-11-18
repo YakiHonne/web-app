@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { createSlice } from "@reduxjs/toolkit";
 
 const userMetadataSlice = createSlice({
@@ -33,6 +33,15 @@ const userRelaysSlice = createSlice({
   initialState: [],
   reducers: {
     setUserRelays(state, action) {
+      return action.payload;
+    },
+  },
+});
+const userRelaysSetSlice = createSlice({
+  name: "userRelaysSet",
+  initialState: { last_timestamp: undefined },
+  reducers: {
+    setUserRelaysSet(state, action) {
       return action.payload;
     },
   },
@@ -215,15 +224,18 @@ export const { setUserKeys } = userKeysSlice.actions;
 export const { setUserBookmarks } = userBookmarksSlice.actions;
 export const { setUserInterestList } = userInterestList.actions;
 export const { setUserRelays } = userRelaysSlice.actions;
+export const { setUserRelaysSet } = userRelaysSetSlice.actions;
 export const { setUserAllRelays } = userAllRelaysSlice.actions;
 export const { setUserChatrooms } = userChatroomsSlice.actions;
 export const { setUserChatContacts } = userChatContactsSlice.actions;
 export const { setUserFollowings } = userFollowingsSlice.actions;
-export const { setIsUserFollowingsLoaded } = isUserFollowingsLoadedSlice.actions;
+export const { setIsUserFollowingsLoaded } =
+  isUserFollowingsLoadedSlice.actions;
 export const { setUserMutedList } = userMutedListSlice.actions;
 export const { setUserBalance } = userBalanceSlice.actions;
 export const { setUserFollowingsRelays } = userFollowingsRelaysSlice.actions;
-export const { setUserFollowingsInboxRelays } = userFollowingsInboxRelaysSlice.actions;
+export const { setUserFollowingsInboxRelays } =
+  userFollowingsInboxRelaysSlice.actions;
 export const { setWallets } = walletsSlice.actions;
 export const { setSelectedWallet } = selectedWalletSlice.actions;
 export const { setUserSavedTools } = userSavedToolsSlice.actions;
@@ -239,6 +251,7 @@ export const UserKeysReducer = userKeysSlice.reducer;
 export const UserInterestListReducer = userInterestList.reducer;
 export const UserBookmarksReducer = userBookmarksSlice.reducer;
 export const UserRelaysReducer = userRelaysSlice.reducer;
+export const UserRelaysSetReducer = userRelaysSetSlice.reducer;
 export const UserAllRelaysReducer = userAllRelaysSlice.reducer;
 export const UserChatroomsReducer = userChatroomsSlice.reducer;
 export const UserChatContactsReducer = userChatContactsSlice.reducer;
@@ -246,7 +259,8 @@ export const UserFollowingsReducer = userFollowingsSlice.reducer;
 export const UserMutedListReducer = userMutedListSlice.reducer;
 export const UserBalanceReducer = userBalanceSlice.reducer;
 export const UserFollowingsRelaysReducer = userFollowingsRelaysSlice.reducer;
-export const UserFollowingsInboxRelaysReducer = userFollowingsInboxRelaysSlice.reducer;
+export const UserFollowingsInboxRelaysReducer =
+  userFollowingsInboxRelaysSlice.reducer;
 export const WalletsReducer = walletsSlice.reducer;
 export const SelectedWalletReducer = selectedWalletSlice.reducer;
 export const UserSavedToolsReducer = userSavedToolsSlice.reducer;
@@ -256,4 +270,5 @@ export const UserFavRelaysReducer = userFavRelaysSlice.reducer;
 export const UserWotListReducer = userWotListSlice.reducer;
 export const UserBlossomServersReducer = userBlossomServersSlice.reducer;
 export const UserSearchRelaysReducer = userSearchRelaysSlice.reducer;
-export const IsUserFollowingsLoadedReducer = isUserFollowingsLoadedSlice.reducer;
+export const IsUserFollowingsLoadedReducer =
+  isUserFollowingsLoadedSlice.reducer;

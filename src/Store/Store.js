@@ -24,6 +24,7 @@ import {
   UserFollowingsInboxRelaysReducer,
   IsUserFollowingsLoadedReducer,
   UserSearchRelaysReducer,
+  UserRelaysSetReducer,
 } from "./Slides/UserData";
 import {
   UserFirstLoginYakiChestReducer,
@@ -57,6 +58,7 @@ export const store = configureStore({
     userKeys: UserKeysReducer,
     userBookmarks: UserBookmarksReducer,
     userRelays: UserRelaysReducer,
+    userRelaysSet: UserRelaysSetReducer,
     userInterestList: UserInterestListReducer,
     userAllRelays: UserAllRelaysReducer,
     userChatrooms: UserChatroomsReducer,
