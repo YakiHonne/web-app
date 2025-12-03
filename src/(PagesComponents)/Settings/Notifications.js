@@ -1,3 +1,4 @@
+import Toggle from "@/Components/Toggle";
 import {
   getCustomSettings,
   getDefaultSettings,
@@ -15,8 +16,10 @@ export function Notifications({ selectedTab, setSelectedTab }) {
   const [notification, setNotification] = useState(
     getCustomSettings().notification || getDefaultSettings("").notification
   );
+  const [hideMentions, setHideMentions] = useState(
+    getCustomSettings().hideMentions
+  );
   const currentSettings = getCustomSettings() || getDefaultSettings("");
-
   const notificationDN = {
     mentions: `${t("A8Da0of")} / ${t("AENEcn9")}`,
     reactions: t("Alz0E9Y"),
@@ -49,19 +52,32 @@ export function Notifications({ selectedTab, setSelectedTab }) {
       pubkey: userKeys.pub,
       ...currentSettings,
       notification: tempArr,
+      hideMentions,
+    });
+  };
+
+  const handleHideMentions = (status) => {
+    setHideMentions(status);
+    updateCustomSettings({
+      pubkey: userKeys.pub,
+      ...currentSettings,
+      notification,
+      hideMentions: status,
     });
   };
 
   return (
     <div
-    className={`fit-container fx-scattered fx-col pointer ${selectedTab === "notifications" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
-    style={{
-      borderBottom: "1px solid var(--very-dim-gray)",
-      gap: 0,
-      borderColor: "var(--very-dim-gray)",
-      transition: "0.2s ease-in-out",
-      borderRadius: 0
-    }}
+      className={`fit-container fx-scattered fx-col pointer ${
+        selectedTab === "notifications" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+      }`}
+      style={{
+        borderBottom: "1px solid var(--very-dim-gray)",
+        gap: 0,
+        borderColor: "var(--very-dim-gray)",
+        transition: "0.2s ease-in-out",
+        borderRadius: 0,
+      }}
     >
       <div
         className="fx-scattered fit-container  box-pad-h-m box-pad-v-m "
@@ -84,6 +100,23 @@ export function Notifications({ selectedTab, setSelectedTab }) {
       </div>
       {selectedTab === "notifications" && (
         <div className="fx-scattered fit-container fx-col fx-start-v box-pad-h box-pad-v-m">
+          <div className="fit-container fx-centered fx-col">
+            <div className="fit-container fx-centered fx-col">
+              <div className="fx-scattered fit-container">
+                <div>
+                  <p className="p-maj">{t("AX4fJlE")}</p>
+                  <p className="p-medium gray-c">{t("A2S1tYG")}</p>
+                </div>
+                <div className="fx-centered">
+                  <Toggle
+                    status={hideMentions}
+                    setStatus={handleHideMentions}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr />
           <div className="fit-container fx-centered fx-col">
             {notification.map((item, index) => {
               return (

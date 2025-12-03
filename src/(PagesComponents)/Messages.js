@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
@@ -12,6 +12,7 @@ import Link from "next/link";
 import { handleUpdateConversation, sendMessage } from "@/Helpers/DMHelpers";
 import useDirectMessages from "@/Hooks/useDirectMessages";
 import { ConversationBox } from "@/Components/ConversationBox";
+import { Virtuoso } from "react-virtuoso";
 
 const getFilterDMByTime = (type) => {
   let filterType =
@@ -53,7 +54,12 @@ export default function Messages() {
   const [filterByTimeType, setFilterByTimeType] = useState(getFilterDMType());
 
   const [mbHide, setMbHide] = useState(true);
-
+  const sortedAndFilteredInbox = useMemo(() => {
+    return sortedInbox.filter((convo) => {
+      return convo.type === contentType && convo.last_message > filterBytime;
+    });
+  }, [sortedInbox, contentType, filterBytime]);
+  const virtuosoRef = useRef();
   const filterByTimeTypes = [
     {
       display_name: t("AeVTLPz"),
@@ -158,6 +164,10 @@ export default function Messages() {
   const handleContentType = (type) => {
     if (type === contentType) return;
     setContentType(type);
+    virtuosoRef?.current?.scrollToIndex({
+      index: 0,
+      behavior: "smooth",
+    });
   };
 
   const handleShowSearch = () => {
@@ -327,7 +337,7 @@ export default function Messages() {
                   }`,
                 }}
                 onClick={() => handleContentType("following")}
-                className="pointer fx fx-centered"
+                className="pointer fx fx-centered p-medium"
               >
                 <span
                   className={contentType === "following" ? "c1-c" : "gray-c"}
@@ -343,7 +353,7 @@ export default function Messages() {
                   }`,
                 }}
                 onClick={() => handleContentType("known")}
-                className="pointer fx fx-centered"
+                className="pointer fx fx-centered p-medium"
               >
                 <span className={contentType === "known" ? "c1-c" : "gray-c"}>
                   {t("AkMu1GE", { count: msgsCount.known })}
@@ -357,7 +367,7 @@ export default function Messages() {
                   }`,
                 }}
                 onClick={() => handleContentType("unknown")}
-                className="pointer fx fx-centered"
+                className="pointer fx fx-centered p-medium"
               >
                 <span className={contentType === "unknown" ? "c1-c" : "gray-c"}>
                   {t("ANAOuTj", { count: msgsCount.unknown })}
@@ -410,73 +420,83 @@ export default function Messages() {
             className="fit-container fx-centered fx-wrap"
             style={{ rowGap: 0, overflow: "auto" }}
           >
-            {!showSearch &&
-              sortedInbox.map((convo) => {
-                if (
-                  convo.type === contentType &&
-                  convo.last_message > filterBytime
-                )
+            {!showSearch && sortedInbox.length > 0 && (
+              <Virtuoso
+                style={{
+                  width: "100%",
+                  height: "calc(100vh - 110px)",
+                }}
+                ref={virtuosoRef}
+                skipAnimationFrameInResizeObserver={true}
+                overscan={1000}
+                data={sortedAndFilteredInbox}
+                increaseViewportBy={1000}
+                itemContent={(index, convo) => {
                   return (
-                    <div
-                      className="fit-container fx-scattered  box-pad-h option box-pad-v-s pointer slide-up"
-                      key={convo.id}
-                      style={{
-                        backgroundColor:
-                          selectedConvo.id === convo.id
-                            ? "var(--very-dim-gray)"
-                            : "",
-                      }}
-                      onClick={() => handleSelectedConversation({ ...convo })}
-                    >
-                      <div className="fx-centered">
-                        <div>
-                          <UserProfilePic
-                            img={convo.picture}
-                            size={40}
-                            user_id={convo.pubkey}
-                            mainAccountUser={false}
-                            allowClick={false}
-                          />
-                        </div>
-                        <div>
-                          <p>
-                            {convo.display_name ||
-                              convo.name ||
-                              convo.pubkey.substring(0, 10)}
-                          </p>
-                          <div className="fx-centered fx-start-h">
-                            {convo.convo[convo.convo.length - 1].peer && (
-                              <p className="p-medium p-one-line">
-                                {t("ARrkukw")}
+                      <div
+                        className="fit-container fx-scattered  box-pad-h option box-pad-v-s pointer slide-up"
+                        key={convo.id}
+                        style={{
+                          backgroundColor:
+                            selectedConvo.id === convo.id
+                              ? "var(--very-dim-gray)"
+                              : "",
+                        }}
+                        onClick={() => handleSelectedConversation({ ...convo })}
+                      >
+                        <div className="fx-centered">
+                          <div>
+                            <UserProfilePic
+                              img={convo.picture}
+                              size={40}
+                              user_id={convo.pubkey}
+                              mainAccountUser={false}
+                              allowClick={false}
+                            />
+                          </div>
+                          <div>
+                            <p>
+                              {convo.display_name ||
+                                convo.name ||
+                                convo.pubkey.substring(0, 10)}
+                            </p>
+                            <div className="fx-centered fx-start-h">
+                              {convo.convo[convo.convo.length - 1].peer && (
+                                <p className="p-medium p-one-line">
+                                  {t("ARrkukw")}
+                                </p>
+                              )}
+                              <p
+                                className="gray-c p-medium p-one-line"
+                                style={{ maxWidth: "100px" }}
+                              >
+                                {convo.convo[convo.convo.length - 1].content}
                               </p>
-                            )}
-                            <p
-                              className="gray-c p-medium p-one-line"
-                              style={{ maxWidth: "100px" }}
-                            >
-                              {convo.convo[convo.convo.length - 1].content}
-                            </p>
-                            <p className="orange-c p-medium">
-                              <Date_
-                                toConvert={new Date(convo.last_message * 1000)}
-                              />
-                            </p>
+                              <p className="orange-c p-medium">
+                                <Date_
+                                  toConvert={
+                                    new Date(convo.last_message * 1000)
+                                  }
+                                />
+                              </p>
+                            </div>
                           </div>
                         </div>
+                        {!convo.checked && (
+                          <div
+                            style={{
+                              minWidth: "8px",
+                              aspectRatio: "1/1",
+                              backgroundColor: "var(--red-main)",
+                              borderRadius: "var(--border-r-50)",
+                            }}
+                          ></div>
+                        )}
                       </div>
-                      {!convo.checked && (
-                        <div
-                          style={{
-                            minWidth: "8px",
-                            aspectRatio: "1/1",
-                            backgroundColor: "var(--red-main)",
-                            borderRadius: "var(--border-r-50)",
-                          }}
-                        ></div>
-                      )}
-                    </div>
-                  );
-              })}
+                    );
+                }}
+              />
+            )}
             {keyword &&
               searchedConvos.map((convo) => {
                 return (
@@ -548,7 +568,6 @@ export default function Messages() {
         <div
           style={{
             flex: "1 1 600px",
-            // width: "min(100%, calc(100% - 350px))",
             border: "1px solid var(--dim-gray)",
           }}
           className={mbHide ? "mb-hide-800" : ""}

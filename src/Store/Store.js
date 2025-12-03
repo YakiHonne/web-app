@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { configureStore } from "@reduxjs/toolkit";
 import {
   UserMetadataReducer,
@@ -24,6 +24,7 @@ import {
   UserFollowingsInboxRelaysReducer,
   IsUserFollowingsLoadedReducer,
   UserSearchRelaysReducer,
+  UserRelaysSetReducer,
 } from "./Slides/UserData";
 import {
   UserFirstLoginYakiChestReducer,
@@ -49,6 +50,9 @@ import {
   HomeCarouselPostsReducer,
   RelaysStatsReducer,
   RefreshAppSettingsReducer,
+  NotificationsReducer,
+  IsNotificationsLoadingReducer,
+  RefreshNotificationsReducer,
 } from "./Slides/Extras";
 
 export const store = configureStore({
@@ -57,6 +61,7 @@ export const store = configureStore({
     userKeys: UserKeysReducer,
     userBookmarks: UserBookmarksReducer,
     userRelays: UserRelaysReducer,
+    userRelaysSet: UserRelaysSetReducer,
     userInterestList: UserInterestListReducer,
     userAllRelays: UserAllRelaysReducer,
     userChatrooms: UserChatroomsReducer,
@@ -94,7 +99,10 @@ export const store = configureStore({
     homeCarouselPosts: HomeCarouselPostsReducer,
     relaysStats: RelaysStatsReducer,
     isUserFollowingsLoaded: IsUserFollowingsLoadedReducer,
-    refreshAppSettings: RefreshAppSettingsReducer,  
+    refreshAppSettings: RefreshAppSettingsReducer,
     userSearchRelays: UserSearchRelaysReducer,
+    notifications: NotificationsReducer,
+    isNotificationsLoading: IsNotificationsLoadingReducer,
+    refreshNotifications: RefreshNotificationsReducer,
   },
 });

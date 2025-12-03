@@ -240,7 +240,7 @@ export default function UserMetadata({ user }) {
             </div>
           </div>
         </div>
-        <div className="fx-centered fit-container box-pad-v-m box-pad-h-m">
+        <div className="fx-centered fit-container fx-start-h box-pad-v-m box-pad-h-m">
           <div
             className="fx-centered fx-col fx-start-v"
             style={{ width: "min(100%, 800px)" }}

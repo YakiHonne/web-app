@@ -15,6 +15,7 @@ import LNURLParsing from "@/Components/LNURLParsing";
 import { customHistory } from "./History";
 import { store } from "@/Store/Store";
 import { setRefreshAppSettings } from "@/Store/Slides/Extras";
+import { nanoid } from "nanoid";
 
 let nostrClients = [
   "nstart.me",
@@ -635,6 +636,10 @@ const checkForNewAddedSettings = (prevSettings) => {
       prevSettings.oneTapReaction !== undefined
         ? prevSettings.oneTapReaction
         : false,
+    hideMentions:
+      prevSettings.hideMentions !== undefined
+        ? prevSettings.hideMentions
+        : true,
     currency:
       prevSettings.currency !== undefined ? prevSettings.currency : "usd",
     blurNonFollowedMedia:
@@ -697,6 +702,7 @@ export function getDefaultSettings(pubkey) {
     oneTapReaction: false,
     blurNonFollowedMedia: true,
     linkPreview: true,
+    hideMentions: true,
     reactionsSettings: [
       { reaction: "likes", status: true },
       { reaction: "replies", status: true },
@@ -1036,7 +1042,7 @@ export function redirectToLogin() {
 export function getPostToEdit(naddr) {
   if (!naddr) return {};
   try {
-    let post = localStorage.getItem(naddr);
+    let post = localStorage.getItem("ArticleToEdit");
     if (post) {
       post = JSON.parse(post);
       return post;
@@ -1544,9 +1550,10 @@ function isRelayUrl(value) {
 const createImageGrid = (images, pubkey, noBlur) => {
   let images_ = images.map((image) => image.props.src);
   // Create a unique key based on the first image URL and number of images
-  const key = `gallery-${images_.length}-${
-    images_[0]?.substring(0, 20) || "empty"
-  }`;
+  // const key = `gallery-${images_.length}-${
+  //   images_[0]?.substring(0, 20) || "empty"
+  // }`;
+  const key = nanoid()
   return <Gallery key={key} imgs={images_} pubkey={pubkey} noBlur={noBlur} />;
 };
 

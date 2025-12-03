@@ -1,5 +1,5 @@
-import { getRelayMetadata } from "@/Helpers/utils";
 import React from "react";
+import { getRelayMetadata } from "@/Helpers/utils";
 
 export default function RelayImage({ url, size = 24 }) {
   let icon = getRelayMetadata(url)?.icon;
@@ -39,7 +39,6 @@ export default function RelayImage({ url, size = 24 }) {
             width: "110%",
             height: "110%",
             objectPosition: "center",
-            
           }}
         />
       )}

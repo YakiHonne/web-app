@@ -28,19 +28,11 @@ export default function CustomizeContentSource({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userAppSettings = useSelector((state) => state.userAppSettings);
-  const userFavRelays = useSelector((state) => state.userFavRelays);
   const [sources, setSources] = useState(optionsList);
   const [category, setCategory] = useState(1);
   const [allRelays, setAllRelays] = useState([]);
-  const [selectedRelaysFeed, setSelectedRelaysFeed] = useState(
-    optionsList.find((_) => _.value === "af")?.list || []
-  );
-
   const optionsToSave = useMemo(() => {
     let communityIndex = sources.findIndex((_) => _.value === "cf");
-    let relaysIndex = sources.findIndex((_) => _.value === "af");
-    let relaysList =
-      sources[relaysIndex].list.map((_) => [_.value, _.enabled]) || [];
     let communityList =
       sources[communityIndex].list.map((_) => [_.value, _.enabled]) ||
       (type === 1 ? mixedContentDefaultCF : NotesDefaultCF);
@@ -54,10 +46,6 @@ export default function CustomizeContentSource({
             index: communityIndex,
             list: communityList,
           },
-          relays: {
-            index: relaysIndex,
-            list: relaysList,
-          },
         },
       },
     };
@@ -66,7 +54,9 @@ export default function CustomizeContentSource({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await axios.get("https://cache-v2.yakihonne.com/api/v1/relays");
+        const data = await axios.get(
+          "https://cache-v2.yakihonne.com/api/v1/relays"
+        );
         setAllRelays(data.data);
       } catch {}
     };
@@ -77,34 +67,6 @@ export default function CustomizeContentSource({
     setSources(optionsList);
   }, [optionsList]);
 
-  useEffect(() => {
-    let tempSources = structuredClone([...sources]);
-    let relaysIndex = tempSources.findIndex((_) => _.value === "af");
-    let relaysList = tempSources[relaysIndex].list;
-    let sortedRelaysFeed = selectedRelaysFeed.map((_, index) => {
-      let checkIndex = relaysList.findIndex((__) => __.value === _.value);
-      if (checkIndex !== -1) {
-        let check = relaysList[checkIndex];
-        return { ...check, index: checkIndex };
-      } else {
-        return {
-          ..._,
-          enabled: true,
-          index: selectedRelaysFeed.length + index,
-        };
-      }
-    });
-    sortedRelaysFeed = sortedRelaysFeed
-      .sort((a, b) => a.index - b.index)
-      .map((_) => {
-        delete _.index;
-        return _;
-      });
-
-    tempSources[relaysIndex].list = sortedRelaysFeed;
-
-    setSources(tempSources);
-  }, [selectedRelaysFeed]);
   const updateCommunityFeed = async () => {
     try {
       let tempSettings = structuredClone(optionsToSave);
@@ -146,38 +108,6 @@ export default function CustomizeContentSource({
       console.log(err);
     }
   };
-  const updateRelaysFeed = async () => {
-    let aTags = userFavRelays.tags
-      ? userFavRelays.tags.filter((_) => _[0] !== "relay")
-      : [];
-    let relays = optionsToSave.content_sources[
-      type === "1" ? "mixed_content" : "notes"
-    ].relays.list.map((_) => {
-      return ["relay", _[0]];
-    });
-    let tags = [...aTags, ...relays];
-    let event = {
-      kind: 10012,
-      content: "",
-      tags: tags,
-    };
-    let eventInitEx = await InitEvent(
-      event.kind,
-      event.content,
-      event.tags,
-      undefined
-    );
-    if (!eventInitEx) {
-      return;
-    }
-    dispatch(
-      setToPublish({
-        eventInitEx,
-        allRelays: [],
-      })
-    );
-    exit();
-  };
 
   return (
     <div
@@ -190,9 +120,8 @@ export default function CustomizeContentSource({
       <div
         className="fx-centered fx-col fx-start-h f-start-v  sc-s bg-sp"
         style={{
-          maxHeight: "70vh",
           minHeight: "30vh",
-          overflow: selectedRelaysFeed.length > 4 ? "scroll" : "visible",
+          overflow: "visible",
           position: "relative",
           marginTop: "3rem",
           width: "min(100%, 500px)",
@@ -200,7 +129,10 @@ export default function CustomizeContentSource({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky fit-container" style={{ padding: 0, borderRadius: "var(--border-r-32)" }}>
+        <div
+          className="sticky fit-container"
+          style={{ padding: 0, borderRadius: "var(--border-r-32)" }}
+        >
           <div className="fit-container fx-scattered box-pad-h box-pad-v-m">
             <h4>{t("AH4Mub1")}</h4>
             <div className="fx-centered">
@@ -241,7 +173,8 @@ export default function CustomizeContentSource({
             </div>
           </div>
         </div>
-        {category === 1 && (
+        {category === 1 && <RelaysFeed allRelays={allRelays} exit={exit} />}
+        {/* {category === 1 && (
           <RelaysFeed
             selectedRelaysFeed={selectedRelaysFeed}
             setSelectedRelaysFeed={setSelectedRelaysFeed}
@@ -249,7 +182,7 @@ export default function CustomizeContentSource({
             update={updateRelaysFeed}
             setSources={setSources}
           />
-        )}
+        )} */}
         {category === 2 && (
           <CommunityFeed
             sources={sources}

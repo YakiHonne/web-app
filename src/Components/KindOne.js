@@ -14,7 +14,6 @@ import { saveUsers } from "@/Helpers/DB";
 import CommentsSection from "@/Components/CommentsSection";
 import {
   getNoteTree,
-  getRepliesViewSettings,
   isImageUrl,
   isVid,
   compactContent,
@@ -23,7 +22,6 @@ import { useTranslation } from "react-i18next";
 import LoadingDots from "@/Components/LoadingDots";
 import ZapAd from "@/Components/ZapAd";
 import useUserProfile from "@/Hooks/useUsersProfile";
-import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import NotesComment from "@/Components/NotesComment";
 import { nip19 } from "nostr-tools";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
@@ -34,6 +32,7 @@ import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
 import Link from "next/link";
 import LinkRepEventPreview from "./LinkRepEventPreview";
+import { getEventFromCache, setEventFromCache } from "@/Helpers/utils";
 
 function KindOne({
   event,
@@ -394,6 +393,7 @@ function KindOne({
                           {compactContent(event.content, event.pubkey)}
                         </div>
                       )}
+                      
                     </div>
                   </div>
                 </Link>
@@ -483,15 +483,33 @@ function KindOne({
 
 export default React.memo(KindOne);
 
+const getPreviouslyFetchedEvent = (id) => {
+  let event = getEventFromCache(id);
+  let parsedEvent = false;
+  if (!event) return false;
+  if (event.kind === 1) {
+    parsedEvent = getParsedNote(event);
+    parsedEvent = { ...parsedEvent, isComment: false };
+  } else {
+    parsedEvent = getParsedRepEvent(event);
+  }
+  return parsedEvent
+};
+
 const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const { t } = useTranslation();
   const [user, setUser] = useState(false);
-  const [relatedEvent, setRelatedEvent] = useState(false);
+  const [relatedEvent, setRelatedEvent] = useState(
+    getPreviouslyFetchedEvent(event)
+  );
   const [isRelatedEventPubkey, setIsRelatedEventPubkey] = useState(false);
-  const [isRelatedEventLoaded, setIsRelatedEventLoaded] = useState(false);
+  const [isRelatedEventLoaded, setIsRelatedEventLoaded] = useState(
+    relatedEvent ? true : false
+  );
   const [isUnsupported, setIsUnsupported] = useState(false);
   const [showNote, setShowNote] = useState(false);
+
   useEffect(() => {
     const fetchAuthor = async () => {
       try {
@@ -522,13 +540,14 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
                 500
               );
         if (event_.data.length > 0) {
-          saveUsers([event_.data[0].pubkey]);
+          let post = event_.data[0];
+          saveUsers([post.pubkey]);
           let parsedEvent;
-          if (event_.data[0].kind === 1) {
-            parsedEvent = getParsedNote(event_.data[0]);
+          if (post.kind === 1) {
+            parsedEvent = getParsedNote(post);
             parsedEvent = { ...parsedEvent, isComment: false };
           } else {
-            parsedEvent = getParsedRepEvent(event_.data[0]);
+            parsedEvent = getParsedRepEvent(post);
           }
           if (
             ![
@@ -536,10 +555,14 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
             ].includes(parsedEvent.kind)
           ) {
             setIsUnsupported(true);
+          } else {
+            let key =
+              kind === 0 ? ids : `${kind}:${ids.pubkey}:${ids.identifier}`;
+            setEventFromCache(key, post.rawEvent());
           }
           setRelatedEvent(parsedEvent);
-          setIsRelatedEventPubkey(event_.data[0].pubkey);
-          setUser(getEmptyuserMetadata(event_.data[0].pubkey));
+          setIsRelatedEventPubkey(post.pubkey);
+          setUser(getEmptyuserMetadata(post.pubkey));
         }
         setIsRelatedEventLoaded(true);
       } catch (err) {
@@ -547,7 +570,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
         setIsRelatedEventLoaded(true);
       }
     };
-    if (event) {
+    if (event && !relatedEvent) {
       let checkEventKind = event.split(":");
       if (checkEventKind.length > 2) {
         saveUsers([checkEventKind[1]]);
@@ -560,6 +583,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
       fetchData(0, event);
     }
   }, [event]);
+
   const handleOnClick = (e) => {
     e.stopPropagation();
     if (!user) return;
