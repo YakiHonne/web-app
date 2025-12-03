@@ -52,91 +52,94 @@ export default function RelaysPicker({
   };
 
   return (
-    <div
-      style={{ position: "relative" }}
-      className="fit-container fx-centered fx-start-h if ifs-full"
-      ref={optionsRef}
-      onClick={() => setShowList(true)}
-    >
-      <div className="search"> </div>
-      <input
-        placeholder={t("ALPrAZz")}
-        className="if if-no-border ifs-full"
-        style={{ height: "var(--40)", paddingLeft: "0" }}
-        value={searchedRelay}
-        onChange={handleOnChange}
-      />
+    <div className="fit-container ">
+      <div
+        style={{ position: "relative" }}
+        className="fit-container fx-centered fx-start-h if ifs-full"
+        ref={optionsRef}
+        onClick={() => setShowList(true)}
+      >
+        <div className="search"></div>
+        <input
+          placeholder={t("ALPrAZz")}
+          className="if if-no-border ifs-full"
+          style={{ height: "var(--40)", paddingLeft: "0" }}
+          value={searchedRelay}
+          onChange={handleOnChange}
+        />
+
+        {showList && (
+          <div
+            className="fit-container sc-s-18 bg-sp fx-centered fx-col fx-start-h fx-start-v box-pad-h-s box-pad-v-s"
+            style={{
+              position: "absolute",
+              left: 0,
+              top: "calc(100% + 5px)",
+              // height: selectedRelay ? "600px" : "300px",
+              height: "300px",
+              // maxHeight: "600px",
+              overflow: "scroll",
+              zIndex: "200",
+              gap: 0,
+              transition: "height 0.3s ease-in-out",
+            }}
+          >
+            <div className="fx-centered fit-container">
+              <p
+                className="gray-c box-pad-h-s"
+                style={{ minWidth: "max-content" }}
+              >
+                {allRelays.length} relays
+              </p>
+              <hr />
+              <hr />
+            </div>
+            {searchedRelays.length > 0 && (
+              <div className="fit-container fit-height">
+                <Virtuoso
+                  style={{ height: "100%" }}
+                  totalCount={searchedRelays.length}
+                  itemContent={(index) => (
+                    <RelayItem
+                      relayList={searchedRelays}
+                      index={index}
+                      addRelay={addRelay}
+                      setShowList={setShowList}
+                      setSearchedRelay={setSearchedRelay}
+                    />
+                  )}
+                />
+              </div>
+            )}
+            {searchedRelays.length === 0 && searchedRelay && (
+              <div
+                className="fx-scattered fit-container pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  addRelay(
+                    searchedRelay.includes("ws://")
+                      ? searchedRelay
+                      : "wss://" + searchedRelay.replace("wss://", "")
+                  );
+                  setShowList(false);
+                  setSearchedRelay("");
+                }}
+              >
+                <p>{searchedRelay}</p>
+                <div className="fx-centered">
+                  <div className="sticker sticker-gray-black">
+                    <div className="plus-sign"></div>
+                  </div>
+                  {/* <div className="sticker sticker-gray-black">{t("ARWeWgJ")}</div> */}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       {showMessage && (
         <div className="box-pad-v-s box-pad-h-s">
           <p className="gray-c p-medium">{t("A2wrBnY")}</p>
-        </div>
-      )}
-      {showList && (
-        <div
-          className="fit-container sc-s-18 bg-dg fx-centered fx-col fx-start-h fx-start-v box-pad-h-s box-pad-v-s"
-          style={{
-            position: "absolute",
-            left: 0,
-            top: "calc(100% + 5px)",
-            // height: selectedRelay ? "600px" : "300px",
-            height: "300px",
-            // maxHeight: "600px",
-            overflow: "scroll",
-            zIndex: "200",
-            gap: 0,
-            transition: "height 0.3s ease-in-out",
-          }}
-        >
-          <div className="fx-centered fit-container">
-            <p
-              className="gray-c box-pad-h-s"
-              style={{ minWidth: "max-content" }}
-            >
-              {allRelays.length} relays
-            </p>
-            <hr />
-            <hr />
-          </div>
-          {searchedRelays.length > 0 && (
-            <div className="fit-container fit-height">
-              <Virtuoso
-                style={{ height: "100%" }}
-                totalCount={searchedRelays.length}
-                itemContent={(index) => (
-                  <RelayItem
-                    relayList={searchedRelays}
-                    index={index}
-                    addRelay={addRelay}
-                    setShowList={setShowList}
-                    setSearchedRelay={setSearchedRelay}
-                  />
-                )}
-              />
-            </div>
-          )}
-          {searchedRelays.length === 0 && searchedRelay && (
-            <div
-              className="fx-scattered fit-container pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                addRelay(
-                  searchedRelay.includes("ws://")
-                    ? searchedRelay
-                    : "wss://" + searchedRelay.replace("wss://", "")
-                );
-                setShowList(false);
-                setSearchedRelay("");
-              }}
-            >
-              <p>{searchedRelay}</p>
-              <div className="fx-centered">
-                <div className="sticker sticker-gray-black">
-                  <div className="plus-sign"></div>
-                </div>
-                {/* <div className="sticker sticker-gray-black">{t("ARWeWgJ")}</div> */}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>

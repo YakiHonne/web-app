@@ -1,7 +1,7 @@
 import React from "react";
 import Toggle from "@/Components/Toggle";
 import RelayImage from "@/Components/RelayImage";
-import CFCategoryPreview from "./CFCategoryPreview";
+import ContentFeedCategoryPreview from "./ContentFeedCategoryPreview";
 
 export default function ContentSourceSettingsItem({
   group,
@@ -34,7 +34,7 @@ export default function ContentSourceSettingsItem({
   return (
     <div className="fx-scattered fit-container sc-s-18 bg-sp box-pad-h-s box-pad-v-s" style={{cursor: "grab"}}>
       <div className="fx-centered">
-        <CFCategoryPreview category={{ group: group.value, ...item }} />
+        <ContentFeedCategoryPreview category={{ group: group.value, ...item }} />
       </div>
       <div className="fx-centered">
         <Toggle

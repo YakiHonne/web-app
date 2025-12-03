@@ -8,7 +8,7 @@ import {
 } from "@/Helpers/Encryptions";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import { saveUsers } from "@/Helpers/DB";
-import {  getSubData } from "@/Helpers/Controlers";
+import { getSubData } from "@/Helpers/Controlers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
@@ -17,6 +17,7 @@ import { getNDKInstance } from "@/Helpers/utils";
 import Backbar from "@/Components/Backbar";
 import RelayPreview from "./Relays/RelayPreview/RelayPreview";
 import { useRouter } from "next/router";
+import { Virtuoso } from "react-virtuoso";
 
 const MixEvents = (articles, curations, videos) => {
   const interleavedArray = [];
@@ -148,12 +149,7 @@ export default function DiscoverSharedRelay() {
   );
 }
 
-const ExploreFeed = ({
-  selectedTab,
-  isLoading,
-  setIsLoading,
-  relay,
-}) => {
+const ExploreFeed = ({ selectedTab, isLoading, setIsLoading, relay }) => {
   const { t } = useTranslation();
   const [content, setContent] = useState([]);
   const [timestamp, setTimestamp] = useState(false);
@@ -174,7 +170,7 @@ const ExploreFeed = ({
 
       const { artsFilter, curationsFilter, videosFilter } = getFilter();
       let ndk = await getNDKInstance(relay);
-      if(!ndk){
+      if (!ndk) {
         setIsConnected(false);
         setIsLoading(false);
         return;
@@ -319,8 +315,9 @@ const ExploreFeed = ({
   };
 
   return (
-    <InfiniteScroll onRefresh={setTimestamp} events={content}>
-      {content.map((item, index) => {
+    <>
+      {/* <InfiniteScroll onRefresh={setTimestamp} events={content}> */}
+      {/* {content.map((item, index) => {
         if (!bannedList.includes(item.pubkey))
           return (
             <Fragment key={item.id}>
@@ -329,8 +326,32 @@ const ExploreFeed = ({
               </div>
             </Fragment>
           );
-      })}
-    {content?.length === 0 && !isLoading && isConnected && (
+      })} */}
+      {content.length > 0 && (
+        <Virtuoso
+          style={{ width: "100%", height: "100vh" }}
+          skipAnimationFrameInResizeObserver={true}
+          overscan={1000}
+          useWindowScroll={true}
+          totalCount={content.length}
+          increaseViewportBy={1000}
+          endReached={(index) => {
+            setTimestamp(content[index].created_at - 1);
+          }}
+          itemContent={(index) => {
+            let item = content[index];
+            if (!bannedList.includes(item.pubkey))
+              return (
+                <Fragment key={item.id}>
+                  <div className="fit-container fx-centered">
+                    <RepEventPreviewCard item={item} />
+                  </div>
+                </Fragment>
+              );
+          }}
+        />
+      )}
+      {content?.length === 0 && !isLoading && isConnected && (
         <div
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
@@ -369,6 +390,7 @@ const ExploreFeed = ({
           <LoadingLogo />
         </div>
       )}
-    </InfiniteScroll>
+      {/* </InfiniteScroll> */}
+    </>
   );
 };

@@ -2,22 +2,28 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getLinkPreview } from "@/Helpers/Helpers";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import { getURLFromCache, setURLFromCache } from "@/Helpers/utils";
+
+const NOT_FOUND = "not found";
 
 export default function LinkPreview({ url, minimal }) {
   const { t } = useTranslation();
   const { linkPreview } = useCustomizationSettings();
-  const [metadata, setMetadata] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [metadata, setMetadata] = useState(getURLFromCache(url));
+  const [isLoading, setIsLoading] = useState(metadata ? false : true);
 
   useEffect(() => {
     const getMetadata = async () => {
       let data = await getLinkPreview(url);
       if (data) {
+        setURLFromCache(url, data);
         setMetadata(data);
+      } else {
+        setURLFromCache(url, NOT_FOUND);
       }
       setIsLoading(false);
     };
-    if (!minimal && linkPreview) getMetadata();
+    if (!minimal && linkPreview && !metadata) getMetadata();
     if (minimal) setIsLoading(false);
     if (!linkPreview) {
       setIsLoading(false);
@@ -33,8 +39,7 @@ export default function LinkPreview({ url, minimal }) {
         onClick={(e) => e.stopPropagation()}
       ></div>
     );
-
-  if (!isLoading && !metadata)
+  if (!isLoading && (!metadata || metadata === NOT_FOUND))
     return (
       <a
         style={{

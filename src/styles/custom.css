@@ -2121,7 +2121,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .main-middle {
-    width: 600px;
+    /* width: 600px; */
+    width: 100%
     /* max-width: 600px; */
 }
 

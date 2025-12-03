@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useReducer, useRef } from "react";
 import {
   getEmptyuserMetadata,
   getParsedRepEvent,
@@ -18,6 +18,7 @@ import { useRouter } from "next/router";
 import useIsMute from "@/Hooks/useIsMute";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import Slider from "@/Components/Slider";
+import { Virtuoso } from "react-virtuoso";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -132,6 +133,7 @@ export default function UserFeed({ user }) {
     query?.contentType ? query.contentType : "notes"
   );
   const [lastEventTime, setLastEventTime] = useState(undefined);
+  const virtuosoRef = useRef(null);
   const getNotesFilter = () => {
     let kinds = {
       notes: [1, 6],
@@ -151,7 +153,14 @@ export default function UserFeed({ user }) {
       },
     ];
   };
-
+  const tabs = [
+    { value: "notes", display_name: t("AYIXG83") },
+    { value: "replies", display_name: t("AENEcn9") },
+    { value: "articles", display_name: t("AesMg52") },
+    { value: "smart-widget", display_name: t("A2mdxcf") },
+    { value: "curations", display_name: t("AVysZ1s") },
+    { value: "videos", display_name: t("AStkKfQ") },
+  ];
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -225,218 +234,153 @@ export default function UserFeed({ user }) {
 
   if (isMuted) return;
   return (
-    <div
-      className="fx-centered  fx-wrap"
-      style={{ gap: 0, Width: "min(100%, 800px)" }}
-    >
-      <div className="user-feed-tab sticky" style={{ padding: 0 }}>
+    <div className="fx-centered  fit-container fx-wrap" style={{ gap: 0 }}>
+      <div
+        className="user-feed-tab sticky fit-container"
+        style={{ padding: 0 }}
+      >
         <Slider
-          items={[
-            <div
-              className={`list-item-b fx-centered fx-shrink ${
-                contentFrom === "notes" ? "selected-list-item-b" : ""
-              }`}
-              onClick={() => switchContentType("notes")}
-            >
-              {t("AYIXG83")}
-            </div>,
-            <div
-              className={`list-item-b fx-centered fx-shrink ${
-                contentFrom === "replies" ? "selected-list-item-b" : ""
-              }`}
-              onClick={() => switchContentType("replies")}
-            >
-              {t("AENEcn9")}
-            </div>,
-            <div
-              className={`list-item-b fx-centered fx-shrink ${
-                contentFrom === "articles" ? "selected-list-item-b" : ""
-              }`}
-              onClick={() => switchContentType("articles")}
-            >
-              {t("AesMg52")}
-            </div>,
-            <div
-              className={`list-item-b fx-centered fx-shrink ${
-                contentFrom === "smart-widget" ? "selected-list-item-b" : ""
-              }`}
-              onClick={() => switchContentType("smart-widget")}
-            >
-              {t("A2mdxcf")}
-            </div>,
-            <div
-              className={`list-item-b fx-centered fx-shrink ${
-                contentFrom === "curations" ? "selected-list-item-b" : ""
-              }`}
-              onClick={() => switchContentType("curations")}
-            >
-              {t("AVysZ1s")}
-            </div>,
-            <div
-              className={`list-item-b fx-centered fx-shrink ${
-                contentFrom === "videos" ? "selected-list-item-b" : ""
-              }`}
-              onClick={() => switchContentType("videos")}
-            >
-              {t("AStkKfQ")}
-            </div>,
-          ]}
+          items={tabs.map((tab) => {
+            return (
+              <div
+                className={`list-item-b fx-centered fx-shrink ${
+                  contentFrom === tab.value ? "selected-list-item-b" : ""
+                }`}
+                onClick={() => switchContentType(tab.value)}
+              >
+                {tab.display_name}
+              </div>
+            );
+          })}
           slideBy={100}
           noGap={true}
         />
       </div>
-      <InfiniteScroll onRefresh={setLastEventTime} events={events[contentFrom]}>
-        {["notes", "replies"].includes(contentFrom) && (
-          <>
-            {events[contentFrom].length > 0 && (
-              <>
-                {events[contentFrom].map((note) => {
-                  if (note.kind === 6)
-                    return <KindSix event={note} key={note.id} />;
-                  return <KindOne event={note} key={note.id} border={true} />;
-                })}
-              </>
-            )}
-            {events[contentFrom].length === 0 && !isLoading && (
+      {["notes", "replies"].includes(contentFrom) && (
+        <>
+          {events[contentFrom].length === 0 && !isLoading && (
+            <div
+              className="fx-centered fx-col box-pad-v"
+              style={{ height: "30vh" }}
+            >
+              <h4>{t("Aezm5AZ")}</h4>
+              <p className="gray-c">{t("AmK41uU", { name: user?.name })}</p>
               <div
-                className="fx-centered fx-col box-pad-v"
-                style={{ height: "30vh" }}
-              >
-                <h4>{t("Aezm5AZ")}</h4>
-                <p className="gray-c">{t("AmK41uU", { name: user?.name })}</p>
-                <div
-                  className="note-2-24"
-                  style={{ width: "48px", height: "48px" }}
-                ></div>
-              </div>
-            )}
-          </>
-        )}
-        {contentFrom === "curations" && (
-          <>
-            {events[contentFrom].length > 0 && (
-              <>
-                {events[contentFrom].map((item) => {
-                  return <RepEventPreviewCard key={item.id} item={item} />;
-                })}
-              </>
-            )}
-            {events[contentFrom].length === 0 && !isLoading && (
+                className="note-2-24"
+                style={{ width: "48px", height: "48px" }}
+              ></div>
+            </div>
+          )}
+        </>
+      )}
+      {contentFrom === "curations" && (
+        <>
+          {events[contentFrom].length === 0 && !isLoading && (
+            <div
+              className="fx-centered fx-col box-pad-v"
+              style={{ height: "30vh" }}
+            >
+              <h4>{t("Aezm5AZ")}</h4>
+              <p className="gray-c">{t("A8pbTGs", { name: user?.name })}</p>
               <div
-                className="fx-centered fx-col box-pad-v"
-                style={{ height: "30vh" }}
-              >
-                <h4>{t("Aezm5AZ")}</h4>
-                <p className="gray-c">{t("A8pbTGs", { name: user?.name })}</p>
-                <div
-                  className="curation-24"
-                  style={{ width: "48px", height: "48px" }}
-                ></div>
-              </div>
-            )}
-          </>
-        )}
-        {contentFrom === "articles" && (
-          <>
-            {events[contentFrom].length === 0 && !isLoading && (
+                className="curation-24"
+                style={{ width: "48px", height: "48px" }}
+              ></div>
+            </div>
+          )}
+        </>
+      )}
+      {contentFrom === "articles" && (
+        <>
+          {events[contentFrom].length === 0 && !isLoading && (
+            <div
+              className="fx-centered fx-col box-pad-v"
+              style={{ height: "30vh" }}
+            >
+              <h4>{t("AUBYIOq")}</h4>
+              <p className="gray-c">{t("AkqCrW5", { name: user?.name })}</p>
               <div
-                className="fx-centered fx-col box-pad-v"
-                style={{ height: "30vh" }}
-              >
-                <h4>{t("AUBYIOq")}</h4>
-                <p className="gray-c">{t("AkqCrW5", { name: user?.name })}</p>
-                <div
-                  className="posts"
-                  style={{ width: "48px", height: "48px" }}
-                ></div>
-              </div>
-            )}
-            {events[contentFrom].length > 0 && (
-              <>
-                {events[contentFrom].map((post) => {
-                  let fullPost = {
-                    ...post,
-                    author_img: user?.picture,
-                  };
-                  return (
-                    <div key={post.id} className="fx-centered fit-container">
-                      <RepEventPreviewCard item={fullPost} />
-                    </div>
-                  );
-                })}
-              </>
-            )}
-          </>
-        )}
-        {contentFrom === "videos" && (
-          <>
-            {events[contentFrom].length === 0 && !isLoading && (
+                className="posts"
+                style={{ width: "48px", height: "48px" }}
+              ></div>
+            </div>
+          )}
+        </>
+      )}
+      {contentFrom === "videos" && (
+        <>
+          {events[contentFrom].length === 0 && !isLoading && (
+            <div
+              className="fx-centered fx-col box-pad-v"
+              style={{ height: "30vh" }}
+            >
+              <h4>{t("A3QrgxE")}</h4>
+              <p className="gray-c">{t("A70xEba", { name: user?.name })}</p>
               <div
-                className="fx-centered fx-col box-pad-v"
-                style={{ height: "30vh" }}
-              >
-                <h4>{t("A3QrgxE")}</h4>
-                <p className="gray-c">{t("A70xEba", { name: user?.name })}</p>
-                <div
-                  className="play-24"
-                  style={{ width: "48px", height: "48px" }}
-                ></div>
-              </div>
-            )}
-            {events[contentFrom].length > 0 && (
-              <>
-                {events[contentFrom].map((video) => {
-                  return (
-                    <div key={video.id} className="fx-centered fit-container">
-                      <RepEventPreviewCard item={video} />
-                    </div>
-                  );
-                })}
-              </>
-            )}
-          </>
-        )}
-        {contentFrom === "smart-widget" && (
-          <>
-            {events[contentFrom].length === 0 && !isLoading && (
+                className="play-24"
+                style={{ width: "48px", height: "48px" }}
+              ></div>
+            </div>
+          )}
+        </>
+      )}
+      {contentFrom === "smart-widget" && (
+        <>
+          {events[contentFrom].length === 0 && !isLoading && (
+            <div
+              className="fx-centered fx-col box-pad-v"
+              style={{ height: "30vh" }}
+            >
+              <h4>{t("Aezm5AZ")}</h4>
+              <p className="gray-c">{t("A1MlrcU", { name: user?.name })}</p>
               <div
-                className="fx-centered fx-col box-pad-v"
-                style={{ height: "30vh" }}
-              >
-                <h4>{t("Aezm5AZ")}</h4>
-                <p className="gray-c">{t("A1MlrcU", { name: user?.name })}</p>
-                <div
-                  className="smart-widget-24"
-                  style={{ width: "48px", height: "48px" }}
-                ></div>
-              </div>
-            )}
-            {events[contentFrom].length > 0 && (
-              <>
-                {events[contentFrom].map((widget) => {
-                  return (
-                    <div key={widget.id} className="fx-centered fit-container">
-                      <WidgetCardV2
-                        widget={widget}
-                        key={widget.id}
-                        deleteWidget={() => null}
-                      />
-                    </div>
-                  );
-                })}
-              </>
-            )}
-          </>
-        )}
-        {isLoading && (
-          <div
-            className="fit-container box-pad-v fx-centered fx-col"
-            style={{ height: "40vh" }}
-          >
-            <LoadingLogo />
-          </div>
-        )}
-      </InfiniteScroll>
+                className="smart-widget-24"
+                style={{ width: "48px", height: "48px" }}
+              ></div>
+            </div>
+          )}
+        </>
+      )}
+      {events[contentFrom].length > 0 && (
+        <>
+          <Virtuoso
+            style={{ width: "100%", height: "100vh" }}
+            totalCount={events[contentFrom].length}
+            increaseViewportBy={1000}
+            endReached={(index) => {
+              setLastEventTime(events[contentFrom][index].created_at - 1);
+            }}
+            overscan={1000}
+            skipAnimationFrameInResizeObserver={true}
+            useWindowScroll={true}
+            ref={virtuosoRef}
+            itemContent={(index) => {
+              let item = events[contentFrom][index];
+              if (["curations", "videos", "articles"].includes(contentFrom))
+                return <RepEventPreviewCard key={item.id} item={item} />;
+              if (contentFrom === "smart-widget")
+                return (
+                  <WidgetCardV2
+                    widget={item}
+                    key={item.id}
+                    deleteWidget={() => null}
+                  />
+                );
+              if (item.kind === 6)
+                return <KindSix event={item} key={item.id} />;
+              return <KindOne event={item} key={item.id} border={true} />;
+            }}
+          />
+        </>
+      )}
+      {isLoading && (
+        <div
+          className="fit-container box-pad-v fx-centered fx-col"
+          style={{ height: "60vh" }}
+        >
+          <LoadingLogo />
+        </div>
+      )}
     </div>
   );
 }

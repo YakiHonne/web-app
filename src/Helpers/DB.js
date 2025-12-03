@@ -691,6 +691,21 @@ export const saveRelaysSet = async (relaysSets, pubkey) => {
     }
   }
 };
+export const deleteRelaysSet = async (setID, pubkey) => {
+  if (db) {
+    try {
+      let currentSet = await getRelaysSet(pubkey);
+      delete currentSet[setID];
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.relaysSet, async () => {
+          await db.relaysSet.put(currentSet, pubkey);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
 export const saveAppSettings = async (event, pubkey, lastTimestamp) => {
   if (db) {
     try {

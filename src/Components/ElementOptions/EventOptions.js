@@ -262,7 +262,7 @@ export default function EventOptions({
       onClick={(e) => {
         e.stopPropagation();
         localStorage.setItem(
-          event.naddr,
+          "ArticleToEdit",
           JSON.stringify({
             post_pubkey: event.pubkey,
             post_id: event.id,

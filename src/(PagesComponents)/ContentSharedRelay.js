@@ -19,16 +19,15 @@ import KindOne from "@/Components/KindOne";
 import bannedList from "@/Content/BannedList";
 import { useRouter } from "next/router";
 import InfiniteScroll from "@/Components/InfiniteScroll";
-import { t } from "i18next";
 import RelayPreview from "./Relays/RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
 import Backbar from "@/Components/Backbar";
 import { getNDKInstance } from "@/Helpers/utils";
-import Slider from "@/Components/Slider";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import PostNotePortal from "@/Components/PostNotePortal";
 import RecentPosts from "@/Components/RecentPosts";
+import { Virtuoso } from "react-virtuoso";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -174,6 +173,7 @@ const HomeFeed = ({ relay }) => {
     () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
     [notes]
   );
+  const virtuosoRef = useRef(null);
 
   useEffect(() => {
     straightUp();
@@ -248,7 +248,10 @@ const HomeFeed = ({ relay }) => {
 
   const handleRecentPostsClick = (notes) => {
     dispatchNotes({ type: "global", note: notes });
-    straightUp(undefined, "smooth");
+    virtuosoRef.current?.scrollToIndex({
+      top: 32,
+      behavior: "smooth",
+    });
   };
   return (
     <div className="fx-centered  fx-wrap fit-container" style={{ gap: 0 }}>
@@ -305,8 +308,51 @@ const HomeFeed = ({ relay }) => {
         kind={contentFrom}
         position="bottom"
       />
-      <InfiniteScroll events={notes} onRefresh={setNotesLastEventTime}>
-        {notes.map((note, index) => {
+      {/* <InfiniteScroll events={notes} onRefresh={setNotesLastEventTime}> */}
+      {notes.length > 0 && (
+        <Virtuoso
+          ref={virtuosoRef}
+          style={{ width: "100%", height: "100vh" }}
+          skipAnimationFrameInResizeObserver={true}
+          overscan={1000}
+          useWindowScroll={true}
+          totalCount={notes.length}
+          increaseViewportBy={1000}
+          endReached={(index) => {
+            setNotesLastEventTime(notes[index].created_at - 1);
+          }}
+          itemContent={(index) => {
+            let item = notes[index];
+            if (![...userMutedList, ...bannedList].includes(item.pubkey)) {
+              if (
+                item.kind === 6 &&
+                ![...userMutedList, ...bannedList].includes(
+                  item.relatedEvent.pubkey
+                )
+              )
+                return (
+                  <Fragment key={item.id}>
+                    <KindSix event={item} />
+                  </Fragment>
+                );
+              if (item.kind === 1)
+                return (
+                  <Fragment key={item.id}>
+                    <KindOne event={item} border={true} />
+                  </Fragment>
+                );
+              if ([30023, 34235, 21, 22, 30004, 30005].includes(item.kind))
+                return (
+                  <Fragment key={item.id}>
+                    <RepEventPreviewCard item={item} />
+                  </Fragment>
+                );
+              return null;
+            }
+          }}
+        />
+      )}
+        {/* {notes.map((note, index) => {
           if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
             if (
               note.kind === 6 &&
@@ -333,7 +379,7 @@ const HomeFeed = ({ relay }) => {
               );
             return null;
           }
-        })}
+        })} */}
         {notes?.length === 0 && !isLoading && isConnected && (
           <div
             className="fit-container fx-centered fx-col"
@@ -373,7 +419,7 @@ const HomeFeed = ({ relay }) => {
             <LoadingLogo size={64} />
           </div>
         )}
-      </InfiniteScroll>
+      {/* </InfiniteScroll> */}
     </div>
   );
 };

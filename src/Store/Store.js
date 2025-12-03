@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { configureStore } from "@reduxjs/toolkit";
 import {
   UserMetadataReducer,
@@ -50,6 +50,9 @@ import {
   HomeCarouselPostsReducer,
   RelaysStatsReducer,
   RefreshAppSettingsReducer,
+  NotificationsReducer,
+  IsNotificationsLoadingReducer,
+  RefreshNotificationsReducer,
 } from "./Slides/Extras";
 
 export const store = configureStore({
@@ -96,7 +99,10 @@ export const store = configureStore({
     homeCarouselPosts: HomeCarouselPostsReducer,
     relaysStats: RelaysStatsReducer,
     isUserFollowingsLoaded: IsUserFollowingsLoadedReducer,
-    refreshAppSettings: RefreshAppSettingsReducer,  
+    refreshAppSettings: RefreshAppSettingsReducer,
     userSearchRelays: UserSearchRelaysReducer,
+    notifications: NotificationsReducer,
+    isNotificationsLoading: IsNotificationsLoadingReducer,
+    refreshNotifications: RefreshNotificationsReducer,
   },
 });

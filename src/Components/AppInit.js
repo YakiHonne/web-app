@@ -108,7 +108,7 @@ import {
 } from "@nostr-dev-kit/ndk";
 import { getTrendingUsers24h } from "@/Helpers/WSInstance";
 import { savedToolsIdentifier } from "@/Content/Extras";
-import { primaryColors } from "@/Content/PrimaryColors";
+import { decryptDMSWorker } from "@/workers/decryptDMWorker";
 
 export default function AppInit() {
   const dispatch = useDispatch();
@@ -229,7 +229,7 @@ export default function AppInit() {
         relaysURLsToWrite.length > 0 ? relaysURLsToWrite : relaysOnPlatform;
       dispatch(setUserRelays(relaysURLsToWrite));
       dispatch(setUserAllRelays(relays.relays));
-      addExplicitRelays(relaysURLsToRead);
+      // addExplicitRelays(relaysURLsToRead);
     }
     if (
       JSON.stringify(previousFavRelays.current) !== JSON.stringify(favRelays)
@@ -282,8 +282,7 @@ export default function AppInit() {
       dispatch(setUserAppSettings(appSettings || false));
     }
     if (
-      JSON.stringify(previousRelaysSet.current) !==
-      JSON.stringify(relaysSet)
+      JSON.stringify(previousRelaysSet.current) !== JSON.stringify(relaysSet)
     ) {
       previousRelaysSet.current = relaysSet;
       dispatch(setUserRelaysSet(relaysSet));
@@ -753,65 +752,19 @@ export default function AppInit() {
         }
       );
       subscription.on("event", async (event) => {
-        if (event.kind === 4 && !userKeys.bunker) {
-          let decryptedMessage = "";
-          tempAuthors = [...new Set([...tempAuthors, event.pubkey])];
-          let peer =
-            event.pubkey === userKeys.pub
-              ? event.tags.find((tag) => tag[0] === "p" && tag[1])[1]
-              : "";
-          let reply = event.tags.find((tag) => tag[0] === "e");
-          let replyID = reply ? reply[1] : "";
-
-          decryptedMessage = await decrypt04(event, userKeys);
-          let tempEvent = {
-            id: event.id,
-            created_at: event.created_at,
-            content: decryptedMessage,
-            pubkey: event.pubkey,
-            kind: event.kind,
-            peer,
-            replyID,
-          };
-          tempInbox.push(tempEvent);
-          if (eose) saveChatrooms(tempInbox, userKeys.pub);
-        }
-        if (
-          event.kind === 1059 &&
-          (userKeys.sec || window?.nostr?.nip44) &&
-          !userKeys.bunker
-        ) {
-          try {
-            let unwrappedEvent = await unwrapGiftWrap(event, userKeys);
-            if (unwrappedEvent && unwrappedEvent.kind === 14) {
-              tempAuthors = [
-                ...new Set([...tempAuthors, unwrappedEvent.pubkey]),
-              ];
-              let peer =
-                unwrappedEvent.pubkey === userKeys.pub
-                  ? unwrappedEvent.tags.find((tag) => tag[0] === "p")[1]
-                  : "";
-              let reply = unwrappedEvent.tags.find((tag) => tag[0] === "e");
-              let replyID = reply ? reply[1] : "";
-              let tempEvent = {
-                id: unwrappedEvent.id,
-                created_at: unwrappedEvent.created_at,
-                content: unwrappedEvent.content,
-                pubkey: unwrappedEvent.pubkey,
-                kind: unwrappedEvent.kind,
-                peer,
-                replyID,
-              };
-              tempInbox.push(tempEvent);
-              if (eose) saveChatrooms(tempInbox, userKeys.pub);
-            }
-          } catch (err) {
-            console.log(err);
-          }
+        let tempEvent = userKeys.ext
+          ? await decryptDMS([event.rawEvent()], userKeys)
+          : await decryptDMSWorker([event.rawEvent()], userKeys);
+        tempInbox = [...tempInbox, ...tempEvent.inbox];
+        tempAuthors = [...tempAuthors, ...tempEvent.authors];
+        if (eose) {
+          saveChatrooms(tempInbox, userKeys.pub);
+          saveUsers(tempAuthors);
         }
       });
       subscription.on("eose", () => {
         saveChatrooms(tempInbox, userKeys.pub);
+        saveUsers(tempAuthors);
         eose = true;
       });
     };
@@ -856,36 +809,46 @@ export default function AppInit() {
 
         while (!endOfData) {
           if (isCancelled) return;
-          const dmsData = await getSubData([
-            {
-              kinds: [4],
-              authors: [userKeys.pub],
-              until,
-              since,
-              limit: 100,
-            },
-            {
-              kinds: [4],
-              "#p": [userKeys.pub],
-              until,
-              since,
-              limit: 100,
-            },
-            {
-              kinds: [1059],
-              "#p": [userKeys.pub],
-              until: until ? until - 432000 : until,
-              since: since ? since - 432000 : since,
-              limit: 100,
-            },
-          ]);
+          const dmsData = await getSubData(
+            [
+              {
+                kinds: [4],
+                authors: [userKeys.pub],
+                until,
+                since,
+                limit: 100,
+              },
+              {
+                kinds: [4],
+                "#p": [userKeys.pub],
+                until,
+                since,
+                limit: 100,
+              },
+              {
+                kinds: [1059],
+                "#p": [userKeys.pub],
+                until: until ? until - 432000 : until,
+                since: since ? since - 432000 : since,
+                limit: 100,
+              },
+            ],
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            true
+          );
 
           if (isCancelled) return;
 
           if (dmsData.data.length > 0) {
-            const tempInbox = await decryptDMS(dmsData.data, userKeys);
+            const tempInbox = userKeys.ext
+              ? await decryptDMS(dmsData.data, userKeys)
+              : await decryptDMSWorker(dmsData.data, userKeys);
             if (isCancelled) return;
             await saveChatrooms(tempInbox.inbox, userKeys.pub);
+            saveUsers(tempInbox.authors);
             until = tempInbox.until ? tempInbox.until : until;
             since = until ? until - 604800 : since;
             timePeriodIndex = 0;

@@ -16,12 +16,9 @@ export default function Followings({
 
   useEffect(() => {
     if (relaysBatch.length === 0 && relays.length > 0) {
-      console.log(relays)
       setRelaysBatch(relays.slice(0, 8));
     }
   }, [relaysBatch, relays]);
-
-
 
   const handleRelayClick = () => {
     let newRelays = relays.slice(relaysBatch.length, relaysBatch.length + 8);

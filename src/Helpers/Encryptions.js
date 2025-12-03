@@ -149,6 +149,7 @@ const getEmptyuserMetadata = (pubkey) => {
     }
   }
   return {
+    kind: 0,
     name: backupName,
     display_name: backupName,
     picture: "",
@@ -248,6 +249,7 @@ const getParsedAuthor = (data) => {
     console.log(err);
   }
   let tempAuthor = {
+    kind: 0,
     display_name:
       content?.display_name || content?.name || data.pubkey.substring(0, 10),
     name:
@@ -416,6 +418,45 @@ const getParsedRepEvent = (event) => {
     console.log(err);
     return false;
   }
+};
+
+const getParsedRelaySet = (event) => {
+  if (!event) return false;
+  let title = "";
+  let description = "";
+  let d = "";
+  let image = "";
+  let relays = [];
+  for (let tag of event.tags) {
+    if (tag[0] === "d") d = tag[1];
+    if (tag[0] === "title") title = tag[1];
+    if (tag[0] === "description") description = tag[1];
+    if (tag[0] === "image") image = tag[1];
+    if (tag[0] === "relay") relays.push(tag[1]);
+  }
+  if (!title) {
+    let allRelays = relays
+      .join(", ")
+      .replaceAll("wss://", "")
+      .replaceAll("ws://", "");
+    title =
+      allRelays.length > 20
+        ? shortenKey(allRelays, 8)
+        : allRelays || `Relays set (${relays.length}) relays`;
+  }
+  return {
+    kind: event.kind,
+    sig: event.sig,
+    pubkey: event.pubkey,
+    id: event.id,
+    created_at: event.created_at,
+    d,
+    aTag: `${event.kind}:${event.pubkey}:${d}`,
+    title,
+    description,
+    image,
+    relays,
+  };
 };
 
 const detectDirection = (text) => {
@@ -1098,6 +1139,7 @@ const getBackupWOTList = () => {
 
 const filterContent = (selectedFilter, list) => {
   const matchWords = (longString, wordArray) => {
+    if (!longString) return false;
     const stringWords = Array.isArray(longString)
       ? longString.map((_) => _.toLowerCase())
       : longString.toLowerCase().match(/\b\w+\b/g) || [];
@@ -1200,6 +1242,7 @@ const filterContent = (selectedFilter, list) => {
 
   const testForNotes = (_) => {
     try {
+      if(!selectedFilter) return true;
       let tags = _.tags.filter((tag) => tag[0] === "t").map((tag) => tag[1]);
       let excluded_words = selectedFilter.excluded_words.length
         ? !(
@@ -1297,6 +1340,7 @@ export {
   removeDuplicatedRelays,
   removeEventsDuplicants,
   getParsedRepEvent,
+  getParsedRelaySet,
   encryptEventData,
   decryptEventData,
   getClaimingData,
