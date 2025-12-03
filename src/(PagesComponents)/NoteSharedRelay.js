@@ -24,6 +24,7 @@ import { useTranslation } from "react-i18next";
 import Backbar from "@/Components/Backbar";
 import { getNDKInstance } from "@/Helpers/utils";
 import PostNotePortal from "@/Components/PostNotePortal";
+import { Virtuoso } from "react-virtuoso";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -272,39 +273,50 @@ const HomeFeed = ({ relay }) => {
           </p>
         </div>
       )}
-      <InfiniteScroll events={notes} onRefresh={setNotesLastEventTime}>
-        {notes.map((note, index) => {
-          if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
-            if (
-              note.kind === 6 &&
-              ![...userMutedList, ...bannedList].includes(
-                note.relatedEvent.pubkey
+      {notes.length > 0 && (
+        <Virtuoso
+          style={{ width: "100%", height: "100vh" }}
+          skipAnimationFrameInResizeObserver={true}
+          overscan={1000}
+          useWindowScroll={true}
+          totalCount={notes.length}
+          increaseViewportBy={1000}
+          endReached={(index) => {
+            setNotesLastEventTime(notes[index].created_at - 1);
+          }}
+          itemContent={(index) => {
+            let note = notes[index];
+            if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
+              if (
+                note.kind === 6 &&
+                ![...userMutedList, ...bannedList].includes(
+                  note.relatedEvent.pubkey
+                )
               )
-            )
-              return (
-                <Fragment key={note.id}>
-                  <KindSix event={note} />
-                </Fragment>
-              );
-            if (note.kind !== 6)
-              return (
-                <Fragment key={note.id}>
-                  <KindOne event={note} border={true} />
-                </Fragment>
-              );
-          }
-        })}
-
-        <div className="box-pad-v"></div>
-        {isLoading && (
-          <div
-            className="fit-container box-pad-v fx-centered fx-col"
-            style={{ height: "60vh" }}
-          >
-            <LoadingLogo size={64} />
-          </div>
-        )}
-      </InfiniteScroll>
+                return (
+                  <Fragment key={note.id}>
+                    <KindSix event={note} />
+                  </Fragment>
+                );
+              if (note.kind !== 6)
+                return (
+                  <Fragment key={note.id}>
+                    <KindOne event={note} border={true} />
+                  </Fragment>
+                );
+            }
+          }}
+        />
+      )}
+      <div className="box-pad-v"></div>
+      {isLoading && (
+        <div
+          className="fit-container box-pad-v fx-centered fx-col"
+          style={{ height: "60vh" }}
+        >
+          <LoadingLogo size={64} />
+        </div>
+      )}
     </div>
   );
 };

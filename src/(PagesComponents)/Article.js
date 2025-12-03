@@ -223,7 +223,7 @@ export default function Article({ event, userProfile, naddrData }) {
             )}
             {!isMuted && (
               <div
-                className={`fit-container fx-centered fx-wrap article-mw main-middle`}
+                className={`fit-container fx-centered fx-wrap  main-middle`}
               >
                 {showCommentsSection && (
                   <RepEventCommentsSection
@@ -323,7 +323,7 @@ export default function Article({ event, userProfile, naddrData }) {
                             href={"/write-article?edit=" + post.naddr}
                             onClick={() => {
                               localStorage.setItem(
-                                post.naddr,
+                                "ArticleToEdit",
                                 JSON.stringify({
                                   post_pubkey: post.pubkey,
                                   post_id: post.id,

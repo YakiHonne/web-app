@@ -1,4 +1,3 @@
-import LoadingDots from "@/Components/LoadingDots";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +8,7 @@ import useOutboxRelays from "@/Hooks/useOutboxRelays";
 import Followings from "./Followings";
 import Network from "./Network";
 import { sleepTimer } from "@/Helpers/Helpers";
+import LoadingLogo from "@/Components/LoadingLogo";
 
 export default function Relays() {
   const { t } = useTranslation();
@@ -25,8 +25,8 @@ export default function Relays() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-       await fetchGlobalRelays();
-       await fetchCollectionsRelays();
+        await fetchGlobalRelays();
+        await fetchCollectionsRelays();
         setIsLoading(false);
       } catch (err) {
         console.log(err);
@@ -121,10 +121,10 @@ export default function Relays() {
           </div>
           {isLoading && (
             <div
-              className="fit-container fx-centered"
+              className="fit-container box-pad-v fx-centered fx-col"
               style={{ height: "60vh" }}
             >
-              <LoadingDots />
+              <LoadingLogo />
             </div>
           )}
           {!isLoading && (

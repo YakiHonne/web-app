@@ -1,9 +1,9 @@
 import { nanoid } from "nanoid";
 import React, { useEffect } from "react";
+const id = nanoid()
+let containerName = "infinite-scroll-" + id
 
 export default function InfiniteScroll({ children, events, onRefresh }) {
-  const id = nanoid()
-  let containerName = "infinite-scroll-" + id
 
   useEffect(() => {
     const contentArea = document.querySelector(`.${containerName}`);

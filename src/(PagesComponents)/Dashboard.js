@@ -169,13 +169,15 @@ const getLocalDrafts = () => {
         : false,
       artDraft: artDraft.default
         ? false
-        : {
+        : artDraft.title || artDraft.content
+        ? {
             created_at: artDraft.created_at || Math.floor(Date.now() / 1000),
             kind: 30024,
             title: artDraft.title || "Untitled",
             content: artDraft.content || "Untitled",
             local: true,
-          },
+          }
+        : false,
     };
     return localDraft.artDraft ||
       localDraft.smartWidgetDraft ||
@@ -941,7 +943,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
   );
 };
 
-const Widgets = ({ setPostToNote, localDraft }) => {
+const Widgets = ({ setPostToNote, localDrafte }) => {
   const userKeys = useSelector((state) => state.userKeys);
   const userSavedTools = useSelector((state) => state.userSavedTools);
   const { t } = useTranslation();
@@ -952,7 +954,7 @@ const Widgets = ({ setPostToNote, localDraft }) => {
   const [selectedSWSet, setSelectedSWSet] = useState(0);
   const [savedTools, setSavedTools] = useState([]);
   const [selectedSW, setSelectedSW] = useState("");
-
+  const [localDraft, setLocalDraft] = useState(getLocalDrafts());
   const [events, dispatchEvents] = useReducer(
     eventsReducer,
     eventsInitialState
@@ -1079,6 +1081,11 @@ const Widgets = ({ setPostToNote, localDraft }) => {
     customHistory("/smart-widget-builder");
   };
 
+  const handleDelete = () => {
+    setLocalDraft(false);
+    localStorage?.removeItem("swv2-cdraft");
+  };
+
   return (
     <>
       {selectedSW && (
@@ -1103,6 +1110,7 @@ const Widgets = ({ setPostToNote, localDraft }) => {
                     <ContentCard
                       event={localDraft?.smartWidgetDraft}
                       refreshAfterDeletion={handleEventDeletion}
+                      handleDelete={handleDelete}
                     />
                   </>
                 )}
@@ -1726,7 +1734,9 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                         <ContentCard event={data.localDraft.artDraft} />
                       )}
                       {data.localDraft.smartWidgetDraft && (
-                        <ContentCard event={data.localDraft.smartWidgetDraft} />
+                        <ContentCard
+                          event={data.localDraft.smartWidgetDraft}
+                        />
                       )}
                     </>
                   )}
@@ -1773,12 +1783,21 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
   );
 };
 
-const ContentCard = ({ event, refreshAfterDeletion, setPostToNote }) => {
+const ContentCard = ({
+  event,
+  refreshAfterDeletion,
+  setPostToNote,
+  handleDelete,
+}) => {
   return (
     <>
       {[1, 6].includes(event.kind) && <NoteCard event={event} />}
       {[11, 300331].includes(event.kind) && (
-        <DraftCardOthers event={event} setPostToNote={setPostToNote} />
+        <DraftCardOthers
+          event={event}
+          setPostToNote={setPostToNote}
+          handleDelete={handleDelete}
+        />
       )}
       {event.kind === 30024 && (
         <DraftCard event={event} refreshAfterDeletion={refreshAfterDeletion} />
@@ -1862,7 +1881,7 @@ const DraftCard = ({ event, refreshAfterDeletion }) => {
   );
 };
 
-const DraftCardOthers = ({ event, setPostToNote }) => {
+const DraftCardOthers = ({ event, setPostToNote, handleDelete }) => {
   const { t } = useTranslation();
   const handleRedirect = (e) => {
     e.stopPropagation();
@@ -1948,9 +1967,20 @@ const DraftCardOthers = ({ event, setPostToNote }) => {
       </div>
       <OptionsDropdown
         options={[
-          <div className="pointer" onClick={handleRedirect}>
+          <div
+            className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
+            onClick={handleRedirect}
+          >
             <p>{t("Ai4af1h")}</p>
           </div>,
+          handleDelete && (
+            <div
+              className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
+              onClick={handleDelete}
+            >
+              <p className="red-c">{t("Almq94P")}</p>
+            </div>
+          ),
         ]}
       />
     </div>

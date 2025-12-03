@@ -8,6 +8,7 @@ const supportedLanguageKeys = [
   "th",
   "ja",
   "ar",
+  "ru",
   "hi",
 ];
 const supportedLanguage = [
@@ -24,9 +25,9 @@ const supportedLanguage = [
     disabled: false,
   },
   {
-    display_name: "Français",
-    value: "fr",
-    left_el: <div className="flag-fr"></div>,
+    display_name: "العربية",
+    value: "ar",
+    left_el: <div className="flag-ar"></div>,
     disabled: false,
   },
   {
@@ -48,6 +49,12 @@ const supportedLanguage = [
     disabled: false,
   },
   {
+    display_name: "Français",
+    value: "fr",
+    left_el: <div className="flag-fr"></div>,
+    disabled: false,
+  },
+  {
     display_name: "ไทย",
     value: "th",
     left_el: <div className="flag-th"></div>,
@@ -60,15 +67,15 @@ const supportedLanguage = [
     disabled: false,
   },
   {
-    display_name: "العربية",
-    value: "ar",
-    left_el: <div className="flag-ar"></div>,
-    disabled: false,
-  },
-  {
     display_name: "भारतीय",
     value: "hi",
     left_el: <div className="flag-hi"></div>,
+    disabled: false,
+  },
+  {
+    display_name: "Русский",
+    value: "ru",
+    left_el: <div className="flag-ru"></div>,
     disabled: false,
   },
 ];

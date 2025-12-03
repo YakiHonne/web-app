@@ -424,7 +424,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
               />
             </div>
           </div>
-          <div className="round-icon">
+          <div className="round-icon" onClick={handleSendMessage}>
             <div className="send-24"></div>
           </div>
         </form>

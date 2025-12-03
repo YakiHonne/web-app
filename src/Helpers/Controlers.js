@@ -533,7 +533,7 @@ const getSubData = async (
   ndk = ndkInstance,
   maxEvents = 1000,
   raw = false,
-  cacheUsage = "RELAY_FIRST"
+  cacheUsage = "CACHE_FIRST"
 ) => {
   const userRelays = relaysOnPlatform;
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
@@ -559,10 +559,10 @@ const getSubData = async (
       filter_,
       {
         groupable: false,
-        skipVerification: false,
-        skipValidation: false,
+        skipVerification: true,
+        skipValidation: true,
         relayUrls: relayUrls.length > 0 ? relayUrls : userRelays,
-        cacheUsage: "ONLY_RELAY",
+        cacheUsage
       },
       {
         onEvent(event) {
@@ -657,7 +657,6 @@ const InitEvent = async (
           },
         }
       );
-      // await bunker.connect();
       tempEvent = await bunker.signEvent(tempEvent);
     } else {
       tempEvent = finalizeEvent(tempEvent, userKeys.sec);

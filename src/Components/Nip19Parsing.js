@@ -5,7 +5,6 @@ import {
   getParsedAuthor,
   getParsedRepEvent,
   getParsedSW,
-  shortenKey,
 } from "@/Helpers/Encryptions";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
 import { nip19 } from "nostr-tools";
@@ -20,19 +19,66 @@ import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import ZapPollsComp from "@/Components/SmartWidget/ZapPollsComp";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
 import UserProfilePic from "./UserProfilePic";
-import { copyText } from "@/Helpers/Helpers";
+import { getLinkFromAddr } from "@/Helpers/Helpers";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
-import { getSubData } from "@/Helpers/Controlers";
+import { getEventFromCache, setEventFromCache } from "@/Helpers/utils";
 
+const getPreviouslyCachedEvent = (addr) => {
+  try {
+    let addr_ = addr
+      .replaceAll(",", "")
+      .replaceAll(":", "")
+      .replaceAll(";", "")
+      .replaceAll(".", "");
+    if (addr_.startsWith("naddr")) {
+      let data = nip19.decode(addr_);
+      let aTag = `${data.data.kind}:${data.data.pubkey}:${data.data.identifier}`;
+      let event = getEventFromCache(aTag);
+      return event ? getParsedRepEvent(event) : false;
+    }
+    if (addr_.startsWith("nprofile")) {
+      let data = nip19.decode(addr_);
+      let pubkey = data.data.pubkey;
+      let event = getEventFromCache(pubkey);
+      return event ? getParsedAuthor(event) : false;
+    }
+    if (addr_.startsWith("npub")) {
+      let data = nip19.decode(addr_);
+      let pubkey = "";
+      if (typeof data.data === "string") pubkey = data.data;
+      else if (data.data.pubkey) pubkey = data.data.pubkey;
+      let event = getEventFromCache(pubkey);
+      return event ? getParsedAuthor(event) : false;
+    }
+
+    if (addr_.startsWith("nevent") || addr_.startsWith("note")) {
+      let data = nip19.decode(addr_);
+      let event = getEventFromCache(data.data.id || data.data);
+      return event ? getParsedNote(event, true) : false;
+    }
+    return false;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+
+const setNewlyFetchedEventToCache = (event) => {
+  let id = event.id;
+  if (event.kind === 0) id = event.pubkey;
+  if ([30033, 30031, 30004, 30005, 30023, 34235, 22, 21].includes(event.kind))
+    id = getParsedRepEvent(event).aTag;
+  setEventFromCache(id, event.rawEvent());
+};
 function Nip19Parsing({ addr, minimal = false }) {
-  const [event, setEvent] = useState(false);
+  const [event, setEvent] = useState(getPreviouslyCachedEvent(addr));
   const [isLoading, setIsLoading] = useState(true);
   const [isParsed, setIsParsed] = useState(false);
   const [isUnsupported, setIsUnsupported] = useState(false);
-  const [url, setUrl] = useState("/");
+  const [url, setUrl] = useState(getLinkFromAddr(addr));
   const { t } = useTranslation();
-
   useEffect(() => {
+    if (event) return;
     let filter = [];
     try {
       let addr_ = addr
@@ -94,6 +140,7 @@ function Nip19Parsing({ addr, minimal = false }) {
       setIsLoading(false);
       return;
     }
+
     const sub = ndkInstance.subscribe(filter, {
       cacheUsage: "CACHE_FIRST",
       groupable: false,
@@ -101,6 +148,7 @@ function Nip19Parsing({ addr, minimal = false }) {
     });
     sub.on("event", (event) => {
       if (event.id) {
+        setNewlyFetchedEventToCache(event);
         if (event.kind === 0) {
           let content =
             getParsedAuthor(event.rawEvent()) ||

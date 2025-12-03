@@ -8,6 +8,8 @@ import { getKeys } from "./ClientHelpers";
 import { getEmptyRelaysData } from "./Encryptions";
 
 const relayMetadataCache = new Map();
+const eventsCache = new Map();
+const urlsMetadataCache = new Map();
 const ndkInstancesCache = new Map();
 const ndkInstancesForDMsCache = new Map();
 
@@ -57,27 +59,32 @@ export function setRelayMetadata(key, data) {
 
 export function getRelayMetadata(key) {
   let cleanURL = !key.endsWith("/") ? key : key.slice(0, -1);
-  return relayMetadataCache.get(cleanURL) || relayMetadataCache.get(key) || getEmptyRelaysData(cleanURL);
+  return (
+    relayMetadataCache.get(cleanURL) ||
+    relayMetadataCache.get(key) ||
+    getEmptyRelaysData(cleanURL)
+  );
 }
 
 export function clearRelayMetadata(key) {
   relayMetadataCache.delete(key);
 }
 
-export async function getNDKInstance(key) {
+export async function getNDKInstance(key, list, isRelayList = false) {
   let instance = ndkInstancesCache.get(key);
   if (instance) return instance;
-  let newInstance = await initiateNDKInstance(key);
+  let newInstance = await initiateNDKInstance(key, list, isRelayList);
   return newInstance;
 }
+
 export function setNDKInstance(key, instance) {
   ndkInstancesCache.set(key, instance);
 }
 
-const initiateNDKInstance = async (relay) => {
+const initiateNDKInstance = async (relay, list, isRelayList) => {
   let userKeys = getKeys();
   const ndkInstance = new NDK({
-    explicitRelayUrls: [relay],
+    explicitRelayUrls: isRelayList ? list : [relay],
   });
 
   if (userKeys?.ext) {
@@ -104,6 +111,7 @@ const initiateNDKInstance = async (relay) => {
   }
   await ndkInstance.connect(4000);
   if (
+    !isRelayList &&
     !ndkInstance.pool.relays.get(relay.endsWith("/") ? relay : `${relay}/`)
       ?.connected
   ) {
@@ -122,6 +130,7 @@ export async function getNDKInstanceForDMs(key, relays) {
   let newInstance = await initiateNDKInstanceForDMs(key, relays);
   return newInstance;
 }
+
 export function setNDKInstanceForDMs(key, instance) {
   ndkInstancesForDMsCache.set(key, instance);
 }
@@ -152,3 +161,51 @@ const initiateNDKInstanceForDMs = async (key, relays) => {
   setNDKInstanceForDMs(key, ndkInstance);
   return ndkInstance;
 };
+
+export function getEventFromCache(id) {
+  let event = eventsCache.get(id);
+  if (event) {
+    setEventFromCache(id, event.event);
+    return event.event;
+  }
+  return null;
+}
+
+export function setEventFromCache(id, event) {
+  eventsCache.set(id, { event, seen: Date.now() });
+
+  if (eventsCache.size > 300) {
+    const sorted = [...eventsCache.entries()].sort(
+      (a, b) => b[1].seen - a[1].seen
+    );
+    const top300 = sorted.slice(0, 300);
+    eventsCache.clear();
+    for (const [k, v] of top300) {
+      eventsCache.set(k, v);
+    }
+  }
+}
+
+export function getURLFromCache(id) {
+  let metadata = urlsMetadataCache.get(id);
+  if (metadata) {
+    setURLFromCache(id, metadata.metadata);
+    return metadata.metadata;
+  }
+  return null;
+}
+
+export function setURLFromCache(id, metadata) {
+  urlsMetadataCache.set(id, { metadata, seen: Date.now() });
+
+  if (urlsMetadataCache.size > 300) {
+    const sorted = [...urlsMetadataCache.entries()].sort(
+      (a, b) => b[1].seen - a[1].seen
+    );
+    const top300 = sorted.slice(0, 300);
+    urlsMetadataCache.clear();
+    for (const [k, v] of top300) {
+      urlsMetadataCache.set(k, v);
+    }
+  }
+}

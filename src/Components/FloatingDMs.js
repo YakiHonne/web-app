@@ -11,6 +11,7 @@ import { handleUpdateConversation } from "@/Helpers/DMHelpers";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import InitiConvo from "./InitConvo";
 import LoadingDots from "./LoadingDots";
+import { Virtuoso } from "react-virtuoso";
 
 export default function FloatingDMs() {
   const { t } = useTranslation();
@@ -274,6 +275,84 @@ export default function FloatingDMs() {
               <>
                 {!selectedConvo &&
                   !isConvoLoading &&
+                  sortedInbox.length > 0 && (
+                    <Virtuoso
+                      style={{
+                        width: "100%",
+                        height: `min(45vh, ${sortedInbox.length * 62}px)`,
+                      }}
+                      skipAnimationFrameInResizeObserver={true}
+                      overscan={1000}
+                      totalCount={sortedInbox.length}
+                      increaseViewportBy={1000}
+                      itemContent={(index) => {
+                        let convo = sortedInbox[index];
+                        return (
+                          <div
+                            className="fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale pointer slide-up"
+                            key={convo.id}
+                            onClick={() =>
+                              handleSelectedConversation({ ...convo })
+                            }
+                          >
+                            <div className="fx-centered">
+                              <div>
+                                <UserProfilePic
+                                  img={convo.picture}
+                                  size={40}
+                                  user_id={convo.pubkey}
+                                  mainAccountUser={false}
+                                  allowClick={false}
+                                />
+                              </div>
+                              <div>
+                                <p>
+                                  {convo.display_name ||
+                                    convo.name ||
+                                    convo.pubkey.substring(0, 10)}
+                                </p>
+                                <div className="fx-centered fx-start-h">
+                                  {convo.convo[convo.convo.length - 1].peer && (
+                                    <p className="p-medium p-one-line">
+                                      {t("ARrkukw")}
+                                    </p>
+                                  )}
+                                  <p
+                                    className="gray-c p-medium p-one-line"
+                                    style={{ maxWidth: "100px" }}
+                                  >
+                                    {
+                                      convo.convo[convo.convo.length - 1]
+                                        .content
+                                    }
+                                  </p>
+                                  <p className="orange-c p-medium">
+                                    <Date_
+                                      toConvert={
+                                        new Date(convo.last_message * 1000)
+                                      }
+                                    />
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            {!convo.checked && (
+                              <div
+                                style={{
+                                  minWidth: "8px",
+                                  aspectRatio: "1/1",
+                                  backgroundColor: "var(--red-main)",
+                                  borderRadius: "var(--border-r-50)",
+                                }}
+                              ></div>
+                            )}
+                          </div>
+                        );
+                      }}
+                    />
+                  )}
+                {/* {!selectedConvo &&
+                  !isConvoLoading &&
                   sortedInbox.map((convo) => {
                     return (
                       <div
@@ -331,7 +410,7 @@ export default function FloatingDMs() {
                         )}
                       </div>
                     );
-                  })}
+                  })} */}
                 {isConvoLoading && (
                   <div
                     className="fit-container fx-centered"

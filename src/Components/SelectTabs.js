@@ -1,6 +1,6 @@
 import React, { useMemo, useRef, useEffect } from "react";
 
-export function SelectTabs({ selectedTab, tabs, setSelectedTab }) {
+export function SelectTabs({ selectedTab, tabs, setSelectedTab, small = false }) {
   const sliderRef = useRef(null);
   const buttonRefs = useMemo(() => {
     return tabs.map((tab) => ({
@@ -35,9 +35,9 @@ export function SelectTabs({ selectedTab, tabs, setSelectedTab }) {
       style={{
         gap: 0,
         position: "relative",
-        height: "2.8rem",
+        height: small ? "2rem" : "2.8rem",
         border: "none",
-        padding: "0 .45rem",
+        padding: small ? ".2rem" : "0 .45rem",
       }}
     >
       {buttonRefs.map((button, index) => (
@@ -62,7 +62,7 @@ export function SelectTabs({ selectedTab, tabs, setSelectedTab }) {
           bottom: 0,
           zIndex: 0,
           transition: ".2s ease-in-out",
-          padding: ".45rem 0",
+          padding: small ? ".2rem 0" : ".45rem 0",
         }}
       >
         <div

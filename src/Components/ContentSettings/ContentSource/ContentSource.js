@@ -3,7 +3,9 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import CustomizeContentSource from "./CustomizeContentSource";
 import ShareRelay from "./ShareRelay";
-import CFCategoryPreview from "./CFCategoryPreview";
+import ContentFeedCategoryPreview from "./ContentFeedCategoryPreview";
+import useRelaysSet from "@/Hooks/useRelaysSet";
+import { getParsedRelaySet } from "@/Helpers/Encryptions";
 
 export default function ContentSource({
   selectedCategory,
@@ -14,11 +16,37 @@ export default function ContentSource({
   const userAppSettings = useSelector((state) => state.userAppSettings);
   const userFavRelays = useSelector((state) => state.userFavRelays);
   const userKeys = useSelector((state) => state.userKeys);
+  const { userRelaysSet } = useRelaysSet();
   const [showOptions, setShowOptions] = useState(false);
   const [showFeedMarketplace, setShowFeedMarketPlace] = useState(false);
   const [showRelaySharing, setshowRelaySharing] = useState(false);
   const optionsRef = useRef(null);
-
+  const relaysSet = useMemo(() => {
+    let favSet = userFavRelays.tags
+      ? [
+          ...new Set(
+            userFavRelays.tags.filter((_) => _[0] === "a").map((_) => _[1])
+          ),
+        ]
+      : [];
+    if (favSet.length === 0) return [];
+    let relaysSet = favSet
+      .map((_) =>
+        userRelaysSet[_] ? getParsedRelaySet(userRelaysSet[_]) : null
+      )
+      .filter((_) => _);
+    return relaysSet;
+  }, [userFavRelays, userRelaysSet]);
+  const favRelays = useMemo(() => {
+    return userFavRelays.relays
+      ? userFavRelays.relays.map((_) => {
+          return {
+            display_name: _.replace("wss://", "").replace("ws://", ""),
+            value: _,
+          };
+        })
+      : [];
+  }, [userFavRelays]);
   const optionsList = useMemo(() => {
     if (!(userKeys && (userKeys?.sec || userKeys?.ext || userKeys?.bunker))) {
       let options =
@@ -35,11 +63,6 @@ export default function ContentSource({
                     enabled: true,
                   },
                 ],
-              },
-              {
-                group_name: t("AhSpIKN"),
-                value: "af",
-                list: [],
               },
             ]
           : [
@@ -60,11 +83,6 @@ export default function ContentSource({
                   },
                 ],
               },
-              {
-                group_name: t("AhSpIKN"),
-                value: "af",
-                list: [],
-              },
             ];
       return options;
     }
@@ -84,23 +102,6 @@ export default function ContentSource({
                 { display_name: t("A0gGIxM"), value: "global", enabled: true },
               ],
             },
-            {
-              group_name: t("AhSpIKN"),
-              value: "af",
-              list: userFavRelays.relays
-                ? userFavRelays.relays.map((_) => {
-                    return {
-                      display_name: _.replace("wss://", "").replace(
-                        "ws://",
-                        ""
-                      ),
-                      value: _,
-                      enabled: true,
-                      fav: true,
-                    };
-                  })
-                : [],
-            },
           ]
         : [
             {
@@ -118,37 +119,21 @@ export default function ContentSource({
                 { display_name: t("AM4vyRX"), value: "widgets", enabled: true },
               ],
             },
-            {
-              group_name: t("AhSpIKN"),
-              value: "af",
-              list: userFavRelays.relays
-                ? userFavRelays.relays.map((_) => {
-                    return {
-                      display_name: _.replace("wss://", "").replace(
-                        "ws://",
-                        ""
-                      ),
-                      value: _,
-                      enabled: true,
-                      fav: true,
-                    };
-                  })
-                : [],
-            },
           ];
     if (
       type === 1 &&
       userAppSettings?.settings?.content_sources?.mixed_content
     ) {
       let sources = userAppSettings?.settings?.content_sources?.mixed_content;
-      return getSourcesArray(sources, options[0].list, t, userFavRelays.relays);
+      return getSourcesArray(sources, options[0].list, t);
     }
     if (type === 2 && userAppSettings?.settings?.content_sources?.notes) {
       let sources = userAppSettings?.settings?.content_sources?.notes;
-      return getSourcesArray(sources, options[0].list, t, userFavRelays.relays);
+      return getSourcesArray(sources, options[0].list, t);
     }
     return options;
-  }, [userAppSettings, userKeys, userFavRelays]);
+  }, [userAppSettings, userKeys]);
+
   useEffect(() => {
     const handleOffClick = (e) => {
       e.stopPropagation();
@@ -226,8 +211,7 @@ export default function ContentSource({
             setShowOptions(!showOptions);
           }}
         >
-          <CFCategoryPreview category={selectedCategory} minimal={true} />
-
+          <ContentFeedCategoryPreview category={selectedCategory} minimal={true} />
           <div className="arrow"></div>
         </div>
         {showOptions && (
@@ -272,62 +256,162 @@ export default function ContentSource({
               style={{ gap: 0, padding: ".25rem .45rem" }}
             >
               {optionsList.map((option, index) => {
-                // let checkVisibility = !(
-                //   option.list.length === 0 ||
-                //   !option.list.find((_) => _.enabled)
-                // );
-                // if (checkVisibility)
-                  return (
+                return (
+                  <div
+                    key={index}
+                    className={"fx-centered fx-col fx-start-v fit-container"}
+                  >
+                    <h5 className="c1-c  box-pad-h-s">{option.group_name}</h5>
                     <div
-                      key={index}
-                      className={"fx-centered fx-col fx-start-v fit-container"}
+                      className="fit-container fx-centered fx-col fx-start-h fx-start-v"
+                      style={{ gap: 0, marginBottom: ".5rem" }}
                     >
-                      <h5 className="c1-c  box-pad-h-s">{option.group_name}</h5>
-                      <div
-                        className="fit-container fx-centered fx-col fx-start-h fx-start-v"
-                        style={{ gap: 0, marginBottom: ".5rem" }}
-                      >
-                        {option.list.map((_, _index) => {
-                          if (_.enabled)
-                            return (
-                              <div
-                                key={_index}
-                                className={`pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale`}
-                                style={{
-                                  borderRadius: "var(--border-r-18)",
+                      {option.list.map((_, _index) => {
+                        if (_.enabled)
+                          return (
+                            <div
+                              key={_index}
+                              className={`pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale`}
+                              style={{
+                                borderRadius: "var(--border-r-18)",
+                              }}
+                              onClick={(e) =>
+                                handleSelectCategory(e, _, option)
+                              }
+                            >
+                              <ContentFeedCategoryPreview
+                                category={{
+                                  group: option.value,
+                                  ..._,
                                 }}
-                                onClick={(e) =>
-                                  handleSelectCategory(e, _, option)
-                                }
-                              >
-                                <CFCategoryPreview
-                                  category={{
-                                    group: option.value,
-                                    ..._,
-                                  }}
-                                />
-                                <div className="fx-centered">
-                                  {selectedCategory.value === _.value && (
-                                    <div className="check-24"></div>
-                                  )}
-                                  {option.value === "af" && (
-                                    <div
-                                      className="share-icon"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setshowRelaySharing(_.value);
-                                      }}
-                                    ></div>
-                                  )}
-                                </div>
+                              />
+                              <div className="fx-centered">
+                                {selectedCategory.value === _.value && (
+                                  <div className="check-24"></div>
+                                )}
+                                {option.value === "af" && (
+                                  <div
+                                    className="share-icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setshowRelaySharing(_.value);
+                                    }}
+                                  ></div>
+                                )}
                               </div>
-                            );
-                        })}
-                      </div>
+                            </div>
+                          );
+                      })}
                     </div>
-                  );
+                  </div>
+                );
               })}
-              {userFavRelays.relays?.length === 0 && (
+              {(favRelays.length > 0 || relaysSet.length > 0) && (
+                <div className="fit-container box-marg-s">
+                  <h5 className="c1-c box-pad-h-s">{t("AhSpIKN")}</h5>
+                </div>
+              )}
+              {relaysSet.length > 0 && (
+                <div className={"fx-centered fx-col fx-start-v fit-container"}>
+                  <h5 className="gray-c  box-pad-h-s">{t("AgRMPL3")}</h5>
+                  <div
+                    className="fit-container fx-centered fx-col fx-start-h fx-start-v"
+                    style={{ gap: 0, marginBottom: ".5rem" }}
+                  >
+                    {relaysSet.map((metadata, _index) => {
+                      let isThereRelays = metadata.relays.length > 0;
+                      return (
+                        <div
+                          key={_index}
+                          className={`pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale`}
+                          style={{
+                            borderRadius: "var(--border-r-18)",
+                            opacity: isThereRelays ? 1 : 0.7,
+                            cursor: isThereRelays ? "pointer" : "not-allowed",
+                          }}
+                          onClick={(e) =>
+                            isThereRelays
+                              ? handleSelectCategory(
+                                  e,
+                                  { ...metadata, value: metadata.aTag },
+                                  { value: "rsf" }
+                                )
+                              : null
+                          }
+                        >
+                          <ContentFeedCategoryPreview
+                            category={{ ...metadata, group: "rsf" }}
+                          />
+                          <div className="fx-centered">
+                            <div
+                              className={`pointer sticker sticker-normal sticker-small ${
+                                isThereRelays
+                                  ? "sticker-green-side"
+                                  : "sticker-red-side"
+                              }`}
+                              style={{ minWidth: "max-content" }}
+                              // onClick={() =>
+                              //   seeDetails ? seeDetails(metadata) : null
+                              // }
+                            >
+                              {metadata.relays.length}{" "}
+                              {metadata.relays.length === 1
+                                ? "relay"
+                                : "relays"}
+                              {/* <div className="arrow-12"></div> */}
+                            </div>
+                            {selectedCategory.value === metadata.aTag && (
+                              <div className="check-24"></div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              {favRelays.length > 0 && (
+                <div className={"fx-centered fx-col fx-start-v fit-container"}>
+                  <h5 className="gray-c  box-pad-h-s">{t("A1NJKQa")}</h5>
+                  <div
+                    className="fit-container fx-centered fx-col fx-start-h fx-start-v"
+                    style={{ gap: 0, marginBottom: ".5rem" }}
+                  >
+                    {favRelays.map((_, _index) => {
+                      return (
+                        <div
+                          key={_index}
+                          className={`pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale`}
+                          style={{
+                            borderRadius: "var(--border-r-18)",
+                          }}
+                          onClick={(e) => handleSelectCategory(e, _, {value: "af"})}
+                        >
+                          <ContentFeedCategoryPreview
+                            category={{
+                              group: "af",
+                              ..._,
+                            }}
+                          />
+                          <div className="fx-centered">
+                            {selectedCategory.value === _.value && (
+                              <div className="check-24"></div>
+                            )}
+                            <div
+                              className="share-icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setshowRelaySharing(_.value);
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              {(favRelays.length === 0 && relaysSet.length === 0) && (
                 <div className="box-pad-h-m fit-container box-marg-s fx-centered">
                   <div className="sc-s-18 box-pad-v fit-container bg-sp fx-centered fx-col">
                     <p className="p-centered box-pad-h">{t("AJbVpAT")}</p>
@@ -353,7 +437,7 @@ export default function ContentSource({
   );
 }
 
-const getSourcesArray = (sources, cfBackup, t, favRelays = []) => {
+const getSourcesArray = (sources, cfBackup, t) => {
   let sourcesArray = [];
   let community_feed_keys = {
     top: t("AZKPdUC"),
@@ -364,34 +448,18 @@ const getSourcesArray = (sources, cfBackup, t, favRelays = []) => {
     paid: t("AAg9D6c"),
     widgets: t("AM4vyRX"),
   };
-
   sourcesArray[0] = {
     group_name: t("A8Y9rVt"),
     value: "cf",
     list:
       sources["community"]?.list.map((_) => {
+        let value = _[0].replaceAll("-", "_");
         return {
-          display_name: community_feed_keys[_[0]] || "N/A",
-          value: _[0],
+          display_name: community_feed_keys[value] || "N/A",
+          value: value,
           enabled: _[1],
         };
       }) || cfBackup,
   };
-  sourcesArray[1] = {
-    group_name: t("AhSpIKN"),
-    value: "af",
-    list:
-      [
-        ...favRelays.map((_) => {
-          return {
-            display_name: _.replace("wss://", "").replace("ws://", ""),
-            value: _,
-            enabled: true,
-            fav: true,
-          };
-        }),
-      ] || [],
-  };
-
   return sourcesArray;
 };

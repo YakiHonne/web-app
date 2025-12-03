@@ -4,9 +4,9 @@ export default function KeepAlive({ routeKey, children }) {
   const cacheRef = useRef({});
   const [isClient, setIsClient] = useState(false);
 
-  const MAX_CACHE = 5;
-  const ALWAYS_KEEP = ["/", "/discover"]; 
-  const ALWAYS_REMOVE = ["/login", "/wallet"]; 
+  const MAX_CACHE = 7;
+  const ALWAYS_KEEP = ["/", "/discover", "/notifications"];
+  const ALWAYS_REMOVE = ["/login", "/wallet", "/write-article"];
 
   useEffect(() => {
     setIsClient(true);
@@ -59,4 +59,3 @@ export default function KeepAlive({ routeKey, children }) {
     </>
   );
 }
-
