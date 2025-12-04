@@ -1,4 +1,3 @@
-'use client'
 import React, { useEffect, useState } from "react";
 import { swContent } from "./content";
 import { customHistory } from "@/Helpers/History";

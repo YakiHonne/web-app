@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useMemo, useState } from "react";
 import BookmarksPicker from "@/Components/BookmarksPicker";
 import { useSelector } from "react-redux";

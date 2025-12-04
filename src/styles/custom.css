@@ -1318,6 +1318,7 @@ main {
     left: 0;
     z-index: 100;
 }
+
 .recent-post-bottom-container {
     position: fixed;
     bottom: 40px;
@@ -2123,7 +2124,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .main-middle {
     /* width: 600px; */
     width: 100%
-    /* max-width: 600px; */
+        /* max-width: 600px; */
 }
 
 .extras-homepage {
@@ -2388,7 +2389,7 @@ h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] {
     position: relative;
     display: inline-block;
     cursor: pointer;
-    
+
     width: fit-content;
     display: flex;
     justify-content: flex-start;
@@ -2399,4 +2400,18 @@ h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] {
     filter: blur(20px) brightness(80%);
     transform-origin: left top;
     transform: scale(1.01);
+}
+
+.user-feed-tab .no-scrollbar{
+    width: 100% !important;
+    justify-content: center !important;
+}
+
+.user-feed-tab .list-item-b{
+    flex: 1 !important;
+}
+
+.user-feed-tab .slider-item  {
+    flex: 1 !important;
+    min-width: max-content !important;
 }
