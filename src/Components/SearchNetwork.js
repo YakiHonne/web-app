@@ -294,7 +294,7 @@ export default function SearchNetwork({ exit }) {
             style={{
               borderBottom: "1px solid var(--very-dim-gray)",
               padding: ".5rem 1rem",
-              top: 0
+              top: 0,
             }}
           >
             <div className="search-24"></div>
@@ -385,6 +385,7 @@ export default function SearchNetwork({ exit }) {
                           exit();
                         }}
                         className="sc-s bg-sp box-pad-h-m box-pad-v-s pointer"
+                        style={{ boxShadow: "none" }}
                         key={index}
                       >
                         #{interest}

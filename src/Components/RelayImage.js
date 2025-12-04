@@ -23,6 +23,7 @@ export default function RelayImage({ url, size = 24 }) {
             top: 0,
             zIndex: 2,
             backgroundImage: `url(${icon ? icon : iconUrl})`,
+            backgroundColor: "var(--c1-side)",
           }}
           className="bg-img cover-bg  fit-container fit-height"
         ></div>
@@ -39,9 +40,11 @@ export default function RelayImage({ url, size = 24 }) {
             width: "110%",
             height: "110%",
             objectPosition: "center",
+            backgroundColor: "var(--c1-side)",
           }}
         />
       )}
+
       <p
         className={`p-bold p-caps ${size > 24 ? "p-big" : ""}`}
         style={{ position: "relative", zIndex: 1 }}
