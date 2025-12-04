@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useState } from "react";
 import { nip19 } from "nostr-tools";
 import LoadingDots from "@/Components/LoadingDots";
