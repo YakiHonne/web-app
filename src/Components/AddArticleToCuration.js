@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useEffect, useState } from "react";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import AddCuration from "@/Components/AddCuration";

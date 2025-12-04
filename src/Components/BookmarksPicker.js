@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useState } from "react";
 import AddBookmark from "./AddBookMark";
 import { useDispatch, useSelector } from "react-redux";

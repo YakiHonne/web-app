@@ -1,4 +1,4 @@
-'use client';
+
 import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import PlayPauseButton from "@/Components/PlayPauseButton/PlayPauseButton";
