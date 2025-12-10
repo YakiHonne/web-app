@@ -1,4 +1,4 @@
-# Development Notes - Spark Wallet Integration
+ # Development Notes - Spark Wallet Integration
 
 **Project**: Yakihonne (Spark wallet integration)
 **Date**: 2025-11-01

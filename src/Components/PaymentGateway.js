@@ -22,6 +22,7 @@ import PagePlaceholder from "@/Components/PagePlaceholder";
 import Link from "next/link";
 import { saveUsers } from "@/Helpers/DB";
 import successJSON from "@/JSONs/success.json";
+import sparkService from "@/Helpers/Spark/spark.service";
 
 export default function PaymentGateway({
   recipientAddr,
@@ -345,6 +346,10 @@ const Cashier = ({
       let res = await sendWithNWC(addr);
       return res;
     }
+    if (selectedWallet.kind === 4) {
+      let res = await sendWithSpark(addr);
+      return res;
+    }
   };
 
   const sendWithWebLN = async (addr_) => {
@@ -415,6 +420,76 @@ const Cashier = ({
     } catch (err) {
       setIsLoading(false);
       console.log(err);
+      return {
+        status: false,
+        preImage: "",
+      };
+    }
+  };
+
+  const sendWithSpark = async (addr_) => {
+    try {
+      // Parse the invoice/address to determine if we need to pass an amount
+      let amountToPass = undefined;
+
+      // Check if this is a Lightning address (not a bolt11 invoice)
+      if (!addr_.toLowerCase().startsWith('lnbc') &&
+          !addr_.toLowerCase().startsWith('lntb') &&
+          !addr_.toLowerCase().startsWith('lnbcrt')) {
+        // Lightning address or LNURL - needs amount
+        const parsedAmount = parseInt(paymentAmount);
+        if (!isNaN(parsedAmount) && parsedAmount > 0) {
+          amountToPass = parsedAmount;
+        }
+      }
+      // For bolt11 invoices, don't pass amount (it's encoded in the invoice)
+      // unless it's a zero-amount invoice
+
+      const response = await sparkService.sendPayment(addr_, amountToPass);
+
+      console.log('[PaymentGateway] Spark payment response:', response);
+
+      // Extract preimage from Breez SDK response
+      // The response is a payment object: { id, paymentType, status, amount, fees, timestamp, method, details }
+      const preimage = response?.details?.preimage || response?.preimage || '';
+      const paymentStatus = response?.status || '';
+
+      console.log('[PaymentGateway] Preimage:', preimage, 'Status:', paymentStatus);
+
+      // Check if payment succeeded based on status or preimage
+      const succeeded = (paymentStatus === 'completed' || paymentStatus === 'succeeded') || !!preimage;
+
+      return {
+        status: succeeded,
+        preImage: preimage,
+      };
+    } catch (err) {
+      setIsLoading(false);
+      console.error('[PaymentGateway] Spark payment error:', err);
+
+      // Handle specific error types
+      if (err.message === 'INSUFFICIENT_FUNDS') {
+        dispatch(
+          setToast({
+            type: 2,
+            desc: t('Insufficient funds'),
+          })
+        );
+      } else if (err.message === 'USER_REJECTED') {
+        // User canceled, don't show error
+        return {
+          status: false,
+          preImage: "",
+        };
+      } else {
+        dispatch(
+          setToast({
+            type: 2,
+            desc: t('Acr4Slu'),
+          })
+        );
+      }
+
       return {
         status: false,
         preImage: "",

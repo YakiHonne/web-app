@@ -396,9 +396,33 @@ class SparkService {
         // Regular Bolt11 invoice or other supported types
         console.log('[SparkService] Using regular payment flow')
 
+        // Check if invoice has an amount
+        const invoiceAmountMsat = parsedInput.amountMsat || 0
+        const invoiceAmountSats = invoiceAmountMsat > 0 ? Math.ceil(invoiceAmountMsat / 1000) : 0
+        console.log('[SparkService] Invoice amount:', invoiceAmountMsat, 'msat =', invoiceAmountSats, 'sats')
+
+        // Determine final amount to use
+        // Priority: 1) Provided amountSats, 2) Invoice amount, 3) undefined
+        let finalAmount
+        if (amountSats && amountSats > 0) {
+          // User explicitly provided amount (for zero-amount invoices)
+          finalAmount = BigInt(amountSats)
+          console.log('[SparkService] Using provided amount:', amountSats, 'sats')
+        } else if (invoiceAmountSats > 0) {
+          // Use amount from invoice (convert msat to sats, round up)
+          finalAmount = BigInt(invoiceAmountSats)
+          console.log('[SparkService] Using invoice amount:', invoiceAmountSats, 'sats')
+        } else {
+          // No amount available - will likely fail
+          finalAmount = undefined
+          console.warn('[SparkService] No amount available for payment')
+        }
+
+        console.log('[SparkService] Final amount to pass:', finalAmount?.toString() || 'undefined')
+
         const prepareResponse = await this.sdk.prepareSendPayment({
           paymentRequest,
-          amount: amountSats !== undefined ? BigInt(amountSats) : undefined
+          ...(finalAmount !== undefined && { amount: finalAmount })
         })
 
         console.log('[SparkService] Payment prepared:', prepareResponse)

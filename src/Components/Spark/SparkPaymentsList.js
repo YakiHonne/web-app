@@ -3,9 +3,13 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import sparkWalletManager from '@/Helpers/Spark/spark-wallet-manager';
+import sparkZapReceipt from '@/Helpers/Spark/spark-zap-receipt.service';
 import { setToast } from '@/Store/Slides/Publishers';
 import LoadingDots from '@/Components/LoadingDots';
 import Date_ from '@/Components/Date_';
+import UserProfilePic from '@/Components/UserProfilePic';
+import { ndkInstance } from '@/Helpers/NDKInstance';
+import { getEmptyuserMetadata } from '@/Helpers/Encryptions';
 
 export default function SparkPaymentsList() {
   const { t } = useTranslation();
@@ -17,9 +21,70 @@ export default function SparkPaymentsList() {
   const [hasMore, setHasMore] = useState(true);
   const limit = 20;
 
+  // Nostr profile management for zap senders
+  const [nostrProfiles, setNostrProfiles] = useState({}); // pubkey -> profile map
+
   useEffect(() => {
     loadPayments();
   }, []);
+
+  // Fetch Nostr profiles for zap payments
+  useEffect(() => {
+    if (!ndkInstance || !sparkPayments || sparkPayments.length === 0) return;
+
+    const fetchProfiles = async () => {
+      try {
+        // Extract unique pubkeys from zap payments
+        const pubkeysToFetch = new Set();
+
+        sparkPayments.forEach((payment) => {
+          // Skip if already fetched
+          if (nostrProfiles[payment.id]) return;
+
+          // Check if this is a zap payment
+          const zapRequest = sparkZapReceipt.extractZapRequestFromPayment(payment);
+          if (zapRequest && zapRequest.pubkey) {
+            pubkeysToFetch.add(zapRequest.pubkey);
+          }
+        });
+
+        if (pubkeysToFetch.size === 0) return;
+
+        console.log('[SparkPaymentsList] Fetching profiles for', pubkeysToFetch.size, 'zap senders');
+
+        // Fetch profiles from Nostr
+        const profiles = {};
+        for (const pubkey of pubkeysToFetch) {
+          try {
+            const user = ndkInstance.getUser({ pubkey });
+            await user.fetchProfile();
+
+            if (user.profile) {
+              profiles[pubkey] = {
+                pubkey,
+                name: user.profile.name || user.profile.displayName || 'Anonymous',
+                display_name: user.profile.displayName || user.profile.name,
+                picture: user.profile.image || user.profile.picture,
+                ...user.profile
+              };
+            } else {
+              profiles[pubkey] = getEmptyuserMetadata(pubkey);
+            }
+          } catch (error) {
+            console.warn('[SparkPaymentsList] Failed to fetch profile for', pubkey, error);
+            profiles[pubkey] = getEmptyuserMetadata(pubkey);
+          }
+        }
+
+        // Update state with fetched profiles
+        setNostrProfiles((prev) => ({ ...prev, ...profiles }));
+      } catch (error) {
+        console.error('[SparkPaymentsList] Failed to fetch profiles:', error);
+      }
+    };
+
+    fetchProfiles();
+  }, [sparkPayments]);
 
   const loadPayments = async () => {
     try {
@@ -168,6 +233,13 @@ export default function SparkPaymentsList() {
           console.log('[SparkPaymentsList] Processing payment:', payment);
         }
 
+        // Check if this is a zap payment and extract sender info
+        const zapRequest = sparkZapReceipt.extractZapRequestFromPayment(payment);
+        const isZap = !!zapRequest;
+        const senderPubkey = zapRequest?.pubkey;
+        const senderProfile = senderPubkey ? nostrProfiles[senderPubkey] : null;
+        const zapComment = zapRequest?.content || '';
+
         // Handle different possible field names from Breez SDK
         // Breez Spark SDK uses lowercase 'send'/'receive' for paymentType
         const isOutgoing = payment.paymentType === 'send' || payment.paymentType === 'sent' ||
@@ -208,22 +280,32 @@ export default function SparkPaymentsList() {
           >
             <div className="fit-container fx-scattered">
               <div className="fx-centered fx-start-h">
-                {/* Direction indicator */}
-                {isOutgoing && (
-                  <div
-                    className="round-icon round-icon-tooltip"
-                    data-tooltip={t('AkPQ73T')}
-                  >
-                    <p className="red-c">&#8593;</p>
-                  </div>
-                )}
-                {!isOutgoing && (
-                  <div
-                    className="round-icon round-icon-tooltip"
-                    data-tooltip={t('A4G4OJ7')}
-                  >
-                    <p className="green-c">&#8595;</p>
-                  </div>
+                {/* Show profile pic for incoming zaps, otherwise direction indicator */}
+                {!isOutgoing && isZap && senderProfile ? (
+                  <UserProfilePic
+                    user={senderProfile}
+                    size="small"
+                  />
+                ) : (
+                  <>
+                    {/* Direction indicator for non-zap payments */}
+                    {isOutgoing && (
+                      <div
+                        className="round-icon round-icon-tooltip"
+                        data-tooltip={t('AkPQ73T')}
+                      >
+                        <p className="red-c">&#8593;</p>
+                      </div>
+                    )}
+                    {!isOutgoing && (
+                      <div
+                        className="round-icon round-icon-tooltip"
+                        data-tooltip={t('A4G4OJ7')}
+                      >
+                        <p className="green-c">&#8595;</p>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <div>
@@ -234,13 +316,32 @@ export default function SparkPaymentsList() {
                     />
                   </p>
                   <p>
-                    {isOutgoing ? t('ATyFagO') : t('AyVA6Q3')}
-                    <span className="orange-c">
-                      {' '}
-                      {amountSats}{' '}
-                      <span className="gray-c">Sats</span>
-                    </span>
+                    {!isOutgoing && isZap && senderProfile ? (
+                      <>
+                        <span className="gray-c">{senderProfile.name || senderProfile.display_name || 'Anonymous'}</span>
+                        {' '}{t('sent you')}{' '}
+                        <span className="orange-c">
+                          {amountSats}{' '}
+                          <span className="gray-c">Sats</span>
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        {isOutgoing ? t('ATyFagO') : t('AyVA6Q3')}
+                        <span className="orange-c">
+                          {' '}
+                          {amountSats}{' '}
+                          <span className="gray-c">Sats</span>
+                        </span>
+                      </>
+                    )}
                   </p>
+                  {/* Show zap comment if available */}
+                  {!isOutgoing && isZap && zapComment && (
+                    <p className="gray-c p-small" style={{ marginTop: '0.25rem', fontStyle: 'italic' }}>
+                      "{zapComment}"
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -257,6 +358,25 @@ export default function SparkPaymentsList() {
             {/* Expanded payment details */}
             {expandedPayment === payment.id && (
               <div className="fit-container fx-col box-pad-v-s" style={{ gap: 'var(--8)' }}>
+                {/* Zap sender info (if available) */}
+                {isZap && senderProfile && (
+                  <div className="fit-container fx-col" style={{ gap: 'var(--4)' }}>
+                    <p className="gray-c p-small">{t('From')}:</p>
+                    <div className="fx-centered fx-start-h" style={{ gap: 'var(--8)' }}>
+                      <UserProfilePic user={senderProfile} size="tiny" />
+                      <p className="p-small">
+                        {senderProfile.name || senderProfile.display_name || 'Anonymous'}
+                      </p>
+                    </div>
+                    {zapComment && (
+                      <>
+                        <p className="gray-c p-small" style={{ marginTop: 'var(--8)' }}>{t('Message')}:</p>
+                        <p className="p-small" style={{ fontStyle: 'italic' }}>"{zapComment}"</p>
+                      </>
+                    )}
+                  </div>
+                )}
+
                 {/* Payment ID */}
                 {payment.id && (
                   <div className="fit-container fx-col" style={{ gap: 'var(--4)' }}>
