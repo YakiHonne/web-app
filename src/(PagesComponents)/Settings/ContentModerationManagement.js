@@ -7,7 +7,14 @@ import LoadingDots from "../../Components/LoadingDots";
 import { MutedList } from "./MutedList";
 import { MediaUploader } from "./MediaUploader";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
-import { getMediaUploader, getSelectedServer, getWotConfig, updateMediaUploader } from "@/Helpers/ClientHelpers";
+import {
+  getMediaUploader,
+  getSelectedServer,
+  getWotConfig,
+  replaceMediaUploader,
+  updateMediaUploader,
+} from "@/Helpers/ClientHelpers";
+import WOTExplanation from "./WOTExplanation";
 
 export function ContentModerationManagement({
   selectedTab,
@@ -22,6 +29,7 @@ export function ContentModerationManagement({
   const [wotConfig, setWotConfig] = useState(getWotConfig());
   const [showMutedList, setShowMutedList] = useState(false);
   const [showMediaUploader, setShowMediaUploader] = useState(false);
+  const [showWOTExplanation, setShowWOTExplanation] = useState(false);
   const [mediaUploader, setMediaUploader] = useState(getMediaUploader());
   const [selectedMediaServer, setSelectedMediaServer] = useState(
     getSelectedServer() || mediaUploader[0].value
@@ -134,18 +142,24 @@ export function ContentModerationManagement({
   };
   return (
     <>
+      {showWOTExplanation && (
+        <WOTExplanation exit={() => setShowWOTExplanation(false)} />
+      )}
       {showMutedList && <MutedList exit={() => setShowMutedList(false)} />}
       {showMediaUploader && (
         <MediaUploader exit={() => setShowMediaUploader(false)} />
       )}
 
       <div
-        className={`fit-container fx-scattered fx-col pointer ${selectedTab === "moderation" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
+        className={`fit-container fx-scattered fx-col pointer ${
+          selectedTab === "moderation" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+        }`}
         style={{
           borderBottom: "1px solid var(--very-dim-gray)",
           gap: 0,
           borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
+          borderRadius: 0,
         }}
       >
         <div
@@ -230,7 +244,15 @@ export function ContentModerationManagement({
             <div className="fx-scattered fit-container">
               <div>
                 <p>{t("ACASAT7")}</p>
-                <p className="p-medium gray-c">{t("AZknCuh")}</p>
+                <p className="p-medium gray-c">
+                  {t("AZknCuh")}{" "}
+                  <span
+                    className="p-medium c1-c"
+                    onClick={() => setShowWOTExplanation(true)}
+                  >
+                    {t("AhxozEk")}
+                  </span>
+                </p>
               </div>
             </div>
             <div className="fit-container">
@@ -362,6 +384,6 @@ export function ContentModerationManagement({
       </div>
     </>
   );
-};
+}
 
 export default ContentModerationManagement;

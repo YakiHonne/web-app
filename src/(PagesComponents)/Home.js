@@ -4,6 +4,7 @@ import React, {
   useReducer,
   Fragment,
   useMemo,
+  useRef,
 } from "react";
 import { useSelector } from "react-redux";
 import { filterContent, getBackupWOTList } from "@/Helpers/Encryptions";
@@ -27,13 +28,15 @@ import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import RecentPosts from "@/Components/RecentPosts";
 import { getNDKInstance } from "@/Helpers/utils";
 import PostNotePortal from "@/Components/PostNotePortal";
+import { Virtuoso } from "react-virtuoso";
+import DynamicWindowedFeed from "@/Components/DynamicWindowedFeed";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
 const getContentFromValue = (contentSource) => {
   if (contentSource.group === "cf") return contentSource.value;
   if (contentSource.group === "mf") return "dvms";
-  if (contentSource.group === "af") return "algo";
+  if (["af", "rsf"].includes(contentSource.group)) return "algo";
 };
 
 const notesReducer = (notes, action) => {
@@ -128,7 +131,7 @@ export default function Home() {
 }
 const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const { t } = useTranslation();
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const isUserFollowingsLoaded = useSelector(
     (state) => state.isUserFollowingsLoaded
   );
@@ -150,6 +153,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
     [notes]
   );
+  const virtuosoRef = useRef(null);
   useEffect(() => {
     let contentFromValue = getContentFromValue(selectedCategory);
     if (selectedCategoryValue !== selectedCategory.value) {
@@ -160,6 +164,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       setNotesLastEventTime(undefined);
     }
   }, [selectedCategory]);
+
   useEffect(() => {
     straightUp();
     dispatchNotes({ type: "remove-events" });
@@ -216,7 +221,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           : tempUserFollowings.length < 5
           ? [...tempUserFollowings, ...getBackupWOTList()]
           : tempUserFollowings;
-      filter = [{ authors, kinds: [1, 6], until, since, limit: 20 }];
+      filter = [{ authors, kinds: [1, 6], until, since, limit: 100 }];
       return {
         filter,
       };
@@ -226,7 +231,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         {
           kinds: [1],
           "#l": ["smart-widget"],
-          limit: 20,
+          limit: 100,
           authors:
             selectedFilter.posted_by?.length > 0
               ? selectedFilter.posted_by
@@ -244,7 +249,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         {
           kinds: [1],
           "#l": ["FLASH NEWS"],
-          limit: 20,
+          limit: 100,
           authors:
             selectedFilter.posted_by?.length > 0
               ? selectedFilter.posted_by
@@ -262,7 +267,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       filter: [
         {
           kinds: [1, 6],
-          limit: 20,
+          limit: 100,
           authors:
             selectedFilter.posted_by?.length > 0
               ? selectedFilter.posted_by
@@ -285,24 +290,35 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       let ndk =
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
+          : selectedCategory.group === "rsf"
+          ? await getNDKInstance(
+              selectedCategory.value,
+              selectedCategory.relays,
+              true
+            )
           : undefined;
       if (ndk === false) {
         setIsConnected(false);
         setIsLoading(false);
         return;
       }
-      const algoRelay =
-        selectedCategory.group === "af" ? [selectedCategory.value] : [];
+      let algoRelay = [];
+      if (selectedCategory.group === "af")
+        algoRelay.push(selectedCategory.value);
+      if (selectedCategory.group === "rsf") algoRelay = selectedCategory.relays;
+      const data = await getSubData(filter, 250, algoRelay, ndk);
       setSubfilter({ filter, relays: algoRelay, ndk });
-      const data = await getSubData(filter, 50, algoRelay, ndk, 200);
       events = data.data
-        .splice(0, 50)
+        .splice(0, 200)
         .map((event) => {
           eventsPubkeys.push(event.pubkey);
           let event_ = getParsedNote(event, true);
           if (event_) fallBackEvents.push(event_);
           if (event_) {
-            if (notesContentFrom !== "recent_with_replies") {
+            if (
+              notesContentFrom !== "recent_with_replies" &&
+              algoRelay.length === 0
+            ) {
               if (!event_.isComment) {
                 if (event.kind === 6) {
                   eventsPubkeys.push(event_.relatedEvent.pubkey);
@@ -327,7 +343,10 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       if (tempEvents.length === 0) setIsLoading(false);
     };
 
-    if (notesContentFrom && ["cf", "af"].includes(selectedCategory?.group)) {
+    if (
+      notesContentFrom &&
+      ["cf", "af", "rsf"].includes(selectedCategory?.group)
+    ) {
       if (
         (["recent", "recent_with_replies"].includes(notesContentFrom) &&
           isUserFollowingsLoaded) ||
@@ -345,10 +364,14 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
 
   const handleRecentPostsClick = (notes) => {
     dispatchNotes({ type: notesContentFrom, note: notes });
-    straightUp(undefined, "smooth");
+    virtuosoRef.current?.scrollToIndex({
+      top: 32,
+      align: "start",
+      behavior: "instant",
+    });
   };
   return (
-    <InfiniteScroll onRefresh={setNotesLastEventTime} events={notes}>
+    <>
       {!["mf"].includes(selectedCategory?.group) && (
         <RecentPosts
           filter={subFilter}
@@ -429,32 +452,45 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           </p>
         </div>
       )}
-      {notesContentFrom &&
-        notes.map((note, index) => {
-          if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
-            if (
-              note.kind === 6 &&
-              ![...userMutedList, ...bannedList].includes(
-                note.relatedEvent.pubkey
-              )
-            )
-              return (
-                <Fragment key={note.id}>
-                  <KindSix event={note} />
-                  <SuggestionsCards index={index} />
-                </Fragment>
-              );
-            if (note.kind !== 6)
-              return (
-                <Fragment key={note.id}>
-                  <KindOne event={note} border={true} />
-                  <SuggestionsCards index={index} />
-                </Fragment>
-              );
-          }
-        })}
 
-      <div className="box-marg-full"></div>
+      {notesContentFrom && notes.length > 0 && (
+        <Virtuoso
+          ref={virtuosoRef}
+          style={{ width: "100%", height: "100vh" }}
+          skipAnimationFrameInResizeObserver={true}
+          overscan={1000}
+          useWindowScroll={true}
+          totalCount={notes.length}
+          increaseViewportBy={1000}
+          endReached={(index) => {
+            setNotesLastEventTime(notes[index].created_at - 1);
+          }}
+          itemContent={(index) => {
+            let note = notes[index];
+            if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
+              if (
+                note.kind === 6 &&
+                ![...userMutedList, ...bannedList].includes(
+                  note.relatedEvent.pubkey
+                )
+              )
+                return (
+                  <Fragment key={note.id}>
+                    <KindSix event={note} />
+                    <SuggestionsCards index={index} />
+                  </Fragment>
+                );
+              if (note.kind !== 6)
+                return (
+                  <Fragment key={note.id}>
+                    <KindOne event={note} border={true} />
+                    <SuggestionsCards index={index} />
+                  </Fragment>
+                );
+            }
+          }}
+        />
+      )}
       {isLoading && (
         <div
           className="fit-container box-pad-v fx-centered fx-col"
@@ -463,6 +499,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           <LoadingLogo size={64} />
         </div>
       )}
-    </InfiniteScroll>
+    </>
   );
 };

@@ -1,3 +1,61 @@
+# (v5.4.0) 03/12/2025
+* Relays feed now supports relay sets, allowing you to browse content from your preferred relay groups.
+* A newly optimized notifications core for significantly faster loading and smoother access.
+* Added the ability to mark notifications as read or unread.
+* A wider middle layout provides improved visibility and a more comfortable browsing experience.
+* Option added to hide mentions in notifications when a note includes many tagged users.
+* Added Russian language support.
+* Autosave is now disabled for empty widgets, articles, and notes to prevent unwanted drafts.
+* Improved real-time content fetching for more accurate and consistent updates.
+* Added in-memory caching to multiple areas of the app (notes, notifications, replies, etc.) for reduced loading times.
+* Performance improvements across long lists — including notes (home, profile, relay feeds, search), other content types, notifications, and messages.
+* Faster message decryption for users signing in with a private key, now non-blocking and more efficient.
+* General bug fixes and improvements.
+
+# (v5.3.0) 17/11/2025
+* Ability to choose a primary color for the interface.
+* Muting note threads now prevents all unwanted replies, reposts, and notifications from that thread.
+* Arrow-key navigation added for selecting tagged users in the mentions list.
+* Cmd/Ctrl + Enter support for quick publishing in the editor.
+* Added NIP-50 search support for enhanced discovery.
+* Added Search Relays set.
+* Added a hard-refresh mechanism to ensure notifications always stay up-to-date.
+* Bookmark improvements: redesigned cards, added covers, added tags/URLs display and filtering, fixed missing notes in filters, and resolved floating message overlay issues.
+* Toggle link previews on or off as needed.
+* Redesigned the muting list in settings.
+* NIP-71 videos now fall back to secondary URLs if the main source fails.
+* Removed the warning box that appeared when selecting text outside the comment field.
+* Videos are now parsed correctly from URLs inside articles.
+* Optimized the relay list picker for smoother interaction.
+* Improved the emoji picker with a faster and larger window.
+* Page titles now set correctly in SSR for better SEO and link previews.
+* Fixed comment sections not closing after posting in articles, curations, and videos.
+* Fixed draft articles not publishing when using “publish with deletion.”
+* Fixed reply previews when the main post is an article, curation, or video.
+* Fixed Relay Orbit becoming stuck when no data is returned.
+
+# (v5.2.0) 02/11/2025
+* Expanded sats-to-fiat conversion to support more currencies
+* Added real-time note updates in Relay Orbits
+* Added curations tab to Relay Orbit feeds
+* Included relay data in note address encoding for more accurate fetching
+* Fixed icon color issues when using the system theme
+* Settings footer repositioned to the right on desktop view
+* Added support for parsing nostr:-prefixed lnbc invoices
+* Fixed missing reaction stats in notes
+* Fixed issues with republishing events
+* Events in the manager are now sorted by actual publish time
+* Fixed home feed timeline fetching
+* Fixed parsed URLs with the nostr: schema
+* Improved self-profile search and general search accuracy
+* Fixed relay metadata display in Relay Orbits
+* Added “Favored By” stats across all Relay Orbit tabs
+* Added Web of Trust explanation to Settings
+* Notes can now be opened in separate tabs
+* Fixed inconsistent article previews before and after publishing
+* Fixed relay list overflow in Relay Feeds settings
+* General improvements
+
 # (v5.1.0) 21/10/2025
 * Customize your post actions — reorder, enable, or disable them to match your style
 * Media blur for posts from non-followed users (enabled by default, adjustable in settings)

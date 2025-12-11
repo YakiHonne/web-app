@@ -7,7 +7,7 @@ import PagePlaceholder from "@/Components/PagePlaceholder";
 export default function Notification() {
   const userKeys = useSelector((state) => state.userKeys);
   return (
-    <div style={{ overflow: "auto" }}>
+    <div >
       <ArrowUp />
       <div className="fit-container fx-centered fx-start-h fx-start-v">
         <div
@@ -16,7 +16,7 @@ export default function Notification() {
         >
           <div
             style={{ gap: 0 }}
-            className={`fx-centered  fx-wrap main-middle`}
+            className={`fx-centered  fx-wrap fit-container`}
           >
             {userKeys && <NotificationCenterMain />}
             {!userKeys && <PagePlaceholder page={"nostr-not-connected"} />}

@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { InitEvent } from "@/Helpers/Controlers";
 
 const FOLLOWING = <div className="user-followed-w-24"></div>;

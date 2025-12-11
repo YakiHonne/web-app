@@ -25,7 +25,7 @@ import LoadingLogo from "@/Components/LoadingLogo";
 import ToastMessages from "@/Components/ToastMessages";
 import dynamic from "next/dynamic";
 import KeepAlive from "@/Components/KeepAlive";
-import FloatingDMs from "@/Components/FloatingDMs";
+import IinitiateNotifications from "@/Components/IinitiateNotifications";
 
 const SideBarClient = dynamic(() => import("@/Components/SideBar/Sidebar"), {
   ssr: false,
@@ -37,6 +37,9 @@ const FloatingDMsClient = dynamic(() => import("@/Components/FloatingDMs"), {
   ssr: false,
 });
 const WarningBarClient = dynamic(() => import("@/Components/WarningBar"), {
+  ssr: false,
+});
+const PublishingClient = dynamic(() => import("@/Components/Publishing"), {
   ssr: false,
 });
 
@@ -80,7 +83,9 @@ function App({ Component, pageProps }) {
       <ThemeProvider>
         <ToastMessages />
         {!shouldHideSidebar && <FloatingDMsClient />}
+        {shouldHideSidebar && <PublishingClient displayOff={true}/>}
         <AppInit />
+        <IinitiateNotifications />
         <NavbarClient />
         <WarningBarClient />
         <div

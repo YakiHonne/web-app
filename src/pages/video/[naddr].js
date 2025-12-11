@@ -1,11 +1,11 @@
 import React from "react";
-import { getSubData } from "@/Helpers/Controlers";
 import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";
 import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getVideoContent } from "@/Helpers/Helpers";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Video"), {
   ssr: false,
@@ -39,15 +39,14 @@ export default function Page({ event, author, naddrData, naddr }) {
 
 export async function getStaticProps({ params }) {
   const { naddr } = params;
-  let { pubkey, identifier, kind, id } = nip19.decode(naddr).data || {};
-  const res = await getSubData(
+  let { pubkey, identifier, kind, id, relays } = nip19.decode(naddr).data || {};
+  const res = await getDataForSSG(
     identifier
       ? [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }]
       : [{ ids: [id] }],
     5000,
-    undefined,
-    undefined,
-    1
+    1,
+    relays || []
   );
   let event =
     res.data.length > 0
@@ -57,13 +56,7 @@ export async function getStaticProps({ params }) {
       : null;
 
   const author = event
-    ? await getSubData(
-        [{ authors: [event.pubkey], kinds: [0] }],
-        1000,
-        undefined,
-        undefined,
-        1
-      )
+    ? await getDataForSSG([{ authors: [event.pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata(pubkey);
   return {
     props: {
@@ -71,8 +64,9 @@ export async function getStaticProps({ params }) {
       naddrData: {
         pubkey: pubkey || false,
         identifier: identifier || false,
-        kind,
+        kind: kind || false,
         id: id || false,
+        relays: relays || [],
       },
       naddr,
       author:

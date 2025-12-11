@@ -355,8 +355,8 @@
 }
 
 .orange-pulse {
-    background: rgba(255, 122, 33, .3);
-    box-shadow: 0 0 0 0 rgba(255, 122, 33, 1);
+    background: var(--orange-side);
+    box-shadow: 0 0 0 0 var(--c1);
     animation: pulse-orange 2s infinite;
 }
 
@@ -452,17 +452,17 @@
 @keyframes pulse-orange {
     0% {
         transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(255, 122, 33, 0.7);
+        box-shadow: 0 0 0 0 var(--orange-side);
     }
 
     70% {
         transform: scale(1);
-        box-shadow: 0 0 0 10px rgba(255, 122, 33, 0);
+        box-shadow: 0 0 0 10px var(--orange-side);
     }
 
     100% {
         transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(255, 122, 33, 0);
+        box-shadow: 0 0 0 0 var(--orange-side);
     }
 }
 

@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useState, useEffect } from "react";
 import { nip19 } from "nostr-tools";
 import { useDispatch, useSelector } from "react-redux";

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { nip19 } from "nostr-tools";
 import { checkForLUDS, convertDate } from "@/Helpers/Encryptions";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import LoadingDots from "@/Components/LoadingDots";
@@ -344,7 +344,10 @@ export default function ZapPollsComp({
         />
       )}
       {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
-      <div className="fit-container fx-centered fx-col">
+      <div className="fit-container fx-centered fx-col" onClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}>
         <div
           className="fit-container poll-content-box"
           style={{ "--p-color": content_text_color }}

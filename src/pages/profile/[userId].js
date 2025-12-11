@@ -1,10 +1,10 @@
 import React from "react";
-import { getSubData } from "@/Helpers/Controlers";
 import dynamic from "next/dynamic";
 import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 import { nip19 } from "nostr-tools";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(
   () => import("@/(PagesComponents)/User/UserHome"),
@@ -53,14 +53,20 @@ export async function getStaticProps({ locale, params }) {
     };
   }
   const [resMetaData, resFollowings] = await Promise.all([
-    getSubData([{ authors: [pubkey], kinds: [0] }], 400),
-    getSubData([{ authors: [pubkey], kinds: [3] }], 50),
+    getDataForSSG([{ authors: [pubkey], kinds: [0] }], 500, 3),
+    getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 3),
   ]);
+
   let metadata = getEmptyuserMetadata(pubkey);
   let followings = [];
-
-  let metadata_ = resMetaData.data.find((_) => _.kind === 0);
-  let followings_ = resFollowings.data.find((_) => _.kind === 3);
+  let metadata_ =
+    resMetaData.data.length > 0
+      ? resMetaData.data.sort((a, b) => b.created_at - a.created_at)[0]
+      : null;
+  let followings_ =
+    resFollowings.data.length > 0
+      ? resFollowings.data.sort((a, b) => b.created_at - a.created_at)[0]
+      : null;
 
   if (metadata_) metadata = getParsedAuthor(metadata_);
   if (followings_)
@@ -74,6 +80,7 @@ export async function getStaticProps({ locale, params }) {
         nprofile: nip19.nprofileEncode({ pubkey: pubkey }),
       },
     },
+    revalidate: metadata_ ? 2 : 3600,
   };
 }
 

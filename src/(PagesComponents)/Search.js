@@ -14,11 +14,14 @@ import LoadingLogo from "@/Components/LoadingLogo";
 import Slider from "@/Components/Slider";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import KindOne from "@/Components/KindOne";
-import { setToPublish } from "@/Store/Slides/Publishers";
+import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
 import { useRouter } from "next/router";
 import InfiniteScroll from "@/Components/InfiniteScroll";
+import { getDataForSearch } from "@/Helpers/lib";
+import Link from "next/link";
+import { Virtuoso } from "react-virtuoso";
 
 const getKeyword = () => {
   let keyword = new URLSearchParams(window.location.search).get("keyword");
@@ -31,8 +34,9 @@ export default function Search() {
   const dispatch = useDispatch();
   const urlKeyword = getKeyword();
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
+  const userSearchRelays = useSelector((state) => state.userSearchRelays);
   const userKeys = useSelector((state) => state.userKeys);
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const userInterestList = useSelector((state) => state.userInterestList);
   const userFollowings = useSelector((state) => state.userFollowings);
   const userFollowingsMetadata = useMemo(() => {
@@ -43,8 +47,13 @@ export default function Search() {
   const [searchKeyword, setSearchKeyword] = useState(urlKeyword);
   const [results, setResults] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [launchSearching, setLaunchSearching] = useState(
+    searchKeyword || false
+  );
   const [lastTimestamp, setLastTimestamp] = useState(undefined);
-  const [selectedTab, setSelectedTab] = useState(query ? query?.tab : "people");
+  const [selectedTab, setSelectedTab] = useState(
+    query?.tab ? query?.tab : "notes"
+  );
   const followed = useMemo(() => {
     return userInterestList.find(
       (interest) => interest === searchKeyword.toLowerCase()
@@ -66,7 +75,6 @@ export default function Search() {
       setLastTimestamp(undefined);
       return;
     }
-    setIsLoading(true);
     let tempKeyword = value.replaceAll("nostr:", "");
     if (
       (tempKeyword.startsWith("naddr") ||
@@ -81,7 +89,7 @@ export default function Search() {
       return;
     }
     setSearchKeyword(value);
-    setResults([]);
+    // setResults([]);
   };
 
   useEffect(() => {
@@ -94,27 +102,24 @@ export default function Search() {
 
     var timer = setTimeout(null);
     if (searchKeyword) {
-      timer = setTimeout(
-        async () => {
-          if (selectedTab === "people") searchForUser();
-          if (selectedTab !== "people") {
-            searchForContent();
-          }
-        },
-        selectedTab === "people" ? 100 : 400
-      );
+      timer = setTimeout(async () => {
+        if (selectedTab === "people") searchForUser();
+        if (selectedTab !== "people") {
+          searchForContent();
+        }
+      }, 1000);
     } else {
       clearTimeout(timer);
     }
     return () => {
       clearTimeout(timer);
     };
-  }, [searchKeyword, selectedTab, lastTimestamp]);
+  }, [launchSearching, selectedTab, lastTimestamp, userSearchRelays]);
 
   const getUsersFromCache = async () => {
     try {
       setIsLoading(true);
-      const API_BASE_URL = import.meta.env.VITE_API_CACHE_BASE_URL;
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_CACHE_BASE_URL;
 
       let data = await axios.get(
         `${API_BASE_URL}/api/v1/users/search/${searchKeyword}`
@@ -224,16 +229,20 @@ export default function Search() {
       `#${String(tag).charAt(0).toUpperCase() + String(tag).slice(1)}`,
     ];
     let filter = {
-      limit: 5,
+      limit: 100,
       "#t": tags,
       until: lastTimestamp ? lastTimestamp - 1 : lastTimestamp,
     };
     if (selectedTab === "notes") filter.kinds = [1];
     if (selectedTab === "articles") filter.kinds = [30023];
     if (selectedTab === "videos") filter.kinds = [34235, 21, 22];
-    if (selectedTab === "all-media") filter.kinds = [1, 30023, 34235, 21, 22];
-    let content = await getSubData([filter], 50);
-
+    // if (selectedTab === "all-media") filter.kinds = [1, 30023, 34235, 21, 22];
+    let content = await getDataForSearch(
+      [filter, { ...filter, search: searchKeyword, "#t": undefined }],
+      100,
+      200,
+      userSearchRelays
+    );
     let content_ = content.data.map((event) => {
       if (event.kind === 1) {
         let parsedNote = getParsedNote(event, true);
@@ -291,6 +300,34 @@ export default function Search() {
     }
   };
 
+  const handleSelectInterest = (interest) => {
+    if (isLoading && results.length === 0) {
+      return;
+    }
+    setSearchKeyword(interest.toLowerCase());
+    setResults([]);
+    setLastTimestamp(undefined);
+    setIsLoading(true);
+    setLaunchSearching(Date.now());
+  };
+  const handleClearSearch = () => {
+    if (isLoading && results.length === 0) {
+      return;
+    }
+    setSearchKeyword("");
+    setLastTimestamp(undefined);
+    setResults([]);
+    setLaunchSearching(false);
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!searchKeyword || (isLoading && results.length === 0)) {
+      return;
+    }
+    setIsLoading(true);
+    setLaunchSearching(Date.now());
+  };
   return (
     <div style={{ overflow: "auto" }}>
       <ArrowUp />
@@ -303,125 +340,114 @@ export default function Search() {
             style={{ gap: 0 }}
             className={`fx-centered fx-wrap fit-container main-middle`}
           >
-            <div
-              className="fit-container sticky fx-centered fx-start-h fx-start-v fx-col box-pad-h "
-              style={{
-                padding: ".5rem",
-                borderBottom: "1px solid var(--very-dim-gray)",
-                top: 0
-              }}
-            >
-              <div
-                className="fx-centered fit-container"
-                style={{
-                  position: "relative",
-                  borderBottom: "1px solid var(--very-dim-gray)",
-                  height: "50px"
-                }}
-              >
-                <div className="search-24"></div>
-                <input
-                  type="text"
-                  placeholder="Search people, notes and content"
-                  className="if ifs-full if-no-border"
-                  onChange={handleOnChange}
-                  value={searchKeyword}
-                  style={{ paddingLeft: ".5rem" }}
-                  autoFocus
-                />
-                {searchKeyword && (
-                  <div
-                    className="close"
-                    onClick={() => {
-                     setSearchKeyword("");
-                    }}
+            <div className="fit-container fx-centered fx-col box-pad-v-s">
+              {!launchSearching && (
+                <form
+                  className="slide-up fx-centered fit-container  box-pad-h-s "
+                  style={{
+                    position: "relative",
+                    height: "50px",
+                    borderRadius: "var(--border-r-18)",
+                    borderBottom: "1px solid var(--dim-gray)",
+                  }}
+                  onSubmit={handleSearch}
+                >
+                  <div className="search-24"></div>
+                  <input
+                    type="text"
+                    placeholder="Search people, notes and content"
+                    className="if ifs-full if-no-border"
+                    onChange={handleOnChange}
+                    value={searchKeyword}
+                    style={{ paddingLeft: ".5rem" }}
+                    autoFocus
+                  />
+                  <button className="btn btn-normal btn-small">
+                    {t("A0omdiR")}
+                  </button>
+                  <Link
+                    href={"/settings?tab=relays&relaysType=2"}
+                    state={{ relaysTab: 1, tab: "relays" }}
                   >
-                    <div></div>
-                  </div>
-                )}
-              </div>
-              <Slider
-                items={[
-                  ...["people", "all-media", "notes", "articles",  "videos"].map(
-                    (tag, index) => {
-                      return (
-                        <div
-                          className={
-                            "btn sticker-gray-black p-caps fx-centered"
-                          }
-                          style={{
-                            backgroundColor:
-                              selectedTab === tag ? "" : "transparent",
-                            color: selectedTab === tag ? "" : "var(--gray)",
-                            // pointerEvents: isLoading ? "none" : "auto",
-                          }}
-                          key={index}
-                          onClick={() => handleSelectedTab(tag)}
-                        >
-                          {tabsContent[tag]}
-                        </div>
-                      );
-                    }
-                  ),
-                ]}
-              />
-              <hr />
-
-              {searchKeyword && selectedTab !== "people" && (
-                <div className="fx-scattered fit-container box-pad-v-s box-pad-h-m">
-                  <h3>#{searchKeyword.replaceAll("#", "")}</h3>
-                  {userKeys && (
-                    <button
-                      className={`btn ${
-                        followed ? "btn-normal" : "btn-gray"
-                      } fx-centered`}
-                      onClick={saveInterestList}
+                    <div className="setting-24"></div>
+                  </Link>
+                </form>
+              )}
+              {launchSearching && (
+                <div
+                  className="fx-scattered fit-container box-pad-v-s slide-down"
+                  style={{ zIndex: 1, position: "relative" }}
+                >
+                  <h3 onDoubleClick={handleClearSearch}>
+                    #{searchKeyword.replaceAll("#", "")}
+                  </h3>
+                  <div className="fx-centered">
+                    <div
+                      onClick={handleClearSearch}
+                      className="round-icon-small round-icon-tooltip"
+                      data-tooltip={t("AboMK2E")}
                     >
-                      {!followed && (
-                        <>
-                          {t("APkD8MP")} <div className="plus-sign"></div>
-                        </>
-                      )}
-                      {followed && (
-                        <>
-                          {t("AiKpDYn")}
-                          <div
-                            className="check-24"
-                            style={{ filter: "brightness(0) invert()" }}
-                          ></div>
-                        </>
-                      )}
-                    </button>
-                  )}
+                      <div className="close" style={{ position: "static" }}>
+                        <div></div>
+                      </div>
+                    </div>
+
+                    {userKeys && (
+                      <div
+                        className="round-icon-tooltip"
+                        data-tooltip={followed ? t("AydCXSh") : t("AdT5mza")}
+                      >
+                        <button
+                          className={`btn btn-small ${
+                            followed ? "btn-red" : "btn-normal"
+                          } fx-centered`}
+                          onClick={saveInterestList}
+                        >
+                          {!followed && (
+                            <>
+                              {t("ARWeWgJ")} <div className="plus-sign"></div>
+                            </>
+                          )}
+                          {followed && (
+                            <>
+                              {t("AzkTxuy")}
+                              <span className="p-big">-</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
+
+              <InterestList
+                userInterestList={userInterestList}
+                handleSelectInterest={handleSelectInterest}
+                searchKeyword={searchKeyword}
+              />
             </div>
-            {userInterestList.length > 0 && (
-              <div className="fit-container fx-centered fx-col fx-start-h fx-start-v box-pad-v-m">
-                <p className="gray-c">{t("AvcFYqP")}</p>
-                <div className="fx-centered fx-wrap">
-                  {userInterestList?.map((interest, index) => {
-                    return (
-                      <div
-                        onClick={() => {
-                          setSearchKeyword(interest.toLowerCase());
-                          setResults([]);
-                          setIsLoading(true);
-                        }}
-                        className={`sc-s  box-pad-h-m box-pad-v-s pointer ${
-                          searchKeyword === interest.toLowerCase()
-                            ? ""
-                            : "bg-sp"
-                        }`}
-                        key={index}
-                      >
-                        #{interest}
-                      </div>
-                    );
-                  })}
-                </div>
+            {launchSearching && (
+              <div
+                className="fit-container fx-even slide-down"
+                style={{ gap: 0 }}
+              >
+                {["people", "notes", "articles", "videos"].map((tag, index) => {
+                  return (
+                    <div
+                      className={`list-item-b fx-centered fx ${
+                        selectedTab === tag ? "selected-list-item-b" : ""
+                      }`}
+                      key={index}
+                      onClick={() => handleSelectedTab(tag)}
+                    >
+                      {tabsContent[tag]}
+                    </div>
+                  );
+                })}
               </div>
             )}
+
             {selectedTab === "people" &&
               results.map((item, index) => {
                 if (!item.kind) {
@@ -437,9 +463,19 @@ export default function Search() {
                     );
                 }
               })}
-            <InfiniteScroll onRefresh={setLastTimestamp} events={results}>
-              {selectedTab !== "people" &&
-                results.map((item, index) => {
+            {results.length > 0 && (
+              <Virtuoso
+                style={{ width: "100%", height: "100vh" }}
+                skipAnimationFrameInResizeObserver={true}
+                overscan={500}
+                useWindowScroll={true}
+                totalCount={results.length}
+                increaseViewportBy={500}
+                endReached={(index) => {
+                  setLastTimestamp(results[index].created_at - 1);
+                }}
+                itemContent={(index) => {
+                  let item = results[index];
                   if (
                     [1].includes(item.kind) &&
                     !userMutedList.includes(item.pubkey)
@@ -450,12 +486,13 @@ export default function Search() {
                     !userMutedList.includes(item.pubkey)
                   )
                     return <RepEventPreviewCard key={item.id} item={item} />;
-                })}
-            </InfiniteScroll>
+                }}
+              />
+            )}
             {isLoading && (
               <div
                 className="fit-container fx-centered"
-                style={{ height: "500px" }}
+                style={{ height: "80vh" }}
               >
                 <LoadingLogo />
               </div>
@@ -463,7 +500,7 @@ export default function Search() {
             {results.length === 0 && !isLoading && (
               <div
                 className="fit-container fx-col fx-centered"
-                style={{ height: "500px" }}
+                style={{ height: "80vh" }}
               >
                 <div
                   className="search"
@@ -479,3 +516,52 @@ export default function Search() {
     </div>
   );
 }
+
+const InterestList = ({
+  userInterestList,
+  handleSelectInterest,
+  searchKeyword,
+}) => {
+  const { t } = useTranslation();
+  const [showInterest, setShowInterest] = useState(false);
+
+  if (userInterestList.length === 0) return null;
+  return (
+    <div
+      className="slide-down fit-container fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
+      style={{
+        borderLeft: "none",
+        borderRight: "none",
+        gap: "10px",
+        zIndex: 0,
+        position: "relative",
+      }}
+    >
+      <div
+        className="fit-container fx-scattered pointer box-pad-h-s"
+        onClick={() => setShowInterest(!showInterest)}
+      >
+        <p className="c1-c">{t("AvcFYqP")}</p>
+        <div className="arrow"></div>
+      </div>
+      {showInterest && (
+        <Slider
+          items={userInterestList?.map((interest, index) => {
+            return (
+              <div
+                onClick={() => handleSelectInterest(interest)}
+                className={`sc-s  box-pad-h-s pointer ${
+                  searchKeyword === interest.toLowerCase() ? "" : "bg-sp"
+                }`}
+                key={index}
+              >
+                <p>#{interest}</p>
+              </div>
+            );
+          })}
+          slideBy={200}
+        />
+      )}
+    </div>
+  );
+};

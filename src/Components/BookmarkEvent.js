@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useMemo, useState } from "react";
 import BookmarksPicker from "@/Components/BookmarksPicker";
 import { useSelector } from "react-redux";
@@ -20,7 +20,8 @@ export default function   BookmarkEvent({
   const itemTypes = {
     a: `${kind}:${pubkey}:${d}`,
     e: pubkey,
-    t: extraData,
+    r: pubkey,
+    t: pubkey,
   };
 
   const isBookmarked = useMemo(() => {

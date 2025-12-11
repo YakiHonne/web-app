@@ -1,4 +1,8 @@
-"use client";
+import {
+  removeDuplicants,
+  removeEventsDuplicants,
+} from "@/Helpers/Encryptions";
+import { checkEventType } from "@/Helpers/NotificationsHelpers";
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = null;
@@ -97,6 +101,44 @@ const refreshAppSettingsSlice = createSlice({
     },
   },
 });
+const notificationsSlice = createSlice({
+  name: "notifications",
+  initialState: [],
+  reducers: {
+    setNotifications(state, action) {
+      let data = action.payload.data.map((_) => {
+        let type = checkEventType(_, action.payload.pubkey);
+        return { ..._, type: {...type} };
+      });
+      data = removeEventsDuplicants([...data, ...state]);
+      return data;
+    },
+    updateNotifications(state, action) {
+      return action.payload;
+    },
+    clearNotifications() {
+      return [];
+    },
+  },
+});
+const isNotificationsLoadingSlice = createSlice({
+  name: "isNotificationsLoading",
+  initialState: false,
+  reducers: {
+    setIsNotificationsLoading(state, action) {
+      return action.payload;
+    },
+  },
+});
+const refreshNotificationsSlice = createSlice({
+  name: "refreshNotifications",
+  initialState: Date.now(),
+  reducers: {
+    setRefreshNotifications(state, action) {
+      return action.payload;
+    },
+  },
+});
 
 export const { setInitDMS } = initDMSSlice.actions;
 export const { setIsDarkMode } = isDarkModeSlice.actions;
@@ -108,6 +150,11 @@ export const { setHomeSavedNotes } = homeSavedNotesSlice.actions;
 export const { setHomeCarouselPosts } = homeCarouselPostsSlice.actions;
 export const { setRelaysStats } = relaysStatsSlice.actions;
 export const { setRefreshAppSettings } = refreshAppSettingsSlice.actions;
+export const { setNotifications, updateNotifications, clearNotifications } =
+  notificationsSlice.actions;
+export const { setIsNotificationsLoading } =
+  isNotificationsLoadingSlice.actions;
+export const { setRefreshNotifications } = refreshNotificationsSlice.actions;
 
 export const InitDMSReducer = initDMSSlice.reducer;
 export const IsDarkModeReducer = isDarkModeSlice.reducer;
@@ -119,3 +166,7 @@ export const HomeSavedNotesReducer = homeSavedNotesSlice.reducer;
 export const HomeCarouselPostsReducer = homeCarouselPostsSlice.reducer;
 export const RelaysStatsReducer = relaysStatsSlice.reducer;
 export const RefreshAppSettingsReducer = refreshAppSettingsSlice.reducer;
+export const NotificationsReducer = notificationsSlice.reducer;
+export const IsNotificationsLoadingReducer =
+  isNotificationsLoadingSlice.reducer;
+export const RefreshNotificationsReducer = refreshNotificationsSlice.reducer;

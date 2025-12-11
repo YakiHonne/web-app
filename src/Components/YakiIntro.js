@@ -38,17 +38,18 @@ const content = [
 ];
 
 const updatesList = [
-  "Customize your post actions — reorder, enable, or disable them to match your style",
-  "Media blur for posts from non-followed users (enabled by default, adjustable in settings)",
-  "Post directly within Relay Orbits for each relay",
-  "Redesigned hashtags for a fresher look",
-  "Fixed layout issues on mobile devices",
-  "Fixed authentication errors when publishing protected events",
-  "Fixed YouTube Shorts not displaying properly",
-  "Fixed wallet switch crashes",
-  "Fixed occasional “Error 500” when browsing posts",
-  "Added support for Indian languages",
-  "General performance and stability improvements",
+  "Relays feed now supports relay sets, allowing you to browse content from your preferred relay groups.",
+  "A newly optimized notifications core for significantly faster loading and smoother access.",
+  "Added the ability to mark notifications as read or unread.",
+  "A wider middle layout provides improved visibility and a more comfortable browsing experience.",
+  "Option added to hide mentions in notifications when a note includes many tagged users.",
+  "Added Russian language support.",
+  "Autosave is now disabled for empty widgets, articles, and notes to prevent unwanted drafts.",
+  "Improved real-time content fetching for more accurate and consistent updates.",
+  "Added in-memory caching to multiple areas of the app (notes, notifications, replies, etc.) for reduced loading times.",
+  "Performance improvements across long lists — including notes (home, profile, relay feeds, search), other content types, notifications, and messages.",
+  "Faster message decryption for users signing in with a private key, now non-blocking and more efficient.",
+  "General bug fixes and improvements.",
 ];
 
 export default function YakiIntro() {
@@ -190,7 +191,7 @@ const Banner = ({ exit }) => {
               <div>
                 <p>Updates</p>
                 <p className="gray-c p-italic p-medium">
-                  Last updated Oct 21, 2025
+                  (Updated: {process.env.NEXT_PUBLIC_UPDATE_DATE})
                 </p>
               </div>
               <p className="orange-c p-medium">

@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useState } from "react";
 import AddBookmark from "./AddBookMark";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,7 +25,8 @@ export default function BookmarksPicker({
   const itemTypes = {
     a: `${kind}:${pubkey}:${d}`,
     e: pubkey,
-    t: extraData,
+    r: pubkey,
+    t: pubkey,
   };
   const isBookmarked = (bookmark) => {
     return (
@@ -39,7 +40,7 @@ export default function BookmarksPicker({
 
     let bookmarkD = bookmark.tags.find((item) => item[0] === "d")[1];
     let itemsLeft = bookmark.tags.filter((tag) =>
-      ["a", "e", "t"].includes(tag[0])
+      ["a", "e", "t", "r"].includes(tag[0])
     ).length;
     let bookmarkImg =
       status && itemsLeft === 1

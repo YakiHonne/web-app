@@ -50,7 +50,11 @@ export default function UserProfilePic({
 
   const handleClick = async (e) => {
     try {
-      if (!allowPropagation) e.stopPropagation();
+      if (!allowPropagation) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+
       if (allowClick) {
         let pubkey = nip19.nprofileEncode({
           pubkey: mainAccountUser ? userMetadata.pubkey : user_id,
@@ -196,7 +200,9 @@ export default function UserProfilePic({
                 />
               </div>
             )}
-            <p className="p-one-line" style={{margin: 0}}>{withName}</p>
+            <p className="p-one-line" style={{ margin: 0 }}>
+              {withName}
+            </p>
           </div>
           {showMetadata && metadata && (
             <div
@@ -366,7 +372,7 @@ export default function UserProfilePic({
             >
               <div className="fx-centered fx-start-h">
                 <div className="nip05"></div>
-                <p>{metadata.nip05 || "N/A"}</p>
+                <p>{metadata.nip05 && typeof metadata.nip05 === "string" ? metadata.nip05 : "N/A"}</p>
               </div>
               {metadata.website && (
                 <div className="fx-centered fx-start-h">

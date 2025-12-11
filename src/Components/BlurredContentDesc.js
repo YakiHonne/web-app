@@ -8,6 +8,7 @@ export default function BlurredContentDesc({ toBlur, label = true }) {
   if (!toBlur) return null;
   const handleOpenSettings = (e) => {
     e.stopPropagation();
+    e.preventDefault();
     setShowModal(true);
   };
   return (
@@ -64,6 +65,7 @@ const DescriptiveWarning = ({ exit }) => {
       className="fixed-container fx-centered box-pad-h"
       onClick={(e) => {
         e.stopPropagation();
+        e.preventDefault();
         exit();
       }}
     >

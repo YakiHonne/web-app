@@ -14,7 +14,6 @@ import { saveUsers } from "@/Helpers/DB";
 import CommentsSection from "@/Components/CommentsSection";
 import {
   getNoteTree,
-  getRepliesViewSettings,
   isImageUrl,
   isVid,
   compactContent,
@@ -23,7 +22,6 @@ import { useTranslation } from "react-i18next";
 import LoadingDots from "@/Components/LoadingDots";
 import ZapAd from "@/Components/ZapAd";
 import useUserProfile from "@/Hooks/useUsersProfile";
-import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import NotesComment from "@/Components/NotesComment";
 import { nip19 } from "nostr-tools";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
@@ -32,8 +30,11 @@ import PostReaction from "./PostReaction";
 import useIsMute from "@/Hooks/useIsMute";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
+import Link from "next/link";
+import LinkRepEventPreview from "./LinkRepEventPreview";
+import { getEventFromCache, setEventFromCache } from "@/Helpers/utils";
 
-export default function KindOne({
+function KindOne({
   event,
   reactions = true,
   border = false,
@@ -57,7 +58,18 @@ export default function KindOne({
   }, [repliesView]);
   const [isClamped, setIsClamped] = useState(10000);
   const noteRef = React.useRef(null);
-  const { isMuted, muteUnmute } = useIsMute(event?.pubkey);
+  const { isMuted: isMutedPubkey, muteUnmute: muteUnmutePubkey } = useIsMute(
+    event?.pubkey
+  );
+  const { isMuted: isMutedId, muteUnmute: muteUnmuteId } = useIsMute(
+    event?.id,
+    "e"
+  );
+  const { isMuted: isMutedComment } = useIsMute(event?.isComment, "e");
+  const { isMuted: isMutedRoot } = useIsMute(
+    event.rootData ? event.rootData[1] : false,
+    "e"
+  );
   const checkNotes = useMemo(() => {
     const NOTE_PREFIXES = ["note1", "nevent", "naddr"];
     const MAX_COMPONENTS = 5;
@@ -116,6 +128,7 @@ export default function KindOne({
   }, [postActions]);
 
   const onClick = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     if (isNavigating) {
       console.log("Click ignored - already navigating");
@@ -143,38 +156,6 @@ export default function KindOne({
     } catch (error) {
       console.error("Error in onClick handler:", error);
       setIsNavigating(false);
-    }
-  };
-
-  const redirect = (e) => {
-    e.stopPropagation();
-
-    try {
-      if (!event?.nEvent) {
-        console.error("Missing nEvent in redirect:", event);
-        return;
-      }
-
-      console.log(
-        "Redirect function called, current path:",
-        window.location.pathname
-      );
-
-      if (window.location.pathname.includes("/note/")) {
-        console.log(
-          "Using customHistory for redirect to:",
-          `/note/${event.nEvent}`
-        );
-        customHistory(`/note/${event.nEvent}`);
-      } else {
-        console.log(
-          "Using window.location for redirect to:",
-          `/note/${event.nEvent}`
-        );
-        window.location = `/note/${event.nEvent}`;
-      }
-    } catch (error) {
-      console.error("Error in redirect function:", error);
     }
   };
 
@@ -233,7 +214,8 @@ export default function KindOne({
     }
   };
 
-  if (isMuted) {
+  if ((isMutedId || isMutedComment || isMutedRoot) && !minimal) return null;
+  if (isMutedPubkey) {
     return (
       <div
         className="box-pad-v fx-centered fx-col fit-container note-item"
@@ -246,9 +228,52 @@ export default function KindOne({
         >
           {t("Ao4Segq")}
         </p>
-        <button className="btn btn-gray btn-small" onClick={() => muteUnmute()}>
+        <button
+          className="btn btn-gray btn-small"
+          onClick={() => muteUnmutePubkey()}
+        >
           {t("AKELUbQ")}
         </button>
+      </div>
+    );
+  }
+  if (isMutedId || isMutedComment || isMutedRoot) {
+    return (
+      <div
+        className="box-pad-v fx-centered fx-col fit-container note-item"
+        id={event.id}
+        style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
+      >
+        <p
+          className="box-pad-h p-centered gray-c"
+          style={{ maxWidth: "400px" }}
+        >
+          {t("AsOUmIi")}
+        </p>
+        {isMutedId && (
+          <button
+            className="btn btn-gray btn-small"
+            onClick={() => muteUnmuteId()}
+          >
+            {t("AnddeNp")}
+          </button>
+        )}
+        {isMutedComment && (
+          <button
+            className="btn btn-gray btn-small"
+            onClick={() => muteUnmuteComment()}
+          >
+            {t("AnddeNp")}
+          </button>
+        )}
+        {isMutedRoot && (
+          <button
+            className="btn btn-gray btn-small"
+            onClick={() => muteUnmuteId()}
+          >
+            {t("AnddeNp")}
+          </button>
+        )}
       </div>
     );
   }
@@ -263,6 +288,15 @@ export default function KindOne({
           author={userProfile}
           exit={() => setShowComments(false)}
           isRoot={event.isComment ? false : true}
+        />
+      )}
+      {usersList && (
+        <ShowUsersList
+          exit={() => setUsersList(false)}
+          title={usersList.title}
+          list={usersList.list}
+          extras={usersList.extras}
+          extrasType={usersList?.extrasType}
         />
       )}
       <div
@@ -285,22 +319,12 @@ export default function KindOne({
             overflow: "visible",
           }}
         >
-          {usersList && (
-            <ShowUsersList
-              exit={() => setUsersList(false)}
-              title={usersList.title}
-              list={usersList.list}
-              extras={usersList.extras}
-              extrasType={usersList?.extrasType}
-            />
-          )}
           <div
             className=" fit-container pointer"
             style={{
               transition: ".2s ease-in-out",
               overflow: "visible",
             }}
-            onClick={reactions ? null : redirect}
           >
             <div className="fit-container fx-centered fx-start-h fx-start-v">
               <div>
@@ -317,7 +341,6 @@ export default function KindOne({
                   "fit-container fx-centered fx-start-h fx-start-v fx-col"
                 }
                 style={{ gap: "6px" }}
-                onClick={onClick}
               >
                 <div className="fx-scattered fit-container">
                   <div className="fx-centered" style={{ gap: "3px" }}>
@@ -349,25 +372,31 @@ export default function KindOne({
                 {event.isComment && !isThread && (
                   <RelatedEvent event={event.isComment} isThread={isThread} />
                 )}
-                <div className="fx-centered fx-col fit-container">
-                  <div className="fit-container" onClick={onClick} dir="auto">
-                    {!minimal ? (
-                      <div
-                        className="p-n-lines"
-                        style={{
-                          "--lines": isClamped ? isClamped : "unset",
-                        }}
-                        ref={noteRef}
-                      >
-                        {showTranslation ? translatedNote : event.note_tree}
-                      </div>
-                    ) : (
-                      <div className="p-six-lines" ref={noteRef}>
-                        {compactContent(event.content, event.pubkey)}
-                      </div>
-                    )}
+                <Link
+                  href={`/note/${event.nEvent}`}
+                  className="fit-container pointer no-hover"
+                >
+                  <div className="fx-centered fx-col fit-container">
+                    <div className="fit-container" dir="auto">
+                      {!minimal ? (
+                        <div
+                          className="p-n-lines"
+                          style={{
+                            "--lines": isClamped ? isClamped : "unset",
+                          }}
+                          ref={noteRef}
+                        >
+                          {showTranslation ? translatedNote : event.note_tree}
+                        </div>
+                      ) : (
+                        <div className="p-six-lines" ref={noteRef}>
+                          {compactContent(event.content, event.pubkey)}
+                        </div>
+                      )}
+                      
+                    </div>
                   </div>
-                </div>
+                </Link>
               </div>
             </div>
             {isClamped !== 10000 && (
@@ -452,15 +481,35 @@ export default function KindOne({
   );
 }
 
-const RelatedEvent = ({ event, reactions = true, isThread }) => {
+export default React.memo(KindOne);
+
+const getPreviouslyFetchedEvent = (id) => {
+  let event = getEventFromCache(id);
+  let parsedEvent = false;
+  if (!event) return false;
+  if (event.kind === 1) {
+    parsedEvent = getParsedNote(event);
+    parsedEvent = { ...parsedEvent, isComment: false };
+  } else {
+    parsedEvent = getParsedRepEvent(event);
+  }
+  return parsedEvent
+};
+
+const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const { t } = useTranslation();
   const [user, setUser] = useState(false);
-  const [relatedEvent, setRelatedEvent] = useState(false);
+  const [relatedEvent, setRelatedEvent] = useState(
+    getPreviouslyFetchedEvent(event)
+  );
   const [isRelatedEventPubkey, setIsRelatedEventPubkey] = useState(false);
-  const [isRelatedEventLoaded, setIsRelatedEventLoaded] = useState(false);
+  const [isRelatedEventLoaded, setIsRelatedEventLoaded] = useState(
+    relatedEvent ? true : false
+  );
   const [isUnsupported, setIsUnsupported] = useState(false);
   const [showNote, setShowNote] = useState(false);
+
   useEffect(() => {
     const fetchAuthor = async () => {
       try {
@@ -478,8 +527,8 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
       try {
         setIsRelatedEventLoaded(false);
         let event_ =
-          kind === 1
-            ? await getSubData([{ kinds: [kind], ids: [ids] }], 500)
+          kind === 0
+            ? await getSubData([{ ids: [ids] }], 500)
             : await getSubData(
                 [
                   {
@@ -491,13 +540,14 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
                 500
               );
         if (event_.data.length > 0) {
-          saveUsers([event_.data[0].pubkey]);
+          let post = event_.data[0];
+          saveUsers([post.pubkey]);
           let parsedEvent;
-          if (kind === 1) {
-            parsedEvent = getParsedNote(event_.data[0]);
+          if (post.kind === 1) {
+            parsedEvent = getParsedNote(post);
             parsedEvent = { ...parsedEvent, isComment: false };
           } else {
-            parsedEvent = getParsedRepEvent(event_.data[0]);
+            parsedEvent = getParsedRepEvent(post);
           }
           if (
             ![
@@ -505,10 +555,14 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
             ].includes(parsedEvent.kind)
           ) {
             setIsUnsupported(true);
+          } else {
+            let key =
+              kind === 0 ? ids : `${kind}:${ids.pubkey}:${ids.identifier}`;
+            setEventFromCache(key, post.rawEvent());
           }
           setRelatedEvent(parsedEvent);
-          setIsRelatedEventPubkey(event_.data[0].pubkey);
-          setUser(getEmptyuserMetadata(event_.data[0].pubkey));
+          setIsRelatedEventPubkey(post.pubkey);
+          setUser(getEmptyuserMetadata(post.pubkey));
         }
         setIsRelatedEventLoaded(true);
       } catch (err) {
@@ -516,7 +570,7 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
         setIsRelatedEventLoaded(true);
       }
     };
-    if (event) {
+    if (event && !relatedEvent) {
       let checkEventKind = event.split(":");
       if (checkEventKind.length > 2) {
         saveUsers([checkEventKind[1]]);
@@ -526,9 +580,10 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
         });
         return;
       }
-      fetchData(1, event);
+      fetchData(0, event);
     }
   }, [event]);
+
   const handleOnClick = (e) => {
     e.stopPropagation();
     if (!user) return;
@@ -549,7 +604,15 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
               />
             )}
             {relatedEvent.kind !== 1 && (
-              <RepEventPreviewCard item={relatedEvent} />
+              <div className="box-pad-h-m">
+                <div>
+                  <LinkRepEventPreview event={relatedEvent} />
+                </div>
+                <div
+                  className="reply-side-border-2"
+                  style={{ paddingBottom: "1.5rem" }}
+                ></div>
+              </div>
             )}
           </>
         )}
@@ -607,14 +670,19 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
         )}
       </div>
       {relatedEvent && showNote && (
-        <div style={{ borderLeft: "1px solid var(--c1)" }}>
+        <div
+          className="fit-container"
+          style={{ borderLeft: "1px solid var(--c1)" }}
+        >
           {!isUnsupported && (
             <>
               {relatedEvent.kind === 1 && (
                 <KindOne event={relatedEvent} reactions={reactions} />
               )}
               {relatedEvent.kind !== 1 && (
-                <RepEventPreviewCard item={relatedEvent} />
+                <div className="fit-container box-pad-h-m">
+                  <LinkRepEventPreview event={relatedEvent} />
+                </div>
               )}
             </>
           )}
@@ -627,7 +695,7 @@ const RelatedEvent = ({ event, reactions = true, isThread }) => {
       )}
     </>
   );
-};
+});
 
 const FastAccessCS = ({
   id,

@@ -1,5 +1,4 @@
 import React from "react";
-import { getSubData } from "@/Helpers/Controlers";
 import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";
 import {
@@ -9,6 +8,7 @@ import {
 } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Article"), {
   ssr: false,
@@ -29,27 +29,26 @@ export default function Page({ event, author, naddrData, naddr }) {
     path: `article/${naddr}`,
   };
   // if (event)
-    return (
-      <div>
-        <HeadMetadata data={data} />
-        <ClientComponent
-          event={parsedEvent}
-          userProfile={author}
-          naddrData={naddrData}
-        />
-      </div>
-    );
+  return (
+    <div>
+      <HeadMetadata data={data} />
+      <ClientComponent
+        event={parsedEvent}
+        userProfile={author}
+        naddrData={naddrData}
+      />
+    </div>
+  );
 }
 
 export async function getStaticProps({ params }) {
   const { naddr } = params;
-  let { pubkey, identifier, kind } = nip19.decode(naddr).data || {};
-  const res = await getSubData(
+  let { pubkey, identifier, kind, relays } = nip19.decode(naddr).data || {};
+  const res = await getDataForSSG(
     [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }],
     5000,
-    undefined,
-    undefined,
-    1
+    1,
+    relays || []
   );
   let event =
     res.data.length > 0
@@ -58,18 +57,12 @@ export async function getStaticProps({ params }) {
         }
       : null;
   const author = event
-    ? await getSubData(
-        [{ authors: [pubkey], kinds: [0] }],
-        1000,
-        undefined,
-        undefined,
-        1
-      )
+    ? await getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata(pubkey);
   return {
     props: {
       event,
-      naddrData: { pubkey, identifier, kind },
+      naddrData: { pubkey, identifier, kind, relays: relays || [] },
       naddr,
       author:
         author.data?.length > 0

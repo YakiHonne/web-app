@@ -1,23 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getLinkPreview } from "@/Helpers/Helpers";
+import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import { getURLFromCache, setURLFromCache } from "@/Helpers/utils";
+
+const NOT_FOUND = "not found";
 
 export default function LinkPreview({ url, minimal }) {
   const { t } = useTranslation();
-  const [metadata, setMetadata] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { linkPreview } = useCustomizationSettings();
+  const [metadata, setMetadata] = useState(getURLFromCache(url));
+  const [isLoading, setIsLoading] = useState(metadata ? false : true);
 
   useEffect(() => {
     const getMetadata = async () => {
       let data = await getLinkPreview(url);
       if (data) {
+        setURLFromCache(url, data);
         setMetadata(data);
+      } else {
+        setURLFromCache(url, NOT_FOUND);
       }
       setIsLoading(false);
     };
-    if (!minimal) getMetadata();
-    if (minimal) setIsLoading();
-  }, []);
+    if (!minimal && linkPreview && !metadata) getMetadata();
+    if (minimal) setIsLoading(false);
+    if (!linkPreview) {
+      setIsLoading(false);
+      setMetadata(false);
+    }
+  }, [linkPreview]);
 
   if (isLoading)
     return (
@@ -27,8 +39,7 @@ export default function LinkPreview({ url, minimal }) {
         onClick={(e) => e.stopPropagation()}
       ></div>
     );
-
-  if (!isLoading && !metadata)
+  if (!isLoading && (!metadata || metadata === NOT_FOUND))
     return (
       <a
         style={{
@@ -67,16 +78,17 @@ export default function LinkPreview({ url, minimal }) {
         style={{ gap: "4px" }}
       >
         <div className="fx-centered" style={{ gap: "6px" }}>
-          {metadata.favicon && <div
-            style={{
-              width: "16px",
-              height: "16px",
-              borderRadius: "4px",
-              backgroundImage: `url(${metadata.favicon})`,
-            
-            }}
-            className="cover-bg bg-img"
-          ></div>}
+          {metadata.favicon && (
+            <div
+              style={{
+                width: "16px",
+                height: "16px",
+                borderRadius: "4px",
+                backgroundImage: `url(${metadata.favicon})`,
+              }}
+              className="cover-bg bg-img"
+            ></div>
+          )}
           <p className="gray-c">{metadata.domain}</p>
         </div>
         <p className="p-two-lines">{metadata.title || "Untitled"}</p>

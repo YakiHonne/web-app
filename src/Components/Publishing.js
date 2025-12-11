@@ -5,14 +5,14 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateYakiChestStats } from "@/Helpers/Controlers";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { setUpdatedActionFromYakiChest } from "@/Store/Slides/YakiChest";
-import { NDKEvent, NDKRelay } from "@nostr-dev-kit/ndk";
+import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import {
   getOutboxRelays,
   removeEventStats,
   removeRecordFromNDKStore,
 } from "@/Helpers/DB";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import {
   removeDuplicatedRelays,
   removeRelayLastSlash,
@@ -20,7 +20,7 @@ import {
 import Date_ from "./Date_";
 import ProgressCirc from "./ProgressCirc";
 import { useTranslation } from "react-i18next";
-import { getNDKInstance, localStorage_ } from "@/Helpers/utils";
+import { localStorage_ } from "@/Helpers/utils";
 import { eventKinds } from "@/Content/Extra";
 
 const PUBLISHING_TIMEOUT = 3000;
@@ -73,7 +73,7 @@ const getPublishedEvents = () => {
   }
 };
 
-export default function Publishing() {
+export default function Publishing({ displayOff = false }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const toPublish = useSelector((state) => state.toPublish);
@@ -144,6 +144,7 @@ export default function Publishing() {
 
   useEffect(() => {
     const publishPost = async () => {
+      console.log(toPublish);
       let { kind, content, tags, eventInitEx, allRelays } = toPublish;
       let relaysToPublish =
         allRelays?.length > 0
@@ -159,6 +160,7 @@ export default function Publishing() {
                 status: 0,
               };
             }) || [];
+
       if (relaysToPublish.length === 0)
         relaysToPublish = relaysOnPlatform.map((relay) => {
           return {
@@ -167,9 +169,12 @@ export default function Publishing() {
           };
         });
       let ak = getActionKey();
-      let pTag = eventInitEx
-        ? getOutboxPubkey(eventInitEx.kind, eventInitEx.tags)
-        : getOutboxPubkey(kind, tags);
+      let pTag =
+        allRelays?.length > 1
+          ? eventInitEx
+            ? getOutboxPubkey(eventInitEx.kind, eventInitEx.tags)
+            : getOutboxPubkey(kind, tags)
+          : null;
       let index = publishedEvents.length;
 
       setShowDetails(false);
@@ -191,6 +196,7 @@ export default function Publishing() {
             relaysToPublish,
             isFinished: false,
             action_key: ak,
+            publisedAt: Date.now(),
           },
         ]);
         initPublishing(relaysToPublish, ndkEvent, index, ak);
@@ -236,6 +242,7 @@ export default function Publishing() {
           relaysToPublish,
           isFinished: false,
           action_key: ak,
+          publisedAt: Date.now(),
         },
       ]);
       initPublishing(relaysToPublish, ndkEvent, index, ak);
@@ -501,6 +508,8 @@ export default function Publishing() {
   };
 
   if (!userMetadata) return;
+  if (displayOff) return null;
+
   return (
     <>
       {showDetails && (
@@ -603,7 +612,9 @@ export default function Publishing() {
                             </p>
                             <Date_
                               toConvert={
-                                new Date(event.ndkEvent.created_at * 1000)
+                                event.publisedAt
+                                  ? new Date(event.publisedAt)
+                                  : new Date(event.ndkEvent.created_at * 1000)
                               }
                               time={true}
                             />
@@ -655,22 +666,20 @@ export default function Publishing() {
                               {failed.length} {t("AOxW08J")}
                             </p>
                           )}
-                          {event.isFinished &&
-                            failed.length > 0 &&
-                            userMetadata.pubkey === event.ndkEvent.pubkey && (
-                              <button
-                                className="btn btn-normal btn-small"
-                                onClick={() =>
-                                  retry(
-                                    event.ndkEvent,
-                                    failed,
-                                    event.originalIndex
-                                  )
-                                }
-                              >
-                                {t("AcdxgMi")}
-                              </button>
-                            )}
+                          {event.isFinished && failed.length > 0 && (
+                            <button
+                              className="btn btn-normal btn-small"
+                              onClick={() =>
+                                retry(
+                                  event.ndkEvent,
+                                  failed,
+                                  event.originalIndex
+                                )
+                              }
+                            >
+                              {t("AcdxgMi")}
+                            </button>
+                          )}
                         </div>
                       </div>
                     );

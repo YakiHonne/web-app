@@ -14,7 +14,7 @@ import {
   getZapper,
   shortenKey,
 } from "@/Helpers/Encryptions";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
 import QRCode from "react-qr-code";
@@ -517,9 +517,6 @@ export default function Wallet() {
                     className="fit-container box-pad-v-m fx-centered"
                     style={{ position: "relative", zIndex: 100 }}
                   >
-                    {/* <div>
-                      <h4>{t("ARXDO1q")}</h4>
-                    </div> */}
                     <div className="fx-centered">
                       <div style={{ position: "relative" }} ref={walletListRef}>
                         {selectedWallet && (
@@ -542,8 +539,6 @@ export default function Wallet() {
                               width: "400px",
                               backgroundColor: "var(--c1-side)",
                               position: "absolute",
-                              // transform: "translateX(-50%)",
-                              // left: "-50%",
                               top: "calc(100% + 5px)",
                               rowGap: 0,
                               overflow: "visible",
@@ -666,12 +661,14 @@ export default function Wallet() {
                   >
                     {!isLoading && !(selectedWallet?.kind === 4 && !sparkConnected) && (
                       <div className="fx-centered fx-col box-pad-v">
-                        <h5>{t("AbcY4ef")}</h5>
                         <div className="fx-centered">
-                          <h2 className="orange-c">{selectedWallet && selectedWallet.kind === 4 ? (sparkBalance !== null ? sparkBalance : 'N/A') : userBalance}</h2>
-                          <p className="gray-c">Sats</p>
+                          <div className="fx-centered fx-col">
+                            <p className="gray-c">{t("AbcY4ef")}</p>
+                            <h1>{selectedWallet && selectedWallet.kind === 4 ? (sparkBalance !== null ? sparkBalance : 'N/A') : userBalance}</h1>
+                          </div>
+                          <sup className="gray-c">Sats</sup>
                         </div>
-                        <SatsToUSD sats={selectedWallet && selectedWallet.kind === 4 ? sparkBalance : userBalance} />
+                        <SatsToUSD sats={selectedWallet && selectedWallet.kind === 4 ? sparkBalance : userBalance} selector={true} />
                         {selectedWallet && selectedWallet.kind !== 1 &&
                           selectedWallet.entitle.includes("@") && (
                             <div

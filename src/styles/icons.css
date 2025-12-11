@@ -1,3 +1,5 @@
+@import url(./root.css);
+
 /* CSS Custom Properties for theme-based icon filtering */
 [data-theme='dark'],
 [data-theme='gray'] {
@@ -152,7 +154,7 @@
 .bookmark-i,
 .bookmark-i-24,
 .bookmark-i-b,
-.bookmark-i-24-b,
+.bookmark-i-b-24,
 .report,
 .report-24,
 .fb-icon,
@@ -430,6 +432,8 @@
 .flag-fr-24,
 .flag-hi,
 .flag-hi-24,
+.flag-ru,
+.flag-ru-24
 .user-bold,
 .user-bold-24,
 .export,
@@ -460,13 +464,15 @@
 .republish,
 .republish-24,
 .protected-2,
-.protected-2-24 ,
+.protected-2-24,
 .orbit,
 .orbit-24,
 .orbit-bold,
 .orbit-bold-24,
 .zapstore,
-.zapstore-24{
+.zapstore-24,
+.bug,
+.bug-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -583,7 +589,7 @@
 .bookmark-i,
 .bookmark-i-24,
 .bookmark-i-b,
-.bookmark-i-24-b,
+.bookmark-i-b-24,
 .report,
 .report-24,
 .fb-icon,
@@ -822,7 +828,9 @@
 .orbit-bold,
 .orbit-bold-24,
 .zapstore,
-.zapstore-24 {
+.zapstore-24,
+.bug,
+.bug-24{
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -890,7 +898,9 @@
 .orbit-bold,
 .orbit-bold-24,
 .zapstore,
-.zapstore-24 {
+.zapstore-24,
+.bug,
+.bug-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -1105,6 +1115,7 @@
 .flag-it,
 .flag-fr,
 .flag-hi,
+.flag-ru,
 .user-bold,
 .export,
 .github-logo,
@@ -1122,7 +1133,8 @@
 .protected-2,
 .orbit,
 .orbit-bold,
-.zapstore {
+.zapstore,
+.bug {
     min-width: 16px;
     min-height: 16px;
 }
@@ -1191,7 +1203,7 @@
 .bookmark-24,
 .bookmark-24-b,
 .bookmark-i-24,
-.bookmark-i-24-b,
+.bookmark-i-b-24,
 .report-24,
 .flag-24,
 .fb-icon-24,
@@ -1328,6 +1340,7 @@
 .flag-it-24,
 .flag-fr-24,
 .flag-hi-24,
+.flag-ru-24,
 .user-bold-24,
 .export-24,
 .github-logo-24,
@@ -1344,7 +1357,8 @@
 .protected-2-24,
 .orbit-24,
 .orbit-bold-24,
-.zapstore-24 {
+.zapstore-24,
+.bug-24 {
     min-width: 24px;
     min-height: 24px;
 }
@@ -1365,21 +1379,43 @@
     min-height: 24px;
 }
 
+.bold-icon {
+    display: inline-block;
+    background-color: var(--c1);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: none !important;
+}
+
+
+.bug, .bug-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bug.svg")
+}
+
 .zapstore, .zapstore-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/Zapstore.svg');
 }
+
 .orbit-bold, .orbit-bold-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/relay-orbits-filled.svg');
 }
+
 .orbit, .orbit-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/relay-orbits-mono.svg');
 }
+
 .protected-2, .protected-2-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/secure-mono.svg');
 }
+
 .republish, .republish-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/republish-2-mono.svg');
 }
+
 .recent-wr, .recent-wr-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/recent-with-replies-mono.svg');
 }
@@ -1448,11 +1484,16 @@
 .flag-it-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-it.svg');
 }
+.flag-ru,
+.flag-ru-24 {
+    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-ru.svg');
+}
 
 .flag-fr,
 .flag-fr-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-fr.svg');
 }
+
 .flag-hi,
 .flag-hi-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-hi.svg');
@@ -1547,7 +1588,16 @@
 
 .info,
 .info-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info.svg');
+    background-color: var(--c1);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: none !important;
+    mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info.svg');
+    -webkit-mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info.svg');
     min-width: 28px;
     min-height: 28px;
 }
@@ -1628,7 +1678,16 @@
 
 .info-tt,
 .info-tt-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info-tt.svg');
+    background-color: var(--c1);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: none !important;
+    mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info-tt.svg');
+    -webkit-mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/info-tt.svg');
 }
 
 .clone,
@@ -1924,12 +1983,30 @@
 
 .quote-bold,
 .quote-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/quote-bold.svg');
+    background-color: var(--c1);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: none !important;
+    mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/quote-bold.svg');
+    -webkit-mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/quote-bold.svg');
 }
 
 .switch-arrows-bold,
 .switch-arrows-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/switch-arrows-bold.svg');
+    background-color: var(--c1);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: none !important;
+    mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/switch-arrows-bold.svg');
+    -webkit-mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/switch-arrows-bold.svg');
 }
 
 .heart,
@@ -1939,7 +2016,16 @@
 
 .heart-bold,
 .heart-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/heart-bold.svg');
+    background-color: var(--c1);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: none !important;
+    mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/heart-bold.svg');
+    -webkit-mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/heart-bold.svg');
 }
 
 .quote,
@@ -2154,7 +2240,7 @@
 }
 
 .bookmark-i-b,
-.bookmark-i-24-b {
+.bookmark-i-b-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/save-bookmark-b.svg');
 }
 
@@ -2177,15 +2263,34 @@
 }
 
 .checkmark-c1, .checkmark-c1-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/checkmark-c1.svg');
+    background-color: var(--c1);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: none !important;
+    mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/checkmark-c1.svg');
+    -webkit-mask-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/checkmark-c1.svg");
 }
+
 
 .bolt, .bolt-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bolt.svg');
 }
 
 .bolt-bold, .bolt-bold-24 {
-    background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bolt-bold-c1.svg');
+    background-color: var(--c1);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    filter: none !important;
+    mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bolt-bold-c1.svg');
+    -webkit-mask-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bolt-bold-c1.svg');
 }
 
 .arrow-up {

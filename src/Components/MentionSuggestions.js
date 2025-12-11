@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { nip19 } from "nostr-tools";
 import LoadingDots from "@/Components/LoadingDots";
 import Link from "next/link";
@@ -15,19 +15,63 @@ export default function MentionSuggestions({
 }) {
   const { t } = useTranslation();
   const { users, isSearchLoading } = useSearchUsers(mention);
+  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const itemRefs = useRef([]);
+
+  useEffect(() => {
+    setHighlightedIndex(0);
+  }, [users]);
 
   const encodePubkey = (pubkey) => {
     try {
       if (!isHex(pubkey)) return false;
-      let url = nip19.nprofileEncode({ pubkey });
-      return url;
+      return nip19.nprofileEncode({ pubkey });
     } catch (err) {
       console.log(err);
       return false;
     }
   };
 
-  if (users === false) return;
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (!users || users.length === 0) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev < users.length - 1 ? prev + 1 : prev
+        );
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+      } else if (e.key === "Enter" && highlightedIndex >= 0) {
+        e.preventDefault();
+        const user = users[highlightedIndex];
+        const url = encodePubkey(user.pubkey);
+        if (url) {
+          setSelectedMention?.(url);
+          setSelectedMentionMetadata?.({ ...user, npub: url });
+        }
+      }
+    },
+    [users, highlightedIndex, setSelectedMention, setSelectedMentionMetadata]
+  );
+
+  useEffect(() => {
+    if (highlightedIndex >= 0 && itemRefs.current[highlightedIndex]) {
+      itemRefs.current[highlightedIndex].scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    }
+  }, [highlightedIndex]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  if (users === false) return null;
 
   return (
     <>
@@ -60,11 +104,10 @@ export default function MentionSuggestions({
           left: 0,
           width: "100%",
           maxHeight: "200px",
-          overflow: "scroll",
+          overflowY: "auto",
           zIndex: 100,
-          gap: 0,
         }}
-        className="sc-s-18 fx-centered fx-start-v fx-start-h fx-col  box-pad-v-s"
+        className="sc-s-18 fx-centered fx-start-v fx-start-h fx-col box-pad-v-s"
       >
         {isSearchLoading && users.length === 0 && (
           <>
@@ -75,36 +118,41 @@ export default function MentionSuggestions({
             <hr />
           </>
         )}
+
         {users.map((user, index) => {
-          let url = encodePubkey(user.pubkey);
-          if (url)
-            return (
-              <div
-                key={user.pubkey}
-                className="fx-scattered box-pad-v-s box-pad-h-m fit-container pointer search-bar-post"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setSelectedMention && setSelectedMention(url);
-                  setSelectedMentionMetadata &&
-                    setSelectedMentionMetadata({ ...user, npub: url });
-                }}
-                style={{
-                  borderTop: index !== 0 ? "1px solid var(--pale-gray)" : "",
-                }}
+          const url = encodePubkey(user.pubkey);
+          if (!url) return null;
+
+          const isHighlighted = index === highlightedIndex;
+
+          return (
+            <div
+              key={user.pubkey}
+              ref={(el) => (itemRefs.current[index] = el)}
+              className={`fx-scattered box-pad-v-s box-pad-h-m fit-container pointer search-bar-post ${
+                isHighlighted ? "keyboard-active" : ""
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedMention?.(url);
+                setSelectedMentionMetadata?.({ ...user, npub: url });
+              }}
+              style={{
+                borderTop: index !== 0 ? "1px solid var(--pale-gray)" : "",
+              }}
+            >
+              <SearchUserCard user={user} />
+              <Link
+                href={`/${url}`}
+                onClick={(e) => e.stopPropagation()}
+                target="_blank"
               >
-                <SearchUserCard user={user} />
-                <Link
-                  href={`/${url}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                  }}
-                  target="_blank"
-                >
-                  <div className="share-icon"></div>
-                </Link>
-              </div>
-            );
+                <div className="share-icon"></div>
+              </Link>
+            </div>
+          );
         })}
+
         {users.length === 0 && !isSearchLoading && (
           <div className="fit-container fx-centered">
             <p className="gray-c p-medium p-italic">{t("A6aLMx1")}</p>

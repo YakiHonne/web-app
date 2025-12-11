@@ -240,7 +240,7 @@ export default function UserMetadata({ user }) {
             </div>
           </div>
         </div>
-        <div className="fx-centered fit-container box-pad-v-m box-pad-h-m">
+        <div className="fx-centered fit-container fx-start-h box-pad-v-m box-pad-h-m">
           <div
             className="fx-centered fx-col fx-start-v"
             style={{ width: "min(100%, 800px)" }}
@@ -264,7 +264,7 @@ export default function UserMetadata({ user }) {
                   <p className="p-one-line" style={{ minWidth: "max-content" }}>
                     {user?.nip05?.length < 50
                       ? user?.nip05
-                      : shortenKey(user?.nip05, 15)}
+                      : typeof user?.nip05 === "string" ? shortenKey(user?.nip05, 15) : "N/A"}
                   </p>
                 )}
                 {!user?.nip05 && <p>N/A</p>}

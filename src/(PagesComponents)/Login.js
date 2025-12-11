@@ -132,8 +132,8 @@ const Bunker = () => {
       [{ kinds: [NostrConnect], "#p": [localKeys.pubkey] }],
       {
         groupable: false,
-        skipVerification: true,
-        skipValidation: true,
+        // skipVerification: true,
+        // skipValidation: true,
       }
     );
 

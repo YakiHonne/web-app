@@ -38,7 +38,7 @@ import {
 import { getCustomServices, getKeys, getWallets } from "./ClientHelpers";
 import { finalizeEvent } from "nostr-tools";
 import axios from "axios";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
 import { t } from "i18next";
 import {
@@ -595,10 +595,11 @@ const getSubData = async (
   timeout = 1000,
   relayUrls = [],
   ndk = ndkInstance,
-  maxEvents = 1000
+  maxEvents = 1000,
+  raw = false,
+  cacheUsage = "CACHE_FIRST"
 ) => {
   const userRelays = relaysOnPlatform;
-
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
 
   return new Promise((resolve) => {
@@ -618,17 +619,41 @@ const getSubData = async (
       resolve({ data: [], pubkeys: [] });
       return;
     }
-    let sub = ndk.subscribe(filter_, {
-      groupable: false,
-      skipVerification: true,
-      skipValidation: true,
-      relayUrls: relayUrls.length > 0 ? relayUrls : userRelays,
-    });
+    let sub = ndk.subscribe(
+      filter_,
+      {
+        groupable: false,
+        skipVerification: true,
+        skipValidation: true,
+        relayUrls: relayUrls.length > 0 ? relayUrls : userRelays,
+        cacheUsage
+      },
+      {
+        onEvent(event) {
+          if (events.length <= maxEvents) {
+            pubkeys.push(event.pubkey);
+            if (event.id) events.push(raw ? event.rawEvent() : event);
+            if (maxEvents === 1) {
+              // sub.removeAllListeners();
+              sub.stop();
+              resolve({
+                data: sortEvents(removeEventsDuplicants(events)),
+                pubkeys: [...new Set(pubkeys)],
+              });
+            }
+            startTimer();
+          }
+        },
+        onEose() {
+          if (events.length === 0) startTimer();
+        },
+      }
+    );
     let timer;
     const startTimer = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
-        sub.removeAllListeners();
+        // sub.removeAllListeners();
         sub.stop();
         resolve({
           data: sortEvents(removeEventsDuplicants(events)),
@@ -637,24 +662,24 @@ const getSubData = async (
       }, timeout);
     };
 
-    sub.on("event", (event) => {
-      if (events.length <= maxEvents) {
-        pubkeys.push(event.pubkey);
-        if (event.id) events.push(event.rawEvent());
-        if (maxEvents === 1) {
-          sub.removeAllListeners();
-          sub.stop();
-          resolve({
-            data: sortEvents(removeEventsDuplicants(events)),
-            pubkeys: [...new Set(pubkeys)],
-          });
-        }
-        startTimer();
-      }
-    });
-    sub.on("eose", () => {
-      if (events.length === 0) startTimer();
-    });
+    // sub.on("event", (event) => {
+    //   if (events.length <= maxEvents) {
+    //     pubkeys.push(event.pubkey);
+    //     if (event.id) events.push(event);
+    //     if (maxEvents === 1) {
+    //       sub.removeAllListeners();
+    //       sub.stop();
+    //       resolve({
+    //         data: sortEvents(removeEventsDuplicants(events)),
+    //         pubkeys: [...new Set(pubkeys)],
+    //       });
+    //     }
+    //     startTimer();
+    //   }
+    // });
+    // sub.on("eose", () => {
+    //   if (events.length === 0) startTimer();
+    // });
   });
 };
 
@@ -683,16 +708,19 @@ const InitEvent = async (
       }
     } else if (userKeys.bunker) {
       const bunkerPointer = await parseBunkerInput(userKeys.bunker);
-      const bunker = BunkerSigner.fromBunker(userKeys.localKeys.sec, bunkerPointer, {
-        onauth: (url) => {
-          window.open(
-            url,
-            "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
-          );
-        },
-      });
-      // await bunker.connect();
+      const bunker = BunkerSigner.fromBunker(
+        userKeys.localKeys.sec,
+        bunkerPointer,
+        {
+          onauth: (url) => {
+            window.open(
+              url,
+              "_blank",
+              "width=600,height=650,scrollbars=yes,resizable=yes"
+            );
+          },
+        }
+      );
       tempEvent = await bunker.signEvent(tempEvent);
     } else {
       tempEvent = finalizeEvent(tempEvent, userKeys.sec);
@@ -731,10 +759,11 @@ const getEventStatAfterEOSE = (
     stats[kind][kind] = removeObjDuplicants(stats[kind][kind], [
       { id: reaction.id, pubkey: reaction.pubkey, content },
     ]);
-  } else
+  } else {
     stats[kind][kind] = removeObjDuplicants(stats[kind][kind], [
       { id: reaction.id, pubkey: reaction.pubkey },
     ]);
+  }
   stats[kind].since = zapsCreatedAt
     ? zapsCreatedAt + 1
     : reaction.created_at + 1;
@@ -897,14 +926,15 @@ const saveRelayMetadata = async (relays) => {
   if (!relays || relays.length === 0) return;
   let onlyUnsavedRelays = relays.filter((relay) => {
     let metadata = getRelayMetadata(relay);
-    if(metadata?.isEmpty || typeof metadata?.isEmpty === undefined) return true;
+    if (metadata?.isEmpty || typeof metadata?.isEmpty === undefined)
+      return true;
     return false;
   });
   let relaysMetadata = await Promise.all(
     onlyUnsavedRelays.map((relay) => fetchRelayMetadata(relay))
   );
   relaysMetadata = relaysMetadata.filter((_) => _);
-  let pubkeys = relaysMetadata.map((_) => _.pubkey);
+  let pubkeys = relaysMetadata.map((_) => _.pubkey).filter((_) => _);
 
   relaysMetadata.forEach((_) => {
     setRelayMetadata(_.url, _);

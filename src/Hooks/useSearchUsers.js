@@ -1,4 +1,5 @@
 import bannedList from "@/Content/BannedList";
+import { getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { getParsedAuthor } from "@/Helpers/Encryptions";
 import { isHex, sortByKeyword } from "@/Helpers/Helpers";
@@ -8,15 +9,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 
 export default function useSearchUsers(keyword) {
+  const userKeys = useSelector((state) => state.userKeys);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const userFollowings = useSelector((state) => state.userFollowings);
   const [users, setUsers] = useState(false);
   const [isSearchLoading, setIsSearchLoading] = useState(false);
   const userFollowingsMetadata = useMemo(() => {
-    return userFollowings
+    return [...userFollowings, ...(userKeys ? [userKeys.pub] : [])]
       .map((_) => nostrAuthors.find((__) => __.pubkey === _))
       .filter((_) => _);
-  }, []);
+  }, [userKeys]);
   useEffect(() => {
     var timer = setTimeout(null);
     if (keyword) {
@@ -35,13 +37,13 @@ export default function useSearchUsers(keyword) {
     try {
       setIsSearchLoading(true);
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_CACHE_BASE_URL;
-
       let data = await axios.get(
         `${API_BASE_URL}/api/v1/users/search/${keyword}`
       );
+      data = data.data;
 
       setUsers((prev) => {
-        let tempData = [...prev, ...data.data];
+        let tempData = [...prev, ...data];
         tempData = tempData.filter((user, index, tempData) => {
           if (
             !bannedList.includes(user.pubkey) &&
@@ -96,7 +98,7 @@ export default function useSearchUsers(keyword) {
       if (checkFollowings.length > 0) {
         filteredUsers = structuredClone(checkFollowings);
       }
-      if (checkFollowings.length < 5) {
+      if (checkFollowings.length < 10) {
         let filterPubkeys = filteredUsers.map((_) => _.pubkey);
 
         filteredUsers = [
@@ -130,7 +132,7 @@ export default function useSearchUsers(keyword) {
     }
 
     setUsers(filteredUsers);
-    if (filteredUsers.length < 5) getUsersFromCache();
+    if (filteredUsers.length < 10) getUsersFromCache();
   };
   const getUserByPubkey = async (keyword) => {
     let hexPubkey =

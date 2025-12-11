@@ -1,5 +1,4 @@
 import React from "react";
-import { getSubData } from "@/Helpers/Controlers";
 import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";
 import {
@@ -9,6 +8,7 @@ import {
 } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Curation"), {
   ssr: false,
@@ -38,22 +38,19 @@ export default function Page({ event, author }) {
 
 export async function getStaticProps({ params }) {
   const { naddr } = params;
-  let { pubkey, identifier, kind } = nip19.decode(naddr).data || {};
-  const res = await getSubData(
+  let { pubkey, identifier, kind, relays } = nip19.decode(naddr).data || {};
+  const res = await getDataForSSG(
     [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }],
     1000,
-    undefined,
-    undefined,
-    1
+    1,
+    relays || []
   );
   let event = {
     ...res.data[0],
   };
-  const author = await getSubData(
+  const author = await getDataForSSG(
     [{ authors: [event.pubkey], kinds: [0] }],
     1000,
-    undefined,
-    undefined,
     1
   );
   return {

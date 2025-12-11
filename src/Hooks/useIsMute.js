@@ -3,32 +3,26 @@ import { useDispatch, useSelector } from "react-redux";
 import { InitEvent } from "@/Helpers/Controlers";
 import { setToPublish } from "@/Store/Slides/Publishers";
 
-export default function useIsMute(pubkey) {
+export default function useIsMute(id, kind = "p") {
   const dispatch = useDispatch();
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList, allTags } = useSelector((state) => state.userMutedList);
 
   const isMuted = useMemo(() => {
     let checkProfile = () => {
       if (!Array.isArray(userMutedList)) return false;
-      let index = userMutedList.findIndex(
-        (item) => item === pubkey
-      );
-      if (index === -1) {
-        return false;
-      }
-      return { index };
+      return userMutedList.includes(id);
     };
-    return pubkey ? checkProfile() : false;
-  }, [userMutedList]);
+    return id ? checkProfile() : false;
+  }, [userMutedList, id]);
 
   const muteUnmute = async () => {
     try {
       if (!Array.isArray(userMutedList)) return;
-      let tempTags = Array.from(userMutedList.map((pubkey) => ["p", pubkey]));
+      let tempTags = Array.from(allTags?.length > 0 ? allTags : userMutedList.map((id) => ["p", id]));
       if (isMuted) {
-        tempTags.splice(isMuted.index, 1);
+        tempTags = tempTags.filter((tag) => tag[1] !== id);
       } else {
-        tempTags.push(["p", pubkey]);
+        tempTags.push([kind, id]);
       }
       let eventInitEx = await InitEvent(10000, "", tempTags);
       if (eventInitEx) {

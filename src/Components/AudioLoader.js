@@ -1,4 +1,4 @@
-'use client';
+
 import { useEffect, useRef, useState } from "react";
 import WaveSurfer from "wavesurfer.js";
 import PlayPauseButton from "@/Components/PlayPauseButton/PlayPauseButton";
@@ -99,8 +99,13 @@ export default function AudioLoader({ audioSrc }) {
         pointerEvents: isLoading ? "none" : "auto",
         borderRadius: "16px",
         border: "none",
+        height: "80px",
+        marginTop: ".5rem"
       }}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.stopPropagation()
+        e.preventDefault()
+      }}
     >
       <PlayPauseButton
         isPlaying={isPlaying}

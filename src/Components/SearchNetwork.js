@@ -23,7 +23,7 @@ function isValidUrl(url) {
 
 export default function SearchNetwork({ exit }) {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const userInterestList = useSelector((state) => state.userInterestList);
   const userFollowings = useSelector((state) => state.userFollowings);
   const userFollowingsMetadata = useMemo(() => {
@@ -294,7 +294,7 @@ export default function SearchNetwork({ exit }) {
             style={{
               borderBottom: "1px solid var(--very-dim-gray)",
               padding: ".5rem 1rem",
-              top: 0
+              top: 0,
             }}
           >
             <div className="search-24"></div>
@@ -385,6 +385,7 @@ export default function SearchNetwork({ exit }) {
                           exit();
                         }}
                         className="sc-s bg-sp box-pad-h-m box-pad-v-s pointer"
+                        style={{ boxShadow: "none" }}
                         key={index}
                       >
                         #{interest}
@@ -417,7 +418,7 @@ export default function SearchNetwork({ exit }) {
           {results.length === 0 && !isLoading && (
             <div
               className="fit-container fx-col fx-centered"
-              style={{ height: "500px" }}
+              style={{ height: "300px" }}
             >
               <div className="search-24"></div>
               <h4>{t("AjlW15t")}</h4>
@@ -427,7 +428,7 @@ export default function SearchNetwork({ exit }) {
           {isLoading && results.length === 0 && (
             <div
               className="fit-container fx-centered"
-              style={{ height: "500px" }}
+              style={{ height: "300px" }}
             >
               <p className="gray-c p-medium">{t("APAkDF0")}</p> <LoadingDots />
             </div>

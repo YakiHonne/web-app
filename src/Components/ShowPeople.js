@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { getParsedAuthor } from "@/Helpers/Encryptions";
 import LoadingScreen from "@/Components/LoadingScreen";
 import Follow from "@/Components/Follow";

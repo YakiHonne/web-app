@@ -1,7 +1,7 @@
 import RelayImage from "@/Components/RelayImage";
 import { getRelayMetadata } from "@/Helpers/utils";
 
-export default function CFCategoryPreview({ category, minimal = false }) {
+export default function ContentFeedCategoryPreview({ category, minimal = false }) {
   if (category.group === "cf") {
     return (
       <div className="fx-centered">
@@ -45,7 +45,7 @@ export default function CFCategoryPreview({ category, minimal = false }) {
     );
   }
   if (category.group === "af") {
-    let metadata = getRelayMetadata(category.value)
+    let metadata = getRelayMetadata(category.value);
     return (
       <div className="fx-centered">
         <div style={{ position: "relative" }}>
@@ -53,7 +53,42 @@ export default function CFCategoryPreview({ category, minimal = false }) {
         </div>
         <div>
           <p className="p-one-line">{category.display_name}</p>
-          {!minimal && <p className="gray-c p-one-line p-medium">{metadata?.description || metadata.value}</p>}
+          {!minimal && (
+            <p className="gray-c p-one-line p-medium">
+              {metadata?.description || metadata?.value}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+  if (category.group === "rsf") {
+    return (
+      <div className="fx-centered">
+        <div
+          style={{
+            minWidth: minimal ? "32px" : "40px",
+            minHeight: minimal ? "32px" : "40px",
+            borderRadius: "var(--border-r-50)",
+            backgroundColor: "var(--white)",
+            backgroundImage: `url(${category.image})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+          className="fx-centered"
+        >
+          {!category.image && (
+            <p
+              className={`p-bold p-caps `}
+              style={{ position: "relative", zIndex: 1 }}
+            >
+              {category.title.charAt(0)}
+            </p>
+          )}
+        </div>
+        <div>
+          <p className="p-one-line">{category.title}</p>
+          <p className="p-medium gray-c p-one-line">{category.title}</p>
         </div>
       </div>
     );

@@ -87,7 +87,18 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
               ? event.content
               : event.tags.find((tag) => `:${tag[1]}:` === event.content)[2] ||
                 "+";
-            kind7.push({ id: event.id, pubkey: event.pubkey, content });
+            let checkValid7 = event.tags.find(
+              (tag) => tag[0] === "a" && tag[1] === aTag
+            );
+            checkValid7 =
+              checkValid7.length > 3
+                ? checkValid7[3].length >= 32
+                  ? true
+                  : false
+                : true;
+            let checkRedundant7 = kind7.find((_) => _.pubkey === event.pubkey);
+            if (checkValid7 && !checkRedundant7)
+              kind7.push({ id: event.id, pubkey: event.pubkey, content });
           }
           if (event.kind === 6) {
             if (!kind6Since || kind6Since < event.created_at)

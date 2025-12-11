@@ -15,7 +15,7 @@ export default function SearchUserCard({ user, url, exit }) {
 
   useEffect(() => {
     const verifyUser = async () => {
-      if (user.nip05) {
+      if (user.nip05 && typeof user.nip05 === "string") {
         let status = await getAuthPubkeyFromNip05(user.nip05);
         if (status === user.pubkey) setVerified(true);
         else setVerified(false);
@@ -23,7 +23,6 @@ export default function SearchUserCard({ user, url, exit }) {
     };
     verifyUser();
   }, [user]);
-
   if (
     !(
       typeof user.nip05 === "string" &&
@@ -52,14 +51,14 @@ export default function SearchUserCard({ user, url, exit }) {
                   {user.display_name || user.name}
                 </p>
                 {verified && <div className="checkmark-c1"></div>}
-                 {isFollowing && (
-                <div className="sticker sticker-small sticker-gray-black">
-                  {t("AOwS3ca")}
-                </div>
-              )}
+                {isFollowing && (
+                  <div className="sticker sticker-small sticker-gray-black">
+                    {t("AOwS3ca")}
+                  </div>
+                )}
               </div>
               <p className={`${verified ? "" : "gray-c"} p-medium p-one-line`}>
-                {user.nip05 || "N/A"}
+                {user.nip05 ? user.nip05 : "N/A"}
               </p>
             </div>
           </div>

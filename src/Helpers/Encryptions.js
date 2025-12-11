@@ -149,6 +149,7 @@ const getEmptyuserMetadata = (pubkey) => {
     }
   }
   return {
+    kind: 0,
     name: backupName,
     display_name: backupName,
     picture: "",
@@ -241,8 +242,14 @@ const encodeLud06 = (url) => {
 };
 
 const getParsedAuthor = (data) => {
-  let content = data.content ? JSON.parse(data.content) : {};
+  let content = {};
+  try {
+    content = data.content ? JSON.parse(data.content) : {};
+  } catch (err) {
+    console.log(err);
+  }
   let tempAuthor = {
+    kind: 0,
     display_name:
       content?.display_name || content?.name || data.pubkey.substring(0, 10),
     name:
@@ -319,6 +326,7 @@ const getParsedRepEvent = (event) => {
       content: event.content,
       created_at: event.created_at,
       tags: event.tags,
+      sig: event.sig,
       author: getEmptyuserMetadata(event.pubkey),
       title: [34235, 34236, 30033, 21, 22].includes(event.kind)
         ? event.content
@@ -383,9 +391,9 @@ const getParsedRepEvent = (event) => {
       if (tag[0] === "imeta") imeta_url = tag.find((_) => _.includes("url"));
     }
     if (imeta_url) content.vUrl = imeta_url.split(" ")[1];
-
     content.naddr = content.d
-      ? nip19.naddrEncode({
+      ? (event.encode && event.encode()) ||
+        nip19.naddrEncode({
           pubkey: event.pubkey,
           identifier: content.d,
           kind: event.kind,
@@ -410,6 +418,45 @@ const getParsedRepEvent = (event) => {
     console.log(err);
     return false;
   }
+};
+
+const getParsedRelaySet = (event) => {
+  if (!event) return false;
+  let title = "";
+  let description = "";
+  let d = "";
+  let image = "";
+  let relays = [];
+  for (let tag of event.tags) {
+    if (tag[0] === "d") d = tag[1];
+    if (tag[0] === "title") title = tag[1];
+    if (tag[0] === "description") description = tag[1];
+    if (tag[0] === "image") image = tag[1];
+    if (tag[0] === "relay") relays.push(tag[1]);
+  }
+  if (!title) {
+    let allRelays = relays
+      .join(", ")
+      .replaceAll("wss://", "")
+      .replaceAll("ws://", "");
+    title =
+      allRelays.length > 20
+        ? shortenKey(allRelays, 8)
+        : allRelays || `Relays set (${relays.length}) relays`;
+  }
+  return {
+    kind: event.kind,
+    sig: event.sig,
+    pubkey: event.pubkey,
+    id: event.id,
+    created_at: event.created_at,
+    d,
+    aTag: `${event.kind}:${event.pubkey}:${d}`,
+    title,
+    description,
+    image,
+    relays,
+  };
 };
 
 const detectDirection = (text) => {
@@ -1004,7 +1051,6 @@ const getWOTScoreForPubkey = (network, pubkey, minScore = 3, counts) => {
         ? 5
         : Math.floor((totalTrusting * 10) / network.length);
 
-    console.log(score);
     return { score, status: score >= minScore };
   } catch (err) {
     console.error(err);
@@ -1093,6 +1139,7 @@ const getBackupWOTList = () => {
 
 const filterContent = (selectedFilter, list) => {
   const matchWords = (longString, wordArray) => {
+    if (!longString) return false;
     const stringWords = Array.isArray(longString)
       ? longString.map((_) => _.toLowerCase())
       : longString.toLowerCase().match(/\b\w+\b/g) || [];
@@ -1195,6 +1242,7 @@ const filterContent = (selectedFilter, list) => {
 
   const testForNotes = (_) => {
     try {
+      if(!selectedFilter) return true;
       let tags = _.tags.filter((tag) => tag[0] === "t").map((tag) => tag[1]);
       let excluded_words = selectedFilter.excluded_words.length
         ? !(
@@ -1237,6 +1285,40 @@ const filterContent = (selectedFilter, list) => {
   });
 };
 
+/**
+ * Extract amount and description from a bolt11 invoice
+ * @param {string} bolt11 - Lightning invoice string
+ * @returns {Object} Object containing amount (in sats) and description (memo)
+ */
+const getInvoiceDetails = (bolt11) => {
+  try {
+    const decoded = decode(bolt11);
+
+    // Extract amount
+    const amountSection = decoded.sections.find((_) => _.name === "amount");
+    const amount = amountSection
+      ? Math.floor(parseInt(amountSection.value) / 1000)
+      : null;
+
+    // Extract description/memo
+    const descriptionSection = decoded.sections.find(
+      (_) => _.name === "description"
+    );
+    const description = descriptionSection?.value || null;
+
+    return {
+      amount,
+      description,
+    };
+  } catch (err) {
+    console.error("Failed to decode invoice:", err);
+    return {
+      amount: null,
+      description: null,
+    };
+  }
+};
+
 export {
   getBech32,
   shortenKey,
@@ -1258,6 +1340,7 @@ export {
   removeDuplicatedRelays,
   removeEventsDuplicants,
   getParsedRepEvent,
+  getParsedRelaySet,
   encryptEventData,
   decryptEventData,
   getClaimingData,
@@ -1282,4 +1365,5 @@ export {
   getWOTScoreForPubkeyLegacy,
   getEmptyRelaysData,
   getEmptyRelaysStats,
+  getInvoiceDetails,
 };

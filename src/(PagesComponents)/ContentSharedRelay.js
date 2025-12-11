@@ -4,6 +4,7 @@ import React, {
   useState,
   useReducer,
   Fragment,
+  useMemo,
 } from "react";
 import { useSelector } from "react-redux";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
@@ -11,22 +12,22 @@ import ArrowUp from "@/Components/ArrowUp";
 import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
 import { saveUsers } from "@/Helpers/DB";
-import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
+import { getSubData } from "@/Helpers/Controlers";
 import { straightUp } from "@/Helpers/Helpers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import KindOne from "@/Components/KindOne";
 import bannedList from "@/Content/BannedList";
 import { useRouter } from "next/router";
 import InfiniteScroll from "@/Components/InfiniteScroll";
-import { t } from "i18next";
 import RelayPreview from "./Relays/RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
 import Backbar from "@/Components/Backbar";
 import { getNDKInstance } from "@/Helpers/utils";
-import Slider from "@/Components/Slider";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import PostNotePortal from "@/Components/PostNotePortal";
+import RecentPosts from "@/Components/RecentPosts";
+import { Virtuoso } from "react-virtuoso";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -161,12 +162,18 @@ export default function ContentSharedRelay() {
 
 const HomeFeed = ({ relay }) => {
   const { t } = useTranslation();
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
   const [contentFrom, setContentFrom] = useState("all");
   const [isConnected, setIsConnected] = useState(true);
+  const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
+  const since = useMemo(
+    () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
+    [notes]
+  );
+  const virtuosoRef = useRef(null);
 
   useEffect(() => {
     straightUp();
@@ -194,6 +201,7 @@ const HomeFeed = ({ relay }) => {
       if (contentFrom === "notes") kinds = [1, 6];
       if (contentFrom === "articles") kinds = [30023];
       if (contentFrom === "videos") kinds = [34235, 21, 22];
+      if (contentFrom === "curations") kinds = [30004, 30005];
 
       let ndk = await getNDKInstance(relay);
       if (!ndk) {
@@ -201,14 +209,9 @@ const HomeFeed = ({ relay }) => {
         setIsLoading(false);
         return;
       }
-      let data = await getSubData(
-        [{ kinds, limit: 100, until: notesLastEventTime, since }],
-        50,
-        [relay],
-        ndk,
-        200
-      );
-
+      let filter = [{ kinds, limit: 100, until: notesLastEventTime, since }];
+      let data = await getSubData(filter, 50, [relay], ndk, 200);
+      setSubfilter({ filter, relays: [relay], ndk });
       events = data.data
         .splice(0, 50)
         .map((event) => {
@@ -243,6 +246,13 @@ const HomeFeed = ({ relay }) => {
     setContentFrom(type);
   };
 
+  const handleRecentPostsClick = (notes) => {
+    dispatchNotes({ type: "global", note: notes });
+    virtuosoRef.current?.scrollToIndex({
+      top: 32,
+      behavior: "smooth",
+    });
+  };
   return (
     <div className="fx-centered  fx-wrap fit-container" style={{ gap: 0 }}>
       <div
@@ -282,9 +292,67 @@ const HomeFeed = ({ relay }) => {
         >
           {t("AStkKfQ")}
         </div>
+        <div
+          className={`list-item-b fx-centered fx ${
+            contentFrom === "curations" ? "selected-list-item-b" : ""
+          }`}
+          onClick={() => switchContentType("curations")}
+        >
+          {t("AVysZ1s")}
+        </div>
       </div>
-      <InfiniteScroll events={notes} onRefresh={setNotesLastEventTime}>
-        {notes.map((note, index) => {
+      <RecentPosts
+        filter={subFilter}
+        since={since}
+        onClick={handleRecentPostsClick}
+        kind={contentFrom}
+        position="bottom"
+      />
+      {/* <InfiniteScroll events={notes} onRefresh={setNotesLastEventTime}> */}
+      {notes.length > 0 && (
+        <Virtuoso
+          ref={virtuosoRef}
+          style={{ width: "100%", height: "100vh" }}
+          skipAnimationFrameInResizeObserver={true}
+          overscan={1000}
+          useWindowScroll={true}
+          totalCount={notes.length}
+          increaseViewportBy={1000}
+          endReached={(index) => {
+            setNotesLastEventTime(notes[index].created_at - 1);
+          }}
+          itemContent={(index) => {
+            let item = notes[index];
+            if (![...userMutedList, ...bannedList].includes(item.pubkey)) {
+              if (
+                item.kind === 6 &&
+                ![...userMutedList, ...bannedList].includes(
+                  item.relatedEvent.pubkey
+                )
+              )
+                return (
+                  <Fragment key={item.id}>
+                    <KindSix event={item} />
+                  </Fragment>
+                );
+              if (item.kind === 1)
+                return (
+                  <Fragment key={item.id}>
+                    <KindOne event={item} border={true} />
+                  </Fragment>
+                );
+              if ([30023, 34235, 21, 22, 30004, 30005].includes(item.kind))
+                return (
+                  <Fragment key={item.id}>
+                    <RepEventPreviewCard item={item} />
+                  </Fragment>
+                );
+              return null;
+            }
+          }}
+        />
+      )}
+        {/* {notes.map((note, index) => {
           if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
             if (
               note.kind === 6 &&
@@ -303,7 +371,7 @@ const HomeFeed = ({ relay }) => {
                   <KindOne event={note} border={true} />
                 </Fragment>
               );
-            if ([30023, 34235, 21, 22].includes(note.kind))
+            if ([30023, 34235, 21, 22, 30004, 30005].includes(note.kind))
               return (
                 <Fragment key={note.id}>
                   <RepEventPreviewCard item={note} />
@@ -311,7 +379,7 @@ const HomeFeed = ({ relay }) => {
               );
             return null;
           }
-        })}
+        })} */}
         {notes?.length === 0 && !isLoading && isConnected && (
           <div
             className="fit-container fx-centered fx-col"
@@ -351,7 +419,7 @@ const HomeFeed = ({ relay }) => {
             <LoadingLogo size={64} />
           </div>
         )}
-      </InfiniteScroll>
+      {/* </InfiniteScroll> */}
     </div>
   );
 };

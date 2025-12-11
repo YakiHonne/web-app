@@ -1,62 +1,145 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import LoadingDots from "@/Components/LoadingDots";
+import useCloseContainer from "@/Hooks/useCloseContainer";
+import { currencies, currenciesSymbols } from "@/Content/currencies";
+import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import { updateCustomSettings } from "@/Helpers/ClientHelpers";
 
-const SatsToUSD = ({ sats, isHidden }) => {
-  const [usdRate, setUsdRate] = useState(null);
-  const [usdValue, setUsdValue] = useState(null);
-  const [error, setError] = useState(false);
+const SatsToUSD = ({ sats, isHidden, selector }) => {
+  const [fiatRate, setFiatRate] = useState(null);
+  const [fiatValue, setFiatValue] = useState(null);
+  const userSettings = useCustomizationSettings();
+  const currency = useMemo(() => {
+    return userSettings.currency;
+  }, [userSettings.currency]);
 
   useEffect(() => {
     const fetchBtcToUsdRate = async () => {
       try {
         const response = await axios.get(
-          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+          `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`,
           {
             timeout: 5000, // 5 second timeout
           }
         );
-        setUsdRate(response.data.bitcoin.usd);
-        setError(false);
+        setFiatRate(response.data.bitcoin[currency]);
       } catch (error) {
         // Silently fail - USD conversion is a nice-to-have feature
         // Don't spam console with errors for network issues
         if (error.code !== 'ECONNABORTED' && error.code !== 'ERR_NETWORK') {
-          console.warn("Could not fetch BTC to USD rate:", error.message);
+          console.warn("Could not fetch BTC to fiat rate:", error.message);
         }
-        setError(true);
       }
     };
 
     fetchBtcToUsdRate();
-  }, []);
+  }, [currency]);
 
   useEffect(() => {
-    if (usdRate !== null) {
+    if (fiatRate !== null) {
       const btcValue = sats / 100000000;
-      const usdValue = btcValue * usdRate;
-      setUsdValue(usdValue);
+      const fiatValue = btcValue * fiatRate;
+      setFiatValue(fiatValue);
     }
-  }, [usdRate, sats]);
+  }, [fiatRate, sats]);
 
-  // Don't render anything if there's an error or no value
-  if (error || !usdValue) return null;
+  const handleChangeCurrency = (currency) => {
+    setFiatValue(null);
+    updateCustomSettings({ ...userSettings, currency });
+  };
+
+  if (!fiatValue) return null;
+
+  if (selector) {
+    return (
+      <div>
+        {fiatValue !== null ? (
+          <FiatSelector
+            isHidden={isHidden}
+            fiatValue={fiatValue}
+            currency={currency}
+            setCurrency={handleChangeCurrency}
+          />
+        ) : (
+          <LoadingDots />
+        )}
+      </div>
+    );
+  }
 
   return (
-    <div style={{ minWidth: 0, overflow: 'hidden' }}>
-      {usdValue !== null ? (
+    <div>
+      {fiatValue !== null ? (
         <div>
-          <span className="gray-c p-medium">USD</span>
-          <p style={{
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis'
-          }}>
-            ${!isHidden ? usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "***"}~{" "}
+          <span className="gray-c p-medium">{currency.toUpperCase()}</span>
+          <p style={{ minWidth: "max-content" }}>
+            {currenciesSymbols[currency]}
+            {!isHidden ? fiatValue.toFixed(2) : "***"}
           </p>
         </div>
       ) : (
         <LoadingDots />
+      )}
+    </div>
+  );
+};
+
+const FiatSelector = ({ isHidden, fiatValue, currency, setCurrency }) => {
+  const { containerRef, setOpen, open } = useCloseContainer();
+
+  return (
+    <div
+      ref={containerRef}
+      onClick={() => setOpen(!open)}
+      style={{ position: "relative" }}
+    >
+      <div
+        className="fx-centered box-pad-h-s box-pad-v-s option-no-scale"
+        style={{ gap: "4px" }}
+      >
+        <p className="p-big" style={{ minWidth: "max-content" }}>
+          {currenciesSymbols[currency]}
+          {!isHidden ? fiatValue.toFixed(2) : "***"}
+        </p>
+        <span className="gray-c p-caps">{currency?.toUpperCase()}</span>
+        <div className="arrow-12"></div>
+      </div>
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "110%",
+            left: "50%",
+            width: "150px",
+            zIndex: 1000,
+            rowGap: "0",
+            maxHeight: "300px",
+            transform: "translate(-50%, 0)",
+            overflow: "scroll",
+          }}
+          className="sc-s-18 fx-centered fx-col fx-start-v fx-start-h pointer box-pad-v-s box-pad-h-s bg-sp"
+        >
+          {currencies.map((option, index) => {
+            return (
+              <div
+                key={index}
+                className={`option-no-scale fit-container fx-scattered fx-start-h pointer box-pad-h-m`}
+                style={{
+                  border: "none",
+                  overflow: "visible",
+                  padding: ".5rem",
+                }}
+                onClick={() => {
+                  setCurrency(option[0]);
+                  setOpen(false);
+                }}
+              >
+                <p>{option[1] + " " + option[0]?.toUpperCase()}</p>
+              </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );

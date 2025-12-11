@@ -99,7 +99,7 @@ export default function Slider({
         >
           {items.map((item, index) => {
             return (
-              <div key={index} style={{ width: "max-content" }}>
+              <div className="slider-item" key={index} style={{ width: "max-content" }}>
                 {item}
               </div>
             );

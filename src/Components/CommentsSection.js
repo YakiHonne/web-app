@@ -112,7 +112,7 @@ export default function CommentsSection({
   rootData,
 }) {
   const userKeys = useSelector((state) => state.userKeys);
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const { t } = useTranslation();
   const [comments, setComments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -120,7 +120,7 @@ export default function CommentsSection({
   const [netComments, setNetComments] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
   const isCommentsMuted = useMemo(() => {
-    return !netComments.find((_) => !userMutedList.includes(_.pubkey));
+    return !netComments.find((_) => !userMutedList?.includes(_.pubkey));
   }, [netComments, userMutedList]);
 
   useEffect(() => {
@@ -339,7 +339,7 @@ const Comment = ({
   index = 0,
 }) => {
   const { t } = useTranslation();
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   let allRepliesCount = useMemo(() => {
     let count = comment.replies.length > 0 ? repliesCount(comment) : 0;
     return count == 0 || count >= 10 ? count : `0${count}`;
@@ -389,7 +389,7 @@ const Comment = ({
         isReply={isReply}
         isReplyBorder={isReplyBorder}
       />
-      {comment.replies.length > 0 && index < 4 && (
+      {comment.replies.length > 0 && index < 3 && (
         <div className="fit-container fx-centered fx-end-h">
           <div
             className="fx-col fit-container fx-centered"
@@ -413,7 +413,7 @@ const Comment = ({
           </div>
         </div>
       )}
-      {comment.replies.length > 0 && index >= 4 && (
+      {comment.replies.length > 0 && index >= 3 && (
         <div className="fit-container fx-centered fx-end-h">
           <div
             className=" fx-centered fx-start-h box-pad-h pointer"

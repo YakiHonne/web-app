@@ -1,12 +1,16 @@
 import NDK from "@nostr-dev-kit/ndk";
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import bannedList from "@/Content/BannedList";
 
 const ndkInstance = new NDK({
   explicitRelayUrls: relaysOnPlatform,
   enableOutboxModel: true,
-  mutedIds: new Map([bannedList.map((p) => [p, "p"])]),
+  muteFilter: (event) => {
+    if (bannedList.includes(event.pubkey)) return true;
+    return false;
+  },
+  // mutedIds: new Map([bannedList.map((p) => [p, "p"])]),
 });
 
 await ndkInstance.connect(1000);

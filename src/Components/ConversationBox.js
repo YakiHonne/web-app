@@ -372,15 +372,18 @@ export function ConversationBox({ convo, back, noHeader = false }) {
               autoFocus
               cols={5}
               style={{
-                padding: "1rem 0rem 1rem 1rem",
+                padding: ".75rem 0rem .75rem .75rem",
                 height: "20px",
                 // minHeight: "200px",
-                maxHeight: "250px",
+                maxHeight: "200px",
                 borderRadius: 0,
                 // fontSize: "1.2rem",
               }}
             />
-            <div className="fx-centered box-pad-h-m box-pad-v-m">
+            <div
+              className="fx-centered"
+              style={{ padding: ".75rem" }}
+            >
               <Emojis
                 position="right"
                 setEmoji={(data) =>
@@ -421,9 +424,9 @@ export function ConversationBox({ convo, back, noHeader = false }) {
               />
             </div>
           </div>
-          <button className="round-icon">
-            <p style={{ rotate: "-45deg" }}>&#x27A4;</p>
-          </button>
+          <div className="round-icon" onClick={handleSendMessage}>
+            <div className="send-24"></div>
+          </div>
         </form>
       </div>
     </div>

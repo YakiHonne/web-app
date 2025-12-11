@@ -3,12 +3,13 @@ import RelayPreview from "./RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import Link from "next/link";
+import { trimRelay } from "@/Helpers/Helpers";
 
 export default function Network({
   relays,
   relaysBatch,
   setRelaysBatch,
-  favoredList = false,
+  favoredList = [],
 }) {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
@@ -64,12 +65,12 @@ export default function Network({
         </div>
       )}
       {relaysBatch.map((relay) => {
+        let pubkeys = favoredList.find(
+          (_) => trimRelay(_.url) === trimRelay(relay.url)
+        );
+        pubkeys = pubkeys ? pubkeys.pubkeys : [];
         return (
-          <RelayPreview
-            url={relay.url}
-            key={relay.url}
-            favoredList={favoredList ? relay.pubkeys : []}
-          />
+          <RelayPreview url={relay.url} key={relay.url} favoredList={pubkeys} />
         );
       })}
       {relaysBatch.length < relays.length && (

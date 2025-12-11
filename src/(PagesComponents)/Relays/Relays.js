@@ -1,4 +1,3 @@
-import LoadingDots from "@/Components/LoadingDots";
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -8,6 +7,8 @@ import useFollowingsFavRelays from "@/Hooks/useFollowingsFavRelays";
 import useOutboxRelays from "@/Hooks/useOutboxRelays";
 import Followings from "./Followings";
 import Network from "./Network";
+import { sleepTimer } from "@/Helpers/Helpers";
+import LoadingLogo from "@/Components/LoadingLogo";
 
 export default function Relays() {
   const { t } = useTranslation();
@@ -20,19 +21,12 @@ export default function Relays() {
   const [outboxRelaysBatch, setOutboxRelaysBatch] = useState([]);
   const [followingsRelaysBatch, setFollowingsRelaysBatch] = useState([]);
   const [relays, setRelays] = useState([]);
-  // console.log(followingsFavRelays)
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [allRelays, relaysCollections] = await Promise.all([
-          axios.get("https://api.nostr.watch/v1/online"),
-          axios.get(
-            "https://raw.githubusercontent.com/CodyTseng/awesome-nostr-relays/master/dist/collections.json"
-          ),
-        ]);
-        setRelaysCollections(relaysCollections.data?.collections);
-        setRelays(allRelays.data);
-        setGlobalRelaysBatch(allRelays.data.slice(0, 8));
+        await fetchGlobalRelays();
+        await fetchCollectionsRelays();
         setIsLoading(false);
       } catch (err) {
         console.log(err);
@@ -40,6 +34,34 @@ export default function Relays() {
     };
     fetchData();
   }, []);
+
+  const fetchGlobalRelays = async () => {
+    try {
+      const relaysList = await Promise.race([
+        axios.get("https://cache-v2.yakihonne.com/api/v1/relays"),
+        sleepTimer(2000),
+      ]);
+      setRelays(relaysList ? relaysList.data : []);
+      setGlobalRelaysBatch(relaysList ? relaysList.data.slice(0, 8) : []);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const fetchCollectionsRelays = async () => {
+    try {
+      const relaysList = await Promise.race([
+        axios.get(
+          "https://raw.githubusercontent.com/CodyTseng/awesome-nostr-relays/master/dist/collections.json"
+        ),
+        sleepTimer(2000),
+      ]);
+      setRelaysCollections(relaysList ? relaysList.data?.collections : []);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div>
       <div
@@ -99,10 +121,10 @@ export default function Relays() {
           </div>
           {isLoading && (
             <div
-              className="fit-container fx-centered"
+              className="fit-container box-pad-v fx-centered fx-col"
               style={{ height: "60vh" }}
             >
-              <LoadingDots />
+              <LoadingLogo />
             </div>
           )}
           {!isLoading && (
@@ -112,6 +134,7 @@ export default function Relays() {
                   relays={outboxRelays}
                   relaysBatch={outboxRelaysBatch}
                   setRelaysBatch={setOutboxRelaysBatch}
+                  favoredList={followingsFavRelays}
                 />
               )}
             </>
@@ -131,7 +154,10 @@ export default function Relays() {
           {!isLoading && (
             <>
               {category === 3 && (
-                <Collections collections={relaysCollections} />
+                <Collections
+                  collections={relaysCollections}
+                  favoredList={followingsFavRelays}
+                />
               )}
             </>
           )}
@@ -142,6 +168,7 @@ export default function Relays() {
                   relays={relays}
                   relaysBatch={globalRelaysBatch}
                   setRelaysBatch={setGlobalRelaysBatch}
+                  favoredList={followingsFavRelays}
                 />
               )}
             </>

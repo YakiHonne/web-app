@@ -307,20 +307,25 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
       { value: swButtons, type: "button" },
     ]);
 
-    return () => {
-      setIsSaving(true);
-      let current = {
-        title: "",
-        image: swImage,
-        input: swInput,
-        buttons: swButtons,
-        components: swComponents,
-      };
+    setIsSaving(true);
+    let current = {
+      title: "",
+      image: swImage,
+      input: swInput,
+      buttons: swButtons,
+      components: swComponents,
+    };
+    if (swImage || swButtons.length > 1 || swComponents.length <= 2) {
       localStorage?.setItem("swv2-cdraft", JSON.stringify(current));
-      let timer = setTimeout(() => {
-        setIsSaving(false);
-        clearTimeout(timer);
-      }, [500]);
+    } else {
+      localStorage?.removeItem("swv2-cdraft");
+    }
+    let timer = setTimeout(() => {
+      setIsSaving(false);
+      clearTimeout(timer);
+    }, [500]);
+    return () => {
+      clearTimeout(timer);
     };
   }, [swImage, swInput, swButtons]);
 

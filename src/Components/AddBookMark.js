@@ -1,33 +1,32 @@
-'use client';
 import React, { useState } from "react";
 import LoadingDots from "@/Components/LoadingDots";
 import { nanoid } from "nanoid";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
+import UploadFile from "./UploadFile";
+import { InitEvent } from "@/Helpers/Controlers";
 
 export default function AddBookmark({ bookmark, exit, tags = [] }) {
   const dispatch = useDispatch();
-  const userKeys = useSelector((state) => state.userKeys);
-  const userRelays = useSelector((state) => state.userRelays);
-
   const { t } = useTranslation();
   const [title, setTitle] = useState(bookmark?.title || "");
   const [description, setDescription] = useState(bookmark?.description || "");
   const [image, setImage] = useState(bookmark?.image || "");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDataUpload = () => {
+  const handleDataUpload = async () => {
     try {
       setIsLoading(true);
       let tempTags = getTags(title, description, image);
+      const eventInitEx = await InitEvent(30003, "", tempTags);
+      if (!eventInitEx) {
+        setIsLoading(false);
+        return;
+      }
       dispatch(
         setToPublish({
-          userKeys: userKeys,
-          kind: 30003,
-          content: "",
-          tags: tempTags,
-          allRelays: userRelays,
+          eventInitEx,
         })
       );
       setIsLoading(false);
@@ -61,6 +60,7 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
       tempTags.push(["title", title]);
       tempTags.push(["description", description]);
       tempTags.push(["image", image]);
+
       return tempTags;
     }
     for (let i = 0; i < tempTags.length; i++) {
@@ -74,7 +74,6 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
         tempTags[i][1] = image;
       }
     }
-
     return tempTags;
   };
 
@@ -99,7 +98,7 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
     >
       <section
         className="fx-centered fx-col sc-s bg-sp box-pad-v"
-        style={{ width: "500px", }}
+        style={{ width: "500px" }}
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -125,6 +124,16 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
               onChange={(e) => setDescription(e.target.value)}
               style={{ height: "100px", paddingTop: "1rem" }}
             />
+            <div className="fx-centered fit-container">
+              <input
+                type="text"
+                className="if ifs-full"
+                placeholder={t("AnD39Ci")}
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+              />
+              <UploadFile round={true} setImageURL={setImage} />
+            </div>
           </div>
         </div>
         <div className="fit-container box-pad-h">

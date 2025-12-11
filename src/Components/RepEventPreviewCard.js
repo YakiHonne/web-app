@@ -179,7 +179,7 @@ export default function RepEventPreviewCard({
                   backgroundImage: `url(${
                     item.image || userProfile.picture || item.imagePP
                   })`,
-                  width: "max(30%,200px)",
+                  width: "max(25%,150px)",
                   aspectRatio: "1/1",
                   border: "none",
                   position: "relative",

@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import AddWallet from "@/Components/AddWallet";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
-import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
+import {
+  getWallets,
+  updateCustomSettings,
+  updateWallets,
+} from "@/Helpers/ClientHelpers";
 import { exportAllWallets } from "@/Helpers/Controlers";
+import Select from "@/Components/Select";
+import { currencies } from "@/Content/currencies";
+import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 
 export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
   const { t } = useTranslation();
@@ -49,15 +56,17 @@ export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
         />
       )}
       <div
-       
-       className={`fit-container fx-scattered fx-col pointer ${selectedTab === "wallets" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
-       style={{
-         borderBottom: "1px solid var(--very-dim-gray)",
-         gap: 0,
-         borderColor: "var(--very-dim-gray)",
-         transition: "0.2s ease-in-out",
-         overflow: "visible",
-       }}
+        className={`fit-container fx-scattered fx-col pointer ${
+          selectedTab === "wallets" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+        }`}
+        style={{
+          borderBottom: "1px solid var(--very-dim-gray)",
+          gap: 0,
+          borderColor: "var(--very-dim-gray)",
+          transition: "0.2s ease-in-out",
+          overflow: "visible",
+          borderRadius: 0,
+        }}
       >
         <div
           className="fx-scattered fit-container  box-pad-h-m box-pad-v-m "
@@ -149,16 +158,51 @@ export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
                       </div>
                     )}
                     {wallet.kind !== 1 && (
-                      <EventOptions event={wallet} component={"wallet"} refreshAfterDeletion={refreshAfterDeletion}/>
+                      <EventOptions
+                        event={wallet}
+                        component={"wallet"}
+                        refreshAfterDeletion={refreshAfterDeletion}
+                      />
                     )}
                   </div>
                 </div>
               );
             })}
+            <div className="fit-container fx-scattered">
+              <div>
+                <p>{t("ADnwK2N")}</p>
+                <p className="p-medium gray-c">{t("AFurzsv")}</p>
+              </div>
+              <FiatCurrency />
+            </div>
           </div>
         )}
       </div>
     </>
+  );
+}
+
+const FiatCurrency = () => {
+  const userSettings = useCustomizationSettings();
+  const currency = useMemo(() => {
+    return userSettings.currency;
+  }, [userSettings.currency]);
+
+  const handleChangeCurrency = (currency) => {
+    updateCustomSettings({ ...userSettings, currency });
+  };
+
+  return (
+    <Select
+      value={currency}
+      options={currencies.map((currency) => {
+        return {
+          value: currency[0],
+          display_name: `${currency[1]} ${currency[0]?.toUpperCase()}`,
+        };
+      })}
+      setSelectedValue={handleChangeCurrency}
+    />
   );
 };
 

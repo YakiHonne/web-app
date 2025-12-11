@@ -14,8 +14,8 @@ export function RelaysManagement({ selectedTab, setSelectedTab }) {
         borderBottom: "1px solid var(--very-dim-gray)",
         borderColor: "var(--very-dim-gray)",
         transition: "0.2s ease-in-out",
-        overflow: "visible",
         gap: 0,
+        borderRadius: 0
       }}
     >
       <div

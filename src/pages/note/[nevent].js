@@ -1,10 +1,10 @@
 import React from "react";
-import { getSubData } from "@/Helpers/Controlers";
 import { nip19 } from "nostr-tools";
 import dynamic from "next/dynamic";
 import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
+import { getDataForSSG } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Note"), {
   ssr: false,
@@ -19,18 +19,24 @@ export default function Page({ event, author, nevent }) {
     path: `note/${nevent}`,
   };
   // if (event)
-    return (
-      <div>
-        <HeadMetadata data={data} />
-        <ClientComponent event={event} nevent={nevent} />
-      </div>
-    );
+  return (
+    <div>
+      <HeadMetadata data={data} />
+      <ClientComponent event={event} nevent={nevent} />
+    </div>
+  );
 }
 
 export async function getStaticProps({ params }) {
   const { nevent } = params;
   let id = nip19.decode(nevent)?.data.id || nip19.decode(nevent)?.data;
-  const res = await getSubData([{ ids: [id] }], 5000, undefined, undefined, 1);
+  let relays = nip19.decode(nevent)?.data.relays || [];
+  const res = await getDataForSSG(
+    [{ ids: [id] }],
+    1000,
+    1,
+    relays
+  );
   let event =
     res.data.length > 0
       ? {
@@ -38,13 +44,7 @@ export async function getStaticProps({ params }) {
         }
       : null;
   const author = event
-    ? await getSubData(
-        [{ authors: [event.pubkey], kinds: [0] }],
-        1000,
-        undefined,
-        undefined,
-        1
-      )
+    ? await getDataForSSG([{ authors: [event.pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata("");
   return {
     props: {
@@ -54,6 +54,7 @@ export async function getStaticProps({ params }) {
         author.data?.length > 0
           ? getParsedAuthor(author.data[0])
           : { ...author },
+      revalidate: !event ? 604800 : 2,
     },
   };
 }

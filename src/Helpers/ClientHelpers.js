@@ -15,9 +15,44 @@ import LNURLParsing from "@/Components/LNURLParsing";
 import { customHistory } from "./History";
 import { store } from "@/Store/Store";
 import { setRefreshAppSettings } from "@/Store/Slides/Extras";
+import { nanoid } from "nanoid";
+
+let nostrClients = [
+  "nstart.me",
+  "yakihonne.com",
+  "njump.me",
+  "nostr.com",
+  "nostr.band",
+  "iris.to",
+  "primal.net",
+  "jumble.social",
+  "coracle.social",
+  "nostrudel.ninja",
+  "phoenix.social",
+  "habla.news",
+  "nosotros.app",
+  "nostter.app",
+  "lumilumi.app",
+  "fevela.me",
+  "jumblekat.com",
+];
 
 const nostrSchemaRegex =
   /\b(naddr1|note1|nevent1|npub1|nprofile1|nsec1|nrelay1)[a-zA-Z0-9]+\b/;
+
+const doesContainNostrSchema = (url) => {
+  try {
+    const url_ = new URL(url);
+    const domain = url_.hostname.replace(/^www\./, "");
+    const isWhitelisted = nostrClients.some((allowed) =>
+      domain.endsWith(allowed)
+    );
+    if (!isWhitelisted) return false;
+    return nostrSchemaRegex.test(url);
+  } catch {
+    return false;
+  }
+};
 
 export function getNoteTree(
   note,
@@ -37,7 +72,7 @@ export function getNoteTree(
   let finalTree = [];
   let maxChar = isCollapsedNote ? wordsCount : tree.length;
   for (let i = 0; i < maxChar; i++) {
-    const el = tree[i];
+    const el = tree[i].replaceAll("nostr:", "");
 
     const key = `${el}-${i}`;
     if (!el) {
@@ -51,9 +86,7 @@ export function getNoteTree(
       }
     } else if (
       (/(https?:\/\/)/i.test(el) || el.startsWith("data:image")) &&
-      !el.includes("https://yakihonne.com/smart-widget-checker?naddr=") &&
-      !el.includes("https://vota.dorafactory.org/round/") &&
-      !el.includes("https://vota-test.dorafactory.org/round/")
+      !el.includes("https://yakihonne.com/smart-widget-checker?naddr=")
     ) {
       const isURLCommonPlatformVid = isVid(el);
       if (!minimal) {
@@ -89,7 +122,7 @@ export function getNoteTree(
             el.includes(".wav")
           ) {
             finalTree.push(<AudioLoader audioSrc={el} key={key} />);
-          } else if (nostrSchemaRegex.test(el)) {
+          } else if (doesContainNostrSchema(el)) {
             let cleanPart = el.match(nostrSchemaRegex)?.[0];
             if (cleanPart) {
               finalTree.push(
@@ -309,18 +342,49 @@ export function getComponent(children) {
     }
     if (typeof children[i] !== "string") {
       let key = `${i}-${Date.now()}`;
-      if (children[i].type === "a" && isImageUrlSync(children[i].props?.href)) {
-        res.push(
-          <img
-            className="sc-s-18"
-            style={{ margin: "1rem auto" }}
-            width={"100%"}
-            src={children[i].props?.href}
-            alt="el"
-            loading="lazy"
-            key={key}
-          />
-        );
+      if (children[i].type === "a") {
+        const checkURL = isImageUrl(children[i].props?.href);
+        if (checkURL) {
+          if (checkURL.type === "image") {
+            res.push(
+              <img
+                className="sc-s-18"
+                style={{ margin: "1rem auto" }}
+                width={"100%"}
+                src={children[i].props?.href}
+                alt="el"
+                loading="lazy"
+                key={key}
+              />
+            );
+          }
+          if (checkURL.type === "video") {
+            res.push(
+              <VideoLoader
+                key={key}
+                src={children[i].props?.href}
+                poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
+              />
+            );
+          }
+        }
+        if (!checkURL) {
+          res.push(
+            <a
+              key={key}
+              style={{
+                wordBreak: "break-word",
+                color: "var(--orange-main)",
+              }}
+              href={children[i].props?.href}
+              target="_blank"
+              className="btn-text-gray"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {children[i].props?.href}
+            </a>
+          );
+        }
       } else
         res.push(
           <span
@@ -338,7 +402,11 @@ export function getComponent(children) {
   return <div className="fit-container">{mergeConsecutivePElements(res)}</div>;
 }
 
-export function getParsedNote(event, isCollapsedNote = false) {
+export function getParsedNote(
+  event,
+  isCollapsedNote = false,
+  parseContent = true
+) {
   try {
     if (!event) return;
     let isNoteLong = event.content.split(" ").length > 150;
@@ -369,19 +437,20 @@ export function getParsedNote(event, isCollapsedNote = false) {
       isPaidNote = true;
     }
 
-    let nEvent = nEventEncode(event.id);
+    let nEvent = event?.encode ? event.encode() : nEventEncode(event.id);
 
-    let rawEvent =
-      typeof event.rawEvent === "function" ? event.rawEvent() : event;
+    let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
     let isProtected = event.tags.find((tag) => tag[0] === "-");
     if (event.kind === 1) {
-      let note_tree = getNoteTree(
-        event.content,
-        undefined,
-        isCollapsedNote_,
-        undefined,
-        event.pubkey
-      );
+      let note_tree = parseContent
+        ? getNoteTree(
+            event.content,
+            undefined,
+            isCollapsedNote_,
+            undefined,
+            event.pubkey
+          )
+        : event.content;
 
       return {
         ...rawEvent,
@@ -568,10 +637,18 @@ const checkForNewAddedSettings = (prevSettings) => {
       prevSettings.oneTapReaction !== undefined
         ? prevSettings.oneTapReaction
         : false,
+    hideMentions:
+      prevSettings.hideMentions !== undefined
+        ? prevSettings.hideMentions
+        : true,
+    currency:
+      prevSettings.currency !== undefined ? prevSettings.currency : "usd",
     blurNonFollowedMedia:
       prevSettings.blurNonFollowedMedia !== undefined
         ? prevSettings.blurNonFollowedMedia
         : true,
+    linkPreview:
+      prevSettings.linkPreview !== undefined ? prevSettings.linkPreview : true,
     reactionsSettings:
       prevSettings.reactionsSettings !== undefined
         ? prevSettings.reactionsSettings
@@ -593,7 +670,7 @@ const checkForNewAddedSettings = (prevSettings) => {
             { tab: "following", isHidden: false },
           ],
   };
-  return settings
+  return settings;
 };
 
 export function getCustomSettings() {
@@ -621,9 +698,12 @@ export function getDefaultSettings(pubkey) {
     collapsedNote: true,
     longPress: "notes",
     defaultReaction: "❤️",
+    currency: "usd",
     repliesView: "thread",
     oneTapReaction: false,
     blurNonFollowedMedia: true,
+    linkPreview: true,
+    hideMentions: true,
     reactionsSettings: [
       { reaction: "likes", status: true },
       { reaction: "replies", status: true },
@@ -986,7 +1066,7 @@ export function redirectToLogin() {
 export function getPostToEdit(naddr) {
   if (!naddr) return {};
   try {
-    let post = localStorage.getItem(naddr);
+    let post = localStorage.getItem("ArticleToEdit");
     if (post) {
       post = JSON.parse(post);
       return post;
@@ -1494,9 +1574,10 @@ function isRelayUrl(value) {
 const createImageGrid = (images, pubkey, noBlur) => {
   let images_ = images.map((image) => image.props.src);
   // Create a unique key based on the first image URL and number of images
-  const key = `gallery-${images_.length}-${
-    images_[0]?.substring(0, 20) || "empty"
-  }`;
+  // const key = `gallery-${images_.length}-${
+  //   images_[0]?.substring(0, 20) || "empty"
+  // }`;
+  const key = nanoid()
   return <Gallery key={key} imgs={images_} pubkey={pubkey} noBlur={noBlur} />;
 };
 

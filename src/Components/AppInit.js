@@ -18,7 +18,9 @@ import {
   setUserMetadata,
   setUserMutedList,
   setUserRelays,
+  setUserRelaysSet,
   setUserSavedTools,
+  setUserSearchRelays,
   setUserWotList,
 } from "@/Store/Slides/UserData";
 import {
@@ -51,6 +53,10 @@ import {
   getFollowingsInboxRelays,
   getRelaysStats,
   saveUsers,
+  getSearchRelays,
+  saveSearchRelays,
+  getRelaysSet,
+  saveRelaysSet,
 } from "@/Helpers/DB";
 import {
   addConnectedAccounts,
@@ -69,8 +75,16 @@ import {
   setTrendingUsers,
 } from "@/Store/Slides/Extras";
 import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
-import { toggleColorScheme } from "@/Helpers/Helpers";
-import { getConnectedAccounts, getKeys, getMetadataFromCachedAccounts } from "@/Helpers/ClientHelpers";
+import {
+  changePrimary,
+  handleAppDirection,
+  toggleColorScheme,
+} from "@/Helpers/Helpers";
+import {
+  getConnectedAccounts,
+  getKeys,
+  getMetadataFromCachedAccounts,
+} from "@/Helpers/ClientHelpers";
 import { setNostrAuthors, setNostrClients } from "@/Store/Slides/Profiles";
 import {
   decrypt04,
@@ -85,7 +99,7 @@ import {
   setIsConnectedToYaki,
   setIsYakiChestLoaded,
 } from "@/Store/Slides/YakiChest";
-import relaysOnPlatform from "@/Content/Relays";
+import { relaysOnPlatform } from "@/Content/Relays";
 import {
   NDKNip07Signer,
   NDKNip46Signer,
@@ -94,6 +108,7 @@ import {
 } from "@nostr-dev-kit/ndk";
 import { getTrendingUsers24h } from "@/Helpers/WSInstance";
 import { savedToolsIdentifier } from "@/Content/Extras";
+import { decryptDMSWorker } from "@/workers/decryptDMWorker";
 
 export default function AppInit() {
   const dispatch = useDispatch();
@@ -145,6 +160,15 @@ export default function AppInit() {
       async () => (userKeys ? await getInboxRelays(userKeys.pub) : []),
       [userKeys]
     ) || [];
+  const relaysSet = useLiveQuery(
+    async () => (userKeys ? await getRelaysSet(userKeys.pub) : []),
+    [userKeys]
+  ) || { last_timestamp: undefined };
+  const searchRelays =
+    useLiveQuery(
+      async () => (userKeys ? await getSearchRelays(userKeys.pub) : []),
+      [userKeys]
+    ) || [];
   const wotList =
     useLiveQuery(
       async () => (userKeys ? await getWotlist(userKeys.pub) : []),
@@ -165,6 +189,7 @@ export default function AppInit() {
 
   const previousChatrooms = useRef([]);
   const previousRelays = useRef([]);
+  const previousSearchRelays = useRef([]);
   const previousAppSettings = useRef(false);
   const previousInterests = useRef([]);
   const previousFollowings = useRef([]);
@@ -179,6 +204,7 @@ export default function AppInit() {
   const previousInboxRelays = useRef([]);
   const previousRelaysStats = useRef([]);
   const previousFavRelays = useRef({ relays: [] });
+  const previousRelaysSet = useRef({ last_timestamp: undefined });
 
   useEffect(() => {
     if (
@@ -203,7 +229,7 @@ export default function AppInit() {
         relaysURLsToWrite.length > 0 ? relaysURLsToWrite : relaysOnPlatform;
       dispatch(setUserRelays(relaysURLsToWrite));
       dispatch(setUserAllRelays(relays.relays));
-      addExplicitRelays(relaysURLsToRead);
+      // addExplicitRelays(relaysURLsToRead);
     }
     if (
       JSON.stringify(previousFavRelays.current) !== JSON.stringify(favRelays)
@@ -211,6 +237,14 @@ export default function AppInit() {
       previousFavRelays.current = favRelays;
       dispatch(setUserFavRelays(favRelays));
       saveRelayMetadata(favRelays.relays || []);
+    }
+    if (
+      JSON.stringify(previousSearchRelays.current) !==
+      JSON.stringify(searchRelays)
+    ) {
+      previousSearchRelays.current = searchRelays;
+      dispatch(setUserSearchRelays(searchRelays.relays));
+      saveRelayMetadata(searchRelays.relays || []);
     }
     if (
       JSON.stringify(previousInboxRelays.current) !==
@@ -248,6 +282,12 @@ export default function AppInit() {
       dispatch(setUserAppSettings(appSettings || false));
     }
     if (
+      JSON.stringify(previousRelaysSet.current) !== JSON.stringify(relaysSet)
+    ) {
+      previousRelaysSet.current = relaysSet;
+      dispatch(setUserRelaysSet(relaysSet));
+    }
+    if (
       JSON.stringify(previousInterests.current) !==
       JSON.stringify(interestsList)
     ) {
@@ -258,10 +298,17 @@ export default function AppInit() {
       JSON.stringify(previousMutedList.current) !== JSON.stringify(mutedlist)
     ) {
       previousMutedList.current = mutedlist;
-      dispatch(setUserMutedList(mutedlist.mutedlist));
-      if (mutedlist.mutedlist && ndkInstance.mutedIds) {
-        for (let p of mutedlist.mutedlist) ndkInstance.mutedIds.set(p, "p");
-      }
+      dispatch(
+        setUserMutedList({
+          userMutedList: mutedlist?.mutedlist || [],
+          allTags: mutedlist?.allTags || [],
+        })
+      );
+      saveUsers(mutedlist?.mutedlist || []);
+      ndkInstance.muteFilter = (event) => {
+        if (mutedlist?.mutedlist?.includes(event.pubkey)) return true;
+        return false;
+      };
     }
     if (
       JSON.stringify(previousBookmarks.current) !== JSON.stringify(bookmarks)
@@ -320,13 +367,17 @@ export default function AppInit() {
     inboxRelays,
     relaysStats,
     favRelays,
+    searchRelays,
+    relaysSet,
   ]);
 
   useEffect(() => {
     let previousDarkMode = localStorage.getItem("yaki-theme");
-    let previousIsConnectedToYaki = localStorage?.getItem("connect_yc")
+    let previousAppLang = localStorage.getItem("app-lang");
+    let previousIsConnectedToYaki = localStorage.getItem("connect_yc")
       ? true
       : false;
+
     if (previousDarkMode === "0") {
       setIsDarkMode("1");
       toggleColorScheme(false);
@@ -340,6 +391,9 @@ export default function AppInit() {
     }
     saveNostrClients();
     getTrendingProfiles();
+    handleAppDirection(previousAppLang);
+    changePrimary();
+
     let keys = getKeys();
     if (keys) {
       dispatch(setUserMetadata(getMetadataFromCachedAccounts(keys.pub)));
@@ -444,6 +498,8 @@ export default function AppInit() {
         FAVRELAYS,
         BLOSSOMSERVERS,
         INBOXRELAYS,
+        SEARCHRELAYS,
+        RELAYSSET,
       ] = await Promise.all([
         getRelays(userKeys.pub),
         getFollowings(userKeys.pub),
@@ -453,14 +509,18 @@ export default function AppInit() {
         getFavRelays(userKeys.pub),
         getBlossomServers(userKeys.pub),
         getInboxRelays(userKeys.pub),
+        getSearchRelays(userKeys.pub),
+        getRelaysSet(userKeys.pub),
       ]);
       let lastRelaysTimestamp = RELAYS?.last_timestamp || undefined;
       let lastFollowingsTimestamp = FOLLOWINGS?.last_timestamp || undefined;
       let lastInterestsTimestamp = INTERESTSLIST?.last_timestamp || undefined;
+      let lastRelaysSetTimestamp = RELAYSSET?.last_timestamp || undefined;
       let lastMutedTimestamp = MUTEDLIST?.last_timestamp || undefined;
       let lastAppSettingsTimestamp = APPSETTINGS?.last_timestamp || undefined;
       let lastInboxRelaysTimestamp = INBOXRELAYS?.last_timestamp || undefined;
       let lastFavRelaysTimestamp = FAVRELAYS?.last_timestamp || undefined;
+      let lastSearchRelaysTimestamp = SEARCHRELAYS?.last_timestamp || undefined;
       let lastBlossomServersTimestamp =
         BLOSSOMSERVERS?.last_timestamp || undefined;
       let lastUserMetadataTimestamp =
@@ -471,10 +531,12 @@ export default function AppInit() {
       let tempBlossomServers;
       let tempMutedList;
       let tempRelays;
+      let tempSearchRelays;
       let tempInboxRelays;
       let tempFavRelays;
       let tempAppSettings;
       let tempBookmarks = [];
+      let tempRelaysSet = [];
       let tempAuthMetadata = false;
       let eose = false;
       subscription = ndkInstance.subscribe(
@@ -508,6 +570,13 @@ export default function AppInit() {
               : lastRelaysTimestamp,
           },
           {
+            kinds: [10007],
+            authors: [userKeys.pub],
+            since: lastSearchRelaysTimestamp
+              ? lastSearchRelaysTimestamp + 1
+              : lastSearchRelaysTimestamp,
+          },
+          {
             kinds: [10050],
             authors: [userKeys.pub],
             since: lastInboxRelaysTimestamp
@@ -527,6 +596,13 @@ export default function AppInit() {
             since: lastFavRelaysTimestamp
               ? lastFavRelaysTimestamp + 1
               : lastFavRelaysTimestamp,
+          },
+          {
+            kinds: [30002],
+            authors: [userKeys.pub],
+            since: lastRelaysSetTimestamp
+              ? lastRelaysSetTimestamp + 1
+              : lastRelaysSetTimestamp,
           },
           {
             kinds: [30078],
@@ -551,8 +627,7 @@ export default function AppInit() {
         {
           cacheUsage: "CACHE_FIRST",
           groupable: false,
-          skipVerification: false,
-          skipValidation: false,
+
           subId: "user-essentials",
         }
       );
@@ -577,6 +652,10 @@ export default function AppInit() {
           tempRelays = { ...event };
           if (eose) saveRelays(event, userKeys.pub);
         }
+        if (event.kind === 10007) {
+          tempSearchRelays = { ...event };
+          if (eose) saveSearchRelays(event, userKeys.pub);
+        }
         if (event.kind === 10050) {
           tempInboxRelays = { ...event };
           if (eose) saveInboxRelays(event, userKeys.pub);
@@ -597,6 +676,11 @@ export default function AppInit() {
           if (index === -1) tempBookmarks.push(parsedEvent);
           else tempBookmarks.splice(index, 1, parsedEvent);
           if (eose) saveBookmarks(tempBookmarks, userKeys.pub);
+        }
+        if (event.kind === 30002) {
+          let tempEvent = { ...event.rawEvent() };
+          tempRelaysSet.push(tempEvent);
+          if (eose) saveRelaysSet(tempRelaysSet, userKeys.pub);
         }
         if (event.kind === 0) {
           if (
@@ -627,6 +711,11 @@ export default function AppInit() {
           lastInboxRelaysTimestamp
         );
         saveFavRelays(tempFavRelays, userKeys.pub, lastFavRelaysTimestamp);
+        saveSearchRelays(
+          tempSearchRelays,
+          userKeys.pub,
+          lastSearchRelaysTimestamp
+        );
         saveBlossomServers(
           tempBlossomServers,
           userKeys.pub,
@@ -643,13 +732,13 @@ export default function AppInit() {
           lastAppSettingsTimestamp
         );
         saveBookmarks(tempBookmarks, userKeys.pub);
+        saveRelaysSet(tempRelaysSet, userKeys.pub);
         if (!(tempAuthMetadata && lastUserMetadataTimestamp)) {
           let emptyMetadata = getEmptyuserMetadata(userKeys.pub);
           dispatch(setUserMetadata(emptyMetadata));
           addConnectedAccounts(emptyMetadata, userKeys);
         }
         eose = true;
-     
       });
     };
 
@@ -708,65 +797,19 @@ export default function AppInit() {
         }
       );
       subscription.on("event", async (event) => {
-        if (event.kind === 4 && !userKeys.bunker) {
-          let decryptedMessage = "";
-          tempAuthors = [...new Set([...tempAuthors, event.pubkey])];
-          let peer =
-            event.pubkey === userKeys.pub
-              ? event.tags.find((tag) => tag[0] === "p" && tag[1])[1]
-              : "";
-          let reply = event.tags.find((tag) => tag[0] === "e");
-          let replyID = reply ? reply[1] : "";
-
-          decryptedMessage = await decrypt04(event, userKeys);
-          let tempEvent = {
-            id: event.id,
-            created_at: event.created_at,
-            content: decryptedMessage,
-            pubkey: event.pubkey,
-            kind: event.kind,
-            peer,
-            replyID,
-          };
-          tempInbox.push(tempEvent);
-          if (eose) saveChatrooms(tempInbox, userKeys.pub);
-        }
-        if (
-          event.kind === 1059 &&
-          (userKeys.sec || window?.nostr?.nip44) &&
-          !userKeys.bunker
-        ) {
-          try {
-            let unwrappedEvent = await unwrapGiftWrap(event, userKeys);
-            if (unwrappedEvent && unwrappedEvent.kind === 14) {
-              tempAuthors = [
-                ...new Set([...tempAuthors, unwrappedEvent.pubkey]),
-              ];
-              let peer =
-                unwrappedEvent.pubkey === userKeys.pub
-                  ? unwrappedEvent.tags.find((tag) => tag[0] === "p")[1]
-                  : "";
-              let reply = unwrappedEvent.tags.find((tag) => tag[0] === "e");
-              let replyID = reply ? reply[1] : "";
-              let tempEvent = {
-                id: unwrappedEvent.id,
-                created_at: unwrappedEvent.created_at,
-                content: unwrappedEvent.content,
-                pubkey: unwrappedEvent.pubkey,
-                kind: unwrappedEvent.kind,
-                peer,
-                replyID,
-              };
-              tempInbox.push(tempEvent);
-              if (eose) saveChatrooms(tempInbox, userKeys.pub);
-            }
-          } catch (err) {
-            console.log(err);
-          }
+        let tempEvent = userKeys.ext
+          ? await decryptDMS([event.rawEvent()], userKeys)
+          : await decryptDMSWorker([event.rawEvent()], userKeys);
+        tempInbox = [...tempInbox, ...tempEvent.inbox];
+        tempAuthors = [...tempAuthors, ...tempEvent.authors];
+        if (eose) {
+          saveChatrooms(tempInbox, userKeys.pub);
+          saveUsers(tempAuthors);
         }
       });
       subscription.on("eose", () => {
         saveChatrooms(tempInbox, userKeys.pub);
+        saveUsers(tempAuthors);
         eose = true;
       });
     };
@@ -779,71 +822,10 @@ export default function AppInit() {
     };
   }, [userKeys]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     let timeFrames = [604800, 1209600, 2592000, 7776000, 15552000, 31536000];
-  //     let INBOX = await getChatrooms(userKeys.pub);
-  //     let until =
-  //       INBOX.length > 0
-  //         ? INBOX.map((convo) => {
-  //             if (convo.convo.length > 0) {
-  //               return convo.convo[0].created_at;
-  //             }
-  //           }).sort((a, b) => b - a)[0] - 1
-  //         : undefined;
-  //     let since = until ? until - 604800 : until;
-  //     dispatch(setInitDMS(true));
-  //     let timePeriodIndex = 0;
-  //     let endOfData = false;
-  //     while (!endOfData) {
-  //       console.log(endOfData)
-  //       let dmsData = await getSubData([
-  //         {
-  //           kinds: [4],
-  //           authors: [userKeys.pub],
-  //           until,
-  //           since: since,
-  //           limit: 10,
-  //         },
-  //         { kinds: [4], "#p": [userKeys.pub], until, since: since, limit: 10 },
-  //         {
-  //           kinds: [1059],
-  //           "#p": [userKeys.pub],
-  //           until: until ? until - 432000 : until,
-  //           since: since ? since - 432000 : since,
-  //           limit: 10,
-  //         },
-  //       ]);
-  //       console.log(dmsData)
-  //       if (dmsData.data.length > 0) {
-  //         let tempInbox = await decryptDMS(dmsData.data, userKeys);
-  //         await saveChatrooms(tempInbox.inbox, userKeys.pub);
-  //         saveUsers(tempInbox.authors);
-  //         until = tempInbox.until ? tempInbox.until - timeFrames[0] : until;
-  //         since = until ? until - 604800 : since;
-  //         timePeriodIndex = 0;
-  //       } else if (
-  //         dmsData.data.length === 0 &&
-  //         timePeriodIndex < timeFrames.length - 1
-  //       ) {
-  //         timePeriodIndex++;
-  //         until = until ? until - timeFrames[timePeriodIndex] : until;
-  //         since = until ? until - 604800 : since;
-  //       } else {
-  //         endOfData = true;
-  //       }
-
-  //     }
-  //   };
-  //   if (userKeys && (userKeys.ext || userKeys.sec)) {
-  //     fetchData();
-  //   }
-  // }, [userKeys]);
-
   useEffect(() => {
     if (!userKeys || (!userKeys.ext && !userKeys.sec)) return;
 
-    let isCancelled = false; // cancellation flag
+    let isCancelled = false;
 
     const fetchData = async () => {
       const timeFrames = [
@@ -852,7 +834,7 @@ export default function AppInit() {
       dispatch(setInitDMS(true));
       try {
         const INBOX = await getChatrooms(userKeys.pub);
-        if (isCancelled) return; //
+        if (isCancelled) return;
 
         let until =
           INBOX.length > 0
@@ -871,41 +853,48 @@ export default function AppInit() {
         let endOfData = false;
 
         while (!endOfData) {
-          if (isCancelled) return; 
-          const dmsData = await getSubData([
-            {
-              kinds: [4],
-              authors: [userKeys.pub],
-              until,
-              since,
-              limit: 100,
-            },
-            {
-              kinds: [4],
-              "#p": [userKeys.pub],
-              until,
-              since,
-              limit: 100,
-            },
-            {
-              kinds: [1059],
-              "#p": [userKeys.pub],
-              until: until ? until - 432000 : until,
-              since: since ? since - 432000 : since,
-              limit: 100,
-            },
-          ]);
+          if (isCancelled) return;
+          const dmsData = await getSubData(
+            [
+              {
+                kinds: [4],
+                authors: [userKeys.pub],
+                until,
+                since,
+                limit: 100,
+              },
+              {
+                kinds: [4],
+                "#p": [userKeys.pub],
+                until,
+                since,
+                limit: 100,
+              },
+              {
+                kinds: [1059],
+                "#p": [userKeys.pub],
+                until: until ? until - 432000 : until,
+                since: since ? since - 432000 : since,
+                limit: 100,
+              },
+            ],
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            true
+          );
 
           if (isCancelled) return;
 
           if (dmsData.data.length > 0) {
-            const tempInbox = await decryptDMS(dmsData.data, userKeys);
+            const tempInbox = userKeys.ext
+              ? await decryptDMS(dmsData.data, userKeys)
+              : await decryptDMSWorker(dmsData.data, userKeys);
             if (isCancelled) return;
             await saveChatrooms(tempInbox.inbox, userKeys.pub);
-            // await saveUsers(tempInbox.authors);
-            console.log(tempInbox)
+            saveUsers(tempInbox.authors);
             until = tempInbox.until ? tempInbox.until : until;
-            // until = tempInbox.until ? tempInbox.until - timeFrames[0] : until;
             since = until ? until - 604800 : since;
             timePeriodIndex = 0;
           } else if (
@@ -928,7 +917,6 @@ export default function AppInit() {
     fetchData();
 
     return () => {
-      
       isCancelled = true;
     };
   }, [userKeys]);
@@ -985,7 +973,11 @@ export default function AppInit() {
               authors: b.bundled,
             },
           ],
-          100
+          100,
+          undefined,
+          undefined,
+          undefined,
+          true
         );
         networkData.push(d);
       }
@@ -1016,15 +1008,12 @@ export default function AppInit() {
         };
       });
       saveWotlist(network, userKeys.pub);
-      // const trustingCounts = precomputeTrustingCounts(network);
+
       let allPubkeys = [...new Set(network.map((_) => _.followings).flat())];
       let wotPubkeys = allPubkeys
-        .map(
-          (_) => {
-            return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
-          }
-          // (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
-        )
+        .map((_) => {
+          return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
+        })
         .sort((a, b) => b.score - a.score)
         .filter((_) => _.status)
         .map((_) => _.pubkey)
@@ -1052,7 +1041,11 @@ export default function AppInit() {
             until: prevData.last_updated,
           },
         ],
-        800
+        800,
+        undefined,
+        undefined,
+        undefined,
+        true
       );
       if (backupFollowings.data.length === 0) return;
       let followinglist = backupFollowings.data[0].tags
@@ -1074,7 +1067,11 @@ export default function AppInit() {
               authors: b.bundled,
             },
           ],
-          100
+          100,
+          undefined,
+          undefined,
+          undefined,
+          true
         );
         networkData.push(d);
       }
@@ -1097,20 +1094,12 @@ export default function AppInit() {
         };
       });
 
-      // const trustingCounts = precomputeTrustingCounts(network);
-
       let allPubkeys = [...new Set(network.map((_) => _.followings).flat())];
 
-      // let wotPubkeys = allPubkeys.filter(
-      //   (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
-      // );
       let wotPubkeys = allPubkeys
-        .map(
-          (_) => {
-            return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
-          }
-          // (_) => getWOTScoreForPubkey(network, _, 5, trustingCounts).status
-        )
+        .map((_) => {
+          return { pubkey: _, ...getWOTScoreForPubkeyLegacy(_, true, 5) };
+        })
         .sort((a, b) => b.score - a.score)
         .filter((_) => _.status)
         .map((_) => _.pubkey)
@@ -1130,7 +1119,6 @@ export default function AppInit() {
     }
     if (followings && followings?.followings?.length >= 5) {
       buildWOTList();
-      // } else if (followings) {
     } else if (followings && followings?.followings?.length < 5) {
       buildBackupWOTList();
     }

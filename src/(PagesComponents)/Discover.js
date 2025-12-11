@@ -31,6 +31,7 @@ import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import RecentPosts from "@/Components/RecentPosts";
 import { straightUp } from "@/Helpers/Helpers";
 import { getNDKInstance } from "@/Helpers/utils";
+import { Virtuoso } from "react-virtuoso";
 
 const MixEvents = (articles, curations, videos) => {
   const interleavedArray = [];
@@ -101,6 +102,7 @@ export default function Discover() {
                 className=" main-middle"
                 style={{
                   marginBottom: "4rem",
+                  minHeight: "90dvh",
                 }}
               >
                 <div style={{ height: "90px" }}></div>
@@ -160,7 +162,7 @@ const ExploreFeed = ({
 }) => {
   const userKeys = useSelector((state) => state.userKeys);
   const userInterestList = useSelector((state) => state.userInterestList);
-  const userMutedList = useSelector((state) => state.userMutedList);
+  const { userMutedList } = useSelector((state) => state.userMutedList);
   const userFollowings = useSelector((state) => state.userFollowings);
   const { t } = useTranslation();
   const [content, setContent] = useState([]);
@@ -177,7 +179,7 @@ const ExploreFeed = ({
     () => (content.length > 0 ? content[0].created_at + 1 : undefined),
     [content]
   );
-
+const virtuosoRef = useRef(null);
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
@@ -187,12 +189,21 @@ const ExploreFeed = ({
       let dateCheckerVideos = lastEventsTimestamps.videos;
       let extraPubkeys = [];
       const { artsFilter, curationsFilter, videosFilter } = getFilter();
-      const algoRelay =
-        selectedCategory.group === "af" ? [selectedCategory.value] : [];
+
       let ndk =
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
+          : selectedCategory.group === "rsf"
+          ? await getNDKInstance(
+              selectedCategory.value,
+              selectedCategory.relays,
+              true
+            )
           : undefined;
+      let algoRelay = [];
+      if (selectedCategory.group === "af")
+        algoRelay.push(selectedCategory.value);
+      if (selectedCategory.group === "rsf") algoRelay = selectedCategory.relays;
       if (ndk === false) {
         setIsConnected(false);
         setIsLoading(false);
@@ -205,9 +216,9 @@ const ExploreFeed = ({
       });
 
       let [articles, curations, videos] = await Promise.all([
-        getSubData(artsFilter, 300, algoRelay, ndk, 300),
-        getSubData(curationsFilter, 300, algoRelay, ndk, 300),
-        getSubData(videosFilter, 300, algoRelay, ndk, 300),
+        getSubData(artsFilter, 150, algoRelay, ndk),
+        getSubData(curationsFilter, 150, algoRelay, ndk),
+        getSubData(videosFilter, 150, algoRelay, ndk),
       ]);
       let articles_ = sortEvents(articles.data).filter(
         (_) => _.created_at > dateCheckerArts
@@ -218,9 +229,11 @@ const ExploreFeed = ({
       let videos_ = sortEvents(videos.data).filter(
         (_) => _.created_at > dateCheckerVideos
       );
-      articles_ = articles_.length === 0 ? articles.data : articles_;
-      curations_ = curations_.length === 0 ? curations.data : curations_;
-      videos_ = videos_.length === 0 ? videos.data : videos_;
+      articles_ =
+        articles_.length === 0 ? articles.data.splice(0, 100) : articles_;
+      curations_ =
+        curations_.length === 0 ? curations.data.splice(0, 100) : curations_;
+      videos_ = videos_.length === 0 ? videos.data.splice(0, 100) : videos_;
 
       setLastEventsTimestamps({
         articles:
@@ -276,33 +289,8 @@ const ExploreFeed = ({
       setIsLoading(false);
       return;
     };
-    const contentFromDVM = async () => {
-      try {
-        setIsLoading(true);
-        let eventId = await getDVMJobRequest(selectedCategory.value);
-        if (!eventId) {
-          setIsLoading(false);
-          return;
-        }
-        let data = await getDVMJobResponse(eventId, selectedCategory.value);
-        if (data.length > 0) {
-          let events = await getSubData([{ ids: data }]);
-          let filteredEvents = filterContent(
-            selectedFilter,
-            events.data.map((_) => getParsedRepEvent(_))
-          );
-          setContent(filteredEvents);
-          saveUsers(events.pubkeys);
-        }
-        setIsLoading(false);
-      } catch (err) {
-        console.log(err);
-        setIsLoading(false);
-      }
-    };
-    if (timestamp && ["cf", "af"].includes(selectedCategory?.group))
+    if (timestamp && ["cf", "af", "rsf"].includes(selectedCategory?.group))
       contentFromRelays();
-    if (["mf"].includes(selectedCategory?.group)) contentFromDVM();
   }, [timestamp]);
 
   useEffect(() => {
@@ -379,7 +367,7 @@ const ExploreFeed = ({
     if (selectedCategory.value === "network") {
       let authors_ = authors || getWOTList();
       authors_ = authors_.length > 0 ? authors_ : getBackupWOTList();
-      
+
       return {
         artsFilter: [0, 1].includes(selectedTab)
           ? [
@@ -487,20 +475,24 @@ const ExploreFeed = ({
   };
 
   return (
-    <InfiniteScroll onRefresh={setTimestamp} events={content}>
-      {userKeys && selectedCategory.value === "network" && userFollowings && userFollowings?.length < 5 && (
-        <div className="fit-container ">
-          <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-marg-s">
-            <div>
-              <div className="eye-opened-24"></div>
-            </div>
-            <div>
-              <p>{t("AZKoEWL")}</p>
-              <p className="gray-c">{t("AstvJYT")}</p>
+    // <InfiniteScroll onRefresh={setTimestamp} events={content}>
+    <>
+      {userKeys &&
+        selectedCategory.value === "network" &&
+        userFollowings &&
+        userFollowings?.length < 5 && (
+          <div className="fit-container ">
+            <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-marg-s">
+              <div>
+                <div className="eye-opened-24"></div>
+              </div>
+              <div>
+                <p>{t("AZKoEWL")}</p>
+                <p className="gray-c">{t("AstvJYT")}</p>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
       {!["mf"].includes(selectedCategory?.group) && (
         <RecentPosts
           filter={subFilter}
@@ -511,17 +503,32 @@ const ExploreFeed = ({
         />
       )}
       {/* <div className="fit-container fx-centered fx-col " style={{ gap: 0 }}> */}
-      {content.map((item, index) => {
-        if (![...bannedList, ...userMutedList].includes(item.pubkey))
-          return (
-            <Fragment key={item.id}>
-              <div className="fit-container fx-centered">
-                <RepEventPreviewCard item={item} />
-              </div>
-              {getContentCard(index)}
-            </Fragment>
-          );
-      })}
+      {content.length > 0 && (
+        <Virtuoso
+          ref={virtuosoRef}
+          style={{ width: "100%", height: "100vh" }}
+          skipAnimationFrameInResizeObserver={true}
+          overscan={1000}
+          useWindowScroll={true}
+          totalCount={content.length}
+          increaseViewportBy={1000}
+          endReached={(index) => {
+            setTimestamp(content[index].created_at - 1);
+          }}
+          itemContent={(index) => {
+            let item = content[index];
+            if (![...bannedList, ...userMutedList].includes(item.pubkey))
+              return (
+                <Fragment key={item.id}>
+                  <div className="fit-container fx-centered">
+                    <RepEventPreviewCard item={item} />
+                  </div>
+                  {getContentCard(index)}
+                </Fragment>
+              )
+          }}
+        />
+      )}
       {content.length === 0 && !isLoading && isConnected && (
         <div
           className="fit-container fx-centered fx-col"
@@ -557,6 +564,7 @@ const ExploreFeed = ({
         </div>
       )}
       {/* </div> */}
-    </InfiniteScroll>
+    {/* </InfiniteScroll> */}
+    </>
   );
 };

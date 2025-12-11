@@ -5,25 +5,32 @@ import RelaysInfo from "./RelaysInfo";
 import ContentRelays from "./ContentRelays";
 import InboxRelays from "./InboxRelays";
 import { useRouter } from "next/router";
+import { SearchRelays } from "./SearchRelays";
 
 export function RelaysConfig() {
   const { query } = useRouter();
   const { t } = useTranslation();
   const [showRelaysInfo, setShowRelaysInfo] = useState(false);
   const [allRelays, setAllRelays] = useState([]);
+  const [allSearchRelays, setAllSearchRelays] = useState([]);
   const [showStatus, setShowStatus] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(query?.relaysType ? query.relaysType : 0);
+  const [selectedTab, setSelectedTab] = useState(
+    query?.relaysType ? query.relaysType : 0
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await axios.get("https://api.nostr.watch/v1/online");
-        setAllRelays(data.data);
+        const [allRelaysData, allSearchRelaysData] = await Promise.allSettled([
+          axios.get("https://cache-v2.yakihonne.com/api/v1/relays"),
+          axios.get("https://cache-v2.yakihonne.com/api/v1/relays/nips/50"),
+        ]);
+        setAllRelays(allRelaysData?.value?.data);
+        setAllSearchRelays(allSearchRelaysData?.value?.data || []);
       } catch {}
     };
     fetchData();
   }, []);
-
   return (
     <>
       {showRelaysInfo && (
@@ -76,23 +83,35 @@ export function RelaysConfig() {
         </div>
       )}
       <div className="fit-container fx-scattered box-pad-h">
-        {selectedTab === 0 && (
+        {selectedTab == 0 && (
           <div className="fx-centered" onClick={() => setShowStatus(true)}>
             <p className="c1-c slide-right">{t("AciF91F")}</p>
             <div className="info-tt" style={{ rotate: "180deg" }}></div>
           </div>
         )}
-        {selectedTab === 1 && (
+        {selectedTab == 1 && (
           <div className="fx-centered" onClick={() => setShowStatus(true)}>
             <p className="c1-c slide-right">{t("AEsTMiq")}</p>
             <div className="info-tt" style={{ rotate: "180deg" }}></div>
           </div>
         )}
+        {selectedTab == 2 && (
+          <div className="fx-centered" onClick={() => setShowStatus(true)}>
+            <p className="c1-c slide-right">{t("AjCr7Wz")}</p>
+            <div className="info-tt" style={{ rotate: "180deg" }}></div>
+          </div>
+        )}
         <div className="fx-centered">
-          <div className="round-icon-small" onClick={() => setSelectedTab(0)}>
+          <div
+            className="round-icon-small"
+            onClick={() => setSelectedTab(Math.max(selectedTab - 1, 0))}
+          >
             <div className="arrow" style={{ rotate: "90deg" }}></div>
           </div>
-          <div className="round-icon-small" onClick={() => setSelectedTab(1)}>
+          <div
+            className="round-icon-small"
+            onClick={() => setSelectedTab(Math.min(selectedTab + 1, 2))}
+          >
             <div className="arrow" style={{ rotate: "-90deg" }}></div>
           </div>
         </div>
@@ -104,7 +123,9 @@ export function RelaysConfig() {
         <div
           className="fit-container fx-centered fx-start-h fx-start-v box-pad-v-s box-marg-s"
           style={{
-            transform: `translateX(${selectedTab ? "-100%" : "0"})`,
+            transform: `translateX(${
+              selectedTab ? `calc(-${selectedTab * 100}%)` : "0"
+            })`,
             transition: "transform 0.3s ease-in-out",
           }}
         >
@@ -115,6 +136,10 @@ export function RelaysConfig() {
           <InboxRelays
             setShowRelaysInfo={setShowRelaysInfo}
             allRelays={allRelays}
+          />
+          <SearchRelays
+            setShowRelaysInfo={setShowRelaysInfo}
+            allRelays={allSearchRelays}
           />
         </div>
       </div>

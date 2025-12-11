@@ -63,9 +63,9 @@ const useFollowingsFavRelays = () => {
         .map((relay) => {
           return {
             url: relay,
-            pubkeys: userFavRelays
+            pubkeys: [...new Set(userFavRelays
               .filter((user) => user.relays.includes(relay))
-              .map((user) => user.pubkey),
+              .map((user) => user.pubkey))],
           };
         })
         .sort((a, b) => b.pubkeys.length - a.pubkeys.length)

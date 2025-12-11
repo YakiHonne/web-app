@@ -54,10 +54,11 @@ export default function Comments({
     const updateDb = async () => {
       let subscription = ndkInstance.subscribe([{ ids: [eventID] }], {
         groupable: false,
-        skipVerification: true,
-        skipValidation: true,
+        // skipVerification: true,
+        // skipValidation: true,
       });
       subscription.on("event", (event_) => {
+        subscription.stop();
         let stats = getEventStatAfterEOSE(
           event_,
           "replies",
@@ -67,7 +68,6 @@ export default function Comments({
         updateNoteDraft(replyId, "");
         saveEventStats(replyId, stats);
         setEventID(false);
-        subscription.stop();
         exit();
       });
     };
@@ -175,7 +175,7 @@ export default function Comments({
   useEffect(() => {
     const handleOffClick = (e) => {
       e.stopPropagation();
-      if (ref.current && !ref.current.contains(e.target) && !showWarningBox) {
+      if (e.target.classList.contains("comment-24") && !showWarningBox) {
         if (!comment) {
           exit();
         } else {
