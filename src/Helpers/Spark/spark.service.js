@@ -114,10 +114,12 @@ class SparkService {
       console.log('[SparkService] Creating configuration...')
       this.config = defaultConfig(network)
       this.config.apiKey = apiKey
+      this.config.private_enabled_default = true // Enable private mode by default
       console.log('[SparkService] Config created:', {
         network: this.config.network,
         syncIntervalSecs: this.config.syncIntervalSecs,
-        preferSparkOverLightning: this.config.preferSparkOverLightning
+        preferSparkOverLightning: this.config.preferSparkOverLightning,
+        privateEnabledDefault: this.config.private_enabled_default
       })
 
       // Prepare seed
@@ -158,9 +160,9 @@ class SparkService {
       // Set up event listener
       await this.setupEventListener()
 
-      // Initial sync
+      // Initial sync - wait for dataSynced event instead of promise
       console.log('[SparkService] Starting initial wallet sync...')
-      await this.syncWallet()
+      await this.syncWalletWithEvent()
 
       console.log('[SparkService] ✅ Connection complete!')
       return { sdk: this.sdk, mnemonic: this.currentMnemonic }
@@ -278,6 +280,39 @@ class SparkService {
       console.error('[SparkService] Sync failed:', error)
       throw error
     }
+  }
+
+  /**
+   * Sync wallet with event-based approach
+   * Workaround for SDK 0.5.2 where syncWallet() promise doesn't resolve
+   * but dataSynced event fires correctly
+   */
+  async syncWalletWithEvent() {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Sync timeout after 60 seconds'))
+      }, 60000) // 60 second timeout
+
+      // Listen for dataSynced event
+      const unsubscribe = this.onEvent((event) => {
+        if (event.type === 'dataSynced') {
+          clearTimeout(timeout)
+          unsubscribe()
+          console.log('[SparkService] ✅ Wallet synced (via dataSynced event)')
+          resolve()
+        }
+      })
+
+      // Trigger sync (don't await the promise since it never resolves)
+      this.sdk.syncWallet({}).catch((error) => {
+        clearTimeout(timeout)
+        unsubscribe()
+        console.error('[SparkService] Sync failed:', error)
+        reject(error)
+      })
+    })
   }
 
   /**

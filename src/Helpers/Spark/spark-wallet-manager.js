@@ -415,8 +415,8 @@ class SparkWalletManager {
 
       console.log('[SparkWalletManager] Refreshing wallet state...')
 
-      // Get wallet info
-      const info = await sparkService.getInfo(true) // ensureSynced = true
+      // Get wallet info (no need to sync again - already synced during connection)
+      const info = await sparkService.getInfo(false) // ensureSynced = false
       console.log('[SparkWalletManager] Got wallet info:', {
         balanceSats: info.balanceSats,
         pendingSendSats: info.pendingSendSats,
