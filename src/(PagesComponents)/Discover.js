@@ -323,10 +323,18 @@ const virtuosoRef = useRef(null);
         ? selectedFilter.to
         : lastEventsTimestamps.videos;
     let since = selectedFilter.from || undefined;
+
+    // Helper function to validate hex pubkeys (64 chars, hex only)
+    const isValidPubkey = (str) => {
+      return typeof str === 'string' && /^[0-9a-f]{64}$/i.test(str);
+    };
+
+    // Filter out invalid pubkeys (like hashtags) from posted_by
     let authors =
       selectedFilter.posted_by?.length > 0
-        ? selectedFilter.posted_by
-        : undefined;
+        ? selectedFilter.posted_by.filter(isValidPubkey)
+        : [];
+    authors = authors.length > 0 ? authors : undefined;
     if (selectedCategory.value === "top")
       return {
         artsFilter: [0, 1].includes(selectedTab)

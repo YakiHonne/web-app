@@ -199,6 +199,16 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         ? undefined
         : twoDaysPrior);
 
+    // Helper function to validate hex pubkeys (64 chars, hex only)
+    const isValidPubkey = (str) => {
+      return typeof str === 'string' && /^[0-9a-f]{64}$/i.test(str);
+    };
+
+    // Filter out invalid pubkeys (like hashtags) from posted_by
+    const validPostedBy = selectedFilter.posted_by?.length > 0
+      ? selectedFilter.posted_by.filter(isValidPubkey)
+      : [];
+
     let tempUserFollowings = Array.isArray(userFollowings)
       ? Array.from(userFollowings)
       : [];
@@ -216,8 +226,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       }
 
       let authors =
-        selectedFilter.posted_by?.length > 0
-          ? selectedFilter.posted_by
+        validPostedBy.length > 0
+          ? validPostedBy
           : tempUserFollowings.length < 5
           ? [...tempUserFollowings, ...getBackupWOTList()]
           : tempUserFollowings;
@@ -233,8 +243,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           "#l": ["smart-widget"],
           limit: 100,
           authors:
-            selectedFilter.posted_by?.length > 0
-              ? selectedFilter.posted_by
+            validPostedBy.length > 0
+              ? validPostedBy
               : undefined,
           until,
           since,
@@ -251,8 +261,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           "#l": ["FLASH NEWS"],
           limit: 100,
           authors:
-            selectedFilter.posted_by?.length > 0
-              ? selectedFilter.posted_by
+            validPostedBy.length > 0
+              ? validPostedBy
               : undefined,
           until,
           since,
@@ -269,8 +279,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           kinds: [1, 6],
           limit: 100,
           authors:
-            selectedFilter.posted_by?.length > 0
-              ? selectedFilter.posted_by
+            validPostedBy.length > 0
+              ? validPostedBy
               : undefined,
           until,
           since,
