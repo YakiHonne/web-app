@@ -4,7 +4,7 @@ import { kinds, nip04 } from 'nostr-tools'
 import { ndkInstance } from '@/Helpers/NDKInstance'
 import { InitEvent } from '@/Helpers/Controlers'
 import { store } from '@/Store/Store'
-import relaysOnPlatform from '@/Content/Relays'
+import { relaysOnPlatform } from '@/Content/Relays'
 import { NDKEvent } from '@nostr-dev-kit/ndk'
 
 // Big relay URLs for backup redundancy
