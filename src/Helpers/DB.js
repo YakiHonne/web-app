@@ -203,9 +203,9 @@ export const getFavRelays = async (pubkey) => {
     try {
       let fav = await db.table("favrelays").get(pubkey);
       let sets =
-        fav && !fav.sets
+        fav && !fav.sets && fav.tags
           ? fav.tags.filter((tag) => tag[0] === "a").map((tag) => tag[1])
-          : fav.sets;
+          : fav?.sets || [];
       return { ...fav, sets } || { relays: [], sets: [] };
     } catch (err) {
       console.log(err);

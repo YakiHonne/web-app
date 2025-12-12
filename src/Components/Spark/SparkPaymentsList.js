@@ -377,8 +377,11 @@ export default function SparkPaymentsList() {
                   </div>
                 )}
 
-                {/* Payment ID */}
-                {payment.id && (
+                {/* Payment ID - Hidden for privacy (private mode enabled by default) */}
+                {/* Note: Payment IDs and block explorer links are intentionally hidden
+                    to protect user privacy when using Spark wallet in private mode.
+                    This prevents on-chain transaction correlation. */}
+                {false && payment.id && (
                   <div className="fit-container fx-col" style={{ gap: 'var(--4)' }}>
                     <p className="gray-c p-small">{t('Payment ID')}:</p>
                     <div className="fx-scattered fit-container" style={{ gap: 'var(--8)' }}>
