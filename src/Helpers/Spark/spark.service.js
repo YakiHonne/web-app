@@ -6,6 +6,22 @@
  *
  * POC Phase 1: Testing basic initialization, send/receive, and compatibility
  */
+
+// Suppress harmless RecvError from Breez SDK WASM during disconnect
+if (typeof window !== 'undefined') {
+  const originalConsoleError = console.error
+  console.error = (...args) => {
+    const errorMsg = args.join(' ')
+    // Suppress sync errors during wallet disconnect - these are harmless
+    if (errorMsg.includes('sync trigger failed: RecvError') ||
+        errorMsg.includes('RecvError()')) {
+      console.log('[Spark] Suppressed harmless WASM sync error during disconnect')
+      return
+    }
+    originalConsoleError.apply(console, args)
+  }
+}
+
 class SparkService {
   static instance
   sdk = null
@@ -114,10 +130,12 @@ class SparkService {
       console.log('[SparkService] Creating configuration...')
       this.config = defaultConfig(network)
       this.config.apiKey = apiKey
+      this.config.private_enabled_default = true // Enable private mode by default
       console.log('[SparkService] Config created:', {
         network: this.config.network,
         syncIntervalSecs: this.config.syncIntervalSecs,
-        preferSparkOverLightning: this.config.preferSparkOverLightning
+        preferSparkOverLightning: this.config.preferSparkOverLightning,
+        privateEnabledDefault: this.config.private_enabled_default
       })
 
       // Prepare seed
@@ -158,9 +176,9 @@ class SparkService {
       // Set up event listener
       await this.setupEventListener()
 
-      // Initial sync
+      // Initial sync - wait for dataSynced event instead of promise
       console.log('[SparkService] Starting initial wallet sync...')
-      await this.syncWallet()
+      await this.syncWalletWithEvent()
 
       console.log('[SparkService] ✅ Connection complete!')
       return { sdk: this.sdk, mnemonic: this.currentMnemonic }
@@ -191,15 +209,34 @@ class SparkService {
 
     if (this.sdk) {
       try {
-        // Remove event listener
+        // Remove event listener first
         if (this.eventListenerId) {
-          await this.sdk.removeEventListener(this.eventListenerId)
+          try {
+            await this.sdk.removeEventListener(this.eventListenerId)
+          } catch (e) {
+            // Ignore errors when removing listener
+          }
           this.eventListenerId = null
         }
-        await this.sdk.disconnect()
+
+        // Disconnect SDK - catch promise rejection to prevent uncaught errors
+        await this.sdk.disconnect().catch(error => {
+          const errorMsg = error?.message || String(error)
+          if (errorMsg.includes('RecvError') || errorMsg.includes('sync trigger failed')) {
+            // Suppress - this is expected during disconnect
+            console.log('[SparkService] Suppressed sync error during disconnect (harmless)')
+          } else {
+            console.warn('[SparkService] Disconnect error (handled):', error)
+          }
+        })
+
         console.log('[SparkService] Disconnected')
       } catch (error) {
-        console.error('[SparkService] Error during disconnect:', error)
+        // Final safety catch - should rarely reach here
+        const errorMsg = error?.message || String(error)
+        if (!errorMsg.includes('RecvError') && !errorMsg.includes('sync trigger failed')) {
+          console.warn('[SparkService] Disconnect cleanup error (handled):', error)
+        }
       }
     }
     this.sdk = null
@@ -278,6 +315,39 @@ class SparkService {
       console.error('[SparkService] Sync failed:', error)
       throw error
     }
+  }
+
+  /**
+   * Sync wallet with event-based approach
+   * Workaround for SDK 0.5.2 where syncWallet() promise doesn't resolve
+   * but dataSynced event fires correctly
+   */
+  async syncWalletWithEvent() {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Sync timeout after 60 seconds'))
+      }, 60000) // 60 second timeout
+
+      // Listen for dataSynced event
+      const unsubscribe = this.onEvent((event) => {
+        if (event.type === 'dataSynced') {
+          clearTimeout(timeout)
+          unsubscribe()
+          console.log('[SparkService] ✅ Wallet synced (via dataSynced event)')
+          resolve()
+        }
+      })
+
+      // Trigger sync (don't await the promise since it never resolves)
+      this.sdk.syncWallet({}).catch((error) => {
+        clearTimeout(timeout)
+        unsubscribe()
+        console.error('[SparkService] Sync failed:', error)
+        reject(error)
+      })
+    })
   }
 
   /**

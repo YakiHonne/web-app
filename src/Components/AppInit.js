@@ -84,6 +84,7 @@ import {
   getConnectedAccounts,
   getKeys,
   getMetadataFromCachedAccounts,
+  getWallets,
 } from "@/Helpers/ClientHelpers";
 import { setNostrAuthors, setNostrClients } from "@/Store/Slides/Profiles";
 import {
@@ -109,6 +110,7 @@ import {
 import { getTrendingUsers24h } from "@/Helpers/WSInstance";
 import { savedToolsIdentifier } from "@/Content/Extras";
 import { decryptDMSWorker } from "@/workers/decryptDMWorker";
+import sparkWalletManager from "@/Helpers/Spark/spark-wallet-manager";
 
 export default function AppInit() {
   const dispatch = useDispatch();
@@ -1199,6 +1201,28 @@ export default function AppInit() {
       console.log(err);
     }
   };
+
+  // Auto-connect Spark wallet if it exists and is active
+  useEffect(() => {
+    if (!userKeys?.pub) return;
+
+    const autoConnectSparkWallet = async () => {
+      try {
+        const wallets = getWallets();
+        const sparkWallet = wallets.find(w => w.kind === 4 && w.active);
+
+        if (sparkWallet) {
+          console.log('[AppInit] Found active Spark wallet, auto-connecting...');
+          await sparkWalletManager.restoreWallet();
+          console.log('[AppInit] Spark wallet auto-connected successfully');
+        }
+      } catch (error) {
+        console.warn('[AppInit] Spark wallet auto-connect failed (will retry manually):', error);
+      }
+    };
+
+    autoConnectSparkWallet();
+  }, [userKeys?.pub]);
 
   return null;
 }
