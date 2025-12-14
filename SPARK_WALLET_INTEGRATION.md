@@ -11,7 +11,7 @@ The Breez Spark self-custodial Lightning wallet has been fully integrated into t
 ### 1. **Service Layer** (`/src/Helpers/Spark/`)
 - `spark.service.js` (551 lines) - Main Breez SDK wrapper
 - `spark-storage.service.js` (183 lines) - XChaCha20-Poly1305 encrypted storage
-- `spark-backup.service.js` (472 lines) - Nostr NIP-78 encrypted backups **[Fully integrated with Yakihonne's NDK]**
+- `spark-backup.service.js` (472 lines) - File-based encrypted backups (NIP-78 Nostr backup infrastructure exists but disabled for YakiHonne)
 - `spark-profile-sync.service.js` (92 lines) - Lightning address → Nostr profile sync
 - `spark-zap-receipt.service.js` (209 lines) - NIP-57 zap receipt publishing
 - `spark-wallet-manager.js` (485 lines) - Centralized wallet coordinator
@@ -57,11 +57,11 @@ The Breez Spark self-custodial Lightning wallet has been fully integrated into t
 
 ### Wallet Setup & Onboarding
 - ✅ Create new wallet with BIP39 12-word mnemonic
-- ✅ Restore from Nostr encrypted backup (auto-detect)
-- ✅ Restore from backup file (encrypted JSON)
+- ✅ Restore from downloadable backup file (encrypted JSON)
 - ✅ Manual seed phrase entry (12/24 words)
-- ✅ Mnemonic display with show/hide
-- ✅ Automatic backup to localStorage + Nostr relays
+- ✅ Mnemonic display with show/hide toggle
+- ✅ Encrypted backup file download (.json)
+- ✅ Automatic backup to localStorage (Nostr relay backup infrastructure exists but disabled for YakiHonne)
 
 ### Core Wallet Operations
 - ✅ Send to Bolt11 invoices

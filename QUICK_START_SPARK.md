@@ -31,8 +31,8 @@ npm run dev
 3. Click "Add Wallet"
 4. Select "Spark Wallet (Self-Custodial)"
 5. Choose "Create New Wallet"
-6. **Save your 12-word seed phrase!** (Download backup)
-7. Backup is automatically saved to Nostr relays
+6. **Save your 12-word seed phrase!** (Download backup file)
+7. Backup file (.json) is encrypted and stored locally on your device
 
 ### Step 5: Test It Out
 1. **Get Some Sats:** Generate a receive invoice
@@ -101,7 +101,7 @@ const sparkLightningAddress = useSelector((state) => state.sparkLightningAddress
 **Solution:** First time users must create a new wallet or manually enter seed phrase.
 
 ### Issue: Wallet doesn't auto-restore
-**Solution:** Check localStorage for `spark_wallet_{pubkey}` key. May need to restore from Nostr.
+**Solution:** Check localStorage for `spark_wallet_{pubkey}` key. May need to restore from backup file or seed phrase.
 
 ---
 

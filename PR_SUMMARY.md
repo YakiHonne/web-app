@@ -403,6 +403,7 @@ For questions about this PR:
 Integration developed using:
 - [Breez SDK](https://github.com/breez/breez-sdk) - Lightning Network SDK
 - [Breez Technology](https://breez.technology) - Lightning infrastructure provider
+- [Claude Code](https://claude.com/claude-code) - AI pair programming assistance
 
 ---
 
