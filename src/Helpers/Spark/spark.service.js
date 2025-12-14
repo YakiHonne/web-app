@@ -143,18 +143,13 @@ class SparkService {
     }
 
     if (this.connecting) {
-      console.warn('[SparkService] Connection already in progress, but no SDK instance. Resetting...')
-      // Reset the flag if we're stuck (e.g., from a previous failed attempt)
-      this.connecting = false
+      console.warn('[SparkService] Connection already in progress - rejecting duplicate attempt')
+      throw new Error('Connection already in progress. Please wait.')
     }
 
     this.connecting = true
 
     try {
-      // PROACTIVE: Clear ALL IndexedDB to prevent WASM corruption
-      console.log('[SparkService] Clearing IndexedDB to prevent WASM corruption...')
-      await this.clearAllIndexedDB()
-
       console.log('[SparkService] Starting connection process...')
       console.log('[SparkService] Network:', network)
       console.log('[SparkService] API Key present:', !!apiKey)
@@ -225,40 +220,7 @@ class SparkService {
       console.log('[SparkService] Storage dir:', connectRequest.storageDir)
       console.log('[SparkService] Calling SDK connect()...')
 
-      try {
-        this.sdk = await connect(connectRequest)
-      } catch (connectError) {
-        // If we get a WASM memory error, try clearing IndexedDB and retrying
-        if (
-          connectError.message &&
-          connectError.message.includes('memory access out of bounds')
-        ) {
-          console.warn(
-            '[SparkService] WASM memory error detected. Attempting to clear corrupted storage and retry...'
-          )
-
-          // Clear IndexedDB storage
-          try {
-            const dbs = await window.indexedDB.databases()
-            for (const db of dbs) {
-              if (db.name && db.name.includes('breez')) {
-                console.log('[SparkService] Deleting IndexedDB:', db.name)
-                await window.indexedDB.deleteDatabase(db.name)
-              }
-            }
-
-            // Retry connection with clean storage
-            console.log('[SparkService] Retrying connection with clean storage...')
-            this.sdk = await connect(connectRequest)
-            console.log('[SparkService] ✅ Connection successful after storage cleanup!')
-          } catch (retryError) {
-            console.error('[SparkService] Retry failed:', retryError)
-            throw connectError // Throw original error
-          }
-        } else {
-          throw connectError
-        }
-      }
+      this.sdk = await connect(connectRequest)
 
       console.log('[SparkService] SDK connected! Instance:', !!this.sdk)
 

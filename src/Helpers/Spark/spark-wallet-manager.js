@@ -248,6 +248,14 @@ class SparkWalletManager {
       const wordCount = mnemonic.split(' ').length
       console.log(`[SparkWalletManager] Loaded ${wordCount}-word mnemonic from storage`)
 
+      // Validate cleaned mnemonic
+      if (wordCount !== 12 && wordCount !== 24) {
+        console.error('[SparkWalletManager] Invalid mnemonic word count:', wordCount)
+        // Clear the corrupted mnemonic
+        await sparkStorage.deleteMnemonic(pubkey)
+        throw new Error(`Invalid mnemonic found in storage (${wordCount} words). Backup cleared. Please restore from seed phrase.`)
+      }
+
       // Connect to Spark SDK
       console.log('[SparkWalletManager] Connecting to Spark SDK...')
       const { sdk } = await sparkService.connect(apiKey, mnemonic)
@@ -266,6 +274,19 @@ class SparkWalletManager {
       console.error('[SparkWalletManager] Failed to restore wallet:', error)
       store.dispatch(setSparkConnecting(false))
       store.dispatch(setSparkConnected(false))
+
+      // If it's a WASM error, clear the corrupted storage
+      if (error.message && error.message.includes('memory access out of bounds')) {
+        console.warn('[SparkWalletManager] WASM error detected - clearing corrupted storage')
+        try {
+          const pubkey = this.getUserPubkey()
+          await sparkStorage.deleteMnemonic(pubkey)
+          console.log('[SparkWalletManager] Corrupted backup cleared. Please restore from seed phrase.')
+        } catch (cleanupError) {
+          console.error('[SparkWalletManager] Failed to cleanup:', cleanupError)
+        }
+      }
+
       throw error
     }
   }

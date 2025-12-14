@@ -1203,11 +1203,18 @@ export default function AppInit() {
   };
 
   // Auto-connect Spark wallet if it exists and is active
+  // This is the ONLY place that should auto-restore on page load
   useEffect(() => {
     if (!userKeys?.pub) return;
 
     const autoConnectSparkWallet = async () => {
       try {
+        // Skip if already connected (prevent duplicate connection attempts)
+        if (sparkWalletManager.isConnected()) {
+          console.log('[AppInit] Spark wallet already connected, skipping auto-connect');
+          return;
+        }
+
         const wallets = getWallets();
         const sparkWallet = wallets.find(w => w.kind === 4 && w.active);
 

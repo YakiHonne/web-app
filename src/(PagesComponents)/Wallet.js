@@ -167,43 +167,10 @@ export default function Wallet() {
           getNWCData(selectedWallet_);
         }
         if (selectedWallet_.kind === 4) {
-          // Spark wallet - check if backup exists before attempting restore
-          if (!sparkConnected) {
-            setIsLoading(true);
-
-            // First check if there's a backup to restore
-            sparkWalletManager.hasBackup()
-              .then((hasBackup) => {
-                if (!hasBackup) {
-                  setIsLoading(false);
-                  dispatch(setToast({
-                    show: true,
-                    message: t('Please set up your Spark wallet'),
-                    type: 'error'
-                  }));
-                  setShowAddWallet(true);
-                  return;
-                }
-
-                // Backup exists, restore it
-                return sparkWalletManager.restoreWallet()
-                  .then(() => {
-                    return sparkWalletManager.refreshWalletState();
-                  })
-                  .then(() => {
-                    setIsLoading(false);
-                  });
-              })
-              .catch(err => {
-                console.error('[Wallet.js] Failed to restore Spark wallet:', err);
-                setIsLoading(false);
-                dispatch(setToast({
-                  show: true,
-                  message: t('Failed to restore wallet. Please try again.'),
-                  type: 'error'
-                }));
-              });
-          } else {
+          // Spark wallet - DO NOT restore here!
+          // AppInit.js handles auto-restore centrally to prevent race conditions.
+          // Just wait for sparkConnected to become true.
+          if (sparkConnected) {
             // Refresh balance if already connected
             setIsLoading(true);
             sparkWalletManager.refreshWalletState()
@@ -215,6 +182,7 @@ export default function Wallet() {
                 setIsLoading(false);
               });
           }
+          // If not connected, AppInit will handle it - don't duplicate the restore call
         }
       } else {
         setWallets([]);
