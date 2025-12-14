@@ -141,15 +141,30 @@ class SparkService {
       // Prepare seed
       let seed
       if (mnemonic && mnemonic.trim()) {
-        // Clean and validate mnemonic
-        const cleanMnemonic = mnemonic.trim().toLowerCase().replace(/\s+/g, ' ')
-        const wordCount = cleanMnemonic.split(' ').length
+        // Clean and validate mnemonic - be extra careful with encoding
+        const cleanMnemonic = mnemonic
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters that could cause WASM issues
+
+        const words = cleanMnemonic.split(' ')
+        const wordCount = words.length
 
         if (wordCount !== 12 && wordCount !== 24) {
           throw new Error(`Invalid mnemonic: expected 12 or 24 words, got ${wordCount}`)
         }
 
+        // Validate each word is alphanumeric (BIP39 words should be)
+        const invalidWords = words.filter(word => !/^[a-z]+$/.test(word))
+        if (invalidWords.length > 0) {
+          console.error('[SparkService] Invalid words detected:', invalidWords)
+          throw new Error(`Mnemonic contains invalid words. Only lowercase letters allowed.`)
+        }
+
         console.log(`[SparkService] Using ${wordCount}-word mnemonic`)
+        console.log(`[SparkService] First word: ${words[0]}`)
+        console.log(`[SparkService] Last word: ${words[words.length - 1]}`)
         seed = { type: 'mnemonic', mnemonic: cleanMnemonic }
         this.currentMnemonic = cleanMnemonic
       } else {
