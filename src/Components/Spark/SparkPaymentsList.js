@@ -396,15 +396,6 @@ export default function SparkPaymentsList() {
                         >
                           <div className="copy"></div>
                         </div>
-                        <a
-                          href={`https://www.sparkscan.io/tx/${payment.id}?network=mainnet`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="round-icon-small pointer"
-                          title={t('View on Sparkscan')}
-                        >
-                          <p>🔍</p>
-                        </a>
                       </div>
                     </div>
                   </div>

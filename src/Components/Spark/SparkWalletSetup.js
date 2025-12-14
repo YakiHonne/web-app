@@ -224,7 +224,7 @@ export default function SparkWalletSetup({ onComplete, onCancel, isOnboarding = 
 
     try {
       setCheckingUsername(true);
-      const available = await sparkWalletManager.checkUsernameAvailability(lightningUsername);
+      const available = await sparkWalletManager.checkLightningAddressAvailable(lightningUsername);
       setUsernameAvailable(available);
     } catch (error) {
       console.error('Failed to check username:', error);

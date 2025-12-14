@@ -30,7 +30,7 @@ This document captures the complete workflow for integrating **Breez Spark Light
 ### Core Dependencies
 ```json
 {
-  "@breeztech/breez-sdk-spark": "^0.3.4",
+  "@breeztech/breez-sdk-spark": "^0.5.2",
   "@scure/bip39": "^1.5.0",
   "@noble/ciphers": "^1.1.0",
   "@nostr-dev-kit/ndk": "^2.10.4",
@@ -41,13 +41,18 @@ This document captures the complete workflow for integrating **Breez Spark Light
 ```
 
 ### Key Technologies
-- **Breez Spark SDK** - WebAssembly-based Lightning wallet
-- **Next.js 15** - Pages Router with Turbopack
+- **Breez Spark SDK 0.5.2** - WebAssembly-based Lightning wallet with privacy mode support
+- **Next.js 15.4.5** - Pages Router with Turbopack (pinned for WASM compatibility)
 - **React 19** - UI framework
 - **Redux Toolkit** - State management
 - **NDK** - Nostr Development Kit
 - **XChaCha20-Poly1305** - Authenticated encryption
 - **BIP39** - Mnemonic generation/validation
+
+### SDK Version Notes
+- **Current**: Breez SDK 0.5.2 (stable)
+- **Privacy Mode**: SDK 0.5.2 includes privacy mode configuration via SDK initialization
+- **Next.js Compatibility**: Next.js 15.4.5 required for proper WASM module handling (15.4.8+ has compatibility issues)
 
 ---
 
@@ -651,6 +656,43 @@ Before deploying Spark wallet features to production:
 
 ## Changelog
 
+### 2025-12-13 - SDK 0.5.2 Stabilization & WASM Fixes
+- ✅ **Breez SDK 0.5.2 Integration**
+  - Upgraded from SDK 0.3.4 to 0.5.2
+  - Added privacy mode support in SDK configuration
+  - Stable SDK version with reliable sync and connection
+- ✅ **WASM Runtime Error Fixes**
+  - Fixed WASM function signature mismatch errors
+  - Fixed memory access out of bounds errors
+  - Restored working spark.service.js from commit 82fa56e
+  - Resolved event listener compatibility issues
+- ✅ **Next.js Version Pinning**
+  - Pinned Next.js to 15.4.5 for WASM compatibility
+  - Next.js 15.4.8+ causes WASM handling issues
+  - Documented version requirement for future upgrades
+- ✅ **Sync Improvements**
+  - Made initial wallet sync non-blocking to prevent UI freezing
+  - Implemented background sync pattern for better UX
+  - Added sync timeout handling (60 second default)
+  - Wallet connects immediately, syncs in background
+- ✅ **Error Suppression**
+  - Added global console.error interceptor for harmless WASM errors
+  - Suppressed RecvError during wallet disconnect (cosmetic SDK issue)
+  - Enhanced disconnect() method with comprehensive error handling
+  - Users no longer see technical WASM errors in console
+- ✅ **UI Reordering**
+  - Moved Spark Wallet to top of wallet selection in Add Wallet modal
+  - Prioritized self-custodial option for better visibility
+- ✅ **Privacy Mode Configuration**
+  - SDK 0.5.2 supports privacy mode via config object
+  - Private mode prevents some metadata from being shared
+  - Configurable during SDK initialization
+- ✅ **Development Documentation**
+  - Updated DEV_NOTES.md with SDK 0.5.2 information
+  - Documented WASM compatibility issues and solutions
+  - Added privacy mode configuration details
+  - Removed deprecated Sparkscan references
+
 ### 2025-11-04 - Production Hardening & UX Improvements
 - ✅ **Comprehensive Error Handling**
   - Converted all wallet connection errors to user-friendly toast notifications
@@ -703,8 +745,6 @@ Before deploying Spark wallet features to production:
   - Added expand (+/−) button to all payments
   - Shows comprehensive payment details: ID, status, amount, fees, time, description
   - Added copy functionality for Payment ID, Payment Hash, and Preimage
-  - Added Sparkscan integration (view on blockchain explorer)
-  - Correct URL format: `https://www.sparkscan.io/tx/{id}?network=mainnet`
 - ✅ Implemented payment pagination
   - Initial load: 20 payments
   - "Load More" button for additional batches

@@ -176,9 +176,11 @@ class SparkService {
       // Set up event listener
       await this.setupEventListener()
 
-      // Initial sync - wait for dataSynced event instead of promise
-      console.log('[SparkService] Starting initial wallet sync...')
-      await this.syncWalletWithEvent()
+      // Initial sync - trigger in background, don't block connection
+      console.log('[SparkService] Starting initial wallet sync in background...')
+      this.syncWalletWithEvent().catch(error => {
+        console.warn('[SparkService] Background sync failed (non-critical):', error)
+      })
 
       console.log('[SparkService] ✅ Connection complete!')
       return { sdk: this.sdk, mnemonic: this.currentMnemonic }
@@ -209,7 +211,7 @@ class SparkService {
 
     if (this.sdk) {
       try {
-        // Remove event listener first
+        // Remove event listener
         if (this.eventListenerId) {
           try {
             await this.sdk.removeEventListener(this.eventListenerId)
@@ -219,23 +221,22 @@ class SparkService {
           this.eventListenerId = null
         }
 
-        // Disconnect SDK - catch promise rejection to prevent uncaught errors
+        // Disconnect SDK - catch to suppress harmless RecvError
         await this.sdk.disconnect().catch(error => {
           const errorMsg = error?.message || String(error)
           if (errorMsg.includes('RecvError') || errorMsg.includes('sync trigger failed')) {
             // Suppress - this is expected during disconnect
-            console.log('[SparkService] Suppressed sync error during disconnect (harmless)')
+            console.log('[SparkService] Wallet disconnected (suppressed harmless sync error)')
           } else {
-            console.warn('[SparkService] Disconnect error (handled):', error)
+            console.warn('[SparkService] Disconnect error:', error)
           }
         })
 
         console.log('[SparkService] Disconnected')
       } catch (error) {
-        // Final safety catch - should rarely reach here
         const errorMsg = error?.message || String(error)
         if (!errorMsg.includes('RecvError') && !errorMsg.includes('sync trigger failed')) {
-          console.warn('[SparkService] Disconnect cleanup error (handled):', error)
+          console.error('[SparkService] Error during disconnect:', error)
         }
       }
     }

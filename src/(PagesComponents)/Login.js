@@ -1069,30 +1069,6 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                   </p>
 
                   <div className="fit-container fx-centered fx-col" style={{ gap: "16px", marginTop: "24px" }}>
-                    {/* NWC Wallet Option */}
-                    <div
-                      className="fit-container fx-scattered box-pad-h box-pad-v sc-s pointer"
-                      onClick={() => setWalletType('nwc')}
-                      style={{
-                        border: "1px solid var(--very-dim-gray)",
-                        borderRadius: "var(--border-r-8)",
-                        transition: "all 0.2s ease"
-                      }}
-                    >
-                      <div className="fx-start fx-col" style={{ gap: "4px" }}>
-                        <div className="fx-centered" style={{ gap: "8px" }}>
-                          <div className="yaki-logomark" style={{ width: "24px", height: "24px" }}></div>
-                          <p className="p-big bold-text">
-                            YakiHonne's NWC <span className="p-medium gray-c" style={{ fontWeight: 'normal' }}>(Custodial)</span>
-                          </p>
-                        </div>
-                        <p className="p-medium gray-c">Hosted wallet with automatic setup</p>
-                      </div>
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 18l6-6-6-6" stroke="var(--orange-main)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-
                     {/* Spark Wallet Option */}
                     <div
                       className="fit-container fx-scattered box-pad-h box-pad-v sc-s pointer"
@@ -1113,6 +1089,30 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                           </p>
                         </div>
                         <p className="p-medium gray-c">Full control with Breez SDK</p>
+                      </div>
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 18l6-6-6-6" stroke="var(--orange-main)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+
+                    {/* NWC Wallet Option */}
+                    <div
+                      className="fit-container fx-scattered box-pad-h box-pad-v sc-s pointer"
+                      onClick={() => setWalletType('nwc')}
+                      style={{
+                        border: "1px solid var(--very-dim-gray)",
+                        borderRadius: "var(--border-r-8)",
+                        transition: "all 0.2s ease"
+                      }}
+                    >
+                      <div className="fx-start fx-col" style={{ gap: "4px" }}>
+                        <div className="fx-centered" style={{ gap: "8px" }}>
+                          <div className="yaki-logomark" style={{ width: "24px", height: "24px" }}></div>
+                          <p className="p-big bold-text">
+                            YakiHonne's NWC <span className="p-medium gray-c" style={{ fontWeight: 'normal' }}>(Custodial)</span>
+                          </p>
+                        </div>
+                        <p className="p-medium gray-c">Hosted wallet with automatic setup</p>
                       </div>
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 18l6-6-6-6" stroke="var(--orange-main)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

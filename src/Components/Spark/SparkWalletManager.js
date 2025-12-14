@@ -312,6 +312,35 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
     }
   };
 
+  const handleDeleteWallet = async () => {
+    if (!confirm(t('Are you sure you want to delete your wallet? This cannot be undone. Make sure you have backed up your seed phrase.'))) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await sparkWalletManager.deleteWallet(true); // true = delete Nostr backups too
+
+      dispatch(setToast({
+        type: 1,
+        desc: t('Wallet deleted successfully'),
+      }));
+
+      // Close modal if onClose is provided
+      if (onClose) {
+        onClose();
+      }
+    } catch (error) {
+      console.error('Failed to delete wallet:', error);
+      dispatch(setToast({
+        type: 2,
+        desc: error.message || t('Failed to delete wallet'),
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCopySeedPhrase = () => {
     navigator.clipboard.writeText(seedPhrase);
     dispatch(setToast({
@@ -696,6 +725,28 @@ export default function SparkWalletManager({ onClose, inlineMode = false, extern
                   </button>
                 </div>
               )}
+            </div>
+
+            {/* Divider */}
+            <div className="fit-container" style={{ height: '1px', backgroundColor: 'var(--pale-gray)' }}></div>
+
+            {/* Danger Zone - Delete Wallet */}
+            <div className="fx-centered fx-col fit-container" style={{ gap: 'var(--16)', paddingBottom: 'var(--8)' }}>
+              <h5 className="fit-container red-c">{t('Danger Zone')}</h5>
+              <p className="gray-c p-medium p-centered">
+                {t('Deleting your wallet will remove all local data. Make sure you have backed up your seed phrase before proceeding. This action cannot be undone.')}
+              </p>
+              <button
+                className="btn btn-danger fit-container"
+                onClick={handleDeleteWallet}
+                disabled={loading}
+                style={{
+                  backgroundColor: 'var(--red-main)',
+                  color: 'white'
+                }}
+              >
+                {loading ? <LoadingDots /> : t('Delete Wallet')}
+              </button>
             </div>
 
           </div>

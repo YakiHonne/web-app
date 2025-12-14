@@ -61,7 +61,6 @@ export default function AddWallet({ exit, refresh }) {
         </div>
         <h4 className="box-marg-s">{t("A8fEwNq")}</h4>
 
-        <AddYakiWallet refresh={refresh} />
         <div
           className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"
           style={{ backgroundColor: "transparent" }}
@@ -87,6 +86,7 @@ export default function AddWallet({ exit, refresh }) {
             <div className="plus-sign"></div>
           </div>
         </div>
+        <AddYakiWallet refresh={refresh} />
         <div className="fit-container fx-centered">
           <p>{t("AvVawBi")}</p>
         </div>
