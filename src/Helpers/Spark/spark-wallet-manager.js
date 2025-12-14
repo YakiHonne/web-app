@@ -232,11 +232,21 @@ class SparkWalletManager {
 
       // Load mnemonic (checks local first, then Nostr)
       console.log('[SparkWalletManager] Loading encrypted mnemonic...')
-      const mnemonic = await sparkStorage.loadMnemonic(pubkey)
+      const rawMnemonic = await sparkStorage.loadMnemonic(pubkey)
 
-      if (!mnemonic) {
+      if (!rawMnemonic) {
         throw new Error('No wallet backup found. Please create a new wallet or restore from seed phrase.')
       }
+
+      // Clean the mnemonic (same as restoreFromSeed) to prevent encoding issues
+      const mnemonic = rawMnemonic
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters
+
+      const wordCount = mnemonic.split(' ').length
+      console.log(`[SparkWalletManager] Loaded ${wordCount}-word mnemonic from storage`)
 
       // Connect to Spark SDK
       console.log('[SparkWalletManager] Connecting to Spark SDK...')
@@ -328,14 +338,21 @@ class SparkWalletManager {
 
       // Read and decrypt file
       console.log('[SparkWalletManager] Reading backup file...')
-      const mnemonic = await sparkBackup.restoreFromSelectedFile(file, pubkey)
+      const rawMnemonic = await sparkBackup.restoreFromSelectedFile(file, pubkey)
+
+      // Clean the mnemonic to prevent encoding issues
+      const mnemonic = rawMnemonic
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, ' ')
+        .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters
 
       // Connect to Spark SDK
       console.log('[SparkWalletManager] Connecting to Spark SDK...')
       const { sdk } = await sparkService.connect(apiKey, mnemonic)
 
-      // Save to local storage for future auto-restore
-      console.log('[SparkWalletManager] Saving to local storage...')
+      // Save cleaned mnemonic to local storage for future auto-restore
+      console.log('[SparkWalletManager] Saving cleaned mnemonic to local storage...')
       await sparkStorage.saveMnemonic(pubkey, mnemonic, false) // Already have Nostr backup
 
       // Update state

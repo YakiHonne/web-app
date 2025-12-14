@@ -88,6 +88,37 @@ class SparkService {
   }
 
   /**
+   * Clear ALL IndexedDB databases to fix corrupted WASM state
+   * This is called proactively before each connection to prevent WASM errors
+   */
+  async clearAllIndexedDB() {
+    try {
+      const dbs = await window.indexedDB.databases()
+      console.log('[SparkService] Found', dbs.length, 'IndexedDB databases')
+
+      for (const db of dbs) {
+        if (db.name) {
+          console.log('[SparkService] Deleting database:', db.name)
+          await new Promise((resolve, reject) => {
+            const request = window.indexedDB.deleteDatabase(db.name)
+            request.onsuccess = () => resolve()
+            request.onerror = () => reject(request.error)
+            request.onblocked = () => {
+              console.warn('[SparkService] Database deletion blocked:', db.name)
+              resolve() // Continue anyway
+            }
+          })
+        }
+      }
+
+      console.log('[SparkService] ✅ All IndexedDB databases cleared')
+    } catch (error) {
+      console.warn('[SparkService] Failed to clear IndexedDB:', error)
+      // Don't throw - this is a best-effort cleanup
+    }
+  }
+
+  /**
    * Connect to Spark SDK with credentials
    *
    * @param apiKey - Breez API key
@@ -120,6 +151,10 @@ class SparkService {
     this.connecting = true
 
     try {
+      // PROACTIVE: Clear ALL IndexedDB to prevent WASM corruption
+      console.log('[SparkService] Clearing IndexedDB to prevent WASM corruption...')
+      await this.clearAllIndexedDB()
+
       console.log('[SparkService] Starting connection process...')
       console.log('[SparkService] Network:', network)
       console.log('[SparkService] API Key present:', !!apiKey)
@@ -130,12 +165,18 @@ class SparkService {
       console.log('[SparkService] Creating configuration...')
       this.config = defaultConfig(network)
       this.config.apiKey = apiKey
-      this.config.private_enabled_default = true // Enable private mode by default
+
+      // Note: private mode config may not be available in SDK 0.5.2
+      // Only set if the property exists in the config object
+      if ('privateEnabledDefault' in this.config) {
+        this.config.privateEnabledDefault = true
+      }
+
       console.log('[SparkService] Config created:', {
         network: this.config.network,
         syncIntervalSecs: this.config.syncIntervalSecs,
         preferSparkOverLightning: this.config.preferSparkOverLightning,
-        privateEnabledDefault: this.config.private_enabled_default
+        apiKey: this.config.apiKey ? '[SET]' : '[MISSING]'
       })
 
       // Prepare seed
@@ -184,7 +225,40 @@ class SparkService {
       console.log('[SparkService] Storage dir:', connectRequest.storageDir)
       console.log('[SparkService] Calling SDK connect()...')
 
-      this.sdk = await connect(connectRequest)
+      try {
+        this.sdk = await connect(connectRequest)
+      } catch (connectError) {
+        // If we get a WASM memory error, try clearing IndexedDB and retrying
+        if (
+          connectError.message &&
+          connectError.message.includes('memory access out of bounds')
+        ) {
+          console.warn(
+            '[SparkService] WASM memory error detected. Attempting to clear corrupted storage and retry...'
+          )
+
+          // Clear IndexedDB storage
+          try {
+            const dbs = await window.indexedDB.databases()
+            for (const db of dbs) {
+              if (db.name && db.name.includes('breez')) {
+                console.log('[SparkService] Deleting IndexedDB:', db.name)
+                await window.indexedDB.deleteDatabase(db.name)
+              }
+            }
+
+            // Retry connection with clean storage
+            console.log('[SparkService] Retrying connection with clean storage...')
+            this.sdk = await connect(connectRequest)
+            console.log('[SparkService] ✅ Connection successful after storage cleanup!')
+          } catch (retryError) {
+            console.error('[SparkService] Retry failed:', retryError)
+            throw connectError // Throw original error
+          }
+        } else {
+          throw connectError
+        }
+      }
 
       console.log('[SparkService] SDK connected! Instance:', !!this.sdk)
 
@@ -374,6 +448,12 @@ class SparkService {
 
     try {
       const info = await this.sdk.getInfo({ ensureSynced })
+
+      // Convert Map to plain object for Redux serialization
+      if (info.tokenBalances instanceof Map) {
+        info.tokenBalances = Object.fromEntries(info.tokenBalances)
+      }
+
       console.log('[SparkService] Wallet info:', info)
       return info
     } catch (error) {
