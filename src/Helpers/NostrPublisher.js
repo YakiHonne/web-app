@@ -15,7 +15,10 @@ const getZapEventRequest = async (userKeys, content, tags = [], created_at) => {
     event.created_at
   );
   if (!eventInitEx) return;
-  return encodeURI(JSON.stringify(eventInitEx));
+  // Use encodeURIComponent (not encodeURI) to properly encode the zap request
+  // for URL parameter transmission. encodeURI doesn't encode &, =, ? which breaks
+  // LNURL callback query string parsing when these chars appear in signatures/tags
+  return encodeURIComponent(JSON.stringify(eventInitEx));
 };
 
 const uploadToS3 = async (img, pubkey) => {

@@ -457,7 +457,8 @@ const Cashier = ({
       console.log('[PaymentGateway] Preimage:', preimage, 'Status:', paymentStatus);
 
       // Check if payment succeeded based on status or preimage
-      const succeeded = (paymentStatus === 'completed' || paymentStatus === 'succeeded') || !!preimage;
+      // Note: Breez SDK returns 'complete' (not 'completed')
+      const succeeded = (paymentStatus === 'complete' || paymentStatus === 'succeeded') || !!preimage;
 
       return {
         status: succeeded,
@@ -783,7 +784,7 @@ const Cashier = ({
             </div>
           </div>
         )}
-        {confirmation === "in_progress" && (
+        {confirmation === "in_progress" && onlyInvoice && (
           <div className="fx-centered fx-col fit-container">
             <h4>Invoice</h4>
             <p className="gray-c box-pad-v-s box-pad-h p-centered">
@@ -807,24 +808,22 @@ const Cashier = ({
               <p>{shortenKey(invoice)}</p>
               <div className="copy-24"></div>
             </div>
-            {!onlyInvoice && (
-              <div className="fit-container fx-centered box-pad-v-s">
-                <p className="gray-c p-medium">{t("A1ufjMM")}</p>
-                <LoadingDots />
-              </div>
-            )}
-            {onlyInvoice && (
-              <div className="fit-container fx-centered">
-                <button
-                  className="btn btn-normal btn-full"
-                  onClick={() => {
-                    exit();
-                  }}
-                >
-                  {t("AI67awJ")}
-                </button>
-              </div>
-            )}
+            <div className="fit-container fx-centered">
+              <button
+                className="btn btn-normal btn-full"
+                onClick={() => {
+                  exit();
+                }}
+              >
+                {t("AI67awJ")}
+              </button>
+            </div>
+          </div>
+        )}
+        {confirmation === "in_progress" && !onlyInvoice && (
+          <div className="fx-centered fx-col fit-container" style={{ height: "25vh" }}>
+            <p className="gray-c p-medium">{t("A1ufjMM")}</p>
+            <LoadingDots />
           </div>
         )}
         {confirmation === "confirmed" && (

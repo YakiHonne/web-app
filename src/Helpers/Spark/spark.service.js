@@ -330,6 +330,18 @@ class SparkService {
             console.error('[SparkService] Error in event callback:', error)
           }
         })
+
+        // Notify payment waiters for payment completion
+        if ((event.type === 'paymentSucceeded' || event.type === 'paymentFailed') && event.payment) {
+          const waiter = this.paymentWaiters?.get(event.payment.id)
+          if (waiter) {
+            try {
+              waiter(event)
+            } catch (error) {
+              console.error('[SparkService] Error in payment waiter:', error)
+            }
+          }
+        }
       }
     }
 
@@ -453,6 +465,43 @@ class SparkService {
   }
 
   /**
+   * Wait for a payment to complete by listening for SDK events
+   * @private
+   */
+  async waitForPaymentCompletion(paymentId, timeoutMs = 60000) {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Payment timeout - no response from Lightning network'))
+      }, timeoutMs)
+
+      // Listen for payment events
+      const checkPayment = async (event) => {
+        if (event.type === 'paymentSucceeded' && event.payment.id === paymentId) {
+          clearTimeout(timeout)
+          resolve(event.payment)
+        } else if (event.type === 'paymentFailed' && event.payment.id === paymentId) {
+          clearTimeout(timeout)
+          reject(new Error(event.payment.error || 'Payment failed'))
+        }
+      }
+
+      // Temporary event listener (will be called by onEvent)
+      this.paymentWaiters = this.paymentWaiters || new Map()
+      this.paymentWaiters.set(paymentId, checkPayment)
+
+      // Clean up on completion
+      const cleanup = () => {
+        clearTimeout(timeout)
+        this.paymentWaiters?.delete(paymentId)
+      }
+
+      Promise.race([
+        new Promise((res) => setTimeout(res, timeoutMs))
+      ]).then(cleanup)
+    })
+  }
+
+  /**
    * Send payment via Lightning
    *
    * @param paymentRequest - Bolt11 invoice or Lightning address
@@ -497,8 +546,13 @@ class SparkService {
           prepareResponse
         })
 
-        console.log('[SparkService] LNURL-Pay sent:', response)
-        return response.payment // Return the payment from LNURL response
+        console.log('[SparkService] LNURL-Pay sent (pending):', response)
+
+        // Wait for payment to complete
+        const completedPayment = await this.waitForPaymentCompletion(response.payment.id)
+
+        console.log('[SparkService] LNURL-Pay completed:', completedPayment)
+        return completedPayment
       } else if (parsedInput.type === 'lnurlPay') {
         console.log('[SparkService] Using LNURL-Pay flow for lnurlPay type')
 
@@ -518,8 +572,13 @@ class SparkService {
           prepareResponse
         })
 
-        console.log('[SparkService] LNURL-Pay sent:', response)
-        return response.payment
+        console.log('[SparkService] LNURL-Pay sent (pending):', response)
+
+        // Wait for payment to complete
+        const completedPayment = await this.waitForPaymentCompletion(response.payment.id)
+
+        console.log('[SparkService] LNURL-Pay completed:', completedPayment)
+        return completedPayment
       } else {
         // Regular Bolt11 invoice or other supported types
         console.log('[SparkService] Using regular payment flow')
@@ -563,8 +622,13 @@ class SparkService {
           }
         })
 
-        console.log('[SparkService] Payment sent:', response)
-        return response
+        console.log('[SparkService] Payment sent (pending):', response)
+
+        // Wait for payment to complete (SDK fires paymentSucceeded/paymentFailed events)
+        const completedPayment = await this.waitForPaymentCompletion(response.payment.id)
+
+        console.log('[SparkService] Payment completed:', completedPayment)
+        return completedPayment
       }
     } catch (error) {
       console.warn('[SparkService] Payment failed (handled):', error)
