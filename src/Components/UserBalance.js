@@ -16,9 +16,11 @@ export default function UserBalance() {
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const userBalance = useSelector((state) => state.userBalance);
+  const sparkBalance = useSelector((state) => state.sparkBalance);
+  const sparkConnected = useSelector((state) => state.sparkConnected);
   const [wallets, setWallets] = useState(getWallets());
   const [selectedWallet, setSelectedWallet] = useState(
-    wallets.find((wallet) => wallet.active)
+    wallets.find((wallet) => wallet && wallet.active)
   );
   const [isLoading, setIsLoading] = useState(false);
   const [isHidden, setIsHidden] = useState(
@@ -29,9 +31,28 @@ export default function UserBalance() {
   useEffect(() => {
     if (["/wallet"].includes(window.location.pathname)) return;
     if (!userKeys) return;
+
+    // Get current wallets
+    let tempWallets = getWallets();
+
+    // Fix: If Spark wallet is connected but not in wallets list, add it
+    if (sparkConnected && !tempWallets.find(w => w.kind === 4) && userKeys.pub) {
+      const sparkWallet = {
+        id: Date.now(),
+        kind: 4,
+        entitle: 'Spark Wallet',
+        active: true,
+        data: 'spark-self-custodial'
+      };
+      tempWallets = tempWallets.map(w => ({ ...w, active: false }));
+      tempWallets.push(sparkWallet);
+      updateWallets(tempWallets);
+    }
+
     if (userKeys && (userKeys?.ext || userKeys?.sec || userKeys?.bunker)) {
-      let tempWallets = getWallets();
-      let selectedWallet_ = tempWallets.find((wallet) => wallet.active);
+      setWallets(tempWallets);
+      let selectedWallet_ = tempWallets.find((wallet) => wallet && wallet.active);
+      setSelectedWallet(selectedWallet_);
       if (selectedWallet_) {
         if (selectedWallet_.kind === 1) {
           getBalancWebLN();
@@ -42,21 +63,27 @@ export default function UserBalance() {
         if (selectedWallet_.kind === 3) {
           getNWCData(selectedWallet_);
         }
+        // Kind 4 (Spark) is handled by SparkWalletManager
       } else {
         setWallets([]);
         setSelectedWallet(false);
         dispatch(setUserBalance("N/A"));
       }
+    } else if (userKeys.pub && tempWallets.length > 0) {
+      // User has pub key and wallets (e.g., Spark wallet)
+      setWallets(tempWallets);
+      let selectedWallet_ = tempWallets.find((wallet) => wallet && wallet.active);
+      setSelectedWallet(selectedWallet_);
     } else {
       dispatch(setUserBalance("N/A"));
     }
-  }, [userKeys, selectedWallet]);
+  }, [userKeys, sparkConnected, sparkBalance]);
 
   useEffect(() => {
     if (!window.location.pathname.includes("users")) {
       let tempWallets = getWallets();
       setWallets(tempWallets);
-      setSelectedWallet(tempWallets.find((wallet) => wallet.active));
+      setSelectedWallet(tempWallets.find((wallet) => wallet && wallet.active));
     }
   }, []);
 
@@ -71,7 +98,7 @@ export default function UserBalance() {
       dispatch(setUserBalance(data.balance));
       setIsLoading(false);
     } catch (err) {
-      console.log(err);
+      console.warn('[UserBalance] WebLN balance fetch failed (handled):', err);
       setIsLoading(false);
     }
   };
@@ -86,7 +113,7 @@ export default function UserBalance() {
       dispatch(setUserBalance(b));
       setIsLoading(false);
     } catch (err) {
-      console.log(err);
+      console.warn('[UserBalance] Alby data fetch failed (handled):', err);
       setIsLoading(false);
     }
   };
@@ -99,7 +126,7 @@ export default function UserBalance() {
       });
       return data.data.balance;
     } catch (err) {
-      console.log(err);
+      console.warn('[UserBalance] Alby balance API failed (handled):', err);
       return 0;
     }
   };
@@ -113,7 +140,7 @@ export default function UserBalance() {
       dispatch(setUserBalance(userBalanceResponse.balance));
       setIsLoading(false);
     } catch (err) {
-      console.log(err);
+      console.warn('[UserBalance] NWC data fetch failed (handled):', err);
       setIsLoading(false);
     }
   };
@@ -129,9 +156,13 @@ export default function UserBalance() {
     localStorage_.setItem("isSatsHidden", ts);
   };
 
-  if (!(userKeys && (userKeys?.ext || userKeys?.sec || userKeys?.bunker)))
+  // Show balance widget if user has appropriate keys or has a wallet
+  const hasValidKeys = userKeys && (userKeys?.ext || userKeys?.sec || userKeys?.bunker);
+  const hasWalletsWithPubkey = userKeys?.pub && wallets.length > 0;
+
+  if (!(hasValidKeys || hasWalletsWithPubkey))
     return;
-  if (userKeys?.sec && userBalance == "N/A")
+  if (userKeys?.sec && userBalance == "N/A" && wallets.length === 0)
     return (
       <Link
         className="fit-container fx-centered fx-start-h box-pad-h-m userBalance-container mb-hide"
@@ -145,38 +176,69 @@ export default function UserBalance() {
         <p>{t("A8fEwNq")}</p>
       </Link>
     );
+  // Determine which balance to display based on wallet type
+  const displayBalance = selectedWallet?.kind === 4
+    ? (sparkBalance !== null ? sparkBalance : 'N/A')
+    : userBalance;
+
+  // Don't show balance if Spark wallet is selected but not connected yet
+  const shouldHideBalance = selectedWallet?.kind === 4 && !sparkConnected;
+
   return (
-    <div
-      className="fit-container fx-scattered box-pad-h-s userBalance-container mb-hide pointer"
-      style={{ borderLeft: "2px solid var(--orange-main)", margin: ".75rem" }}
-      onClick={(e) => {
-        e.stopPropagation();
-        customHistory("/wallet");
-      }}
-    >
+    <>
+      {/* Desktop wallet display */}
       <div
-        className="fx-centered  fit-container fx-start-h "
-        style={{ rowGap: 0 }}
+        className="fit-container fx-scattered box-pad-h-s userBalance-container mb-hide pointer"
+        style={{ borderLeft: "2px solid var(--orange-main)", margin: ".75rem" }}
+        onClick={(e) => {
+          e.stopPropagation();
+          customHistory("/wallet");
+        }}
       >
-        <div>
-          <p className="gray-c p-medium">Sats</p>
-          {!isHidden && (
-            <h4 style={{ minWidth: "max-content" }}>
-              <NumberShrink value={userBalance} />
-            </h4>
-          )}
-          {isHidden && <h4>***</h4>}
-        </div>
-        <p className="gray-c">&#8596;</p>
-        <SatsToUSD sats={userBalance} isHidden={isHidden} />
+        {!shouldHideBalance && (
+          <div
+            className="fx-centered fx-start-h"
+            style={{ rowGap: 0, flex: 1, minWidth: 0, overflow: 'hidden' }}
+          >
+            <div style={{ flexShrink: 0 }}>
+              <p className="gray-c p-medium">Sats</p>
+              {!isHidden && (
+                <h4 style={{ minWidth: "max-content" }}>
+                  <NumberShrink value={displayBalance} />
+                </h4>
+              )}
+              {isHidden && <h4>***</h4>}
+            </div>
+            <p className="gray-c" style={{ flexShrink: 0, padding: '0 0.5rem' }}>&#8596;</p>
+            <div style={{ minWidth: 0, overflow: 'hidden' }}>
+              <SatsToUSD sats={displayBalance} isHidden={isHidden} />
+            </div>
+          </div>
+        )}
+        {!shouldHideBalance && (
+          <div style={{ flexShrink: 0, marginLeft: '0.5rem' }}>
+            {!isHidden && (
+              <div className="eye-closed-24" onClick={handleSatsDisplay}></div>
+            )}
+            {isHidden && (
+              <div className="eye-opened-24" onClick={handleSatsDisplay}></div>
+            )}
+          </div>
+        )}
       </div>
-      {!isHidden && (
-        <div className="eye-closed-24" onClick={handleSatsDisplay}></div>
-      )}
-      {isHidden && (
-        <div className="eye-opened-24" onClick={handleSatsDisplay}></div>
-      )}
-    </div>
+
+      {/* Mobile wallet icon */}
+      <Link
+        className="mb-show fx-centered box-pad-h-s pointer"
+        style={{
+          borderLeft: "2px solid var(--orange-main)",
+          margin: ".75rem"
+        }}
+        href={"/wallet"}
+      >
+        <div className="wallet-24"></div>
+      </Link>
+    </>
   );
 }
 
@@ -219,7 +281,7 @@ const checkAlbyToken = async (wallets, activeWallet) => {
       activeWallet: tempWallet,
     };
   } catch (err) {
-    console.log(err);
+    console.warn('[UserBalance] Alby token refresh failed (handled):', err);
     return {
       wallets,
       activeWallet,

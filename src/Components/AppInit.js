@@ -84,6 +84,7 @@ import {
   getConnectedAccounts,
   getKeys,
   getMetadataFromCachedAccounts,
+  getWallets,
 } from "@/Helpers/ClientHelpers";
 import { setNostrAuthors, setNostrClients } from "@/Store/Slides/Profiles";
 import {
@@ -109,6 +110,7 @@ import {
 import { getTrendingUsers24h } from "@/Helpers/WSInstance";
 import { savedToolsIdentifier } from "@/Content/Extras";
 import { decryptDMSWorker } from "@/workers/decryptDMWorker";
+import sparkWalletManager from "@/Helpers/Spark/spark-wallet-manager";
 
 export default function AppInit() {
   const dispatch = useDispatch();
@@ -399,6 +401,32 @@ export default function AppInit() {
       dispatch(setUserMetadata(getMetadataFromCachedAccounts(keys.pub)));
       dispatch(setUserKeys(keys));
     }
+
+    // Add global error handler for NDK relay errors
+    const handleGlobalError = (event) => {
+      const error = event.error || event.reason;
+      if (error && typeof error === 'object') {
+        const errorMsg = error.message || String(error);
+        // Suppress common relay errors that shouldn't break the app
+        if (errorMsg.includes('already authenticated') ||
+            errorMsg.includes('user unauthorized') ||
+            errorMsg.includes('restricted') ||
+            (errorMsg.includes('Relay') && errorMsg.includes('disconnected')) ||
+            (errorMsg.includes('WebSocket') && errorMsg.includes('closed'))) {
+          console.warn('[AppInit] Suppressing NDK relay error:', errorMsg);
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleGlobalError);
+
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleGlobalError);
+    };
   }, []);
 
   useEffect(() => {
@@ -428,9 +456,28 @@ export default function AppInit() {
         }
       }
 
-      ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
-        ndk: ndkInstance,
-      });
+      // Custom auth policy that doesn't throw on authentication errors
+      ndkInstance.relayAuthDefaultPolicy = async (relay) => {
+        try {
+          // Attempt standard sign-in
+          const policy = NDKRelayAuthPolicies.signIn({ ndk: ndkInstance });
+          if (typeof policy === 'function') {
+            await policy(relay);
+          }
+        } catch (error) {
+          // Suppress auth errors silently
+          const errorMsg = error?.message || String(error);
+          if (errorMsg.includes('already authenticated') ||
+              errorMsg.includes('user unauthorized') ||
+              errorMsg.includes('restricted')) {
+            console.warn('[NDK Auth] Suppressing relay auth error:', relay.url, errorMsg);
+            // Don't throw - just continue without auth
+            return;
+          }
+          // Re-throw other errors
+          throw error;
+        }
+      };
     };
     if (userKeys) {
       handleUseRKeys();
@@ -1154,6 +1201,35 @@ export default function AppInit() {
       console.log(err);
     }
   };
+
+  // Auto-connect Spark wallet if it exists and is active
+  // This is the ONLY place that should auto-restore on page load
+  useEffect(() => {
+    if (!userKeys?.pub) return;
+
+    const autoConnectSparkWallet = async () => {
+      try {
+        // Skip if already connected (prevent duplicate connection attempts)
+        if (sparkWalletManager.isConnected()) {
+          console.log('[AppInit] Spark wallet already connected, skipping auto-connect');
+          return;
+        }
+
+        const wallets = getWallets();
+        const sparkWallet = wallets.find(w => w.kind === 4 && w.active);
+
+        if (sparkWallet) {
+          console.log('[AppInit] Found active Spark wallet, auto-connecting...');
+          await sparkWalletManager.restoreWallet();
+          console.log('[AppInit] Spark wallet auto-connected successfully');
+        }
+      } catch (error) {
+        console.warn('[AppInit] Spark wallet auto-connect failed (will retry manually):', error);
+      }
+    };
+
+    autoConnectSparkWallet();
+  }, [userKeys?.pub]);
 
   return null;
 }

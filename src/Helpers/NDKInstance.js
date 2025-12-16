@@ -20,6 +20,26 @@ if (typeof window !== "undefined") {
     expirationTime: 3600 * 24 * 7,
     profileCacheSize: 200,
   });
+
+  // Suppress console output of common NDK relay errors
+  // These errors don't break functionality but clutter the console
+  const originalConsoleError = console.error;
+  console.error = (...args) => {
+    const errorMsg = args.join(' ');
+    // Check if this is a relay error we want to suppress
+    if (typeof errorMsg === 'string' && (
+        errorMsg.includes('already authenticated') ||
+        errorMsg.includes('user unauthorized') ||
+        errorMsg.includes('restricted') ||
+        (errorMsg.includes('Relay') && errorMsg.includes('disconnected'))
+    )) {
+      // Log as warning instead to reduce noise
+      console.warn('[NDK Relay]', errorMsg);
+      return;
+    }
+    // Call original console.error for all other errors
+    originalConsoleError.apply(console, args);
+  };
 }
 
 export { ndkInstance };

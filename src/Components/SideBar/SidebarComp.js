@@ -24,6 +24,8 @@ import {
   logoutAllAccounts,
   userLogout,
 } from "@/Helpers/Controlers";
+import { store } from "@/Store/Store";
+import { setToast } from "@/Store/Slides/Publishers";
 import Publishing from "@/Components/Publishing";
 import YakiMobileappSidebar from "@/Components/YakiMobileappSidebar";
 import { useTranslation } from "react-i18next";
@@ -109,52 +111,33 @@ export default function SidebarComp() {
     logoutAllAccounts();
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (showConfirmationBox === 1) {
-      exportAllWallets();
+      // Show toast to inform user about downloads
+      store.dispatch(
+        setToast({
+          show: true,
+          type: 'info',
+          message: t('Downloading wallet backups... Please allow downloads if prompted by your browser.'),
+        })
+      );
+
+      await exportAllWallets();
       setShowSettings(false);
       userLogout(userKeys.pub);
     }
     if (showConfirmationBox === 2) {
-      let wallets = getAllWallets();
-      wallets = wallets.filter((_) => _.wallets.find((_) => _.kind !== 1));
-      let NWCs = wallets.map((_) => {
-        return { ..._, wallets: _.wallets.filter((_) => _.kind !== 1) };
-      });
-      let toSave = NWCs.map((wallet) => {
-        return [
-          `Wallets for: ${getBech32("npub", wallet.pubkey)}`,
-          "-",
-          ...wallet.wallets.map((_, index, arr) => {
-            return [
-              `Address: ${_.entitle}`,
-              `NWC secret: ${_.data}`,
-              index === arr.length - 1 ? "" : "----",
-            ];
-          }),
-        ].flat();
-      })
-        .map((_, index, arr) => {
-          return [
-            ..._,
-            index === arr.length - 1
-              ? ""
-              : "------------------------------------------------------",
-            " ",
-          ];
+      // Show toast to inform user about downloads
+      store.dispatch(
+        setToast({
+          show: true,
+          type: 'info',
+          message: t('Downloading wallet backups... Please allow downloads if prompted by your browser.'),
         })
-        .flat();
-      downloadAsFile(
-        [
-          "Important: Store this information securely. If you lose it, recovery may not be possible. Keep it private and protected at all times",
-          "---",
-          ...toSave,
-        ].join("\n"),
-        "text/plain",
-        `NWCs-wallets.txt`,
-        t("AVUlnek")
       );
+
       setShowSettings(false);
+      // logoutAllAccounts() will handle all the exports
       logoutAllAccounts();
     }
     setShowConfirmationBox(false);

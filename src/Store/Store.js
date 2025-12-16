@@ -53,6 +53,15 @@ import {
   IsNotificationsLoadingReducer,
   RefreshNotificationsReducer,
 } from "./Slides/Extras";
+import {
+  SparkConnectedReducer,
+  SparkConnectingReducer,
+  SparkBalanceReducer,
+  SparkLightningAddressReducer,
+  SparkWalletInfoReducer,
+  SparkLastSyncReducer,
+  SparkPaymentsReducer,
+} from "./Slides/SparkWallet";
 
 export const store = configureStore({
   reducer: {
@@ -103,5 +112,13 @@ export const store = configureStore({
     notifications: NotificationsReducer,
     isNotificationsLoading: IsNotificationsLoadingReducer,
     refreshNotifications: RefreshNotificationsReducer,
+    // Spark Wallet state
+    sparkConnected: SparkConnectedReducer,
+    sparkConnecting: SparkConnectingReducer,
+    sparkBalance: SparkBalanceReducer,
+    sparkLightningAddress: SparkLightningAddressReducer,
+    sparkWalletInfo: SparkWalletInfoReducer,
+    sparkLastSync: SparkLastSyncReducer,
+    sparkPayments: SparkPaymentsReducer,
   },
 });

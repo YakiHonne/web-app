@@ -90,6 +90,7 @@ const getAnswerFromAIRemoteAPI = async (pubkey_, input) => {
 
 const getLinkFromAddr = (addr_) => {
   try {
+    if (!addr_ || typeof addr_ !== 'string') return null;
     let addr = addr_
       .replaceAll("nostr:", "")
       .replaceAll(",", "")
@@ -915,6 +916,7 @@ const extractNip19 = (note) => {
 
 const decodeNip19 = (word) => {
   try {
+    if (!word || typeof word !== 'string') return null;
     let word_ = word
       .replaceAll("@", "")
       .replaceAll("nostr:", "")

@@ -1,0 +1,593 @@
+/**
+ * Spark Wallet Styles
+ *
+ * Custom styles for the Breez Spark Lightning wallet integration
+ * Follows Yakihonne's design system conventions
+ */
+
+/* Wallet Setup Tabs */
+.spark-setup-tabs {
+  display: flex;
+  gap: var(--12);
+  border-bottom: 1px solid var(--dim-gray);
+  margin-bottom: var(--24);
+}
+
+.spark-setup-tab {
+  padding: var(--12) var(--24);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--gray);
+  cursor: pointer;
+  transition: .2s ease-in-out;
+  font-size: var(--16);
+  font-family: 'DM Sans', sans-serif;
+}
+
+.spark-setup-tab:hover {
+  color: var(--orange-main);
+}
+
+.spark-setup-tab-active {
+  color: var(--orange-main);
+  border-bottom-color: var(--orange-main);
+  font-weight: 600;
+}
+
+/* Mnemonic Display */
+.spark-mnemonic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--12);
+  padding: var(--24);
+  background: var(--very-dim-gray);
+  border: 1px solid var(--dim-gray);
+  border-radius: var(--border-r-6);
+  margin: var(--16) 0;
+}
+
+.spark-mnemonic-word {
+  display: flex;
+  align-items: center;
+  gap: var(--12);
+  padding: var(--12);
+  background: var(--white);
+  border-radius: var(--border-r-6);
+  font-family: 'Inconsolata', monospace;
+  font-size: var(--16);
+}
+
+.spark-mnemonic-word-number {
+  color: var(--gray);
+  font-size: var(--12);
+  min-width: 24px;
+}
+
+.spark-mnemonic-word-text {
+  color: var(--black);
+  font-weight: 600;
+}
+
+.spark-mnemonic-blur {
+  filter: blur(5px);
+  transition: filter .2s ease-in-out;
+}
+
+.spark-mnemonic-blur:hover {
+  filter: blur(0);
+}
+
+/* Balance Display */
+.spark-balance-container {
+  display: flex;
+  align-items: center;
+  gap: var(--16);
+  padding: var(--16) var(--24);
+  background: var(--orange-side);
+  border: 1px solid var(--orange-main);
+  border-radius: var(--border-r-18);
+  margin-bottom: var(--24);
+}
+
+.spark-balance-amount {
+  font-size: var(--32);
+  font-weight: 900;
+  color: var(--orange-main);
+  line-height: 1;
+}
+
+.spark-balance-unit {
+  font-size: var(--16);
+  color: var(--gray);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.spark-balance-usd {
+  font-size: var(--12);
+  color: var(--gray);
+  margin-top: var(--12);
+}
+
+.spark-balance-hidden {
+  font-size: var(--32);
+  color: var(--gray);
+}
+
+/* Lightning Address Display */
+.spark-lightning-address {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--16) var(--24);
+  background: var(--very-dim-gray);
+  border: 1px solid var(--dim-gray);
+  border-radius: var(--border-r-18);
+  margin-bottom: var(--24);
+}
+
+.spark-lightning-address-text {
+  font-family: 'Inconsolata', monospace;
+  font-size: var(--16);
+  color: var(--black);
+  display: flex;
+  align-items: center;
+  gap: var(--12);
+}
+
+.spark-lightning-address-icon {
+  color: var(--orange-main);
+  font-size: var(--20);
+}
+
+/* Payment List */
+.spark-payment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--16);
+  background: var(--white);
+  border: 1px solid var(--dim-gray);
+  border-radius: var(--border-r-6);
+  margin-bottom: var(--12);
+  cursor: pointer;
+  transition: .2s ease-in-out;
+}
+
+.spark-payment-item:hover {
+  border-color: var(--orange-main);
+  background: var(--orange-side);
+}
+
+.spark-payment-item-expanded {
+  border-color: var(--orange-main);
+  background: var(--orange-side);
+}
+
+.spark-payment-left {
+  display: flex;
+  align-items: center;
+  gap: var(--16);
+}
+
+.spark-payment-icon {
+  width: var(--40);
+  height: var(--40);
+  border-radius: var(--border-r-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--20);
+  font-weight: 700;
+}
+
+.spark-payment-icon-incoming {
+  background: var(--green-side);
+  color: var(--green-main);
+}
+
+.spark-payment-icon-outgoing {
+  background: var(--orange-side);
+  color: var(--orange-main);
+}
+
+.spark-payment-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--12);
+}
+
+.spark-payment-amount {
+  font-size: var(--20);
+  font-weight: 700;
+  color: var(--black);
+}
+
+.spark-payment-amount-incoming {
+  color: var(--green-main);
+}
+
+.spark-payment-amount-outgoing {
+  color: var(--orange-main);
+}
+
+.spark-payment-date {
+  font-size: var(--12);
+  color: var(--gray);
+}
+
+.spark-payment-status {
+  padding: 4px var(--12);
+  border-radius: var(--border-r-6);
+  font-size: var(--10);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.spark-payment-status-completed {
+  background: var(--green-side);
+  color: var(--green-main);
+}
+
+.spark-payment-status-pending {
+  background: var(--orange-side);
+  color: var(--orange-main);
+}
+
+.spark-payment-status-failed {
+  background: var(--red-side);
+  color: var(--red-main);
+}
+
+/* Payment Details (expanded) */
+.spark-payment-details {
+  margin-top: var(--16);
+  padding-top: var(--16);
+  border-top: 1px solid var(--dim-gray);
+}
+
+.spark-payment-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--12) 0;
+  font-size: var(--12);
+}
+
+.spark-payment-detail-label {
+  color: var(--gray);
+  font-weight: 600;
+}
+
+.spark-payment-detail-value {
+  color: var(--black);
+  font-family: 'Inconsolata', monospace;
+  max-width: 60%;
+  word-break: break-all;
+}
+
+/* QR Code Container */
+.spark-qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--16);
+  padding: var(--24);
+  background: var(--white);
+  border: 1px solid var(--dim-gray);
+  border-radius: var(--border-r-18);
+  margin: var(--24) 0;
+}
+
+.spark-qr-code {
+  padding: var(--16);
+  background: white;
+  border-radius: var(--border-r-6);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.spark-qr-invoice {
+  width: 100%;
+  padding: var(--12) var(--16);
+  background: var(--very-dim-gray);
+  border: 1px solid var(--dim-gray);
+  border-radius: var(--border-r-6);
+  font-family: 'Inconsolata', monospace;
+  font-size: var(--12);
+  word-break: break-all;
+  color: var(--black);
+  text-align: center;
+}
+
+/* Input Field Styles */
+.spark-input-field {
+  width: 100%;
+  padding: var(--12) var(--16);
+  background: var(--white);
+  border: 1px solid var(--dim-gray);
+  border-radius: var(--border-r-6);
+  font-size: var(--16);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--black);
+  transition: .2s ease-in-out;
+}
+
+.spark-input-field:focus {
+  outline: none;
+  border-color: var(--orange-main);
+  box-shadow: 0 0 0 3px var(--orange-side);
+}
+
+.spark-input-field::placeholder {
+  color: var(--gray);
+}
+
+.spark-textarea-field {
+  width: 100%;
+  padding: var(--12) var(--16);
+  background: var(--white);
+  border: 1px solid var(--dim-gray);
+  border-radius: var(--border-r-6);
+  font-size: var(--16);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--black);
+  min-height: 80px;
+  resize: vertical;
+  transition: .2s ease-in-out;
+}
+
+.spark-textarea-field:focus {
+  outline: none;
+  border-color: var(--orange-main);
+  box-shadow: 0 0 0 3px var(--orange-side);
+}
+
+/* Form Group */
+.spark-form-group {
+  margin-bottom: var(--24);
+}
+
+.spark-form-label {
+  display: block;
+  margin-bottom: var(--12);
+  font-size: var(--16);
+  font-weight: 600;
+  color: var(--black);
+}
+
+.spark-form-hint {
+  margin-top: var(--12);
+  font-size: var(--12);
+  color: var(--gray);
+}
+
+.spark-form-error {
+  margin-top: var(--12);
+  font-size: var(--12);
+  color: var(--red-main);
+  font-weight: 600;
+}
+
+/* Wallet Tabs */
+.spark-wallet-tabs {
+  display: flex;
+  gap: var(--12);
+  border-bottom: 1px solid var(--dim-gray);
+  margin-bottom: var(--24);
+}
+
+.spark-wallet-tab {
+  padding: var(--12) var(--24);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--gray);
+  cursor: pointer;
+  transition: .2s ease-in-out;
+  font-size: var(--16);
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.spark-wallet-tab:hover {
+  color: var(--orange-main);
+}
+
+.spark-wallet-tab-active {
+  color: var(--orange-main);
+  border-bottom-color: var(--orange-main);
+}
+
+/* Settings Section */
+.spark-settings-section {
+  margin-bottom: var(--32);
+}
+
+.spark-settings-title {
+  font-size: var(--20);
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: var(--16);
+}
+
+.spark-settings-description {
+  font-size: var(--16);
+  color: var(--gray);
+  margin-bottom: var(--16);
+  line-height: 150%;
+}
+
+/* Warning Box */
+.spark-warning-box {
+  padding: var(--16) var(--24);
+  background: var(--orange-side);
+  border: 1px solid var(--orange-main);
+  border-radius: var(--border-r-6);
+  margin: var(--16) 0;
+}
+
+.spark-warning-title {
+  display: flex;
+  align-items: center;
+  gap: var(--12);
+  font-size: var(--16);
+  font-weight: 700;
+  color: var(--orange-main);
+  margin-bottom: var(--12);
+}
+
+.spark-warning-text {
+  font-size: var(--16);
+  color: var(--black);
+  line-height: 150%;
+}
+
+/* Success Box */
+.spark-success-box {
+  padding: var(--16) var(--24);
+  background: var(--green-side);
+  border: 1px solid var(--green-main);
+  border-radius: var(--border-r-6);
+  margin: var(--16) 0;
+}
+
+.spark-success-title {
+  display: flex;
+  align-items: center;
+  gap: var(--12);
+  font-size: var(--16);
+  font-weight: 700;
+  color: var(--green-main);
+  margin-bottom: var(--12);
+}
+
+.spark-success-text {
+  font-size: var(--16);
+  color: var(--black);
+  line-height: 150%;
+}
+
+/* Error Box */
+.spark-error-box {
+  padding: var(--16) var(--24);
+  background: var(--red-side);
+  border: 1px solid var(--red-main);
+  border-radius: var(--border-r-6);
+  margin: var(--16) 0;
+}
+
+.spark-error-title {
+  display: flex;
+  align-items: center;
+  gap: var(--12);
+  font-size: var(--16);
+  font-weight: 700;
+  color: var(--red-main);
+  margin-bottom: var(--12);
+}
+
+.spark-error-text {
+  font-size: var(--16);
+  color: var(--black);
+  line-height: 150%;
+}
+
+/* Empty State */
+.spark-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--48) var(--24);
+  text-align: center;
+}
+
+.spark-empty-state-icon {
+  font-size: var(--64);
+  color: var(--gray);
+  margin-bottom: var(--24);
+  opacity: 0.3;
+}
+
+.spark-empty-state-title {
+  font-size: var(--24);
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: var(--12);
+}
+
+.spark-empty-state-text {
+  font-size: var(--16);
+  color: var(--gray);
+  line-height: 150%;
+}
+
+/* Lightning Animation */
+@keyframes spark-lightning-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.spark-lightning-icon-animated {
+  animation: spark-lightning-pulse 2s ease-in-out infinite;
+}
+
+/* Loading Spinner */
+.spark-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--48);
+}
+
+.spark-loading-text {
+  margin-top: var(--16);
+  font-size: var(--16);
+  color: var(--gray);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .spark-mnemonic-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .spark-setup-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .spark-wallet-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .spark-balance-amount {
+    font-size: var(--24);
+  }
+
+  .spark-payment-detail-value {
+    max-width: 50%;
+  }
+}
+
+/* Dark Theme Support */
+[data-theme='dark'] .spark-qr-code,
+[data-theme='gray'] .spark-qr-code {
+  background: var(--white);
+  padding: var(--16);
+}
+
+[data-theme='dark'] .spark-qr-code svg,
+[data-theme='gray'] .spark-qr-code svg {
+  background: white;
+  padding: var(--12);
+  border-radius: var(--border-r-6);
+}

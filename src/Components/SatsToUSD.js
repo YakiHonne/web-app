@@ -18,11 +18,18 @@ const SatsToUSD = ({ sats, isHidden, selector }) => {
     const fetchBtcToUsdRate = async () => {
       try {
         const response = await axios.get(
-          `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`
+          `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`,
+          {
+            timeout: 5000, // 5 second timeout
+          }
         );
         setFiatRate(response.data.bitcoin[currency]);
       } catch (error) {
-        console.error("Error fetching BTC to USD rate:", error);
+        // Silently fail - USD conversion is a nice-to-have feature
+        // Don't spam console with errors for network issues
+        if (error.code !== 'ECONNABORTED' && error.code !== 'ERR_NETWORK') {
+          console.warn("Could not fetch BTC to fiat rate:", error.message);
+        }
       }
     };
 
@@ -42,7 +49,8 @@ const SatsToUSD = ({ sats, isHidden, selector }) => {
     updateCustomSettings({ ...userSettings, currency });
   };
 
-  if (!fiatValue) return;
+  if (!fiatValue) return null;
+
   if (selector) {
     return (
       <div>
@@ -59,6 +67,7 @@ const SatsToUSD = ({ sats, isHidden, selector }) => {
       </div>
     );
   }
+
   return (
     <div>
       {fiatValue !== null ? (

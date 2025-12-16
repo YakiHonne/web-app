@@ -21,6 +21,7 @@ import {
   setUserKeys,
   setUserMetadata,
 } from "@/Store/Slides/UserData";
+import { setToast } from "@/Store/Slides/Publishers";
 import {
   clearDB,
   savefollowingsFavRelays,
@@ -221,17 +222,48 @@ const yakiChestDisconnect = async () => {
 };
 
 const logoutAllAccounts = async () => {
-  let ignore = ["app-lang", "yaki-wallets", "i18nextLng", "chsettings"];
+  // Only preserve language and settings - clear everything else including wallets
+  let ignore = ["app-lang", "i18nextLng", "chsettings"];
+
+  // Export all wallets including Spark wallet BEFORE clearing storage
+  try {
+    await exportAllWallets();
+  } catch (error) {
+    console.error('Failed to export wallets during logout:', error);
+  }
+
   downloadAllKeys();
+
+  // Clear all localStorage except ignored keys
   Object.keys(localStorage).forEach((key) => {
     if (!ignore.includes(key)) {
       localStorage.removeItem(key);
     }
   });
-  // localStorage_.clear();
+
+  // Disconnect and remove Spark wallet if connected
+  try {
+    const sparkWalletManager = (await import('./Spark/spark-wallet-manager')).default;
+    await sparkWalletManager.disconnect();
+    // Remove Spark wallet from the wallet list
+    sparkWalletManager.removeFromWalletList();
+  } catch (error) {
+    console.error('Failed to disconnect Spark wallet:', error);
+    // Continue with logout even if disconnect fails
+  }
+
+  // Clear Spark wallet encrypted mnemonics (these use pattern: spark_wallet_{pubkey})
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('spark_wallet_')) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  // Clear Redux state
   store.dispatch(setUserBalance("N/A"));
   store.dispatch(setUserKeys(false));
   store.dispatch(setUserMetadata(false));
+
   clearDB();
   yakiChestDisconnect();
 };
@@ -240,6 +272,14 @@ const downloadAllKeys = () => {
   let accounts = localStorage_.getItem("yaki-accounts") || [];
   accounts = Array.isArray(accounts) ? [] : JSON.parse(accounts);
   accounts = accounts.filter((account) => account?.userKeys?.sec);
+
+  // Skip download if no accounts have exportable private keys
+  // (e.g., browser extension logins don't expose private keys)
+  if (accounts.length === 0) {
+    console.log('[Logout] No exportable private keys found (browser extension login)');
+    return;
+  }
+
   let toSave = accounts
     .map((account) => {
       return [
@@ -273,29 +313,53 @@ const downloadAllKeys = () => {
   );
 };
 
-const exportAllWallets = () => {
+const exportAllWallets = async () => {
   let wallets = getWallets();
   let userKeys = getKeys();
-  let NWCs = wallets.filter((_) => _.kind !== 1);
-  let toSave = [
-    "Important: Store this information securely. If you lose it, recovery may not be possible. Keep it private and protected at all times",
-    "---",
-    `Wallets for: ${getBech32("npub", userKeys.pub)}`,
-    "-",
-    ...NWCs.map((_, index) => {
-      return [
-        `Address: ${_.entitle}`,
-        `NWC secret: ${_.data}`,
-        index === NWCs.length - 1 ? "" : "----",
-      ];
-    }),
-  ].flat();
-  downloadAsFile(
-    toSave.join("\n"),
-    "text/plain",
-    `NWCs-${userKeys.pub}.txt`,
-    t("AIzBCBb")
-  );
+
+  // Helper function to identify Spark wallets (check both kind and data properties)
+  const isSparkWallet = (wallet) => {
+    return wallet.kind === 4 || wallet.data === 'spark-self-custodial';
+  };
+
+  // Filter out Spark wallet (kind: 4 or data: 'spark-self-custodial') and regular wallets (kind: 1)
+  let NWCs = wallets.filter((_) => _.kind !== 1 && !isSparkWallet(_));
+  let sparkWallet = wallets.find((_) => isSparkWallet(_));
+
+  // Export NWC wallets
+  if (NWCs.length > 0) {
+    let toSave = [
+      "Important: Store this information securely. If you lose it, recovery may not be possible. Keep it private and protected at all times",
+      "---",
+      `Wallets for: ${getBech32("npub", userKeys.pub)}`,
+      "-",
+      ...NWCs.map((_, index) => {
+        return [
+          `Address: ${_.entitle}`,
+          `NWC secret: ${_.data}`,
+          index === NWCs.length - 1 ? "" : "----",
+        ];
+      }),
+    ].flat();
+    downloadAsFile(
+      toSave.join("\n"),
+      "text/plain",
+      `NWCs-${userKeys.pub}.txt`,
+      t("AIzBCBb")
+    );
+  }
+
+  // Export Spark wallet backup
+  if (sparkWallet) {
+    try {
+      const sparkWalletManager = (await import('./Spark/spark-wallet-manager')).default;
+      // Don't require wallet to be connected during logout - just check if backup exists
+      await sparkWalletManager.downloadBackup(false);
+    } catch (error) {
+      console.error('Failed to export Spark wallet backup:', error);
+      // Silently fail - backup might not be available or user might not have a wallet
+    }
+  }
 };
 
 const exportWallet = (nwc, addr) => {
@@ -850,9 +914,10 @@ const getDVMJobResponse = async (eventId) => {
 
 const walletWarning = () => {
   store.dispatch(
-    store.getState().setToast({
-      type: 3,
-      desc: t("A4R0ICw"),
+    setToast({
+      show: true,
+      type: 'warning',
+      message: t("A4R0ICw"),
     })
   );
 };

@@ -1,0 +1,805 @@
+/**
+ * SparkService - Wrapper for Breez Spark SDK
+ *
+ * This service provides a simplified interface to the Breez Spark SDK
+ * for Lightning wallet functionality in the browser.
+ *
+ * POC Phase 1: Testing basic initialization, send/receive, and compatibility
+ */
+
+// Suppress harmless RecvError from Breez SDK WASM during disconnect
+if (typeof window !== 'undefined') {
+  const originalConsoleError = console.error
+  console.error = (...args) => {
+    const errorMsg = args.join(' ')
+    // Suppress sync errors during wallet disconnect - these are harmless
+    if (errorMsg.includes('sync trigger failed: RecvError') ||
+        errorMsg.includes('RecvError()')) {
+      console.log('[Spark] Suppressed harmless WASM sync error during disconnect')
+      return
+    }
+    originalConsoleError.apply(console, args)
+  }
+}
+
+class SparkService {
+  static instance
+  sdk = null
+  config = null
+  initialized = false
+  connecting = false
+  currentMnemonic = '' // Store for the session
+  eventListenerId = null
+  eventCallbacks = []
+  breezSDK = null // Store dynamically loaded SDK
+
+  constructor() {
+    if (!SparkService.instance) {
+      SparkService.instance = this
+    }
+    return SparkService.instance
+  }
+
+  /**
+   * Dynamically load the Breez SDK (client-side only)
+   */
+  async loadSDK() {
+    if (this.breezSDK) return this.breezSDK
+
+    try {
+      // Dynamic import to avoid SSR issues with WASM
+      const module = await import('@breeztech/breez-sdk-spark/web')
+      this.breezSDK = module
+      return module
+    } catch (error) {
+      console.error('[SparkService] Failed to load Breez SDK:', error)
+      throw new Error('Failed to load Breez Spark SDK')
+    }
+  }
+
+  /**
+   * Initialize the Breez SDK WebAssembly module
+   * Must be called before any other operations
+   */
+  async initializeWasm() {
+    if (this.initialized) return
+
+    try {
+      console.log('[SparkService] Initializing Breez SDK WebAssembly...')
+      const { default: initBreezSDK } = await this.loadSDK()
+
+      console.log('[SparkService] Calling initBreezSDK()...')
+
+      // Let the SDK handle WASM loading itself
+      // The SDK will use import.meta.url which works in both dev and production
+      await initBreezSDK()
+
+      this.initialized = true
+      console.log('[SparkService] WebAssembly initialized successfully')
+    } catch (error) {
+      console.error('[SparkService] Failed to initialize WebAssembly:', error)
+      console.error('[SparkService] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
+      throw new Error(`Failed to initialize Breez Spark SDK: ${error.message}`)
+    }
+  }
+
+  /**
+   * Clear ALL IndexedDB databases to fix corrupted WASM state
+   * This is called proactively before each connection to prevent WASM errors
+   */
+  async clearAllIndexedDB() {
+    try {
+      const dbs = await window.indexedDB.databases()
+      console.log('[SparkService] Found', dbs.length, 'IndexedDB databases')
+
+      for (const db of dbs) {
+        if (db.name) {
+          console.log('[SparkService] Deleting database:', db.name)
+          await new Promise((resolve, reject) => {
+            const request = window.indexedDB.deleteDatabase(db.name)
+            request.onsuccess = () => resolve()
+            request.onerror = () => reject(request.error)
+            request.onblocked = () => {
+              console.warn('[SparkService] Database deletion blocked:', db.name)
+              resolve() // Continue anyway
+            }
+          })
+        }
+      }
+
+      console.log('[SparkService] ✅ All IndexedDB databases cleared')
+    } catch (error) {
+      console.warn('[SparkService] Failed to clear IndexedDB:', error)
+      // Don't throw - this is a best-effort cleanup
+    }
+  }
+
+  /**
+   * Connect to Spark SDK with credentials
+   *
+   * @param apiKey - Breez API key
+   * @param mnemonic - 12/24 word seed phrase (for existing wallet recovery)
+   * @param network - Network to connect to (mainnet or regtest)
+   */
+  async connect(
+    apiKey,
+    mnemonic,
+    network = 'mainnet'
+  ) {
+    if (!this.initialized) {
+      await this.initializeWasm()
+    }
+
+    // If already connected, return existing connection
+    if (this.sdk) {
+      console.log('[SparkService] Already connected, returning existing SDK')
+      // Reset connecting flag if it was stuck
+      this.connecting = false
+      return { sdk: this.sdk, mnemonic: this.currentMnemonic }
+    }
+
+    if (this.connecting) {
+      console.warn('[SparkService] Connection already in progress - rejecting duplicate attempt')
+      throw new Error('Connection already in progress. Please wait.')
+    }
+
+    this.connecting = true
+
+    try {
+      console.log('[SparkService] Starting connection process...')
+      console.log('[SparkService] Network:', network)
+      console.log('[SparkService] API Key present:', !!apiKey)
+
+      // Load SDK functions
+      const { defaultConfig, connect } = await this.loadSDK()
+
+      console.log('[SparkService] Creating configuration...')
+      this.config = defaultConfig(network)
+      this.config.apiKey = apiKey
+
+      // Note: private mode config may not be available in SDK 0.5.2
+      // Only set if the property exists in the config object
+      if ('privateEnabledDefault' in this.config) {
+        this.config.privateEnabledDefault = true
+      }
+
+      console.log('[SparkService] Config created:', {
+        network: this.config.network,
+        syncIntervalSecs: this.config.syncIntervalSecs,
+        preferSparkOverLightning: this.config.preferSparkOverLightning,
+        apiKey: this.config.apiKey ? '[SET]' : '[MISSING]'
+      })
+
+      // Prepare seed
+      let seed
+      if (mnemonic && mnemonic.trim()) {
+        // Clean and validate mnemonic - be extra careful with encoding
+        const cleanMnemonic = mnemonic
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, ' ')
+          .replace(/[^\x00-\x7F]/g, '') // Remove non-ASCII characters that could cause WASM issues
+
+        const words = cleanMnemonic.split(' ')
+        const wordCount = words.length
+
+        if (wordCount !== 12 && wordCount !== 24) {
+          throw new Error(`Invalid mnemonic: expected 12 or 24 words, got ${wordCount}`)
+        }
+
+        // Validate each word is alphanumeric (BIP39 words should be)
+        const invalidWords = words.filter(word => !/^[a-z]+$/.test(word))
+        if (invalidWords.length > 0) {
+          console.error('[SparkService] Invalid words detected:', invalidWords)
+          throw new Error(`Mnemonic contains invalid words. Only lowercase letters allowed.`)
+        }
+
+        console.log(`[SparkService] Using ${wordCount}-word mnemonic`)
+        console.log(`[SparkService] First word: ${words[0]}`)
+        console.log(`[SparkService] Last word: ${words[words.length - 1]}`)
+        seed = { type: 'mnemonic', mnemonic: cleanMnemonic }
+        this.currentMnemonic = cleanMnemonic
+      } else {
+        throw new Error(
+          'Mnemonic is required. Please provide a 12 or 24 word BIP39 mnemonic.'
+        )
+      }
+
+      // Prepare connect request
+      const connectRequest = {
+        config: this.config,
+        seed,
+        storageDir: 'yakihonne-spark-wallet'
+      }
+
+      console.log('[SparkService] Connect request prepared')
+      console.log('[SparkService] Storage dir:', connectRequest.storageDir)
+      console.log('[SparkService] Calling SDK connect()...')
+
+      this.sdk = await connect(connectRequest)
+
+      console.log('[SparkService] SDK connected! Instance:', !!this.sdk)
+
+      // Set up event listener
+      await this.setupEventListener()
+
+      // Initial sync - trigger in background, don't block connection
+      console.log('[SparkService] Starting initial wallet sync in background...')
+      this.syncWalletWithEvent().catch(error => {
+        console.warn('[SparkService] Background sync failed (non-critical):', error)
+      })
+
+      console.log('[SparkService] ✅ Connection complete!')
+      return { sdk: this.sdk, mnemonic: this.currentMnemonic }
+    } catch (error) {
+      console.error('[SparkService] ❌ Connection failed with error:')
+      console.error('[SparkService] Error type:', error?.constructor?.name)
+      console.error('[SparkService] Error message:', error instanceof Error ? error.message : String(error))
+      console.error('[SparkService] Full error:', error)
+
+      // Re-throw with more context
+      if (error instanceof Error) {
+        throw new Error(`Spark SDK connection failed: ${error.message}`)
+      } else {
+        throw new Error(`Spark SDK connection failed: ${String(error)}`)
+      }
+    } finally {
+      this.connecting = false
+    }
+  }
+
+
+  /**
+   * Disconnect and cleanup
+   */
+  async disconnect() {
+    // Reset connecting flag first
+    this.connecting = false
+
+    if (this.sdk) {
+      try {
+        // Remove event listener
+        if (this.eventListenerId) {
+          try {
+            await this.sdk.removeEventListener(this.eventListenerId)
+          } catch (e) {
+            // Ignore errors when removing listener
+          }
+          this.eventListenerId = null
+        }
+
+        // Disconnect SDK - catch to suppress harmless RecvError
+        await this.sdk.disconnect().catch(error => {
+          const errorMsg = error?.message || String(error)
+          if (errorMsg.includes('RecvError') || errorMsg.includes('sync trigger failed')) {
+            // Suppress - this is expected during disconnect
+            console.log('[SparkService] Wallet disconnected (suppressed harmless sync error)')
+          } else {
+            console.warn('[SparkService] Disconnect error:', error)
+          }
+        })
+
+        console.log('[SparkService] Disconnected')
+      } catch (error) {
+        const errorMsg = error?.message || String(error)
+        if (!errorMsg.includes('RecvError') && !errorMsg.includes('sync trigger failed')) {
+          console.error('[SparkService] Error during disconnect:', error)
+        }
+      }
+    }
+    this.sdk = null
+    this.config = null
+    this.currentMnemonic = ''
+    this.eventCallbacks = []
+  }
+
+  /**
+   * Reset connection state (useful if stuck in connecting state)
+   */
+  resetConnectionState() {
+    console.log('[SparkService] Resetting connection state')
+    this.connecting = false
+  }
+
+  /**
+   * Check if wallet is connected
+   */
+  isConnected() {
+    return this.sdk !== null
+  }
+
+  /**
+   * Setup event listener for SDK events
+   */
+  async setupEventListener() {
+    if (!this.sdk) return
+
+    const listener = {
+      onEvent: (event) => {
+        console.log('[SparkService] SDK Event:', event.type, event)
+
+        // Notify all registered callbacks
+        this.eventCallbacks.forEach((callback) => {
+          try {
+            callback(event)
+          } catch (error) {
+            console.error('[SparkService] Error in event callback:', error)
+          }
+        })
+
+        // Notify payment waiters for payment completion
+        if ((event.type === 'paymentSucceeded' || event.type === 'paymentFailed') && event.payment) {
+          const waiter = this.paymentWaiters?.get(event.payment.id)
+          if (waiter) {
+            try {
+              waiter(event)
+            } catch (error) {
+              console.error('[SparkService] Error in payment waiter:', error)
+            }
+          }
+        }
+      }
+    }
+
+    this.eventListenerId = await this.sdk.addEventListener(listener)
+    console.log('[SparkService] Event listener registered:', this.eventListenerId)
+  }
+
+  /**
+   * Register a callback for SDK events
+   * @returns Unsubscribe function
+   */
+  onEvent(callback) {
+    this.eventCallbacks.push(callback)
+
+    // Return unsubscribe function
+    return () => {
+      const index = this.eventCallbacks.indexOf(callback)
+      if (index > -1) {
+        this.eventCallbacks.splice(index, 1)
+      }
+    }
+  }
+
+  /**
+   * Sync wallet with the network
+   */
+  async syncWallet() {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      console.log('[SparkService] Syncing wallet...')
+      await this.sdk.syncWallet({})
+      console.log('[SparkService] Wallet synced')
+    } catch (error) {
+      console.error('[SparkService] Sync failed:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Sync wallet with event-based approach
+   * Workaround for SDK 0.5.2 where syncWallet() promise doesn't resolve
+   * but dataSynced event fires correctly
+   */
+  async syncWalletWithEvent() {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Sync timeout after 60 seconds'))
+      }, 60000) // 60 second timeout
+
+      // Listen for dataSynced event
+      const unsubscribe = this.onEvent((event) => {
+        if (event.type === 'dataSynced') {
+          clearTimeout(timeout)
+          unsubscribe()
+          console.log('[SparkService] ✅ Wallet synced (via dataSynced event)')
+          resolve()
+        }
+      })
+
+      // Trigger sync (don't await the promise since it never resolves)
+      this.sdk.syncWallet({}).catch((error) => {
+        clearTimeout(timeout)
+        unsubscribe()
+        console.error('[SparkService] Sync failed:', error)
+        reject(error)
+      })
+    })
+  }
+
+  /**
+   * Get wallet info (balance, etc.)
+   */
+  async getInfo(ensureSynced = true) {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      const info = await this.sdk.getInfo({ ensureSynced })
+
+      // Convert Map to plain object for Redux serialization
+      if (info.tokenBalances instanceof Map) {
+        info.tokenBalances = Object.fromEntries(info.tokenBalances)
+      }
+
+      console.log('[SparkService] Wallet info:', info)
+      return info
+    } catch (error) {
+      console.error('[SparkService] Failed to get info:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Generate Lightning invoice to receive payment
+   *
+   * @param amountSats - Amount in satoshis (optional for variable amount)
+   * @param description - Invoice description
+   */
+  async receivePayment(
+    amountSats,
+    description = 'Yakihonne payment'
+  ) {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      const response = await this.sdk.receivePayment({
+        paymentMethod: {
+          type: 'bolt11Invoice',
+          description,
+          amountSats
+        }
+      })
+      console.log('[SparkService] Invoice generated:', response.paymentRequest)
+      return response
+    } catch (error) {
+      console.error('[SparkService] Failed to generate invoice:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Wait for a payment to complete by listening for SDK events
+   * @private
+   */
+  async waitForPaymentCompletion(paymentId, timeoutMs = 60000) {
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Payment timeout - no response from Lightning network'))
+      }, timeoutMs)
+
+      // Listen for payment events
+      const checkPayment = async (event) => {
+        if (event.type === 'paymentSucceeded' && event.payment.id === paymentId) {
+          clearTimeout(timeout)
+          resolve(event.payment)
+        } else if (event.type === 'paymentFailed' && event.payment.id === paymentId) {
+          clearTimeout(timeout)
+          reject(new Error(event.payment.error || 'Payment failed'))
+        }
+      }
+
+      // Temporary event listener (will be called by onEvent)
+      this.paymentWaiters = this.paymentWaiters || new Map()
+      this.paymentWaiters.set(paymentId, checkPayment)
+
+      // Clean up on completion
+      const cleanup = () => {
+        clearTimeout(timeout)
+        this.paymentWaiters?.delete(paymentId)
+      }
+
+      Promise.race([
+        new Promise((res) => setTimeout(res, timeoutMs))
+      ]).then(cleanup)
+    })
+  }
+
+  /**
+   * Send payment via Lightning
+   *
+   * @param paymentRequest - Bolt11 invoice or Lightning address
+   * @param amountSats - Amount (required for Lightning addresses and zero-amount invoices)
+   */
+  async sendPayment(
+    paymentRequest,
+    amountSats
+  ) {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      // Parse the input to determine what type it is
+      console.log('[SparkService] Parsing payment input:', paymentRequest)
+      const parsedInput = await this.sdk.parse(paymentRequest)
+      console.log('[SparkService] Parsed input:', JSON.stringify(parsedInput, null, 2))
+      console.log('[SparkService] Parsed input type:', parsedInput.type)
+
+      // Handle Lightning addresses via LNURL-Pay
+      if (parsedInput.type === 'lightningAddress') {
+        console.log('[SparkService] Using LNURL-Pay flow for Lightning address')
+
+        if (!amountSats || amountSats <= 0) {
+          throw new Error('Amount is required for Lightning addresses')
+        }
+
+        // Extract the payRequest from the parsed Lightning address
+        const lightningAddressDetails = parsedInput
+        const payRequest = lightningAddressDetails.payRequest
+
+        console.log('[SparkService] PayRequest:', payRequest)
+
+        // Prepare LNURL-Pay with the payRequest details
+        const prepareResponse = await this.sdk.prepareLnurlPay({
+          payRequest,
+          amountSats
+        })
+
+        console.log('[SparkService] LNURL-Pay prepared:', prepareResponse)
+
+        const response = await this.sdk.lnurlPay({
+          prepareResponse
+        })
+
+        console.log('[SparkService] LNURL-Pay sent (pending):', response)
+
+        // Wait for payment to complete
+        const completedPayment = await this.waitForPaymentCompletion(response.payment.id)
+
+        console.log('[SparkService] LNURL-Pay completed:', completedPayment)
+        return completedPayment
+      } else if (parsedInput.type === 'lnurlPay') {
+        console.log('[SparkService] Using LNURL-Pay flow for lnurlPay type')
+
+        if (!amountSats || amountSats <= 0) {
+          throw new Error('Amount is required for LNURL-Pay')
+        }
+
+        // For lnurlPay type, the parsed input IS the payRequest
+        const prepareResponse = await this.sdk.prepareLnurlPay({
+          payRequest: parsedInput,
+          amountSats
+        })
+
+        console.log('[SparkService] LNURL-Pay prepared:', prepareResponse)
+
+        const response = await this.sdk.lnurlPay({
+          prepareResponse
+        })
+
+        console.log('[SparkService] LNURL-Pay sent (pending):', response)
+
+        // Wait for payment to complete
+        const completedPayment = await this.waitForPaymentCompletion(response.payment.id)
+
+        console.log('[SparkService] LNURL-Pay completed:', completedPayment)
+        return completedPayment
+      } else {
+        // Regular Bolt11 invoice or other supported types
+        console.log('[SparkService] Using regular payment flow')
+
+        // Check if invoice has an amount
+        const invoiceAmountMsat = parsedInput.amountMsat || 0
+        const invoiceAmountSats = invoiceAmountMsat > 0 ? Math.ceil(invoiceAmountMsat / 1000) : 0
+        console.log('[SparkService] Invoice amount:', invoiceAmountMsat, 'msat =', invoiceAmountSats, 'sats')
+
+        // Determine final amount to use
+        // Priority: 1) Provided amountSats, 2) Invoice amount, 3) undefined
+        let finalAmount
+        if (amountSats && amountSats > 0) {
+          // User explicitly provided amount (for zero-amount invoices)
+          finalAmount = BigInt(amountSats)
+          console.log('[SparkService] Using provided amount:', amountSats, 'sats')
+        } else if (invoiceAmountSats > 0) {
+          // Use amount from invoice (convert msat to sats, round up)
+          finalAmount = BigInt(invoiceAmountSats)
+          console.log('[SparkService] Using invoice amount:', invoiceAmountSats, 'sats')
+        } else {
+          // No amount available - will likely fail
+          finalAmount = undefined
+          console.warn('[SparkService] No amount available for payment')
+        }
+
+        console.log('[SparkService] Final amount to pass:', finalAmount?.toString() || 'undefined')
+
+        const prepareResponse = await this.sdk.prepareSendPayment({
+          paymentRequest,
+          ...(finalAmount !== undefined && { amount: finalAmount })
+        })
+
+        console.log('[SparkService] Payment prepared:', prepareResponse)
+
+        const response = await this.sdk.sendPayment({
+          prepareResponse,
+          options: {
+            type: 'bolt11Invoice',
+            preferSpark: false
+          }
+        })
+
+        console.log('[SparkService] Payment sent (pending):', response)
+
+        // Wait for payment to complete (SDK fires paymentSucceeded/paymentFailed events)
+        const completedPayment = await this.waitForPaymentCompletion(response.payment.id)
+
+        console.log('[SparkService] Payment completed:', completedPayment)
+        return completedPayment
+      }
+    } catch (error) {
+      console.warn('[SparkService] Payment failed (handled):', error)
+
+      // Convert SDK errors to user-friendly messages
+      const errorMessage = error.message || error.toString()
+
+      if (errorMessage.includes('insufficient funds')) {
+        throw new Error('INSUFFICIENT_FUNDS')
+      } else if (errorMessage.includes('User rejected')) {
+        throw new Error('USER_REJECTED')
+      }
+
+      throw error
+    }
+  }
+
+  /**
+   * List payment history
+   */
+  async listPayments(offset = 0, limit = 100) {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      const response = await this.sdk.listPayments({ offset, limit })
+      return response.payments
+    } catch (error) {
+      console.error('[SparkService] Failed to list payments:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Register a Lightning address
+   * Format: username@domain
+   */
+  async registerLightningAddress(username, description) {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      const response = await this.sdk.registerLightningAddress({
+        username,
+        description: description || 'Pay YakiHonne user'
+      })
+      console.log('[SparkService] Lightning address registered:', response.lightningAddress)
+      return response
+    } catch (error) {
+      console.error('[SparkService] Failed to register Lightning address:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Get current Lightning address if registered
+   */
+  async getLightningAddress() {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      const response = await this.sdk.getLightningAddress()
+      return response || null
+    } catch (error) {
+      console.error('[SparkService] Failed to get Lightning address:', error)
+      return null
+    }
+  }
+
+  /**
+   * Check if a Lightning address username is available
+   */
+  async checkLightningAddressAvailable(username) {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      const isAvailable = await this.sdk.checkLightningAddressAvailable({ username })
+      return isAvailable
+    } catch (error) {
+      console.error('[SparkService] Failed to check Lightning address availability:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Delete current Lightning address
+   */
+  async deleteLightningAddress() {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      await this.sdk.deleteLightningAddress()
+      console.log('[SparkService] Lightning address deleted')
+    } catch (error) {
+      console.error('[SparkService] Failed to delete Lightning address:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Find an available username variation based on preferred name
+   * Sanitizes the name and tries variations with numeric suffixes if needed
+   */
+  async suggestAvailableUsername(preferredName) {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    // Sanitize username: lowercase, alphanumeric + underscores only
+    const sanitize = (name) => {
+      return name
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, '') // Remove special chars
+        .replace(/^[0-9]+/, '') // Remove leading numbers
+        .substring(0, 32) // Max length
+        .trim()
+    }
+
+    let username = sanitize(preferredName)
+
+    // Fallback if sanitization results in empty string
+    if (!username) {
+      username = 'user'
+    }
+
+    try {
+      // Check if base username is available
+      const isAvailable = await this.checkLightningAddressAvailable(username)
+      if (isAvailable) {
+        return username
+      }
+
+      // Try variations with numeric suffix
+      for (let i = 1; i <= 999; i++) {
+        const variation = `${username}${i}`
+        const isVariationAvailable = await this.checkLightningAddressAvailable(variation)
+        if (isVariationAvailable) {
+          return variation
+        }
+      }
+
+      // If we couldn't find anything after 999 tries, throw error
+      throw new Error('Unable to find available username variation')
+    } catch (error) {
+      console.error('[SparkService] Failed to suggest available username:', error)
+      throw error
+    }
+  }
+
+  /**
+   * Register or update Lightning address
+   * If address already exists, deletes it first then registers the new one
+   */
+  async setLightningAddress(username, description) {
+    if (!this.sdk) throw new Error('SDK not connected')
+
+    try {
+      // Check if we already have a Lightning address
+      const existing = await this.getLightningAddress()
+
+      if (existing) {
+        console.log('[SparkService] Deleting existing Lightning address:', existing.lightningAddress)
+        await this.deleteLightningAddress()
+      }
+
+      // Register new address
+      const response = await this.registerLightningAddress(username, description)
+      console.log('[SparkService] Lightning address set:', response.lightningAddress)
+      return response
+    } catch (error) {
+      console.error('[SparkService] Failed to set Lightning address:', error)
+      throw error
+    }
+  }
+}
+
+const instance = new SparkService()
+export default instance
