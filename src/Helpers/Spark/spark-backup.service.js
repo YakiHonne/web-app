@@ -1,6 +1,6 @@
 import { generateMnemonic } from '@scure/bip39'
 import { wordlist } from '@scure/bip39/wordlists/english.js'
-import { kinds, nip04 } from 'nostr-tools'
+import { kinds, nip04, nip44 } from 'nostr-tools'
 import { ndkInstance } from '@/Helpers/NDKInstance'
 import { InitEvent } from '@/Helpers/Controlers'
 import { store } from '@/Store/Store'
@@ -14,7 +14,8 @@ const BIG_RELAY_URLS = relaysOnPlatform
  * SparkBackupService - Nostr-based encrypted backup for Spark wallet
  *
  * Uses NIP-78 (Kind 30078) for application-specific data storage
- * Encrypts mnemonic with NIP-04 (self-to-self) for multi-device sync
+ * Encrypts mnemonic with NIP-44 v2 (self-to-self) for multi-device sync
+ * Maintains backward compatibility with NIP-04 v1 backups
  *
  * Benefits over local-only storage:
  * - Multi-device wallet access
@@ -34,8 +35,23 @@ class SparkBackupService {
   }
 
   /**
+   * Convert hex private key to Uint8Array for NIP-44
+   * @private
+   */
+  _hexToUint8Array(hex) {
+    if (hex.length % 2 !== 0) {
+      throw new Error('Invalid hex string')
+    }
+    const bytes = new Uint8Array(hex.length / 2)
+    for (let i = 0; i < hex.length; i += 2) {
+      bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16)
+    }
+    return bytes
+  }
+
+  /**
    * Save encrypted mnemonic to Nostr relays
-   * Uses NIP-04 self-encryption for privacy
+   * Uses NIP-44 v2 encryption for enhanced security
    */
   async saveToNostr(mnemonic) {
     const userKeys = store.getState().userKeys
@@ -50,16 +66,27 @@ class SparkBackupService {
       const pubkey = userKeys.pub
       console.log('[SparkBackup] Pubkey obtained:', pubkey.substring(0, 8) + '...')
 
-      // Encrypt mnemonic to self using NIP-04
-      console.log('[SparkBackup] Step 2: Encrypting mnemonic with NIP-04...')
+      // Encrypt mnemonic to self using NIP-44 v2
+      console.log('[SparkBackup] Step 2: Encrypting mnemonic with NIP-44 v2...')
       let encryptedContent
 
       if (userKeys.ext) {
-        // Use browser extension for encryption
-        encryptedContent = await window.nostr.nip04.encrypt(pubkey, mnemonic)
+        // Browser extensions may not support NIP-44 yet, fallback to NIP-04
+        if (window.nostr?.nip44?.encrypt) {
+          // Use NIP-44 if available
+          encryptedContent = await window.nostr.nip44.encrypt(pubkey, mnemonic)
+          console.log('[SparkBackup] Using NIP-44 from browser extension')
+        } else {
+          // Fallback to NIP-04 for older extensions
+          encryptedContent = await window.nostr.nip04.encrypt(pubkey, mnemonic)
+          console.warn('[SparkBackup] Extension does not support NIP-44, using NIP-04 fallback')
+        }
       } else if (userKeys.sec) {
-        // Use nostr-tools for encryption
-        encryptedContent = await nip04.encrypt(userKeys.sec, pubkey, mnemonic)
+        // Use nostr-tools NIP-44 encryption
+        const privateKeyBytes = this._hexToUint8Array(userKeys.sec)
+        const conversationKey = nip44.v2.utils.getConversationKey(privateKeyBytes, pubkey)
+        encryptedContent = nip44.v2.encrypt(mnemonic, conversationKey)
+        console.log('[SparkBackup] Using NIP-44 v2 from nostr-tools')
       } else {
         throw new Error('No valid signing method available')
       }
@@ -68,11 +95,14 @@ class SparkBackupService {
 
       // Create NIP-78 event
       console.log('[SparkBackup] Step 3: Signing backup event...')
+      // Determine encryption version (2 for NIP-44, 1 for NIP-04 fallback)
+      const encryptionVersion = (userKeys.ext && !window.nostr?.nip44?.encrypt) ? '1' : '2'
       const event = await InitEvent(
         this.BACKUP_KIND,
         encryptedContent,
         [
           ['d', this.BACKUP_D_TAG], // Addressable event identifier
+          ['v', encryptionVersion], // Encryption version (1=NIP-04, 2=NIP-44)
           ['client', 'Yakihonne'],
           ['description', 'Encrypted Spark wallet backup']
         ],
@@ -223,17 +253,55 @@ class SparkBackupService {
           const backupEvent = events.sort((a, b) => b.created_at - a.created_at)[0]
 
           try {
-            // Decrypt the mnemonic
+            // Decrypt the mnemonic based on encryption version
             let mnemonic
 
-            if (userKeys.ext) {
-              // Use browser extension for decryption
-              mnemonic = await window.nostr.nip04.decrypt(pubkey, backupEvent.content)
-            } else if (userKeys.sec) {
-              // Use nostr-tools for decryption
-              mnemonic = await nip04.decrypt(userKeys.sec, pubkey, backupEvent.content)
+            // Get encryption version from event tags (default to 1 for old backups without version tag)
+            const versionTag = backupEvent.tags?.find(tag => tag[0] === 'v')
+            const encryptionVersion = versionTag ? versionTag[1] : '1'
+
+            // Determine if we should use NIP-44 or NIP-04
+            // Check the encrypted content format as well (NIP-04 has ?iv=)
+            let useNip44 = false
+            if (backupEvent.content.includes('?iv=')) {
+              // NIP-04 format has ?iv= separator
+              useNip44 = false
             } else {
-              throw new Error('No valid decryption method available')
+              // Default: v2 = NIP-44, v1 = NIP-04
+              useNip44 = encryptionVersion === '2'
+            }
+
+            console.log('[SparkBackup] Backup encryption version:', encryptionVersion, 'using NIP-44:', useNip44)
+
+            if (useNip44) {
+              // NIP-44 v2 decryption
+              if (userKeys.ext) {
+                // Try browser extension NIP-44 first
+                if (window.nostr?.nip44?.decrypt) {
+                  mnemonic = await window.nostr.nip44.decrypt(pubkey, backupEvent.content)
+                } else {
+                  // Extension doesn't support NIP-44, this shouldn't happen for v2 backups
+                  throw new Error('Browser extension does not support NIP-44 decryption')
+                }
+              } else if (userKeys.sec) {
+                // Use nostr-tools for NIP-44 decryption
+                const privateKeyBytes = this._hexToUint8Array(userKeys.sec)
+                const conversationKey = nip44.v2.utils.getConversationKey(privateKeyBytes, pubkey)
+                mnemonic = nip44.v2.decrypt(backupEvent.content, conversationKey)
+              } else {
+                throw new Error('No valid decryption method available')
+              }
+            } else {
+              // NIP-04 v1 decryption (backward compatibility)
+              if (userKeys.ext) {
+                // Use browser extension for decryption
+                mnemonic = await window.nostr.nip04.decrypt(pubkey, backupEvent.content)
+              } else if (userKeys.sec) {
+                // Use nostr-tools for decryption
+                mnemonic = await nip04.decrypt(userKeys.sec, pubkey, backupEvent.content)
+              } else {
+                throw new Error('No valid decryption method available')
+              }
             }
 
             console.log('[SparkBackup] Backup loaded and decrypted from Nostr')
@@ -514,7 +582,7 @@ class SparkBackupService {
    */
   async downloadEncryptedBackup(pubkey) {
     try {
-      const { nip04 } = await import('nostr-tools')
+      const { nip04, nip44 } = await import('nostr-tools')
       const { store } = await import('@/Store/Store')
 
       // Get mnemonic from storage
@@ -531,12 +599,35 @@ class SparkBackupService {
         throw new Error('User not logged in')
       }
 
-      // Encrypt function
+      // Encrypt function - uses NIP-44 v2 with fallback to NIP-04
       const encrypt = async (recipientPubkey, plaintext) => {
-        if (userKeys.ext && window.nostr?.nip04?.encrypt) {
-          return await window.nostr.nip04.encrypt(recipientPubkey, plaintext)
+        if (userKeys.ext) {
+          // Try NIP-44 first if available in extension
+          if (window.nostr?.nip44?.encrypt) {
+            console.log('[SparkBackup] Using NIP-44 from browser extension')
+            return {
+              encrypted: await window.nostr.nip44.encrypt(recipientPubkey, plaintext),
+              version: 2
+            }
+          } else if (window.nostr?.nip04?.encrypt) {
+            // Fallback to NIP-04 for older extensions
+            console.warn('[SparkBackup] Extension does not support NIP-44, using NIP-04 fallback')
+            return {
+              encrypted: await window.nostr.nip04.encrypt(recipientPubkey, plaintext),
+              version: 1
+            }
+          } else {
+            throw new Error('Browser extension does not support encryption')
+          }
         } else if (userKeys.sec) {
-          return await nip04.encrypt(userKeys.sec, recipientPubkey, plaintext)
+          // Use nostr-tools NIP-44 v2
+          console.log('[SparkBackup] Using NIP-44 v2 from nostr-tools')
+          const privateKeyBytes = this._hexToUint8Array(userKeys.sec)
+          const conversationKey = nip44.v2.utils.getConversationKey(privateKeyBytes, recipientPubkey)
+          return {
+            encrypted: nip44.v2.encrypt(plaintext, conversationKey),
+            version: 2
+          }
         } else {
           throw new Error('Backup encryption requires a Nostr extension or secret key. Please use a Nostr extension like Alby or nos2x to download encrypted backups.')
         }
@@ -562,12 +653,12 @@ class SparkBackupService {
     encrypt
   ) {
     try {
-      // Encrypt the mnemonic
-      const encryptedMnemonic = await encrypt(pubkey, mnemonic)
+      // Encrypt the mnemonic (returns {encrypted, version})
+      const { encrypted: encryptedMnemonic, version } = await encrypt(pubkey, mnemonic)
 
       // Create backup object
       const backup = {
-        version: 1,
+        version, // Will be 2 for NIP-44 or 1 for NIP-04 fallback
         type: 'spark-wallet-backup',
         pubkey,
         encryptedMnemonic,
@@ -671,7 +762,8 @@ class SparkBackupService {
               throw new Error('Invalid backup file format')
             }
 
-            if (backup.version !== 1) {
+            // Support both version 1 (NIP-04) and version 2 (NIP-44 or NIP-04)
+            if (backup.version !== 1 && backup.version !== 2) {
               throw new Error(`Unsupported backup version: ${backup.version}`)
             }
 
@@ -680,10 +772,24 @@ class SparkBackupService {
               throw new Error(`WRONG_ACCOUNT:${backup.pubkey}:${pubkey}`)
             }
 
-            // Decrypt mnemonic
-            const mnemonic = await decrypt(pubkey, backup.encryptedMnemonic)
+            // Determine encryption method
+            // Priority: 1) explicit encryption field, 2) detect from format, 3) assume based on version
+            let useNip44 = false
+            if (backup.encryption) {
+              // Explicit encryption field (e.g., Primal backups)
+              useNip44 = backup.encryption === 'nip44'
+            } else if (backup.encryptedMnemonic.includes('?iv=')) {
+              // NIP-04 format has ?iv= separator
+              useNip44 = false
+            } else {
+              // Default: v2 = NIP-44, v1 = NIP-04
+              useNip44 = backup.version === 2
+            }
 
-            console.log('[SparkBackup] Wallet restored from backup file')
+            // Decrypt mnemonic
+            const mnemonic = await decrypt(pubkey, backup.encryptedMnemonic, useNip44 ? 2 : 1)
+
+            console.log('[SparkBackup] Wallet restored from backup file (version', backup.version + ')')
             resolve(mnemonic)
           } catch (error) {
             console.warn('[SparkBackup] Failed to restore from backup file (handled):', error)
@@ -700,11 +806,12 @@ class SparkBackupService {
   }
 
   /**
-   * Decrypt encrypted mnemonic using NIP-04
+   * Decrypt encrypted mnemonic using NIP-04 or NIP-44
    * @param pubkey - User's public key
    * @param encryptedMnemonic - Encrypted mnemonic string
+   * @param version - Encryption version (1=NIP-04, 2=NIP-44)
    */
-  async decryptMnemonic(pubkey, encryptedMnemonic) {
+  async decryptMnemonic(pubkey, encryptedMnemonic, version = 1) {
     const userKeys = store.getState().userKeys
 
     if (!userKeys || !userKeys.pub) {
@@ -713,14 +820,32 @@ class SparkBackupService {
 
     let mnemonic
 
-    if (userKeys.ext) {
-      // Use browser extension for decryption
-      mnemonic = await window.nostr.nip04.decrypt(pubkey, encryptedMnemonic)
-    } else if (userKeys.sec) {
-      // Use nostr-tools for decryption
-      mnemonic = await nip04.decrypt(userKeys.sec, pubkey, encryptedMnemonic)
+    if (version === 2) {
+      // NIP-44 v2 decryption
+      if (userKeys.ext) {
+        if (window.nostr?.nip44?.decrypt) {
+          mnemonic = await window.nostr.nip44.decrypt(pubkey, encryptedMnemonic)
+        } else {
+          throw new Error('Browser extension does not support NIP-44 decryption')
+        }
+      } else if (userKeys.sec) {
+        const privateKeyBytes = this._hexToUint8Array(userKeys.sec)
+        const conversationKey = nip44.v2.utils.getConversationKey(privateKeyBytes, pubkey)
+        mnemonic = nip44.v2.decrypt(encryptedMnemonic, conversationKey)
+      } else {
+        throw new Error('No valid decryption method available')
+      }
     } else {
-      throw new Error('No valid decryption method available')
+      // NIP-04 v1 decryption (backward compatibility)
+      if (userKeys.ext) {
+        // Use browser extension for decryption
+        mnemonic = await window.nostr.nip04.decrypt(pubkey, encryptedMnemonic)
+      } else if (userKeys.sec) {
+        // Use nostr-tools for decryption
+        mnemonic = await nip04.decrypt(userKeys.sec, pubkey, encryptedMnemonic)
+      } else {
+        throw new Error('No valid decryption method available')
+      }
     }
 
     return mnemonic
@@ -752,7 +877,8 @@ class SparkBackupService {
         throw new Error('Invalid backup file format')
       }
 
-      if (backup.version !== 1) {
+      // Support both version 1 (NIP-04) and version 2 (NIP-44 or NIP-04)
+      if (backup.version !== 1 && backup.version !== 2) {
         throw new Error(`Unsupported backup version: ${backup.version}`)
       }
 
@@ -761,10 +887,24 @@ class SparkBackupService {
         throw new Error(`WRONG_ACCOUNT:${backup.pubkey}:${pubkey}`)
       }
 
-      // Decrypt mnemonic
-      const mnemonic = await this.decryptMnemonic(pubkey, backup.encryptedMnemonic)
+      // Determine encryption method
+      // Priority: 1) explicit encryption field, 2) detect from format, 3) assume based on version
+      let useNip44 = false
+      if (backup.encryption) {
+        // Explicit encryption field (e.g., Primal backups)
+        useNip44 = backup.encryption === 'nip44'
+      } else if (backup.encryptedMnemonic.includes('?iv=')) {
+        // NIP-04 format has ?iv= separator
+        useNip44 = false
+      } else {
+        // Default: v2 = NIP-44, v1 = NIP-04
+        useNip44 = backup.version === 2
+      }
 
-      console.log('[SparkBackup] Wallet restored from selected backup file')
+      // Decrypt mnemonic
+      const mnemonic = await this.decryptMnemonic(pubkey, backup.encryptedMnemonic, useNip44 ? 2 : 1)
+
+      console.log('[SparkBackup] Wallet restored from selected backup file (version', backup.version + ')')
       return mnemonic
     } catch (error) {
       console.warn('[SparkBackup] Failed to restore from selected file (handled):', error)
