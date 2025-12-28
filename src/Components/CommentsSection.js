@@ -107,7 +107,6 @@ export default function CommentsSection({
   author,
   isRoot,
   tagKind = "e",
-  kind = "note",
   leaveComment = false,
   rootData,
 }) {
@@ -145,7 +144,6 @@ export default function CommentsSection({
         ],
         300
       );
-
       let tempEvents = events.data
         .map((event) => {
           let is_un = event.tags.find((tag) => tag[0] === "l");
@@ -250,7 +248,6 @@ export default function CommentsSection({
                   replyId={id}
                   replyPubkey={eventPubkey}
                   actions={postActions}
-                  kind={kind}
                   tagKind={tagKind}
                 />
               </div>

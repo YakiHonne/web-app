@@ -1,8 +1,7 @@
 import { saveRelayMetadata } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
-import { getEmptyRelaysData } from "@/Helpers/Encryptions";
 import { isHex } from "@/Helpers/Helpers";
-import { getRelayMetadata } from "@/Helpers/utils";
+import { getRelayMetadata, getEmptyRelaysData } from "@/Helpers/utils/relayMetadataCache";
 import { useEffect, useState } from "react";
 
 export default function useRelaysMetadata(url) {

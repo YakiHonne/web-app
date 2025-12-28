@@ -209,18 +209,20 @@ const MDEditorWrapper = ({
         ...link,
         execute: (state, api) => {
           const linkText = "URL here";
-          let modifyText = `[](${linkText})`;
+          let modifyText = `[Text here](${linkText})`;
+          let isURL = false
           if (state.selectedText) {
-            modifyText = `[](${state.selectedText})`;
+            isURL = state.selectedText.startsWith("http://") || state.selectedText.startsWith("https://");
+            modifyText = isURL ? `[Text here](${state.selectedText})` : `[${state.selectedText}](URL here)`;
           }
-          let cursorPosition = api.textArea.selectionStart + 3;
+          // let cursorPosition = api.textArea.selectionStart + (isURL ? 12 : state.selectedText.length);
           api.replaceSelection(modifyText);
-          api.setSelectionRange({
-            start: cursorPosition,
-            end: state.selectedText
-              ? state.selectedText.length + cursorPosition
-              : cursorPosition + 8,
-          });
+          // api.setSelectionRange({
+          //   start: cursorPosition,
+          //   end: state.selectedText
+          //     ? state.selectedText.length + cursorPosition
+          //     : cursorPosition + 8,
+          // });
         },
       },
       quote,
@@ -370,6 +372,7 @@ const MDEditorWrapper = ({
   return (
     <MDEditor
       direction={direction}
+      autoFocus
       data-color-mode={dataColorMode}
       preview={preview}
       height={height}

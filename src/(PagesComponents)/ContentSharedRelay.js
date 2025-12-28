@@ -18,16 +18,16 @@ import LoadingLogo from "@/Components/LoadingLogo";
 import KindOne from "@/Components/KindOne";
 import bannedList from "@/Content/BannedList";
 import { useRouter } from "next/router";
-import InfiniteScroll from "@/Components/InfiniteScroll";
 import RelayPreview from "./Relays/RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
 import Backbar from "@/Components/Backbar";
-import { getNDKInstance } from "@/Helpers/utils";
-import { getParsedRepEvent } from "@/Helpers/Encryptions";
+import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
+import { getParsedMedia, getParsedRepEvent } from "@/Helpers/Encryptions";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import PostNotePortal from "@/Components/PostNotePortal";
 import RecentPosts from "@/Components/RecentPosts";
 import { Virtuoso } from "react-virtuoso";
+import MediaMasonryList from "@/Components/MediaMasonryList";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -166,7 +166,7 @@ const HomeFeed = ({ relay }) => {
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
-  const [contentFrom, setContentFrom] = useState("all");
+  const [contentFrom, setContentFrom] = useState("notes");
   const [isConnected, setIsConnected] = useState(true);
   const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
   const since = useMemo(
@@ -200,7 +200,7 @@ const HomeFeed = ({ relay }) => {
 
       if (contentFrom === "notes") kinds = [1, 6];
       if (contentFrom === "articles") kinds = [30023];
-      if (contentFrom === "videos") kinds = [34235, 21, 22];
+      if (contentFrom === "media") kinds = [34235, 34236, 20, 21, 22];
       if (contentFrom === "curations") kinds = [30004, 30005];
 
       let ndk = await getNDKInstance(relay);
@@ -225,6 +225,8 @@ const HomeFeed = ({ relay }) => {
               }
               return event_;
             }
+          } else if ([34235, 34236, 20, 21, 22].includes(event.kind)) {
+            return getParsedMedia(event);
           } else return getParsedRepEvent(event);
         })
         .filter((_) => _);
@@ -261,14 +263,6 @@ const HomeFeed = ({ relay }) => {
       >
         <div
           className={`list-item-b fx-centered fx ${
-            contentFrom === "all" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("all")}
-        >
-          {t("AR9ctVs")}
-        </div>
-        <div
-          className={`list-item-b fx-centered fx ${
             contentFrom === "notes" ? "selected-list-item-b" : ""
           }`}
           onClick={() => switchContentType("notes")}
@@ -286,11 +280,11 @@ const HomeFeed = ({ relay }) => {
 
         <div
           className={`list-item-b fx-centered fx ${
-            contentFrom === "videos" ? "selected-list-item-b" : ""
+            contentFrom === "media" ? "selected-list-item-b" : ""
           }`}
-          onClick={() => switchContentType("videos")}
+          onClick={() => switchContentType("media")}
         >
-          {t("AStkKfQ")}
+          {t("A0i2SOt")}
         </div>
         <div
           className={`list-item-b fx-centered fx ${
@@ -309,7 +303,7 @@ const HomeFeed = ({ relay }) => {
         position="bottom"
       />
       {/* <InfiniteScroll events={notes} onRefresh={setNotesLastEventTime}> */}
-      {notes.length > 0 && (
+      {notes.length > 0 && contentFrom !== "media" && (
         <Virtuoso
           ref={virtuosoRef}
           style={{ width: "100%", height: "100vh" }}
@@ -352,7 +346,13 @@ const HomeFeed = ({ relay }) => {
           }}
         />
       )}
-        {/* {notes.map((note, index) => {
+      {notes.length > 0 && contentFrom === "media" && (
+        <MediaMasonryList
+          events={notes}
+          setLastEventTime={setNotesLastEventTime}
+        />
+      )}
+      {/* {notes.map((note, index) => {
           if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
             if (
               note.kind === 6 &&
@@ -380,45 +380,45 @@ const HomeFeed = ({ relay }) => {
             return null;
           }
         })} */}
-        {notes?.length === 0 && !isLoading && isConnected && (
+      {notes?.length === 0 && !isLoading && isConnected && (
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ height: "40vh" }}
+        >
           <div
-            className="fit-container fx-centered fx-col"
-            style={{ height: "40vh" }}
-          >
-            <div
-              className="yaki-logomark"
-              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-            ></div>
-            <h4>{t("A5BPCrj")}</h4>
-            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-              {t("AB9jjjH")}
-            </p>
-          </div>
-        )}
-        {notes?.length === 0 && !isLoading && !isConnected && (
+            className="yaki-logomark"
+            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+          ></div>
+          <h4>{t("A5BPCrj")}</h4>
+          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+            {t("AB9jjjH")}
+          </p>
+        </div>
+      )}
+      {notes?.length === 0 && !isLoading && !isConnected && (
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ height: "40vh" }}
+        >
           <div
-            className="fit-container fx-centered fx-col"
-            style={{ height: "40vh" }}
-          >
-            <div
-              className="link"
-              style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-            ></div>
-            <h4>{t("AZ826Ej")}</h4>
-            <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
-              {t("A5ebGh9")}
-            </p>
-          </div>
-        )}
-        <div className="box-pad-v"></div>
-        {isLoading && (
-          <div
-            className="fit-container box-pad-v fx-centered fx-col"
-            style={{ height: "60vh" }}
-          >
-            <LoadingLogo size={64} />
-          </div>
-        )}
+            className="link"
+            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
+          ></div>
+          <h4>{t("AZ826Ej")}</h4>
+          <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
+            {t("A5ebGh9")}
+          </p>
+        </div>
+      )}
+      <div className="box-pad-v"></div>
+      {isLoading && (
+        <div
+          className="fit-container box-pad-v fx-centered fx-col"
+          style={{ height: "60vh" }}
+        >
+          <LoadingLogo size={64} />
+        </div>
+      )}
       {/* </InfiniteScroll> */}
     </div>
   );

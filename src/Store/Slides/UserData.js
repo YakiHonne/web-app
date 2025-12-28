@@ -218,6 +218,16 @@ const userBlossomServersSlice = createSlice({
   },
 });
 
+const userPinnedNotesSlice = createSlice({
+  name: "userPinnedNotes",
+  initialState: [],
+  reducers: {
+    setUserPinnedNotes(state, action) {
+      return action.payload;
+    },
+  },
+});
+
 export const { setUserMetadata } = userMetadataSlice.actions;
 export const { setUserKeys } = userKeysSlice.actions;
 export const { setUserBookmarks } = userBookmarksSlice.actions;
@@ -244,6 +254,7 @@ export const { setUserFavRelays } = userFavRelaysSlice.actions;
 export const { setUserWotList } = userWotListSlice.actions;
 export const { setUserBlossomServers } = userBlossomServersSlice.actions;
 export const { setUserSearchRelays } = userSearchRelaysSlice.actions;
+export const { setUserPinnedNotes } = userPinnedNotesSlice.actions;
 
 export const UserMetadataReducer = userMetadataSlice.reducer;
 export const UserKeysReducer = userKeysSlice.reducer;
@@ -269,5 +280,6 @@ export const UserFavRelaysReducer = userFavRelaysSlice.reducer;
 export const UserWotListReducer = userWotListSlice.reducer;
 export const UserBlossomServersReducer = userBlossomServersSlice.reducer;
 export const UserSearchRelaysReducer = userSearchRelaysSlice.reducer;
+export const UserPinnedNotesReducer = userPinnedNotesSlice.reducer;
 export const IsUserFollowingsLoadedReducer =
   isUserFollowingsLoadedSlice.reducer;

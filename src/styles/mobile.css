@@ -1,6 +1,10 @@
 @media only screen and (min-width: 1990px) {
+  .note-txtarea {
+    height: calc(100% - 105px);
+  }
+
   html {
-    font-size: 17px;
+    font-size: 19px;
   }
 }
 
@@ -180,6 +184,35 @@
 
   .desk-hide-1000 {
     display: flex;
+  }
+
+  .mb-hide-1000 {
+    display: none;
+  }
+
+  .media-overlay {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow: scroll;
+  }
+
+  .media-overlay-r-side {
+    height: auto;
+    flex-shrink: 0;
+    width: 100%;
+    border-top-left-radius: initial;
+    border-bottom-left-radius: initial;
+    border-top-right-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  .media-overlay-l-side {
+    flex-shrink: 0;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    min-height: unset;
   }
 
   .carouselX::before {
@@ -436,19 +469,20 @@
   .note-txtarea {
     height: calc(100% - 90px);
   }
-  .user-feed-tab .no-scrollbar{
+
+  .user-feed-tab .no-scrollbar {
     width: unset !important;
     justify-content: flex-start !important;
-}
+  }
 
-.user-feed-tab .list-item-b{
+  .user-feed-tab .list-item-b {
     flex: unset !important;
-}
+  }
 
-.user-feed-tab .slider-item  {
+  .user-feed-tab .slider-item {
     flex: unset !important;
     min-width: unset !important;
-}
+  }
 }
 
 @media only screen and (max-width: 550px) {

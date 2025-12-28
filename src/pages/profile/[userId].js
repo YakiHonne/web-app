@@ -52,9 +52,10 @@ export async function getStaticProps({ locale, params }) {
       },
     };
   }
-  const [resMetaData, resFollowings] = await Promise.all([
+  const [resMetaData, resFollowings, resPinned] = await Promise.all([
     getDataForSSG([{ authors: [pubkey], kinds: [0] }], 500, 3),
     getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 3),
+    getDataForSSG([{ authors: [pubkey], kinds: [10001] }], 1000, 3),
   ]);
 
   let metadata = getEmptyuserMetadata(pubkey);
@@ -67,7 +68,13 @@ export async function getStaticProps({ locale, params }) {
     resFollowings.data.length > 0
       ? resFollowings.data.sort((a, b) => b.created_at - a.created_at)[0]
       : null;
-
+  let pinned_ =
+    resPinned.data.length > 0
+      ? resPinned.data.sort((a, b) => b.created_at - a.created_at)[0]
+      : null;
+  pinned_ = pinned_
+    ? pinned_.tags.filter((_) => _[0] === "e").map((_) => _[1])
+    : [];
   if (metadata_) metadata = getParsedAuthor(metadata_);
   if (followings_)
     followings = followings_.tags.filter((_) => _[0] === "p").map((_) => _[1]);
@@ -77,6 +84,7 @@ export async function getStaticProps({ locale, params }) {
       event: {
         ...metadata,
         followings,
+        pinned: pinned_,
         nprofile: nip19.nprofileEncode({ pubkey: pubkey }),
       },
     },
@@ -86,10 +94,14 @@ export async function getStaticProps({ locale, params }) {
 
 const decodePubkey = (pubkey) => {
   try {
+    if (pubkey.length < 32) {
+      return false;
+    }
     let hexPubkey =
-      nip19.decode(pubkey).data.pubkey || nip19.decode(pubkey).data;
+      (nip19.decode(pubkey).data.pubkey || nip19.decode(pubkey).data);
     return hexPubkey;
   } catch (err) {
+    console.log(pubkey);
     console.log(err);
     return false;
   }

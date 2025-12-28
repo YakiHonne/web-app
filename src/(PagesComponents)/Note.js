@@ -121,6 +121,9 @@ export default function Note({ event, nevent }) {
   if ([21, 22].includes(event?.kind)) {
     return customHistory("/video/" + nevent);
   }
+  if ([20].includes(event?.kind)) {
+    return customHistory("/image/" + nevent);
+  }
   if (isLoading)
     return (
       <div

@@ -38,18 +38,25 @@ const content = [
 ];
 
 const updatesList = [
-  "Relays feed now supports relay sets, allowing you to browse content from your preferred relay groups.",
-  "A newly optimized notifications core for significantly faster loading and smoother access.",
-  "Added the ability to mark notifications as read or unread.",
-  "A wider middle layout provides improved visibility and a more comfortable browsing experience.",
-  "Option added to hide mentions in notifications when a note includes many tagged users.",
-  "Added Russian language support.",
-  "Autosave is now disabled for empty widgets, articles, and notes to prevent unwanted drafts.",
-  "Improved real-time content fetching for more accurate and consistent updates.",
-  "Added in-memory caching to multiple areas of the app (notes, notifications, replies, etc.) for reduced loading times.",
-  "Performance improvements across long lists — including notes (home, profile, relay feeds, search), other content types, notifications, and messages.",
-  "Faster message decryption for users signing in with a private key, now non-blocking and more efficient.",
-  "General bug fixes and improvements.",
+  "Media support for images and videos across the app, including dashboard, notifications, note previews, relay feeds, search, and user profiles.",
+  "Display of pinned notes on user profiles.",
+  "Ability to pin and unpin notes.",
+  "Added a dedicated mentions section to user profiles.",
+  "Muting state for videos is now properly saved across media views.",
+  "Media publishing now supports images and videos with filtering, trimming, and additional controls.",
+  "Replaced the loading screen with a minimal loading bar for a smoother experience.",
+  "Comment inputs now auto-adjust height based on content.",
+  "Relay encodings are now included in notification URLs for more accurate routing.",
+  "Articles can now be browsed on a standalone page.",
+  "Automatic language direction detection in the article editor (LTR/RTL).",
+  "Fixed incorrect hashtag parsing.",
+  "Fixed markdown link syntax issues when selecting text.",
+  "Improved markdown link parsing in the previewer.",
+  "Added helpful hints to the link toolbar for better usability and clarity.",
+  "Added support for displaying QuickTime videos.",
+  "Fixed timestamp randomization issues related to NIP-17.",
+  "Updated default image placeholders for profile pictures and thumbnails.",
+  "Fixed message decryption issues to prevent multiple parallel popups when using extension signers.",
 ];
 
 export default function YakiIntro() {

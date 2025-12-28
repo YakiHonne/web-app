@@ -69,7 +69,8 @@ const unwrapGiftWrap = async (event, userKeys) => {
     let { pubkey, content } = JSON.parse(decryptedEvent13);
 
     let decryptedEvent14 = await decrypt44(userKeys, pubkey, content);
-    return JSON.parse(decryptedEvent14);
+    let decryptedEvent14_ = JSON.parse(decryptedEvent14);
+    return decryptedEvent14_.pubkey === pubkey ? decryptedEvent14_ : false;
   } catch (err) {
     return false;
   }

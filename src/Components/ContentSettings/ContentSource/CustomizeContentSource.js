@@ -19,6 +19,15 @@ const NotesDefaultCF = [
   ["paid", true],
   ["widgets", true],
 ];
+const MediaDefaultCF = [
+  ["recent", true],
+  ["global", true],
+];
+const contentTypes = {
+  1: "mixed_content",
+  2: "notes",
+  3: "media",
+};
 
 export default function CustomizeContentSource({
   exit,
@@ -35,13 +44,13 @@ export default function CustomizeContentSource({
     let communityIndex = sources.findIndex((_) => _.value === "cf");
     let communityList =
       sources[communityIndex].list.map((_) => [_.value, _.enabled]) ||
-      (type === 1 ? mixedContentDefaultCF : NotesDefaultCF);
+      (type === 1 ? mixedContentDefaultCF : type === 2 ? NotesDefaultCF : MediaDefaultCF);
 
     return {
       ...userAppSettings?.settings,
       content_sources: {
         ...userAppSettings?.settings?.content_sources,
-        [type === 1 ? "mixed_content" : "notes"]: {
+        [contentTypes[type]]: {
           community: {
             index: communityIndex,
             list: communityList,
@@ -72,7 +81,7 @@ export default function CustomizeContentSource({
       let tempSettings = structuredClone(optionsToSave);
 
       delete tempSettings.content_sources[
-        type === "1" ? "mixed_content" : "notes"
+        contentTypes[type]
       ].relays;
 
       const event = {

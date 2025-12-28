@@ -5,8 +5,13 @@ import { copyText } from "@/Helpers/Helpers";
 
 export default function ShareRelay({ relay, exit, type = 1 }) {
     const { t } = useTranslation();
+    const types = {
+      1: "discover",
+      2: "notes",
+      3: "media",
+    }
     let fullURL = `${window.location.protocol}//${window.location.host}/r/${
-      type === 1 ? "discover" : "notes"
+      types[type]
     }?r=${relay}`;
     return (
       <div className="fixed-container fx-centered box-pad-h">
@@ -23,7 +28,6 @@ export default function ShareRelay({ relay, exit, type = 1 }) {
               <p className="p-centered box-pad-h-m p-big">{relay}</p>
             </div>
           </div>
-          {/* <div className="box-pad-v-s"></div> */}
           <p className="c1-c box-pad-h-s">{t("A5DDopE")}</p>
           <div className="fit-container fx-centered fx-col">
             <div

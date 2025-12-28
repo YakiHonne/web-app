@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getLinkPreview } from "@/Helpers/Helpers";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
-import { getURLFromCache, setURLFromCache } from "@/Helpers/utils";
+import { getURLFromCache, setURLFromCache } from "@/Helpers/utils/urlsMetadataCache";
 
 const NOT_FOUND = "not found";
 

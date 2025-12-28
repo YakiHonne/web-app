@@ -18,7 +18,7 @@ import MediaUploaderServer from "@/Content/MediaUploaderServer";
 import { t } from "i18next";
 import axiosInstance from "./HTTP_Client";
 import { InitEvent } from "./Controlers";
-import { localStorage_ } from "./utils";
+import { localStorage_ } from "./utils/clientLocalStorage";
 import { supportedLanguageKeys } from "@/Content/SupportedLanguages";
 import {
   getMediaUploader,
@@ -88,7 +88,7 @@ const getAnswerFromAIRemoteAPI = async (pubkey_, input) => {
   }
 };
 
-const getLinkFromAddr = (addr_) => {
+const getLinkFromAddr = (addr_, kind = 1) => {
   try {
     let addr = addr_
       .replaceAll("nostr:", "")
@@ -112,6 +112,8 @@ const getLinkFromAddr = (addr_) => {
       return `/profile/${nip19.nprofileEncode({ pubkey: hex })}`;
     }
     if (addr.startsWith("nevent")) {
+      if (kind === 20) return `/image/${addr}`;
+      if ([22, 21].includes(kind)) return `/video/${addr}`;
       return `/note/${addr}`;
     }
     if (addr.startsWith("note")) {
@@ -718,7 +720,7 @@ const blossomServerFileUpload = async (file, userKeys, cb) => {
   let expiration = `${Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7}`;
   let event = {
     kind: 24242,
-    content: "Image upload",
+    content: "File upload",
     created_at: Math.floor(Date.now() / 1000),
     tags: [
       ["t", "upload"],
@@ -842,7 +844,7 @@ const regularServerFileUpload = async (file, userKeys, cb) => {
   }
   let event = {
     kind: 27235,
-    content: "",
+    content: "File upload",
     created_at: Math.floor(Date.now() / 1000),
     tags: [
       ["u", endpoint],
@@ -1313,5 +1315,5 @@ export {
   trimRelay,
   isNoteMuted,
   changePrimary,
-  getPrimaryColor
+  getPrimaryColor,
 };

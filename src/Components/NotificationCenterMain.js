@@ -6,7 +6,6 @@ import { useSelector } from "react-redux";
 import { getUser } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import Link from "next/link";
-import { straightUp } from "@/Helpers/Helpers";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { customHistory } from "@/Helpers/History";
@@ -19,7 +18,10 @@ import { checkEventType } from "@/Helpers/NotificationsHelpers";
 import useNotifications from "@/Hooks/useNotifications";
 import OptionsDropdown from "./OptionsDropdown";
 import { Virtuoso } from "react-virtuoso";
-import { getEventFromCache, setEventFromCache } from "@/Helpers/utils";
+import {
+  getEventFromCache,
+  setEventFromCache,
+} from "@/Helpers/utils/eventsCache";
 
 export default function NotificationCenterMain() {
   const {
@@ -297,9 +299,9 @@ const Notification = React.memo(
       if (!event.isRead) handleRead();
       if (notificationsDetails.url) customHistory(notificationsDetails.url);
     };
-
     // if (!type || event.pubkey === userKeys.pub) return;
     // if ((filterByType && filterByType.includes(type)) || !filterByType)
+    if (!notificationsDetails) return;
     return (
       <div
         className="fit-container fx-centered fx-start-v fx-start-h box-pad-v-m box-pad-h  pointer "

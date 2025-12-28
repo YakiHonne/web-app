@@ -5,11 +5,9 @@ import {
 import { checkEventType } from "@/Helpers/NotificationsHelpers";
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = null;
-
 const initDMSSlice = createSlice({
   name: "initDMS",
-  initialState,
+  initialState: true,
   reducers: {
     setInitDMS(state, action) {
       return action.payload;
@@ -108,7 +106,7 @@ const notificationsSlice = createSlice({
     setNotifications(state, action) {
       let data = action.payload.data.map((_) => {
         let type = checkEventType(_, action.payload.pubkey);
-        return { ..._, type: {...type} };
+        return { ..._, type: { ...type } };
       });
       data = removeEventsDuplicants([...data, ...state]);
       return data;
@@ -140,6 +138,16 @@ const refreshNotificationsSlice = createSlice({
   },
 });
 
+const videoVolumeSlice = createSlice({
+  name: "videoVolume",
+  initialState: "",
+  reducers: {
+    setVideoVolume(state, action) {
+      return action.payload;
+    },
+  },
+});
+
 export const { setInitDMS } = initDMSSlice.actions;
 export const { setIsDarkMode } = isDarkModeSlice.actions;
 export const { setFollowersCountSL } = followersCountSLSlice.actions;
@@ -155,6 +163,7 @@ export const { setNotifications, updateNotifications, clearNotifications } =
 export const { setIsNotificationsLoading } =
   isNotificationsLoadingSlice.actions;
 export const { setRefreshNotifications } = refreshNotificationsSlice.actions;
+export const { setVideoVolume } = videoVolumeSlice.actions;
 
 export const InitDMSReducer = initDMSSlice.reducer;
 export const IsDarkModeReducer = isDarkModeSlice.reducer;
@@ -170,3 +179,4 @@ export const NotificationsReducer = notificationsSlice.reducer;
 export const IsNotificationsLoadingReducer =
   isNotificationsLoadingSlice.reducer;
 export const RefreshNotificationsReducer = refreshNotificationsSlice.reducer;
+export const VideoVolumeReducer = videoVolumeSlice.reducer;

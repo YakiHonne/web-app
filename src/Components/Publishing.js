@@ -20,7 +20,7 @@ import {
 import Date_ from "./Date_";
 import ProgressCirc from "./ProgressCirc";
 import { useTranslation } from "react-i18next";
-import { localStorage_ } from "@/Helpers/utils";
+import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import { eventKinds } from "@/Content/Extra";
 
 const PUBLISHING_TIMEOUT = 3000;
@@ -269,7 +269,8 @@ export default function Publishing({ displayOff = false }) {
               let index_ = tempArray[index].relaysToPublish.findIndex(
                 (_) => _.url === removeRelayLastSlash(relay.url)
               );
-              tempArray[index].relaysToPublish[index_].status = 1;
+              if (index_ !== -1)
+                tempArray[index].relaysToPublish[index_].status = 1;
               return tempArray;
             });
           }

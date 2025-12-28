@@ -11,7 +11,7 @@ import useCloseContainer from "@/Hooks/useCloseContainer";
 import { DraggableComp } from "@/Components/DraggableComp";
 import Toggle from "@/Components/Toggle";
 import { useRouter } from "next/router";
-import { localStorage_ } from "@/Helpers/utils";
+import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 // import PostReactionsPreview from "@/Components/PostReactionsPreview";
 let boxView =
