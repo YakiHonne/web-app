@@ -414,10 +414,7 @@ export default function Curation({ event, userProfile }) {
                   setShowCommentsSections({ comment: true })
                 }
               />
-              <EventOptions
-                event={curation}
-                component="repEventsCard"
-              />
+              <EventOptions event={curation} component="repEventsCard" />
             </div>
           </div>
         )}

@@ -7,7 +7,7 @@ import LoadingDots from "@/Components/LoadingDots";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import { useTranslation } from "react-i18next";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
-import { getParsedRepEvent } from "@/Helpers/Encryptions";
+import { getParsedMedia, getParsedRepEvent } from "@/Helpers/Encryptions";
 
 const traceEventPath = (id, all, mainEventID, tagKind) => {
   const path = [];
@@ -17,7 +17,6 @@ const traceEventPath = (id, all, mainEventID, tagKind) => {
     if (!event) break;
 
     let parsedEvent = getParsedNote(event, true);
-
     path.unshift(parsedEvent);
     const parentRoot = event.tags.find(
       (tag) => tag.length > 3 && tag[3] === "root"
@@ -33,7 +32,9 @@ const traceEventPath = (id, all, mainEventID, tagKind) => {
   if (tagKind === "e") {
     let mainEvent = all.find((comment) => comment.id === mainEventID);
     if (mainEvent) {
-      let parsedEvent = getParsedNote(mainEvent, true);
+      let parsedEvent;
+      if (mainEvent.kind === 1) parsedEvent = getParsedNote(mainEvent, true);
+      if (mainEvent.kind !== 1) parsedEvent = getParsedMedia(mainEvent);
       path.unshift(parsedEvent);
     }
   }
@@ -90,13 +91,11 @@ export default function HistorySection({
         });
       } else {
         filter.push({
-          // kinds: [1],
           ids: [id],
         });
       }
       const events = await getSubData(filter, 500);
       let tempEvents = events.data;
-
       if (tempEvents.length === 0) setIsLoading(false);
       setComments(tempEvents);
       saveUsers(events.pubkeys);

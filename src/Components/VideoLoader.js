@@ -1,12 +1,14 @@
-import useToBlurMedia from "@/Hooks/useToBlurMedia";
 import React, { useRef, useEffect, useState } from "react";
 import BlurredContentDesc from "./BlurredContentDesc";
+import useVideoVolume from "@/Hooks/useVideoVolume";
 
 const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   const videoRef = useRef();
   const [isLoaded, setIsLoaded] = useState(false);
+  const { videoVolume, handleMutedVideos } = useVideoVolume();
+
   // const { toBlur, setIsOpened } = useToBlurMedia({ pubkey });
-const toBlur = false;
+  const toBlur = false;
   useEffect(() => {
     const observer = new window.IntersectionObserver(
       ([entry]) => {
@@ -52,7 +54,7 @@ const toBlur = false;
           className={`sc-s-18 ${toBlur ? "blurred" : ""}`}
           allowFullScreen
         ></iframe>
-         <BlurredContentDesc toBlur={toBlur} />
+        <BlurredContentDesc toBlur={toBlur} />
       </div>
     );
   }
@@ -75,8 +77,7 @@ const toBlur = false;
           className={`sc-s-18 ${toBlur ? "blurred" : ""}`}
           allowFullScreen
         ></iframe>
-              <BlurredContentDesc toBlur={toBlur} />
-
+        <BlurredContentDesc toBlur={toBlur} />
       </div>
     );
   }
@@ -99,6 +100,8 @@ const toBlur = false;
           aspectRatio: "16/9",
           pointerEvents: toBlur ? "none" : "auto",
         }}
+        muted={videoVolume}
+        onVolumeChange={handleMutedVideos}
       >
         <source src={src} type="video/mp4" />
       </video>

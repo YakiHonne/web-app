@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  checkForLUDS,
-  shortenKey,
-} from "@/Helpers/Encryptions";
+import { checkForLUDS, shortenKey } from "@/Helpers/Encryptions";
 import ZapTip from "@/Components/ZapTip";
 import Follow from "@/Components/Follow";
 import ShowPeople from "@/Components/ShowPeople";
@@ -10,7 +7,6 @@ import axios from "axios";
 import NumberShrink from "@/Components/NumberShrink";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import InitiConvo from "@/Components/InitConvo";
-import Avatar from "boring-avatars";
 import { useSelector } from "react-redux";
 import { getUserStats } from "@/Helpers/WSInstance";
 import { customHistory } from "@/Helpers/History";
@@ -23,6 +19,7 @@ import QRSharing from "@/Components/QRSharing";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import useIsMute from "@/Hooks/useIsMute";
 import { sleepTimer } from "@/Helpers/Helpers";
+import AvatarPlaceholder from "@/Components/AvatarPlaceholder";
 
 export default function UserMetadata({ user }) {
   const { t } = useTranslation();
@@ -59,7 +56,7 @@ export default function UserMetadata({ user }) {
   const getUserFollowersCache = async () => {
     try {
       let stats = await Promise.race([getUserStats(id), sleepTimer(2000)]);
-   
+
       if (stats) {
         let userStats_ = stats.find((_) => _.kind === 10000105);
         userStats_ = userStats_ ? JSON.parse(userStats_.content) : false;
@@ -264,7 +261,9 @@ export default function UserMetadata({ user }) {
                   <p className="p-one-line" style={{ minWidth: "max-content" }}>
                     {user?.nip05?.length < 50
                       ? user?.nip05
-                      : typeof user?.nip05 === "string" ? shortenKey(user?.nip05, 15) : "N/A"}
+                      : typeof user?.nip05 === "string"
+                      ? shortenKey(user?.nip05, 15)
+                      : "N/A"}
                   </p>
                 )}
                 {!user?.nip05 && <p>N/A</p>}
@@ -332,12 +331,12 @@ export default function UserMetadata({ user }) {
   );
 }
 
-const UserPP = ({ src, size, user_id, setSelectedItemInCarousel }) => {
+const UserPP = ({ src, size, setSelectedItemInCarousel }) => {
   if (!src) {
     return (
       <div
         style={{
-          border: "6px solid var(--white)",
+          outline: "6px solid var(--white)",
           borderRadius: "var(--border-r-50)",
           position: "relative",
           overflow: "hidden",
@@ -348,13 +347,7 @@ const UserPP = ({ src, size, user_id, setSelectedItemInCarousel }) => {
         }}
         className="settings-profile-pic"
       >
-        <Avatar
-          size={size}
-          name={user_id}
-          variant="marble"
-          square
-          colors={["#0A0310", "#49007E", "#FF005B", "#FF7D10", "#FFB238"]}
-        />
+        <AvatarPlaceholder size={size} />
       </div>
     );
   }

@@ -3,7 +3,7 @@ import ArrowUp from "@/Components/ArrowUp";
 import { useDispatch, useSelector } from "react-redux";
 import { nip19 } from "nostr-tools";
 import { getLinkFromAddr, isHex, sortByKeyword } from "@/Helpers/Helpers";
-import { getParsedRepEvent } from "@/Helpers/Encryptions";
+import { getParsedMedia, getParsedRepEvent } from "@/Helpers/Encryptions";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
 import { getSubData } from "@/Helpers/Controlers";
 import { customHistory } from "@/Helpers/History";
@@ -22,6 +22,7 @@ import InfiniteScroll from "@/Components/InfiniteScroll";
 import { getDataForSearch } from "@/Helpers/lib";
 import Link from "next/link";
 import { Virtuoso } from "react-virtuoso";
+import MediaMasonryList from "@/Components/MediaMasonryList";
 
 const getKeyword = () => {
   let keyword = new URLSearchParams(window.location.search).get("keyword");
@@ -64,7 +65,7 @@ export default function Search() {
     "all-media": t("A7DfXrs"),
     articles: t("AesMg52"),
     notes: t("AYIXG83"),
-    videos: t("AStkKfQ"),
+    media: t("Media"),
   };
   const handleOnChange = (e) => {
     let value = e.target.value;
@@ -229,26 +230,28 @@ export default function Search() {
       `#${String(tag).charAt(0).toUpperCase() + String(tag).slice(1)}`,
     ];
     let filter = {
-      limit: 100,
+      limit: 300,
       "#t": tags,
       until: lastTimestamp ? lastTimestamp - 1 : lastTimestamp,
     };
     if (selectedTab === "notes") filter.kinds = [1];
     if (selectedTab === "articles") filter.kinds = [30023];
-    if (selectedTab === "videos") filter.kinds = [34235, 21, 22];
+    if (selectedTab === "media") filter.kinds = [34235, 34236, 21, 22, 20];
     // if (selectedTab === "all-media") filter.kinds = [1, 30023, 34235, 21, 22];
     let content = await getDataForSearch(
       [filter, { ...filter, search: searchKeyword, "#t": undefined }],
       100,
-      200,
+      1000,
       userSearchRelays
     );
     let content_ = content.data.map((event) => {
       if (event.kind === 1) {
         let parsedNote = getParsedNote(event, true);
         return parsedNote;
-      } else {
+      } else if (event.kind === 30023) {
         return getParsedRepEvent(event);
+      } else if ([34235, 34236, 21, 22, 20].includes(event.kind)) {
+        return getParsedMedia(event);
       }
     });
     if (content_.length === 0) setIsLoading(false);
@@ -432,7 +435,7 @@ export default function Search() {
                 className="fit-container fx-even slide-down"
                 style={{ gap: 0 }}
               >
-                {["people", "notes", "articles", "videos"].map((tag, index) => {
+                {["people", "notes", "articles", "media"].map((tag, index) => {
                   return (
                     <div
                       className={`list-item-b fx-centered fx ${
@@ -463,14 +466,14 @@ export default function Search() {
                     );
                 }
               })}
-            {results.length > 0 && (
+            {results.length > 0 && selectedTab !== "media" && (
               <Virtuoso
                 style={{ width: "100%", height: "100vh" }}
                 skipAnimationFrameInResizeObserver={true}
-                overscan={500}
+                overscan={1000}
                 useWindowScroll={true}
                 totalCount={results.length}
-                increaseViewportBy={500}
+                increaseViewportBy={1000}
                 endReached={(index) => {
                   setLastTimestamp(results[index].created_at - 1);
                 }}
@@ -482,12 +485,15 @@ export default function Search() {
                   )
                     return <KindOne key={item.id} event={item} border={true} />;
                   if (
-                    [30023, 34235, 21, 22].includes(item.kind) &&
+                    [30023, 34235].includes(item.kind) &&
                     !userMutedList.includes(item.pubkey)
                   )
                     return <RepEventPreviewCard key={item.id} item={item} />;
                 }}
               />
+            )}
+            {results.length > 0 && selectedTab === "media" && (
+              <MediaMasonryList events={results} setLastEventTime={setLastTimestamp}/>
             )}
             {isLoading && (
               <div

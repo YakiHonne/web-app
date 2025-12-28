@@ -5,14 +5,15 @@ import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import PostAsNote from "./PostAsNote";
-import { getCustomSettings } from "@/Helpers/ClientHelpers";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import PostMedia from "./PostMedia/PostMedia";
 
 export default function WriteNew({ exit }) {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const [redirectLinks, setRedirectLinks] = useState(false);
   const [showPostNote, setShowPostNote] = useState(false);
+  const [showPostMedia, setShowPostMedia] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const { longPress } = useCustomizationSettings();
   const timeoutRef = useRef(null);
@@ -62,9 +63,11 @@ export default function WriteNew({ exit }) {
           }}
           internalExit={() => setRedirectLinks(false)}
           setShowPostNote={() => setShowPostNote(true)}
+          setShowPostMedia={() => setShowPostMedia(true)}
         />
       )}
       {showPostNote && <PostAsNote exit={() => setShowPostNote(false)} />}
+      {showPostMedia && <PostMedia exit={() => setShowPostMedia(false)} />}
       <button
         className="btn btn-full btn-orange fx-centered"
         style={{ padding: 0 }}
@@ -86,7 +89,12 @@ export default function WriteNew({ exit }) {
   );
 }
 
-const RedictingLinks = ({ exit, internalExit, setShowPostNote }) => {
+const RedictingLinks = ({
+  exit,
+  internalExit,
+  setShowPostNote,
+  setShowPostMedia,
+}) => {
   const { t } = useTranslation();
   return (
     <div
@@ -110,18 +118,14 @@ const RedictingLinks = ({ exit, internalExit, setShowPostNote }) => {
         >
           <div></div>
         </div>
-        <h3 className="box-marg-s">{t("AfTMpSr")}</h3>
-        <div className="fx-centered fx-wrap" onClick={exit}>
+        <h4 className="box-marg-s">{t("AfTMpSr")}</h4>
+        <div className="fx-centered fx-wrap">
           <div
-            // href={{
-            //   pathname: "/dashboard",
-            //   query: { tabNumber: 1, init: true },
-            // }}
             onClick={setShowPostNote}
-            // href={() => null}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s bg-sp`}
+            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18 bg-sp`}
             style={{
               width: "48%",
+              borderRadius: "16px",
               padding: "2rem",
             }}
           >
@@ -132,10 +136,14 @@ const RedictingLinks = ({ exit, internalExit, setShowPostNote }) => {
             <div className="gray-c">{t("Az5ftet")}</div>
           </div>
           <div
-            onClick={() => customHistory("/write-article")}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s bg-sp`}
+            onClick={() => {
+              customHistory("/write-article");
+              exit();
+            }}
+            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18 bg-sp`}
             style={{
               width: "48%",
+              borderRadius: "16px",
               padding: "2rem",
             }}
           >
@@ -145,11 +153,29 @@ const RedictingLinks = ({ exit, internalExit, setShowPostNote }) => {
             ></div>
             <div className="gray-c">{t("AyYkCrS")}</div>
           </div>
+          <div
+            onClick={setShowPostMedia}
+            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18 bg-sp`}
+            style={{
+              width: "48%",
+              borderRadius: "16px",
+              padding: "2rem",
+            }}
+          >
+            <div
+              className="media-24"
+              style={{ width: "48px", height: "48px" }}
+            ></div>
+            <div className="gray-c">{t("A0i2SOt")}</div>
+          </div>
           <Link
             href={"/smart-widget-builder"}
-            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s bg-sp`}
+            onClick={exit}
+            className={`pointer fit-container fx-centered fx-col box-pad-h-s box-pad-v-s option sc-s-18 bg-sp`}
             style={{
               padding: "2rem",
+              width: "48%",
+              borderRadius: "16px",
             }}
           >
             <div

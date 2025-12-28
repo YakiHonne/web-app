@@ -316,6 +316,10 @@ const HandleFilter = ({ type = 1, filter, exit, prevSettings }) => {
     return (
       <NotesFilter exit={exit} filter={filter} prevSettings={prevSettings} />
     );
+  if (type === 3)
+    return (
+      <MediaFilter exit={exit} filter={filter} prevSettings={prevSettings} />
+    );
 };
 
 const MixedContentFilter = ({ exit, filter, prevSettings }) => {
@@ -930,6 +934,281 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
         <div className="fit-container fx-scattered if">
           <p>{t("A3COVRL")}</p>
           <Toggle status={mediaOnly} setStatus={setMediaOnly} />
+        </div>
+        <UserSearchBar
+          placeholder={t("AY0XZEx")}
+          full={true}
+          getUserMetadata={(data) =>
+            setPostedBy((prev) => [...new Set([...prev, data])])
+          }
+          displayAbove={true}
+        />
+        {postedBy.length > 0 && (
+          <div className="fit-container fx-centered fx-start-h fx-start-v fx-wrap">
+            {postedBy.map((_) => {
+              return (
+                <div style={{ position: "relative" }}>
+                  <div
+                    className="close"
+                    style={{ top: "-5px", right: "-5px" }}
+                    onClick={() =>
+                      setPostedBy((prev) =>
+                        prev.filter((__) => __.pubkey !== _.pubkey)
+                      )
+                    }
+                  >
+                    <div></div>
+                  </div>
+                  <UserProfilePic
+                    user_id={_.pubkey}
+                    allowClick={false}
+                    size={50}
+                    mainAccountUser={false}
+                    img={_.picture}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <button className="btn btn-normal btn-full" onClick={updateFilter}>
+          {filter ? t("AvUZCrj") : t("ANtvfQr")}
+        </button>
+      </div>
+    </div>
+  );
+};
+const MediaFilter = ({ exit, filter, prevSettings }) => {
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const [title, setTitle] = useState(filter.title || "");
+  const [tempIncludedWord, setTempIncludedWord] = useState("");
+  const [includedWords, setIncludedWords] = useState(
+    filter.included_words || []
+  );
+  const [tempExcludedWord, setTempExcludedWord] = useState("");
+  const [excludedWords, setExcludedWords] = useState(
+    filter.excluded_words || []
+  );
+  const [postedBy, setPostedBy] = useState(
+    getUsersFromPubkeys(filter.posted_by) || []
+  );
+  const [hideSensitive, setHideSensitive] = useState(filter.hide_sensitive || false);
+  const [from, setFrom] = useState(filter.from || false);
+  const [to, setTo] = useState(filter.to || false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleIncludeWords = (e) => {
+    if (e) e.preventDefault();
+    if (!tempIncludedWord) return;
+    let tempString = tempIncludedWord.trim().toLowerCase();
+    if (excludedWords.includes(tempString)) {
+      dispatch(
+        setToast({
+          type: 2,
+          desc: t("A49050m"),
+        })
+      );
+      return;
+    }
+    setIncludedWords((prev) => [...new Set([...prev, tempString])]);
+    setTempIncludedWord("");
+  };
+  const handleIExcludeWords = (e) => {
+    if (e) e.preventDefault();
+    if (!tempExcludedWord) return;
+    let tempString = tempExcludedWord.trim().toLowerCase();
+    if (includedWords.includes(tempString)) {
+      dispatch(
+        setToast({
+          type: 2,
+          desc: t("AobQ9pm"),
+        })
+      );
+      return;
+    }
+    setExcludedWords((prev) => [...new Set([...prev, tempString])]);
+    setTempExcludedWord("");
+  };
+  const updateFilter = async () => {
+    if (!title) {
+      dispatch(
+        setToast({
+          type: 2,
+          desc: t("AxzAeS0"),
+        })
+      );
+      return;
+    }
+    try {
+      setIsLoading(true);
+      const toInject = {
+        title,
+        type: 3,
+        included_words: includedWords,
+        excluded_words: excludedWords,
+        posted_by: postedBy.map((_) => _.pubkey),
+        hide_sensitive: hideSensitive,
+        from: from || null,
+        to: to || null,
+      };
+      const contentFilter = {
+        ...(prevSettings.settings || { content_sources: {} }),
+        content_filters: [...(prevSettings?.settings?.content_filters || [])],
+      };
+      if (!filter) contentFilter.content_filters.push(toInject);
+      else contentFilter.content_filters[filter.index] = toInject;
+      const event = {
+        kind: 30078,
+        content: JSON.stringify(contentFilter),
+        tags: [
+          [
+            "client",
+            "Yakihonne",
+            "31990:20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3:1700732875747",
+          ],
+          ["d", "YakihonneAppSettings"],
+        ],
+      };
+
+      let eventInitEx = await InitEvent(
+        event.kind,
+        event.content,
+        event.tags,
+        undefined
+      );
+      if (!eventInitEx) {
+        setIsLoading(false);
+        return;
+      }
+      dispatch(
+        setToPublish({
+          eventInitEx,
+          allRelays: [],
+        })
+      );
+      exit();
+    } catch (err) {
+      console.log(err);
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fit-container fx-centered fx-start-h fx-start-v fx-col">
+      <h4>{filter ? t("AvUZCrj") : t("ANtvfQr")}</h4>
+      <div className="fit-container fx-centered fx-col">
+        <input
+          type="text"
+          className="if ifs-full"
+          placeholder={t("AZ0I7NJ")}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <div className="fit-container fx-centered fx-wrap">
+          <div style={{flex: "1 1 100px"}}>
+            <p className="gray-c">{t("AZFMiVf")}</p>
+            <input
+              type="date"
+              value={from ? new Date(from * 1000).toJSON()?.split("T")[0] : ""}
+              onChange={(e) => {
+                setFrom(Math.floor(new Date(e.target.value).getTime() / 1000));
+              }}
+              className="if ifs-full"
+            />
+          </div>
+          <div style={{flex: "1 1 100px"}}>
+            <p className="gray-c">{t("AWUmU6P")}</p>
+            <input
+              type="date"
+              value={to ? new Date(to * 1000).toJSON()?.split("T")[0] : ""}
+              onChange={(e) => {
+                setTo(Math.floor(new Date(e.target.value).getTime() / 1000));
+              }}
+              className="if ifs-full"
+            />
+          </div>
+        </div>
+        <form
+          className="fit-container fx-scattered"
+          onSubmit={handleIncludeWords}
+        >
+          <input
+            type="text"
+            className="if ifs-full"
+            placeholder={t("A492vpu")}
+            value={tempIncludedWord}
+            onChange={(e) => setTempIncludedWord(e.target.value)}
+          />
+          <div className="round-icon-small" onClick={handleIncludeWords}>
+            <div className="plus-sign"></div>
+          </div>
+        </form>
+        {includedWords.length > 0 && (
+          <div className="fit-container fx-centered fx-wrap fx-start-h fx-start-v">
+            {includedWords.map((tag, index) => {
+              return (
+                <div
+                  key={index}
+                  className="fx-centered box-pad-h-s box-pad-v-s sc-s-18"
+                >
+                  <p>{tag}</p>
+                  <div
+                    style={{ rotate: "-45deg" }}
+                    className="box-pad-h-s"
+                    onClick={() =>
+                      setIncludedWords((prev) => prev.filter((_) => _ !== tag))
+                    }
+                  >
+                    <div className="plus-sign"></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        <form
+          className="fit-container fx-scattered"
+          onSubmit={handleIExcludeWords}
+        >
+          <input
+            type="text"
+            className="if ifs-full"
+            placeholder={t("A07kVBP")}
+            value={tempExcludedWord}
+            onChange={(e) => setTempExcludedWord(e.target.value)}
+          />
+          <div className="round-icon-small" onClick={handleIExcludeWords}>
+            <div className="plus-sign"></div>
+          </div>
+        </form>
+        {excludedWords.length > 0 && (
+          <div className="fit-container fx-centered fx-wrap fx-start-h fx-start-v">
+            {excludedWords.map((tag, index) => {
+              return (
+                <div
+                  key={index}
+                  className="fx-centered box-pad-h-s box-pad-v-s sc-s-18"
+                >
+                  <p>{tag}</p>
+                  <div
+                    style={{ rotate: "-45deg" }}
+                    className="box-pad-h-s"
+                    onClick={() =>
+                      setExcludedWords((prev) => prev.filter((_) => _ !== tag))
+                    }
+                  >
+                    <div className="plus-sign"></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div className="fit-container fx-scattered if">
+          <p>{t("ATTdCzC")}</p>
+          <Toggle status={hideSensitive} setStatus={setHideSensitive} />
         </div>
         <UserSearchBar
           placeholder={t("AY0XZEx")}

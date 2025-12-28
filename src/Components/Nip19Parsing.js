@@ -3,6 +3,7 @@ import {
   getEmptyuserMetadata,
   getHex,
   getParsedAuthor,
+  getParsedMedia,
   getParsedRepEvent,
   getParsedSW,
 } from "@/Helpers/Encryptions";
@@ -21,7 +22,11 @@ import WidgetCardV2 from "@/Components/WidgetCardV2";
 import UserProfilePic from "./UserProfilePic";
 import { getLinkFromAddr } from "@/Helpers/Helpers";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
-import { getEventFromCache, setEventFromCache } from "@/Helpers/utils";
+import {
+  getEventFromCache,
+  setEventFromCache,
+} from "@/Helpers/utils/eventsCache";
+import MediaEventPreview from "./MediaEventPreview";
 
 const getPreviouslyCachedEvent = (addr) => {
   try {
@@ -178,17 +183,23 @@ function Nip19Parsing({ addr, minimal = false }) {
           saveUsers([event.pubkey]);
           setIsLoading(false);
         }
-        if ([30004, 30005, 30023, 34235, 22, 21].includes(event.kind)) {
+        if ([30004, 30005, 30023, 34235].includes(event.kind)) {
           let parsedContent = getParsedRepEvent(event);
           let title = parsedContent.title;
           if (!title) {
             if ([30004, 30005].includes(event.kind)) title = t("A1lshru");
             if ([30023].includes(event.kind)) title = t("Aqw9gzk");
-            if ([34235, 21, 22].includes(event.kind)) title = t("A3vFdLd");
+            if ([34235].includes(event.kind)) title = t("A3vFdLd");
           }
           setEvent({
             ...parsedContent,
             title,
+          });
+        }
+        if ([20, 22, 21].includes(event.kind)) {
+          let parsedContent = getParsedMedia(event);
+          setEvent({
+            ...parsedContent,
           });
         }
         if (
@@ -236,32 +247,6 @@ function Nip19Parsing({ addr, minimal = false }) {
     return (
       <>
         {isParsed && (
-          // <div
-          //   className="fit-container fx-scattered box-pad-h-m box-pad-v-s sc-s-18"
-          //   style={{ margin: ".5rem 0", overflow: "visible" }}
-          // >
-          //   <div>
-          //     <p className="gray-c">{t("AcFjmGe")}</p>
-          //     <p>{shortenKey(addr, 20)}</p>
-          //   </div>
-          //   <div className="fx-centered">
-          //     <div
-          //       className="round-icon-small round-icon-tooltip"
-          //       data-tooltip={t("ArCMp34")}
-          //       onClick={() => copyText(addr, t("AQf5QYH"))}
-          //     >
-          //       <div className="copy"></div>
-          //     </div>
-          //     <a href={`https://njump.me/${addr}`} target="_blank">
-          //       <div
-          //         className="round-icon-small round-icon-tooltip"
-          //         data-tooltip={t("Aaa3apb")}
-          //       >
-          //         <div className="share-icon"></div>
-          //       </div>
-          //     </a>
-          //   </div>
-          // </div>
           <UnsupportedKindPreview addr={addr} />
         )}
         {!isParsed && <p>{addr}</p>}
@@ -314,7 +299,7 @@ function Nip19Parsing({ addr, minimal = false }) {
                 <p className="p-medium gray-c">{t("AQeXcer")}</p>
               </div>
             )}
-            {[30004, 30005, 30023, 34235, 21, 22].includes(event.kind) && (
+            {[30004, 30005, 30023, 34235].includes(event.kind) && (
               <div className="fit-container" style={{ margin: ".5rem 0" }}>
                 {!minimal && (
                   <LinkRepEventPreview event={event} allowClick={true} />
@@ -328,6 +313,22 @@ function Nip19Parsing({ addr, minimal = false }) {
                     style={{ color: "var(--orange-main)" }}
                   >
                     @{event.title}
+                  </Link>
+                )}
+              </div>
+            )}
+            {[20, 21, 22].includes(event.kind) && (
+              <div className="fit-container" style={{ margin: ".5rem 0" }}>
+                {!minimal && <MediaEventPreview event={event} />}
+                {minimal && (
+                  <Link
+                    href={url}
+                    className="btn-text-gray"
+                    target={"_blank"}
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ color: "var(--orange-main)" }}
+                  >
+                    @{event.naddr || event.nEvent}
                   </Link>
                 )}
               </div>
@@ -378,7 +379,7 @@ function Nip19Parsing({ addr, minimal = false }) {
       </div>
     );
 
-  if ([30004, 30005, 30023, 34235, 21, 22].includes(event.kind))
+  if ([30004, 30005, 30023, 34235].includes(event.kind))
     return (
       <div className="fit-container" style={{ margin: ".5rem 0" }}>
         {!minimal && <LinkRepEventPreview event={event} allowClick={true} />}
@@ -391,6 +392,23 @@ function Nip19Parsing({ addr, minimal = false }) {
             style={{ color: "var(--orange-main)" }}
           >
             @{event.title}
+          </Link>
+        )}
+      </div>
+    );
+  if ([20, 21, 22].includes(event.kind))
+    return (
+      <div className="fit-container" style={{ margin: ".5rem 0" }}>
+        {!minimal && <MediaEventPreview event={event} />}
+        {minimal && (
+          <Link
+            href={url}
+            className="btn-text-gray"
+            target={"_blank"}
+            onClick={(e) => e.stopPropagation()}
+            style={{ color: "var(--orange-main)" }}
+          >
+            @{event.naddr || event.nEvent}
           </Link>
         )}
       </div>

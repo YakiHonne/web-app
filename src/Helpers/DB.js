@@ -35,6 +35,7 @@ if (typeof window !== "undefined") {
     followingsRelays: "",
     followingsInboxRelays: "",
     followingsFavRelays: "",
+    pinnedNotes: "",
     appSettings: "",
     relays: "",
     relaysSet: "",
@@ -164,6 +165,17 @@ export const getRelaysSet = async (pubkey) => {
       return { last_timestamp: undefined };
     }
   } else return { last_timestamp: undefined };
+};
+export const getPinnedNotes = async (pubkey) => {
+  if (db) {
+    try {
+      let pinnedNotes = await db.table("pinnedNotes").get(pubkey);
+      return pinnedNotes || { last_timestamp: undefined, pinnedNotes: [] };
+    } catch (err) {
+      console.log(err);
+      return { last_timestamp: undefined, pinnedNotes: [] };
+    }
+  } else return { last_timestamp: undefined, pinnedNotes: [] };
 };
 export const getInboxRelays = async (pubkey) => {
   if (db) {
@@ -413,6 +425,29 @@ export const saveFollowings = async (event, pubkey, lastTimestamp) => {
       await Dexie.ignoreTransaction(async () => {
         await db.transaction("rw", db.followings, async () => {
           await db.followings.put(eventToStore, pubkey);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+export const savePinnedNotes = async (event, pubkey, lastTimestamp) => {
+  if (db) {
+    if (!event && lastTimestamp) return;
+    let eventToStore = { last_timestamp: undefined, pinnedNotes: [] };
+
+    if (event) {
+      let pinnedNotes = event.tags
+        .filter((tag) => tag[0] === "e")
+        .map((tag) => tag[1]);
+      eventToStore = { last_timestamp: event.created_at, pinnedNotes };
+    }
+
+    try {
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.pinnedNotes, async () => {
+          await db.pinnedNotes.put(eventToStore, pubkey);
         });
       });
     } catch (err) {

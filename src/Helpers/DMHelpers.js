@@ -6,16 +6,15 @@ import {
 } from "nostr-tools";
 import { bytesTohex, encrypt04, encrypt44 } from "./Encryptions";
 import { InitEvent, updateYakiChestStats } from "./Controlers";
-import { NDKRelaySet, NDKEvent, NDKRelay } from "@nostr-dev-kit/ndk";
+import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { store } from "@/Store/Store";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { t } from "i18next";
 import { checkCurrentConvo, getInboxRelaysForUser } from "./DB";
 import { relaysOnPlatform } from "@/Content/Relays";
 import { getKeys } from "./ClientHelpers";
-import { ndkInstance } from "./NDKInstance";
 import axiosInstance from "./HTTP_Client";
-import { getNDKInstanceForDMs } from "./utils";
+import { getNDKInstanceForDMs } from "./utils/ndkInstancesForDMsCache";
 
 export const sendMessage = async (selectedPerson, message) => {
   let userKeys = getKeys();
@@ -115,13 +114,13 @@ const getGiftWrap = async (selectedPerson, userKeys, message) => {
     nip44.v2.utils.getConversationKey(g_sk_2, userKeys.pub)
   );
   let event_1 = {
-    created_at: Math.floor(Date.now() / 1000) - 172800,
+    created_at: getRandomizedTimestamp(),
     kind: 1059,
     tags: [["p", selectedPerson]],
     content: content_1,
   };
   let event_2 = {
-    created_at: Math.floor(Date.now() / 1000) - 172800,
+    created_at: getRandomizedTimestamp(),
     kind: 1059,
     tags: [["p", userKeys.pub]],
     content: content_2,
@@ -158,7 +157,7 @@ const getEventKind13 = async (pubkey, userKeys, selectedPerson, message) => {
   if (!content) return false;
 
   let event = {
-    created_at: Math.floor(Date.now() / 1000) - 172800,
+    created_at: getRandomizedTimestamp(),
     kind: 13,
     tags: [],
     content,
@@ -227,4 +226,10 @@ export const handleUpdateConversation = (event) => {
     checked: true,
   };
   checkCurrentConvo(tempEvent, userKeys.pub);
+};
+
+const getRandomizedTimestamp = () => {
+  let randomTimestamp =
+    Math.floor(Date.now() / 1000) - Math.floor(Math.random() * 172800);
+  return randomTimestamp;
 };

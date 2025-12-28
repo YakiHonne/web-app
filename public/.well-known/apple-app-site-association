@@ -12,6 +12,7 @@
           "/r/discover/*",
           "/note/*",
           "/video/*",
+          "/image/*",
           "/profile/*",
           "/curation/*",
           "/verify-notes/*",

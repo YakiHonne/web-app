@@ -22,14 +22,12 @@ import KindOne from "@/Components/KindOne";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
 import { getKeys } from "@/Helpers/ClientHelpers";
-import InfiniteScroll from "@/Components/InfiniteScroll";
 import SuggestionsCards from "@/Components/SuggestionsCards/SuggestionsCards";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import RecentPosts from "@/Components/RecentPosts";
-import { getNDKInstance } from "@/Helpers/utils";
+import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
 import PostNotePortal from "@/Components/PostNotePortal";
 import { Virtuoso } from "react-virtuoso";
-import DynamicWindowedFeed from "@/Components/DynamicWindowedFeed";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -199,22 +197,20 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         ? undefined
         : twoDaysPrior);
 
+    let userKeys = getKeys();
     let tempUserFollowings = Array.isArray(userFollowings)
       ? Array.from(userFollowings)
       : [];
+    if (userKeys) {
+      tempUserFollowings.push(userKeys.pub);
+    }
     if (["recent", "recent_with_replies"].includes(notesContentFrom)) {
       if (tempUserFollowings.length === 0) {
-        let userKeys = getKeys();
-        if (userKeys) {
-          tempUserFollowings =
-            userFollowings?.length > 0
-              ? [userKeys.pub, ...Array.from(userFollowings)]
-              : [userKeys.pub, process.env.NEXT_PUBLIC_YAKI_PUBKEY];
-        } else {
-          tempUserFollowings = [process.env.NEXT_PUBLIC_YAKI_PUBKEY];
-        }
+        tempUserFollowings = [
+          ...tempUserFollowings,
+          process.env.NEXT_PUBLIC_YAKI_PUBKEY,
+        ];
       }
-
       let authors =
         selectedFilter.posted_by?.length > 0
           ? selectedFilter.posted_by

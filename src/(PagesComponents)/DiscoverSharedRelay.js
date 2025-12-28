@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import ArrowUp from "@/Components/ArrowUp";
 import { SelectTabs } from "@/Components/SelectTabs";
 import {
@@ -12,8 +12,7 @@ import { getSubData } from "@/Helpers/Controlers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
-import InfiniteScroll from "@/Components/InfiniteScroll";
-import { getNDKInstance } from "@/Helpers/utils";
+import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
 import Backbar from "@/Components/Backbar";
 import RelayPreview from "./Relays/RelayPreview/RelayPreview";
 import { useRouter } from "next/router";

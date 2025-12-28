@@ -7,7 +7,7 @@ import Nip19Parsing from "@/Components/Nip19Parsing";
 import VideoLoader from "@/Components/VideoLoader";
 import Link from "next/link";
 import { Fragment } from "react";
-import { localStorage_ } from "./utils";
+import { localStorage_ } from "./utils/clientLocalStorage";
 import { nip19 } from "nostr-tools";
 import React from "react";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
@@ -229,11 +229,10 @@ export function getNoteTree(
       finalTree.push(<LNURLParsing lnurl={el} key={key} />);
     } else if (el?.startsWith("#")) {
       const match = el.match(/(#+)([\w-+]+)/);
-
       if (match) {
         const hashes = match[1];
         const text = match[2];
-
+        const ifMore = el.replace(match[0], "");
         finalTree.push(
           <React.Fragment key={key}>
             {hashes.slice(1)}
@@ -249,6 +248,7 @@ export function getNoteTree(
               <p>{`${hashes.slice(-1)}${text}`}</p>
               <div className="share-icon"></div>
             </Link>{" "}
+            {ifMore && <span>{ifMore} </span>}
           </React.Fragment>
         );
       }
@@ -380,8 +380,11 @@ export function getComponent(children) {
               target="_blank"
               className="btn-text-gray"
               onClick={(e) => e.stopPropagation()}
+              dir="auto"
             >
-              {children[i].props?.href}
+              {children[i].props?.children?.length > 0
+                ? children[i].props?.children[0]
+                : children[i].props?.children}
             </a>
           );
         }
@@ -539,7 +542,7 @@ export function isImageUrl(url) {
     if (/^data:video/.test(url)) return { type: "video" };
     if (/(https?:\/\/[^ ]*\.(gif|png|jpg|jpeg|webp))/i.test(url))
       return { type: "image" };
-    if (/(https?:\/\/[^ ]*\.(mp4|mov|webm|ogg|avi))/i.test(url))
+    if (/(https?:\/\/[^ ]*\.(mp4|mov|webm|ogg|avi|qt))/i.test(url))
       return { type: "video" };
     if (
       /(\/images\/|cdn\.|img\.|\/media\/|\/uploads\/|encrypted-tbn0\.gstatic\.com\/images|i\.insider\.com\/)/i.test(
@@ -1054,6 +1057,21 @@ export function getPostToEdit(naddr) {
   }
 }
 
+export const checkMentionInContent = (note, pubkey) => {
+  let matches = note.match(/\b(?:npub1|nprofile1)[0-9a-z]+\b/g);
+  matches =
+    matches?.map((_) => {
+      try {
+        if (_.startsWith("npub")) return nip19.decode(_).data;
+        if (_.startsWith("nprofile")) return nip19.decode(_).data.pubkey;
+      } catch (err) {
+        console.log(err);
+        return false;
+      }
+    }) || [];
+  return matches?.includes(pubkey);
+};
+
 const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
   const result = [];
   let currentTextElement = null;
@@ -1192,368 +1210,28 @@ function isRelayUrl(value) {
   try {
     const u = new URL(value);
 
-    // 1) scheme must be ws:// or wss://
     if (!/^wss?:$/i.test(u.protocol)) return false;
 
-    const host = u.hostname; // hostname excludes port
+    const host = u.hostname; //
 
-    // 2) allow "localhost"
     if (host === "localhost") return true;
 
-    // 3) allow IPv4 (0.0.0.0 - 255.255.255.255)
     const ipv4 =
       /^(25[0-5]|2[0-4]\d|1?\d{1,2})(\.(25[0-5]|2[0-4]\d|1?\d{1,2})){3}$/;
     if (ipv4.test(host)) return true;
 
-    // 4) require domain with at least one dot and TLD of 2-63 letters
-    //    labels: start/end with alnum, inner chars alnum or hyphen, max 63 per label
     const domain = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i;
     if (domain.test(host)) return true;
 
-    // otherwise reject (this will reject single-label hosts like "a")
     return false;
   } catch (e) {
-    return false; // invalid URL string
+    return false;
   }
 }
 
-// const mergeConsecutivePElements = (arr, pubkey) => {
-//   const result = [];
-//   let currentTextElement = null;
-//   let currentImages = [];
-//   let tempArray = [];
-
-//   // Step 1: filter out <br> between consecutive images
-//   for (let i = 0; i < arr.length; i++) {
-//     if (
-//       !(
-//         i - 1 > 0 &&
-//         i + 1 < arr.length &&
-//         arr[i].type === "br" &&
-//         typeof arr[i - 1].type !== "string" &&
-//         arr[i - 1].props?.src &&
-//         typeof arr[i + 1].type !== "string" &&
-//         arr[i + 1].props?.src
-//       )
-//     ) {
-//       tempArray.push(arr[i]);
-//     }
-//   }
-
-//   // Step 2: collapse multiple consecutive <br> into one
-//   let collapsedArray = [];
-//   for (let i = 0; i < tempArray.length; i++) {
-//     const el = tempArray[i];
-//     if (el.type === "br" && collapsedArray.at(-1)?.type === "br") {
-//       continue; // skip duplicate <br>
-//     }
-//     collapsedArray.push(el);
-//   }
-
-//   // Step 3: remove <br> that touches an image, video, or component
-//   collapsedArray = collapsedArray.filter((el, i, arr) => {
-//     if (el.type === "br") {
-//       const prev = arr[i - 1];
-//       const next = arr[i + 1];
-
-//       const isMediaOrComponent = (node) =>
-//         node &&
-//         typeof node.type !== "string" && // not "p" / "span" / "br"
-//         (node.props?.src || node.props?.poster !== undefined);
-
-//       if (isMediaOrComponent(prev) || isMediaOrComponent(next)) {
-//         return false; // drop this <br>
-//       }
-//     }
-//     return true;
-//   });
-
-//   // Step 4: process collapsedArray like before
-//   for (const element of collapsedArray) {
-//     if (["p", "span"].includes(element.type)) {
-//       if (!currentTextElement) {
-//         currentTextElement = { ...element };
-//         currentTextElement.props = {
-//           ...element.props,
-//           children: [element.props.children],
-//         };
-//       } else {
-//         let tempPrevChildren = currentTextElement.props.children;
-//         if (typeof element.props.children !== "string") {
-//           tempPrevChildren.push(element.props.children);
-//         }
-//         if (
-//           typeof tempPrevChildren[tempPrevChildren.length - 1] === "string" &&
-//           typeof element.props.children === "string"
-//         ) {
-//           tempPrevChildren[tempPrevChildren.length - 1] =
-//             `${tempPrevChildren[tempPrevChildren.length - 1]} ${element.props.children}`;
-//         }
-//         if (
-//           typeof tempPrevChildren[tempPrevChildren.length - 1] !== "string" &&
-//           typeof element.props.children === "string"
-//         ) {
-//           tempPrevChildren.push(` ${element.props.children}`);
-//         }
-//         currentTextElement = {
-//           ...currentTextElement,
-//           props: {
-//             ...currentTextElement.props,
-//             children: tempPrevChildren,
-//           },
-//         };
-//       }
-//     } else if (
-//       typeof element.type !== "string" &&
-//       element.props?.src &&
-//       element.props?.poster === undefined
-//     ) {
-//       if (currentTextElement) {
-//         result.push(currentTextElement);
-//         currentTextElement = null;
-//       }
-//       currentImages.push(element);
-//     } else {
-//       if (currentTextElement) {
-//         result.push(currentTextElement);
-//         currentTextElement = null;
-//       }
-//       if (currentImages.length > 0) {
-//         result.push(createImageGrid(currentImages, pubkey));
-//         currentImages = [];
-//       }
-//       result.push(element);
-//     }
-//   }
-
-//   if (currentTextElement) {
-//     result.push(currentTextElement);
-//   }
-//   if (currentImages.length > 0) {
-//     result.push(createImageGrid(currentImages, pubkey));
-//   }
-
-//   return result;
-// };
-
-// const mergeConsecutivePElements = (arr, pubkey) => {
-//   const result = [];
-//   let currentTextElement = null;
-//   let currentImages = [];
-//   let tempArray = [];
-
-//   // Step 1: filter out <br> between consecutive images
-//   for (let i = 0; i < arr.length; i++) {
-//     if (
-//       !(
-//         i - 1 > 0 &&
-//         i + 1 < arr.length &&
-//         arr[i].type === "br" &&
-//         typeof arr[i - 1].type !== "string" &&
-//         arr[i - 1].props?.src &&
-//         typeof arr[i + 1].type !== "string" &&
-//         arr[i + 1].props?.src
-//       )
-//     ) {
-//       tempArray.push(arr[i]);
-//     }
-//   }
-
-//   // Step 2: collapse multiple consecutive <br> into a single one
-//   const collapsedArray = [];
-//   for (let i = 0; i < tempArray.length; i++) {
-//     const el = tempArray[i];
-//     if (el.type === "br" && collapsedArray.at(-1)?.type === "br") {
-//       continue; // skip duplicate <br>
-//     }
-//     collapsedArray.push(el);
-//   }
-
-//   // Step 3: process collapsedArray
-//   for (const element of collapsedArray) {
-//     if (["p", "span"].includes(element.type)) {
-//       if (!currentTextElement) {
-//         currentTextElement = { ...element };
-//         currentTextElement.props = {
-//           ...element.props,
-//           children: [element.props.children],
-//         };
-//       } else {
-//         let tempPrevChildren = currentTextElement.props.children;
-//         if (typeof element.props.children !== "string") {
-//           tempPrevChildren.push(element.props.children);
-//         }
-//         if (
-//           typeof tempPrevChildren[tempPrevChildren.length - 1] === "string" &&
-//           typeof element.props.children === "string"
-//         ) {
-//           tempPrevChildren[tempPrevChildren.length - 1] =
-//             `${tempPrevChildren[tempPrevChildren.length - 1]} ${element.props.children}`;
-//         }
-//         if (
-//           typeof tempPrevChildren[tempPrevChildren.length - 1] !== "string" &&
-//           typeof element.props.children === "string"
-//         ) {
-//           tempPrevChildren.push(` ${element.props.children}`);
-//         }
-//         currentTextElement = {
-//           ...currentTextElement,
-//           props: {
-//             ...currentTextElement.props,
-//             children: tempPrevChildren,
-//           },
-//         };
-//       }
-//     } else if (
-//       typeof element.type !== "string" &&
-//       element.props?.src &&
-//       element.props?.poster === undefined
-//     ) {
-//       if (currentTextElement) {
-//         result.push(currentTextElement);
-//         currentTextElement = null;
-//       }
-//       currentImages.push(element);
-//     } else {
-//       if (currentTextElement) {
-//         result.push(currentTextElement);
-//         currentTextElement = null;
-//       }
-//       if (currentImages.length > 0) {
-//         result.push(createImageGrid(currentImages, pubkey));
-//         currentImages = [];
-//       }
-//       result.push(element);
-//     }
-//   }
-
-//   if (currentTextElement) {
-//     result.push(currentTextElement);
-//   }
-//   if (currentImages.length > 0) {
-//     result.push(createImageGrid(currentImages, pubkey));
-//   }
-
-//   return result;
-// };
-
-// const mergeConsecutivePElements = (arr, pubkey) => {
-//   const result = [];
-//   let currentTextElement = null;
-//   let currentImages = [];
-//   let tempArray = [];
-
-//   for (let i = 0; i < arr.length; i++) {
-//     if (
-//       !(
-//         i - 1 > 0 &&
-//         i + 1 < arr.length &&
-//         arr[i].type === "br" &&
-//         typeof arr[i - 1].type !== "string" &&
-//         arr[i - 1].props?.src &&
-//         typeof arr[i + 1].type !== "string" &&
-//         arr[i + 1].props?.src
-//       )
-//     ) {
-//       tempArray.push(arr[i]);
-//     }
-//   }
-//   tempArray = tempArray.filter((element, index, arr) => {
-//     if (element.type === "br") {
-//       const prev = arr
-//         .slice(0, index)
-//         .reverse()
-//         .find((el) => el.type !== "br");
-//       const next = arr.slice(index + 1).find((el) => el.type !== "br");
-
-//       if (
-//         prev?.type !== "string" &&
-//         prev?.props?.src &&
-//         next?.type !== "string" &&
-//         next?.props?.src
-//       ) {
-//         return false;
-//       }
-//     }
-
-//     return true;
-//   });
-
-//   for (const element of tempArray) {
-//     if (["p", "span"].includes(element.type)) {
-//       if (!currentTextElement) {
-//         currentTextElement = { ...element };
-//         currentTextElement.props = {
-//           ...element.props,
-//           children: [element.props.children],
-//         };
-//       } else {
-//         let tempPrevChildren = currentTextElement.props.children;
-//         if (typeof element.props.children !== "string") {
-//           tempPrevChildren.push(element.props.children);
-//         }
-//         if (
-//           typeof tempPrevChildren[tempPrevChildren.length - 1] === "string" &&
-//           typeof element.props.children === "string"
-//         ) {
-//           tempPrevChildren[tempPrevChildren.length - 1] = `${
-//             tempPrevChildren[tempPrevChildren.length - 1]
-//           } ${element.props.children}`;
-//         }
-//         if (
-//           typeof tempPrevChildren[tempPrevChildren.length - 1] !== "string" &&
-//           typeof element.props.children === "string"
-//         ) {
-//           tempPrevChildren.push(` ${element.props.children}`);
-//         }
-//         currentTextElement = {
-//           ...currentTextElement,
-//           props: {
-//             ...currentTextElement.props,
-//             children: tempPrevChildren,
-//           },
-//         };
-//       }
-//     } else if (
-//       typeof element.type !== "string" &&
-//       element.props?.src &&
-//       element.props?.poster === undefined
-//     ) {
-//       if (currentTextElement) {
-//         result.push(currentTextElement);
-//         currentTextElement = null;
-//       }
-//       currentImages.push(element);
-//     } else {
-//       if (currentTextElement) {
-//         result.push(currentTextElement);
-//         currentTextElement = null;
-//       }
-//       if (currentImages.length > 0) {
-//         result.push(createImageGrid(currentImages, pubkey));
-//         currentImages = [];
-//       }
-//       result.push(element);
-//     }
-//   }
-
-//   if (currentTextElement) {
-//     result.push(currentTextElement);
-//   }
-//   if (currentImages.length > 0) {
-//     result.push(createImageGrid(currentImages, pubkey));
-//   }
-
-//   return result;
-// };
-
 const createImageGrid = (images, pubkey, noBlur) => {
   let images_ = images.map((image) => image.props.src);
-  // Create a unique key based on the first image URL and number of images
-  // const key = `gallery-${images_.length}-${
-  //   images_[0]?.substring(0, 20) || "empty"
-  // }`;
-  const key = nanoid()
+  const key = nanoid();
   return <Gallery key={key} imgs={images_} pubkey={pubkey} noBlur={noBlur} />;
 };
 
@@ -1582,15 +1260,6 @@ export function nEventEncode(id) {
     id,
   });
 }
-
-const isImageUrlSync = (url) => {
-  try {
-    if (/(https?:\/\/[^ ]*\.(?:gif|png|jpg|jpeg|webp))/i.test(url)) return true;
-    return false;
-  } catch (error) {
-    return false;
-  }
-};
 
 const getNIP21FromURL = (url) => {
   const regex = /n(event|profile|pub|addr)([^\s\W]*)/;

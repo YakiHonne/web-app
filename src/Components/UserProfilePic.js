@@ -1,6 +1,5 @@
 import { nip19 } from "nostr-tools";
 import React, { useEffect, useState } from "react";
-import Avatar from "boring-avatars";
 import InitiConvo from "@/Components/InitConvo";
 import { checkForLUDS, getuserMetadata } from "@/Helpers/Encryptions";
 import ZapTip from "@/Components/ZapTip";
@@ -15,6 +14,7 @@ import { NDKUser } from "@nostr-dev-kit/ndk";
 import { useTranslation } from "react-i18next";
 import Follow from "@/Components/Follow";
 import useUserProfile from "@/Hooks/useUsersProfile";
+import AvatarPlaceholder from "./AvatarPlaceholder";
 
 export default function UserProfilePic({
   user_id,
@@ -125,13 +125,7 @@ export default function UserProfilePic({
             className={`pointer fx-centered`}
             onClick={handleClick}
           >
-            <Avatar
-              size={size}
-              name={userKeys.pub}
-              square
-              variant="marble"
-              colors={["#0A0310", "#49007E", "#FF005B", "#FF7D10", "#FFB238"]}
-            />
+            <AvatarPlaceholder size={size} />
           </div>
         )}
       </>
@@ -185,19 +179,7 @@ export default function UserProfilePic({
                 }}
                 className={`pointer fx-centered`}
               >
-                <Avatar
-                  size={size}
-                  name={user_id}
-                  square
-                  variant="marble"
-                  colors={[
-                    "#0A0310",
-                    "#49007E",
-                    "#FF005B",
-                    "#FF7D10",
-                    "#FFB238",
-                  ]}
-                />
+                <AvatarPlaceholder size={size} />
               </div>
             )}
             <p className="p-one-line" style={{ margin: 0 }}>
@@ -334,13 +316,7 @@ export default function UserProfilePic({
             className={`pointer fx-centered`}
             onClick={handleClick}
           >
-            <Avatar
-              size={size}
-              name={user_id}
-              square
-              variant="marble"
-              colors={["#0A0310", "#49007E", "#FF005B", "#FF7D10", "#FFB238"]}
-            />
+            <AvatarPlaceholder size={size} />
           </div>
         )}
         {showMetadata && metadata && (
@@ -372,7 +348,11 @@ export default function UserProfilePic({
             >
               <div className="fx-centered fx-start-h">
                 <div className="nip05"></div>
-                <p>{metadata.nip05 && typeof metadata.nip05 === "string" ? metadata.nip05 : "N/A"}</p>
+                <p>
+                  {metadata.nip05 && typeof metadata.nip05 === "string"
+                    ? metadata.nip05
+                    : "N/A"}
+                </p>
               </div>
               {metadata.website && (
                 <div className="fx-centered fx-start-h">

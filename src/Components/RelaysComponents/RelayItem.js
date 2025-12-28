@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import RelayImage from "@/Components/RelayImage";
-import { getRelayMetadata } from "@/Helpers/utils";
+import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 import { saveRelayMetadata } from "@/Helpers/Controlers";
 
 export default function RelayItem({

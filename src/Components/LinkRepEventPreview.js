@@ -7,11 +7,11 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import MinimalPreviewWidget from "@/Components/SmartWidget/MinimalPreviewWidget";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import Date_ from "./Date_";
+import MediaEventPreview from "./MediaEventPreview";
 
 export default function LinkRepEventPreview({ event, allowClick = true }) {
   const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
-  let url = getLinkFromAddr(event.naddr || event.nEvent);
-
+  let url = getLinkFromAddr(event.naddr || event.nEvent, event.kind);
   const { t } = useTranslation();
   const onClick = (e) => {
     e.stopPropagation();
@@ -90,9 +90,9 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
         </div>
       </div>
     );
-  // return <KindOne event={event} reactions={false} minimal={true} />;
-
   if (event.kind === 30031) return <MinimalPreviewWidget widget={event} />;
+  if ([20, 21, 22].includes(event.kind)) return <MediaEventPreview event={event} />;
+
   return (
     <div
       className={`fit-container sc-s-18 bg-sp fx-centered fx-start-h fx-stretch ${

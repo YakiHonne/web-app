@@ -18,6 +18,7 @@ import { useTranslation } from "react-i18next";
 import ProfilesPicker from "@/Components/ProfilesPicker";
 import Router, { useRouter } from "next/router";
 import { useTheme } from "next-themes";
+import { detectDirection } from "@/Helpers/Encryptions";
 
 const getUploadsHistory = () => {
   let history = localStorage?.getItem("YakihonneUploadsHistory");
@@ -76,6 +77,12 @@ export default function WritingArticle() {
   useEffect(() => {
     if (userKeys && !post_id) {
       let draft = getArticleDraft();
+      let direction = detectDirection(draft.content)
+      if(direction === "RTL") {
+        setSelectedTab(1)
+      } else {
+        setSelectedTab(0)
+      }
       setDraftData(draft);
       setTitle(draft.title);
       setContent(draft.content);
@@ -179,6 +186,12 @@ export default function WritingArticle() {
   };
 
   const handleSetContent = (data) => {
+    let direction = detectDirection(data)
+    if(direction === "RTL") {
+      setSelectedTab(1)
+    } else {
+      setSelectedTab(0)
+    }
     updateArticleDraft({ title, content: data });
     setContent(data);
   };

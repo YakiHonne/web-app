@@ -4,13 +4,13 @@ import { nip04, nip19, nip44 } from "nostr-tools";
 import { decode } from "light-bolt11-decoder";
 import { getImagePlaceholder } from "@/Content/NostrPPPlaceholder";
 import CryptoJS from "crypto-js";
-import { getAppLang } from "./Helpers";
-import { getKeys } from "./ClientHelpers";
+import { formatMinutesToMMSS, getAppLang } from "./Helpers";
+import { getKeys, isVid, nEventEncode } from "./ClientHelpers";
 import axiosInstance from "./HTTP_Client";
 import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
-import { localStorage_ } from "./utils";
+import { localStorage_ } from "./utils/clientLocalStorage";
 
 const LNURL_REGEX =
   /^(?:http.*[&?]lightning=|lightning:)?(lnurl[0-9]{1,}[02-9ac-hj-np-z]+)/;
@@ -113,29 +113,6 @@ const getEmptyRelaysStats = (url) => {
       rttOpen: null,
       since: undefined,
     },
-  };
-};
-
-const getEmptyRelaysData = (url) => {
-  return {
-    url,
-    name: url.replace("wss://", "").replace("https://", "").replace("/", ""),
-    description: url,
-    pubkey: "",
-    contact: "",
-    supported_nips: [],
-    supported_nip_extensions: [],
-    software: "",
-    version: "",
-    limitation: {
-      auth_required: false,
-      payment_required: false,
-    },
-    payments_url: "",
-    fees: {
-      admission: [],
-    },
-    isEmpty: true,
   };
 };
 
@@ -346,6 +323,7 @@ const getParsedRepEvent = (event) => {
         : [],
       dir: detectDirection(event.content),
       vUrl: "",
+      iMetaFallbacks: [],
     };
     for (let tag of event.tags) {
       if (tag[0] === "title") {
@@ -388,7 +366,9 @@ const getParsedRepEvent = (event) => {
         content.tTags.push(tag[1]);
       }
       if (tag[0] === "url") content.vUrl = tag[1];
-      if (tag[0] === "imeta") imeta_url = tag.find((_) => _.includes("url"));
+      if (tag[0] === "imeta") {
+        imeta_url = tag.find((_) => _.includes("url"));
+      }
     }
     if (imeta_url) content.vUrl = imeta_url.split(" ")[1];
     content.naddr = content.d
@@ -406,12 +386,135 @@ const getParsedRepEvent = (event) => {
     };
     content.aTag = `${event.kind}:${event.pubkey}:${content.d}`;
 
-    if ([22, 21].includes(event.kind))
-      content.nEvent = nip19.neventEncode({
-        pubkey: event.pubkey,
-        id: event.id,
-        kind: event.kind,
-      });
+    if ([22, 21, 20].includes(event.kind))
+      content.nEvent = event.encode
+        ? event.encode()
+        : nip19.neventEncode({
+            pubkey: event.pubkey,
+            id: event.id,
+            kind: event.kind,
+          });
+
+    return content;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+const getParsedMedia = (event) => {
+  try {
+    if (!event) return false;
+    let imeta_url = "";
+    let imeta_img = "";
+    let content = {
+      id: event.id,
+      pubkey: event.pubkey,
+      kind: event.kind,
+      content: event.content,
+      created_at: event.created_at,
+      tags: event.tags,
+      sig: event.sig,
+      title: event.content,
+      description: event.content,
+      image: "",
+      imagePP: getImagePlaceholder(),
+      published_at: event.created_at,
+      contentSensitive: false,
+      d: "",
+      client: "",
+      items: [],
+      tTags: [],
+      zapSplit: [],
+      seenOn: event.onRelays
+        ? [...new Set(event.onRelays.map((relay) => relay.url))]
+        : [],
+      url: "",
+      iMetaFallbacks: [],
+      duration: 0,
+      plain: true,
+    };
+
+    for (let tag of event.tags) {
+      if (tag[0] === "title") {
+        content.title = tag[1];
+      }
+      if (["image", "thumbnail", "thumb"].includes(tag[0])) {
+        content.image = tag[1];
+      }
+      if (["description", "excerpt", "summary"].includes(tag[0])) {
+        content.description = tag[1];
+      }
+      if (tag[0] === "d") {
+        content.d = encodeURIComponent(tag[1]);
+      }
+      if (tag[0] === "zap") {
+        content.zapSplit.push(tag);
+      }
+      if (tag[0] === "published_at" && tag[1]) {
+        content.published_at =
+          parseInt(tag[1]) !== NaN ? parseInt(tag[1]) : event.created_at;
+      }
+      if (tag[0] === "client") {
+        if (tag.length >= 3 && tag[2].includes("31990")) {
+          content.client = tag[2];
+        }
+        if ((tag.length >= 3 && !tag[2].includes("31990")) || tag.length < 3)
+          content.client = tag[1];
+      }
+      if (tag[0] === "duration" && tag[1]) {
+        let duration = parseInt(tag[1]);
+        content.duration = formatMinutesToMMSS(duration);
+      }
+      if (tag[0] === "L" && tag[1] === "content-warning")
+        content.contentSensitive = true;
+      if (
+        tag[0] === "a" ||
+        tag[0] === "e" ||
+        tag[0] === "r" ||
+        tag[0] === "t"
+      ) {
+        content.items.push(tag[1]);
+      }
+      if (tag[0] === "t") {
+        content.tTags.push(tag[1]);
+      }
+      if (tag[0] === "url") content.url = tag[1];
+      if (tag[0] === "imeta") {
+        imeta_url = tag.find((_) => _.includes("url "));
+        imeta_img = tag.find((_) => _.includes("image "));
+        content.iMetaFallbacks = tag
+          .filter((_) => _.includes("fallback "))
+          .map((_) => _.replace("fallback ", "").trim());
+      }
+    }
+    if (imeta_url)
+      content.url = imeta_url.replace("url", "").replaceAll(" ", "");
+    if (imeta_img)
+      content.image = imeta_img.replace("image", "").replaceAll(" ", "");
+    content.naddr = content.d
+      ? (event.encode && event.encode()) ||
+        nip19.naddrEncode({
+          pubkey: event.pubkey,
+          identifier: content.d,
+          kind: event.kind,
+        })
+      : "";
+    content.naddrData = content.d
+      ? {
+          pubkey: event.pubkey,
+          identifier: content.d,
+          kind: event.kind,
+        }
+      : undefined;
+    content.aTag = content.d
+      ? `${event.kind}:${event.pubkey}:${content.d}`
+      : "";
+    let isNotPlain = isVid(content.url);
+    if (isNotPlain) {
+      content.plain = false;
+    }
+    if ([22, 21, 20].includes(event.kind))
+      content.nEvent = event?.encode ? event.encode() : nEventEncode(event.id);
 
     return content;
   } catch (err) {
@@ -1161,18 +1264,9 @@ const filterContent = (selectedFilter, list) => {
     if (curType === "articles" && kind === 30004) return true;
     return true;
   };
-  const sameOrigin = (type, url) => {
-    const youtubeRegex =
-      /(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/i;
-    const vimeoRegex = /(https?:\/\/)?(www\.)?(vimeo\.com\/)([0-9]+)/i;
-    if (type === "all") return true;
-    if (type === "youtube" && youtubeRegex.test(url)) return true;
-    if (type === "vimeo" && vimeoRegex.test(url)) return true;
-    return true;
-  };
 
   const testForMixedContent = (_) => {
-    let thumbnail = selectedFilter.thumbnail ? _.image : true;
+    let thumbnail = selectedFilter?.thumbnail ? _.image : true;
     let excluded_words = selectedFilter.excluded_words.length
       ? !(
           matchWords(_.title, selectedFilter.excluded_words) ||
@@ -1219,9 +1313,9 @@ const filterContent = (selectedFilter, list) => {
     let c_min_items = [30004, 30005].includes(_.kind)
       ? _.items.length > selectedFilter.for_curations.min_items
       : true;
-    let v_source = [34235, 34236, 21, 22].includes(_.kind)
-      ? sameOrigin(selectedFilter.for_videos.source, _.vUrl)
-      : true;
+    // let v_source = [34235, 34236, 21, 22].includes(_.kind)
+    //   ? sameOrigin(selectedFilter.for_videos.source, _.vUrl)
+    //   : true;
 
     if (
       thumbnail &&
@@ -1233,8 +1327,8 @@ const filterContent = (selectedFilter, list) => {
       a_min_words &&
       a_media_only &&
       c_type &&
-      c_min_items &&
-      v_source
+      c_min_items
+      // v_source
     )
       return true;
     return false;
@@ -1242,7 +1336,7 @@ const filterContent = (selectedFilter, list) => {
 
   const testForNotes = (_) => {
     try {
-      if(!selectedFilter) return true;
+      if (!selectedFilter) return true;
       let tags = _.tags.filter((tag) => tag[0] === "t").map((tag) => tag[1]);
       let excluded_words = selectedFilter.excluded_words.length
         ? !(
@@ -1353,6 +1447,7 @@ export {
   encodeBase64URL,
   getuserMetadata,
   getParsedSW,
+  getParsedMedia,
   sortEvents,
   detectDirection,
   enableTranslation,
@@ -1363,7 +1458,6 @@ export {
   precomputeTrustingCounts,
   getBackupWOTList,
   getWOTScoreForPubkeyLegacy,
-  getEmptyRelaysData,
   getEmptyRelaysStats,
   getInvoiceDetails,
 };

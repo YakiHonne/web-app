@@ -40,12 +40,12 @@ import axios from "axios";
 import { relaysOnPlatform } from "@/Content/Relays";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
 import { t } from "i18next";
+import { localStorage_ } from "./utils/clientLocalStorage";
 import {
   getRelayMetadata,
-  localStorage_,
   saveLocalRelaysMetadata,
   setRelayMetadata,
-} from "./utils";
+} from "./utils/relayMetadataCache";
 
 const ConnectNDK = async (relays) => {
   try {
@@ -562,7 +562,7 @@ const getSubData = async (
         skipVerification: true,
         skipValidation: true,
         relayUrls: relayUrls.length > 0 ? relayUrls : userRelays,
-        cacheUsage
+        cacheUsage,
       },
       {
         onEvent(event) {
@@ -769,6 +769,24 @@ const getDefaultFilter = (type = 1) => {
         source: "all",
       },
     };
+  if (type === 2)
+    return {
+      default: true,
+      included_words: [],
+      excluded_words: [
+        "test",
+        "ignore",
+        "porn",
+        "sex",
+        "ass",
+        "boobs",
+        "hentai",
+        "nsfw",
+      ],
+      posted_by: [],
+      media_only: false,
+    };
+
   return {
     default: true,
     included_words: [],
@@ -783,7 +801,7 @@ const getDefaultFilter = (type = 1) => {
       "nsfw",
     ],
     posted_by: [],
-    media_only: false,
+    hide_sensitive: false,
   };
 };
 

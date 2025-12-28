@@ -230,11 +230,11 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                   </div>
                 )}
                 <div
-                  className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fx-start-h fx-start-v fx-col"
+                  className="sc-s-18 box-pad-h-s box-pad-v-s fx-centered fx-start-h fx-start-v fx-col"
                   style={{
                     backgroundColor: convo.peer
-                      ? "var(--pale-gray)"
-                      : "var(--dim-gray)",
+                      ? "var(--orange-side)"
+                      : "var(--c1-side)",
                     borderBottomLeftRadius: !convo.peer ? 0 : "inital",
                     borderBottomRightRadius: convo.peer ? 0 : "inital",
                     maxWidth: "min(90%, 500px)",
@@ -380,10 +380,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                 // fontSize: "1.2rem",
               }}
             />
-            <div
-              className="fx-centered"
-              style={{ padding: ".75rem" }}
-            >
+            <div className="fx-centered" style={{ padding: ".75rem" }}>
               <Emojis
                 position="right"
                 setEmoji={(data) =>

@@ -9,7 +9,7 @@ import { setUserBalance } from "@/Store/Slides/UserData";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import NumberShrink from "@/Components/NumberShrink";
-import { localStorage_ } from "@/Helpers/utils";
+import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 
 export default function UserBalance() {
   const { t } = useTranslation();

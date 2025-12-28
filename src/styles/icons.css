@@ -433,8 +433,7 @@
 .flag-hi,
 .flag-hi-24,
 .flag-ru,
-.flag-ru-24
-.user-bold,
+.flag-ru-24 .user-bold,
 .user-bold-24,
 .export,
 .export-24,
@@ -472,7 +471,13 @@
 .zapstore,
 .zapstore-24,
 .bug,
-.bug-24 {
+.bug-24,
+.broken-image,
+.broke-image-24,
+.pin,
+.pin-24,
+.unpin,
+.unpin-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -830,7 +835,11 @@
 .zapstore,
 .zapstore-24,
 .bug,
-.bug-24{
+.bug-24,
+.pin,
+.pin-24,
+.unpin,
+.unpin-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -900,7 +909,9 @@
 .zapstore,
 .zapstore-24,
 .bug,
-.bug-24 {
+.bug-24,
+.broken-image,
+.broke-image-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -1134,7 +1145,10 @@
 .orbit,
 .orbit-bold,
 .zapstore,
-.bug {
+.bug,
+.broken-image,
+.pin,
+.unpin {
     min-width: 16px;
     min-height: 16px;
 }
@@ -1358,7 +1372,10 @@
 .orbit-24,
 .orbit-bold-24,
 .zapstore-24,
-.bug-24 {
+.bug-24,
+.broken-image-24,
+.pin-24,
+.unpin-24 {
     min-width: 24px;
     min-height: 24px;
 }
@@ -1391,6 +1408,18 @@
     filter: none !important;
 }
 
+
+.pin, .pin-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/pin.svg")
+}
+
+.unpin, .unpin-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/unpin.svg")
+}
+
+.broken-image, .broken-image-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/broken-image.svg")
+}
 
 .bug, .bug-24 {
     background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/bug.svg")
@@ -1484,6 +1513,7 @@
 .flag-it-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-it.svg');
 }
+
 .flag-ru,
 .flag-ru-24 {
     background-image: url('https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/flag-ru.svg');

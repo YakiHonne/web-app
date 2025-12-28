@@ -12,12 +12,7 @@ import {
 } from "@/Helpers/Encryptions";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import { saveUsers } from "@/Helpers/DB";
-import {
-  getDefaultFilter,
-  getDVMJobRequest,
-  getDVMJobResponse,
-  getSubData,
-} from "@/Helpers/Controlers";
+import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import LoadingLogo from "@/Components/LoadingLogo";
 import UserToFollowSuggestionsCards from "@/Components/SuggestionsCards/UserToFollowSuggestionsCards";
 import ContentSuggestionsCards from "@/Components/SuggestionsCards/ContentSuggestionCards";
@@ -26,11 +21,10 @@ import DonationBoxSuggestionCards from "@/Components/SuggestionsCards/DonationBo
 import ProfileShareSuggestionCards from "@/Components/SuggestionsCards/ProfileShareSuggestionCards";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
-import InfiniteScroll from "@/Components/InfiniteScroll";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import RecentPosts from "@/Components/RecentPosts";
 import { straightUp } from "@/Helpers/Helpers";
-import { getNDKInstance } from "@/Helpers/utils";
+import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
 import { Virtuoso } from "react-virtuoso";
 
 const MixEvents = (articles, curations, videos) => {
@@ -179,7 +173,7 @@ const ExploreFeed = ({
     () => (content.length > 0 ? content[0].created_at + 1 : undefined),
     [content]
   );
-const virtuosoRef = useRef(null);
+  const virtuosoRef = useRef(null);
   useEffect(() => {
     const contentFromRelays = async () => {
       setIsLoading(true);
@@ -525,7 +519,7 @@ const virtuosoRef = useRef(null);
                   </div>
                   {getContentCard(index)}
                 </Fragment>
-              )
+              );
           }}
         />
       )}
@@ -564,7 +558,7 @@ const virtuosoRef = useRef(null);
         </div>
       )}
       {/* </div> */}
-    {/* </InfiniteScroll> */}
+      {/* </InfiniteScroll> */}
     </>
   );
 };

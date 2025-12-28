@@ -276,7 +276,7 @@ export default function Comments({
           overflow: "visible",
           zIndex: "10",
           position: "relative",
-          height: "300px",
+          // height: "300px",
         }}
         ref={ref}
       >
@@ -318,7 +318,7 @@ export default function Comments({
                     type="text"
                     style={{
                       padding: 0,
-                      maxHeight: "100%",
+                      maxHeight: "350px",
                       minHeight: "100%",
                       borderRadius: 0,
                     }}

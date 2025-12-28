@@ -37,7 +37,10 @@ export default function NotificationCenter({
             }`
       }
       style={{ position: "relative" }}
-      onClick={() => customHistory("/notifications")}
+      onClick={() => {
+        customHistory("/notifications");
+        dismiss && dismiss();
+      }}
     >
       <div className="fx-centered">
         {!isCurrent && <div className="ringbell-24"></div>}
