@@ -31,50 +31,23 @@ export default function MenuMobile({ toggleLogin, exit }) {
   );
   const [dismissed, setDismissed] = useState(false);
   const { t } = useTranslation();
-  const [showSettings, setShowSettings] = useState(false);
-  const [showMyContent, setShowMyContent] = useState(false);
-  const [showWritingOptions, setShowWritingOptions] = useState(false);
-
   const accounts = useMemo(() => {
     return getConnectedAccounts();
   }, [userKeys, userMetadata]);
-  const settingsRef = useRef(null);
-  const myContentRef = useRef(null);
-  const writingOpt = useRef(null);
+  const menuRef = useRef(null);
+
   useEffect(() => {
     userKeys.pub ? setPubkey(getBech32("npub", userKeys.pub)) : setPubkey("");
   }, [userKeys]);
 
   useEffect(() => {
-    const handleOffClick = (e) => {
-      if (settingsRef.current && !settingsRef.current.contains(e.target))
-        setShowSettings(false);
-    };
-    document.addEventListener("mousedown", handleOffClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOffClick);
-    };
-  }, [settingsRef]);
-  useEffect(() => {
-    const handleOffClick = (e) => {
-      if (myContentRef.current && !myContentRef.current.contains(e.target))
-        setShowMyContent(false);
-    };
-    document.addEventListener("mousedown", handleOffClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOffClick);
-    };
-  }, [myContentRef]);
-  useEffect(() => {
-    const handleOffClick = (e) => {
-      if (writingOpt.current && !writingOpt.current.contains(e.target))
-        setShowWritingOptions(false);
-    };
-    document.addEventListener("mousedown", handleOffClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOffClick);
-    };
-  }, [writingOpt]);
+    if (menuRef.current) {
+      let timeout = setTimeout(() => {
+        menuRef.current.classList.remove("slide-right");
+        clearTimeout(timeout);
+      }, [600]);
+    }
+  }, [menuRef]);
 
   const isPage = (url) => {
     if (url === window.location.pathname) return true;
@@ -88,17 +61,19 @@ export default function MenuMobile({ toggleLogin, exit }) {
   };
 
   return (
-    <div className={`menu-login ${dismissed ? "dismiss" : "slide-right"}`}>
+    <div
+      className={`menu-login ${dismissed ? "dismiss" : "slide-right"}`}
+      ref={menuRef}
+    >
       <div
         className="fit-container fx-centered fx-start-h sticky"
-        style={{top: 0}}
+        style={{ top: 0 }}
         onClick={dismiss}
       >
         <div className="close-button">
           <div className="arrow" style={{ rotate: "-90deg" }}></div>
         </div>
       </div>
-
       {!userMetadata && (
         <>
           <div className="fit-container fx-scattered">
@@ -137,6 +112,18 @@ export default function MenuMobile({ toggleLogin, exit }) {
         </div>
         <div
           onClick={() => {
+            customHistory("/media");
+            dismiss();
+          }}
+          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${
+            isPage("/media") ? "active-link" : "inactive-link"
+          }`}
+        >
+          <div className="media-24"></div>
+          <div className="p-big">{t("A0i2SOt")}</div>
+        </div>
+        <div
+          onClick={() => {
             customHistory("/relay-orbits");
             dismiss();
           }}
@@ -149,18 +136,6 @@ export default function MenuMobile({ toggleLogin, exit }) {
         </div>
         <div
           onClick={() => {
-            customHistory("/discover");
-            dismiss();
-          }}
-          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${
-            isPage("/discover") ? "active-link" : "inactive-link"
-          }`}
-        >
-          <div className="posts-24"></div>
-          <div className="p-big">{t("ABSoIm9")}</div>
-        </div>
-        {/* <div
-          onClick={() => {
             customHistory("/articles");
             dismiss();
           }}
@@ -170,8 +145,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
         >
           <div className="posts-24"></div>
           <div className="p-big">{t("AesMg52")}</div>
-        </div> */}
-
+        </div>
         <div
           onClick={() => {
             customHistory("/smart-widgets");
@@ -315,7 +289,6 @@ export default function MenuMobile({ toggleLogin, exit }) {
                     key={account.pubkey}
                     onClick={() => {
                       handleSwitchAccount(account);
-                      setShowSettings(false);
                       dismiss();
                     }}
                   >

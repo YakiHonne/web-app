@@ -53,72 +53,6 @@ import { DraggableComp } from "@/Components/DraggableComp";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
-    case "notes": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.events];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "articles": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.events];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "drafts": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.events];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "curations": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.events];
-      let sortedNotes = tempArr
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at)
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.d === note.d) === index) return note;
-        });
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "videos": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.events];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
-    case "widgets": {
-      let nextState = { ...notes };
-      let tempArr = [...nextState[action.type], ...action.events];
-      let sortedNotes = tempArr
-        .filter((note, index, tempArr) => {
-          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
-        })
-        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
-      nextState[action.type] = sortedNotes;
-      return nextState;
-    }
     case "remove-event": {
       let nextState = { ...notes };
       let tempArr = [...action.events];
@@ -130,7 +64,15 @@ const eventsReducer = (notes, action) => {
       return eventsInitialState;
     }
     default: {
-      console.log("wrong action type");
+      let nextState = { ...notes };
+      let tempArr = [...nextState[action.type], ...action.events];
+      let sortedNotes = tempArr
+        .filter((note, index, tempArr) => {
+          if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
+        })
+        .sort((note_1, note_2) => note_2.created_at - note_1.created_at);
+      nextState[action.type] = sortedNotes;
+      return nextState;
     }
   }
 };
@@ -140,6 +82,7 @@ const eventsInitialState = {
   drafts: [],
   curations: [],
   videos: [],
+  pictures: [],
   widgets: [],
 };
 const getLocalDrafts = () => {
@@ -236,7 +179,7 @@ export default function Dashboard() {
           Promise.race([getPopularNotes(userKeys.pub), sleepTimer(2000)]),
           getSubData([
             {
-              kinds: [30023, 30004, 30005, 34235, 21, 22],
+              kinds: [30023, 30004, 30005, 34235, 21, 22, 20],
               limit: 5,
               authors: [userKeys.pub],
             },
@@ -284,7 +227,7 @@ export default function Dashboard() {
   const handleUpdate = async () => {
     let userContent = await getSubData([
       {
-        kinds: [30023, 30004, 30005, 34235, 21, 22],
+        kinds: [30023, 30004, 30005, 34235, 21, 22, 20],
         limit: 5,
         authors: [userKeys.pub],
       },
@@ -374,13 +317,21 @@ export default function Dashboard() {
                   />
                 )}
                 {selectedTab === 5 && (
+                  <Content
+                    filter={"pictures"}
+                    localDraft={userPreview.localDraft}
+                    init={postToNote || false}
+                    setPostToNote={setPostToNote}
+                  />
+                )}
+                {selectedTab === 6 && (
                   <Widgets
                     setPostToNote={setPostToNote}
                     localDraft={userPreview.localDraft}
                   />
                 )}
-                {selectedTab === 6 && <Bookmarks />}
-                {selectedTab === 7 && <Interests />}
+                {selectedTab === 7 && <Bookmarks />}
+                {selectedTab === 8 && <Interests />}
                 <div style={{ marginBottom: "100px" }}></div>
               </div>
             </div>
@@ -408,6 +359,44 @@ const SideMenu = ({ setSelectedTab, selectedTab }) => {
 
 const SideMenuDesktop = ({ setSelectedTab, selectedTab }) => {
   const { t } = useTranslation();
+  const tabs = [
+    {
+      display_name: t("AJDdA3h"),
+      value: 0,
+    },
+    {
+      display_name: t("AYIXG83"),
+      value: 1,
+    },
+    {
+      display_name: t("AesMg52"),
+      value: 2,
+    },
+    {
+      display_name: t("AVysZ1s"),
+      value: 3,
+    },
+    {
+      display_name: t("AStkKfQ"),
+      value: 4,
+    },
+    {
+      display_name: t("Aa73Zgk"),
+      value: 5,
+    },
+    {
+      display_name: t("A2mdxcf"),
+      value: 6,
+    },
+    {
+      display_name: t("AqwEL0G"),
+      value: 7,
+    },
+    {
+      display_name: t("AvcFYqP"),
+      value: 8,
+    },
+  ];
   return (
     <div
       style={{
@@ -424,78 +413,20 @@ const SideMenuDesktop = ({ setSelectedTab, selectedTab }) => {
         <h4>{t("ALBhi3j")}</h4>
       </div>
       <div className="fx-centered fx-start-v fx-col" style={{ gap: "0" }}>
-        <p
-          className="option fit-container box-pad-h box-pad-v-m pointer"
-          style={{
-            backgroundColor: selectedTab === 0 ? "var(--pale-gray)" : "",
-          }}
-          onClick={() => setSelectedTab(0)}
-        >
-          {t("AJDdA3h")}
-        </p>
-        <p
-          className="option fit-container box-pad-h box-pad-v-m pointer"
-          style={{
-            backgroundColor: selectedTab === 1 ? "var(--pale-gray)" : "",
-          }}
-          onClick={() => setSelectedTab(1)}
-        >
-          {t("AYIXG83")}
-        </p>
-        <p
-          className="option fit-container box-pad-h box-pad-v-m pointer"
-          style={{
-            backgroundColor: selectedTab === 2 ? "var(--pale-gray)" : "",
-          }}
-          onClick={() => setSelectedTab(2)}
-        >
-          {t("AesMg52")}
-        </p>
-        <p
-          className="option fit-container box-pad-h box-pad-v-m pointer"
-          style={{
-            backgroundColor: selectedTab === 3 ? "var(--pale-gray)" : "",
-          }}
-          onClick={() => setSelectedTab(3)}
-        >
-          {t("AVysZ1s")}
-        </p>
-        <p
-          className="option fit-container box-pad-h box-pad-v-m pointer"
-          style={{
-            backgroundColor: selectedTab === 4 ? "var(--pale-gray)" : "",
-          }}
-          onClick={() => setSelectedTab(4)}
-        >
-          {t("AStkKfQ")}
-        </p>
-        <p
-          className="option fit-container box-pad-h box-pad-v-m pointer"
-          style={{
-            backgroundColor: selectedTab === 5 ? "var(--pale-gray)" : "",
-          }}
-          onClick={() => setSelectedTab(5)}
-        >
-          {t("A2mdxcf")}
-        </p>
-        <p
-          className="option fit-container box-pad-h box-pad-v-m pointer"
-          style={{
-            backgroundColor: selectedTab === 6 ? "var(--pale-gray)" : "",
-          }}
-          onClick={() => setSelectedTab(6)}
-        >
-          {t("AqwEL0G")}
-        </p>
-        <p
-          className="option fit-container box-pad-h box-pad-v-m pointer"
-          style={{
-            backgroundColor: selectedTab === 7 ? "var(--pale-gray)" : "",
-          }}
-          onClick={() => setSelectedTab(7)}
-        >
-          {t("AvcFYqP")}
-        </p>
+        {tabs.map((tab) => {
+          return (
+            <p
+              className="option fit-container box-pad-h box-pad-v-m pointer"
+              style={{
+                backgroundColor:
+                  selectedTab === tab.value ? "var(--pale-gray)" : "",
+              }}
+              onClick={() => setSelectedTab(tab.value)}
+            >
+              {tab.display_name}
+            </p>
+          );
+        })}
       </div>
     </div>
   );
@@ -504,6 +435,44 @@ const SideMenuDesktop = ({ setSelectedTab, selectedTab }) => {
 const SideMenuMobile = ({ setSelectedTab, selectedTab }) => {
   const { t } = useTranslation();
   const [showMenu, setShowMenu] = useState(false);
+  const tabs = [
+    {
+      display_name: t("AJDdA3h"),
+      value: 0,
+    },
+    {
+      display_name: t("AYIXG83"),
+      value: 1,
+    },
+    {
+      display_name: t("AesMg52"),
+      value: 2,
+    },
+    {
+      display_name: t("AVysZ1s"),
+      value: 3,
+    },
+    {
+      display_name: t("AStkKfQ"),
+      value: 4,
+    },
+    {
+      display_name: t("Aa73Zgk"),
+      value: 5,
+    },
+    {
+      display_name: t("A2mdxcf"),
+      value: 6,
+    },
+    {
+      display_name: t("AqwEL0G"),
+      value: 7,
+    },
+    {
+      display_name: t("AvcFYqP"),
+      value: 8,
+    },
+  ];
   return (
     <div
       style={{
@@ -547,102 +516,23 @@ const SideMenuMobile = ({ setSelectedTab, selectedTab }) => {
                 <div></div>
               </div>
             </div>
-            <p
-              className="option fit-container box-pad-h box-pad-v-m pointer"
-              style={{
-                backgroundColor: selectedTab === 0 ? "var(--pale-gray)" : "",
-              }}
-              onClick={() => {
-                setSelectedTab(0);
-                setShowMenu(false);
-              }}
-            >
-              {t("AJDdA3h")}
-            </p>
-            <p
-              className="option fit-container box-pad-h box-pad-v-m pointer"
-              style={{
-                backgroundColor: selectedTab === 1 ? "var(--pale-gray)" : "",
-              }}
-              onClick={() => {
-                setSelectedTab(1);
-                setShowMenu(false);
-              }}
-            >
-              {t("AYIXG83")}
-            </p>
-            <p
-              className="option fit-container box-pad-h box-pad-v-m pointer"
-              style={{
-                backgroundColor: selectedTab === 2 ? "var(--pale-gray)" : "",
-              }}
-              onClick={() => {
-                setSelectedTab(2);
-                setShowMenu(false);
-              }}
-            >
-              {t("AesMg52")}
-            </p>
-            <p
-              className="option fit-container box-pad-h box-pad-v-m pointer"
-              style={{
-                backgroundColor: selectedTab === 3 ? "var(--pale-gray)" : "",
-              }}
-              onClick={() => {
-                setSelectedTab(3);
-                setShowMenu(false);
-              }}
-            >
-              {t("AVysZ1s")}
-            </p>
-            <p
-              className="option fit-container box-pad-h box-pad-v-m pointer"
-              style={{
-                backgroundColor: selectedTab === 4 ? "var(--pale-gray)" : "",
-              }}
-              onClick={() => {
-                setSelectedTab(4);
-                setShowMenu(false);
-              }}
-            >
-              {t("AStkKfQ")}
-            </p>
-            <p
-              className="option fit-container box-pad-h box-pad-v-m pointer"
-              style={{
-                backgroundColor: selectedTab === 5 ? "var(--pale-gray)" : "",
-              }}
-              onClick={() => {
-                setSelectedTab(5);
-                setShowMenu(false);
-              }}
-            >
-              {t("A2mdxcf")}
-            </p>
-            <p
-              className="option fit-container box-pad-h box-pad-v-m pointer"
-              style={{
-                backgroundColor: selectedTab === 6 ? "var(--pale-gray)" : "",
-              }}
-              onClick={() => {
-                setSelectedTab(6);
-                setShowMenu(false);
-              }}
-            >
-              {t("AqwEL0G")}
-            </p>
-            <p
-              className="option fit-container box-pad-h box-pad-v-m pointer"
-              style={{
-                backgroundColor: selectedTab === 7 ? "var(--pale-gray)" : "",
-              }}
-              onClick={() => {
-                setSelectedTab(7);
-                setShowMenu(false);
-              }}
-            >
-              {t("AvcFYqP")}
-            </p>
+            {tabs.map((tab) => {
+              return (
+                <p
+                  className="option fit-container box-pad-h box-pad-v-m pointer"
+                  style={{
+                    backgroundColor:
+                      selectedTab === tab.value ? "var(--pale-gray)" : "",
+                  }}
+                  onClick={() => {
+                    setSelectedTab(tab.value);
+                    setShowMenu(false);
+                  }}
+                >
+                  {tab.display_name}
+                </p>
+              );
+            })}
           </div>
         </div>
       )}
@@ -672,6 +562,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
     drafts: t("A14HHPP"),
     curations: t("AAUycZW"),
     videos: t("AQIAfYS"),
+    pictures: t("Aa73Zgk"),
     widgets: t("AvEJw6B"),
     notes: t("A6rkFum"),
   };
@@ -763,6 +654,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
     if (contentFrom === "drafts") filter.kinds = [30024];
     if (contentFrom === "curations") filter.kinds = [30004, 30005];
     if (contentFrom === "videos") filter.kinds = [34235, 21, 22];
+    if (contentFrom === "pictures") filter.kinds = [20];
     if (contentFrom === "widgets") filter.kinds = [30033];
     if (contentFrom === "notes") filter.kinds = [1, 6];
     return filter;
@@ -842,6 +734,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
           <h4 className="p-caps">
             {["articles", "drafts"].includes(contentFrom) && t("AesMg52")}
             {contentFrom === "widgets" && t("A2mdxcf")}
+            {contentFrom === "pictures" && t("Aa73Zgk")}
             {contentFrom === "videos" && t("AStkKfQ")}
             {contentFrom === "curations" && t("AVysZ1s")}
             {contentFrom === "notes" && t("AYIXG83")}
@@ -1734,9 +1627,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                         <ContentCard event={data.localDraft.artDraft} />
                       )}
                       {data.localDraft.smartWidgetDraft && (
-                        <ContentCard
-                          event={data.localDraft.smartWidgetDraft}
-                        />
+                        <ContentCard event={data.localDraft.smartWidgetDraft} />
                       )}
                     </>
                   )}
@@ -1802,7 +1693,7 @@ const ContentCard = ({
       {event.kind === 30024 && (
         <DraftCard event={event} refreshAfterDeletion={refreshAfterDeletion} />
       )}
-      {[30004, 30005, 30023, 34235, 30033, 21, 22].includes(event.kind) && (
+      {[30004, 30005, 30023, 34235, 30033, 21, 22, 20].includes(event.kind) && (
         <RepCard event={event} refreshAfterDeletion={refreshAfterDeletion} />
       )}
       {event.kind === 30003 && <BookmarkCard event={event} />}
@@ -1903,6 +1794,7 @@ const DraftCardOthers = ({ event, setPostToNote, handleDelete }) => {
     30004: t("Ac6UnVb"),
     30005: t("Ac6UnVb"),
     34235: t("AVdmifm"),
+    20: t("Aa73Zgk"),
     21: t("AVdmifm"),
     22: t("AVdmifm"),
     34236: t("AVdmifm"),
@@ -2003,6 +1895,7 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
     34235: t("AVdmifm"),
     22: t("AVdmifm"),
     21: t("AVdmifm"),
+    20: t("Aa73Zgk"),
     34236: t("AVdmifm"),
     300331: t("AkvXmyz"),
     30033: t("AkvXmyz"),
@@ -2018,11 +1911,11 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
       }}
       onClick={(e) => {
         e.stopPropagation();
-        customHistory(getLinkFromAddr(event.naddr));
+        customHistory(getLinkFromAddr(event.naddr || event.nEvent, event.kind));
       }}
-    >
+    > 
       <div className="fx-centered fx-start-v">
-        {!event.image && (
+        {!event.image && event.kind !== 20 && (
           <div className="round-icon">
             {[30004, 30005].includes(event.kind) && (
               <div className="curation-24"></div>
@@ -2036,11 +1929,21 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
             )}
           </div>
         )}
-        {event.image && (
+        {event.image && event.kind !== 20 && (
           <div
             className="sc-s-18 bg-img cover-bg"
             style={{
               backgroundImage: `url(${event.image})`,
+              minWidth: "48px",
+              aspectRatio: "1/1",
+            }}
+          ></div>
+        )}
+        {event.kind === 20 && (
+          <div
+            className="sc-s-18 bg-img cover-bg"
+            style={{
+              backgroundImage: `url(${event.vUrl})`,
               minWidth: "48px",
               aspectRatio: "1/1",
             }}
@@ -2101,6 +2004,13 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
             <EventOptions
               event={event}
               component="dashboardVideos"
+              refreshAfterDeletion={refreshAfterDeletion}
+            />
+          )}
+          {[20].includes(event.kind) && (
+            <EventOptions
+              event={event}
+              component="dashboardPictures"
               refreshAfterDeletion={refreshAfterDeletion}
             />
           )}
@@ -2302,6 +2212,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
     34235: t("AVdmifm"),
     22: t("AVdmifm"),
     21: t("AVdmifm"),
+    20: t("Aa73Zgk"),
     34236: t("AVdmifm"),
     300331: t("AkvXmyz"),
     30033: t("AkvXmyz"),
@@ -2363,7 +2274,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
       let events = await getSubData(filter);
 
       events = events.data.map((event) => {
-        if ([30004, 30005, 30023, 34235, 21, 22].includes(event.kind)) {
+        if ([30004, 30005, 30023, 34235, 21, 22, 20].includes(event.kind)) {
           let parsedEvent = getParsedRepEvent(event);
           return parsedEvent;
         }
@@ -2442,7 +2353,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
             {content.map((item) => {
               if (
                 !postKind &&
-                [30004, 30023, 30005, 34235, 21, 22].includes(item.kind)
+                [30004, 30023, 30005, 34235, 21, 22, 20].includes(item.kind)
               )
                 return (
                   <div

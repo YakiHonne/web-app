@@ -77,7 +77,7 @@ export default function PostReaction({
           extrasType={usersList.extrasType}
         />
       )}
-      <div className="fx-centered" style={{ columnGap: "20px" }}>
+      <div className="fx-centered" style={{ columnGap: "14px" }}>
         {order.likes > -1 && (
           <div
             className={`fx-centered pointer `}

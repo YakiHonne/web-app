@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import RelayImage from "./RelayImage";
 import LoadingDots from "./LoadingDots";
 import { saveRelayMetadata } from "@/Helpers/Controlers";
-import { getRelayMetadata } from "@/Helpers/utils";
+import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 import RelayMetadataPreview from "./RelayMetadataPreview";
 import { Virtuoso } from "react-virtuoso";
 

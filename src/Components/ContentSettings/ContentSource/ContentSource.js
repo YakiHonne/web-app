@@ -49,77 +49,100 @@ export default function ContentSource({
   }, [userFavRelays]);
   const optionsList = useMemo(() => {
     if (!(userKeys && (userKeys?.sec || userKeys?.ext || userKeys?.bunker))) {
-      let options =
-        type === 1
-          ? [
+      let options = [
+        {
+          group_name: t("A8Y9rVt"),
+          value: "cf",
+          list: [
+            { display_name: t("AZKPdUC"), value: "top", enabled: true },
+            {
+              display_name: t("A0gGIxM"),
+              value: "global",
+              enabled: true,
+            },
+          ],
+        },
+      ];
+      if (type === 2)
+        options = [
+          {
+            group_name: t("A8Y9rVt"),
+            value: "cf",
+            list: [
               {
-                group_name: t("A8Y9rVt"),
-                value: "cf",
-                list: [
-                  { display_name: t("AZKPdUC"), value: "top", enabled: true },
-                  {
-                    display_name: t("A0gGIxM"),
-                    value: "global",
-                    enabled: true,
-                  },
-                ],
+                display_name: t("A0gGIxM"),
+                value: "global",
+                enabled: true,
               },
-            ]
-          : [
+              { display_name: t("AAg9D6c"), value: "paid", enabled: true },
               {
-                group_name: t("A8Y9rVt"),
-                value: "cf",
-                list: [
-                  {
-                    display_name: t("A0gGIxM"),
-                    value: "global",
-                    enabled: true,
-                  },
-                  { display_name: t("AAg9D6c"), value: "paid", enabled: true },
-                  {
-                    display_name: t("AM4vyRX"),
-                    value: "widgets",
-                    enabled: true,
-                  },
-                ],
+                display_name: t("AM4vyRX"),
+                value: "widgets",
+                enabled: true,
               },
-            ];
+            ],
+          },
+        ];
+      if (type === 3)
+        options = [
+          {
+            group_name: t("A8Y9rVt"),
+            value: "cf",
+            list: [
+              {
+                display_name: t("A0gGIxM"),
+                value: "global",
+                enabled: true,
+              },
+            ],
+          },
+        ];
       return options;
     }
-    let options =
-      type === 1
-        ? [
+    let options = [
+      {
+        group_name: t("A8Y9rVt"),
+        value: "cf",
+        list: [
+          { display_name: t("AZKPdUC"), value: "top", enabled: true },
+          {
+            display_name: t("AnwFQtj"),
+            value: "network",
+            enabled: true,
+          },
+          { display_name: t("A0gGIxM"), value: "global", enabled: true },
+        ],
+      },
+    ];
+    if (type === 2)
+      options = [
+        {
+          group_name: t("A8Y9rVt"),
+          value: "cf",
+          list: [
+            { display_name: t("AiAJcg1"), value: "recent", enabled: true },
             {
-              group_name: t("A8Y9rVt"),
-              value: "cf",
-              list: [
-                { display_name: t("AZKPdUC"), value: "top", enabled: true },
-                {
-                  display_name: t("AnwFQtj"),
-                  value: "network",
-                  enabled: true,
-                },
-                { display_name: t("A0gGIxM"), value: "global", enabled: true },
-              ],
+              display_name: t("AgF8nZU"),
+              value: "recent_with_replies",
+              enabled: true,
             },
-          ]
-        : [
-            {
-              group_name: t("A8Y9rVt"),
-              value: "cf",
-              list: [
-                { display_name: t("AiAJcg1"), value: "recent", enabled: true },
-                {
-                  display_name: t("AgF8nZU"),
-                  value: "recent_with_replies",
-                  enabled: true,
-                },
-                { display_name: t("A0gGIxM"), value: "global", enabled: true },
-                { display_name: t("AAg9D6c"), value: "paid", enabled: true },
-                { display_name: t("AM4vyRX"), value: "widgets", enabled: true },
-              ],
-            },
-          ];
+            { display_name: t("A0gGIxM"), value: "global", enabled: true },
+            { display_name: t("AAg9D6c"), value: "paid", enabled: true },
+            { display_name: t("AM4vyRX"), value: "widgets", enabled: true },
+          ],
+        },
+      ];
+    if (type === 3)
+      options = [
+        {
+          group_name: t("A8Y9rVt"),
+          value: "cf",
+          list: [
+            { display_name: t("AiAJcg1"), value: "recent", enabled: true },
+            { display_name: t("A0gGIxM"), value: "global", enabled: true },
+          ],
+        },
+      ];
     if (
       type === 1 &&
       userAppSettings?.settings?.content_sources?.mixed_content
@@ -129,6 +152,10 @@ export default function ContentSource({
     }
     if (type === 2 && userAppSettings?.settings?.content_sources?.notes) {
       let sources = userAppSettings?.settings?.content_sources?.notes;
+      return getSourcesArray(sources, options[0].list, t);
+    }
+    if (type === 3 && userAppSettings?.settings?.content_sources?.media) {
+      let sources = userAppSettings?.settings?.content_sources?.media;
       return getSourcesArray(sources, options[0].list, t);
     }
     return options;
@@ -211,7 +238,10 @@ export default function ContentSource({
             setShowOptions(!showOptions);
           }}
         >
-          <ContentFeedCategoryPreview category={selectedCategory} minimal={true} />
+          <ContentFeedCategoryPreview
+            category={selectedCategory}
+            minimal={true}
+          />
           <div className="arrow"></div>
         </div>
         {showOptions && (
@@ -385,7 +415,9 @@ export default function ContentSource({
                           style={{
                             borderRadius: "var(--border-r-18)",
                           }}
-                          onClick={(e) => handleSelectCategory(e, _, {value: "af"})}
+                          onClick={(e) =>
+                            handleSelectCategory(e, _, { value: "af" })
+                          }
                         >
                           <ContentFeedCategoryPreview
                             category={{
@@ -411,7 +443,7 @@ export default function ContentSource({
                   </div>
                 </div>
               )}
-              {(favRelays.length === 0 && relaysSet.length === 0) && (
+              {favRelays.length === 0 && relaysSet.length === 0 && (
                 <div className="box-pad-h-m fit-container box-marg-s fx-centered">
                   <div className="sc-s-18 box-pad-v fit-container bg-sp fx-centered fx-col">
                     <p className="p-centered box-pad-h">{t("AJbVpAT")}</p>

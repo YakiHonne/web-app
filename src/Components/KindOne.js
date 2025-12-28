@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
-import { getParsedRepEvent } from "@/Helpers/Encryptions";
+import { getParsedMedia, getParsedRepEvent } from "@/Helpers/Encryptions";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import ShowUsersList from "@/Components/ShowUsersList";
@@ -32,7 +32,10 @@ import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
 import Link from "next/link";
 import LinkRepEventPreview from "./LinkRepEventPreview";
-import { getEventFromCache, setEventFromCache } from "@/Helpers/utils";
+import {
+  getEventFromCache,
+  setEventFromCache,
+} from "@/Helpers/utils/eventsCache";
 
 function KindOne({
   event,
@@ -393,7 +396,6 @@ function KindOne({
                           {compactContent(event.content, event.pubkey)}
                         </div>
                       )}
-                      
                     </div>
                   </div>
                 </Link>
@@ -490,10 +492,12 @@ const getPreviouslyFetchedEvent = (id) => {
   if (event.kind === 1) {
     parsedEvent = getParsedNote(event);
     parsedEvent = { ...parsedEvent, isComment: false };
+  } else if ([22, 21, 20].includes(event.kind)) {
+    parsedEvent = getParsedMedia(event);
   } else {
     parsedEvent = getParsedRepEvent(event);
   }
-  return parsedEvent
+  return parsedEvent;
 };
 
 const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
@@ -546,12 +550,14 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
           if (post.kind === 1) {
             parsedEvent = getParsedNote(post);
             parsedEvent = { ...parsedEvent, isComment: false };
+          } else if ([22, 21, 20].includes(post.kind)) {
+            parsedEvent = getParsedMedia(post);
           } else {
             parsedEvent = getParsedRepEvent(post);
           }
           if (
             ![
-              0, 1, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21,
+              0, 1, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21, 20,
             ].includes(parsedEvent.kind)
           ) {
             setIsUnsupported(true);

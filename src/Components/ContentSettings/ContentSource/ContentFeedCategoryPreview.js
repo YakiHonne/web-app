@@ -1,5 +1,5 @@
 import RelayImage from "@/Components/RelayImage";
-import { getRelayMetadata } from "@/Helpers/utils";
+import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 
 export default function ContentFeedCategoryPreview({ category, minimal = false }) {
   if (category.group === "cf") {

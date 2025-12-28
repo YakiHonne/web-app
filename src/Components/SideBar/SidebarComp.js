@@ -239,6 +239,17 @@ export default function SidebarComp() {
             </SidebarNavItem>
             <SidebarNavItem
               onClick={() => {
+                customHistory("/media", true);
+              }}
+              isActive={isPage("/media")}
+            >
+              <div
+                className={isPage("/media") ? "media-bold-24" : "media-24"}
+              ></div>
+              <div className="link-label">{t("A0i2SOt")}</div>
+            </SidebarNavItem>
+            <SidebarNavItem
+              onClick={() => {
                 customHistory("/relay-orbits", true);
               }}
               isActive={isPage("/relay-orbits")}
@@ -250,20 +261,18 @@ export default function SidebarComp() {
               ></div>
               <div className="link-label">{t("AjGFut6")}</div>
             </SidebarNavItem>
-
             <SidebarNavItem
               onClick={() => {
-                customHistory("/discover", true);
+                customHistory("/articles", true);
               }}
-              isActive={isPage("/discover")}
+              isActive={isPage("/articles")}
             >
               <div
-                className={
-                  isPage("/discover") ? "discover-bold-24" : "discover-24"
-                }
+                className={isPage("/articles") ? "posts-bold-24" : "posts-24"}
               ></div>
-              <div className="link-label">{t("ABSoIm9")}</div>
+              <div className="link-label">{t("AesMg52")}</div>
             </SidebarNavItem>
+
             <SidebarNavItem
               onClick={() => {
                 customHistory("/smart-widgets");

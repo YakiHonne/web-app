@@ -78,10 +78,10 @@ export default function IinitiateNotifications() {
       let filter = getFilter(
         userFollowings,
         notificationsHistory.length > 0
-          ? lastEventCreatedAt
-            ? lastEventCreatedAt + 1
-            : undefined
-          : undefined
+        ? lastEventCreatedAt
+        ? lastEventCreatedAt + 1
+        : undefined
+        : undefined
       );
       let data = await getSubData(
         filter,
@@ -242,7 +242,7 @@ export default function IinitiateNotifications() {
 
     if (!mentions) {
       filter.push({
-        kinds: [30023, 30004, 34235, 30031, 21, 22],
+        kinds: [30023, 30004, 34235, 30031, 21, 22, 20],
         "#p": [userKeys.pub],
         limit: 150,
         since,
@@ -277,7 +277,7 @@ export default function IinitiateNotifications() {
       });
     if (!following) {
       filter.push({
-        kinds: [30023, 30004, 34235, 30031, 21, 22],
+        kinds: [30023, 30004, 34235, 30031, 21, 22, 20],
         authors: fList,
         limit: 150,
         since,
@@ -304,7 +304,7 @@ export default function IinitiateNotifications() {
         });
         if (notificationSettings.hideMentions) {
           list = list.filter(
-            (_) => _.tags.filter((_) => _[0] === "p").length < 10
+            (_) => _.tags.filter((_) => _[0] === "p").length <= 10
           );
         }
         return list;
@@ -321,7 +321,7 @@ export default function IinitiateNotifications() {
       let newList = removeEventsDuplicants(sortEvents([...list, ...history]));
       if (notificationSettings.hideMentions) {
         newList = newList.filter(
-          (_) => _.tags.filter((_) => _[0] === "p").length < 10
+          (_) => _.tags.filter((_) => _[0] === "p").length <= 10
         );
       }
       localStorage.setItem(

@@ -24,6 +24,7 @@ import {
   IsUserFollowingsLoadedReducer,
   UserSearchRelaysReducer,
   UserRelaysSetReducer,
+  UserPinnedNotesReducer,
 } from "./Slides/UserData";
 import {
   UserFirstLoginYakiChestReducer,
@@ -52,6 +53,7 @@ import {
   NotificationsReducer,
   IsNotificationsLoadingReducer,
   RefreshNotificationsReducer,
+  VideoVolumeReducer,
 } from "./Slides/Extras";
 
 export const store = configureStore({
@@ -103,5 +105,7 @@ export const store = configureStore({
     notifications: NotificationsReducer,
     isNotificationsLoading: IsNotificationsLoadingReducer,
     refreshNotifications: RefreshNotificationsReducer,
+    userPinnedNotes: UserPinnedNotesReducer,
+    videoVolume: VideoVolumeReducer,
   },
 });

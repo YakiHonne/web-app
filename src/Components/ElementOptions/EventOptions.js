@@ -23,6 +23,7 @@ import DeleteWallet from "@/Components/DeleteWallet";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import RelayImage from "../RelayImage";
+import useIsPinnedNote from "@/Hooks/useIsPinnedNote";
 
 export default function EventOptions({
   event,
@@ -43,6 +44,7 @@ export default function EventOptions({
     event?.id,
     "e"
   );
+  const { isPinned, pinUnpin } = useIsPinnedNote(event?.id);
 
   const [showRawEvent, setShowRawEvent] = useState(false);
   const [showAddArticleToCuration, setShowArticleToCuration] = useState(false);
@@ -65,7 +67,8 @@ export default function EventOptions({
   let path = getLinkFromAddr(
     event.naddr ||
       event.nEvent ||
-      (event.pubkey && nip19.npubEncode(event.pubkey))
+      (event.pubkey && nip19.npubEncode(event.pubkey)),
+    event.kind
   );
   const postAsNote = (
     <div
@@ -83,7 +86,7 @@ export default function EventOptions({
     <div
       onClick={(e) => {
         e.stopPropagation();
-        copyText(event.nEvent, t("ARJICtS"));
+        copyText(event.naddr || event.nEvent, t("ARJICtS"));
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
@@ -95,7 +98,7 @@ export default function EventOptions({
     <div
       onClick={(e) => {
         e.stopPropagation();
-        copyText(event.naddr, t("ApPw14o", { item: "naddr" }));
+        copyText(event.naddr || event.nEvent, t("ApPw14o", { item: "naddr" }));
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
@@ -358,6 +361,27 @@ export default function EventOptions({
     ) : (
       ""
     );
+  const pinNote =
+    userKeys && event.pubkey === userKeys.pub ? (
+      <div
+        onClick={pinUnpin}
+        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+      >
+        {!isPinned ? (
+          <>
+            <div className="pin-24"></div>
+            <p>{t("AZKwkIB")}</p>
+          </>
+        ) : (
+          <>
+            <div className="unpin-24"></div>
+            <p>{t("AXGyCxz")}</p>
+          </>
+        )}
+      </div>
+    ) : (
+      ""
+    );
   const muteThread = userKeys ? (
     <div
       onClick={muteUnmuteId}
@@ -402,9 +426,21 @@ export default function EventOptions({
         return [
           copyID,
           copyPubkey,
+          pinNote,
           showRawEventContent,
           broadcastEvent,
           noteBookmark,
+          shareLink,
+          HR,
+          muteThread,
+          muteUser,
+        ];
+      case "media":
+        return [
+          copyID,
+          copyPubkey,
+          showRawEventContent,
+          broadcastEvent,
           shareLink,
           HR,
           muteThread,
@@ -470,6 +506,15 @@ export default function EventOptions({
           showRawEventContent,
           broadcastEvent,
           editVideo,
+          shareLink,
+          HR,
+          toDeleteEvent,
+        ];
+      case "dashboardPictures":
+        return [
+          copyID,
+          showRawEventContent,
+          broadcastEvent,
           shareLink,
           HR,
           toDeleteEvent,

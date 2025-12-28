@@ -246,6 +246,7 @@ li {
 .p-two-lines {
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -253,6 +254,7 @@ li {
 .p-one-line {
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -260,6 +262,7 @@ li {
 .p-three-lines {
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -267,6 +270,7 @@ li {
 .p-four-lines {
     display: -webkit-box;
     -webkit-line-clamp: 4;
+    line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -274,6 +278,7 @@ li {
 .p-five-lines {
     display: -webkit-box;
     -webkit-line-clamp: 5;
+    line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -281,6 +286,7 @@ li {
 .p-six-lines {
     display: -webkit-box;
     -webkit-line-clamp: 6;
+    line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
     word-break: break-word;
@@ -1074,7 +1080,7 @@ label {
     padding-right: 1.5rem;
 }
 
-.box-pad-v {
+.box-pad-v {    
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
 }

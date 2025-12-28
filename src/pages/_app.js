@@ -82,7 +82,7 @@ function App({ Component, pageProps }) {
       <ThemeProvider>
         <ToastMessages />
         {!shouldHideSidebar && <FloatingDMsClient />}
-        {shouldHideSidebar && <PublishingClient displayOff={true}/>}
+        {shouldHideSidebar && <PublishingClient displayOff={true} />}
         <AppInit />
         <IinitiateNotifications />
         <NavbarClient />
@@ -112,6 +112,27 @@ function App({ Component, pageProps }) {
           </div>
         </div>
         {loading && (
+          <div
+            className="fit-container sc-s-18"
+            style={{
+              width: "100%",
+              position: "fixed",
+              left: 0,
+              top:  0,
+              overflow: "hidden",
+              zIndex: 999999999999,
+              height: "20px",
+              border: "none",
+              backgroundColor: "transparent",
+            }}
+          >
+            <div
+              style={{ height: "4px", backgroundColor: "var(--c1)", borderRadius: "10px" }}
+              className="v-bounce"
+            ></div>
+          </div>
+        )}
+        {/* {loading && (
           <div
             className="fit-container content-source-and-filter fx-centered"
             style={{ zIndex: 10000 }}
@@ -145,7 +166,7 @@ function App({ Component, pageProps }) {
               </main>
             </div>
           </div>
-        )}
+        )} */}
       </ThemeProvider>
     </ReduxProvider>
   );

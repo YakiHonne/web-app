@@ -11,7 +11,7 @@ import {
 } from "@/Helpers/Encryptions";
 import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
-import { localStorage_ } from "@/Helpers/utils";
+import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import { setHomeCarouselPosts } from "@/Store/Slides/Extras";
 import { useDispatch } from "react-redux";
 
