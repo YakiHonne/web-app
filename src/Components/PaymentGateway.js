@@ -22,6 +22,8 @@ import PagePlaceholder from "@/Components/PagePlaceholder";
 import Link from "next/link";
 import { saveUsers } from "@/Helpers/DB";
 import successJSON from "@/JSONs/success.json";
+import useCashu from "@/Hooks/useCachu";
+import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
 
 export default function PaymentGateway({
   recipientAddr,
@@ -52,7 +54,7 @@ export default function PaymentGateway({
           try {
             let decoded = decode(recipientAddr);
             let lnbc = decoded.sections.find(
-              (section) => section.name === "amount"
+              (section) => section.name === "amount",
             );
             setLnbcAmount(parseInt(lnbc.value) / 1000);
             setIsLoading(false);
@@ -108,7 +110,7 @@ export default function PaymentGateway({
             <div></div>
           </div>
           <PagePlaceholder page={"nostr-add-wallet"} />
-          <Link href={"/wallet"} target="_blank">
+          <Link href={"/lightning-wallet"} target="_blank">
             <button className="btn btn-normal">{t("A8fEwNq")}</button>
           </Link>
         </div>
@@ -184,9 +186,10 @@ const Cashier = ({
   const [invoice, setInvoice] = useState("");
   const [wallets, setWallets] = useState(getWallets());
   const [selectedWallet, setSelectedWallet] = useState(
-    wallets.find((wallet) => wallet.active)
+    wallets.find((wallet) => wallet.active),
   );
   const [confirmation, setConfirmation] = useState("initiated");
+  const { cashuTokens, cashuWalletMints } = useCashu();
   const [onlyInvoice, setOnlyInvoice] = useState(false);
   const [showWalletsList, setShowWalletList] = useState(false);
   const walletListRef = useRef(null);
@@ -211,7 +214,7 @@ const Cashier = ({
           setToast({
             type: 2,
             desc: t("AbnA22A"),
-          })
+          }),
         );
         return;
       }
@@ -243,7 +246,7 @@ const Cashier = ({
           const res = await axios(
             `${callback}${callback.includes("?") ? "&" : "?"}amount=${sats}${
               event ? `&nostr=${event}` : ""
-            }&lnurl=${tempRecipientLNURL}`
+            }&lnurl=${tempRecipientLNURL}`,
           );
           if (res.data.status === "ERROR") {
             setIsLoading(false);
@@ -252,7 +255,7 @@ const Cashier = ({
               setToast({
                 type: 2,
                 desc: t("AZ43zpG"),
-              })
+              }),
             );
             return;
           }
@@ -264,7 +267,7 @@ const Cashier = ({
             setToast({
               type: 2,
               desc: t("AgCBh6S"),
-            })
+            }),
           );
           return;
         }
@@ -337,12 +340,20 @@ const Cashier = ({
       setWallets(checkTokens.wallets);
       let res = await sendWithAlby(
         addr,
-        checkTokens.activeWallet.data.access_token
+        checkTokens.activeWallet.data.access_token,
       );
       return res;
     }
     if (selectedWallet.kind === 3) {
       let res = await sendWithNWC(addr);
+      return res;
+    }
+    if (selectedWallet.kind === -1) {
+      let res = await swapTokensInvoiceFromMint({
+        mintFrom: selectedWallet.url,
+        invoice: addr,
+        cashuTokens,
+      });
       return res;
     }
   };
@@ -362,7 +373,7 @@ const Cashier = ({
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
       return {
         status: false,
@@ -388,7 +399,7 @@ const Cashier = ({
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
       return {
         status: false,
@@ -406,7 +417,7 @@ const Cashier = ({
           headers: {
             Authorization: `Bearer ${code}`,
           },
-        }
+        },
       );
       return {
         status: res.data.preimage ? true : false,
@@ -428,11 +439,11 @@ const Cashier = ({
       setToast({
         type: 1,
         desc: `${t("AS0m8W5")} 👏`,
-      })
+      }),
     );
   };
 
-  const handleSelectWallet = (walletID) => {
+  const handleSelectLightningWallet = (walletID) => {
     let index = wallets.findIndex((wallet) => wallet.id == walletID);
 
     let tempWallets = Array.from(wallets);
@@ -444,6 +455,14 @@ const Cashier = ({
     tempWallets[index].active = true;
     setSelectedWallet(wallets[index]);
     setWallets(tempWallets);
+    setShowWalletList(false);
+  };
+
+  const handleSelectCachuMints = (mint) => {
+    setSelectedWallet({
+      kind: -1,
+      ...mint,
+    });
     setShowWalletList(false);
   };
 
@@ -484,7 +503,6 @@ const Cashier = ({
                       borderRadius: "50%",
                     }}
                   ></div>
-                  {/* <div className="arrow" style={{rotate: "-90deg"}}></div> */}
                   <div style={{ position: "relative" }}>
                     <div className="arrows-animated">
                       <span></span>
@@ -530,9 +548,26 @@ const Cashier = ({
                             <div className="nwc-logo-24"></div>
                           </div>
                         )}
+                        {selectedWallet.kind === -1 && (
+                          <div className="round-icon-small">
+                            <div
+                              style={{
+                                backgroundImage: `url(${selectedWallet.data.icon_url})`,
+                                minWidth: "24px",
+                                minHeight: "24px",
+                                borderRadius: "50%",
+                                backgroundColor: "var(--pale-gray)",
+                              }}
+                              className="bg-img cover-bg"
+                            ></div>
+                          </div>
+                        )}
                         <div>
                           <p className="gray-c p-medium">{t("A7r9XS1")}</p>
-                          <p className="p-one-line">{selectedWallet.entitle}</p>
+                          <p className="p-one-line">
+                            {selectedWallet.entitle ||
+                              selectedWallet?.data?.name}
+                          </p>
                         </div>
                       </div>
                       <div className="box-pad-h-s"></div>
@@ -541,7 +576,7 @@ const Cashier = ({
                   )}
                   {showWalletsList && (
                     <div
-                      className="fx-centered fx-col sc-s-18  box-pad-v-s fx-start-v fx-start-h fit-container"
+                      className="fx-centered fx-col sc-s-18 bg-sp box-pad-h-s box-pad-v-s fx-start-v fx-start-h fit-container"
                       style={{
                         // width: "400px",
                         backgroundColor: "var(--c1-side)",
@@ -554,42 +589,112 @@ const Cashier = ({
                         zIndex: 100,
                       }}
                     >
-                      <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
-                        {t("AnXYtQy")}
+                      <p className="p-medium gray-c  box-pad-v-s">
+                        {t("AOSWanf")}
                       </p>
                       {wallets.map((wallet) => {
                         return (
                           <div
                             key={wallet.id}
-                            className="option-no-scale fit-container fx-scattered sc-s-18 pointer box-pad-h-m box-pad-v-s"
+                            className={`option-no-scale fit-container fx-scattered pointer box-pad-h-s box-pad-v-s ${selectedWallet.kind !== -1 && wallet.active ? "sc-s-18" : ""}`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleSelectWallet(wallet.id);
+                              handleSelectLightningWallet(wallet.id);
                             }}
                             style={{
                               border: "none",
-                              minWidth: "max-content",
+                              // minWidth: "max-content",
                               overflow: "visible",
                             }}
                           >
                             <div className="fx-centered">
-                              {wallet.active && (
+                              {wallet.kind === 1 && (
                                 <div
+                                  className="round-icon"
                                   style={{
-                                    minWidth: "8px",
-                                    aspectRatio: "1/1",
-                                    backgroundColor: "var(--green-main)",
-                                    borderRadius: "var(--border-r-50)",
+                                    minWidth: "32px",
+                                    minHeight: "32px",
                                   }}
-                                ></div>
+                                >
+                                  <div className="webln-logo-24"></div>
+                                </div>
                               )}
-                              <p className={wallet.active ? "green-c" : ""}>
-                                {wallet.entitle}
-                              </p>
+                              {wallet.kind === 2 && (
+                                <div
+                                  className="round-icon"
+                                  style={{
+                                    minWidth: "32px",
+                                    minHeight: "32px",
+                                  }}
+                                >
+                                  <div className="alby-logo-24"></div>
+                                </div>
+                              )}
+                              {wallet.kind === 3 && (
+                                <div
+                                  className="round-icon"
+                                  style={{
+                                    minWidth: "32px",
+                                    minHeight: "32px",
+                                  }}
+                                >
+                                  <div className="nwc-logo-24"></div>
+                                </div>
+                              )}
+                              <p className="p-one-line">{wallet.entitle}</p>
                             </div>
                           </div>
                         );
                       })}
+                      {cashuWalletMints.length > 0 && (
+                        <>
+                          <p className="p-medium gray-c box-pad-v-s">
+                            {t("AiYbIZT")}
+                          </p>
+                          {cashuWalletMints.map((mint) => {
+                            return (
+                              <div
+                                className={`pointer fx-scattered fit-container box-pad-h-s box-pad-v-s option-no-scale ${selectedWallet.kind === -1 && mint.url === selectedWallet?.url ? "sc-s-18" : ""}`}
+                                onClick={() => {
+                                  handleSelectCachuMints(mint);
+                                }}
+                                style={{
+                                  border: "none",
+                                  overflow: "visible",
+                                }}
+                                key={mint.url}
+                              >
+                                <div className="fx-centered">
+                                  <div
+                                    style={{
+                                      backgroundImage: `url(${mint.data.icon_url})`,
+                                      minWidth: "32px",
+                                      minHeight: "32px",
+                                      borderRadius: "50%",
+                                      backgroundColor: "var(--pale-gray)",
+                                    }}
+                                    className="bg-img cover-bg"
+                                  ></div>
+                                  <div>
+                                    <p className="p-caps p-one-line">
+                                      {mint.data.name}
+                                    </p>
+                                    <p className="gray-c p-medium p-one-line">
+                                      {mint.url}
+                                    </p>
+                                  </div>
+                                </div>
+                                <div
+                                  className="sticker sticker-green-side sticker-c1"
+                                  style={{ minWidth: "max-content" }}
+                                >
+                                  Max {cashuTokens[mint.url]?.total || 0} sats
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
@@ -633,7 +738,8 @@ const Cashier = ({
                   </div>
                 </>
               )}
-              {(isLNBC || (paymentAmount !== 0 && paymentAmount !== undefined)) && (
+              {(isLNBC ||
+                (paymentAmount !== 0 && paymentAmount !== undefined)) && (
                 <div className="fx-centered fx-col box-pad-v-m">
                   <div className="fx-centered fx-col">
                     <p className="gray-c p-big">{t("A82pzWN")}</p>
@@ -710,9 +816,9 @@ const Cashier = ({
         )}
         {confirmation === "in_progress" && (
           <div className="fx-centered fx-col fit-container">
-            <h4>Invoice</h4>
+            <h4>{t("AvEHTiP")}</h4>
             <p className="gray-c box-pad-v-s box-pad-h p-centered">
-              Scan the QR Code or copy the invoice address
+              {t("ASopYJK")}
             </p>
             <div
               style={{ backgroundColor: "white" }}
@@ -880,7 +986,7 @@ const checkAlbyToken = async (wallets, activeWallet) => {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     let tempWallet = { ...activeWallet };
     tempWallet.data = {

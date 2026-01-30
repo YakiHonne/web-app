@@ -122,72 +122,72 @@ export default function AppInit() {
   const chatrooms =
     useLiveQuery(
       async () => (userKeys ? await getChatrooms(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const relays =
     useLiveQuery(
       async () => (userKeys ? await getRelays(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const appSettings =
     useLiveQuery(
       async () => (userKeys ? await getAppSettings(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || false;
   const followings =
     useLiveQuery(
       async () => (userKeys ? await getFollowings(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const interestsList =
     useLiveQuery(
       async () => (userKeys ? await getInterestsList(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const bookmarks =
     useLiveQuery(
       async () => (userKeys ? await getBookmarks(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const mutedlist =
     useLiveQuery(
       async () => (userKeys ? await getMutedlist(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const favRelays =
     useLiveQuery(
       async () =>
         userKeys ? await getFavRelays(userKeys.pub) : { relays: [] },
-      [userKeys]
+      [userKeys],
     ) || [];
   const inboxRelays =
     useLiveQuery(
       async () => (userKeys ? await getInboxRelays(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const relaysSet = useLiveQuery(
     async () => (userKeys ? await getRelaysSet(userKeys.pub) : []),
-    [userKeys]
+    [userKeys],
   ) || { last_timestamp: undefined };
   const searchRelays =
     useLiveQuery(
       async () => (userKeys ? await getSearchRelays(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const wotList =
     useLiveQuery(
       async () => (userKeys ? await getWotlist(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const blossomServers =
     useLiveQuery(
       async () => (userKeys ? await getBlossomServers(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const pinnedNotes =
     useLiveQuery(
       async () => (userKeys ? await getPinnedNotes(userKeys.pub) : []),
-      [userKeys]
+      [userKeys],
     ) || [];
   const users = useLiveQuery(async () => await getUsers(), []);
   const followingsRelays =
@@ -320,7 +320,7 @@ export default function AppInit() {
         setUserMutedList({
           userMutedList: mutedlist?.mutedlist || [],
           allTags: mutedlist?.allTags || [],
-        })
+        }),
       );
       saveUsers(mutedlist?.mutedlist || []);
       ndkInstance.muteFilter = (event) => {
@@ -445,7 +445,7 @@ export default function AppInit() {
           const signer = new NDKNip46Signer(
             ndkInstance,
             userKeys.bunker,
-            localKeys
+            localKeys,
           );
           ndkInstance.signer = signer;
         }
@@ -618,7 +618,7 @@ export default function AppInit() {
           groupable: false,
 
           subId: "user-essentials",
-        }
+        },
       );
       subscription.on("event", async (event) => {
         if (event.kind === 3) {
@@ -664,7 +664,7 @@ export default function AppInit() {
         if (event.kind === 30003) {
           let parsedEvent = getParsedRepEvent(event);
           let index = tempBookmarks.findIndex(
-            (bookmark) => bookmark.d === parsedEvent.d
+            (bookmark) => bookmark.d === parsedEvent.d,
           );
           if (index === -1) tempBookmarks.push(parsedEvent);
           else tempBookmarks.splice(index, 1, parsedEvent);
@@ -693,7 +693,7 @@ export default function AppInit() {
         saveFollowings(
           tempUserFollowings,
           userKeys.pub,
-          lastFollowingsTimestamp
+          lastFollowingsTimestamp,
         );
         saveInterests(tempUserInterests, userKeys.pub, lastInterestsTimestamp);
         saveMutedlist(tempMutedList, userKeys.pub, lastMutedTimestamp);
@@ -701,33 +701,33 @@ export default function AppInit() {
         savePinnedNotes(
           tempPinnedNotes,
           userKeys.pub,
-          lastPinnedNotesTimestamp
+          lastPinnedNotesTimestamp,
         );
         saveInboxRelays(
           tempInboxRelays,
           userKeys.pub,
-          lastInboxRelaysTimestamp
+          lastInboxRelaysTimestamp,
         );
         saveFavRelays(tempFavRelays, userKeys.pub, lastFavRelaysTimestamp);
         saveSearchRelays(
           tempSearchRelays,
           userKeys.pub,
-          lastSearchRelaysTimestamp
+          lastSearchRelaysTimestamp,
         );
         saveBlossomServers(
           tempBlossomServers,
           userKeys.pub,
-          lastBlossomServersTimestamp
+          lastBlossomServersTimestamp,
         );
         saveAppSettings(
           tempAppSettings,
           userKeys.pub,
-          lastAppSettingsTimestamp
+          lastAppSettingsTimestamp,
         );
         saveAppSettings(
           tempAppSettings,
           userKeys.pub,
-          lastAppSettingsTimestamp
+          lastAppSettingsTimestamp,
         );
         saveBookmarks(tempBookmarks, userKeys.pub);
         saveRelaysSet(tempRelaysSet, userKeys.pub);
@@ -785,7 +785,7 @@ export default function AppInit() {
       let lastMessageTimestamp =
         INBOX.length > 0
           ? INBOX.sort(
-              (conv_1, conv_2) => conv_2.last_message - conv_1.last_message
+              (conv_1, conv_2) => conv_2.last_message - conv_1.last_message,
             )[0].last_message
           : Math.floor(Date.now() / 1000);
 
@@ -819,7 +819,7 @@ export default function AppInit() {
           skipVerification: false,
           skipValidation: false,
           subId: "user-essentials",
-        }
+        },
       );
       subscription.on("event", async (event) => {
         queueDecrypt(event);
@@ -894,7 +894,7 @@ export default function AppInit() {
             undefined,
             undefined,
             undefined,
-            true
+            true,
           );
 
           if (isCancelled) return;
@@ -989,7 +989,7 @@ export default function AppInit() {
           undefined,
           undefined,
           undefined,
-          true
+          true,
         );
         networkData.push(d);
       }
@@ -1005,7 +1005,7 @@ export default function AppInit() {
                 network
                   .find((__) => __.kind === 3 && __.pubkey === _)
                   ?.tags.filter((tag) => tag[0] === "p")
-                  .map((tag) => tag[1])
+                  .map((tag) => tag[1]),
               ),
             ] || [],
           muted:
@@ -1014,7 +1014,7 @@ export default function AppInit() {
                 network
                   .find((__) => __.kind === 10000 && __.pubkey === _)
                   ?.tags.filter((tag) => tag[0] === "p")
-                  .map((tag) => tag[1])
+                  .map((tag) => tag[1]),
               ),
             ] || [],
         };
@@ -1035,7 +1035,7 @@ export default function AppInit() {
         JSON.stringify({
           last_updated: Math.floor(Date.now() / 1000),
           wotPubkeys,
-        })
+        }),
       );
     };
     const buildBackupWOTList = async () => {
@@ -1057,7 +1057,7 @@ export default function AppInit() {
         undefined,
         undefined,
         undefined,
-        true
+        true,
       );
       if (backupFollowings.data.length === 0) return;
       let followinglist = backupFollowings.data[0].tags
@@ -1083,7 +1083,7 @@ export default function AppInit() {
           undefined,
           undefined,
           undefined,
-          true
+          true,
         );
         networkData.push(d);
       }
@@ -1099,7 +1099,7 @@ export default function AppInit() {
                 network
                   .find((__) => __.kind === 3 && __.pubkey === _)
                   ?.tags.filter((tag) => tag[0] === "p")
-                  .map((tag) => tag[1])
+                  .map((tag) => tag[1]),
               ),
             ] || [],
           muted: [],
@@ -1121,7 +1121,7 @@ export default function AppInit() {
         JSON.stringify({
           last_updated: backupFollowings.data[0].created_at + 1,
           wotPubkeys,
-        })
+        }),
       );
     };
     if (followings && followings?.followings?.length > 0) {
@@ -1181,6 +1181,7 @@ export default function AppInit() {
             let reply = unwrappedEvent.tags.find((tag) => tag[0] === "e");
             let replyID = reply ? reply[1] : "";
             let tempEvent = {
+              giftWrapId: event.id,
               id: unwrappedEvent.id,
               created_at: unwrappedEvent.created_at,
               content: unwrappedEvent.content,

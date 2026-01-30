@@ -36,9 +36,10 @@ export default function NotesComment({
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
   const [translatedNote, setTranslatedNote] = useState("");
   const [showTranslation, setShowTranslation] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
   const isLikedByAuthor = useMemo(() => {
     return postActions.likes.likes.find(
-      (item) => item.pubkey === rootNotePubkey
+      (item) => item.pubkey === rootNotePubkey,
     );
   }, [postActions]);
 
@@ -79,7 +80,7 @@ export default function NotesComment({
           setToast({
             type: 2,
             desc: t("AZ5VQXL"),
-          })
+          }),
         );
       }
       if (res.status === 400) {
@@ -87,7 +88,7 @@ export default function NotesComment({
           setToast({
             type: 2,
             desc: t("AJeHuH1"),
-          })
+          }),
         );
       }
       if (res.status === 200) {
@@ -96,7 +97,7 @@ export default function NotesComment({
           undefined,
           undefined,
           undefined,
-          event.pubkey
+          event.pubkey,
         );
         setTranslatedNote(noteTree);
         setShowTranslation(true);
@@ -109,11 +110,11 @@ export default function NotesComment({
         setToast({
           type: 2,
           desc: t("AZ5VQXL"),
-        })
+        }),
       );
     }
   };
-
+  if (isDeleted) return;
   return (
     <>
       {usersList && (
@@ -187,7 +188,11 @@ export default function NotesComment({
                   )}
                 </div>
                 {!noReactions && (
-                  <EventOptions event={event} component="notes" />
+                  <EventOptions
+                    event={event}
+                    component="notes"
+                    refreshAfterDeletion={() => setIsDeleted(true)}
+                  />
                 )}
               </div>
             )}
@@ -266,7 +271,7 @@ export default function NotesComment({
                             setUsersList({
                               title: t("AVDZ5cJ"),
                               list: postActions.zaps.zaps.map(
-                                (item) => item.pubkey
+                                (item) => item.pubkey,
                               ),
                               extras: postActions.zaps.zaps,
                             })

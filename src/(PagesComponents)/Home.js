@@ -59,7 +59,7 @@ const notesReducer = (notes, action) => {
                     note.relatedEvent.id === _.relatedEvent?.id)) ||
                 (_.kind === 6 &&
                   (_.relatedEvent.id === note.id ||
-                    _.relatedEvent.id === note.relatedEvent?.id))
+                    _.relatedEvent.id === note.relatedEvent?.id)),
             ) === index
           )
             return note;
@@ -131,7 +131,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const { t } = useTranslation();
   const { userMutedList } = useSelector((state) => state.userMutedList);
   const isUserFollowingsLoaded = useSelector(
-    (state) => state.isUserFollowingsLoaded
+    (state) => state.isUserFollowingsLoaded,
   );
   const userFollowings = useSelector((state) => state.userFollowings);
   const userKeys = useSelector((state) => state.userKeys);
@@ -139,17 +139,17 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(true);
   const [notesContentFrom, setNotesContentFrom] = useState(
-    getContentFromValue(selectedCategory)
+    getContentFromValue(selectedCategory),
   );
   const [selectedCategoryValue, setSelectedCategoryValue] = useState(
-    selectedCategory.value
+    selectedCategory.value,
   );
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
   const [rerenderTimestamp, setRerenderTimestamp] = useState(undefined);
   const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
   const since = useMemo(
     () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
-    [notes]
+    [notes],
   );
   const virtuosoRef = useRef(null);
   useEffect(() => {
@@ -182,11 +182,11 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       selectedFilter.to && notesLastEventTime
         ? Math.min(selectedFilter.to, notesLastEventTime)
         : selectedFilter.to
-        ? selectedFilter.to
-        : notesLastEventTime;
+          ? selectedFilter.to
+          : notesLastEventTime;
     let towDaysPeriod = (2 * 24 * 60 * 60 * 1000) / 1000;
     let twoDaysPrior = Math.floor(
-      (Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000
+      (Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000,
     );
     twoDaysPrior = notesLastEventTime
       ? notesLastEventTime - towDaysPeriod
@@ -215,8 +215,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         selectedFilter.posted_by?.length > 0
           ? selectedFilter.posted_by
           : tempUserFollowings.length < 5
-          ? [...tempUserFollowings, ...getBackupWOTList()]
-          : tempUserFollowings;
+            ? [...tempUserFollowings, ...getBackupWOTList()]
+            : tempUserFollowings;
       filter = [{ authors, kinds: [1, 6], until, since, limit: 100 }];
       return {
         filter,
@@ -287,12 +287,12 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
           : selectedCategory.group === "rsf"
-          ? await getNDKInstance(
-              selectedCategory.value,
-              selectedCategory.relays,
-              true
-            )
-          : undefined;
+            ? await getNDKInstance(
+                selectedCategory.value,
+                selectedCategory.relays,
+                true,
+              )
+            : undefined;
       if (ndk === false) {
         setIsConnected(false);
         setIsLoading(false);
@@ -467,7 +467,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
               if (
                 note.kind === 6 &&
                 ![...userMutedList, ...bannedList].includes(
-                  note.relatedEvent.pubkey
+                  note.relatedEvent.pubkey,
                 )
               )
                 return (

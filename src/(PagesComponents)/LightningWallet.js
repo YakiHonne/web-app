@@ -33,31 +33,42 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import { walletWarning } from "@/Helpers/Controlers";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
+import { SelectTabsNoIndex } from "@/Components/SelectTabsNoIndex";
+import { customHistory } from "@/Helpers/History";
+import { useRouter } from "next/router";
 
-export default function Wallet() {
+export default function LightningWallet() {
   const dispatch = useDispatch();
-
+  const { route } = useRouter();
   const userKeys = useSelector((state) => state.userKeys);
-  const userBalance = useSelector((state) => state.userBalance);
   const userMetadata = useSelector((state) => state.userMetadata);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
 
   const { t } = useTranslation();
   const [transactions, setTransactions] = useState([]);
   const [walletTransactions, setWalletTransactions] = useState([]);
-  const [selectWalletToLink, setSelectWalletToLink] = useState(false);
   const [displayMessage, setDisplayMessage] = useState(false);
   const [ops, setOps] = useState("");
   const [wallets, setWallets] = useState(getWallets());
+  const [walletBalance, setWalletBalance] = useState("N/A");
   const [selectedWallet, setSelectedWallet] = useState(
-    wallets.find((wallet) => wallet.active)
+    wallets.find((wallet) => wallet.active),
   );
   const [isLoading, setIsLoading] = useState(false);
   const [showAddWallet, setShowAddWallet] = useState(false);
   const [showWalletsList, setShowWalletList] = useState(false);
   const [timestamp, setTimestamp] = useState(Date.now());
   const walletListRef = useRef(null);
-
+  const pageTabs = [
+    {
+      display_name: t("AQtRwt6"),
+      value: 0,
+    },
+    {
+      display_name: t("ALrBEok"),
+      value: 1,
+    },
+  ];
   const checkIsLinked = (addr) => {
     if (userMetadata) {
       if (!(userMetadata.lud16 && userMetadata.lud06)) return false;
@@ -104,7 +115,7 @@ export default function Wallet() {
               "#p": [userKeys.pub],
             },
           ],
-          { closeOnEose: true, cacheUsage: "CACHE_FIRST", groupable: false }
+          { closeOnEose: true, cacheUsage: "CACHE_FIRST", groupable: false },
         );
 
         sub.on("event", async (event) => {
@@ -148,12 +159,19 @@ export default function Wallet() {
       } else {
         setWallets([]);
         setSelectedWallet(false);
-        dispatch(setUserBalance("N/A"));
+        setWalletBalance("N/A");
       }
     } else {
-      dispatch(setUserBalance("N/A"));
+      setWalletBalance("N/A");
     }
   }, [userKeys, selectedWallet, timestamp]);
+
+  useEffect(() => {
+    if (route === "/lightning-wallet" && walletBalance) {
+      localStorage.setItem("selectedWalletType", route);
+      dispatch(setUserBalance(walletBalance));
+    }
+  }, [route, walletBalance]);
 
   useEffect(() => {
     let handleOffClick = (e) => {
@@ -173,10 +191,8 @@ export default function Wallet() {
       setIsLoading(true);
       await window.webln.enable();
       let data = await window.webln.getBalance();
-      // localStorage?.setItem("wallet-userBalance", `${data.userBalance}`);
       setIsLoading(false);
-
-      dispatch(setUserBalance(data.balance));
+      setWalletBalance(data.balance);
     } catch (err) {
       console.log(err);
       setIsLoading(false);
@@ -187,13 +203,13 @@ export default function Wallet() {
       setIsLoading(true);
       let checkTokens = await checkAlbyToken(wallets, activeWallet);
       let b = await getBalanceAlbyAPI(
-        checkTokens.activeWallet.data.access_token
+        checkTokens.activeWallet.data.access_token,
       );
       let t = await getTransactionsAlbyAPI(
-        checkTokens.activeWallet.data.access_token
+        checkTokens.activeWallet.data.access_token,
       );
       setWallets(checkTokens.wallets);
-      dispatch(setUserBalance(b));
+      setWalletBalance(b);
       setWalletTransactions(t);
       setIsLoading(false);
     } catch (err) {
@@ -246,7 +262,7 @@ export default function Wallet() {
       const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 90;
 
       const userBalance_ = await nwc.getBalance();
-      dispatch(setUserBalance(userBalance_.balance));
+      setWalletBalance(userBalance_.balance);
       const transactions_ = await nwc.listTransactions({
         from: Math.floor(new Date().getTime() / 1000 - ONE_WEEK_IN_SECONDS),
         until: Math.ceil(new Date().getTime() / 1000),
@@ -300,6 +316,10 @@ export default function Wallet() {
     setSelectedWallet(selectedWallet_);
     setShowAddWallet(false);
   };
+
+  const handleSelectPageTab = (tab) => {
+    if (tab === 1) customHistory("/cashu-wallet");
+  };
   return (
     <>
       {showAddWallet && (
@@ -308,233 +328,291 @@ export default function Wallet() {
           refresh={handleAddWallet}
         />
       )}
-
+      {ops === "send" && (
+        <SendPayment
+          exit={() => setOps("")}
+          wallets={wallets}
+          selectedWallet={selectedWallet}
+          setWallets={setWallets}
+          refreshTransactions={() => setTimestamp(Date.now())}
+        />
+      )}
+      {ops === "receive" && (
+        <ReceivePayment
+          exit={() => setOps("")}
+          wallets={wallets}
+          selectedWallet={selectedWallet}
+          setWallets={setWallets}
+        />
+      )}
       <div>
         <ArrowUp />
         <div className="fx-centered fit-container  fx-start-v">
-          <div className="box-pad-h-m main-middle">
+          <div className="main-middle">
             {!(userKeys.ext || userKeys.sec || userKeys.bunker) && (
               <PagePlaceholder page={"nostr-wallet"} />
             )}
             {(userKeys.ext || userKeys.sec || userKeys.bunker) &&
               wallets.length === 0 && (
-                <PagePlaceholder
-                  page={"nostr-add-wallet"}
-                  onClick={handleAddWallet}
-                />
+                <div className="fx-centered fx-col fx-start-h">
+                  <div className="fit-container fx-centered box-pad-v">
+                    <SelectTabsNoIndex
+                      tabs={pageTabs}
+                      selectedTab={0}
+                      setSelectedTab={handleSelectPageTab}
+                    />
+                  </div>
+
+                  <PagePlaceholder
+                    page={"nostr-add-wallet"}
+                    onClick={handleAddWallet}
+                  />
+                </div>
               )}
+
             {(userKeys.ext || userKeys.sec || userKeys.bunker) &&
               wallets.length > 0 && (
-                <div>
-                  <div
-                    className="fit-container box-pad-v-m fx-centered"
-                    style={{ position: "relative", zIndex: 100 }}
-                  >
-                    <div className="fx-centered">
-                      <div style={{ position: "relative" }} ref={walletListRef}>
-                        {selectedWallet && (
-                          <div
-                            className="fit-container fx-scattered if if-no-border option pointer"
-                            style={{
-                              height: "var(--40)",
-                              padding: "1rem",
-                            }}
-                            onClick={() => setShowWalletList(!showWalletsList)}
-                          >
-                            <p>{selectedWallet.entitle}</p>
-                            <div className="arrow-12"></div>
-                          </div>
-                        )}
-                        {showWalletsList && (
-                          <div
-                            className="fx-centered fx-col sc-s-18 bg-sp box-pad-v-s box-pad-h-s fx-start-v drop-down"
-                            style={{
-                              width: "400px",
-                              backgroundColor: "var(--c1-side)",
-                              position: "absolute",
-                              top: "calc(100% + 5px)",
-                              rowGap: 0,
-                              overflow: "visible",
-                            }}
-                          >
-                            <div className="fit-container fx-scattered">
-                              <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
-                                {t("AnXYtQy")}
-                              </p>
-                              <div
-                                className="round-icon-tooltip fx-centered btn btn-small btn-gray"
-                                // data-tooltip={t("A8fEwNq")}
-                                onClick={() => setShowAddWallet(true)}
-                              >
-                                <div className="plus-sign"></div>
-                                <p>{t("A8fEwNq")}</p>
+                <div className="box-pad-v box-pad-h">
+                  <div className="fit-container fx-centered">
+                    <SelectTabsNoIndex
+                      tabs={pageTabs}
+                      selectedTab={0}
+                      setSelectedTab={handleSelectPageTab}
+                    />
+                  </div>
+                  {/* <h3>{t("AQtRwt6")}</h3> */}
+                  <div className="fit-container box-pad-v">
+                    <div
+                      className="fit-container fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
+                      style={{ overflow: "visible" }}
+                    >
+                      <div className="fit-container fx-scattered fx-wrap">
+                        <div
+                          className="fx-centered fx-col fx-start-h fx-start-v"
+                          style={{
+                            position: "relative",
+                            gap: "10px",
+                            flex: "1 1 300px",
+                          }}
+                        >
+                          {!isLoading && (
+                            <div className="fx-centered fx-col fx-start-h fx-start-v">
+                              <div className="fx-centered">
+                                <div className="fx-centered ">
+                                  <div className="fx-centered fx-col fx-start-h fx-start-v">
+                                    <p className="gray-c">{t("A1yJkHJ")}</p>
+                                    <h2>{walletBalance}</h2>
+                                  </div>
+                                  <span className="gray-c p-big">sats</span>
+                                </div>
+                                <p className="box-pad-h-m">|</p>
+                                <div className="fx-centered fx-col fx-start-h fx-start-v">
+                                  <p className="gray-c">{t("AjECxdb")}</p>
+                                  <SatsToUSD
+                                    sats={walletBalance}
+                                    selector={true}
+                                  />
+                                </div>
                               </div>
+                              {selectedWallet.kind !== 1 &&
+                                selectedWallet.entitle.includes("@") && (
+                                  <div
+                                    className="btn btn-gray btn-small fx-centered"
+                                    onClick={() =>
+                                      selectedWallet.entitle.includes("@")
+                                        ? copyText(
+                                            selectedWallet.entitle,
+                                            t("ALR84Tq"),
+                                          )
+                                        : walletWarning()
+                                    }
+                                  >
+                                    {selectedWallet.entitle}
+                                    <div className="copy"></div>
+                                  </div>
+                                )}
                             </div>
-                            {wallets.map((wallet) => {
-                              let isLinked = checkIsLinked(wallet.entitle);
-                              return (
+                          )}
+
+                          {isLoading && (
+                            <div
+                              className="fx-centered fx-col box-pad-v box-pad-h"
+                              style={{ height: "150px" }}
+                            >
+                              <LoadingDots />
+                            </div>
+                          )}
+                        </div>
+
+                        <div
+                          style={{
+                            position: "relative",
+                            zIndex: 100,
+                            flex: "1 1 150px",
+                          }}
+                        >
+                          <div className="fx-centered fit-container fx-start-h">
+                            <div
+                              style={{ position: "relative" }}
+                              ref={walletListRef}
+                              className="fit-container fx-centered fx-start-v fx-col"
+                            >
+                              <p className="gray-c box-pad-h-m">
+                                {t("AX8w9cg")}
+                              </p>
+                              {selectedWallet && (
                                 <div
-                                  key={wallet.id}
-                                  className="option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleSelectWallet(wallet.id);
-                                  }}
+                                  className="fit-container fx-scattered if if-no-border option pointer"
                                   style={{
-                                    border: "none",
+                                    height: "var(--40)",
+                                    padding: "1rem",
+                                  }}
+                                  onClick={() =>
+                                    setShowWalletList(!showWalletsList)
+                                  }
+                                >
+                                  <p>{selectedWallet.entitle}</p>
+                                  <div className="arrow-12"></div>
+                                </div>
+                              )}
+                              {showWalletsList && (
+                                <div
+                                  className="fx-centered fx-col sc-s-18 bg-sp box-pad-v-s box-pad-h-s fx-start-v drop-down"
+                                  style={{
+                                    width: "400px",
+                                    backgroundColor: "var(--c1-side)",
+                                    position: "absolute",
+                                    top: "calc(100% + 5px)",
+                                    rowGap: 0,
                                     overflow: "visible",
                                   }}
                                 >
-                                  <div className="fx-centered">
-                                    {wallet.active && (
-                                      <div
-                                        style={{
-                                          minWidth: "8px",
-                                          aspectRatio: "1/1",
-                                          backgroundColor: "var(--green-main)",
-                                          borderRadius: "var(--border-r-50)",
-                                        }}
-                                      ></div>
-                                    )}
-                                    <p
-                                      className={wallet.active ? "green-c" : ""}
-                                    >
-                                      {wallet.entitle}
+                                  <div className="fit-container fx-scattered">
+                                    <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
+                                      {t("AnXYtQy")}
                                     </p>
-                                    {isLinked && (
-                                      <div
-                                        className="round-icon-tooltip"
-                                        data-tooltip={t("ANExIY1")}
-                                      >
-                                        <div className="sticker sticker-small sticker-green-pale">
-                                          {t("AqlBPla")}
-                                        </div>
-                                      </div>
-                                    )}
+                                    <div
+                                      className="round-icon-tooltip fx-centered btn btn-small btn-gray"
+                                      // data-tooltip={t("A8fEwNq")}
+                                      onClick={() => setShowAddWallet(true)}
+                                    >
+                                      <div className="plus-sign"></div>
+                                      <p>{t("A8fEwNq")}</p>
+                                    </div>
                                   </div>
-                                  {wallet.kind !== 1 && (
-                                    <EventOptions
-                                      event={wallet}
-                                      component={"wallet"}
-                                      refreshAfterDeletion={
-                                        refreshAfterDeletion
-                                      }
-                                    />
-                                  )}
+                                  {wallets.map((wallet) => {
+                                    let isLinked = checkIsLinked(
+                                      wallet.entitle,
+                                    );
+                                    return (
+                                      <div
+                                        key={wallet.id}
+                                        className="option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleSelectWallet(wallet.id);
+                                        }}
+                                        style={{
+                                          border: "none",
+                                          overflow: "visible",
+                                        }}
+                                      >
+                                        <div className="fx-centered">
+                                          {wallet.active && (
+                                            <div
+                                              style={{
+                                                minWidth: "8px",
+                                                aspectRatio: "1/1",
+                                                backgroundColor:
+                                                  "var(--green-main)",
+                                                borderRadius:
+                                                  "var(--border-r-50)",
+                                              }}
+                                            ></div>
+                                          )}
+                                          <p
+                                            className={`p-one-line ${wallet.active ? "green-c" : ""}`}
+                                          >
+                                            {wallet.entitle}
+                                          </p>
+                                          {isLinked && (
+                                            <div
+                                              className="round-icon-tooltip"
+                                              data-tooltip={t("ANExIY1")}
+                                            >
+                                              <div className="sticker sticker-small sticker-green-pale">
+                                                {t("AqlBPla")}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                        {wallet.kind !== 1 && (
+                                          <EventOptions
+                                            event={wallet}
+                                            component={"wallet"}
+                                            refreshAfterDeletion={
+                                              refreshAfterDeletion
+                                            }
+                                          />
+                                        )}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              );
-                            })}
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {!isLoading &&
+                        !(
+                          profileHasWallet.hasWallet &&
+                          profileHasWallet.isWalletLinked
+                        ) && (
+                          <div className="box-pad-h-m box-pad-v-m fit-container sc-s-18 bg-sp fx-centered fx-centered fx-col gray-c p-centered">
+                            ⚠️{" "}
+                            {!profileHasWallet.hasWallet && <>{t("AAPZe91")}</>}
+                            {profileHasWallet.hasWallet &&
+                              !profileHasWallet.isWalletLinked && (
+                                <>{t("AHKiPjO")}</>
+                              )}{" "}
+                            {t("AHTCsEO")}
                           </div>
                         )}
+                      <div className="fx-centered fit-container">
+                        <button
+                          style={{ height: "70px", gap: 0 }}
+                          className={
+                            selectedWallet
+                              ? "btn btn-gray fx fx-centered fx-col"
+                              : "btn btn-disabled fx fx-centered fx-col"
+                          }
+                          onClick={() =>
+                            selectedWallet ? setOps("receive") : null
+                          }
+                          disabled={selectedWallet ? false : true}
+                        >
+                          <span className="p-big">&#8595;</span>
+                          <span>{t("A8SflFr")}</span>
+                        </button>
+                        <button
+                          style={{ height: "70px", gap: 0 }}
+                          className={
+                            selectedWallet
+                              ? "btn btn-orange  fx fx-centered fx-col"
+                              : "btn btn-disabled fx fx-centered fx-col"
+                          }
+                          onClick={() =>
+                            selectedWallet ? setOps("send") : null
+                          }
+                          disabled={selectedWallet ? false : true}
+                        >
+                          <span className="p-big">&#8593;</span>
+                          <span>{t("A14LwWS")}</span>
+                        </button>
                       </div>
                     </div>
                   </div>
-                  <div
-                    className="fx-scattered box-pad-h fit-container fx-col fx-wrap"
-                    style={{
-                      position: "relative",
-                      padding: "1rem",
-                    }}
-                  >
-                    {!isLoading && (
-                      <div className="fx-centered fx-col box-pad-v">
-                        <div className="fx-centered">
-                          <div className="fx-centered fx-col">
-                            <p className="gray-c">{t("AbcY4ef")}</p>
-                            <h1>{userBalance}</h1>
-                          </div>
-                          <sup className="gray-c">Sats</sup>
-                        </div>
-                        <SatsToUSD sats={userBalance} selector={true} />
-                        {selectedWallet.kind !== 1 &&
-                          selectedWallet.entitle.includes("@") && (
-                            <div
-                              className="btn btn-gray btn-small fx-centered"
-                              onClick={() =>
-                                selectedWallet.entitle.includes("@")
-                                  ? copyText(
-                                      selectedWallet.entitle,
-                                      t("ALR84Tq")
-                                    )
-                                  : walletWarning()
-                              }
-                            >
-                              {selectedWallet.entitle}
-                              <div className="copy"></div>
-                            </div>
-                          )}
-                      </div>
-                    )}
-                    {!isLoading &&
-                      !(
-                        profileHasWallet.hasWallet &&
-                        profileHasWallet.isWalletLinked
-                      ) && (
-                        <div className="box-pad-h box-pad-v fit-container sc-s-18 fx-centered fx-centered fx-col gray-c p-centered">
-                          {!profileHasWallet.hasWallet && <>{t("AAPZe91")}</>}
-                          {profileHasWallet.hasWallet &&
-                            !profileHasWallet.isWalletLinked && (
-                              <>{t("AHKiPjO")}</>
-                            )}{" "}
-                          {t("AHTCsEO")}
-                        </div>
-                      )}
-                    {isLoading && (
-                      <div
-                        className="fx-centered fx-col box-pad-v"
-                        style={{ height: "150px" }}
-                      >
-                        <LoadingDots />
-                      </div>
-                    )}
-                    <div className="fx-centered fit-container">
-                      <button
-                        style={{ height: "70px", gap: 0 }}
-                        className={
-                          selectedWallet
-                            ? "btn btn-gray fx fx-centered fx-col"
-                            : "btn btn-disabled fx fx-centered fx-col"
-                        }
-                        onClick={() =>
-                          selectedWallet ? setOps("receive") : null
-                        }
-                        disabled={selectedWallet ? false : true}
-                      >
-                        <span className="p-big">&#8595;</span>
-                        <span>{t("A8SflFr")}</span>
-                      </button>
-                      <button
-                        style={{ height: "70px", gap: 0 }}
-                        className={
-                          selectedWallet
-                            ? "btn btn-orange  fx fx-centered fx-col"
-                            : "btn btn-disabled fx fx-centered fx-col"
-                        }
-                        onClick={() => (selectedWallet ? setOps("send") : null)}
-                        disabled={selectedWallet ? false : true}
-                      >
-                        <span className="p-big">&#8593;</span>
-                        <span>{t("A14LwWS")}</span>
-                      </button>
-                    </div>
-                  </div>
-                  {ops === "send" && (
-                    <SendPayment
-                      exit={() => setOps("")}
-                      wallets={wallets}
-                      selectedWallet={selectedWallet}
-                      setWallets={setWallets}
-                      refreshTransactions={() => setTimestamp(Date.now())}
-                    />
-                  )}
-                  {ops === "receive" && (
-                    <ReceivePayment
-                      exit={() => setOps("")}
-                      wallets={wallets}
-                      selectedWallet={selectedWallet}
-                      setWallets={setWallets}
-                    />
-                  )}
                   {isLoading && (
                     <div
                       className="fit-container fx-centered"
@@ -547,18 +625,18 @@ export default function Wallet() {
                     <>
                       {transactions.length > 0 &&
                         selectedWallet?.kind === 1 && (
-                          <div className="fit-container box-pad-v fx-centered fx-col fx-start-v">
+                          <div className="fit-container  fx-centered fx-col fx-start-v">
                             <p className="gray-c">{t("AzLQdQO")}</p>
                             {transactions.map((transaction, index) => {
                               let author =
                                 nostrAuthors.find(
                                   (author) =>
-                                    author.pubkey === transaction.pubkey
+                                    author.pubkey === transaction.pubkey,
                                 ) || getEmptyuserMetadata(transaction.pubkey);
                               return (
                                 <div
                                   key={transaction.id}
-                                  className="fit-container fx-scattered fx-col box-pad-v-s box-pad-h-s sc-s-18 bg-sp"
+                                  className="fit-container fx-scattered fx-col box-pad-v-m box-pad-h-m sc-s-18 bg-sp"
                                   style={{
                                     // border: "none",
                                     overflow: "visible",
@@ -592,7 +670,7 @@ export default function Wallet() {
                                           <Date_
                                             toConvert={
                                               new Date(
-                                                transaction.created_at * 1000
+                                                transaction.created_at * 1000,
                                               )
                                             }
                                             time={true}
@@ -669,7 +747,7 @@ export default function Wallet() {
                                 ? nostrAuthors.find(
                                     (author) =>
                                       author.pubkey ===
-                                      transaction.metadata.zap_request.pubkey
+                                      transaction.metadata.zap_request.pubkey,
                                   )
                                 : false;
                               return (
@@ -745,7 +823,8 @@ export default function Wallet() {
                                           <Date_
                                             toConvert={
                                               new Date(
-                                                transaction.creation_date * 1000
+                                                transaction.creation_date *
+                                                  1000,
                                               )
                                             }
                                             time={true}
@@ -773,7 +852,7 @@ export default function Wallet() {
                                                     author.name
                                                   : getBech32(
                                                       "npub",
-                                                      isZap.pubkey
+                                                      isZap.pubkey,
                                                     ).substring(0, 10),
                                               })}
                                             </>
@@ -796,7 +875,7 @@ export default function Wallet() {
                                           transaction.identifier
                                             ? setDisplayMessage(false)
                                             : setDisplayMessage(
-                                                transaction.identifier
+                                                transaction.identifier,
                                               )
                                         }
                                       >
@@ -848,7 +927,7 @@ export default function Wallet() {
                                 ? nostrAuthors.find(
                                     (author) =>
                                       author.pubkey ===
-                                      transaction.metadata.zap_request.pubkey
+                                      transaction.metadata.zap_request.pubkey,
                                   )
                                 : false;
                               return (
@@ -924,7 +1003,7 @@ export default function Wallet() {
                                           <Date_
                                             toConvert={
                                               new Date(
-                                                transaction.created_at * 1000
+                                                transaction.created_at * 1000,
                                               )
                                             }
                                             time={true}
@@ -952,7 +1031,7 @@ export default function Wallet() {
                                                     author.name
                                                   : getBech32(
                                                       "npub",
-                                                      isZap.pubkey
+                                                      isZap.pubkey,
                                                     ).substring(0, 10),
                                               })}
                                             </>
@@ -974,7 +1053,7 @@ export default function Wallet() {
                                           displayMessage === transaction.invoice
                                             ? setDisplayMessage(false)
                                             : setDisplayMessage(
-                                                transaction.invoice
+                                                transaction.invoice,
                                               )
                                         }
                                       >
@@ -1062,7 +1141,7 @@ const SendPayment = ({
             amount: res.route.total_amt,
             fees: res.route.total_fees,
           }),
-        })
+        }),
       );
       reInitParams();
       setIsLoading(false);
@@ -1074,7 +1153,7 @@ const SendPayment = ({
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
     }
   };
@@ -1089,7 +1168,7 @@ const SendPayment = ({
         setToast({
           type: 1,
           desc: t("A5n8Ifp"),
-        })
+        }),
       );
       reInitParams();
       setIsLoading(false);
@@ -1102,7 +1181,7 @@ const SendPayment = ({
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
     }
   };
@@ -1116,7 +1195,7 @@ const SendPayment = ({
           headers: {
             Authorization: `Bearer ${code}`,
           },
-        }
+        },
       );
       setIsLoading(false);
       reInitParams();
@@ -1128,7 +1207,7 @@ const SendPayment = ({
             amount: data.data.amount,
             fees: data.data.fee,
           }),
-        })
+        }),
       );
       return data.data;
     } catch (err) {
@@ -1138,11 +1217,12 @@ const SendPayment = ({
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
       return 0;
     }
   };
+
   const handleSendPayment = async () => {
     if (isLoading) return;
     if (invoiceData) {
@@ -1153,7 +1233,7 @@ const SendPayment = ({
             setToast({
               type: 3,
               desc: t("AR2vydH"),
-            })
+            }),
           );
           return;
         }
@@ -1162,7 +1242,7 @@ const SendPayment = ({
             setToast({
               type: 3,
               desc: t("AJbsVsG"),
-            })
+            }),
           );
           return;
         }
@@ -1173,7 +1253,7 @@ const SendPayment = ({
               setToast({
                 type: 3,
                 desc: t("AiHLMRi"),
-              })
+              }),
             );
             return;
           }
@@ -1187,7 +1267,7 @@ const SendPayment = ({
             setToast({
               type: 3,
               desc: t("AiHLMRi"),
-            })
+            }),
           );
           return;
         }
@@ -1198,7 +1278,7 @@ const SendPayment = ({
         let event = getEvent(sats, addr_, hex);
         const res = isZap
           ? await axios(
-              `${callback}?amount=${sats}&nostr=${event}&lnurl=${addr_}`
+              `${callback}?amount=${sats}&nostr=${event}&lnurl=${addr_}`,
             )
           : await axios(`${callback}?amount=${sats}&lnurl=${addr_}`);
 
@@ -1219,7 +1299,7 @@ const SendPayment = ({
           setToast({
             type: 2,
             desc: t("AYuUnqd"),
-          })
+          }),
         );
       }
     }
@@ -1263,95 +1343,112 @@ const SendPayment = ({
 
   return (
     <div
-      className="fit-container fx-centered fx-col fx-start-v slide-up"
-      style={{ marginTop: "1rem" }}
+      className="fixed-container fx-centered box-pad-h"
+      onClick={(e) => {
+        e.stopPropagation();
+        exit();
+      }}
     >
-      <div className="fit-container fx-scattered">
-        <h4>{t("A14LwWS")}</h4>
-        <div className="close" style={{ position: "static" }} onClick={exit}>
+      <div
+        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v slide-up"
+        style={{ marginTop: "1rem", width: "min(100%, 500px)" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="close" onClick={exit}>
           <div></div>
         </div>
-      </div>
 
-      <div
-        className="fx-scattered fit-container if pointer"
-        onClick={() => {
-          setInvoicedata(!invoiceData);
-          setAddr("");
-        }}
-      >
-        <p>{t("AI19tdC")}</p>
+        <h4>{t("A14LwWS")}</h4>
+
         <div
-          className={`toggle ${invoiceData ? "toggle-dim-gray" : ""} ${
-            !invoiceData ? "toggle-c1" : "toggle-dim-gray"
-          }`}
-        ></div>
+          className="fx-scattered fit-container if pointer"
+          onClick={() => {
+            setInvoicedata(!invoiceData);
+            setAddr("");
+          }}
+        >
+          <p>{t("AI19tdC")}</p>
+          <div
+            className={`toggle ${invoiceData ? "toggle-dim-gray" : ""} ${
+              !invoiceData ? "toggle-c1" : "toggle-dim-gray"
+            }`}
+          ></div>
+        </div>
+
+        <input
+          type="text"
+          className="if ifs-full"
+          placeholder={!invoiceData ? t("AvEHTiP") : t("A40BuYB")}
+          value={addr}
+          onChange={(e) => setAddr(e.target.value)}
+        />
+
+        {invoiceData && (
+          <>
+            {!pubkey && (
+              <UserSearchBar
+                onClick={setPubkey}
+                full={true}
+                placeholder={t("ABRi9O2")}
+              />
+            )}
+            {pubkey && (
+              <NProfilePreviewer
+                pubkey={pubkey}
+                margin={false}
+                close={true}
+                showSha
+                onClose={() => setPubkey("")}
+                setMetataData={handleUserMetadata}
+              />
+            )}
+          </>
+        )}
+        {invoiceData && (
+          <>
+            <div className="fx-centered fx-col">
+              <p className="gray-c p-big">{t("AcDgXKI")}</p>
+              <input
+                type="number"
+                className="if p-bold if-no-border ifs-full p-centered"
+                placeholder={t("AcDgXKI")}
+                style={{
+                  fontSize: `max(${
+                    amount.toString().length > 5
+                      ? `${80 - (amount.toString().length - 6) * 10}px`
+                      : "80px"
+                  },50px)`,
+                  height: "80px",
+                }}
+                value={amount}
+                onChange={(e) => setAmount(parseInt(e.target.value))}
+                autoFocus
+              />
+              <p className="gray-c p-big">Sats</p>
+            </div>
+            <input
+              type="text"
+              className="if ifs-full if-no-border p-centered"
+              style={{
+                borderTop: "1px solid var(--pale-gray)",
+                borderBottom: "1px solid var(--pale-gray)",
+                borderRadius: "0",
+                height: "50px",
+              }}
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder={t("Ark6BLW")}
+            />
+          </>
+        )}
+        <button
+          className="btn btn-orange btn-full"
+          onClick={handleSendPayment}
+          disabled={isLoading}
+        >
+          {isLoading ? <LoadingDots /> : t("A14LwWS")}
+        </button>
       </div>
-
-      <input
-        type="text"
-        className="if ifs-full"
-        placeholder={!invoiceData ? t("AvEHTiP") : t("A40BuYB")}
-        value={addr}
-        onChange={(e) => setAddr(e.target.value)}
-      />
-      {invoiceData && (
-        <input
-          type="number"
-          className="if ifs-full"
-          placeholder="0"
-          value={amount}
-          onChange={(e) => setAmount(Math.abs(parseInt(e.target.value)))}
-        />
-      )}
-
-      {invoiceData && (
-        <>
-          {!pubkey && (
-            <UserSearchBar
-              onClick={setPubkey}
-              full={true}
-              placeholder={t("ABRi9O2")}
-            />
-          )}
-          {pubkey && (
-            <NProfilePreviewer
-              pubkey={pubkey}
-              margin={false}
-              close={true}
-              showSha
-              onClose={() => setPubkey("")}
-              setMetataData={handleUserMetadata}
-            />
-          )}
-        </>
-      )}
-      {invoiceData && (
-        <input
-          type="text"
-          className="if ifs-full"
-          placeholder={t("AAcGVGY")}
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
-      )}
-      {/* {isZap && (
-        <input
-          type="text"
-          className="if ifs-full"
-          placeholder="User pubkey/npub"
-          value={pubkey}
-          onChange={(e) => setPubkey(e.target.value)}
-        />
-      )} */}
-
-      <button
-        className="btn btn-orange btn-full"
-        onClick={handleSendPayment}
-        disabled={isLoading}
-      >
-        {isLoading ? <LoadingDots /> : t("A14LwWS")}
-      </button>
     </div>
   );
 };
@@ -1382,7 +1479,7 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
     }
   };
@@ -1406,7 +1503,7 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
     }
   };
@@ -1421,7 +1518,7 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
           headers: {
             Authorization: `Bearer ${code}`,
           },
-        }
+        },
       );
       setIsLoading(false);
       setInvoiceRequest(data.data.payment_request);
@@ -1454,7 +1551,7 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
       setToast({
         type: 1,
         desc: `${t("AS0m8W5")} 👏`,
-      })
+      }),
     );
   };
 
@@ -1491,36 +1588,64 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
         </div>
       )}
       <div
-        className="fit-container fx-centered fx-col fx-start-v slide-up"
-        style={{ marginTop: "1rem" }}
+        className="fixed-container fx-centered box-pad-h"
+        onClick={(e) => {
+          e.stopPropagation();
+          exit();
+        }}
       >
-        <div className="fit-container fx-scattered">
-          <h4>{t("AuOH50L")}</h4>
-          <div className="close" style={{ position: "static" }} onClick={exit}>
+        <div
+          className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v slide-up"
+          style={{ marginTop: "1rem", width: "min(100%, 500px)" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="close" onClick={exit}>
             <div></div>
           </div>
+
+          <h4>{t("AuOH50L")}</h4>
+
+          <div className="fx-centered fx-col">
+            <p className="gray-c p-big">{t("AcDgXKI")}</p>
+            <input
+              type="number"
+              className="if p-bold if-no-border ifs-full p-centered"
+              placeholder={t("AcDgXKI")}
+              style={{
+                fontSize: `max(${
+                  amount.toString().length > 5
+                    ? `${80 - (amount.toString().length - 6) * 10}px`
+                    : "80px"
+                },50px)`,
+                height: "80px",
+              }}
+              value={amount}
+              onChange={(e) => setAmount(parseInt(e.target.value))}
+              autoFocus
+            />
+            <p className="gray-c p-big">Sats</p>
+          </div>
+          <input
+            type="text"
+            className="if ifs-full if-no-border p-centered"
+            style={{
+              borderTop: "1px solid var(--pale-gray)",
+              borderBottom: "1px solid var(--pale-gray)",
+              borderRadius: "0",
+              height: "50px",
+            }}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder={t("Ark6BLW")}
+          />
+          <button
+            className="btn btn-orange btn-full"
+            onClick={generateInvoice}
+            disabled={isLoading}
+          >
+            {isLoading ? <LoadingDots /> : t("AuOH50L")}
+          </button>
         </div>
-        <input
-          type="text"
-          className="if ifs-full"
-          placeholder={t("AAcGVGY")}
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        />
-        <input
-          type="number"
-          className="if ifs-full"
-          placeholder="0"
-          value={amount}
-          onChange={(e) => setAmount(Math.abs(parseInt(e.target.value)))}
-        />
-        <button
-          className="btn btn-orange btn-full"
-          onClick={generateInvoice}
-          disabled={isLoading}
-        >
-          {isLoading ? <LoadingDots /> : t("AuOH50L")}
-        </button>
       </div>
     </>
   );
@@ -1549,7 +1674,7 @@ const checkAlbyToken = async (wallets, activeWallet) => {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     let tempWallet = { ...activeWallet };
     tempWallet.data = {

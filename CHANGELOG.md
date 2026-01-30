@@ -1,3 +1,14 @@
+# (v5.6.0) 29/01/2026
+
+- ECash support: swipe tokens, deposit, send Nutzups, and restore wallets.
+- Copy note text for easy sharing.
+- Fixed mobile layout issues when using RTL languages.
+- Fixed external URLs with trailing characters.
+- Delete notes directly from the note options menu.
+- Redesigned video controllers for a cleaner experience.
+- Fixed fullscreen video playback in the home feed.
+- General bug fixes and improvements.
+
 # (v5.5.0) 25/12/2025
 
 - Media support for images and videos across the app, including dashboard, notifications, note previews, relay feeds, search, and user profiles.

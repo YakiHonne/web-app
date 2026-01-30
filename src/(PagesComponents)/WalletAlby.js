@@ -34,7 +34,7 @@ export default function WalletAlby() {
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
             },
-          }
+          },
         );
         const data = await axios.get("https://api.getalby.com/user/me", {
           headers: {
@@ -63,19 +63,19 @@ export default function WalletAlby() {
             });
             oldVersion.push(alby);
             updateWallets(oldVersion);
-            customHistory.push("/wallet");
+            customHistory.push("/lightning-wallet");
             return;
           } catch (err) {
             updateWallets([alby]);
-            customHistory.push("/wallet");
+            customHistory.push("/lightning-wallet");
             return;
           }
         }
         updateWallets([alby]);
-        customHistory.push("/wallet");
+        customHistory.push("/lightning-wallet");
       } catch (err) {
         console.log(err);
-        customHistory.push("/wallet");
+        customHistory.push("/lightning-wallet");
       }
     };
     getMeData();

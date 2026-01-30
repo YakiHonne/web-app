@@ -113,14 +113,14 @@ const getLocalDrafts = () => {
       artDraft: artDraft.default
         ? false
         : artDraft.title || artDraft.content
-        ? {
-            created_at: artDraft.created_at || Math.floor(Date.now() / 1000),
-            kind: 30024,
-            title: artDraft.title || "Untitled",
-            content: artDraft.content || "Untitled",
-            local: true,
-          }
-        : false,
+          ? {
+              created_at: artDraft.created_at || Math.floor(Date.now() / 1000),
+              kind: 30024,
+              title: artDraft.title || "Untitled",
+              content: artDraft.content || "Untitled",
+              local: true,
+            }
+          : false,
     };
     return localDraft.artDraft ||
       localDraft.smartWidgetDraft ||
@@ -137,7 +137,7 @@ const getInterestList = (list) => {
     let icon = InterestSuggestions.find(
       (_) =>
         _.main_tag.toLowerCase() === item.toLowerCase() ||
-        _.sub_tags.find(($) => $.toLowerCase() === item.toLowerCase())
+        _.sub_tags.find(($) => $.toLowerCase() === item.toLowerCase()),
     );
     tempList.push({
       icon: icon?.icon || "",
@@ -152,7 +152,7 @@ export default function Dashboard() {
   const { query } = useRouter();
   const userKeys = useSelector((state) => state.userKeys);
   const [selectedTab, setSelectedTab] = useState(
-    query?.tabNumber ? parseInt(query.tabNumber) : 0
+    query?.tabNumber ? parseInt(query.tabNumber) : 0,
   );
   const [userPreview, setUserPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -188,7 +188,7 @@ export default function Dashboard() {
         ]);
         userProfile = userProfile
           ? JSON.parse(
-              userProfile.find((event) => event.kind === 10000105).content
+              userProfile.find((event) => event.kind === 10000105).content,
             )
           : { time_joined: Math.floor(Date.now() / 1000) };
 
@@ -548,14 +548,14 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
   const [lastEventTime, setLastEventTime] = useState(undefined);
   const [editEvent, setEditEvent] = useState(false);
   const [showCurationCreator, setShowCurationCreator] = useState(
-    filter === "curations" && init ? true : false
+    filter === "curations" && init ? true : false,
   );
   const [showVideosCreator, setShowVideosCreator] = useState(
-    filter === "videos" && init ? true : false
+    filter === "videos" && init ? true : false,
   );
   const [events, dispatchEvents] = useReducer(
     eventsReducer,
-    eventsInitialState
+    eventsInitialState,
   );
   const emptyContent = {
     articles: t("AH90wGL"),
@@ -632,7 +632,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
       }
       setLastEventTime(
         events[contentFrom][events[contentFrom].length - 1]?.created_at ||
-          undefined
+          undefined,
       );
     };
     document
@@ -781,6 +781,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
                     <ContentCard
                       event={localDraft?.noteDraft}
                       setPostToNote={setPostToNote}
+                      refreshAfterDeletion={handleEventDeletion}
                     />
                   </>
                 )}
@@ -850,7 +851,7 @@ const Widgets = ({ setPostToNote, localDrafte }) => {
   const [localDraft, setLocalDraft] = useState(getLocalDrafts());
   const [events, dispatchEvents] = useReducer(
     eventsReducer,
-    eventsInitialState
+    eventsInitialState,
   );
   const emptyContent = {
     widgets: t("AvEJw6B"),
@@ -935,7 +936,7 @@ const Widgets = ({ setPostToNote, localDrafte }) => {
       }
       setLastEventTime(
         events[contentFrom][events[contentFrom].length - 1]?.created_at ||
-          undefined
+          undefined,
       );
     };
     document
@@ -1111,7 +1112,7 @@ const Bookmarks = () => {
   const handleBookmarkDeletion = () => {
     let tempArr = Array.from(userBookmarks);
     let index = tempArr.findIndex(
-      (bookmark) => bookmark.id === deleteBookmark.id
+      (bookmark) => bookmark.id === deleteBookmark.id,
     );
     tempArr.splice(index, 1);
     saveBookmarks(tempArr, userKeys.pub);
@@ -1367,7 +1368,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                     <p className="gray-c">
                       {t("AcqUGhB", {
                         date: convertDate(
-                          new Date(data.userProfile.time_joined * 1000)
+                          new Date(data.userProfile.time_joined * 1000),
                         ),
                       })}{" "}
                       {/* <Date_
@@ -1682,7 +1683,9 @@ const ContentCard = ({
 }) => {
   return (
     <>
-      {[1, 6].includes(event.kind) && <NoteCard event={event} />}
+      {[1, 6].includes(event.kind) && (
+        <NoteCard event={event} refreshAfterDeletion={refreshAfterDeletion} />
+      )}
       {[11, 300331].includes(event.kind) && (
         <DraftCardOthers
           event={event}
@@ -1730,7 +1733,7 @@ const DraftCard = ({ event, refreshAfterDeletion }) => {
               post_d: event.d,
               post_content: event.content,
               post_published_at: event.published_at,
-            })
+            }),
           );
           customHistory("/write-article?edit=" + event.naddr);
         }
@@ -1913,7 +1916,7 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
         e.stopPropagation();
         customHistory(getLinkFromAddr(event.naddr || event.nEvent, event.kind));
       }}
-    > 
+    >
       <div className="fx-centered fx-start-v">
         {!event.image && event.kind !== 20 && (
           <div className="round-icon">
@@ -1952,7 +1955,9 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
 
         <div className="fx-centered fx-col fx-start-h fx-start-v">
           <p className="gray-c p-medium">
-            {t("AcKscQl", { date: timeAgo(new Date(event.created_at * 1000)) })}{" "}
+            {t("AcKscQl", {
+              date: timeAgo(new Date(event.created_at * 1000)),
+            })}{" "}
           </p>
           <p className="p-two-lines">
             {event.title || (
@@ -2027,7 +2032,7 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
   );
 };
 
-const NoteCard = ({ event }) => {
+const NoteCard = ({ event, refreshAfterDeletion }) => {
   const { t } = useTranslation();
   const isRepost =
     event.kind === 6
@@ -2036,7 +2041,7 @@ const NoteCard = ({ event }) => {
   if (!isRepost) return null;
   const { postActions } = useNoteStats(isRepost.id, isRepost.pubkey);
   const isFlashNews = isRepost.tags.find(
-    (tag) => tag[0] === "l" && tag[1] === "FLASH NEWS"
+    (tag) => tag[0] === "l" && tag[1] === "FLASH NEWS",
   )
     ? true
     : false;
@@ -2095,7 +2100,11 @@ const NoteCard = ({ event }) => {
         </div>
       </div>
       <div className="fx-centered" style={{ minWidth: "max-content" }}>
-        <EventOptions event={isRepost} component="dashboardNotes" />
+        <EventOptions
+          event={isRepost}
+          component="dashboardNotes"
+          refreshAfterDeletion={refreshAfterDeletion}
+        />
       </div>
     </div>
   );
@@ -2135,7 +2144,9 @@ const BookmarkCard = ({ event, showDetails, deleteEvent, editEvent }) => {
 
         <div className="fx-centered fx-col fx-start-h fx-start-v">
           <p className="gray-c p-medium">
-            {t("AcKscQl", { date: timeAgo(new Date(event.created_at * 1000)) })}{" "}
+            {t("AcKscQl", {
+              date: timeAgo(new Date(event.created_at * 1000)),
+            })}{" "}
           </p>
           <div className="fx-centered">
             <p className="p-two-lines">
@@ -2624,7 +2635,7 @@ const ManageInterest = ({ exit }) => {
           content: "",
           tags: tags,
           allRelays: [],
-        })
+        }),
       );
       return true;
     } catch (err) {

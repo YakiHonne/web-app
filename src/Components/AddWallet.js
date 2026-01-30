@@ -1,4 +1,3 @@
-
 import React from "react";
 import Link from "next/link";
 import AddYakiWallet from "@/Components/AddYakiWallet";
@@ -34,7 +33,7 @@ export default function AddWallet({ exit, refresh }) {
         <Link
           className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"
           style={{ backgroundColor: "transparent" }}
-          href={"/wallet/nwc"}
+          href={"/lightning-wallet/nwc"}
           onClick={exit}
         >
           <div className="fx-centered">

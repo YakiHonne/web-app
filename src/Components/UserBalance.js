@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import SatsToUSD from "@/Components/SatsToUSD";
 import Link from "next/link";
 import axios from "axios";
@@ -10,47 +10,63 @@ import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import NumberShrink from "@/Components/NumberShrink";
 import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
+import useCashu from "@/Hooks/useCachu";
 
 export default function UserBalance() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const userBalance = useSelector((state) => state.userBalance);
+  const { cashuTotalBalance } = useCashu();
   const [wallets, setWallets] = useState(getWallets());
   const [selectedWallet, setSelectedWallet] = useState(
-    wallets.find((wallet) => wallet.active)
+    wallets.find((wallet) => wallet.active),
   );
-  const [isLoading, setIsLoading] = useState(false);
   const [isHidden, setIsHidden] = useState(
     localStorage_.getItem("isSatsHidden")
       ? localStorage_.getItem("isSatsHidden")
-      : ""
+      : "",
   );
+
+  const walletUrl = useMemo(() => {
+    let url = localStorage.getItem("selectedWalletType");
+    if (["/lightning-wallet", "/cashu-wallet"].includes(url)) return url;
+    return "/lightning-wallet";
+  }, [userBalance]);
+
   useEffect(() => {
-    if (["/wallet"].includes(window.location.pathname)) return;
+    if (
+      ["/lightning-wallet", "/cashu-wallet"].includes(window.location.pathname)
+    )
+      return;
     if (!userKeys) return;
     if (userKeys && (userKeys?.ext || userKeys?.sec || userKeys?.bunker)) {
-      let tempWallets = getWallets();
-      let selectedWallet_ = tempWallets.find((wallet) => wallet.active);
-      if (selectedWallet_) {
-        if (selectedWallet_.kind === 1) {
-          getBalancWebLN();
+      if (walletUrl === "/lightning-wallet") {
+        let tempWallets = getWallets();
+        let selectedWallet_ = tempWallets.find((wallet) => wallet.active);
+        if (selectedWallet_) {
+          if (selectedWallet_.kind === 1) {
+            getBalancWebLN();
+          }
+          if (selectedWallet_.kind === 2) {
+            getAlbyData(selectedWallet_);
+          }
+          if (selectedWallet_.kind === 3) {
+            getNWCData(selectedWallet_);
+          }
+        } else {
+          setWallets([]);
+          setSelectedWallet(false);
+          dispatch(setUserBalance("N/A"));
         }
-        if (selectedWallet_.kind === 2) {
-          getAlbyData(selectedWallet_);
-        }
-        if (selectedWallet_.kind === 3) {
-          getNWCData(selectedWallet_);
-        }
-      } else {
-        setWallets([]);
-        setSelectedWallet(false);
-        dispatch(setUserBalance("N/A"));
+      }
+      if (walletUrl === "/cashu-wallet" && cashuTotalBalance >= 0) {
+        dispatch(setUserBalance(cashuTotalBalance));
       }
     } else {
       dispatch(setUserBalance("N/A"));
     }
-  }, [userKeys, selectedWallet]);
+  }, [userKeys, selectedWallet, cashuTotalBalance]);
 
   useEffect(() => {
     if (!window.location.pathname.includes("users")) {
@@ -62,32 +78,26 @@ export default function UserBalance() {
 
   const getBalancWebLN = async () => {
     try {
-      setIsLoading(true);
       await window.webln.enable();
       let data = await window.webln.getBalance();
 
       localStorage_.setItem("wallet-userBalance", `${data.balance}`);
 
       dispatch(setUserBalance(data.balance));
-      setIsLoading(false);
     } catch (err) {
       console.log(err);
-      setIsLoading(false);
     }
   };
   const getAlbyData = async (activeWallet) => {
     try {
-      setIsLoading(true);
       let checkTokens = await checkAlbyToken(wallets, activeWallet);
       let b = await getBalanceAlbyAPI(
-        checkTokens.activeWallet.data.access_token
+        checkTokens.activeWallet.data.access_token,
       );
       setWallets(checkTokens.wallets);
       dispatch(setUserBalance(b));
-      setIsLoading(false);
     } catch (err) {
       console.log(err);
-      setIsLoading(false);
     }
   };
   const getBalanceAlbyAPI = async (code) => {
@@ -105,16 +115,13 @@ export default function UserBalance() {
   };
   const getNWCData = async (activeWallet) => {
     try {
-      setIsLoading(true);
       const nwc = new webln.NWC({ nostrWalletConnectUrl: activeWallet.data });
       await nwc.enable();
       const userBalanceResponse = await nwc.getBalance();
 
       dispatch(setUserBalance(userBalanceResponse.balance));
-      setIsLoading(false);
     } catch (err) {
       console.log(err);
-      setIsLoading(false);
     }
   };
   const handleSatsDisplay = (e) => {
@@ -136,7 +143,7 @@ export default function UserBalance() {
       <Link
         className="fit-container fx-centered fx-start-h box-pad-h-m userBalance-container mb-hide"
         style={{ borderLeft: "2px solid var(--orange-main)", margin: ".75rem" }}
-        href={"/wallet"}
+        href={walletUrl}
       >
         <div
           className="wallet-add"
@@ -151,7 +158,7 @@ export default function UserBalance() {
       style={{ borderLeft: "2px solid var(--orange-main)", margin: ".75rem" }}
       onClick={(e) => {
         e.stopPropagation();
-        customHistory("/wallet");
+        customHistory(walletUrl);
       }}
     >
       <div
@@ -203,7 +210,7 @@ const checkAlbyToken = async (wallets, activeWallet) => {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     let tempWallet = { ...activeWallet };
     tempWallet.data = {

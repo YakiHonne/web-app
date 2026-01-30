@@ -9,6 +9,8 @@ export default function Select({
   revert = false,
   fullWidth = false,
   noBorder = false,
+  animatedHover = true,
+  header = null,
 }) {
   const [showOptions, setShowOptions] = useState(false);
   const selectedValue = useMemo(() => {
@@ -36,7 +38,7 @@ export default function Select({
       ref={optionsRef}
     >
       <div
-        className="fit-container fx-scattered if option pointer"
+        className={`fit-container fx-scattered if pointer ${animatedHover ? "option" : ""}`}
         style={{
           height: "var(--40)",
           padding: "1rem",
@@ -65,41 +67,45 @@ export default function Select({
             zIndex: 1000,
             rowGap: "0",
           }}
-          className="sc-s-18 fx-centered fx-col fx-start-v fx-start-h pointer box-pad-v-s box-pad-h-s bg-sp drop-down"
+          className="sc-s-18 fx-centered fx-col fx-start-v fx-start-h pointer bg-sp drop-down"
+          // className="sc-s-18 fx-centered fx-col fx-start-v fx-start-h pointer box-pad-v-s box-pad-h-s bg-sp drop-down"
         >
-          {options.map((option, index) => {
-            return (
-              <div
-                key={index}
-                className={`option-no-scale fit-container fx-scattered ${
-                  option?.left_el ? "fx-start-h" : ""
-                }  pointer box-pad-h-m`}
-                style={{
-                  border: "none",
-                  overflow: "visible",
-                  padding: ".5rem",
-                  cursor: option.disabled ? "not-allowed" : "pointer",
-                  opacity: option.disabled ? 0.5 : 1,
-                }}
-                onClick={() => {
-                  setSelectedValue(option?.value);
-                  setShowOptions(false);
-                }}
-              >
-                {option?.left_el && option?.left_el}
+          {header && header}
+          <div className="fit-container box-pad-v-s box-pad-h-s">
+            {options.map((option, index) => {
+              return (
                 <div
-                  className={
-                    selectedValue?.value === option?.value
-                      ? "orange-c"
-                      : "gray-c"
-                  }
+                  key={index}
+                  className={`option-no-scale fit-container fx-scattered ${
+                    option?.left_el ? "fx-start-h" : ""
+                  }  pointer box-pad-h-m`}
+                  style={{
+                    border: "none",
+                    overflow: "visible",
+                    padding: ".5rem",
+                    cursor: option.disabled ? "not-allowed" : "pointer",
+                    opacity: option.disabled ? 0.5 : 1,
+                  }}
+                  onClick={() => {
+                    setSelectedValue(option?.value);
+                    setShowOptions(false);
+                  }}
                 >
-                  {option?.display_name}
+                  {option?.left_el && option?.left_el}
+                  <div
+                    className={
+                      selectedValue?.value === option?.value
+                        ? "orange-c"
+                        : "gray-c"
+                    }
+                  >
+                    {option?.display_name}
+                  </div>
+                  {option?.right_el && option?.right_el}
                 </div>
-                {option?.right_el && option?.right_el}
-              </div>
-            );
-          })}
+              );
+            })}{" "}
+          </div>
         </div>
       )}
     </div>

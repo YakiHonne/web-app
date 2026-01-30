@@ -6,7 +6,12 @@ export default function KeepAlive({ routeKey, children }) {
 
   const MAX_CACHE = 7;
   const ALWAYS_KEEP = ["/", "/discover", "/notifications"];
-  const ALWAYS_REMOVE = ["/login", "/wallet", "/write-article"];
+  const ALWAYS_REMOVE = [
+    "/login",
+    // "/lightning-wallet",
+    // "/cashu-wallet",
+    "/write-article",
+  ];
 
   useEffect(() => {
     setIsClient(true);
@@ -30,7 +35,7 @@ export default function KeepAlive({ routeKey, children }) {
 
     const keys = Object.keys(cacheRef.current);
     const extraKeys = keys.filter(
-      (key) => !ALWAYS_KEEP.includes(key) && key !== routeKey
+      (key) => !ALWAYS_KEEP.includes(key) && key !== routeKey,
     );
 
     if (extraKeys.length > MAX_CACHE) {

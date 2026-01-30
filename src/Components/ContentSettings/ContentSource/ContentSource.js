@@ -25,14 +25,14 @@ export default function ContentSource({
     let favSet = userFavRelays.tags
       ? [
           ...new Set(
-            userFavRelays.tags.filter((_) => _[0] === "a").map((_) => _[1])
+            userFavRelays.tags.filter((_) => _[0] === "a").map((_) => _[1]),
           ),
         ]
       : [];
     if (favSet.length === 0) return [];
     let relaysSet = favSet
       .map((_) =>
-        userRelaysSet[_] ? getParsedRelaySet(userRelaysSet[_]) : null
+        userRelaysSet[_] ? getParsedRelaySet(userRelaysSet[_]) : null,
       )
       .filter((_) => _);
     return relaysSet;
@@ -177,7 +177,7 @@ export default function ContentSource({
     let categoryHistory;
     try {
       categoryHistory = JSON.parse(
-        localStorage.getItem(`selectedCategorySource-${type}`)
+        localStorage.getItem(`selectedCategorySource-${type}`),
       );
     } catch {}
     let selectedCategory_ = {
@@ -185,7 +185,7 @@ export default function ContentSource({
       ...optionsList[0].list[0],
     };
     setSelectedCategory(
-      userKeys ? categoryHistory || selectedCategory_ : selectedCategory_
+      userKeys ? categoryHistory || selectedCategory_ : selectedCategory_,
     );
   }, [optionsList]);
 
@@ -200,7 +200,7 @@ export default function ContentSource({
       JSON.stringify({
         ..._,
         group: option.value,
-      })
+      }),
     );
     setShowOptions(false);
   };
@@ -364,7 +364,7 @@ export default function ContentSource({
                               ? handleSelectCategory(
                                   e,
                                   { ...metadata, value: metadata.aTag },
-                                  { value: "rsf" }
+                                  { value: "rsf" },
                                 )
                               : null
                           }

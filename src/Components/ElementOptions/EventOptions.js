@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import RelayImage from "../RelayImage";
 import useIsPinnedNote from "@/Hooks/useIsPinnedNote";
+import { removeEventStats } from "@/Helpers/DB";
 
 export default function EventOptions({
   event,
@@ -38,11 +39,11 @@ export default function EventOptions({
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
   const { isMuted: isMutedPubkey, muteUnmute: muteUnmutePubkey } = useIsMute(
-    event?.pubkey
+    event?.pubkey,
   );
   const { isMuted: isMutedId, muteUnmute: muteUnmuteId } = useIsMute(
     event?.id,
-    "e"
+    "e",
   );
   const { isPinned, pinUnpin } = useIsPinnedNote(event?.id);
 
@@ -68,7 +69,7 @@ export default function EventOptions({
     event.naddr ||
       event.nEvent ||
       (event.pubkey && nip19.npubEncode(event.pubkey)),
-    event.kind
+    event.kind,
   );
   const postAsNote = (
     <div
@@ -116,6 +117,18 @@ export default function EventOptions({
     >
       <div className="key-icon-24"></div>
       <p>{t("AHrJpSX")}</p>
+    </div>
+  );
+  const copyContent = (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        copyText(event.content, t("Ae9XEnt"));
+      }}
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
+    >
+      <div className="copy-24"></div>
+      <p>{t("AUkCrth")}</p>
     </div>
   );
   const copyPubkeyHex = (
@@ -277,7 +290,7 @@ export default function EventOptions({
             post_d: event.d,
             post_content: event.content,
             post_published_at: event.published_at,
-          })
+          }),
         );
         navigate.push("/write-article?edit=" + event.naddr);
       }}
@@ -403,18 +416,21 @@ export default function EventOptions({
     ""
   );
 
-  const toDeleteEvent = (
-    <div
-      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
-      onClick={(e) => {
-        e.stopPropagation();
-        setDeleteEvent(event);
-      }}
-    >
-      <div className="trash-24"></div>
-      <p className="red-c">{t("Almq94P")}</p>
-    </div>
-  );
+  const toDeleteEvent =
+    userKeys && event.pubkey === userKeys.pub ? (
+      <div
+        className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+        onClick={(e) => {
+          e.stopPropagation();
+          setDeleteEvent(event);
+        }}
+      >
+        <div className="trash-24"></div>
+        <p className="red-c">{t("Almq94P")}</p>
+      </div>
+    ) : (
+      ""
+    );
 
   const HR = <hr style={{ margin: "4px 0", padding: "0 5px" }} />;
 
@@ -426,6 +442,7 @@ export default function EventOptions({
         return [
           copyID,
           copyPubkey,
+          copyContent,
           pinNote,
           showRawEventContent,
           broadcastEvent,
@@ -434,6 +451,7 @@ export default function EventOptions({
           HR,
           muteThread,
           muteUser,
+          toDeleteEvent,
         ];
       case "media":
         return [
@@ -472,7 +490,14 @@ export default function EventOptions({
           muteUser,
         ];
       case "dashboardNotes":
-        return [copyID, showRawEventContent, broadcastEvent, shareLink];
+        return [
+          copyID,
+          copyContent,
+          showRawEventContent,
+          broadcastEvent,
+          shareLink,
+          toDeleteEvent,
+        ];
       case "dashboardSW":
         return [
           postAsNote,
@@ -545,6 +570,12 @@ export default function EventOptions({
   const refreshAfterDeletion_ = () => {
     setDeleteEvent(false);
     refreshAfterDeletion(event.id);
+    if (event.kind === 1) {
+      let isComment = event.isComment;
+      let isRoot = event.rootData?.length > 0 ? event.rootData[1] : false;
+      if (isComment) removeEventStats(isComment, event.id, "replies");
+      if (isRoot) removeEventStats(isRoot, event.id, "replies");
+    }
   };
 
   const linkWallet = async () => {
@@ -568,7 +599,7 @@ export default function EventOptions({
         kind: 0,
         content: JSON.stringify(content),
         tags: [],
-      })
+      }),
     );
     setSelectWalletToLink(false);
   };
@@ -844,7 +875,7 @@ const BroadcastEvent = ({ event }) => {
       setToPublish({
         eventInitEx: rawEvent,
         allRelays: [relay],
-      })
+      }),
     );
     setShowRelays(false);
   };

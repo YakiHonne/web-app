@@ -45,7 +45,7 @@ const doesContainNostrSchema = (url) => {
     const url_ = new URL(url);
     const domain = url_.hostname.replace(/^www\./, "");
     const isWhitelisted = nostrClients.some((allowed) =>
-      domain.endsWith(allowed)
+      domain.endsWith(allowed),
     );
     if (!isWhitelisted) return false;
     return nostrSchemaRegex.test(url);
@@ -60,7 +60,7 @@ export function getNoteTree(
   isCollapsedNote = false,
   wordsCount = 150,
   pubkey,
-  noBlur = false
+  noBlur = false,
 ) {
   if (!note) return "";
   let tree = note
@@ -88,7 +88,8 @@ export function getNoteTree(
       (/(https?:\/\/)/i.test(el) || el.startsWith("data:image")) &&
       !el.includes("https://yakihonne.com/smart-widget-checker?naddr=")
     ) {
-      const isURLCommonPlatformVid = isVid(el);
+      let cleanUrl = el.replace(/[.,|']+$/, "");
+      const isURLCommonPlatformVid = isVid(cleanUrl);
       if (!minimal) {
         if (isURLCommonPlatformVid) {
           finalTree.push(
@@ -98,50 +99,50 @@ export function getNoteTree(
               isCommonPlatform={isURLCommonPlatformVid.isYT ? "yt" : "vm"}
               src={isURLCommonPlatformVid.videoId}
               poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-            />
+            />,
           );
         }
         if (!isURLCommonPlatformVid) {
-          const checkURL = isImageUrl(el);
+          const checkURL = isImageUrl(cleanUrl);
           if (checkURL) {
             if (checkURL.type === "image") {
-              finalTree.push(<IMGElement src={el} key={key} />);
+              finalTree.push(<IMGElement src={cleanUrl} key={key} />);
             } else if (checkURL.type === "video") {
               finalTree.push(
                 <VideoLoader
                   pubkey={pubkey}
                   key={key}
-                  src={el}
+                  src={cleanUrl}
                   poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                />
+                />,
               );
             }
           } else if (
-            el.includes(".mp3") ||
-            el.includes(".ogg") ||
-            el.includes(".wav")
+            cleanUrl.includes(".mp3") ||
+            cleanUrl.includes(".ogg") ||
+            cleanUrl.includes(".wav")
           ) {
-            finalTree.push(<AudioLoader audioSrc={el} key={key} />);
-          } else if (doesContainNostrSchema(el)) {
-            let cleanPart = el.match(nostrSchemaRegex)?.[0];
+            finalTree.push(<AudioLoader audioSrc={cleanUrl} key={key} />);
+          } else if (doesContainNostrSchema(cleanUrl)) {
+            let cleanPart = cleanUrl.match(nostrSchemaRegex)?.[0];
             if (cleanPart) {
               finalTree.push(
                 <Fragment key={key}>
                   <Nip19Parsing addr={cleanPart} minimal={minimal} />
-                </Fragment>
+                </Fragment>,
               );
             } else {
               finalTree.push(
                 <Fragment key={key}>
-                  <LinkPreview url={el} minimal={minimal} />{" "}
-                </Fragment>
+                  <LinkPreview url={cleanUrl} minimal={minimal} />{" "}
+                </Fragment>,
               );
             }
           } else {
             finalTree.push(
               <Fragment key={key}>
-                <LinkPreview url={el} minimal={minimal} />{" "}
-              </Fragment>
+                <LinkPreview url={cleanUrl} minimal={minimal} />{" "}
+              </Fragment>,
             );
           }
         }
@@ -150,13 +151,13 @@ export function getNoteTree(
           <Fragment key={key}>
             <a
               style={{ wordBreak: "break-word", color: "var(--orange-main)" }}
-              href={el}
+              href={cleanUrl}
               className="btn-text-gray"
               onClick={(e) => e.stopPropagation()}
             >
-              {el}
+              {cleanUrl}
             </a>{" "}
-          </Fragment>
+          </Fragment>,
         );
     } else if (isRelayUrl(el))
       finalTree.push(
@@ -171,7 +172,7 @@ export function getNoteTree(
             <p>{el}</p>
             <div className="share-icon"></div>
           </a>{" "}
-        </Fragment>
+        </Fragment>,
       );
     else if (
       (el?.includes("nostr:") ||
@@ -221,7 +222,7 @@ export function getNoteTree(
       finalTree.push(
         <Fragment key={key}>
           <Nip19Parsing addr={cleanPart} minimal={minimal} />
-        </Fragment>
+        </Fragment>,
       );
     } else if (el?.startsWith("lnbc") && el.length > 30) {
       finalTree.push(<LNBCInvoice lnbc={el} key={key} />);
@@ -249,7 +250,7 @@ export function getNoteTree(
               <div className="share-icon"></div>
             </Link>{" "}
             {ifMore && <span>{ifMore} </span>}
-          </React.Fragment>
+          </React.Fragment>,
         );
       }
     } else {
@@ -262,7 +263,7 @@ export function getNoteTree(
           key={key}
         >
           {el}{" "}
-        </span>
+        </span>,
       );
     }
   }
@@ -300,7 +301,7 @@ export function getComponent(children) {
               res.push(
                 <>
                   <Nip19Parsing addr={nip19add} key={key} />{" "}
-                </>
+                </>,
               );
             }
           } catch (err) {
@@ -313,7 +314,7 @@ export function getComponent(children) {
                 }}
               >
                 {child_.split("nostr:")[1]}{" "}
-              </span>
+              </span>,
             );
           }
         }
@@ -335,7 +336,7 @@ export function getComponent(children) {
                   {index < lines.length - 1 && <br />}
                 </React.Fragment>
               ))}
-            </span>
+            </span>,
           );
         }
       }
@@ -355,7 +356,7 @@ export function getComponent(children) {
                 alt="el"
                 loading="lazy"
                 key={key}
-              />
+              />,
             );
           }
           if (checkURL.type === "video") {
@@ -364,7 +365,7 @@ export function getComponent(children) {
                 key={key}
                 src={children[i].props?.href}
                 poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-              />
+              />,
             );
           }
         }
@@ -385,7 +386,7 @@ export function getComponent(children) {
               {children[i].props?.children?.length > 0
                 ? children[i].props?.children[0]
                 : children[i].props?.children}
-            </a>
+            </a>,
           );
         }
       } else
@@ -398,7 +399,7 @@ export function getComponent(children) {
             }}
           >
             {children[i]}{" "}
-          </span>
+          </span>,
         );
     }
   }
@@ -408,7 +409,7 @@ export function getComponent(children) {
 export function getParsedNote(
   event,
   isCollapsedNote = false,
-  parseContent = true
+  parseContent = true,
 ) {
   try {
     if (!event) return;
@@ -422,7 +423,7 @@ export function getParsedNote(
     let isQuote = event.tags.find((tag) => tag[0] === "q");
     let checkForLabel = event.tags.find((tag) => tag[0] === "l");
     let isComment = event.tags.find(
-      (tag) => tag.length > 0 && tag[3] === "root"
+      (tag) => tag.length > 0 && tag[3] === "root",
     );
 
     let isNotRoot =
@@ -451,7 +452,7 @@ export function getParsedNote(
             undefined,
             isCollapsedNote_,
             undefined,
-            event.pubkey
+            event.pubkey,
           )
         : event.content;
 
@@ -546,7 +547,7 @@ export function isImageUrl(url) {
       return { type: "video" };
     if (
       /(\/images\/|cdn\.|img\.|\/media\/|\/uploads\/|encrypted-tbn0\.gstatic\.com\/images|i\.insider\.com\/)/i.test(
-        url
+        url,
       ) &&
       !/\.(mp4|mov|webm|ogg|avi)$/i.test(url)
     ) {
@@ -683,7 +684,7 @@ export function getCustomSettings() {
   try {
     customHomeSettings = JSON.parse(customHomeSettings);
     let customHomeSettings_ = customHomeSettings.find(
-      (settings) => settings?.pubkey === nostkeys.pub
+      (settings) => settings?.pubkey === nostkeys.pub,
     );
     return customHomeSettings_
       ? checkForNewAddedSettings(customHomeSettings_)
@@ -929,7 +930,7 @@ export function updateCustomSettings(settings, pubkey_) {
       : [];
     let pubkey = userKeys?.pub || pubkey_;
     let customHomeSettings_index = customHomeSettings.findIndex(
-      (_) => _?.pubkey === pubkey
+      (_) => _?.pubkey === pubkey,
     );
     if (customHomeSettings_index !== -1) {
       customHomeSettings[customHomeSettings_index] = settings;
@@ -967,7 +968,7 @@ export function getCustomServices() {
   let userKeys = getKeys();
   if (!userKeys) return {};
   let customServices = localStorage_.getItem(
-    `custom-lang-services-${userKeys.pub}`
+    `custom-lang-services-${userKeys.pub}`,
   );
   if (!customServices) return {};
   try {
@@ -986,7 +987,7 @@ export function updateWallets(wallets_, pubkey_) {
     wallets = wallets ? JSON.parse(wallets) : [];
     let pubkey = pubkey_ || userKeys?.pub;
     let wallets_index = wallets.findIndex(
-      (wallet) => wallet?.pubkey === pubkey
+      (wallet) => wallet?.pubkey === pubkey,
     );
     if (wallets_index !== -1) {
       wallets[wallets_index].wallets = wallets_;

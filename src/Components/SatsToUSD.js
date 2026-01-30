@@ -8,7 +8,7 @@ import { updateCustomSettings } from "@/Helpers/ClientHelpers";
 
 const SatsToUSD = ({ sats, isHidden, selector }) => {
   const [fiatRate, setFiatRate] = useState(null);
-  const [fiatValue, setFiatValue] = useState(null);
+  const [fiatValue, setFiatValue] = useState(sats === 0 ? 0 : null);
   const userSettings = useCustomizationSettings();
   const currency = useMemo(() => {
     return userSettings.currency;
@@ -18,7 +18,7 @@ const SatsToUSD = ({ sats, isHidden, selector }) => {
     const fetchBtcToUsdRate = async () => {
       try {
         const response = await axios.get(
-          `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`
+          `https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`,
         );
         setFiatRate(response.data.bitcoin[currency]);
       } catch (error) {
@@ -42,7 +42,18 @@ const SatsToUSD = ({ sats, isHidden, selector }) => {
     updateCustomSettings({ ...userSettings, currency });
   };
 
-  if (!fiatValue) return;
+  if (fiatValue === null)
+    return (
+      <div
+        style={{
+          backgroundColor: "var(--c1-side)",
+          height: "40px",
+          width: "50px",
+          borderRadius: "var(--border-r-18)",
+        }}
+        className="skeleton-container"
+      ></div>
+    );
   if (selector) {
     return (
       <div>
@@ -85,14 +96,11 @@ const FiatSelector = ({ isHidden, fiatValue, currency, setCurrency }) => {
       onClick={() => setOpen(!open)}
       style={{ position: "relative" }}
     >
-      <div
-        className="fx-centered box-pad-h-s box-pad-v-s option-no-scale"
-        style={{ gap: "4px" }}
-      >
-        <p className="p-big" style={{ minWidth: "max-content" }}>
-          {currenciesSymbols[currency]}
+      <div className="fx-centered  option-no-scale" style={{ gap: "4px" }}>
+        {/* <span className="gray-c p-big">{currenciesSymbols[currency]}</span> */}
+        <h2 style={{ minWidth: "max-content" }}>
           {!isHidden ? fiatValue.toFixed(2) : "***"}
-        </p>
+        </h2>
         <span className="gray-c p-caps">{currency?.toUpperCase()}</span>
         <div className="arrow-12"></div>
       </div>
