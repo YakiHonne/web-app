@@ -445,7 +445,7 @@ export function getParsedNote(
 
     let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
     let isProtected = event.tags.find((tag) => tag[0] === "-");
-    if (event.kind === 1) {
+    if (event.kind === 1 || event.kind === 1111) {
       let note_tree = parseContent
         ? getNoteTree(
             event.content,

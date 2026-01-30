@@ -160,7 +160,7 @@ function Nip19Parsing({ addr, minimal = false }) {
             getEmptyuserMetadata(event.pubkey);
           setEvent({ ...content, kind: 0 });
         }
-        if (event.kind === 1) {
+        if (event.kind === 1 || event.kind === 1111) {
           let parsedEvent = getParsedNote(event, true);
 
           setEvent(parsedEvent);
@@ -253,14 +253,14 @@ function Nip19Parsing({ addr, minimal = false }) {
       </>
     );
   if (
-    event?.kind === 1 ||
+    event?.kind === 1 || event?.kind === 1111 ||
     ((addr.startsWith("nevent") || addr.startsWith("note")) && addr.length > 20)
   )
     return (
       <>
         {!minimal && (
           <>
-            {event?.kind === 1 && (
+            {(event?.kind === 1 || event?.kind === 1111) && (
               <div
                 className="fit-container sc-s-18 "
                 style={{
