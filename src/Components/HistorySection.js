@@ -33,13 +33,13 @@ const traceEventPath = (id, all, mainEventID, tagKind) => {
     let mainEvent = all.find((comment) => comment.id === mainEventID);
     if (mainEvent) {
       let parsedEvent;
-      if (mainEvent.kind === 1) parsedEvent = getParsedNote(mainEvent, true);
-      if (mainEvent.kind !== 1) parsedEvent = getParsedMedia(mainEvent);
+      if (mainEvent.kind === 1 || mainEvent.kind === 1111) parsedEvent = getParsedNote(mainEvent, true);
+      if (mainEvent.kind !== 1 && mainEvent.kind !== 1111) parsedEvent = getParsedMedia(mainEvent);
       path.unshift(parsedEvent);
     }
   }
   if (tagKind !== "e") {
-    let mainEvent = all.find((comment) => comment.kind !== 1);
+    let mainEvent = all.find((comment) => comment.kind !== 1 && comment.kind !== 1111);
     if (mainEvent) {
       let parsedEvent = getParsedRepEvent(mainEvent);
       path.unshift(parsedEvent);
@@ -74,11 +74,14 @@ export default function HistorySection({
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+
+      const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+      
       let filter = isRoot
         ? []
         : [
             {
-              kinds: [1],
+              kinds: commentKinds,
               [`#${tagKind}`]: [id],
             },
           ];
@@ -105,10 +108,13 @@ export default function HistorySection({
 
   useEffect(() => {
     if (isLoading) return;
+
+    const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+    
     const sub = ndkInstance.subscribe(
       [
         {
-          kinds: [1],
+          kinds: commentKinds,
           [`#${tagKind}`]: [id],
           since: Math.floor(Date.now() / 1000),
         },
@@ -162,7 +168,7 @@ export default function HistorySection({
         </div>
       )}
       {netComments.map((comment, index) => {
-        if (comment.kind === 1)
+        if (comment.kind === 1 || comment.kind === 1111)
           return (
             <NotesComment
               event={comment}

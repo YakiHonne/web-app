@@ -106,9 +106,11 @@ export default function Comments({
       }
       let imetasTags = filterImetas({ note: content, imetas });
 
+      const commentKind = tagKind === "a" ? 1111 : 1;
+
       tags = [...tags, ...extracted.tags, ...imetasTags];
       let eventInitEx = await InitEvent(
-        1,
+        commentKind,
         content,
         tags,
         undefined,
