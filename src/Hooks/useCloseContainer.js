@@ -5,17 +5,29 @@ export default function useCloseContainer() {
   const containerRef = useRef(null);
   const [open, setOpen] = useState(false);
 
+  // useEffect(() => {
+  //   const handleOffClick = (e) => {
+  //     e.stopPropagation();
+  //     if (containerRef.current && !containerRef.current.contains(e.target))
+  //       setOpen(false);
+  //   };
+  //   document.addEventListener("click", handleOffClick);
+  //   return () => {
+  //     document.removeEventListener("click", handleOffClick);
+  //   };
+  // }, [containerRef]);
   useEffect(() => {
     const handleOffClick = (e) => {
-      e.stopPropagation();
-      if (containerRef.current && !containerRef.current.contains(e.target))
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
         setOpen(false);
+      }
     };
-    document.addEventListener("click", handleOffClick);
+
+    document.addEventListener("mousedown", handleOffClick);
     return () => {
-      document.removeEventListener("click", handleOffClick);
+      document.removeEventListener("mousedown", handleOffClick);
     };
-  }, [containerRef]);
+  }, []);
 
   return { containerRef, open, setOpen };
 }

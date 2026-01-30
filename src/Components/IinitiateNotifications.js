@@ -21,7 +21,6 @@ import {
   clearNotifications,
   setIsNotificationsLoading,
   setNotifications,
-  setRefreshNotifications,
   updateNotifications,
 } from "@/Store/Slides/Extras";
 import { useDispatch } from "react-redux";
@@ -30,7 +29,7 @@ export default function IinitiateNotifications() {
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const refreshNotifications = useSelector(
-    (state) => state.refreshNotifications
+    (state) => state.refreshNotifications,
   );
 
   const notificationSettings = (() => {
@@ -38,17 +37,17 @@ export default function IinitiateNotifications() {
     let hideMentions = settings.hideMentions;
     let notificationsSettings = settings.notification;
     let mentions = notificationsSettings.find(
-      (_) => _.tab === "mentions"
+      (_) => _.tab === "mentions",
     )?.isHidden;
     let zaps = notificationsSettings.find((_) => _.tab === "zaps")?.isHidden;
     let reactions = notificationsSettings.find(
-      (_) => _.tab === "reactions"
+      (_) => _.tab === "reactions",
     )?.isHidden;
     let reposts = notificationsSettings.find(
-      (_) => _.tab === "reposts"
+      (_) => _.tab === "reposts",
     )?.isHidden;
     let following = notificationsSettings.find(
-      (_) => _.tab === "following"
+      (_) => _.tab === "following",
     )?.isHidden;
 
     return {
@@ -78,18 +77,18 @@ export default function IinitiateNotifications() {
       let filter = getFilter(
         userFollowings,
         notificationsHistory.length > 0
-        ? lastEventCreatedAt
-        ? lastEventCreatedAt + 1
-        : undefined
-        : undefined
+          ? lastEventCreatedAt
+            ? lastEventCreatedAt + 1
+            : undefined
+          : undefined,
       );
       let data = await getSubData(
         filter,
-        150,
+        450,
         undefined,
         undefined,
         undefined,
-        true
+        true,
         // "ONLY_RELAY"
       );
       data = data.data
@@ -97,7 +96,7 @@ export default function IinitiateNotifications() {
           let scoreStatus = getWOTScoreForPubkeyLegacy(
             event.pubkey,
             notifications,
-            score
+            score,
           ).status;
           let hideMentions = notificationSettings.hideMentions
             ? event.tags.filter((_) => _[0] === "p").length > 10
@@ -112,7 +111,7 @@ export default function IinitiateNotifications() {
           ) {
             if (event.kind === 9735) {
               let description = JSON.parse(
-                event.tags.find((tag) => tag[0] === "description")[1]
+                event.tags.find((tag) => tag[0] === "description")[1],
               );
               tempAuth.push(description.pubkey);
               return {
@@ -139,7 +138,7 @@ export default function IinitiateNotifications() {
               let checkForLabel = event.tags.find((tag) => tag[0] === "l");
               let isUncensored = checkForLabel
                 ? ["UNCENSORED NOTE RATING", "UNCENSORED NOTE"].includes(
-                    checkForLabel[1]
+                    checkForLabel[1],
                   )
                 : false;
               if (!isUncensored) {
@@ -154,7 +153,7 @@ export default function IinitiateNotifications() {
         })
         .filter((_) => _);
       let list = saveNotificationsHistory(userKeys.pub, data);
-      dispatch(setNotifications({data: list, pubkey: userKeys.pub}));
+      dispatch(setNotifications({ data: list, pubkey: userKeys.pub }));
       if (data.length)
         saveNotificationLastEventTS(userKeys.pub, data[0]?.created_at);
       dispatch(setIsNotificationsLoading(false));
@@ -168,7 +167,7 @@ export default function IinitiateNotifications() {
         let scoreStatus = getWOTScoreForPubkeyLegacy(
           event.pubkey,
           notifications,
-          score
+          score,
         ).status;
         let hideMentions = notificationSettings.hideMentions
           ? event.tags.filter((_) => _[0] === "p").length > 10
@@ -182,7 +181,7 @@ export default function IinitiateNotifications() {
         ) {
           if (event.kind === 9735) {
             let description = JSON.parse(
-              event.tags.find((tag) => tag[0] === "description")[1]
+              event.tags.find((tag) => tag[0] === "description")[1],
             );
             saveUsers([description.pubkey]);
             dispatch(
@@ -197,7 +196,7 @@ export default function IinitiateNotifications() {
                   },
                 ],
                 pubkey: userKeys.pub,
-              })
+              }),
             );
           } else {
             let pubkeys = event.tags
@@ -211,10 +210,10 @@ export default function IinitiateNotifications() {
                     ...event.rawEvent(),
                     isNew: true,
                     isRead: false,
-                  },    
+                  },
                 ],
                 pubkey: userKeys.pub,
-              })
+              }),
             );
           }
         }
@@ -256,7 +255,7 @@ export default function IinitiateNotifications() {
     }
     if (!zaps)
       filter.push({
-        kinds: [9735],
+        kinds: [9735, 9321],
         "#p": [userKeys.pub],
         limit: 150,
         since,
@@ -304,7 +303,7 @@ export default function IinitiateNotifications() {
         });
         if (notificationSettings.hideMentions) {
           list = list.filter(
-            (_) => _.tags.filter((_) => _[0] === "p").length <= 10
+            (_) => _.tags.filter((_) => _[0] === "p").length <= 10,
           );
         }
         return list;
@@ -321,12 +320,12 @@ export default function IinitiateNotifications() {
       let newList = removeEventsDuplicants(sortEvents([...list, ...history]));
       if (notificationSettings.hideMentions) {
         newList = newList.filter(
-          (_) => _.tags.filter((_) => _[0] === "p").length <= 10
+          (_) => _.tags.filter((_) => _[0] === "p").length <= 10,
         );
       }
       localStorage.setItem(
         `notificationsSet_${pubkey}`,
-        JSON.stringify(newList.slice(0, 800))
+        JSON.stringify(newList.slice(0, 800)),
       );
       return newList;
     } catch (err) {

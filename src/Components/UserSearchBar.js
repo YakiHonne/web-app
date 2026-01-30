@@ -37,7 +37,7 @@ export default function UserSearchBar({
 
   const setSelectedMentionPubkey = (data) => {
     onClick(
-      data.includes("npub") ? getHex(data) : nip19.decode(data).data?.pubkey
+      data.includes("npub") ? getHex(data) : nip19.decode(data).data?.pubkey,
     );
     setKeyword("");
   };
@@ -74,10 +74,12 @@ export default function UserSearchBar({
         {keyword && (
           <MentionSuggestions
             mention={keyword}
-            setSelectedMention={!getUserMetadata && setSelectedMentionPubkey}
-            setSelectedMentionMetadata={
-              getUserMetadata && setSelectedMentionMetadata
+            setSelectedMention={(data) =>
+              !getUserMetadata && setSelectedMentionPubkey(data)
             }
+            setSelectedMentionMetadata={(data) => {
+              if (getUserMetadata) setSelectedMentionMetadata(data);
+            }}
             displayAbove={displayAbove}
           />
         )}

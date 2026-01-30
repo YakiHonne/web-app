@@ -1,8 +1,10 @@
 import React from "react";
 import { nip19 } from "nostr-tools";
 import {
+  decodeUrlOrAddress,
   decryptEventData,
   encodeBase64URL,
+  encodeLud06,
   encrypt44,
   getHex,
   removeObjDuplicants,
@@ -55,7 +57,7 @@ const getLoginsParams = async (publicKey, userKeys) => {
     let password = await encrypt44(
       userKeys,
       process.env.NEXT_PUBLIC_CHECKER_PUBKEY,
-      content
+      content,
     );
 
     return { password, pubkey: publicKey };
@@ -79,7 +81,7 @@ const getAnswerFromAIRemoteAPI = async (pubkey_, input) => {
         headers: {
           Authorization: password,
         },
-      }
+      },
     );
     const data = res.data;
     return data;
@@ -131,7 +133,7 @@ const getLinkPreview = async (url) => {
   try {
     const metadata = await Promise.race([
       axiosInstance.get(
-        "https://api.yakihonne.com/link-preview?url=" + encodeURIComponent(url)
+        "https://api.yakihonne.com/link-preview?url=" + encodeURIComponent(url),
       ),
       sleepTimer(5000),
     ]);
@@ -165,7 +167,7 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
       addressParts.unshift("_");
     }
     const data = await axios.get(
-      `https://${addressParts[1]}/.well-known/nostr.json?name=${addressParts[0]}`
+      `https://${addressParts[1]}/.well-known/nostr.json?name=${addressParts[0]}`,
     );
 
     let pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
@@ -271,7 +273,7 @@ const getFlashnewsContent = (news) => {
     undefined,
     undefined,
     undefined,
-    news.pubkey
+    news.pubkey,
   );
   return {
     id: news.id,
@@ -536,8 +538,8 @@ const validateWidgetValues = (value, kind, type) => {
       let checkKeys = Object.keys(parsed).find(
         (key) =>
           !["created_at", "content", "pubkey", "sig", "id", "tags"].includes(
-            key
-          )
+            key,
+          ),
       );
       if (parsed.kind === 6969 && !checkKeys) return true;
       return false;
@@ -588,7 +590,7 @@ const isNoteMuted = (event, userMutedList) => {
   const isMutedId = userMutedList.includes(parsedNote.id);
   const isMutedComment = userMutedList.includes(parsedNote?.isComment);
   const isMutedRoot = userMutedList.includes(
-    parsedNote.rootData ? parsedNote.rootData[1] : false
+    parsedNote.rootData ? parsedNote.rootData[1] : false,
   );
   return isMutedId || isMutedComment || isMutedRoot;
 };
@@ -597,7 +599,7 @@ const updateContentTranslationConfig = (
   service,
   plan,
   freeApikey,
-  proApikey
+  proApikey,
 ) => {
   try {
     let config = localStorage_.getItem("content-lang-config");
@@ -685,7 +687,7 @@ const getCAEATooltip = (published_at, created_at) => {
 
 const FileUpload = async (file, userKeys, cb) => {
   let service = ["1", "2"].includes(
-    localStorage_.getItem(`${userKeys.pub}_media_service`)
+    localStorage_.getItem(`${userKeys.pub}_media_service`),
   )
     ? localStorage_.getItem(`${userKeys.pub}_media_service`)
     : "1";
@@ -733,7 +735,7 @@ const blossomServerFileUpload = async (file, userKeys, cb) => {
     event.kind,
     event.content,
     event.tags,
-    event.created_at
+    event.created_at,
   );
   if (!event) return;
   let encodeB64 = encodeBase64URL(JSON.stringify(event));
@@ -747,7 +749,7 @@ const blossomServerFileUpload = async (file, userKeys, cb) => {
       },
       onUploadProgress: (progressEvent) => {
         const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
+          (progressEvent.loaded * 100) / progressEvent.total,
         );
         if (cb) cb(percentCompleted);
       },
@@ -756,7 +758,7 @@ const blossomServerFileUpload = async (file, userKeys, cb) => {
       mirror,
       servers,
       encodeB64,
-      imageURL.data.url
+      imageURL.data.url,
     );
     return imageURL.data.url;
   } catch (err) {
@@ -765,7 +767,7 @@ const blossomServerFileUpload = async (file, userKeys, cb) => {
       setToast({
         type: 2,
         desc: t("AOKDMRt"),
-      })
+      }),
     );
     return false;
   }
@@ -775,7 +777,7 @@ const mirrorBlossomServerFileUpload = async (
   isMirror,
   serversList,
   eventHash,
-  fileUrl
+  fileUrl,
 ) => {
   try {
     if (isMirror && serversList.length > 1) {
@@ -795,7 +797,7 @@ const mirrorBlossomServerFileUpload = async (
           } catch (err) {
             console.log(err);
           }
-        })
+        }),
       );
     }
   } catch (err) {
@@ -836,7 +838,7 @@ const regularServerFileUpload = async (file, userKeys, cb) => {
         setToast({
           type: 2,
           desc: t("AOKDMRt"),
-        })
+        }),
       );
     }
 
@@ -855,7 +857,7 @@ const regularServerFileUpload = async (file, userKeys, cb) => {
     event.kind,
     event.content,
     event.tags,
-    event.created_at
+    event.created_at,
   );
   if (!event) return;
   let encodeB64 = encodeBase64URL(JSON.stringify(event));
@@ -869,7 +871,7 @@ const regularServerFileUpload = async (file, userKeys, cb) => {
       },
       onUploadProgress: (progressEvent) => {
         const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
+          (progressEvent.loaded * 100) / progressEvent.total,
         );
         if (cb) cb(percentCompleted);
       },
@@ -881,7 +883,7 @@ const regularServerFileUpload = async (file, userKeys, cb) => {
       setToast({
         type: 2,
         desc: t("AOKDMRt"),
-      })
+      }),
     );
     return false;
   }
@@ -1006,7 +1008,7 @@ const copyText = (value, message, event) => {
     setToast({
       type: 1,
       desc: `${message} 👏`,
-    })
+    }),
   );
 };
 
@@ -1018,7 +1020,7 @@ function getLevenshteinDistance(a, b) {
   if (lenB === 0) return lenA;
 
   const matrix = Array.from({ length: lenA + 1 }, (_, i) =>
-    Array(lenB + 1).fill(0)
+    Array(lenB + 1).fill(0),
   );
 
   for (let i = 0; i <= lenA; i++) matrix[i][0] = i;
@@ -1031,7 +1033,7 @@ function getLevenshteinDistance(a, b) {
       matrix[i][j] = Math.min(
         matrix[i - 1][j] + 1,
         matrix[i][j - 1] + 1,
-        matrix[i - 1][j - 1] + cost
+        matrix[i - 1][j - 1] + cost,
       );
     }
   }
@@ -1054,15 +1056,15 @@ function sortByKeyword(array, keyword) {
         .startsWith(keyword.toLowerCase())
         ? 2
         : nameA.toLowerCase().includes(keyword.toLowerCase())
-        ? 1
-        : 0;
+          ? 1
+          : 0;
       const bKeywordPriority = nameB
         .toLowerCase()
         .startsWith(keyword.toLowerCase())
         ? 2
         : nameB.toLowerCase().includes(keyword.toLowerCase())
-        ? 1
-        : 0;
+          ? 1
+          : 0;
 
       const scoreA = getLevenshteinDistance(nameA, keyword.toLowerCase());
       const scoreB = getLevenshteinDistance(nameB, keyword.toLowerCase());
@@ -1109,7 +1111,7 @@ const verifyEvent = (event) => {
         type: tag[2] || "",
         url: tag[3] || "",
         type_status: ["redirect", "post", "app", "zap", "nostr"].includes(
-          tag[2] || ""
+          tag[2] || "",
         ),
         url_status: isURLValid(tag[3] || "", tag[2] || ""),
       };
@@ -1276,6 +1278,79 @@ const getPrimaryColor = () => {
   return primaryColor;
 };
 
+const createLightningInvoice = async ({ amount, message, recipientAddr }) => {
+  let tempRecipientLNURL = recipientAddr.includes("@")
+    ? encodeLud06(decodeUrlOrAddress(recipientAddr))
+    : recipientAddr;
+  let sats = amount * 1000;
+  try {
+    let url = decodeUrlOrAddress(recipientAddr);
+    if (!url) return;
+    const data = await axios.get(url);
+    const callback = data.data.callback;
+    const res = await axios(
+      `${callback}${callback.includes("?") ? "&" : "?"}amount=${sats}&lnurl=${tempRecipientLNURL}`,
+    );
+    if (res.data.status === "ERROR") {
+      store.dispatch(
+        setToast({
+          type: 2,
+          desc: t("AZ43zpG"),
+        }),
+      );
+      return;
+    }
+    lnbcInvoice = res.data.pr;
+    return lnbcInvoice;
+  } catch (err) {
+    store.dispatch(
+      setToast({
+        type: 2,
+        desc: t("AgCBh6S"),
+      }),
+    );
+    return;
+  }
+};
+
+const parseProofs = (proof) => {
+  try {
+    let parsedProof = JSON.parse(proof);
+    return parsedProof;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
+
+const parsNutZap = (event) => {
+  let zap = event;
+  let proofs = [];
+  let mint = "";
+  let unit = "";
+  for (let tag of zap.tags) {
+    if (tag[0] === "unit") unit = tag[1];
+    if (tag[0] === "proof") {
+      let p = parseProofs(tag[1]);
+      if (p) proofs.push(p);
+    }
+    if (tag[0] === "u") mint = tag[1];
+  }
+  return {
+    id: zap.id,
+    created_at: zap.created_at,
+    pubkey: zap.pubkey,
+    amount: proofs.reduce(
+      (total, p) => (total = total + parseInt(p.amount)),
+      0,
+    ),
+    message: zap.content,
+    mint,
+    unit,
+    proofs,
+  };
+};
+
 export {
   getLinkFromAddr,
   getAuthPubkeyFromNip05,
@@ -1316,4 +1391,6 @@ export {
   isNoteMuted,
   changePrimary,
   getPrimaryColor,
+  createLightningInvoice,
+  parsNutZap,
 };

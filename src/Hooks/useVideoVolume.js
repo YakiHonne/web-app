@@ -5,8 +5,8 @@ export default function useVideoVolume() {
   const dispatch = useDispatch();
   const videoVolume = useSelector((state) => state.videoVolume);
 
-  const handleMutedVideos = (e) => {
-    let state = e.currentTarget.muted;
+  const handleMutedVideos = (e, isMuted) => {
+    let state = isMuted !== undefined ? isMuted : e.currentTarget.muted;
     dispatch(setVideoVolume(state));
     if (!state) {
       localStorage.removeItem("video-volume");

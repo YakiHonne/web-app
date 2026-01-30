@@ -37,7 +37,7 @@ export default function FloatingDMs() {
           undefined,
           undefined,
           undefined,
-          convo.pubkey
+          convo.pubkey,
         );
         return {
           ...convo,
@@ -61,7 +61,7 @@ export default function FloatingDMs() {
   useEffect(() => {
     if (selectedConvo && open) {
       let updatedConvo = userChatrooms.find(
-        (inbox) => inbox.pubkey === selectedConvo.pubkey
+        (inbox) => inbox.pubkey === selectedConvo.pubkey,
       );
       handleSelectedConversation(
         {
@@ -70,7 +70,7 @@ export default function FloatingDMs() {
           display_name: selectedConvo.display_name,
           name: selectedConvo.name,
         },
-        true
+        true,
       );
     }
     if (convoBoxRef.current) {
@@ -101,6 +101,7 @@ export default function FloatingDMs() {
           zIndex: "10001",
         }}
         className="mb-hide-800"
+        id="floating-dms"
         ref={containerRef}
         onClick={(e) => e.stopPropagation()}
       >

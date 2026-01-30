@@ -143,10 +143,11 @@ export default function OptionsDropdown({
   }, [optionsRef]);
 
   const handleDropdownToggle = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     setShowOptions((prev) => {
       if (!prev) {
-        if (optionsRef.current) {
+        if (optionsRef.current && !displayAbove_) {
           const rect = optionsRef.current.getBoundingClientRect();
           const distanceFromBottom = window.innerHeight - rect.bottom;
           setDisplayAbove_(distanceFromBottom < 37.5 * (options.length - 1));

@@ -2,6 +2,7 @@ import { nip19 } from "nostr-tools";
 import { checkMentionInContent, nEventEncode } from "./ClientHelpers";
 import { t } from "i18next";
 import { eventKinds } from "@/Content/Extra";
+import { parsNutZap } from "./Helpers";
 
 const eventIcons = {
   paid_notes: "not-paid-notes",
@@ -47,14 +48,14 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
   try {
     if (event.kind === 1) {
       let isReply = event.tags.find(
-        (tag) => tag.length > 3 && tag[3] === "reply"
+        (tag) => tag.length > 3 && tag[3] === "reply",
       );
       let isRoot = event.tags.find(
-        (tag) => tag.length > 3 && tag[3] === "root"
+        (tag) => tag.length > 3 && tag[3] === "root",
       );
       let isQuote = event.tags.find((tag) => tag[0] === "q");
       let isPaidNote = event.tags.find(
-        (tag) => tag[0] === "l" && tag[1] === "FLASH NEWS"
+        (tag) => tag[0] === "l" && tag[1] === "FLASH NEWS",
       );
       let isRelayedEventPaidNote = relatedEvent
         ? event.tags.find((tag) => tag[0] === "l" && tag[1] === "FLASH NEWS")
@@ -106,7 +107,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           url: getUnRepEventsLink(
             relatedEvent?.id || event.id,
             relatedEvent?.kind || event.kind,
-            relatedEvent
+            relatedEvent,
           ),
         };
       }
@@ -132,7 +133,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           ? getRepEventsLink(eventPubkey, eventKind, eventIdentifier)
           : getUnRepEventsLink(
               relatedEvent?.id || event.id,
-              relatedEvent?.kind || event.kind
+              relatedEvent?.kind || event.kind,
             );
         let type = "replies";
         let icon = eventIcons.replies_comments;
@@ -186,7 +187,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
           url: getUnRepEventsLink(
             relatedEvent?.id || event.id,
             relatedEvent?.kind || event.kind,
-            relatedEvent
+            relatedEvent,
           ),
         };
       }
@@ -203,7 +204,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         url: getUnRepEventsLink(
           relatedEvent?.id || event.id,
           relatedEvent?.kind || event.kind,
-          relatedEvent
+          relatedEvent,
         ),
       };
     }
@@ -268,7 +269,7 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         : getUnRepEventsLink(
             relatedEvent?.id || event.id,
             relatedEvent?.kind || event.kind,
-            relatedEvent
+            relatedEvent,
           );
 
       return {
@@ -329,6 +330,19 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
         label_2: message ? `: ${message}` : "",
         icon: eventIcons.zaps,
         id: isE ? isE[1] : false,
+        url,
+      };
+    }
+    if (event.kind === 9321) {
+      let url = "/cashu-wallet?tab=nutzap";
+      let parsedZap = parsNutZap(event);
+
+      return {
+        type: "zaps",
+        label_1: t("ACVPtR9", { name: username, amount: parsedZap.amount }),
+        label_2: parsedZap.message ? `: ${parsedZap.message}` : "",
+        icon: eventIcons.zaps,
+        id: event.id,
         url,
       };
     }

@@ -208,6 +208,7 @@ const userWotListSlice = createSlice({
     },
   },
 });
+
 const userBlossomServersSlice = createSlice({
   name: "userBlossomServers",
   initialState: [],
@@ -223,6 +224,46 @@ const userPinnedNotesSlice = createSlice({
   initialState: [],
   reducers: {
     setUserPinnedNotes(state, action) {
+      return action.payload;
+    },
+  },
+});
+
+const userCashuWalletSlice = createSlice({
+  name: "userCashuWallet",
+  initialState: { last_timestamp: undefined, wallet: false },
+  reducers: {
+    setUserCashuWallet(state, action) {
+      return action.payload;
+    },
+  },
+});
+
+const userCashuTokensSlice = createSlice({
+  name: "userCashuTokens",
+  initialState: [],
+  reducers: {
+    setUserCashuTokens(state, action) {
+      return action.payload;
+    },
+  },
+});
+
+const userCashuHistorySlice = createSlice({
+  name: "userCashuHistory",
+  initialState: [],
+  reducers: {
+    setUserCashuHistory(state, action) {
+      return action.payload;
+    },
+  },
+});
+
+const userNutZapsSlice = createSlice({
+  name: "userNutZaps",
+  initialState: { last_timestamp: undefined, zaps: [] },
+  reducers: {
+    setUserNutZaps(state, action) {
       return action.payload;
     },
   },
@@ -255,6 +296,10 @@ export const { setUserWotList } = userWotListSlice.actions;
 export const { setUserBlossomServers } = userBlossomServersSlice.actions;
 export const { setUserSearchRelays } = userSearchRelaysSlice.actions;
 export const { setUserPinnedNotes } = userPinnedNotesSlice.actions;
+export const { setUserCashuWallet } = userCashuWalletSlice.actions;
+export const { setUserCashuTokens } = userCashuTokensSlice.actions;
+export const { setUserCashuHistory } = userCashuHistorySlice.actions;
+export const { setUserNutZaps } = userNutZapsSlice.actions;
 
 export const UserMetadataReducer = userMetadataSlice.reducer;
 export const UserKeysReducer = userKeysSlice.reducer;
@@ -281,5 +326,9 @@ export const UserWotListReducer = userWotListSlice.reducer;
 export const UserBlossomServersReducer = userBlossomServersSlice.reducer;
 export const UserSearchRelaysReducer = userSearchRelaysSlice.reducer;
 export const UserPinnedNotesReducer = userPinnedNotesSlice.reducer;
+export const UserCashuWalletReducer = userCashuWalletSlice.reducer;
+export const UserCashuTokensReducer = userCashuTokensSlice.reducer;
+export const UserCashuHistoryReducer = userCashuHistorySlice.reducer;
+export const UserNutZapsReducer = userNutZapsSlice.reducer;
 export const IsUserFollowingsLoadedReducer =
   isUserFollowingsLoadedSlice.reducer;

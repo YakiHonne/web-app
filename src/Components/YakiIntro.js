@@ -38,25 +38,15 @@ const content = [
 ];
 
 const updatesList = [
-  "Media support for images and videos across the app, including dashboard, notifications, note previews, relay feeds, search, and user profiles.",
-  "Display of pinned notes on user profiles.",
-  "Ability to pin and unpin notes.",
-  "Added a dedicated mentions section to user profiles.",
-  "Muting state for videos is now properly saved across media views.",
-  "Media publishing now supports images and videos with filtering, trimming, and additional controls.",
-  "Replaced the loading screen with a minimal loading bar for a smoother experience.",
-  "Comment inputs now auto-adjust height based on content.",
-  "Relay encodings are now included in notification URLs for more accurate routing.",
-  "Articles can now be browsed on a standalone page.",
-  "Automatic language direction detection in the article editor (LTR/RTL).",
-  "Fixed incorrect hashtag parsing.",
-  "Fixed markdown link syntax issues when selecting text.",
-  "Improved markdown link parsing in the previewer.",
-  "Added helpful hints to the link toolbar for better usability and clarity.",
-  "Added support for displaying QuickTime videos.",
-  "Fixed timestamp randomization issues related to NIP-17.",
-  "Updated default image placeholders for profile pictures and thumbnails.",
-  "Fixed message decryption issues to prevent multiple parallel popups when using extension signers.",
+  "ECash support: swipe tokens, deposit, send Nutzups, and restore wallets.",
+  "Zap users using eCash mints",
+  "Copy note text for easy sharing.",
+  "Fixed mobile layout issues when using RTL languages.",
+  "Fixed external URLs with trailing characters.",
+  "Delete notes directly from the note options menu.",
+  "Redesigned video controllers for a cleaner experience.",
+  "Fixed fullscreen video playback in the home feed.",
+  "General bug fixes and improvements.",
 ];
 
 export default function YakiIntro() {
@@ -86,6 +76,7 @@ export default function YakiIntro() {
           zIndex: "1000000",
         }}
         className="fx-centered fx-end-h"
+        id="floating-info"
       >
         {!swipe && (
           <div className="slide-right" onClick={() => setSwipe(!swipe)}>
@@ -105,7 +96,7 @@ const MobileAppQR = ({ exit }) => {
       setToast({
         type: 1,
         desc: `${keyType} was copied! 👏`,
-      })
+      }),
     );
   };
   return (

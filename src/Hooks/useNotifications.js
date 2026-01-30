@@ -13,7 +13,7 @@ export default function useNotifications() {
   const userKeys = useSelector((state) => state.userKeys);
   const globalNotifications = useSelector((state) => state.notifications);
   const isNotificationsLoading = useSelector(
-    (state) => state.isNotificationsLoading
+    (state) => state.isNotificationsLoading,
   );
   const notifications = useMemo(() => {
     return globalNotifications.filter((_) => !_.isNew);
@@ -59,7 +59,7 @@ export default function useNotifications() {
     });
     localStorage.setItem(
       `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications)
+      JSON.stringify(notifications),
     );
     dispatch(updateNotifications(notifications));
   };
@@ -73,7 +73,7 @@ export default function useNotifications() {
     });
     localStorage.setItem(
       `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications)
+      JSON.stringify(notifications),
     );
     dispatch(updateNotifications(notifications));
   };
@@ -83,7 +83,7 @@ export default function useNotifications() {
     notifications[index].isNew = false;
     localStorage.setItem(
       `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications)
+      JSON.stringify(notifications),
     );
     dispatch(updateNotifications(notifications));
   };
@@ -93,7 +93,7 @@ export default function useNotifications() {
     notifications[index].isNew = false;
     localStorage.setItem(
       `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications)
+      JSON.stringify(notifications),
     );
     dispatch(updateNotifications(notifications));
   };
@@ -107,7 +107,7 @@ export default function useNotifications() {
     });
     localStorage.setItem(
       `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications)
+      JSON.stringify(notifications),
     );
     dispatch(updateNotifications(notifications));
   };

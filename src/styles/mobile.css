@@ -76,7 +76,7 @@
     width: calc(100% - 80px);
   }
 
-  .nostr-sidebar {
+  .nostr-sidebar, [dir="rtl"] .nostr-sidebar {
     position: relative;
     flex: auto;
     width: 80px;
@@ -116,7 +116,7 @@
 
   }
 
-  .nostr-sidebar .link-label {
+  .nostr-sidebar .link-label, [dir="rtl"] .nostr-sidebar .link-label {
     display: none;
   }
 
@@ -355,7 +355,7 @@
     font-size: var(--16);
   }
 
-  .login-screen-heros, .nostr-sidebar, .navbar, .author-info-post-p {
+  .login-screen-heros, .nostr-sidebar, [dir="rtl"] .nostr-sidebar, .navbar, .author-info-post-p {
     display: none;
   }
 

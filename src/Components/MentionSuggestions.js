@@ -39,7 +39,7 @@ export default function MentionSuggestions({
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev < users.length - 1 ? prev + 1 : prev
+          prev < users.length - 1 ? prev + 1 : prev,
         );
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
@@ -54,7 +54,7 @@ export default function MentionSuggestions({
         }
       }
     },
-    [users, highlightedIndex, setSelectedMention, setSelectedMentionMetadata]
+    [users, highlightedIndex, setSelectedMention, setSelectedMentionMetadata],
   );
 
   useEffect(() => {
