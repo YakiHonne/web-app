@@ -135,10 +135,13 @@ export default function CommentsSection({
     const fetchData = async () => {
       setIsLoading(true);
       const { score, reactions } = getWotConfig();
+
+      const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+      
       const events = await getSubData(
         [
           {
-            kinds: [1],
+            kinds: commentKinds,
             [`#${tagKind}`]: [rootData ? rootData[1] : id],
           },
         ],
@@ -182,10 +185,12 @@ export default function CommentsSection({
   useEffect(() => {
     if (isLoading) return;
 
+    const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+
     const sub = ndkInstance.subscribe(
       [
         {
-          kinds: [1],
+          kinds: commentKinds,
           [`#${tagKind}`]: [rootData ? rootData[1] : id],
           since: Math.floor(Date.now() / 1000),
         },

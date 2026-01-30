@@ -50,7 +50,7 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
             since: actions.quotes.since,
           },
           {
-            kinds: [1],
+            kinds: [1, 1111],
             "#a": [aTag],
             since: actions.replies.since,
           },
@@ -105,7 +105,7 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
               kind6Since = event.created_at;
             kind6.push({ id: event.id, pubkey: event.pubkey });
           }
-          if (event.kind === 1) {
+          if (event.kind === 1 || event.kind === 1111) {
             let check_kind1 = {
               isQuote: event.tags.find((tag) => tag[0] === "q"),
               isComment: event.tags.find(
@@ -115,7 +115,7 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
                   ["root", "reply"].includes(tag[3])
               ),
             };
-            if (check_kind1.isQuote && check_kind1.isQuote[1] === aTag) {
+            if (event.kind === 1 && check_kind1.isQuote && check_kind1.isQuote[1] === aTag) {
               if (!kind1_Since || kind1_Since < event.created_at)
                 kind1_Since = event.created_at;
               kind1_.push({ id: event.id, pubkey: event.pubkey });

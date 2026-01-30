@@ -28,7 +28,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
     }
   };
 
-  if (event.kind === 1)
+  if (event.kind === 1 || event.kind === 1111)
     return (
       <div
         className="sc-s-18 bg-sp fit-container pointer box-pad-h-m box-pad-v-m"

@@ -105,8 +105,11 @@ export default function Comments({
       }
 
       tags = [...tags, ...extracted.tags];
+
+      const commentKind = tagKind === "a" ? 1111 : 1;
+      
       let eventInitEx = await InitEvent(
-        1,
+        commentKind,
         content,
         tags,
         undefined,
