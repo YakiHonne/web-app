@@ -88,7 +88,7 @@ export default function Publishing({ displayOff = false }) {
 
   const succeededEvents = useMemo(() => {
     return publishedEvents.filter((event) =>
-      event.relaysToPublish.find((relay) => relay.status === 1)
+      event.relaysToPublish.find((relay) => relay.status === 1),
     ).length;
   }, [publishedEvents]);
   const failedEvents = useMemo(() => {
@@ -110,7 +110,7 @@ export default function Publishing({ displayOff = false }) {
       };
     let lastEvent = { ...publishedEvents[publishedEvents.length - 1] };
     let succeeded = lastEvent.relaysToPublish.filter(
-      (relay) => relay.status === 1
+      (relay) => relay.status === 1,
     ).length;
     let total = lastEvent.relaysToPublish.length;
     return {
@@ -144,7 +144,6 @@ export default function Publishing({ displayOff = false }) {
 
   useEffect(() => {
     const publishPost = async () => {
-      console.log(toPublish);
       let { kind, content, tags, eventInitEx, allRelays } = toPublish;
       let relaysToPublish =
         allRelays?.length > 0
@@ -230,7 +229,7 @@ export default function Publishing({ displayOff = false }) {
           setToast({
             type: 2,
             desc: t("ALmNi6E"),
-          })
+          }),
         );
         dispatch(setToPublish(false));
         return;
@@ -267,7 +266,7 @@ export default function Publishing({ displayOff = false }) {
             setPublishedEvents((prev) => {
               let tempArray = Array.from(prev);
               let index_ = tempArray[index].relaysToPublish.findIndex(
-                (_) => _.url === removeRelayLastSlash(relay.url)
+                (_) => _.url === removeRelayLastSlash(relay.url),
               );
               if (index_ !== -1)
                 tempArray[index].relaysToPublish[index_].status = 1;
@@ -291,7 +290,7 @@ export default function Publishing({ displayOff = false }) {
               let tempArray = Array.from(prev);
 
               let index_ = tempArray[index].relaysToPublish.findIndex(
-                (_) => _.url === removeRelayLastSlash(relay.url)
+                (_) => _.url === removeRelayLastSlash(relay.url),
               );
 
               if (index_ !== -1) {
@@ -327,7 +326,7 @@ export default function Publishing({ displayOff = false }) {
           removeEventStats(
             toRemoveFromCache.eventId,
             id,
-            toRemoveFromCache.kind
+            toRemoveFromCache.kind,
           );
         }
       }
@@ -348,7 +347,7 @@ export default function Publishing({ displayOff = false }) {
           (relay) => {
             if (relay.status === 0) return { url: relay.url, status: 2 };
             return relay;
-          }
+          },
         );
         tempArray[index].isFinished = true;
         return tempArray;
@@ -366,7 +365,7 @@ export default function Publishing({ displayOff = false }) {
         (relay) => {
           if (relay.status === 2) return { url: relay.url, status: 0 };
           return relay;
-        }
+        },
       );
       tempArray[index].isFinished = false;
       return tempArray;
@@ -436,7 +435,7 @@ export default function Publishing({ displayOff = false }) {
       let checkYakiInFollowings = userFollowings.find(
         (item) =>
           item ===
-          "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3"
+          "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3",
       );
       if (checkYakiInFollowings) return action_key_from_kind[3];
       if (!checkYakiInFollowings) return false;
@@ -457,7 +456,7 @@ export default function Publishing({ displayOff = false }) {
       (tag) =>
         tag[0] === "p" &&
         tag[1] ===
-          "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3"
+          "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3",
     );
     if (receiver) return 44;
     return 4;
@@ -588,10 +587,10 @@ export default function Publishing({ displayOff = false }) {
                   .reverse()
                   .map((event, index) => {
                     let succeeded = event.relaysToPublish.filter(
-                      (relay) => relay.status === 1
+                      (relay) => relay.status === 1,
                     ).length;
                     let failed = event.relaysToPublish.filter(
-                      (relay) => relay.status === 2
+                      (relay) => relay.status === 2,
                     );
                     return (
                       <div
@@ -674,7 +673,7 @@ export default function Publishing({ displayOff = false }) {
                                 retry(
                                   event.ndkEvent,
                                   failed,
-                                  event.originalIndex
+                                  event.originalIndex,
                                 )
                               }
                             >

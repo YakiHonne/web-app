@@ -39,7 +39,7 @@ export default function Note({ event, nevent }) {
   const [openComment, setOpenComment] = useState(false);
   const [note, setNote] = useState(getParsedNote(event));
   const { isMuted: isMutedPubkey, muteUnmute: muteUnmutePubkey } = useIsMute(
-    note?.pubkey
+    note?.pubkey,
   );
 
   const { userProfile, isNip05Verified } = useUserProfile(note?.pubkey);
@@ -84,7 +84,7 @@ export default function Note({ event, nevent }) {
           setToast({
             type: 2,
             desc: t("AZ5VQXL"),
-          })
+          }),
         );
       }
       if (res.status === 400) {
@@ -92,7 +92,7 @@ export default function Note({ event, nevent }) {
           setToast({
             type: 2,
             desc: t("AJeHuH1"),
-          })
+          }),
         );
       }
       if (res.status === 200) {
@@ -101,7 +101,7 @@ export default function Note({ event, nevent }) {
           undefined,
           undefined,
           undefined,
-          note.pubkey
+          note.pubkey,
         );
         setTranslatedNote(noteTree);
         setShowTranslation(true);
@@ -114,7 +114,7 @@ export default function Note({ event, nevent }) {
         setToast({
           type: 2,
           desc: t("AZ5VQXL"),
-        })
+        }),
       );
     }
   };
@@ -149,7 +149,7 @@ export default function Note({ event, nevent }) {
     );
   if (note?.kind !== 1)
     return customHistory(
-      "/unsupported/" + nip19.neventEncode({ id: event?.id })
+      "/unsupported/" + nip19.neventEncode({ id: event?.id }),
     );
   return (
     <div>
@@ -251,7 +251,7 @@ export default function Note({ event, nevent }) {
                         setUsersList({
                           title: t("AVDZ5cJ"),
                           list: postActions.zaps.zaps.map(
-                            (item) => item.pubkey
+                            (item) => item.pubkey,
                           ),
                           extras: postActions.zaps.zaps,
                         })
@@ -289,7 +289,15 @@ export default function Note({ event, nevent }) {
                       )}
                       {isNoteTranslating && <LoadingDots />}
                     </div>
-                    <EventOptions event={note} component={"notes"} />
+                    <EventOptions
+                      event={note}
+                      component={"notes"}
+                      refreshAfterDeletion={() =>
+                        customHistory(
+                          `/profile/${nip19.nprofileEncode({ pubkey: event.pubkey })}`,
+                        )
+                      }
+                    />
                   </div>
                 </div>
                 <MutedThreadWarning event={note} />
@@ -338,7 +346,7 @@ const MutedThreadWarning = ({ event }) => {
   const { isMuted: isMutedComment } = useIsMute(event?.isComment, "e");
   const { isMuted: isMutedRoot } = useIsMute(
     event.rootData ? event.rootData[1] : false,
-    "e"
+    "e",
   );
   if (!(isMutedId || isMutedComment || isMutedRoot)) return null;
   return (

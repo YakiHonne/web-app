@@ -2476,3 +2476,89 @@ video:hover::-webkit-media-controls {
     background: #000000;
     background: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.46) 50%, rgba(0, 0, 0, 0) 100%);
 }
+
+.video-volume .video-volume-range {
+    display: none;
+}
+
+.video-volume:hover .video-volume-range {
+    display: flex;
+}
+
+.video-volume {
+    border: none;
+    background-color: transparent
+}
+
+.video-volume:hover {
+    background-color: var(--c1-side);
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--pale-gray);
+    border-radius: 999px;
+    outline: none;
+}
+
+/* ===================== */
+/* CHROME / SAFARI */
+/* ===================== */
+
+input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: linear-gradient(to right,
+            var(--c1) 0%,
+            var(--c1) var(--progress),
+            var(--pale-gray) var(--progress),
+            var(--pale-gray) 100%);
+    border-radius: 999px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--c1);
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -5px;
+    /* center thumb */
+}
+
+/* ===================== */
+/* FIREFOX */
+/* ===================== */
+
+input[type="range"]::-moz-range-track {
+    height: 4px;
+    background: var(--pale-gray);
+    border-radius: 999px;
+}
+
+input[type="range"]::-moz-range-progress {
+    height: 4px;
+    background: var(--c1);
+    border-radius: 999px;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--c1);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.video-controler-container {
+    animation: fadein 1.5s ease-in-out forwards;
+}
+
+.video-controler-container:hover {
+    animation: fadeout .3s ease-in-out forwards;
+}

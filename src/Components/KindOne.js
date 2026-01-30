@@ -49,6 +49,7 @@ function KindOne({
   const { isNip05Verified, userProfile } = useUserProfile(event?.pubkey);
   const [toggleComment, setToggleComment] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [isDeleted, setIsDeleted] = useState(false);
   const [usersList, setUsersList] = useState(false);
   const { postActions } = useNoteStats(event?.id, event?.pubkey);
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
@@ -62,16 +63,16 @@ function KindOne({
   const [isClamped, setIsClamped] = useState(10000);
   const noteRef = React.useRef(null);
   const { isMuted: isMutedPubkey, muteUnmute: muteUnmutePubkey } = useIsMute(
-    event?.pubkey
+    event?.pubkey,
   );
   const { isMuted: isMutedId, muteUnmute: muteUnmuteId } = useIsMute(
     event?.id,
-    "e"
+    "e",
   );
   const { isMuted: isMutedComment } = useIsMute(event?.isComment, "e");
   const { isMuted: isMutedRoot } = useIsMute(
     event.rootData ? event.rootData[1] : false,
-    "e"
+    "e",
   );
   const checkNotes = useMemo(() => {
     const NOTE_PREFIXES = ["note1", "nevent", "naddr"];
@@ -182,7 +183,7 @@ function KindOne({
           setToast({
             type: 2,
             desc: t("AZ5VQXL"),
-          })
+          }),
         );
       }
       if (res.status === 400) {
@@ -190,7 +191,7 @@ function KindOne({
           setToast({
             type: 2,
             desc: t("AJeHuH1"),
-          })
+          }),
         );
       }
       if (res.status === 200) {
@@ -199,7 +200,7 @@ function KindOne({
           undefined,
           undefined,
           undefined,
-          event.pubkey
+          event.pubkey,
         );
         setTranslatedNote(noteTree);
         setShowTranslation(true);
@@ -212,12 +213,14 @@ function KindOne({
         setToast({
           type: 2,
           desc: t("AZ5VQXL"),
-        })
+        }),
       );
     }
   };
-
-  if ((isMutedId || isMutedComment || isMutedRoot) && !minimal) return null;
+  if (isDeleted) {
+    return;
+  }
+  if ((isMutedId || isMutedComment || isMutedRoot) && !minimal) return;
   if (isMutedPubkey) {
     return (
       <div
@@ -368,7 +371,11 @@ function KindOne({
                       <div className="sticker sticker-c1">{t("AAg9D6c")}</div>
                     )}
                     {reactions && (
-                      <EventOptions event={event} component="notes" />
+                      <EventOptions
+                        event={event}
+                        component="notes"
+                        refreshAfterDeletion={(data) => setIsDeleted(data)}
+                      />
                     )}{" "}
                   </div>
                 </div>
@@ -420,7 +427,7 @@ function KindOne({
                         setUsersList({
                           title: t("AVDZ5cJ"),
                           list: postActions.zaps.zaps.map(
-                            (item) => item.pubkey
+                            (item) => item.pubkey,
                           ),
                           extras: postActions.zaps.zaps,
                         })
@@ -505,11 +512,11 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
   const { t } = useTranslation();
   const [user, setUser] = useState(false);
   const [relatedEvent, setRelatedEvent] = useState(
-    getPreviouslyFetchedEvent(event)
+    getPreviouslyFetchedEvent(event),
   );
   const [isRelatedEventPubkey, setIsRelatedEventPubkey] = useState(false);
   const [isRelatedEventLoaded, setIsRelatedEventLoaded] = useState(
-    relatedEvent ? true : false
+    relatedEvent ? true : false,
   );
   const [isUnsupported, setIsUnsupported] = useState(false);
   const [showNote, setShowNote] = useState(false);
@@ -541,7 +548,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
                     "#d": [ids.identifier],
                   },
                 ],
-                500
+                500,
               );
         if (event_.data.length > 0) {
           let post = event_.data[0];

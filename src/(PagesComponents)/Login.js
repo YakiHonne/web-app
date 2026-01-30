@@ -117,7 +117,7 @@ const Bunker = () => {
       "wss://nostr-01.yakihonne.com&relay=wss://offchain.pub&relay=wss://relay.nsec.app&relay=wss://relay.damus.io&relay=wss://relay.nostr.band";
     const localSigner = NDKNip46Signer.nostrconnect(
       ndkInstance,
-      relay,
+      "wss://nostr-01.yakihonne.com",
       localKeys,
       {
         name: "Yakihonne",
@@ -173,15 +173,19 @@ const Bunker = () => {
       if (!bunkerPointer) {
         return;
       }
-      const bunker =  BunkerSigner.fromBunker(localKeys.privateKey, bunkerPointer, {
-        onauth: (url) => {
-          window.open(
-            url,
-            "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
-          );
-        },
-      });
+      const bunker = BunkerSigner.fromBunker(
+        localKeys.privateKey,
+        bunkerPointer,
+        {
+          onauth: (url) => {
+            window.open(
+              url,
+              "_blank",
+              "width=600,height=650,scrollbars=yes,resizable=yes"
+            );
+          },
+        }
+      );
 
       await bunker.connect();
       const pubkey = await bunker.getPublicKey();
@@ -214,15 +218,19 @@ const Bunker = () => {
       throw new Error("Invalid bunker input");
     }
     setIsLoading(true);
-    const bunker =  BunkerSigner.fromBunker(localKeys.privateKey, bunkerPointer, {
-      onauth: (url) => {
-        window.open(
-          url,
-          "_blank",
-          "width=600,height=650,scrollbars=yes,resizable=yes"
-        );
-      },
-    });
+    const bunker = BunkerSigner.fromBunker(
+      localKeys.privateKey,
+      bunkerPointer,
+      {
+        onauth: (url) => {
+          window.open(
+            url,
+            "_blank",
+            "width=600,height=650,scrollbars=yes,resizable=yes"
+          );
+        },
+      }
+    );
 
     await bunker.connect();
     const pubkey = await bunker.getPublicKey();
@@ -884,8 +892,9 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                     >
                       <div
                         style={{
-                          backgroundImage: `url(${picture || profilePlaceholder
-                            })`,
+                          backgroundImage: `url(${
+                            picture || profilePlaceholder
+                          })`,
                           border: "none",
                           minWidth: "128px",
                           aspectRatio: "1/1",
@@ -957,8 +966,9 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                 return (
                   <Fragment key={index}>
                     <div
-                      className={`fit-container box-pad-h box-pad-v-s fx-scattered pointer ${selectedInterest === index ? "sc-s-18" : ""
-                        }`}
+                      className={`fit-container box-pad-h box-pad-v-s fx-scattered pointer ${
+                        selectedInterest === index ? "sc-s-18" : ""
+                      }`}
                       key={index}
                       style={{ border: "none", borderRadius: "0" }}
                       onClick={() => handleSelectedInterest(index)}
@@ -1060,8 +1070,8 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                       style={{
                         borderColor:
                           showErrorMessage ||
-                            showEmptyUNMessage ||
-                            showInvalidMessage
+                          showEmptyUNMessage ||
+                          showInvalidMessage
                             ? "var(--red-main)"
                             : "",
                       }}
@@ -1298,7 +1308,7 @@ const MobileAd = () => {
             className="fit-container"
             style={{ objectFit: "contain" }}
             src={ymaHero}
-          // style={{ objectFit: "contain" }}
+            // style={{ objectFit: "contain" }}
           />
         </div>
       </div>
@@ -1423,22 +1433,22 @@ const Suggestions = ({ index, selectedInterests, handleSelectInterests }) => {
         <p className="gray-c">{t("AoO5zem")}</p>
         {isInterested?.pubkeys?.length !==
           InterestSuggestions[index].pubkeys.length && (
-            <button
-              className="btn btn-gst btn-small"
-              onClick={() => followUnfollowAll(true)}
-            >
-              {t("AzkUxnd")}
-            </button>
-          )}
+          <button
+            className="btn btn-gst btn-small"
+            onClick={() => followUnfollowAll(true)}
+          >
+            {t("AzkUxnd")}
+          </button>
+        )}
         {isInterested?.pubkeys?.length ===
           InterestSuggestions[index].pubkeys.length && (
-            <button
-              className="btn btn-normal btn-small"
-              onClick={() => followUnfollowAll(false)}
-            >
-              {t("AyohNeT")}
-            </button>
-          )}
+          <button
+            className="btn btn-normal btn-small"
+            onClick={() => followUnfollowAll(false)}
+          >
+            {t("AyohNeT")}
+          </button>
+        )}
       </div>
       <div
         className="fx-centered fx-col fx-start-h fx-start-v"

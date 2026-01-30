@@ -25,6 +25,10 @@ import {
   UserSearchRelaysReducer,
   UserRelaysSetReducer,
   UserPinnedNotesReducer,
+  UserCashuWalletReducer,
+  UserCashuTokensReducer,
+  UserCashuHistoryReducer,
+  UserNutZapsReducer,
 } from "./Slides/UserData";
 import {
   UserFirstLoginYakiChestReducer,
@@ -107,5 +111,9 @@ export const store = configureStore({
     refreshNotifications: RefreshNotificationsReducer,
     userPinnedNotes: UserPinnedNotesReducer,
     videoVolume: VideoVolumeReducer,
+    userCashuWallet: UserCashuWalletReducer,
+    userCashuTokens: UserCashuTokensReducer,
+    userCashuHistory: UserCashuHistoryReducer,
+    userNutZaps: UserNutZapsReducer,
   },
 });

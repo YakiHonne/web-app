@@ -32,7 +32,10 @@ export const sendMessage = async (selectedPerson, message) => {
   let userInboxRelays = store.getState().userInboxRelays;
   let otherPartyRelays = await getInboxRelaysForUser(selectedPerson);
   let relaysToPublish = [
-    ...new Set([...userInboxRelays, ...relaysOnPlatform, ...otherPartyRelays]),
+    ...new Set([
+      ...userInboxRelays,
+      ...(otherPartyRelays.length > 0 ? otherPartyRelays : relaysOnPlatform),
+    ]),
   ];
 
   if (legacy) {
@@ -54,14 +57,14 @@ export const sendMessage = async (selectedPerson, message) => {
       tempEvent.kind,
       tempEvent.content,
       tempEvent.tags,
-      tempEvent.created_at
+      tempEvent.created_at,
     );
     if (!tempEvent) return;
     store.dispatch(
       setToPublish({
         eventInitEx: tempEvent,
         allRelays: relaysToPublish,
-      })
+      }),
     );
     return true;
   }
@@ -69,7 +72,7 @@ export const sendMessage = async (selectedPerson, message) => {
     let { sender_event, receiver_event } = await getGiftWrap(
       selectedPerson,
       userKeys,
-      message
+      message,
     );
 
     if (!(sender_event && receiver_event)) return false;
@@ -78,7 +81,7 @@ export const sendMessage = async (selectedPerson, message) => {
       `${userKeys.pub}:${selectedPerson}`,
       relaysToPublish,
       sender_event,
-      receiver_event
+      receiver_event,
     );
     if (response) {
       let action_key =
@@ -107,11 +110,11 @@ const getGiftWrap = async (selectedPerson, userKeys, message) => {
 
   let content_1 = nip44.v2.encrypt(
     JSON.stringify(signedKind13_1),
-    nip44.v2.utils.getConversationKey(g_sk_1, selectedPerson)
+    nip44.v2.utils.getConversationKey(g_sk_1, selectedPerson),
   );
   let content_2 = nip44.v2.encrypt(
     JSON.stringify(signedKind13_2),
-    nip44.v2.utils.getConversationKey(g_sk_2, userKeys.pub)
+    nip44.v2.utils.getConversationKey(g_sk_2, userKeys.pub),
   );
   let event_1 = {
     created_at: getRandomizedTimestamp(),
@@ -151,7 +154,7 @@ const getEventKind13 = async (pubkey, userKeys, selectedPerson, message) => {
   let content = await encrypt44(
     userKeys,
     pubkey,
-    JSON.stringify(unsignedKind14)
+    JSON.stringify(unsignedKind14),
   );
 
   if (!content) return false;
@@ -166,7 +169,7 @@ const getEventKind13 = async (pubkey, userKeys, selectedPerson, message) => {
     event.kind,
     event.content,
     event.tags,
-    event.created_at
+    event.created_at,
   );
   return event;
 };
@@ -183,7 +186,7 @@ const initPublishing = async (name, relays, event1, event2) => {
       setToast({
         type: 1,
         desc: t("Ax4F7eu"),
-      })
+      }),
     );
 
     return true;
@@ -193,7 +196,7 @@ const initPublishing = async (name, relays, event1, event2) => {
       setToast({
         type: 2,
         desc: t("A4cCSy5"),
-      })
+      }),
     );
     return false;
   }

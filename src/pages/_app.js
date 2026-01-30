@@ -25,6 +25,7 @@ import ToastMessages from "@/Components/ToastMessages";
 import dynamic from "next/dynamic";
 import KeepAlive from "@/Components/KeepAlive";
 import IinitiateNotifications from "@/Components/IinitiateNotifications";
+import InitiateCashu from "@/Components/InitiateCashu";
 
 const SideBarClient = dynamic(() => import("@/Components/SideBar/Sidebar"), {
   ssr: false,
@@ -85,6 +86,7 @@ function App({ Component, pageProps }) {
         {shouldHideSidebar && <PublishingClient displayOff={true} />}
         <AppInit />
         <IinitiateNotifications />
+        <InitiateCashu />
         <NavbarClient />
         <WarningBarClient />
         <div
@@ -118,7 +120,7 @@ function App({ Component, pageProps }) {
               width: "100%",
               position: "fixed",
               left: 0,
-              top:  0,
+              top: 0,
               overflow: "hidden",
               zIndex: 999999999999,
               height: "20px",
@@ -127,7 +129,11 @@ function App({ Component, pageProps }) {
             }}
           >
             <div
-              style={{ height: "4px", backgroundColor: "var(--c1)", borderRadius: "10px" }}
+              style={{
+                height: "4px",
+                backgroundColor: "var(--c1)",
+                borderRadius: "10px",
+              }}
               className="v-bounce"
             ></div>
           </div>

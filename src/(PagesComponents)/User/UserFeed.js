@@ -28,7 +28,7 @@ const eventsReducer = (notes, action) => {
     case "remove-specific-events": {
       let nextState = { ...notes };
       nextState["pinned"] = nextState["pinned"].filter((note) =>
-        action.note.includes(note.id)
+        action.note.includes(note.id),
       );
       return nextState;
     }
@@ -77,14 +77,14 @@ export default function UserFeed({ user }) {
   const isCurrentUser = userKeys?.pub === pubkey;
   const [events, dispatchEvents] = useReducer(
     eventsReducer,
-    eventsInitialState
+    eventsInitialState,
   );
   const [isLoading, setIsLoading] = useState(true);
   const [contentFrom, setContentFrom] = useState(
-    query?.contentType ? query.contentType : "notes"
+    query?.contentType ? query.contentType : "notes",
   );
   const [selectedTab, setSelectedTab] = useState(
-    query?.contentType ? query.contentType : "notes"
+    query?.contentType ? query.contentType : "notes",
   );
   const [lastEventTime, setLastEventTime] = useState(undefined);
   const virtuosoRef = useRef(null);
@@ -265,7 +265,7 @@ export default function UserFeed({ user }) {
           slideBy={100}
           noGap={true}
         />
-        {subTabs[selectedTab].length > 1 && (
+        {subTabs[selectedTab]?.length > 1 && (
           <div
             className="fx-centered box-pad-h-s box-pad-v-s fx-start-h"
             style={{ borderBottom: "1px solid var(--very-dim-gray)" }}

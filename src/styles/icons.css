@@ -477,7 +477,27 @@
 .pin,
 .pin-24,
 .unpin,
-.unpin-24 {
+.unpin-24,
+.download,
+.download-24,
+.volume-muted,
+.volume-muted-24,
+.volume-normal,
+.volume-normal-24,
+.video-play,
+.video-play-24,
+.video-pause,
+.video-pause-24,
+.redeem-ecash,
+.redeem-ecash-24,
+.send-ecash,
+.send-ecash-24,
+.restore,
+.restore-24,
+.nut-zap,
+.nut-zap-24,
+.deposit-sats,
+.deposit-sats-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -839,7 +859,27 @@
 .pin,
 .pin-24,
 .unpin,
-.unpin-24 {
+.unpin-24,
+.download,
+.download-24,
+.volume-muted,
+.volume-muted-24,
+.volume-normal,
+.volume-normal-24,
+.video-play,
+.video-play-24,
+.video-pause,
+.video-pause-24,
+.redeem-ecash,
+.redeem-ecash-24,
+.send-ecash,
+.send-ecash-24,
+.restore,
+.restore-24,
+.nut-zap,
+.nut-zap-24,
+.deposit-sats,
+.deposit-sats-24 {
     background-position: center center;
     background-repeat: no-repeat;
     background-size: contain;
@@ -1148,7 +1188,16 @@
 .bug,
 .broken-image,
 .pin,
-.unpin {
+.unpin,
+.download,
+.volume-muted .volume-normal,
+.video-play,
+.video-pause,
+.redeem-ecash,
+.send-ecash,
+.restore,
+.nut-zap,
+.deposit-sats {
     min-width: 16px;
     min-height: 16px;
 }
@@ -1375,7 +1424,17 @@
 .bug-24,
 .broken-image-24,
 .pin-24,
-.unpin-24 {
+.unpin-24,
+.download-24,
+.volume-muted-24,
+.volume-normal-24,
+.video-play-24,
+.video-pause-24,
+.redeem-ecash-24,
+.send-ecash-24,
+.restore-24,
+.nut-zap-24,
+.deposit-sats-24 {
     min-width: 24px;
     min-height: 24px;
 }
@@ -1408,6 +1467,45 @@
     filter: none !important;
 }
 
+.redeem-ecash, .redeem-ecash-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/redeem-ecash.svg")
+}
+
+.send-ecash, .send-ecash-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/send-ecash.svg")
+}
+
+.restore, .restore-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/swap-mint-lightning.svg")
+}
+
+.nut-zap, .nut-zap-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/nut-zap.svg")
+}
+
+.deposit-sats, .deposit-sats-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/deposit-sats.svg")
+}
+
+.video-play, .video-play-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/video-play.svg")
+}
+
+.video-pause, .video-pause-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/video-pause.svg")
+}
+
+.volume-muted, .volume-muted-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/volume-muted.svg")
+}
+
+.volume-normal, .volume-normal-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/volume-normal.svg")
+}
+
+.download, .download-24 {
+    background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/download.svg")
+}
 
 .pin, .pin-24 {
     background-image: url("https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons-mono/pin.svg")

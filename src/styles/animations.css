@@ -81,6 +81,7 @@
     50% {
         transform: translateX(80%);
     }
+
     100% {
         transform: translateX(-80%);
     }
@@ -215,6 +216,24 @@
 
     100% {
         opacity: 1;
+    }
+}
+
+@keyframes fadein {
+    0% {
+        opacity: 1;
+    }
+
+    80% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: .5;
+    }
+
+    100% {
+        opacity: 0;
     }
 }
 

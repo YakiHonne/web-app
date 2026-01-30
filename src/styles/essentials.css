@@ -1080,7 +1080,7 @@ label {
     padding-right: 1.5rem;
 }
 
-.box-pad-v {    
+.box-pad-v {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
 }
@@ -1376,6 +1376,7 @@ a:not(.no-hover):hover {
     background-color: var(--white);
     transition: .2s ease-in-out;
 }
+
 .sc-s-d-18 {
     overflow: hidden;
     border-radius: var(--border-r-18);

@@ -39,7 +39,7 @@ export default function WalletNWC() {
           setToast({
             type: 2,
             desc: t("A4FVHJa"),
-          })
+          }),
         );
         return;
       }
@@ -62,11 +62,11 @@ export default function WalletNWC() {
           });
           oldVersion.push(nwcNode);
           updateWallets(oldVersion);
-          customHistory("/wallet");
+          customHistory("/lightning-wallet");
           return;
         } catch (err) {
           updateWallets([nwcNode]);
-          customHistory("/wallet");
+          customHistory("/lightning-wallet");
           return;
         }
       }
@@ -74,7 +74,7 @@ export default function WalletNWC() {
 
       nwc.close();
       setIsLoading(false);
-      customHistory("/wallet");
+      customHistory("/lightning-wallet");
     } catch (err) {
       console.log(err);
       setIsLoading(false);
@@ -82,7 +82,7 @@ export default function WalletNWC() {
         setToast({
           type: 2,
           desc: t("AhM21RA"),
-        })
+        }),
       );
     }
   };
@@ -97,7 +97,7 @@ export default function WalletNWC() {
           <div className="fit-container fx-col fx-centered">
             <Link
               className="fx-centered fx-start-h fit-container"
-              href={"/wallet"}
+              href={"/lightning-wallet"}
             >
               <div className="round-icon">
                 <div className="arrow" style={{ rotate: "90deg" }}></div>
