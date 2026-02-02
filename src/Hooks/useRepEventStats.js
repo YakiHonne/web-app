@@ -106,21 +106,30 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
             kind6.push({ id: event.id, pubkey: event.pubkey });
           }
           if (event.kind === 1 || event.kind === 1111) {
-            let check_kind1 = {
-              isQuote: event.tags.find((tag) => tag[0] === "q"),
-              isComment: event.tags.find(
+            let isQuote = event.kind === 1 ? event.tags.find((tag) => tag[0] === "q") : false;
+            let isComment = false;
+            
+            if (event.kind === 1111) {
+              isComment = event.tags.find(
+                (tag) =>
+                  (tag[0] === "a" || tag[0] === "A") &&
+                  tag[1] === aTag
+              );
+            } else {
+              isComment = event.tags.find(
                 (tag) =>
                   tag.length > 3 &&
                   tag[1] === aTag &&
                   ["root", "reply"].includes(tag[3])
-              ),
-            };
-            if (event.kind === 1 && check_kind1.isQuote && check_kind1.isQuote[1] === aTag) {
+              );
+            }
+            
+            if (event.kind === 1 && isQuote && isQuote[1] === aTag) {
               if (!kind1_Since || kind1_Since < event.created_at)
                 kind1_Since = event.created_at;
               kind1_.push({ id: event.id, pubkey: event.pubkey });
             }
-            if (check_kind1.isComment) {
+            if (isComment) {
               if (!kind1Since || kind1Since < event.created_at)
                 kind1Since = event.created_at;
               kind1.push({ id: event.id, pubkey: event.pubkey });
