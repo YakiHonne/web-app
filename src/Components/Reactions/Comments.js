@@ -25,6 +25,7 @@ export default function Comments({
   exit,
   actions,
   tagKind = "e",
+  rootKind = null,
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -84,29 +85,117 @@ export default function Comments({
       let content = extracted.content;
       let tags = [];
 
-      if (noteTags) {
-        tags = [
-          ...tags,
-          ...noteTags.filter(
-            (tag) => tag[0] === "p" || (tag.length > 3 && tag[3] === "root")
-          ),
-        ];
-        let checkIsRoot = tags.find(
-          (tag) => tag.length > 3 && tag[3] === "root"
-        );
-        if (checkIsRoot) tags.push(["e", replyId, "", "reply"]);
-        else tags.push([tagKind, replyId, "", "root"]);
-        if (!tags.find((tag) => tag[0] === "p" && tag[1] === replyPubkey))
+      const commentKind = tagKind === "a" ? 1111 : 1;
+      
+      if (commentKind === 1111) {
+        let rootEventTag = null;
+        let rootEventPubkey = null;
+        let rootEventKind = rootKind;
+        
+        if (noteTags) {
+          rootEventTag = noteTags.find(
+            (tag) => (tag[0] === "a" || tag[0] === "e") && tag.length > 3 && tag[3] === "root"
+          );
+          
+          if (rootEventTag) {
+            if (rootEventTag[0] === "a" && rootEventTag[1]) {
+              const addressParts = rootEventTag[1].split(":");
+              if (addressParts.length >= 2) {
+                rootEventPubkey = addressParts[1];
+                rootEventKind = addressParts[0];
+              }
+            }
+            if (rootEventTag[0] === "e") {
+              rootEventPubkey = noteTags.find(tag => tag[0] === "P" || (tag[0] === "p" && tag[1] !== replyPubkey))?.[1];
+            }
+            
+            tags.push([rootEventTag[0].toUpperCase(), rootEventTag[1], rootEventTag[2] || ""]);
+            tags.push(["K", String(rootEventKind || "")]);
+            if (rootEventPubkey) {
+              tags.push(["P", rootEventPubkey, ""]);
+            }
+            
+            tags.push(["e", replyId, "", replyPubkey]);
+            tags.push(["k", "1111"]);
+            tags.push(["p", replyPubkey, ""]);
+            
+          } else {
+            if (tagKind === "a" && replyId) {
+              const addressParts = replyId.split(":");
+              if (addressParts.length >= 2) {
+                rootEventPubkey = addressParts[1];
+              }
+            } else {
+              rootEventPubkey = replyPubkey;
+            }
+            
+            tags.push([tagKind.toUpperCase(), replyId, ""]);
+            tags.push(["K", String(rootEventKind || "")]);
+            if (rootEventPubkey) {
+              tags.push(["P", rootEventPubkey, ""]);
+            }
+            
+            tags.push([tagKind, replyId, ""]);
+            tags.push(["k", String(rootEventKind || "")]);
+            if (rootEventPubkey) {
+              tags.push(["p", rootEventPubkey, ""]);
+            }
+          }
+          
+          let otherPTags = noteTags.filter(
+            tag => tag[0] === "p" && 
+                   tag[1] !== replyPubkey && 
+                   tag[1] !== rootEventPubkey &&
+                   !tags.find(t => t[0] === "p" && t[1] === tag[1])
+          );
+          tags = [...tags, ...otherPTags];
+          
+        } else {
+          if (tagKind === "a" && replyId) {
+            const addressParts = replyId.split(":");
+            if (addressParts.length >= 2) {
+              rootEventPubkey = addressParts[1];
+            }
+          } else {
+            rootEventPubkey = replyPubkey;
+          }
+          
+          tags.push([tagKind.toUpperCase(), replyId, ""]);
+          tags.push(["K", String(rootEventKind || "")]);
+          if (rootEventPubkey) {
+            tags.push(["P", rootEventPubkey, ""]);
+          }
+          
+          tags.push([tagKind, replyId, ""]);
+          tags.push(["k", String(rootEventKind || "")]);
+          if (rootEventPubkey) {
+            tags.push(["p", rootEventPubkey, ""]);
+          }
+        }
+        
+      } else {
+        if (noteTags) {
+          tags = [
+            ...tags,
+            ...noteTags.filter(
+              (tag) => tag[0] === "p" || (tag.length > 3 && tag[3] === "root")
+            ),
+          ];
+          let checkIsRoot = tags.find(
+            (tag) => tag.length > 3 && tag[3] === "root"
+          );
+          if (checkIsRoot) tags.push(["e", replyId, "", "reply"]);
+          else tags.push([tagKind, replyId, "", "root"]);
+          if (!tags.find((tag) => tag[0] === "p" && tag[1] === replyPubkey))
+            tags.push(["p", replyPubkey]);
+        }
+        if (!noteTags) {
+          tags.push([tagKind, replyId, "", "root"]);
           tags.push(["p", replyPubkey]);
-      }
-      if (!noteTags) {
-        tags.push([tagKind, replyId, "", "root"]);
-        tags.push(["p", replyPubkey]);
+        }
       }
 
       tags = [...tags, ...extracted.tags];
-
-      const commentKind = tagKind === "a" ? 1111 : 1;
       
       let eventInitEx = await InitEvent(
         commentKind,

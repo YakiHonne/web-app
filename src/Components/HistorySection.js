@@ -18,16 +18,27 @@ const traceEventPath = (id, all, mainEventID, tagKind) => {
 
     let parsedEvent = getParsedNote(event, true);
     path.unshift(parsedEvent);
-    const parentRoot = event.tags.find(
-      (tag) => tag.length > 3 && tag[3] === "root"
-    );
-    const parentReply = event.tags.find(
-      (tag) => tag.length > 3 && tag[3] === "reply"
-    );
-
-    if (!(parentRoot && parentReply)) break;
-    currentId =
-      (parentReply && parentReply[1]) || (parentRoot && parentRoot[1]);
+    
+    let parentId = null;
+    
+    if (event.kind === 1111) {
+      const parentTag = event.tags.find(
+        (tag) => tag[0] === "e" && (!tag[3] || tag[3] === "")
+      );
+      parentId = parentTag ? parentTag[1] : null;
+    } else {
+      const parentRoot = event.tags.find(
+        (tag) => tag.length > 3 && tag[3] === "root"
+      );
+      const parentReply = event.tags.find(
+        (tag) => tag.length > 3 && tag[3] === "reply"
+      );
+      if (!(parentRoot && parentReply)) break;
+      parentId = (parentReply && parentReply[1]) || (parentRoot && parentRoot[1]);
+    }
+    
+    if (!parentId) break;
+    currentId = parentId;
   }
   if (tagKind === "e") {
     let mainEvent = all.find((comment) => comment.id === mainEventID);
