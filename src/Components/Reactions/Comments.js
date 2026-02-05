@@ -85,44 +85,66 @@ export default function Comments({
       let content = extracted.content;
       let tags = [];
 
-      const commentKind = tagKind === "a" ? 1111 : 1;
+      let useNip22 = false;
+      let rootEventTag = null;
+      
+      if (noteTags) {
+        rootEventTag = noteTags.find(
+          (tag) => (tag[0] === "a" || tag[0] === "e" || tag[0] === "A" || tag[0] === "E") && 
+                   tag.length > 3 && tag[3] === "root"
+        );
+        
+        if (rootEventTag && (rootEventTag[0] === "a" || rootEventTag[0] === "A")) {
+          useNip22 = true;
+        }
+      }
+      
+      if (tagKind === "a") {
+        useNip22 = true;
+      }
+      
+      const commentKind = useNip22 ? 1111 : 1;
       
       if (commentKind === 1111) {
-        let rootEventTag = null;
         let rootEventPubkey = null;
         let rootEventKind = rootKind;
         
         if (noteTags) {
-          rootEventTag = noteTags.find(
-            (tag) => (tag[0] === "a" || tag[0] === "e") && tag.length > 3 && tag[3] === "root"
-          );
+          if (!rootEventTag) {
+            rootEventTag = noteTags.find(
+              (tag) => (tag[0] === "a" || tag[0] === "e") && tag.length > 3 && tag[3] === "root"
+            );
+          }
           
           if (rootEventTag) {
-            if (rootEventTag[0] === "a" && rootEventTag[1]) {
+            const rootTagType = rootEventTag[0].toLowerCase();
+            
+            if (rootTagType === "a" && rootEventTag[1]) {
               const addressParts = rootEventTag[1].split(":");
               if (addressParts.length >= 2) {
                 rootEventPubkey = addressParts[1];
                 rootEventKind = addressParts[0];
               }
             }
-            if (rootEventTag[0] === "e") {
+            if (rootTagType === "e") {
               rootEventPubkey = noteTags.find(tag => tag[0] === "P" || (tag[0] === "p" && tag[1] !== replyPubkey))?.[1];
             }
             
-            tags.push([rootEventTag[0].toUpperCase(), rootEventTag[1], rootEventTag[2] || ""]);
+            tags.push([rootTagType.toUpperCase(), rootEventTag[1], rootEventTag[2] || ""]);
             tags.push(["K", String(rootEventKind || "")]);
             if (rootEventPubkey) {
               tags.push(["P", rootEventPubkey, ""]);
             }
             
-            tags.push(["e", replyId, "", replyPubkey]);
+            tags.push(["e", replyId, rootEventTag[2] || ""]);
             tags.push(["k", "1111"]);
             tags.push(["p", replyPubkey, ""]);
             
           } else {
             if (tagKind === "a" && replyId) {
               const addressParts = replyId.split(":");
-              if (addressParts.length >= 2) {
+              if (addressParts.length >= 3) {
+                rootEventKind = addressParts[0];
                 rootEventPubkey = addressParts[1];
               }
             } else {
@@ -153,7 +175,8 @@ export default function Comments({
         } else {
           if (tagKind === "a" && replyId) {
             const addressParts = replyId.split(":");
-            if (addressParts.length >= 2) {
+            if (addressParts.length >= 3) {
+              rootEventKind = addressParts[0];
               rootEventPubkey = addressParts[1];
             }
           } else {
