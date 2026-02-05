@@ -247,7 +247,7 @@ export default function IinitiateNotifications() {
         since,
       });
       filter.push({
-        kinds: [1],
+        kinds: [1, 1111],
         "#p": [userKeys.pub],
         limit: 150,
         since,

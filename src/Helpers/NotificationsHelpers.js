@@ -38,7 +38,7 @@ const getRepEventsLink = (pubkey, kind, identifier) => {
 };
 const getUnRepEventsLink = (id, kind, event) => {
   let nevent = event?.encode ? event.encode() : nEventEncode(id);
-  if (kind == 1) return `/note/${nevent}`;
+  if (kind == 1 || kind == 1111) return `/note/${nevent}`;
   if (kind == 21) return `/video/${nevent}`;
   if (kind == 22) return `/video/${nevent}`;
   if (kind == 20) return `/image/${nevent}`;
@@ -46,17 +46,29 @@ const getUnRepEventsLink = (id, kind, event) => {
 
 const checkEventType = (event, pubkey, relatedEvent, username) => {
   try {
-    if (event.kind === 1) {
-      let isReply = event.tags.find(
-        (tag) => tag.length > 3 && tag[3] === "reply",
-      );
-      let isRoot = event.tags.find(
-        (tag) => tag.length > 3 && tag[3] === "root",
-      );
-      let isQuote = event.tags.find((tag) => tag[0] === "q");
-      let isPaidNote = event.tags.find(
+    if (event.kind === 1 || event.kind === 1111) {
+      let isReply, isRoot;
+      
+      if (event.kind === 1111) {
+        isReply = event.tags.find(
+          (tag) => tag[0] === "e" && (!tag[3] || tag[3] === "")
+        );
+        isRoot = event.tags.find(
+          (tag) => (tag[0] === "E" || tag[0] === "A")
+        );
+      } else {
+        isReply = event.tags.find(
+          (tag) => tag.length > 3 && tag[3] === "reply",
+        );
+        isRoot = event.tags.find(
+          (tag) => tag.length > 3 && tag[3] === "root",
+        );
+      }
+      
+      let isQuote = event.kind === 1 ? event.tags.find((tag) => tag[0] === "q") : false;
+      let isPaidNote = event.kind === 1 ? event.tags.find(
         (tag) => tag[0] === "l" && tag[1] === "FLASH NEWS",
-      );
+      ) : false;
       let isRelayedEventPaidNote = relatedEvent
         ? event.tags.find((tag) => tag[0] === "l" && tag[1] === "FLASH NEWS")
         : false;

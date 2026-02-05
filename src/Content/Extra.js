@@ -2,6 +2,7 @@ export const eventKinds = {
   0: "metadata",
   1: "note",
   11: "note",
+  1111: "comment",
   5: "deletion",
   7: "reactions",
   6: "reposts",

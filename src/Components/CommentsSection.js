@@ -20,14 +20,21 @@ const filterComments = (all, id, isRoot) => {
 const filterRepliesComments = (all, id) => {
   let temp = [];
   for (let comment of all) {
-    if (
-      comment.tags.find(
-        (item) =>
-          item[0] === "e" &&
-          item[1] === id &&
-          ["reply", "root"].includes(item[3])
-      )
-    ) {
+    let hasNip10Tag = comment.tags.find(
+      (item) =>
+        item[0] === "e" &&
+        item[1] === id &&
+        ["reply", "root"].includes(item[3])
+    );
+    
+    let hasNip22Tag = comment.kind === 1111 && comment.tags.find(
+      (item) =>
+        (item[0] === "e" || item[0] === "a") &&
+        item[1] === id &&
+        (!item[3] || item[3] === "")
+    );
+    
+    if (hasNip10Tag || hasNip22Tag) {
       let note_tree = getParsedNote(comment, true);
       let replies = countReplies(comment.id, all);
 
@@ -44,18 +51,26 @@ const filterRootComments = (all) => {
   let temp = [];
 
   for (let comment of all) {
-    let isRoot = comment.tags.find(
-      (item) => item[0] === "e" && item[3] === "root"
-    );
-    let isReply = comment.tags.find(
-      (item) => item[0] === "e" && item[3] === "reply"
-    );
-    if (
-      !isReply ||
-      (Array.isArray(isReply) &&
-        Array.isArray(isRoot) &&
-        isReply[1] === isRoot[1])
-    ) {
+    let isTopLevel = false;
+    
+    if (comment.kind === 1111) {
+      let parentKindTag = comment.tags.find((item) => item[0] === "k");
+      let parentKind = parentKindTag ? parentKindTag[1] : null;
+      isTopLevel = parentKind !== "1111";
+    } else {
+      let isRoot = comment.tags.find(
+        (item) => item[0] === "e" && item[3] === "root"
+      );
+      let isReply = comment.tags.find(
+        (item) => item[0] === "e" && item[3] === "reply"
+      );
+      isTopLevel = !isReply ||
+        (Array.isArray(isReply) &&
+          Array.isArray(isRoot) &&
+          isReply[1] === isRoot[1]);
+    }
+    
+    if (isTopLevel) {
       let note_tree = getParsedNote(comment, true);
       let replies = countReplies(comment.id, all);
 
@@ -72,10 +87,15 @@ const countReplies = (id, all) => {
   let replies = [];
 
   for (let comment of all) {
-    let ev = comment.tags.find(
+    let hasNip10Reply = comment.tags.find(
       (item) => item[3] === "reply" && item[0] === "e" && item[1] === id
     );
-    if (ev) {
+    
+    let hasNip22Reply = comment.kind === 1111 && comment.tags.find(
+      (item) => item[0] === "e" && item[1] === id && (!item[3] || item[3] === "")
+    );
+    
+    if (hasNip10Reply || hasNip22Reply) {
       let nestedReplies = countReplies(comment.id, all);
       let _ = getParsedNote(comment, true);
       replies.push({
@@ -109,6 +129,7 @@ export default function CommentsSection({
   tagKind = "e",
   leaveComment = false,
   rootData,
+  rootKind = null,
 }) {
   const userKeys = useSelector((state) => state.userKeys);
   const { userMutedList } = useSelector((state) => state.userMutedList);
@@ -135,10 +156,13 @@ export default function CommentsSection({
     const fetchData = async () => {
       setIsLoading(true);
       const { score, reactions } = getWotConfig();
+
+      const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+      
       const events = await getSubData(
         [
           {
-            kinds: [1],
+            kinds: commentKinds,
             [`#${tagKind}`]: [rootData ? rootData[1] : id],
           },
         ],
@@ -182,10 +206,12 @@ export default function CommentsSection({
   useEffect(() => {
     if (isLoading) return;
 
+    const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+
     const sub = ndkInstance.subscribe(
       [
         {
-          kinds: [1],
+          kinds: commentKinds,
           [`#${tagKind}`]: [rootData ? rootData[1] : id],
           since: Math.floor(Date.now() / 1000),
         },
@@ -249,6 +275,7 @@ export default function CommentsSection({
                   replyPubkey={eventPubkey}
                   actions={postActions}
                   tagKind={tagKind}
+                  rootKind={rootKind}
                 />
               </div>
             )}
