@@ -381,7 +381,8 @@ export default function Article({ event, userProfile, naddrData }) {
                       </div>
                       {post.description && (
                         <div
-                          className="fit-container "
+                          className="fit-container"
+                          style={{ whiteSpace: "pre-line" }}
                           dir={showTranslation ? translatedDir : post.dir}
                         >
                           {showTranslation

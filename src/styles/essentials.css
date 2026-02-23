@@ -249,6 +249,7 @@ li {
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
 }
 
 .p-one-line {
@@ -257,6 +258,7 @@ li {
     line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
 }
 
 .p-three-lines {
@@ -265,6 +267,7 @@ li {
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
 }
 
 .p-four-lines {
@@ -273,6 +276,7 @@ li {
     line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
 }
 
 .p-five-lines {
@@ -281,6 +285,7 @@ li {
     line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
 }
 
 .p-six-lines {
@@ -289,6 +294,7 @@ li {
     line-clamp: 6;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    white-space: pre-line;
     word-break: break-word;
 }
 
