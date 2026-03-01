@@ -6,6 +6,7 @@ import slugify from "slugify";
 export default function SearchEngine({ sticky = true }) {
   const [searchWindow, setSearchWindow] = useState(false);
   useEffect(() => {
+    if (typeof document === "undefined") return;
     let handleKeyDown = (e) => {
       if (e.key === "/") {
         e.preventDefault();
@@ -21,7 +22,9 @@ export default function SearchEngine({ sticky = true }) {
   return (
     <>
       {searchWindow && <SearchWindow exit={() => setSearchWindow(false)} />}
-      <div className={`fx-centered fx-start-h ${sticky ? "fit-container sticky" : ""}`}>
+      <div
+        className={`fx-centered fx-start-h ${sticky ? "fit-container sticky" : ""}`}
+      >
         <div
           className="if fx-scattered fit-container pointer sw-search-box sc-s-18"
           onClick={() => setSearchWindow(!searchWindow)}
@@ -63,7 +66,7 @@ const SearchWindow = ({ exit }) => {
     customHistory(
       `/docs/sw/${page}${
         hash ? `#${slugify(hash, { lower: true, strict: true })}` : ""
-      }`
+      }`,
     );
     exit();
   };
@@ -182,7 +185,7 @@ function deepSearchTitles(subtitles, keyword, content, parentPath = "") {
         context: extractContextSnippet(
           content,
           content.toLowerCase().indexOf(keyword.toLowerCase()),
-          50
+          50,
         ),
       });
     }
@@ -197,7 +200,7 @@ function deepSearchTitles(subtitles, keyword, content, parentPath = "") {
             context: extractContextSnippet(
               content,
               content.toLowerCase().indexOf(keyword.toLowerCase()),
-              50
+              50,
             ),
           });
         }

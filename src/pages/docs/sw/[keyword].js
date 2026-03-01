@@ -7,7 +7,7 @@ const ClientComponent = dynamic(
   () => import("@/(PagesComponents)/Docs/SW/Home"),
   {
     ssr: true,
-  }
+  },
 );
 
 export default function index({ keyword }) {
