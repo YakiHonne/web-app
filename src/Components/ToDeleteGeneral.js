@@ -12,6 +12,7 @@ export default function ToDeleteGeneral({
   eventId,
   refresh,
   cancel,
+  tags = [],
 }) {
   const dispatch = useDispatch();
   const userRelays = useSelector((state) => state.userRelays);
@@ -28,13 +29,13 @@ export default function ToDeleteGeneral({
         created_at,
         kind: 5,
         content: "This event will be deleted!",
-        tags: [["e", eventId]],
+        tags: [["e", eventId], ...tags],
       };
       let eventInitEx = await InitEvent(
         tempEvent.kind,
         tempEvent.content,
         tempEvent.tags,
-        tempEvent.created_at
+        tempEvent.created_at,
       );
       if (!eventInitEx) return;
       dispatch(
@@ -42,7 +43,7 @@ export default function ToDeleteGeneral({
           eventInitEx: eventInitEx,
           allRelays: relaysToPublish,
           aTag,
-        })
+        }),
       );
       dispatch(setToast({ type: 1, desc: t("Armbzm8") }));
       refresh(eventId);
@@ -52,7 +53,7 @@ export default function ToDeleteGeneral({
         setToast({
           type: 2,
           desc: t("AT94ell"),
-        })
+        }),
       );
       setIsLoading(false);
     }
@@ -61,7 +62,7 @@ export default function ToDeleteGeneral({
   return (
     <section className="fixed-container fx-centered box-pad-h">
       <section
-        className="fx-centered fx-col sc-s-18 bg-sp box-pad-h box-pad-v"
+        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
         style={{ width: "450px" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -88,7 +89,9 @@ export default function ToDeleteGeneral({
             {t("AQ9Wcw7")}
           </h3>
         )}
-        <p className="p-centered gray-c box-pad-v-m">{description || t("A2QosxI")}</p>
+        <p className="p-centered gray-c box-pad-v-m">
+          {description || t("A2QosxI")}
+        </p>
         <div className="fx-centered fit-container">
           <button
             className="fx btn btn-gst-red"

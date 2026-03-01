@@ -10,13 +10,13 @@ import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { store } from "@/Store/Store";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { t } from "i18next";
-import { checkCurrentConvo, getInboxRelaysForUser } from "./DB";
+import { checkCurrentConvo, getInboxRelaysForUser, removeMessage } from "./DB";
 import { relaysOnPlatform } from "@/Content/Relays";
 import { getKeys } from "./ClientHelpers";
 import axiosInstance from "./HTTP_Client";
 import { getNDKInstanceForDMs } from "./utils/ndkInstancesForDMsCache";
 
-export const sendMessage = async (selectedPerson, message) => {
+export const sendMessage = async (selectedPerson, message, replyOn) => {
   let userKeys = getKeys();
   let legacy =
     userKeys?.sec || window?.nostr?.nip44
@@ -45,6 +45,9 @@ export const sendMessage = async (selectedPerson, message) => {
     }
     let tags = [];
     tags.push(["p", selectedPerson]);
+    if (replyOn) {
+      tags.push(["e", replyOn]);
+    }
 
     let created_at = Math.floor(Date.now() / 1000);
     let tempEvent = {
@@ -73,6 +76,7 @@ export const sendMessage = async (selectedPerson, message) => {
       selectedPerson,
       userKeys,
       message,
+      replyOn,
     );
 
     if (!(sender_event && receiver_event)) return false;
@@ -97,43 +101,86 @@ export const sendMessage = async (selectedPerson, message) => {
   }
 };
 
-const getGiftWrap = async (selectedPerson, userKeys, message) => {
-  let g_sk_1 = bytesTohex(generateSecretKey());
-  let g_sk_2 = bytesTohex(generateSecretKey());
+export const deleteMessage = async ({ ids, pubkey }) => {
+  let userKeys = getKeys();
+  let convoId = `${pubkey},${userKeys.pub}`;
+  let userInboxRelays = store.getState().userInboxRelays;
+  let otherPartyRelays = await getInboxRelaysForUser(pubkey);
+  let relaysToPublish = [
+    ...new Set([...userInboxRelays, ...relaysOnPlatform, ...otherPartyRelays]),
+  ];
 
-  let [signedKind13_1, signedKind13_2] = await Promise.all([
-    getEventKind13(selectedPerson, userKeys, selectedPerson, message),
-    getEventKind13(userKeys.pub, userKeys, selectedPerson, message),
-  ]);
-
-  if (!(signedKind13_1 && signedKind13_2)) return false;
-
-  let content_1 = nip44.v2.encrypt(
-    JSON.stringify(signedKind13_1),
-    nip44.v2.utils.getConversationKey(g_sk_1, selectedPerson),
-  );
-  let content_2 = nip44.v2.encrypt(
-    JSON.stringify(signedKind13_2),
-    nip44.v2.utils.getConversationKey(g_sk_2, userKeys.pub),
-  );
-  let event_1 = {
-    created_at: getRandomizedTimestamp(),
-    kind: 1059,
-    tags: [["p", selectedPerson]],
-    content: content_1,
+  let created_at = Math.floor(Date.now() / 1000);
+  let tempEvent = {
+    created_at,
+    kind: 5,
+    content: "Delete message",
+    tags: ids.map((id) => ["e", id]),
   };
-  let event_2 = {
-    created_at: getRandomizedTimestamp(),
-    kind: 1059,
-    tags: [["p", userKeys.pub]],
-    content: content_2,
-  };
-  event_1 = finalizeEvent(event_1, g_sk_1);
-  event_2 = finalizeEvent(event_2, g_sk_2);
-  return { sender_event: event_2, receiver_event: event_1 };
+  tempEvent = await InitEvent(
+    tempEvent.kind,
+    tempEvent.content,
+    tempEvent.tags,
+    tempEvent.created_at,
+  );
+  if (!tempEvent) return;
+  await removeMessage({ ids, convoId });
+  store.dispatch(
+    setToPublish({
+      eventInitEx: tempEvent,
+      allRelays: relaysToPublish,
+    }),
+  );
+  return true;
 };
 
-const getEventKind14 = (selectedPerson, userKeys, message) => {
+const getGiftWrap = async (selectedPerson, userKeys, message, replyOn) => {
+  try {
+    let g_sk_1 = generateSecretKey();
+    let g_sk_2 = generateSecretKey();
+    let [signedKind13_1, signedKind13_2] = await Promise.all([
+      getEventKind13(
+        selectedPerson,
+        userKeys,
+        selectedPerson,
+        message,
+        replyOn,
+      ),
+      getEventKind13(userKeys.pub, userKeys, selectedPerson, message, replyOn),
+    ]);
+
+    if (!(signedKind13_1 && signedKind13_2)) return false;
+
+    let content_1 = nip44.v2.encrypt(
+      JSON.stringify(signedKind13_1),
+      nip44.v2.utils.getConversationKey(g_sk_1, selectedPerson),
+    );
+    let content_2 = nip44.v2.encrypt(
+      JSON.stringify(signedKind13_2),
+      nip44.v2.utils.getConversationKey(g_sk_2, userKeys.pub),
+    );
+    let event_1 = {
+      created_at: getRandomizedTimestamp(),
+      kind: 1059,
+      tags: [["p", selectedPerson]],
+      content: content_1,
+    };
+    let event_2 = {
+      created_at: getRandomizedTimestamp(),
+      kind: 1059,
+      tags: [["p", userKeys.pub]],
+      content: content_2,
+    };
+    event_1 = finalizeEvent(event_1, g_sk_1);
+    event_2 = finalizeEvent(event_2, g_sk_2);
+    return { sender_event: event_2, receiver_event: event_1 };
+  } catch (err) {
+    console.log(err.message);
+    return { sender_event: undefined, receiver_event: undefined };
+  }
+};
+
+const getEventKind14 = (selectedPerson, userKeys, message, replyOn) => {
   let event = {
     pubkey: userKeys.pub,
     created_at: Math.floor(Date.now() / 1000),
@@ -141,6 +188,7 @@ const getEventKind14 = (selectedPerson, userKeys, message) => {
     tags: [
       ["p", selectedPerson],
       ["p", userKeys.pub],
+      ...(replyOn ? [["e", replyOn]] : []),
     ],
     content: message,
   };
@@ -149,8 +197,19 @@ const getEventKind14 = (selectedPerson, userKeys, message) => {
   return event;
 };
 
-const getEventKind13 = async (pubkey, userKeys, selectedPerson, message) => {
-  let unsignedKind14 = getEventKind14(selectedPerson, userKeys, message);
+const getEventKind13 = async (
+  pubkey,
+  userKeys,
+  selectedPerson,
+  message,
+  replyOn,
+) => {
+  let unsignedKind14 = getEventKind14(
+    selectedPerson,
+    userKeys,
+    message,
+    replyOn,
+  );
   let content = await encrypt44(
     userKeys,
     pubkey,

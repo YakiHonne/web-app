@@ -31,7 +31,7 @@ export default function RelayItem({
       <div className="fx-centered">
         <RelayImage url={item.id} size={32} />
         <div>
-          <p className="p-maj">{item.id}</p>
+          <p>{metadata.name}</p>
           <p className="gray-c p-one-line p-medium">
             {metadata?.description || item.id}
           </p>

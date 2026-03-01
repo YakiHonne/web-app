@@ -269,6 +269,25 @@ const userNutZapsSlice = createSlice({
   },
 });
 
+const userStarterPacksSlice = createSlice({
+  name: "userStarterPacks",
+  initialState: { last_timestamp: undefined },
+  reducers: {
+    setUserStarterPacks(state, action) {
+      return action.payload;
+    },
+  },
+});
+const userMediaPacksSlice = createSlice({
+  name: "userMediaPacks",
+  initialState: { last_timestamp: undefined },
+  reducers: {
+    setUserMediaPacks(state, action) {
+      return action.payload;
+    },
+  },
+});
+
 export const { setUserMetadata } = userMetadataSlice.actions;
 export const { setUserKeys } = userKeysSlice.actions;
 export const { setUserBookmarks } = userBookmarksSlice.actions;
@@ -300,6 +319,8 @@ export const { setUserCashuWallet } = userCashuWalletSlice.actions;
 export const { setUserCashuTokens } = userCashuTokensSlice.actions;
 export const { setUserCashuHistory } = userCashuHistorySlice.actions;
 export const { setUserNutZaps } = userNutZapsSlice.actions;
+export const { setUserStarterPacks } = userStarterPacksSlice.actions;
+export const { setUserMediaPacks } = userMediaPacksSlice.actions;
 
 export const UserMetadataReducer = userMetadataSlice.reducer;
 export const UserKeysReducer = userKeysSlice.reducer;
@@ -330,5 +351,7 @@ export const UserCashuWalletReducer = userCashuWalletSlice.reducer;
 export const UserCashuTokensReducer = userCashuTokensSlice.reducer;
 export const UserCashuHistoryReducer = userCashuHistorySlice.reducer;
 export const UserNutZapsReducer = userNutZapsSlice.reducer;
+export const UserStarterPacksReducer = userStarterPacksSlice.reducer;
+export const UserMediaPacksReducer = userMediaPacksSlice.reducer;
 export const IsUserFollowingsLoadedReducer =
   isUserFollowingsLoadedSlice.reducer;

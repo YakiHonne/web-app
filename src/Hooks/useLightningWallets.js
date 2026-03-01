@@ -115,7 +115,7 @@ export default function () {
       return invoice.paymentRequest;
     } catch (err) {
       console.log(err);
-      if (err.includes("User rejected")) return;
+      if (err?.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,
@@ -136,7 +136,7 @@ export default function () {
       return invoice.paymentRequest;
     } catch (err) {
       console.log(err);
-      if (err.includes("User rejected")) return;
+      if (err?.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,

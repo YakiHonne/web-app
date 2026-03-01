@@ -4,7 +4,7 @@ import LoadingLogo from "@/Components/LoadingLogo";
 import MediaMasonryList from "@/Components/MediaMasonryList";
 import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
-import { filterContent, getParsedMedia, getParsedRepEvent } from "@/Helpers/Encryptions";
+import { filterContent, getParsedMedia } from "@/Helpers/Encryptions";
 import { straightUp } from "@/Helpers/Helpers";
 import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
 import React, { useEffect, useReducer, useState } from "react";
@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 
 const getContentFromValue = (contentSource) => {
   if (contentSource.group === "cf") return contentSource.value;
+  if (contentSource.group === "pf") return contentSource.value;
   if (contentSource.group === "mf") return "dvms";
   if (["af", "rsf"].includes(contentSource.group)) return "algo";
 };
@@ -26,7 +27,7 @@ const notesReducer = (notes, action) => {
       return [];
     }
     default: {
-      let tempArr =  [...notes, ...action.note];
+      let tempArr = [...notes, ...action.note];
       let sortedNotes = tempArr
         .filter((note, index, tempArr) => {
           if (tempArr.findIndex((_) => _.id === note.id) === index) return note;
@@ -76,7 +77,7 @@ export default function Media() {
 const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const { t } = useTranslation();
   const isUserFollowingsLoaded = useSelector(
-    (state) => state.isUserFollowingsLoaded
+    (state) => state.isUserFollowingsLoaded,
   );
   const userFollowings = useSelector((state) => state.userFollowings);
   const userKeys = useSelector((state) => state.userKeys);
@@ -84,10 +85,10 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(true);
   const [notesContentFrom, setNotesContentFrom] = useState(
-    getContentFromValue(selectedCategory)
+    getContentFromValue(selectedCategory),
   );
   const [selectedCategoryValue, setSelectedCategoryValue] = useState(
-    selectedCategory.value
+    selectedCategory.value,
   );
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
   const [rerenderTimestamp, setRerenderTimestamp] = useState(undefined);
@@ -123,11 +124,11 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       selectedFilter.to && notesLastEventTime
         ? Math.min(selectedFilter.to, notesLastEventTime)
         : selectedFilter.to
-        ? selectedFilter.to
-        : notesLastEventTime;
+          ? selectedFilter.to
+          : notesLastEventTime;
     let towDaysPeriod = (2 * 24 * 60 * 60 * 1000) / 1000;
     let twoDaysPrior = Math.floor(
-      (Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000
+      (Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000,
     );
     twoDaysPrior = notesLastEventTime
       ? notesLastEventTime - towDaysPeriod
@@ -154,8 +155,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         selectedFilter.posted_by?.length > 0
           ? selectedFilter.posted_by
           : tempUserFollowings.length < 5
-          ? [...tempUserFollowings, ...getBackupWOTList()]
-          : tempUserFollowings;
+            ? [...tempUserFollowings, ...getBackupWOTList()]
+            : tempUserFollowings;
       filter = [
         {
           authors,
@@ -170,15 +171,17 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       };
     }
 
+    let authors =
+      selectedCategory.group === "pf" ? selectedCategory.pTags : undefined;
+    if (selectedFilter.posted_by?.length > 0)
+      authors = selectedFilter.posted_by;
+
     return {
       filter: [
         {
           kinds: [34235, 34236, 20, 21, 22],
           limit: 100,
-          authors:
-            selectedFilter.posted_by?.length > 0
-              ? selectedFilter.posted_by
-              : undefined,
+          authors,
           until,
           since,
         },
@@ -198,12 +201,12 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
           : selectedCategory.group === "rsf"
-          ? await getNDKInstance(
-              selectedCategory.value,
-              selectedCategory.relays,
-              true
-            )
-          : undefined;
+            ? await getNDKInstance(
+                selectedCategory.value,
+                selectedCategory.relays,
+                true,
+              )
+            : undefined;
       if (ndk === false) {
         setIsConnected(false);
         setIsLoading(false);
@@ -220,7 +223,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         .map((event) => {
           eventsPubkeys.push(event.pubkey);
           let event_ = getParsedMedia(event, true);
-          return event_
+          return event_;
         })
         .filter((_) => _);
 
@@ -234,11 +237,10 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
 
     if (
       notesContentFrom &&
-      ["cf", "af", "rsf"].includes(selectedCategory?.group)
+      ["cf", "af", "rsf", "pf"].includes(selectedCategory?.group)
     ) {
       if (
-        (["recent"].includes(notesContentFrom) &&
-          isUserFollowingsLoaded) ||
+        (["recent"].includes(notesContentFrom) && isUserFollowingsLoaded) ||
         !["recent"].includes(notesContentFrom)
       )
         contentFromRelays();

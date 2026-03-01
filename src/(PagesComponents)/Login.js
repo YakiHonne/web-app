@@ -43,6 +43,9 @@ import { NostrConnect } from "nostr-tools/kinds";
 import QRCode from "react-qr-code";
 import Link from "next/link";
 import Router from "next/router";
+import useRecommendedPacks from "@/Hooks/useRecommendedPacks";
+import PackPreview from "./Explore/PackPreview";
+import PackPreviewOnboarding from "@/Components/PackPreviewOnboarding";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 let s8e =
@@ -56,15 +59,16 @@ let isNewAccount = getWallets().length > 0 ? true : false;
 
 export default function Login() {
   const { t } = useTranslation();
-  let sk = bytesTohex(generateSecretKey());
-  let pk = getPublicKey(sk);
+  let sk_ = generateSecretKey();
+  let sk = bytesTohex(sk_);
+  let pk = getPublicKey(sk_);
   let userKeys = { pub: pk, sec: sk };
   const [isLogin, setIsLogin] = useState(true);
-
+  const { recommendedStarterPacks } = useRecommendedPacks();
   useEffect(() => {
     let pubkeys = [
       ...new Set(
-        InterestSuggestions.map((interest) => interest.pubkeys).flat()
+        InterestSuggestions.map((interest) => interest.pubkeys).flat(),
       ),
     ].map((pubkey) => {
       return getHex(pubkey);
@@ -97,6 +101,7 @@ export default function Login() {
           <SignupScreen
             switchScreen={() => setIsLogin(!isLogin)}
             userKeys={userKeys}
+            recommendedStarterPacks={recommendedStarterPacks}
           />
         )}
       </div>
@@ -114,7 +119,7 @@ const Bunker = () => {
 
   const launchBunkerWindow = () => {
     const relay =
-      "wss://nostr-01.yakihonne.com&relay=wss://offchain.pub&relay=wss://relay.nsec.app&relay=wss://relay.damus.io&relay=wss://relay.nostr.band";
+      "wss://nostr-01.yakihonne.com&relay=wss://offchain.pub&relay=wss://relay.nsec.app&relay=wss://relay.damus.io";
     const localSigner = NDKNip46Signer.nostrconnect(
       ndkInstance,
       "wss://nostr-01.yakihonne.com",
@@ -123,7 +128,7 @@ const Bunker = () => {
         name: "Yakihonne",
         url: "https://yakihonne.com",
         perms: [],
-      }
+      },
     );
     let nostrConnectUri = localSigner.nostrConnectUri;
     setNostrConnectURI(nostrConnectUri);
@@ -133,7 +138,7 @@ const Bunker = () => {
         groupable: false,
         // skipVerification: true,
         // skipValidation: true,
-      }
+      },
     );
 
     sub.on("event", async (event) => {
@@ -144,7 +149,10 @@ const Bunker = () => {
       try {
         data = nip44.decrypt(
           event.content,
-          nip44.v2.utils.getConversationKey(localKeys.privateKey, event.pubkey)
+          nip44.v2.utils.getConversationKey(
+            hexToUint8Array(localKeys.privateKey),
+            event.pubkey,
+          ),
         );
         isDecrypted = true;
         data = JSON.parse(data);
@@ -155,9 +163,9 @@ const Bunker = () => {
       if (!isDecrypted) {
         try {
           data = nip04.decrypt(
-            localKeys.privateKey,
+            hexToUint8Array(localKeys.privateKey),
             event.pubkey,
-            event.content
+            event.content,
           );
           data = JSON.parse(data);
         } catch (err) {
@@ -181,10 +189,10 @@ const Bunker = () => {
             window.open(
               url,
               "_blank",
-              "width=600,height=650,scrollbars=yes,resizable=yes"
+              "width=600,height=650,scrollbars=yes,resizable=yes",
             );
           },
-        }
+        },
       );
 
       await bunker.connect();
@@ -209,7 +217,7 @@ const Bunker = () => {
         setToast({
           type: 2,
           desc: t("A2l1JgC"),
-        })
+        }),
       );
       return;
     }
@@ -226,10 +234,10 @@ const Bunker = () => {
           window.open(
             url,
             "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
+            "width=600,height=650,scrollbars=yes,resizable=yes",
           );
         },
-      }
+      },
     );
 
     await bunker.connect();
@@ -323,7 +331,7 @@ const LeftSection = () => {
   );
 };
 
-const LoginScreen = ({ switchScreen, userKeys }) => {
+const LoginScreen = ({ switchScreen }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
@@ -353,7 +361,7 @@ const LoginScreen = ({ switchScreen, userKeys }) => {
           setToast({
             type: 2,
             desc: t("AiHLMRi"),
-          })
+          }),
         );
       }
     }
@@ -361,13 +369,13 @@ const LoginScreen = ({ switchScreen, userKeys }) => {
       try {
         let hex = getHex(inputKey);
         if (secp.utils.isValidPrivateKey(hex)) {
-          let user = await getUserFromNOSTR(getPublicKey(hex));
+          let secKey = hexToUint8Array(hex);
+          let user = await getUserFromNOSTR(getPublicKey(secKey));
           if (user) {
             let keys = {
               sec: hex,
-              pub: getPublicKey(hex),
+              pub: getPublicKey(secKey),
             };
-
             dispatch(setUserKeys(keys));
           }
           setIsLoading(false);
@@ -381,7 +389,7 @@ const LoginScreen = ({ switchScreen, userKeys }) => {
           setToast({
             type: 2,
             desc: t("AC5ByUA"),
-          })
+          }),
         );
       }
     }
@@ -405,7 +413,7 @@ const LoginScreen = ({ switchScreen, userKeys }) => {
       setToast({
         type: 2,
         desc: t("AC5ByUA"),
-      })
+      }),
     );
   };
   const onLoginWithExt = async () => {
@@ -441,7 +449,7 @@ const LoginScreen = ({ switchScreen, userKeys }) => {
         setToast({
           type: 2,
           desc: t("AiHLMRi"),
-        })
+        }),
       );
     }
   };
@@ -496,7 +504,9 @@ const LoginScreen = ({ switchScreen, userKeys }) => {
           </div>
           <div className=" fx-centered" onClick={switchScreen}>
             <p className="gray-c">
-              <span className="orange-c pointer p-bold">{t("AHXrr4Y")}</span>{" "}
+              <span className="orange-c pointer p-bold">
+                {t("AHXrr4Y")}
+              </span>{" "}
             </p>
           </div>
         </div>
@@ -505,7 +515,7 @@ const LoginScreen = ({ switchScreen, userKeys }) => {
   );
 };
 
-const SignupScreen = ({ switchScreen, userKeys }) => {
+const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [name, setName] = useState("");
@@ -525,44 +535,27 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
   const [showInvalidMessage, setShowInvalidMessage] = useState(false);
   const [userName, setUserName] = useState("");
   const [enableWalletLinking, setEnablingWalletLinking] = useState(true);
-
+  const [selectedPacks, setSelectedPacks] = useState([]);
   const handleNextSteps = () => {
+    if (![1, 2, 3, 4].includes(step)) return;
     if (step == 1) {
       if (!name) {
         dispatch(
           setToast({
             type: 2,
             desc: t("AdrCWCj"),
-          })
+          }),
         );
         return;
       }
-      setStep(2);
-      return;
     }
-    if (step == 2) {
-      setStep(3);
-      return;
-    }
-    if (step == 3) {
-      setStep(4);
-      return;
-    }
+    setStep(step + 1);
   };
   const handlePrevSteps = () => {
-    if (step == 4) {
-      setStep(3);
-      return;
-    }
-    if (step == 3) {
-      setStep(2);
-      return;
-    }
-    if (step == 2) {
-      setStep(1);
-      return;
-    }
+    if (![2, 3, 4, 5].includes(step)) return;
+    setStep(step - 1);
   };
+
   const handleSelectedInterest = (index) => {
     if (index === selectedInterest) setSelectedInteres(false);
     else setSelectedInteres(index);
@@ -570,7 +563,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
   const handleSelectInterests = (data) => {
     if (!data) return;
     let index = selectedInterests.findIndex(
-      (interest) => interest.tag === data.tag
+      (interest) => interest.tag === data.tag,
     );
 
     let tempArray = Array.from(selectedInterests);
@@ -614,7 +607,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         "text/plain",
         `${url.data.lightningAddress}-NWC.txt`,
         t("AIzBCBb"),
-        false
+        false,
       );
       setIsCreatingWalletLoading(false);
     } catch (err) {
@@ -627,21 +620,21 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
           setToast({
             type: 3,
             desc: t("AQ12OQz"),
-          })
+          }),
         );
     }
   };
 
   const initializeAccount = async () => {
     try {
-      setStep(5);
+      setStep(6);
       let picture_ = pictureFile ? await FileUpload(pictureFile, userKeys) : "";
       if (picture_ === false) {
         dispatch(
           setToast({
             type: 2,
             desc: t("AfM6xbs"),
-          })
+          }),
         );
         setStep(4);
 
@@ -653,10 +646,10 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
           setToast({
             type: 2,
             desc: t("AnmPNHc"),
-          })
+          }),
         );
 
-        setStep(4);
+        setStep(5);
         return;
       }
 
@@ -672,7 +665,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         "text/plain",
         `account-credentials.txt`,
         t("AdoWp0E"),
-        false
+        false,
       );
 
       let signer = new NDKPrivateKeySigner(userKeys.sec);
@@ -710,6 +703,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
     tempEvent.publish();
     return;
   };
+
   const metadataEvent = async (profilePicture, bannerPicture) => {
     try {
       const ndkEvent = new NDKEvent(ndkInstance);
@@ -734,7 +728,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
   };
 
   const interestsEvents = async () => {
-    if (selectedInterests.length === 0) return;
+    if (selectedInterests.length === 0 && selectedPacks.length === 0) return;
     let published = await Promise.all([
       await tagsEvent(),
       await followingsEvent(),
@@ -744,6 +738,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
 
   const tagsEvent = async () => {
     try {
+      if (selectedInterests.length === 0) return;
       let interestsTags = selectedInterests.map((interest) => [
         "t",
         interest.tag?.toLowerCase(),
@@ -763,11 +758,14 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
 
   const followingsEvent = async () => {
     try {
-      let followingsTags = [
+      let followingsTags = [];
+      let interestsTagsPubkeys = [
         ...new Set(
-          selectedInterests.map((interest) => interest.pubkeys).flat()
+          selectedInterests.map((interest) => interest.pubkeys).flat(),
         ),
       ].map((pubkey) => ["p", pubkey]);
+      let packsTagsPubkeys = selectedPacks.map((pubkey) => ["p", pubkey]);
+      followingsTags = [...interestsTagsPubkeys, ...packsTagsPubkeys];
 
       const ndkFollowingsEvent = new NDKEvent(ndkInstance);
       ndkFollowingsEvent.kind = 3;
@@ -789,7 +787,6 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         "wss://nostr-01.yakihonne.com",
         "wss://nostr-02.yakihonne.com",
         "wss://relay.damus.io",
-        "wss://relay.nostr.band",
       ];
       let relaysTags = defaultRelays.map((relay) => ["r", relay]);
 
@@ -819,10 +816,28 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
     setUserName(value);
   };
 
+  const handleMultiSelection = ({ pubkeys, action }) => {
+    if (action === "add") {
+      setSelectedPacks((prev) => [...new Set([...prev, ...pubkeys])]);
+    } else {
+      console.log(pubkeys.length);
+      setSelectedPacks((prev) =>
+        prev.filter((pubkey) => !pubkeys.includes(pubkey)),
+      );
+    }
+  };
+  const handleSingleSelection = ({ pubkey, action }) => {
+    if (action === "add") {
+      setSelectedPacks((prev) => [...new Set([...prev, pubkey])]);
+    } else {
+      setSelectedPacks((prev) => prev.filter((pubkey_) => pubkey_ !== pubkey));
+    }
+  };
+
   return (
     <>
       <div
-        className="fit-container sc-s-18 slide-right"
+        className="fit-container sc-s slide-right"
         style={{ backgroundColor: "transparent" }}
       >
         {step === 1 && (
@@ -952,6 +967,30 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
         {step === 2 && (
           <>
             <div className="box-pad-h box-pad-v fx-centered fx-start-v fx-col">
+              <h4>{t("AVzZUeP")}</h4>
+              <p className="gray-c">{t("Aj7xwXe")}</p>
+            </div>
+            <div
+              className="fx-centered fx-end-h fx-wrap box-marg-s"
+              style={{ maxHeight: "50vh", overflow: "scroll", gap: 0 }}
+            >
+              {recommendedStarterPacks.map((_) => {
+                return (
+                  <PackPreviewOnboarding
+                    pack={_}
+                    handleMultiSelection={handleMultiSelection}
+                    handleSingleSelection={handleSingleSelection}
+                    selectedPubkeys={selectedPacks}
+                    key={_.id}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
+        {step === 3 && (
+          <>
+            <div className="box-pad-h box-pad-v fx-centered fx-start-v fx-col">
               <h4>{t("A3fxtP2")}</h4>
               <p className="gray-c">{t("AmiGAX0")}</p>
             </div>
@@ -961,7 +1000,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
             >
               {InterestSuggestions.map((interest, index) => {
                 let isAdded = selectedInterests.find(
-                  (_) => _.tag === interest.main_tag
+                  (_) => _.tag === interest.main_tag,
                 );
                 return (
                   <Fragment key={index}>
@@ -989,7 +1028,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
                             <ProfilePreview
                               pubkeys={Array.from(interest.pubkeys).splice(
                                 0,
-                                3
+                                3,
                               )}
                             />
                             <p className="gray-c p-medium">
@@ -1038,7 +1077,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
             </div>
           </>
         )}
-        {step === 3 && (
+        {step === 4 && (
           <>
             <div className="box-pad-h box-pad-v fx-centered  fx-col">
               {!NWCURL && (
@@ -1134,7 +1173,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
             </div>
           </>
         )}
-        {step === 4 && (
+        {step === 5 && (
           <>
             <div
               className="fit-container fx-centered fx-end-v"
@@ -1201,7 +1240,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
             {/* <SignUpDataToCopy /> */}
           </>
         )}
-        {step !== 5 && (
+        {step !== 6 && (
           <>
             <div className="fit-container fx-scattered box-pad-h box-marg-s">
               {step > 1 && (
@@ -1236,7 +1275,7 @@ const SignupScreen = ({ switchScreen, userKeys }) => {
             ></div>
           </>
         )}
-        {step === 5 && <InitiProfile />}
+        {step === 6 && <InitiProfile />}
       </div>
       <div className="fx-scattered  fit-container box-pad-v-m">
         <div className="fx-centered pointer">

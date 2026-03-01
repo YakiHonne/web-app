@@ -20,7 +20,7 @@ export default function WriteNew({ exit }) {
 
   const handleLongPress = () => {
     const longPressOption =
-      longPress && ["notes", "articles", "sw"].includes(longPress)
+      longPress && ["notes", "articles", "sw", "mu"].includes(longPress)
         ? longPress
         : "notes";
 
@@ -30,6 +30,9 @@ export default function WriteNew({ exit }) {
     }
     if (longPressOption === "notes") {
       setShowPostNote(true);
+    }
+    if (longPressOption === "mu") {
+      setShowPostMedia(true);
     }
     if (longPressOption === "articles") {
       customHistory("/write-article");

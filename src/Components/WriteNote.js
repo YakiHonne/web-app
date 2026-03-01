@@ -25,6 +25,8 @@ import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
 import LinkRepEventPreview from "./LinkRepEventPreview";
 import { customHistory } from "@/Helpers/History";
+import { publishScheduledEvent } from "@/Helpers/EventSchedulerHelper";
+import DatePicker from "./DatePicker";
 
 export default function WriteNote({
   exit,
@@ -54,6 +56,8 @@ export default function WriteNote({
   const [selectedTab, setSelectedTab] = useState(0);
   const textareaRef = useRef(null);
   const [selectedProfile, setSelectedProfile] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedScheduleDate, setSelectedScheduleDate] = useState(undefined);
   const ref = useRef();
 
   useEffect(() => {
@@ -111,7 +115,7 @@ export default function WriteNote({
           setToast({
             type: 2,
             desc: t("AXwG7Rx"),
-          })
+          }),
         );
         return;
       }
@@ -126,7 +130,7 @@ export default function WriteNote({
       let processedContent = extractNip19(
         linkedEvent
           ? `${note} nostr:${linkedEvent.naddr || linkedEvent.nEvent}`
-          : note
+          : note,
       );
 
       let processedTags = Array.from(processedContent.tags);
@@ -135,7 +139,7 @@ export default function WriteNote({
         tags.push(["q", linkedEvent.aTag || linkedEvent.id]);
         tags.push(["p", linkedEvent.pubkey]);
         processedTags = processedTags.filter(
-          (_) => _[1] !== (linkedEvent.aTag || linkedEvent.id)
+          (_) => _[1] !== (linkedEvent.aTag || linkedEvent.id),
         );
       }
 
@@ -147,13 +151,13 @@ export default function WriteNote({
         publishAsPaid(
           processedContent.content,
           [...tags, ...processedTags],
-          isProtected && protectedRelay ? protectedRelay : false
+          isProtected && protectedRelay ? protectedRelay : false,
         );
       } else {
         publishAsFree(
           processedContent.content,
           [...tags, ...processedTags],
-          isProtected && protectedRelay ? protectedRelay : false
+          isProtected && protectedRelay ? protectedRelay : false,
         );
       }
     } catch (err) {
@@ -162,36 +166,44 @@ export default function WriteNote({
         setToast({
           type: 2,
           desc: t("AXNt63U"),
-        })
+        }),
       );
     }
   };
 
   const publishAsFree = async (content, tags, relay) => {
     setIsLoading(true);
+
     let eventInitEx = await InitEvent(
       1,
       content,
       tags,
-      undefined,
-      selectedProfile
+      selectedScheduleDate,
+      selectedProfile,
     );
 
     if (!eventInitEx) {
       setIsLoading(false);
       return;
     }
-
-    dispatch(
-      setToPublish({
-        eventInitEx,
-        allRelays: relay ? [relay] : [],
-        isFavRelay: relay ? relay : false,
-      })
-    );
+    if (selectedScheduleDate) {
+      publishScheduledEvent({
+        event: eventInitEx,
+        relays: relay ? [relay] : userRelays,
+      });
+    } else
+      dispatch(
+        setToPublish({
+          eventInitEx,
+          allRelays: relay ? [relay] : [],
+          isFavRelay: relay ? relay : false,
+        }),
+      );
     updateNoteDraft("root", "");
     let timer = setTimeout(() => {
-      if (window.location.pathname !== "/") customHistory("/");
+      if (window.location.pathname !== "/" && !selectedScheduleDate)
+        customHistory("/");
+      if (selectedScheduleDate) customHistory("/dashboard?tabNumber=9");
       // navigateTo.push("/dashboard", { state: { tabNumber: 1, filter: "notes" } });
       exit();
       setIsLoading(false);
@@ -204,7 +216,7 @@ export default function WriteNote({
       setIsLoading(true);
 
       let tags = structuredClone(tags_);
-      let created_at = Math.floor(Date.now() / 1000);
+      let created_at = selectedScheduleDate || Math.floor(Date.now() / 1000);
 
       tags.push(["l", "FLASH NEWS"]);
       tags.push(["yaki_flash_news", encryptEventData(`${created_at}`)]);
@@ -214,7 +226,7 @@ export default function WriteNote({
         content,
         tags,
         created_at,
-        selectedProfile
+        selectedProfile,
       );
 
       if (!eventInitEx) {
@@ -234,7 +246,7 @@ export default function WriteNote({
       var zapEvent = await getZapEventRequest(
         userKeys,
         `${userMetadata.name} paid for a paid note.`,
-        zapTags
+        zapTags,
       );
       if (!zapEvent) {
         setIsLoading(false);
@@ -242,7 +254,7 @@ export default function WriteNote({
       }
 
       const res = await axios(
-        `${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR_CALLBACK}?amount=${sats}&nostr=${zapEvent}&lnurl=${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR}`
+        `${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR_CALLBACK}?amount=${sats}&nostr=${zapEvent}&lnurl=${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR}`,
       );
 
       if (res.data.status === "ERROR") {
@@ -251,7 +263,7 @@ export default function WriteNote({
           setToast({
             type: 2,
             desc: t("AZ43zpG"),
-          })
+          }),
         );
         return;
       }
@@ -278,17 +290,23 @@ export default function WriteNote({
             "#e": [eventInitEx.id],
           },
         ],
-        { groupable: false, cacheUsage: "ONLY_RELAY" }
+        { groupable: false, cacheUsage: "ONLY_RELAY" },
       );
 
       sub.on("event", () => {
         setInvoice("");
-        dispatch(
-          setToPublish({
-            eventInitEx,
-            allRelays: relay ? [relay] : [],
-          })
-        );
+        if (selectedScheduleDate)
+          publishScheduledEvent({
+            event: eventInitEx,
+            relays: relay ? [relay] : userRelays,
+          });
+        else
+          dispatch(
+            setToPublish({
+              eventInitEx,
+              allRelays: relay ? [relay] : [],
+            }),
+          );
         sub.stop();
         updateNoteDraft("root", "");
         navigateTo.push("/dashboard", {
@@ -304,7 +322,7 @@ export default function WriteNote({
         setToast({
           type: 2,
           desc: t("AXNt63U"),
-        })
+        }),
       );
     }
   };
@@ -316,7 +334,9 @@ export default function WriteNote({
   const handleAddWidget = (data) => {
     if (note)
       setNote(
-        note + " " + `https://yakihonne.com/smart-widget-checker?naddr=${data} `
+        note +
+          " " +
+          `https://yakihonne.com/smart-widget-checker?naddr=${data} `,
       );
     if (!note)
       setNote(`https://yakihonne.com/smart-widget-checker?naddr=${data} `);
@@ -342,12 +362,15 @@ export default function WriteNote({
     }, 0);
   };
 
-  const handleKeyDown = useCallback((e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-      e.preventDefault();
-      publishNote();
-    }
-  }, [publishNote]);
+  const handleKeyDown = useCallback(
+    (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        publishNote();
+      }
+    },
+    [publishNote],
+  );
 
   const copyKey = (key) => {
     navigator.clipboard.writeText(key);
@@ -355,7 +378,7 @@ export default function WriteNote({
       setToast({
         type: 1,
         desc: `${t("AS0m8W5")} 👏`,
-      })
+      }),
     );
   };
 
@@ -363,10 +386,12 @@ export default function WriteNote({
     const handleOffClick = (e) => {
       e.stopPropagation();
       let swbrowser = document.getElementById("sw-browser");
+      let datepicker = document.getElementById("date-picker");
       if (
         ref.current &&
         !ref.current.contains(e.target) &&
         !swbrowser?.contains(e.target) &&
+        !datepicker?.contains(e.target) &&
         !invoice
       ) {
         if (!note) {
@@ -434,7 +459,6 @@ export default function WriteNote({
           </div>
         </div>
       )}
-
       {showSmartWidgets && (
         <BrowseSmartWidgetsV2
           exit={() => setShowSmartWidgets(false)}
@@ -488,11 +512,21 @@ export default function WriteNote({
           </div>
         </div>
       )}
+      {showDatePicker && (
+        <DatePicker
+          close={() => setShowDatePicker(false)}
+          selected={selectedScheduleDate}
+          onSelect={(data) => {
+            setShowDatePicker(false);
+            setSelectedScheduleDate(data);
+          }}
+        />
+      )}
       <div
-        className="fit-container fx-centered fx-start-v fx-stretch sc-s box-pad-h box-pad-v bg-sp"
+        className="fit-container fx-centered fx-col fx-start-v fx-stretch sc-s  bg-sp"
         style={{
           overflow: "visible",
-          height: linkedEvent ? "65vh" : "55vh",
+          // height: linkedEvent ? "65vh" : "55vh",
           backgroundColor: !border ? "transparent" : "",
           border: border ? "1px solid var(--very-dim-gray)" : "none",
           borderBottom: borderBottom
@@ -504,194 +538,216 @@ export default function WriteNote({
           textareaRef?.current?.focus();
         }}
       >
-        <div style={{ paddingTop: ".2rem" }}>
-          <ProfilesPicker setSelectedProfile={setSelectedProfile} />
-        </div>
         <div
-          className="fit-container fx-scattered fx-col fx-wrap fit-height"
-          style={{ maxWidth: "calc(100% - 36px)" }}
+          className="fit-container fx-scattered fx-start-h fx-start-v box-pad-h box-pad-v"
+          style={{ height: linkedEvent ? "55vh" : "45vh", paddingBottom: 0 }}
         >
+          <div style={{ paddingTop: ".2rem" }}>
+            <ProfilesPicker setSelectedProfile={setSelectedProfile} />
+          </div>
           <div
-            className="fit-container fx-scattered fx-col note-txtarea"
-            style={{
-              position: "relative",
-            }}
+            className="fit-container fx-scattered fx-col fx-wrap fit-height"
+            style={{ maxWidth: "calc(100% - 36px)" }}
           >
             <div
-              className="fit-container fx-scattered fx-col fx-start-h fx-start-v"
+              className="fit-container fx-scattered fx-col note-txtarea"
               style={{
-                height:
-                  linkedEvent && selectedTab === 0
-                    ? "calc(100% - 138px)"
-                    : "100%",
+                position: "relative",
+                gap: 0,
               }}
             >
               <div
-                className="fit-container fx-centered fx-start-h"
-                style={{ gap: "16px" }}
+                className="fit-container fx-scattered fx-col fx-start-h fx-start-v"
+                style={{
+                  height:
+                    linkedEvent && selectedTab === 0
+                      ? "calc(100% - 115px)"
+                      : "100%",
+                }}
               >
-                <div className="fx-centered">
-                  <SelectTabs
-                    tabs={[t("AsXohpb"), t("Ao1TlO5")]}
-                    selectedTab={selectedTab}
-                    setSelectedTab={setSelectedTab}
-                  />
-                </div>
-                {protectedRelay && (
-                  <div className="fx fx-centered fx-start-h">
-                    <div
-                      className="fx-centered  box-pad-h-m"
-                      style={{ borderLeft: "1px solid var(--dim-gray)" }}
-                    >
-                      <div
-                        className="fx-centered fx-col fx-start-v"
-                        style={{ gap: "0px" }}
-                      >
-                        <p
-                          className="gray-c p-medium p-one-line"
-                          style={{ minWidth: "max-content" }}
-                        >
-                          {t("A0qEczF")}
-                        </p>
-                        <div className="fx-centered" style={{ gap: "3px" }}>
-                          <RelayImage url={protectedRelay} size={16} />
-                          <span className="p-one-line">
-                            {protectedRelay.substring(0, 25)}
-                            {protectedRelay.length > 25 ? "..." : ""}
-                          </span>
-                          {/* <span className="p-one-line">{protectedRelay.replace("wss://", "").replace("ws://", "")}</span> */}
-                        </div>
-                      </div>
-                      <Toggle
-                        status={isProtected}
-                        setStatus={setIsProtected}
-                        small={true}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-              {selectedTab === 0 && (
                 <div
-                  className="fit-container box-pad-h-s box-pad-v-s"
-                  style={{
-                    position: "relative",
-                    height: "auto",
-                    maxHeight: "100%",
-                    minHeight: "45px",
-                  }}
+                  className="fit-container fx-centered fx-start-h"
+                  style={{ gap: "16px" }}
                 >
-                  <textarea
-                    type="text"
-                    style={{
-                      padding: 0,
-                      maxHeight: "100%",
-                      minHeight: "100%",
-                      borderRadius: 0,
-                      fontSize: "1.2rem",
-                    }}
-                    value={note}
-                    className="ifs-full if if-no-border"
-                    placeholder={t("AGAXMQ3")}
-                    ref={textareaRef}
-                    onChange={handleChange}
-                    onKeyDown={handleKeyDown}
-                    autoFocus
-                    dir="auto"
-                  />
-                  {showMentionSuggestions && (
-                    <MentionSuggestions
-                      mention={mention}
-                      setSelectedMention={handleSelectingMention}
+                  <div className="fx-centered">
+                    <SelectTabs
+                      tabs={[t("AsXohpb"), t("Ao1TlO5")]}
+                      selectedTab={selectedTab}
+                      setSelectedTab={setSelectedTab}
                     />
+                  </div>
+                  {protectedRelay && (
+                    <div className="fx fx-centered fx-start-h">
+                      <div
+                        className="fx-centered  box-pad-h-m"
+                        style={{ borderLeft: "1px solid var(--dim-gray)" }}
+                      >
+                        <div
+                          className="fx-centered fx-col fx-start-v"
+                          style={{ gap: "0px" }}
+                        >
+                          <p
+                            className="gray-c p-medium p-one-line"
+                            style={{ minWidth: "max-content" }}
+                          >
+                            {t("A0qEczF")}
+                          </p>
+                          <div className="fx-centered" style={{ gap: "3px" }}>
+                            <RelayImage url={protectedRelay} size={16} />
+                            <span className="p-one-line">
+                              {protectedRelay.substring(0, 25)}
+                              {protectedRelay.length > 25 ? "..." : ""}
+                            </span>
+                            {/* <span className="p-one-line">{protectedRelay.replace("wss://", "").replace("ws://", "")}</span> */}
+                          </div>
+                        </div>
+                        <Toggle
+                          status={isProtected}
+                          setStatus={setIsProtected}
+                          small={true}
+                        />
+                      </div>
+                    </div>
                   )}
                 </div>
-              )}
-              {selectedTab === 1 && (
-                <NotePreview
-                  content={note}
-                  linkedEvent={linkedEvent}
-                  viewPort={true}
-                />
+
+                {selectedTab === 0 && (
+                  <div
+                    className="fit-container box-pad-h-s box-pad-v-s"
+                    style={{
+                      position: "relative",
+                      height: "auto",
+                      maxHeight: "100%",
+                      minHeight: "45px",
+                    }}
+                  >
+                    <textarea
+                      type="text"
+                      style={{
+                        padding: 0,
+                        maxHeight: "100%",
+                        minHeight: "100%",
+                        borderRadius: 0,
+                        fontSize: "1.2rem",
+                      }}
+                      value={note}
+                      className="ifs-full if if-no-border"
+                      placeholder={t("AGAXMQ3")}
+                      ref={textareaRef}
+                      onChange={handleChange}
+                      onKeyDown={handleKeyDown}
+                      autoFocus
+                      dir="auto"
+                    />
+                    {showMentionSuggestions && (
+                      <MentionSuggestions
+                        mention={mention}
+                        setSelectedMention={handleSelectingMention}
+                      />
+                    )}
+                  </div>
+                )}
+                {selectedTab === 1 && (
+                  <NotePreview
+                    content={note}
+                    linkedEvent={linkedEvent}
+                    viewPort={true}
+                  />
+                )}
+              </div>
+              {linkedEvent && selectedTab === 0 && (
+                <div className="fit-container">
+                  <LinkRepEventPreview event={linkedEvent} />
+                </div>
               )}
             </div>
-            {linkedEvent && selectedTab === 0 && (
-              <div className="fit-container">
-                <LinkRepEventPreview event={linkedEvent} />
-              </div>
-            )}
           </div>
-          <div className="fit-container fx-centered fx-start-v">
-            <div className="fit-container fx-scattered fx-wrap">
-              <div className="fx-centered" style={{ gap: "12px" }}>
-                <UploadFile
-                  setImageURL={handleAddImage}
-                  setIsUploadsLoading={() => null}
-                />
-                <Emojis setEmoji={(data) => handleInsertTextInPosition(data)} />
-                <div style={{ position: "relative" }}>
-                  <div
-                    className="p-small box-pad-v-s box-pad-h-s pointer fx-centered"
-                    style={{
-                      padding: ".125rem .25rem",
-                      border: "1.5px solid var(--gray)",
-                      borderRadius: "6px",
-                      backgroundColor: showGIFs
-                        ? "var(--black)"
-                        : "transparent",
-                      color: showGIFs ? "var(--white)" : "",
-                    }}
-                    onClick={() => {
-                      setShowGIFs(!showGIFs);
-                      setShowMentionSuggestions(false);
-                    }}
-                  >
-                    GIFs
-                  </div>
-                  {showGIFs && (
-                    <Gifs
-                      setGif={handleAddImage}
-                      exit={() => setShowGIFs(false)}
-                    />
-                  )}
-                </div>
-                <ActionTools
-                  setData={(data) => handleInsertTextInPosition(data)}
-                />
-                <div className="fx-centered sc-s-18 bg-sp box-pad-h-s ">
-                  <p
-                    className="gray-c p-medium"
-                    style={{ minWidth: "max-content" }}
-                  >
-                    {t("AfkY3WI")}
-                  </p>
-                  <Toggle status={isPaid} setStatus={setIsPaid} small={true} />
-                </div>
-              </div>
-              <div className="fx-centered" style={{ flex: "1 1 100px" }}>
-                {exit && (
-                  <button
-                    className="btn btn-gst btn-small fx"
-                    disabled={isLoading}
-                    onClick={() => (note ? setShowWarningBox(true) : exit())}
-                  >
-                    {isLoading ? <LoadingDots /> : t("AB4BSCe")}
-                  </button>
-                )}
-                <button
-                  className="btn btn-normal btn-small fx"
-                  onClick={publishNote}
-                  disabled={isLoading}
+        </div>
+        {selectedScheduleDate && (
+          <div
+            className="fit-container fx-centered fx-start-h btn-text box-pad-h-m pointer"
+            onClick={() => setShowDatePicker(true)}
+          >
+            <div className="calendar"></div>
+            <p>
+              {t("Al2pbNK")}{" "}
+              {new Intl.DateTimeFormat("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              }).format(selectedScheduleDate * 1000)}
+            </p>
+          </div>
+        )}
+        <div
+          className="fit-container fx-centered fx-start-v box-pad-h box-pad-v-m"
+          style={{ borderTop: "1px solid var(--pale-gray)" }}
+        >
+          <div className="fit-container fx-scattered fx-wrap">
+            <div className="fx-centered" style={{ gap: "12px" }}>
+              <UploadFile
+                setImageURL={handleAddImage}
+                setIsUploadsLoading={() => null}
+              />
+              <Emojis setEmoji={(data) => handleInsertTextInPosition(data)} />
+              <div style={{ position: "relative" }}>
+                <div
+                  className="p-small box-pad-v-s box-pad-h-s pointer fx-centered"
+                  style={{
+                    padding: ".125rem .25rem",
+                    border: "1.5px solid var(--gray)",
+                    borderRadius: "6px",
+                    backgroundColor: showGIFs ? "var(--black)" : "transparent",
+                    color: showGIFs ? "var(--white)" : "",
+                  }}
+                  onClick={() => {
+                    setShowGIFs(!showGIFs);
+                    setShowMentionSuggestions(false);
+                  }}
                 >
-                  {isLoading ? (
-                    <LoadingDots />
-                  ) : isPaid ? (
-                    t("A559jVY")
-                  ) : (
-                    t("AT4tygn")
-                  )}
-                </button>
+                  GIFs
+                </div>
+                {showGIFs && (
+                  <Gifs
+                    setGif={handleAddImage}
+                    exit={() => setShowGIFs(false)}
+                  />
+                )}
               </div>
+              <ActionTools
+                setData={(data) => handleInsertTextInPosition(data)}
+              />
+              <div onClick={() => setShowDatePicker(true)}>
+                <div className="calendar-24"></div>
+              </div>
+              <div className="fx-centered sc-s-18 bg-sp box-pad-h-s ">
+                <p
+                  className="gray-c p-medium"
+                  style={{ minWidth: "max-content" }}
+                >
+                  {t("AfkY3WI")}
+                </p>
+                <Toggle status={isPaid} setStatus={setIsPaid} small={true} />
+              </div>
+            </div>
+            <div>
+              <button
+                className="btn btn-normal btn-small"
+                onClick={publishNote}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <LoadingDots />
+                ) : isPaid ? (
+                  t("A559jVY")
+                ) : (
+                  t("AT4tygn")
+                )}
+              </button>
             </div>
           </div>
         </div>

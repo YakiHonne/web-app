@@ -6,6 +6,8 @@ import ShareRelay from "./ShareRelay";
 import ContentFeedCategoryPreview from "./ContentFeedCategoryPreview";
 import useRelaysSet from "@/Hooks/useRelaysSet";
 import { getParsedRelaySet } from "@/Helpers/Encryptions";
+import usePacks from "@/Hooks/usePacks";
+import SharePackLink from "./SharePackLink";
 
 export default function ContentSource({
   selectedCategory,
@@ -16,10 +18,12 @@ export default function ContentSource({
   const userAppSettings = useSelector((state) => state.userAppSettings);
   const userFavRelays = useSelector((state) => state.userFavRelays);
   const userKeys = useSelector((state) => state.userKeys);
+  const { userStarterPacksSimplified, userMediaPacksSimplified } = usePacks();
   const { userRelaysSet } = useRelaysSet();
   const [showOptions, setShowOptions] = useState(false);
   const [showFeedMarketplace, setShowFeedMarketPlace] = useState(false);
   const [showRelaySharing, setshowRelaySharing] = useState(false);
+  const [showPackSharing, setShowPackSharing] = useState(false);
   const optionsRef = useRef(null);
   const relaysSet = useMemo(() => {
     let favSet = userFavRelays.tags
@@ -126,6 +130,7 @@ export default function ContentSource({
               value: "recent_with_replies",
               enabled: true,
             },
+            { display_name: t("AMxeg1d"), value: "trending", enabled: true },
             { display_name: t("A0gGIxM"), value: "global", enabled: true },
             { display_name: t("AAg9D6c"), value: "paid", enabled: true },
             { display_name: t("AM4vyRX"), value: "widgets", enabled: true },
@@ -148,15 +153,15 @@ export default function ContentSource({
       userAppSettings?.settings?.content_sources?.mixed_content
     ) {
       let sources = userAppSettings?.settings?.content_sources?.mixed_content;
-      return getSourcesArray(sources, options[0].list, t);
+      return getSourcesArray(sources, options[0].list, t, type);
     }
     if (type === 2 && userAppSettings?.settings?.content_sources?.notes) {
       let sources = userAppSettings?.settings?.content_sources?.notes;
-      return getSourcesArray(sources, options[0].list, t);
+      return getSourcesArray(sources, options[0].list, t, type);
     }
     if (type === 3 && userAppSettings?.settings?.content_sources?.media) {
       let sources = userAppSettings?.settings?.content_sources?.media;
-      return getSourcesArray(sources, options[0].list, t);
+      return getSourcesArray(sources, options[0].list, t, type);
     }
     return options;
   }, [userAppSettings, userKeys]);
@@ -220,6 +225,16 @@ export default function ContentSource({
           exit={(e) => {
             e.stopPropagation();
             setshowRelaySharing();
+          }}
+          type={type}
+        />
+      )}
+      {showPackSharing && (
+        <SharePackLink
+          d={showPackSharing}
+          exit={(e) => {
+            e.stopPropagation();
+            setShowPackSharing();
           }}
           type={type}
         />
@@ -443,6 +458,57 @@ export default function ContentSource({
                   </div>
                 </div>
               )}
+              {((userStarterPacksSimplified.length > 0 && type !== 3) ||
+                (userMediaPacksSimplified.length > 0 && type === 3)) && (
+                <div className={"fx-centered fx-col fx-start-v fit-container"}>
+                  <h5 className="c1-c  box-pad-h-s">
+                    {type === 3 ? t("AusIycI") : t("AVzZUeP")}
+                  </h5>
+                  <div
+                    className="fit-container fx-centered fx-col fx-start-h fx-start-v"
+                    style={{ gap: 0, marginBottom: ".5rem" }}
+                  >
+                    {[
+                      ...(type === 3
+                        ? userMediaPacksSimplified
+                        : userStarterPacksSimplified),
+                    ].map((metadata, _index) => {
+                      return (
+                        <div
+                          key={_index}
+                          className={`pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale`}
+                          style={{
+                            borderRadius: "var(--border-r-18)",
+                          }}
+                          onClick={(e) =>
+                            handleSelectCategory(
+                              e,
+                              { ...metadata, value: metadata.aTag },
+                              { value: "pf" },
+                            )
+                          }
+                        >
+                          <ContentFeedCategoryPreview
+                            category={{ ...metadata, group: "pf" }}
+                          />
+                          <div className="fx-centered">
+                            {selectedCategory.value === metadata.aTag && (
+                              <div className="check-24"></div>
+                            )}
+                            <div
+                              className="share-icon"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowPackSharing(metadata.d);
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
               {favRelays.length === 0 && relaysSet.length === 0 && (
                 <div className="box-pad-h-m fit-container box-marg-s fx-centered">
                   <div className="sc-s-18 box-pad-v fit-container bg-sp fx-centered fx-col">
@@ -469,29 +535,45 @@ export default function ContentSource({
   );
 }
 
-const getSourcesArray = (sources, cfBackup, t) => {
+const getSourcesArray = (sources, cfBackup, t, type) => {
+  let newSources = [];
+  if (type === 2) newSources = ["trending"];
   let sourcesArray = [];
   let community_feed_keys = {
     top: t("AZKPdUC"),
     network: t("AnwFQtj"),
     global: t("A0gGIxM"),
     recent: t("AiAJcg1"),
+    trending: t("AMxeg1d"),
     recent_with_replies: t("AgF8nZU"),
     paid: t("AAg9D6c"),
     widgets: t("AM4vyRX"),
   };
+  let sourcesList = sources["community"]?.list.map((_) => {
+    let value = _[0].replaceAll("-", "_");
+    return {
+      display_name: community_feed_keys[value] || "N/A",
+      value: value,
+      enabled: _[1],
+    };
+  });
+  let isNew = newSources.filter((_) => !sourcesList.find((s) => s.value === _));
+
+  if (isNew && newSources.length > 0)
+    sourcesList = [
+      ...sourcesList,
+      ...isNew.map((_) => ({
+        display_name: community_feed_keys[_] || "N/A",
+        value: _,
+        enabled: true,
+      })),
+    ];
+  if (newSources.length === 0) sourcesList = cfBackup;
+
   sourcesArray[0] = {
     group_name: t("A8Y9rVt"),
     value: "cf",
-    list:
-      sources["community"]?.list.map((_) => {
-        let value = _[0].replaceAll("-", "_");
-        return {
-          display_name: community_feed_keys[value] || "N/A",
-          value: value,
-          enabled: _[1],
-        };
-      }) || cfBackup,
+    list: sourcesList,
   };
   return sourcesArray;
 };

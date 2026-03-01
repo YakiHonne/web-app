@@ -1,9 +1,33 @@
-import React, { useState } from 'react'
-import ProgressBar from '@/Components/ProgressBar';
+import React, { useState, useEffect } from "react";
+import ProgressBar from "@/Components/ProgressBar";
 
 export default function Carousel({ imgs, selectedImage, back }) {
   const [currentImg, setCurrentImg] = useState(selectedImage);
+  useEffect(() => {
+    setCurrentImg(selectedImage);
+  }, [selectedImage]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "ArrowRight") {
+        setCurrentImg((prev) => (prev + 1 < imgs.length ? prev + 1 : 0));
+      }
+
+      if (e.key === "ArrowLeft") {
+        setCurrentImg((prev) => (prev > 0 ? prev - 1 : imgs.length - 1));
+      }
+
+      if (e.key === "Escape") {
+        back(e);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [imgs.length, back]);
   return (
     <div
       className="fixed-container fx-centered box-pad-h-s fx-col slide-up"
@@ -28,7 +52,9 @@ export default function Carousel({ imgs, selectedImage, back }) {
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              currentImg > 0 ?  setCurrentImg(currentImg - 1) : setCurrentImg(imgs.length - 1);
+              currentImg > 0
+                ? setCurrentImg(currentImg - 1)
+                : setCurrentImg(imgs.length - 1);
             }}
           >
             <div

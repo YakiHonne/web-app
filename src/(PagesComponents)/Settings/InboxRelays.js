@@ -22,8 +22,9 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
   }, [userInboxRelays]);
   const suggestedRelays = useMemo(() => {
     let relays = [
-      "wss://relay.damus.io",
-      "wss://nostr-01.yakihonne.com",
+      "wss://auth.nostr1.com",
+      "wss://nostr-01.uid.ovh",
+      "wss://nostr-02.uid.ovh",
       "wss://relay.0xchat.com",
     ];
     if (tempUserRelays.length === 0) return relays;
@@ -48,7 +49,7 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
       setInboxRelaysStatus(
         userInboxRelays.map((item) => {
           return { url: item, connected: false };
-        })
+        }),
       );
     } catch (err) {
       console.log(err);
@@ -69,7 +70,7 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
               let relayStatus = tempNDK.pool.getRelay(relay.url);
               return { url: relay.url, connected: relayStatus.connected };
             }
-          })
+          }),
         );
         setInboxRelaysStatus(res);
       } catch (err) {}
@@ -104,7 +105,7 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
     dispatch(
       setToPublish({
         eventInitEx: event,
-      })
+      }),
     );
   };
 

@@ -5,6 +5,7 @@ import {
   getBech32,
   getEmptyuserMetadata,
   getuserMetadata,
+  hexToUint8Array,
   removeEventsDuplicants,
   removeObjDuplicants,
   sortEvents,
@@ -75,7 +76,7 @@ const aggregateUsers = (convo, oldAggregated = [], userPubkey) => {
 
       if (!checkConvo) {
         let sortedConvo = [...map.get(`${pubkey}`).convo, item].sort(
-          (convo_1, convo_2) => convo_1.created_at - convo_2.created_at
+          (convo_1, convo_2) => convo_1.created_at - convo_2.created_at,
         );
         map.get(`${pubkey}`).convo = sortedConvo;
         map.get(`${pubkey}`).checked =
@@ -116,7 +117,7 @@ const addConnectedAccounts = (account, userKeys) => {
   try {
     let accounts = getConnectedAccounts() || [];
     let isAccount = accounts.findIndex(
-      (account_) => account_.pubkey === userKeys.pub
+      (account_) => account_.pubkey === userKeys.pub,
     );
     if (isAccount === -1) {
       accounts.push({ ...account, userKeys });
@@ -141,7 +142,7 @@ const getUserFromNOSTR = (pubkey) => {
             authors: [pubkey],
           },
         ],
-        { closeOnEose: true, groupable: false, cacheUsage: "CACHE_FIRST" }
+        { closeOnEose: true, groupable: false, cacheUsage: "CACHE_FIRST" },
       );
 
       subscription.on("event", (event) => {
@@ -168,7 +169,7 @@ const getUserRelaysFromNOSTR = (pubkey) => {
             authors: [pubkey],
           },
         ],
-        { closeOnEose: true, cacheUsage: "CACHE_FIRST" }
+        { closeOnEose: true, cacheUsage: "CACHE_FIRST" },
       );
 
       subscription.on("event", (event) => {
@@ -269,7 +270,7 @@ const downloadAllKeys = () => {
       ...toSave,
     ].join("\n"),
     "text/plain",
-    `accounts-credentials.txt`
+    `accounts-credentials.txt`,
   );
 };
 
@@ -294,7 +295,7 @@ const exportAllWallets = () => {
     toSave.join("\n"),
     "text/plain",
     `NWCs-${userKeys.pub}.txt`,
-    t("AIzBCBb")
+    t("AIzBCBb"),
   );
 };
 
@@ -307,7 +308,7 @@ const exportWallet = (nwc, addr) => {
     ].join("\n"),
     "text/plain",
     `NWC-for-${addr}.txt`,
-    t("AVUlnek")
+    t("AVUlnek"),
   );
 };
 
@@ -327,7 +328,7 @@ const userLogout = async (pubkey) => {
   }
 
   let accountIndex = accounts.findIndex(
-    (account) => account.userKeys.pub === pubkey
+    (account) => account.userKeys.pub === pubkey,
   );
   if (accountIndex !== -1) {
     let isSec = accounts[accountIndex]?.userKeys?.sec ? true : false;
@@ -342,13 +343,13 @@ const userLogout = async (pubkey) => {
         }`,
         `Public key: ${getBech32(
           "npub",
-          accounts[accountIndex]?.userKeys?.pub
+          accounts[accountIndex]?.userKeys?.pub,
         )}`,
       ];
       downloadAsFile(
         toSave.join("\n"),
         "text/plain",
-        `account-credentials.txt`
+        `account-credentials.txt`,
       );
     }
     accounts.splice(accountIndex, 1);
@@ -377,7 +378,7 @@ const updateYakiChestStats = (user_stats) => {
       totalPointInLevel,
       inBetweenLevelPoints,
       remainingPointsToNextLevel,
-    })
+    }),
   );
 };
 
@@ -402,7 +403,7 @@ const initiFirstLoginStats = (user_stats) => {
       lvl,
       percentage: (inBetweenLevelPoints * 100) / totalPointInLevel,
       actions,
-    })
+    }),
   );
 };
 
@@ -533,7 +534,7 @@ const getSubData = async (
   ndk = ndkInstance,
   maxEvents = 1000,
   raw = false,
-  cacheUsage = "CACHE_FIRST"
+  cacheUsage = "CACHE_FIRST",
 ) => {
   const userRelays = relaysOnPlatform;
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
@@ -583,7 +584,7 @@ const getSubData = async (
         onEose() {
           if (events.length === 0) startTimer();
         },
-      }
+      },
     );
     let timer;
     const startTimer = () => {
@@ -624,7 +625,7 @@ const InitEvent = async (
   content,
   tags,
   created_at,
-  userKeys_ = false
+  userKeys_ = false,
 ) => {
   try {
     let userKeys = userKeys_ || getKeys();
@@ -652,14 +653,14 @@ const InitEvent = async (
             window.open(
               url,
               "_blank",
-              "width=600,height=650,scrollbars=yes,resizable=yes"
+              "width=600,height=650,scrollbars=yes,resizable=yes",
             );
           },
-        }
+        },
       );
       tempEvent = await bunker.signEvent(tempEvent);
     } else {
-      tempEvent = finalizeEvent(tempEvent, userKeys.sec);
+      tempEvent = finalizeEvent(tempEvent, hexToUint8Array(userKeys.sec));
     }
 
     return tempEvent;
@@ -674,7 +675,7 @@ const getEventStatAfterEOSE = (
   kind,
   oldStats,
   extra,
-  zapsCreatedAt
+  zapsCreatedAt,
 ) => {
   let stats = { ...oldStats };
   if (reaction.kind === 9734) {
@@ -850,7 +851,7 @@ const getDVMJobResponse = async (eventId) => {
           groupable: false,
           skipVerification: true,
           skipValidation: true,
-        }
+        },
       );
       sub.on("event", (event) => {
         clearTimeout(timer);
@@ -871,7 +872,7 @@ const walletWarning = () => {
     store.getState().setToast({
       type: 3,
       desc: t("A4R0ICw"),
-    })
+    }),
   );
 };
 
@@ -884,7 +885,7 @@ const saveRelayMetadata = async (relays) => {
     return false;
   });
   let relaysMetadata = await Promise.all(
-    onlyUnsavedRelays.map((relay) => fetchRelayMetadata(relay))
+    onlyUnsavedRelays.map((relay) => fetchRelayMetadata(relay)),
   );
   relaysMetadata = relaysMetadata.filter((_) => _);
   let pubkeys = relaysMetadata.map((_) => _.pubkey).filter((_) => _);

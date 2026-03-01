@@ -1,6 +1,17 @@
 import { nip04, nip44 } from "nostr-tools";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
 
+function hexToUint8Array(hex) {
+  if (hex.length % 2 !== 0) {
+    throw new Error("Invalid hex string");
+  }
+  const array = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    array[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+  return array;
+}
+
 const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
@@ -12,10 +23,10 @@ const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
           window.open(
             url,
             "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
+            "width=600,height=650,scrollbars=yes,resizable=yes",
           );
         },
-      }
+      },
     );
     await bunker.connect();
     let data = await bunker.nip04Decrypt(otherPartyPubkey, content);
@@ -37,19 +48,19 @@ const decrypt04 = async (event, userKeys) => {
     if (userKeys.ext) {
       decryptedMessage = await window.nostr.nip04.decrypt(
         pubkey,
-        event.content
+        event.content,
       );
     } else if (userKeys.sec) {
       decryptedMessage = await nip04.decrypt(
         userKeys.sec,
         pubkey,
-        event.content
+        event.content,
       );
     } else {
       decryptedMessage = await decrypt04UsingBunker(
         userKeys,
         pubkey,
-        event.content
+        event.content,
       );
     }
     return decryptedMessage;
@@ -63,7 +74,7 @@ const unwrapGiftWrap = async (event, userKeys) => {
     let decryptedEvent13 = await decrypt44(
       userKeys,
       event.pubkey,
-      event.content
+      event.content,
     );
 
     let { pubkey, content } = JSON.parse(decryptedEvent13);
@@ -82,18 +93,21 @@ const decrypt44 = async (userKeys, otherPartyPubkey, content) => {
     if (userKeys.ext) {
       decryptedMessage = await window.nostr.nip44.decrypt(
         otherPartyPubkey,
-        content
+        content,
       );
     } else if (userKeys.sec) {
       decryptedMessage = await nip44.v2.decrypt(
         content,
-        nip44.v2.utils.getConversationKey(userKeys.sec, otherPartyPubkey)
+        nip44.v2.utils.getConversationKey(
+          hexToUint8Array(userKeys.sec),
+          otherPartyPubkey,
+        ),
       );
     } else {
       decryptedMessage = await decrypt44UsingBunker(
         userKeys,
         otherPartyPubkey,
-        content
+        content,
       );
     }
     return decryptedMessage;
@@ -113,10 +127,10 @@ const decrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
           window.open(
             url,
             "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
+            "width=600,height=650,scrollbars=yes,resizable=yes",
           );
         },
-      }
+      },
     );
     await bunker.connect();
 

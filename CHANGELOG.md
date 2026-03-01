@@ -1,3 +1,24 @@
+# (v5.7.0) 01/01/2026
+
+- Explore page featuring media packs and starter packs.
+- Custom feed support for media and starter packs.
+- Recommended starter packs now appear during onboarding.
+- Scheduled notes support added.
+- Enhanced message options, multi/single deletion and copy text.
+- Fixed Nostr tools issues with nSec login and signing events.
+- Fixed web worker loading issues.
+- Resolved problem where new NWC wallets were not appearing in the list.
+- Fixed invoice generation display in the Lightning wallet.
+- Added hotkey support for publishing comments and replies (Cmd/Ctrl + Enter).
+- Added hotkeys for browsing image galleries in notes (arrow keys).
+- Added new relay suggestions in inbox when no relays are set.
+- Fixed notifications not opening due to storage limitations.
+- Added quick actions in the “Add New” button for media creation and uploads.
+- Fixed tag display issues for Greek language.
+- Optimized notifications hints on the sidebar for better visibility when visited.
+- Added Trending Notes feed for discovering popular content.
+- General bug fixes and optimizations across the app.
+
 # (v5.6.0) 29/01/2026
 
 - ECash support: swipe tokens, deposit, send Nutzups, and restore wallets.

@@ -71,7 +71,7 @@ export default function MediaPostData({
           textareaRef?.current?.focus();
         }}
       >
-        <div style={{ paddingTop: ".2rem" }}>
+        <div style={{ paddingTop: ".2rem", zIndex: 100, position: "relative" }}>
           <ProfilesPicker setSelectedProfile={setSelectedProfile} />
         </div>
         <div

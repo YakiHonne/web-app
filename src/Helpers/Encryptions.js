@@ -401,6 +401,71 @@ const getParsedRepEvent = (event) => {
     return false;
   }
 };
+const getParsedPacksEvent = (event) => {
+  try {
+    if (!event) return false;
+    let content = {
+      id: event.id,
+      pubkey: event.pubkey,
+      kind: event.kind,
+      content: event.content,
+      created_at: event.created_at,
+      tags: event.tags,
+      sig: event.sig,
+      title: "",
+      description: "",
+      image: "",
+      d: "",
+      client: "",
+      pTags: [],
+      pCount: 0,
+    };
+    for (let tag of event.tags) {
+      if (tag[0] === "title") {
+        content.title = tag[1];
+      }
+      if (["image", "thumbnail", "thumb"].includes(tag[0])) {
+        content.image = tag[1];
+      }
+      if (["description", "excerpt", "summary"].includes(tag[0])) {
+        content.description = tag[1];
+      }
+      if (tag[0] === "d") {
+        content.d = encodeURIComponent(tag[1]);
+      }
+      if (tag[0] === "client") {
+        if (tag.length >= 3 && tag[2].includes("31990")) {
+          content.client = tag[2];
+        }
+        if ((tag.length >= 3 && !tag[2].includes("31990")) || tag.length < 3)
+          content.client = tag[1];
+      }
+      if (tag[0] === "p") {
+        content.pTags.push(tag[1]);
+      }
+    }
+    content.naddr = content.d
+      ? (event.encode && event.encode()) ||
+        nip19.naddrEncode({
+          pubkey: event.pubkey,
+          identifier: content.d,
+          kind: event.kind,
+        })
+      : "";
+    content.naddrData = {
+      pubkey: event.pubkey,
+      identifier: content.d,
+      kind: event.kind,
+    };
+    content.aTag = `${event.kind}:${event.pubkey}:${content.d}`;
+    content.pTags = [...new Set(content.pTags)];
+    content.pCount = content.pTags.length;
+    return content;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};
 const getParsedMedia = (event) => {
   try {
     if (!event) return false;
@@ -639,8 +704,8 @@ const checkForLUDS = (lud06, lud16) => {
   return lud16?.includes("@")
     ? encodeLud06(decodeUrlOrAddress(lud16))
     : lud06?.includes("@")
-    ? encodeLud06(decodeUrlOrAddress(lud06))
-    : lud06;
+      ? encodeLud06(decodeUrlOrAddress(lud06))
+      : lud06;
 };
 
 const convertDate = (toConvert, time = false, t = null) => {
@@ -785,7 +850,7 @@ const sortEvents = (events) => {
 const encryptEventData = (data) => {
   let enc = CryptoJS.AES.encrypt(
     data,
-    process.env.NEXT_PUBLIC_ENC_SECRET
+    process.env.NEXT_PUBLIC_ENC_SECRET,
   ).toString();
   return enc;
 };
@@ -817,7 +882,7 @@ const getClaimingData = async (pubkey, event_id, kind, t = null) => {
       };
     const encrypted = await window.nostr.nip04.encrypt(
       process.env.NEXT_PUBLIC_YAKI_PUBKEY,
-      JSON.stringify(message)
+      JSON.stringify(message),
     );
     return { status: true, message: encrypted };
   } catch (err) {
@@ -837,10 +902,10 @@ const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
           window.open(
             url,
             "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
+            "width=600,height=650,scrollbars=yes,resizable=yes",
           );
         },
-      }
+      },
     );
     await bunker.connect();
     let data = await bunker.nip04Decrypt(otherPartyPubkey, content);
@@ -862,10 +927,10 @@ const encrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
           window.open(
             url,
             "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
+            "width=600,height=650,scrollbars=yes,resizable=yes",
           );
         },
-      }
+      },
     );
     await bunker.connect();
 
@@ -888,10 +953,10 @@ const encrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
           window.open(
             url,
             "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
+            "width=600,height=650,scrollbars=yes,resizable=yes",
           );
         },
-      }
+      },
     );
     await bunker.connect();
 
@@ -914,10 +979,10 @@ const decrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
           window.open(
             url,
             "_blank",
-            "width=600,height=650,scrollbars=yes,resizable=yes"
+            "width=600,height=650,scrollbars=yes,resizable=yes",
           );
         },
-      }
+      },
     );
     await bunker.connect();
 
@@ -935,18 +1000,21 @@ const encrypt44 = async (userKeys, otherPartyPubkey, content) => {
     if (userKeys.ext) {
       encryptedMessage = await window.nostr.nip44.encrypt(
         otherPartyPubkey,
-        content
+        content,
       );
     } else if (userKeys.sec) {
       encryptedMessage = nip44.v2.encrypt(
         content,
-        nip44.v2.utils.getConversationKey(userKeys.sec, otherPartyPubkey)
+        nip44.v2.utils.getConversationKey(
+          hexToUint8Array(userKeys.sec),
+          otherPartyPubkey,
+        ),
       );
     } else {
       encryptedMessage = await encrypt44UsingBunker(
         userKeys,
         otherPartyPubkey,
-        content
+        content,
       );
     }
     return encryptedMessage;
@@ -961,18 +1029,21 @@ const decrypt44 = async (userKeys, otherPartyPubkey, content) => {
     if (userKeys.ext) {
       decryptedMessage = await window.nostr.nip44.decrypt(
         otherPartyPubkey,
-        content
+        content,
       );
     } else if (userKeys.sec) {
       decryptedMessage = await nip44.v2.decrypt(
         content,
-        nip44.v2.utils.getConversationKey(userKeys.sec, otherPartyPubkey)
+        nip44.v2.utils.getConversationKey(
+          hexToUint8Array(userKeys.sec),
+          otherPartyPubkey,
+        ),
       );
     } else {
       decryptedMessage = await decrypt44UsingBunker(
         userKeys,
         otherPartyPubkey,
-        content
+        content,
       );
     }
     return decryptedMessage;
@@ -992,19 +1063,19 @@ const decrypt04 = async (event, userKeys) => {
     if (userKeys.ext) {
       decryptedMessage = await window.nostr.nip04.decrypt(
         pubkey,
-        event.content
+        event.content,
       );
     } else if (userKeys.sec) {
       decryptedMessage = await nip04.decrypt(
         userKeys.sec,
         pubkey,
-        event.content
+        event.content,
       );
     } else {
       decryptedMessage = await decrypt04UsingBunker(
         userKeys,
         pubkey,
-        event.content
+        event.content,
       );
     }
     return decryptedMessage;
@@ -1019,19 +1090,19 @@ const encrypt04 = async (userKeys, otherPartyPubkey, content) => {
     if (userKeys.ext) {
       encryptedMessage = await window.nostr.nip04.encrypt(
         otherPartyPubkey,
-        content
+        content,
       );
     } else if (userKeys.sec) {
       encryptedMessage = await nip04.encrypt(
         userKeys.sec,
         otherPartyPubkey,
-        content
+        content,
       );
     } else {
       encryptedMessage = await encrypt04UsingBunker(
         userKeys,
         otherPartyPubkey,
-        content
+        content,
       );
     }
     return encryptedMessage;
@@ -1045,7 +1116,7 @@ const unwrapGiftWrap = async (event, userKeys) => {
     let decryptedEvent13 = await decrypt44(
       userKeys,
       event.pubkey,
-      event.content
+      event.content,
     );
 
     let { pubkey, content } = JSON.parse(decryptedEvent13);
@@ -1069,7 +1140,7 @@ const downloadAsFile = (
   type = "application/json",
   name,
   message = false,
-  allowMobile = true
+  allowMobile = true,
 ) => {
   let isTouchScreen = window.matchMedia("(pointer: coarse)").matches;
   if (isTouchScreen && !allowMobile) return;
@@ -1096,7 +1167,7 @@ const downloadAsFile = (
       setToast({
         type: 1,
         desc: message,
-      })
+      }),
     );
 };
 
@@ -1112,7 +1183,7 @@ const getWOTScoreForPubkeyLegacy = (pubkey, enabled, minScore = 3) => {
       return { score: 10, status: true };
     }
     let totalTrusting = network.filter((_) =>
-      _.followings.includes(pubkey)
+      _.followings.includes(pubkey),
     ).length;
     let totalMuted = network.filter((_) => _.muted.includes(pubkey)).length;
     let ratio = totalTrusting / network.length;
@@ -1241,6 +1312,7 @@ const getBackupWOTList = () => {
 // };
 
 const filterContent = (selectedFilter, list) => {
+  if (!selectedFilter) return list;
   const matchWords = (longString, wordArray) => {
     if (!longString) return false;
     const stringWords = Array.isArray(longString)
@@ -1267,7 +1339,7 @@ const filterContent = (selectedFilter, list) => {
 
   const testForMixedContent = (_) => {
     let thumbnail = selectedFilter?.thumbnail ? _.image : true;
-    let excluded_words = selectedFilter.excluded_words.length
+    let excluded_words = selectedFilter?.excluded_words?.length
       ? !(
           matchWords(_.title, selectedFilter.excluded_words) ||
           matchWords(_.description, selectedFilter.excluded_words) ||
@@ -1275,16 +1347,16 @@ const filterContent = (selectedFilter, list) => {
           matchWords(_.items, selectedFilter.excluded_words)
         )
       : true;
-    let included_words = selectedFilter.included_words.length
+    let included_words = selectedFilter?.included_words?.length
       ? matchWords(_.title, selectedFilter.included_words) ||
         matchWords(_.description, selectedFilter.included_words) ||
         matchWords(_.content, selectedFilter.included_words) ||
         matchWords(_.items, selectedFilter.included_words)
       : true;
-    let hide_sensitive = selectedFilter.hide_sensitive
+    let hide_sensitive = selectedFilter?.hide_sensitive
       ? !_.contentSensitive
       : true;
-    let posted_by = selectedFilter.posted_by.length
+    let posted_by = selectedFilter?.posted_by?.length
       ? selectedFilter.posted_by.includes(_.pubkey)
       : true;
     let a_min_words =
@@ -1296,16 +1368,16 @@ const filterContent = (selectedFilter, list) => {
         ? !selectedFilter.media_only
           ? true
           : hasImageLinks(_.content)
-          ? true
-          : false
+            ? true
+            : false
         : true;
     let a_media_only =
       _.kind === 30023
         ? !selectedFilter.for_articles.media_only
           ? true
           : hasImageLinks(_.content)
-          ? true
-          : false
+            ? true
+            : false
         : true;
     let c_type = [30004, 30005].includes(_.kind)
       ? hasCurType(_.kind, selectedFilter.for_curations.type)
@@ -1338,18 +1410,18 @@ const filterContent = (selectedFilter, list) => {
     try {
       if (!selectedFilter) return true;
       let tags = _.tags.filter((tag) => tag[0] === "t").map((tag) => tag[1]);
-      let excluded_words = selectedFilter.excluded_words.length
+      let excluded_words = selectedFilter?.excluded_words?.length
         ? !(
             matchWords(_.content, selectedFilter.excluded_words) ||
             matchWords(tags, selectedFilter.excluded_words)
           )
         : true;
-      let included_words = selectedFilter.included_words.length
+      let included_words = selectedFilter?.included_words?.length
         ? matchWords(_.content, selectedFilter.included_words) ||
           matchWords(tags, selectedFilter.included_words)
         : true;
 
-      let posted_by = selectedFilter.posted_by.length
+      let posted_by = selectedFilter?.posted_by?.length
         ? selectedFilter.posted_by.includes(_.pubkey)
         : true;
 
@@ -1358,8 +1430,8 @@ const filterContent = (selectedFilter, list) => {
           ? !selectedFilter.media_only
             ? true
             : hasImageLinks(_.content)
-            ? true
-            : false
+              ? true
+              : false
           : true;
 
       if (excluded_words && included_words && posted_by && n_media_only)
@@ -1396,7 +1468,7 @@ const getInvoiceDetails = (bolt11) => {
 
     // Extract description/memo
     const descriptionSection = decoded.sections.find(
-      (_) => _.name === "description"
+      (_) => _.name === "description",
     );
     const description = descriptionSection?.value || null;
 
@@ -1460,4 +1532,5 @@ export {
   getWOTScoreForPubkeyLegacy,
   getEmptyRelaysStats,
   getInvoiceDetails,
+  getParsedPacksEvent,
 };

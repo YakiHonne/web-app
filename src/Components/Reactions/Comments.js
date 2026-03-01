@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import ActionTools from "@/Components/ActionTools";
 import { useDispatch, useSelector } from "react-redux";
 import { ndkInstance } from "@/Helpers/NDKInstance";
@@ -63,7 +63,7 @@ export default function Comments({
           event_,
           "replies",
           actions,
-          undefined
+          undefined,
         );
         updateNoteDraft(replyId, "");
         saveEventStats(replyId, stats);
@@ -75,7 +75,7 @@ export default function Comments({
   }, [eventID]);
 
   const commentNote = async (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     if (isLoading || !comment) return;
 
     try {
@@ -88,11 +88,11 @@ export default function Comments({
         tags = [
           ...tags,
           ...noteTags.filter(
-            (tag) => tag[0] === "p" || (tag.length > 3 && tag[3] === "root")
+            (tag) => tag[0] === "p" || (tag.length > 3 && tag[3] === "root"),
           ),
         ];
         let checkIsRoot = tags.find(
-          (tag) => tag.length > 3 && tag[3] === "root"
+          (tag) => tag.length > 3 && tag[3] === "root",
         );
         if (checkIsRoot) tags.push(["e", replyId, "", "reply"]);
         else tags.push([tagKind, replyId, "", "root"]);
@@ -110,7 +110,7 @@ export default function Comments({
         content,
         tags,
         undefined,
-        selectedProfile
+        selectedProfile,
       );
       if (!eventInitEx) {
         setIsLoading(false);
@@ -120,7 +120,7 @@ export default function Comments({
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
 
       setIsLoading(false);
@@ -213,6 +213,16 @@ export default function Comments({
     if (!match) setShowMentionSuggestions(false);
     setComment(value);
   };
+
+  const handleKeyDown = useCallback(
+    (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        commentNote();
+      }
+    },
+    [commentNote],
+  );
 
   if (!userKeys)
     return (
@@ -326,6 +336,7 @@ export default function Comments({
                     placeholder={t("AOmRQKF")}
                     value={comment}
                     onChange={handleOnChange}
+                    onKeyDown={handleKeyDown}
                     disabled={isLoading}
                     autoFocus
                     ref={textareaRef}
