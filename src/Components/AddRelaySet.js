@@ -16,7 +16,7 @@ export default function AddRelaySet({ exit, toEdit, allRelays }) {
   const [title, setTitle] = useState(toEdit ? toEdit.title : "");
   const [image, setImage] = useState(toEdit ? toEdit.image : "");
   const [description, setDescription] = useState(
-    toEdit ? toEdit.description : ""
+    toEdit ? toEdit.description : "",
   );
   const [relays, setRelays] = useState(toEdit ? toEdit.relays : []);
   const d = toEdit ? toEdit.d : nanoid();
@@ -25,7 +25,7 @@ export default function AddRelaySet({ exit, toEdit, allRelays }) {
     setRelays((prev) => prev.filter((_, _index) => _index !== index));
   };
   const addRelay = (relay) => {
-    setRelays((prev) => [relay, ...prev]);
+    setRelays((prev) => [...new Set([relay, ...prev])]);
   };
 
   const update = async () => {
@@ -40,12 +40,12 @@ export default function AddRelaySet({ exit, toEdit, allRelays }) {
         ...relays.map((_) => ["relay", _]),
       ],
     };
-    let aTag = `30002:${userKeys.pub}:${d}`
+    let aTag = `30002:${userKeys.pub}:${d}`;
     let eventInitEx = await InitEvent(
       event.kind,
       event.content,
       event.tags,
-      undefined
+      undefined,
     );
     if (!eventInitEx) {
       return;
@@ -54,7 +54,7 @@ export default function AddRelaySet({ exit, toEdit, allRelays }) {
       setToPublish({
         eventInitEx,
         allRelays: [],
-      })
+      }),
     );
     exit(aTag);
   };
@@ -139,7 +139,7 @@ export default function AddRelaySet({ exit, toEdit, allRelays }) {
             {relays.map((_, index) => {
               return (
                 <RelayItem
-                  key={index}
+                  key={_}
                   index={index}
                   item={{ id: _ }}
                   removeRelay={removeRelay}

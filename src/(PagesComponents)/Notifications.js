@@ -7,7 +7,7 @@ import PagePlaceholder from "@/Components/PagePlaceholder";
 export default function Notification() {
   const userKeys = useSelector((state) => state.userKeys);
   return (
-    <div >
+    <div>
       <ArrowUp />
       <div className="fit-container fx-centered fx-start-h fx-start-v">
         <div

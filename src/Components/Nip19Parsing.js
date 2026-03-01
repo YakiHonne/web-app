@@ -85,6 +85,7 @@ function Nip19Parsing({ addr, minimal = false }) {
   useEffect(() => {
     if (event) return;
     let filter = [];
+    let relays = [];
     try {
       let addr_ = addr
         .replaceAll(",", "")
@@ -93,6 +94,7 @@ function Nip19Parsing({ addr, minimal = false }) {
         .replaceAll(".", "");
       if (addr_.startsWith("naddr")) {
         let data = nip19.decode(addr_);
+        relays = data.data.relays || [];
         filter.push({
           kinds: [data.data.kind],
           "#d": [data.data.identifier],
@@ -107,6 +109,8 @@ function Nip19Parsing({ addr, minimal = false }) {
       }
       if (addr_.startsWith("nprofile")) {
         let data = nip19.decode(addr_);
+        relays = data.data.relays || [];
+
         filter.push({
           kinds: [0],
           authors: [data.data.pubkey],
@@ -119,6 +123,7 @@ function Nip19Parsing({ addr, minimal = false }) {
         let pubkey = "";
         if (typeof data.data === "string") pubkey = data.data;
         else if (data.data.pubkey) pubkey = data.data.pubkey;
+        relays = data.data.relays || [];
         filter.push({
           kinds: [0],
           authors: [pubkey],
@@ -130,6 +135,7 @@ function Nip19Parsing({ addr, minimal = false }) {
 
       if (addr_.startsWith("nevent") || addr_.startsWith("note")) {
         let data = nip19.decode(addr_);
+        relays = data.data.relays || [];
         filter.push({
           ids: [data.data.id || data.data],
         });
@@ -150,6 +156,7 @@ function Nip19Parsing({ addr, minimal = false }) {
       cacheUsage: "CACHE_FIRST",
       groupable: false,
       subId: "nip19-parsing",
+      relayUrls: relays || ndkInstance.explicitRelayUrls,
     });
     sub.on("event", (event) => {
       if (event.id) {
@@ -246,9 +253,7 @@ function Nip19Parsing({ addr, minimal = false }) {
   if (!event && isUnsupported)
     return (
       <>
-        {isParsed && (
-          <UnsupportedKindPreview addr={addr} />
-        )}
+        {isParsed && <UnsupportedKindPreview addr={addr} />}
         {!isParsed && <p>{addr}</p>}
       </>
     );

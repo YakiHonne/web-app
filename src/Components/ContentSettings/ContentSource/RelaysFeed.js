@@ -18,16 +18,16 @@ export default function RelaysFeed({ allRelays, exit }) {
   const userFavRelays = useSelector((state) => state.userFavRelays);
   const [selectedTab, setSelectedTab] = useState(0);
   const [selectedRelaysFeed, setSelectedRelaysFeed] = useState(
-    userFavRelays.relays
+    userFavRelays.relays,
   );
   const [selectedRelaysSetFeed, setSelectedRelaysSetFeed] = useState(
     userFavRelays.tags
       ? [
           ...new Set(
-            userFavRelays.tags.filter((_) => _[0] === "a").map((_) => _[1])
+            userFavRelays.tags.filter((_) => _[0] === "a").map((_) => _[1]),
           ),
         ]
-      : []
+      : [],
   );
   const [seeRelaySetDetails, setSeeRelaySetDetails] = useState(false);
   const toUpdate = useMemo(() => {
@@ -36,7 +36,7 @@ export default function RelaysFeed({ allRelays, exit }) {
       set: userFavRelays.tags
         ? [
             ...new Set(
-              userFavRelays.tags.filter((_) => _[0] === "a").map((_) => _[1])
+              userFavRelays.tags.filter((_) => _[0] === "a").map((_) => _[1]),
             ),
           ]
         : [],
@@ -53,7 +53,7 @@ export default function RelaysFeed({ allRelays, exit }) {
       ? data.trim().toLowerCase()
       : "wss://" + data.trim().replace("wss://", "").toLowerCase();
     setSelectedRelaysFeed((prev) => {
-      if (prev.find((_) => _.value === tempString)) {
+      if (prev.find((_) => _ === tempString)) {
         return prev;
       }
       return [tempString, ...prev];
@@ -62,13 +62,13 @@ export default function RelaysFeed({ allRelays, exit }) {
 
   const removeRelay = (index) => {
     setSelectedRelaysFeed((prev) =>
-      prev.filter((_, _index) => _index !== index)
+      prev.filter((_, _index) => _index !== index),
     );
   };
 
   const removeRelaySet = (index) => {
     setSelectedRelaysSetFeed((prev) =>
-      prev.filter((_, _index) => _index !== index)
+      prev.filter((_, _index) => _index !== index),
     );
   };
   const hanleDragInternalITems = (newList) => {
@@ -82,7 +82,7 @@ export default function RelaysFeed({ allRelays, exit }) {
     let aTags = userFavRelays.tags
       ? userFavRelays.tags.filter((_) => !["relay", "a"].includes(_[0]))
       : [];
-    let relays = selectedRelaysFeed.map((_) => {
+    let relays = selectedRelaysFeed?.map((_) => {
       return ["relay", _];
     });
     let relaysSet = [
@@ -97,12 +97,11 @@ export default function RelaysFeed({ allRelays, exit }) {
       content: "",
       tags: tags,
     };
-    console.log(tags);
     let eventInitEx = await InitEvent(
       event.kind,
       event.content,
       event.tags,
-      undefined
+      undefined,
     );
     if (!eventInitEx) {
       return;
@@ -111,7 +110,7 @@ export default function RelaysFeed({ allRelays, exit }) {
       setToPublish({
         eventInitEx,
         allRelays: [],
-      })
+      }),
     );
     if (addToRelaysSet) {
       setSelectedRelaysSetFeed((prev) => [addToRelaysSet, ...prev]);
@@ -141,7 +140,7 @@ export default function RelaysFeed({ allRelays, exit }) {
             className={`btn ${
               !toUpdate ? "btn-disabled" : "btn-normal"
             } btn-small`}
-            onClick={() => toUpdate ? update() : null}
+            onClick={() => (toUpdate ? update() : null)}
             disabled={!toUpdate}
           >
             {t("A8alhKV")}
@@ -152,10 +151,10 @@ export default function RelaysFeed({ allRelays, exit }) {
             <RelaysPicker
               allRelays={allRelays}
               addRelay={handleAddRelaysFeed}
-              excludedRelays={selectedRelaysFeed.map((_) => _.value)}
+              excludedRelays={selectedRelaysFeed}
               showMessage={false}
             />
-            {selectedRelaysFeed.length > 0 && (
+            {selectedRelaysFeed?.length > 0 && (
               <>
                 <p className="gray-c">{t("A4lbpBF")}</p>
                 <div
@@ -163,7 +162,7 @@ export default function RelaysFeed({ allRelays, exit }) {
                   style={{ maxHeight: "50vh", overflow: "scroll" }}
                 >
                   <DraggableComp
-                    children={selectedRelaysFeed.map((_) => {
+                    children={selectedRelaysFeed?.map((_) => {
                       return {
                         id: _,
                       };
@@ -179,7 +178,7 @@ export default function RelaysFeed({ allRelays, exit }) {
                 </div>
               </>
             )}
-            {selectedRelaysFeed.length === 0 && (
+            {selectedRelaysFeed?.length === 0 && (
               <div
                 className="fit-container fx-centered"
                 style={{ height: "150px" }}
@@ -213,7 +212,9 @@ export default function RelaysFeed({ allRelays, exit }) {
                         id: _,
                       };
                     })}
-                    setNewOrderedList={(data) => hanleDragInternalITemsForSets(data)}
+                    setNewOrderedList={(data) =>
+                      hanleDragInternalITemsForSets(data)
+                    }
                     component={RelaySetItem}
                     props={{
                       removeRelaySet,

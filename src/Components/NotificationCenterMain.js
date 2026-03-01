@@ -46,6 +46,7 @@ export default function NotificationCenterMain() {
       return _.type.type === contentFrom;
     });
   }, [notifications, contentFrom]);
+
   const switchContentSource = (source) => {
     if (source === contentFrom) return;
     setContentFrom(source);
@@ -55,6 +56,7 @@ export default function NotificationCenterMain() {
       behavior: "instant",
     });
   };
+
   const notificationsTypes = [
     { value: "all", display_name: t("AR9ctVs") },
     { value: "mentions", display_name: t("A8Da0of") },
@@ -71,6 +73,7 @@ export default function NotificationCenterMain() {
       behavior: "instant",
     });
   };
+
   return (
     <>
       <div
@@ -251,7 +254,7 @@ const Notification = React.memo(
       return getUser(event.pubkey) || getEmptyuserMetadata(event.pubkey);
     }, [nostrAuthors]);
     const [relatedEvent, setRelatedEvent] = useState(
-      getEventFromCache(event?.type?.id)
+      getEventFromCache(event?.type?.id),
     );
     const { postActions } = useNoteStats(event?.id, event?.pubkey);
 
@@ -260,7 +263,7 @@ const Notification = React.memo(
         event,
         userKeys.pub,
         relatedEvent,
-        user.display_name || user.name
+        user.display_name || user.name,
       );
     }, [event, userKeys, relatedEvent, user]);
 
@@ -422,7 +425,7 @@ const Notification = React.memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 const ActivateNotification = () => {

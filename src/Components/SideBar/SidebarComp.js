@@ -45,7 +45,7 @@ export default function SidebarComp() {
   const yakiChestStats = useSelector((state) => state.yakiChestStats);
   const isYakiChestLoaded = useSelector((state) => state.isYakiChestLoaded);
   const updatedActionFromYakiChest = useSelector(
-    (state) => state.updatedActionFromYakiChest
+    (state) => state.updatedActionFromYakiChest,
   );
 
   const [showConfirmationBox, setShowConfirmationBox] = useState(false);
@@ -152,7 +152,7 @@ export default function SidebarComp() {
         ].join("\n"),
         "text/plain",
         `NWCs-wallets.txt`,
-        t("AVUlnek")
+        t("AVUlnek"),
       );
       setShowSettings(false);
       logoutAllAccounts();
@@ -263,6 +263,19 @@ export default function SidebarComp() {
             </SidebarNavItem>
             <SidebarNavItem
               onClick={() => {
+                customHistory("/explore", true);
+              }}
+              isActive={isPage("/explore")}
+            >
+              <div
+                className={
+                  isPage("/explore") ? "discover-bold-24" : "discover-24"
+                }
+              ></div>
+              <div className="link-label">{t("ABxLOSx")}</div>
+            </SidebarNavItem>
+            <SidebarNavItem
+              onClick={() => {
                 customHistory("/articles", true);
               }}
               isActive={isPage("/articles")}
@@ -308,7 +321,8 @@ export default function SidebarComp() {
                 isActive={
                   isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
                   isPage(
-                    "/profile/" + nip19.nprofileEncode({ pubkey: userKeys.pub })
+                    "/profile/" +
+                      nip19.nprofileEncode({ pubkey: userKeys.pub }),
                   ) ||
                   isPage("/profile/" + userMetadata.nip05)
                 }
@@ -319,7 +333,7 @@ export default function SidebarComp() {
                     isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
                     isPage(
                       "/profile/" +
-                        nip19.nprofileEncode({ pubkey: userKeys.pub })
+                        nip19.nprofileEncode({ pubkey: userKeys.pub }),
                     ) ||
                     isPage("/profile/" + userMetadata.nip05)
                       ? "user-bold-24"

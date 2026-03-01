@@ -1878,11 +1878,11 @@ main {
     }
 }
 
-.convo-message .round-icon {
+.convo-message .convo-options {
     display: none;
 }
 
-.convo-message:hover .round-icon {
+.convo-message:hover .convo-options {
     display: flex;
 }
 
@@ -2379,7 +2379,8 @@ h1[id], h2[id], h3[id], h4[id], h5[id], h6[id] {
 }
 
 .note-txtarea {
-    height: calc(100% - 60px);
+    /* height: calc(100% - 60px); */
+    height: 100%;
 }
 
 .blur-box {

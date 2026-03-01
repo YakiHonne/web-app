@@ -33,6 +33,7 @@ const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
 const getContentFromValue = (contentSource) => {
   if (contentSource.group === "cf") return contentSource.value;
+  if (contentSource.group === "pf") return contentSource.value;
   if (contentSource.group === "mf") return "dvms";
   if (["af", "rsf"].includes(contentSource.group)) return "algo";
 };
@@ -259,15 +260,16 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       };
     }
 
+    let authors =
+      selectedCategory.group === "pf" ? selectedCategory.pTags : undefined;
+    if (selectedFilter.posted_by?.length > 0)
+      authors = selectedFilter.posted_by;
     return {
       filter: [
         {
           kinds: [1, 6],
           limit: 100,
-          authors:
-            selectedFilter.posted_by?.length > 0
-              ? selectedFilter.posted_by
-              : undefined,
+          authors,
           until,
           since,
         },
@@ -302,6 +304,13 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       if (selectedCategory.group === "af")
         algoRelay.push(selectedCategory.value);
       if (selectedCategory.group === "rsf") algoRelay = selectedCategory.relays;
+      if (selectedCategory.group === "cf" && notesContentFrom === "trending")
+        algoRelay = [
+          "wss://pyramid.fiatjaf.com/popular",
+          "wss://pyramid.fiatjaf.com/uppermost",
+          "wss://spatia-arcana.com/lux",
+          "wss://antiprimal.net/hot",
+        ];
       const data = await getSubData(filter, 250, algoRelay, ndk);
       setSubfilter({ filter, relays: algoRelay, ndk });
       events = data.data
@@ -338,10 +347,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       saveUsers(eventsPubkeys);
       if (tempEvents.length === 0) setIsLoading(false);
     };
-
     if (
       notesContentFrom &&
-      ["cf", "af", "rsf"].includes(selectedCategory?.group)
+      ["cf", "af", "rsf", "pf"].includes(selectedCategory?.group)
     ) {
       if (
         (["recent", "recent_with_replies"].includes(notesContentFrom) &&

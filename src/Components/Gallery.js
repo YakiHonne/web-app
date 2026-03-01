@@ -64,14 +64,14 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
                               headers: {
                                 Authorization: `Nostr ${encodeB64}`,
                               },
-                            }
+                            },
                           );
                           const mimeType = imageURL.headers["content-type"];
                           const base64 = btoa(
                             new Uint8Array(imageURL.data).reduce(
                               (data, byte) => data + String.fromCharCode(byte),
-                              ""
-                            )
+                              "",
+                            ),
                           );
 
                           return `data:${mimeType};base64,${base64}`;
@@ -79,7 +79,7 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
                           console.log(err);
                           return "";
                         }
-                      })
+                      }),
                     );
                     images = images
                       .filter((_) => _.status === "fulfilled")
@@ -88,7 +88,7 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
                       ...item,
                       newImg: images.length > 0 ? images[0] : "",
                     };
-                  })
+                  }),
                 );
                 fetchedImgs = fetchedImgs
                   .filter((_) => _.status === "fulfilled")
@@ -100,7 +100,7 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
                       return isThere.newImg ? isThere.newImg : item;
                     }
                     return item;
-                  })
+                  }),
                 );
               }
             }
@@ -124,7 +124,7 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
   };
 
   const authorizationEvent = (fileName) => {
-    const secKey = bytesTohex(generateSecretKey());
+    const secKey = generateSecretKey();
     let expiration = `${Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7}`;
     let event = {
       kind: 24242,

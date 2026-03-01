@@ -2,9 +2,12 @@ import dynamic from "next/dynamic";
 import React from "react";
 import HeadMetadata from "@/Components/HeadMetadata";
 
-const ClientComponent = dynamic(() => import("@/(PagesComponents)/Dashboard"), {
-  ssr: false,
-});
+const ClientComponent = dynamic(
+  () => import("@/(PagesComponents)/Dashboard/Dashboard"),
+  {
+    ssr: false,
+  },
+);
 
 export default function index() {
   let data = {

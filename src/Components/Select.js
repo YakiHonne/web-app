@@ -11,6 +11,7 @@ export default function Select({
   noBorder = false,
   animatedHover = true,
   header = null,
+  label = false,
 }) {
   const [showOptions, setShowOptions] = useState(false);
   const selectedValue = useMemo(() => {
@@ -38,20 +39,28 @@ export default function Select({
       ref={optionsRef}
     >
       <div
-        className={`fit-container fx-scattered if pointer ${animatedHover ? "option" : ""}`}
+        className={`fit-container fx-scattered fx-col fx-start-v pointer ${animatedHover ? "option" : ""} if`}
         style={{
-          height: "var(--40)",
-          padding: "1rem",
+          height: label ? "auto" : "var(--40)",
+          padding: ".5rem 1rem",
           minWidth: "max-content",
           border: noBorder ? "none" : "",
+          gap: label ? 0 : "4px",
         }}
         onClick={() => (disabled ? null : setShowOptions(!showOptions))}
       >
-        <div className="fx-centered">
-          {selectedValue?.left_el && selectedValue?.left_el}
-          <p>{selectedValue?.display_name || defaultLabel}</p>
+        {label && (
+          <div>
+            <p className="gray-c p-medium">{label}</p>
+          </div>
+        )}
+        <div className="fit-container fx-scattered">
+          <div className="fx-centered">
+            {selectedValue?.left_el && selectedValue?.left_el}
+            <p>{selectedValue?.display_name || defaultLabel}</p>
+          </div>
+          <div className="arrow-12"></div>
         </div>
-        <div className="arrow-12"></div>
       </div>
       {showOptions && (
         <div
