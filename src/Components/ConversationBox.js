@@ -7,9 +7,13 @@ import { useSelector } from "react-redux";
 import Emojis from "@/Components/Emojis";
 import Gifs from "@/Components/Gifs";
 import { useTranslation } from "react-i18next";
-import { sendMessage } from "@/Helpers/DMHelpers";
+import { deleteMessage, sendMessage } from "@/Helpers/DMHelpers";
+import OptionsDropdown from "./OptionsDropdown";
+import { copyText } from "@/Helpers/Helpers";
+import DeleteWarning from "./DeleteWarning";
 
 export function ConversationBox({ convo, back, noHeader = false }) {
+  let conversationLength = convo.convo.length;
   const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
   const convoContainerRef = useRef(null);
@@ -18,11 +22,13 @@ export function ConversationBox({ convo, back, noHeader = false }) {
   const [legacy, setLegacy] = useState(
     userKeys.sec || window?.nostr?.nip44
       ? localStorage?.getItem("legacy-dm")
-      : true
+      : true,
   );
-  const [replayOn, setReplayOn] = useState("");
+  const [replyOn, setReplyOn] = useState("");
   const [showProgress, setShowProgress] = useState(false);
   const [showGifs, setShowGifs] = useState(false);
+  const [multiDeletion, setMultiDeletion] = useState([]);
+  const [showDelete, setShowDelete] = useState(false);
   const peerName =
     convo?.display_name?.substring(0, 10) ||
     convo?.name?.substring(0, 10) ||
@@ -44,12 +50,12 @@ export function ConversationBox({ convo, back, noHeader = false }) {
     }
   }, [message]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!message || !convo.pubkey) return;
-    setMessage("");
-    setReplayOn(false);
     setShowProgress(true);
-    sendMessage(convo.pubkey, message);
+    await sendMessage(convo.pubkey, message, replyOn?.id);
+    setMessage("");
+    setReplyOn(false);
   };
 
   const getReply = (ID) => {
@@ -77,356 +83,474 @@ export function ConversationBox({ convo, back, noHeader = false }) {
     }
   };
 
+  const handleDelete = async () => {
+    let ids =
+      multiDeletion.length > 0
+        ? multiDeletion
+        : [showDelete.giftWrapId || showDelete.id];
+    await deleteMessage({
+      ids,
+      pubkey: convo.pubkey,
+    });
+    setShowDelete(false);
+    setMultiDeletion([]);
+  };
+
+  const handleSelectMessageToDelete = (convo, isSelected) => {
+    let id = convo.giftWrapId || convo.id;
+    if (isSelected) {
+      setMultiDeletion((prev) => prev.filter((id) => id !== id));
+    } else {
+      setMultiDeletion((prev) => [...prev, id]);
+    }
+    setReplyOn(false);
+  };
+
   if (!convo) return;
   return (
-    <div
-      className="fit-container fx-scattered fx-col"
-      style={{ height: "100%", rowGap: 0 }}
-    >
-      {!noHeader && (
-        <div
-          className="fit-container fx-scattered box-pad-h-m box-pad-v-m"
-          style={{ position: "sticky", top: 0 }}
-        >
-          <div className="fx-centered">
-            <div className="round-icon desk-hide" onClick={back}>
-              <div className="arrow arrow-back"></div>
-            </div>
-            <UserProfilePic
-              img={convo.picture}
-              size={40}
-              user_id={convo.pubkey}
-              mainAccountUser={false}
-            />
-            <div>
-              <p>
-                {convo.display_name?.substring(0, 10) ||
-                  convo.name?.substring(0, 10) ||
-                  convo.pubkey.substring(0, 10)}
-              </p>
-              <p className="p-medium gray-c">
-                @
-                {convo.name?.substring(0, 10) ||
-                  convo.display_name?.substring(0, 10)}
-              </p>
-            </div>
-          </div>
-          {(userKeys.sec || window?.nostr?.nip44) && (
-            <div
-              className="fx-centered round-icon-tooltip"
-              data-tooltip={legacy ? t("Al6NH4U") : t("AfN9sMV")}
-            >
-              <p className="p-medium slide-left">{t("ATta6yb")}</p>
-              <div
-                className={`toggle ${legacy ? "toggle-dim-gray" : ""} ${
-                  !legacy ? "toggle-green" : "toggle-dim-gray"
-                }`}
-                onClick={handleLegacyDMs}
-              ></div>
-            </div>
-          )}
-        </div>
+    <>
+      {showDelete && (
+        <DeleteWarning
+          exit={() => setShowDelete(false)}
+          handleDelete={handleDelete}
+          title={t("ARlLMMl")}
+          description={t("ABlFqJP")}
+        />
       )}
       <div
-        className="fx-centered fx-start-h fx-col box-pad-h-m box-pad-v-m fit-container"
-        style={{
-          height: noHeader ? "100%" : "calc(100% - 160px)",
-          overflow: "auto",
-          paddingTop: 0,
-        }}
-        ref={convoContainerRef}
+        className="fit-container fx-scattered fx-col"
+        style={{ height: "100%", rowGap: 0 }}
       >
-        {legacy && (
+        {!noHeader && (
           <div
-            className="fit-container"
-            style={{ position: "sticky", zIndex: 100, top: 0 }}
+            className="fit-container fx-scattered box-pad-h-m box-pad-v-m"
+            style={{ position: "sticky", top: 0 }}
           >
-            <div className="fit-container">
-              <div className="box-pad-h-m box-pad-v-m fx-centered fx-start-h fit-container sc-s-18">
-                <div className="info-tt-24"></div>
-                <div>
-                  <p className="c1-c p-medium">{t("AakbxOk")}</p>
-                </div>
+            <div className="fx-centered">
+              <div className="round-icon desk-hide" onClick={back}>
+                <div className="arrow arrow-back"></div>
               </div>
-            </div>
-          </div>
-        )}
-        {convo.convo.map((convo) => {
-          let reply = convo.replyID ? getReply(convo.replyID) : false;
-          return (
-            <div
-              key={convo.id}
-              className="fit-container fx-centered fx-col"
-              style={
-                reply
-                  ? {
-                      borderRight: convo.peer
-                        ? "2px solid var(--orange-main)"
-                        : "",
-                      borderLeft: !convo.peer
-                        ? "2px solid var(--orange-main)"
-                        : "",
-                      paddingRight: convo.peer ? "1rem" : "",
-                      paddingLeft: !convo.peer ? "1rem" : "",
-                    }
-                  : {}
-              }
-            >
-              {reply && (
-                <div
-                  className={`convo-message fit-container  fx-centered fx-col ${
-                    !convo.peer ? "fx-start-v" : "fx-end-v"
-                  }`}
-                >
-                  {convo.peer && reply.self && (
-                    <p className="p-italic p-medium orange-c">{t("ARPGCjx")}</p>
-                  )}
-                  {convo.peer && !reply.self && (
-                    <p className="p-italic p-medium orange-c">
-                      {t("AUvbLfk")} {peerName}
-                    </p>
-                  )}
-                  {!convo.peer && reply.self && (
-                    <p className="p-italic p-medium orange-c">
-                      {peerName} {t("AyI4PnF")}
-                    </p>
-                  )}
-                  {!convo.peer && !reply.self && (
-                    <p className="p-italic p-medium orange-c">
-                      {peerName} {t("AxbN1sx")} {peerName}
-                    </p>
-                  )}
-                  <div
-                    className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fx-start-h fx-start-v fx-col"
-                    style={{
-                      overflow: "visible",
-                      maxWidth: "min(90%, 500px)",
-                    }}
-                  >
-                    <div>{reply.content}</div>
-                  </div>
-                </div>
-              )}
-              <div
-                className={`convo-message fit-container  fx-centered ${
-                  !convo.peer ? "fx-start-h" : "fx-end-h"
-                }`}
-              >
-                {convo.peer && (
-                  <div>
-                    <div
-                      className="round-icon slide-left"
-                      style={{
-                        border: "none",
-                        minHeight: "32px",
-                        minWidth: "32px",
-                        backgroundColor: "var(--dim-gray)",
-                        transform: "scaleX(-1)",
-                      }}
-                      onClick={() => setReplayOn(convo)}
-                    >
-                      <p className="gray-c">&#x27A6;</p>
-                    </div>
-                  </div>
-                )}
-                <div
-                  className="sc-s-18 box-pad-h-s box-pad-v-s fx-centered fx-start-h fx-start-v fx-col"
-                  style={{
-                    backgroundColor: convo.peer
-                      ? "var(--orange-side)"
-                      : "var(--c1-side)",
-                    borderBottomLeftRadius: !convo.peer ? 0 : "inital",
-                    borderBottomRightRadius: convo.peer ? 0 : "inital",
-                    maxWidth: "min(90%, 500px)",
-                    minWidth: "300px",
-                    border: "none",
-                    overflow: "visible",
-                  }}
-                >
-                  {<div className="fit-container">{convo.content}</div> || (
-                    <LoadingDots />
-                  )}
-                  <div
-                    className="fx-centered fx-start-h round-icon-tooltip pointer fit-container"
-                    data-tooltip={
-                      convo.kind === 4 ? t("ALZCVV2") : t("ATta6yb")
-                    }
-                  >
-                    {convo.kind === 4 && (
-                      <>
-                        <div>
-                          <div className="unprotected"></div>
-                        </div>
-                        <p
-                          className="gray-c p-medium"
-                          style={{ fontStyle: "italic" }}
-                        >
-                          <Date_
-                            toConvert={new Date(convo.created_at * 1000)}
-                            time={true}
-                          />
-                        </p>
-                      </>
-                    )}
-                    {convo.kind !== 4 && (
-                      <>
-                        <div>
-                          <div className="protected"></div>
-                        </div>
-                        <p
-                          className="green-c p-medium"
-                          style={{ fontStyle: "italic" }}
-                        >
-                          <Date_
-                            toConvert={new Date(convo.created_at * 1000)}
-                            time={true}
-                          />
-                        </p>
-                      </>
-                    )}
-                  </div>
-                </div>
-                {!convo.peer && (
-                  <div>
-                    <div
-                      className="round-icon slide-right"
-                      style={{
-                        border: "none",
-                        minHeight: "32px",
-                        minWidth: "32px",
-                        backgroundColor: "var(--dim-gray)",
-                        transform: "scaleX(-1)",
-                      }}
-                      onClick={() => setReplayOn(convo)}
-                    >
-                      <p className="gray-c">&#x27A6;</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {showProgress && <SendingInProgress />}
-      {replayOn && (
-        <div
-          className="fit-container box-pad-h-m box-pad-v-m fx-scattered slide-up"
-          style={{
-            paddingBottom: 0,
-            borderTop: "1px solid var(--very-dim-gray)",
-          }}
-        >
-          <div>
-            <p className="gray-c p-medium">
-              {t("AoUrRsg")}{" "}
-              {replayOn.pubkey === userKeys.pub ? (
-                t("Aesj4ga")
-              ) : (
-                <>
+              <UserProfilePic
+                img={convo.picture}
+                size={40}
+                user_id={convo.pubkey}
+                mainAccountUser={false}
+              />
+              <div>
+                <p>
                   {convo.display_name?.substring(0, 10) ||
                     convo.name?.substring(0, 10) ||
                     convo.pubkey.substring(0, 10)}
-                </>
-              )}
-            </p>
-            <p className=" p-one-line" style={{ width: "min(90%, 500px)" }}>
-              {replayOn.raw_content}
-            </p>
+                </p>
+                <p className="p-medium gray-c">
+                  @
+                  {convo.name?.substring(0, 10) ||
+                    convo.display_name?.substring(0, 10)}
+                </p>
+              </div>
+            </div>
+            {(userKeys.sec || window?.nostr?.nip44) && (
+              <div
+                className="fx-centered round-icon-tooltip"
+                data-tooltip={legacy ? t("Al6NH4U") : t("AfN9sMV")}
+              >
+                <p className="p-medium slide-left">{t("ATta6yb")}</p>
+                <div
+                  className={`toggle ${legacy ? "toggle-dim-gray" : ""} ${
+                    !legacy ? "toggle-green" : "toggle-dim-gray"
+                  }`}
+                  onClick={handleLegacyDMs}
+                ></div>
+              </div>
+            )}
           </div>
-          <div
-            className="close"
-            style={{ position: "static" }}
-            onClick={() => setReplayOn(false)}
-          >
-            <div></div>
-          </div>
-        </div>
-      )}
-      <div className="fit-container box-pad-h-m box-pad-v-m fx-scattered">
-        <form
-          className="fit-container fx-scattered fx-end-v"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
+        )}
+        <div
+          className="fx-centered fx-start-h fx-col box-pad-h-m box-pad-v-m fit-container"
+          style={{
+            height: noHeader ? "100%" : "calc(100% - 160px)",
+            overflow: "auto",
+            paddingTop: 0,
           }}
+          ref={convoContainerRef}
         >
+          {legacy && (
+            <div
+              className="fit-container"
+              style={{ position: "sticky", zIndex: 100, top: 0 }}
+            >
+              <div className="fit-container">
+                <div className="box-pad-h-m box-pad-v-m fx-centered fx-start-h fit-container sc-s-18">
+                  <div className="info-tt-24"></div>
+                  <div>
+                    <p className="c1-c p-medium">{t("AakbxOk")}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          {convo.convo.map((convo, index) => {
+            let reply = convo.replyID ? getReply(convo.replyID) : false;
+            let isSelected = multiDeletion.includes(
+              convo.giftWrapId || convo.id,
+            );
+            let zIndex = convo.peer ? conversationLength - index : 0;
+            return (
+              <div
+                key={convo.id}
+                className="fit-container fx-centered fx-col"
+                style={
+                  reply
+                    ? {
+                        borderRight: convo.peer
+                          ? "2px solid var(--orange-main)"
+                          : "",
+                        borderLeft: !convo.peer
+                          ? "2px solid var(--orange-main)"
+                          : "",
+                        paddingRight: convo.peer ? "1rem" : "",
+                        paddingLeft: !convo.peer ? "1rem" : "",
+                        position: "relative",
+                        zIndex,
+                      }
+                    : { position: "relative", zIndex }
+                }
+              >
+                {reply && (
+                  <div
+                    className={`convo-message fit-container  fx-centered fx-col ${
+                      !convo.peer ? "fx-start-v" : "fx-end-v"
+                    }`}
+                  >
+                    {convo.peer && reply.self && (
+                      <p className="p-italic p-medium orange-c">
+                        {t("ARPGCjx")}
+                      </p>
+                    )}
+                    {convo.peer && !reply.self && (
+                      <p className="p-italic p-medium orange-c">
+                        {t("AUvbLfk")} {peerName}
+                      </p>
+                    )}
+                    {!convo.peer && reply.self && (
+                      <p className="p-italic p-medium orange-c">
+                        {peerName} {t("AyI4PnF")}
+                      </p>
+                    )}
+                    {!convo.peer && !reply.self && (
+                      <p className="p-italic p-medium orange-c">
+                        {peerName} {t("AxbN1sx")} {peerName}
+                      </p>
+                    )}
+                    <div
+                      className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fx-start-h fx-start-v fx-col"
+                      style={{
+                        overflow: "visible",
+                        maxWidth: "min(90%, 500px)",
+                      }}
+                    >
+                      <div>{reply.content}</div>
+                    </div>
+                  </div>
+                )}
+                <div
+                  className={`convo-message fit-container  fx-centered ${
+                    !convo.peer ? "fx-start-h" : "fx-end-h"
+                  }`}
+                >
+                  {convo.peer && (
+                    <div className="fx-centered">
+                      <div className="convo-options slide-left">
+                        {((convo.kind === 4 && convo.id) ||
+                          (convo.kind === 14 && convo.giftWrapId)) && (
+                          <OptionsDropdown
+                            displayLeft={false}
+                            parent={convoContainerRef}
+                            options={[
+                              <div
+                                className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                                onClick={() =>
+                                  copyText(convo.raw_content, t("Ae9XEnt"))
+                                }
+                              >
+                                <div className="copy"></div>
+                                <p>{t("AUkCrth")}</p>
+                              </div>,
+                              <div
+                                className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                                onClick={() =>
+                                  handleSelectMessageToDelete(convo, isSelected)
+                                }
+                              >
+                                <div
+                                  className="arrow"
+                                  style={{ rotate: "-90deg" }}
+                                ></div>
+                                <p>{t("AbqDpIH")}</p>
+                              </div>,
+                              <div
+                                className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                                onClick={() => setShowDelete(convo)}
+                              >
+                                <div className="trash"></div>
+                                <p className=" red-c">
+                                  {convo.kind === 4
+                                    ? t("AUyfblR")
+                                    : t("AvhC4K1")}
+                                </p>
+                              </div>,
+                            ]}
+                          />
+                        )}
+                      </div>
+                      <div
+                        className="convo-options round-icon slide-left"
+                        style={{
+                          border: "none",
+                          minHeight: "32px",
+                          minWidth: "32px",
+                          backgroundColor: "var(--dim-gray)",
+                          transform: "scaleX(-1)",
+                        }}
+                        onClick={() => setReplyOn(convo)}
+                      >
+                        <p className="gray-c">&#x27A6;</p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="fx-centered">
+                    <div
+                      className="sc-s-18 box-pad-h-s box-pad-v-s fx-centered fx-start-h fx-start-v fx-col"
+                      style={{
+                        backgroundColor: convo.peer
+                          ? "var(--orange-side)"
+                          : "var(--c1-side)",
+                        borderBottomLeftRadius: !convo.peer ? 0 : "inital",
+                        borderBottomRightRadius: convo.peer ? 0 : "inital",
+                        maxWidth: "min(90%, 500px)",
+                        minWidth: "300px",
+                        border: "none",
+                        overflow: "visible",
+                      }}
+                    >
+                      {<div className="fit-container">{convo.content}</div> || (
+                        <LoadingDots />
+                      )}
+                      <div
+                        className="fx-centered fx-start-h round-icon-tooltip pointer fit-container"
+                        data-tooltip={
+                          convo.kind === 4 ? t("ALZCVV2") : t("ATta6yb")
+                        }
+                      >
+                        {convo.kind === 4 && (
+                          <>
+                            <div>
+                              <div className="unprotected"></div>
+                            </div>
+                            <p
+                              className="gray-c p-medium"
+                              style={{ fontStyle: "italic" }}
+                            >
+                              <Date_
+                                toConvert={new Date(convo.created_at * 1000)}
+                                time={true}
+                              />
+                            </p>
+                          </>
+                        )}
+                        {convo.kind !== 4 && (
+                          <>
+                            <div>
+                              <div className="protected"></div>
+                            </div>
+                            <p
+                              className="green-c p-medium"
+                              style={{ fontStyle: "italic" }}
+                            >
+                              <Date_
+                                toConvert={new Date(convo.created_at * 1000)}
+                                time={true}
+                              />
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {convo.peer && multiDeletion.length > 0 && (
+                      <div
+                        className="fx-centered pointer"
+                        onClick={() =>
+                          handleSelectMessageToDelete(convo, isSelected)
+                        }
+                      >
+                        <div
+                          style={{ minWidth: "24px", minHeight: "24px" }}
+                          className="sc-s"
+                        >
+                          {isSelected && <div className="checkmark-24"></div>}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {!convo.peer && (
+                    <div>
+                      <div
+                        className="convo-options round-icon slide-right"
+                        style={{
+                          border: "none",
+                          minHeight: "32px",
+                          minWidth: "32px",
+                          backgroundColor: "var(--dim-gray)",
+                          transform: "scaleX(-1)",
+                        }}
+                        onClick={() => setReplyOn(convo)}
+                      >
+                        <p className="gray-c">&#x27A6;</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {showProgress && <SendingInProgress />}
+        {replyOn && (
           <div
-            className="sc-s-18 fx-centered fx-end-v fit-container"
+            className="fit-container box-pad-h-m box-pad-v-m fx-scattered slide-up"
             style={{
-              overflow: "visible",
-              backgroundColor: "transparent",
-              gap: 0,
+              paddingBottom: 0,
+              borderTop: "1px solid var(--very-dim-gray)",
             }}
           >
-            <textarea
-              // type="text"
-              className="if ifs-full if-no-border"
-              placeholder={t("A7a54es")}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              ref={inputFieldRef}
-              disabled={showProgress}
-              onKeyDown={handleKeyDown}
-              autoFocus
-              cols={5}
-              style={{
-                padding: ".75rem 0rem .75rem .75rem",
-                height: "20px",
-                // minHeight: "200px",
-                maxHeight: "200px",
-                borderRadius: 0,
-                // fontSize: "1.2rem",
-              }}
-            />
-            <div className="fx-centered" style={{ padding: ".75rem" }}>
-              <Emojis
-                position="right"
-                setEmoji={(data) =>
-                  setMessage(message ? `${message} ${data} ` : `${data} `)
-                }
-              />
-              <div style={{ position: "relative" }}>
-                <div
-                  className="p-small box-pad-v-s box-pad-h-s pointer fx-centered"
-                  style={{
-                    padding: ".125rem .25rem",
-                    border: "1px solid var(--gray)",
-                    borderRadius: "6px",
-                    backgroundColor: showGifs ? "var(--black)" : "transparent",
-                    color: showGifs ? "var(--white)" : "",
-                  }}
-                  onClick={() => {
-                    setShowGifs(!showGifs);
-                  }}
-                >
-                  GIFs
-                </div>
-                {showGifs && (
-                  <Gifs
-                    setGif={(data) => {
-                      setMessage(message ? `${message} ${data}` : data);
-                      setShowGifs(false);
-                    }}
-                    exit={() => setShowGifs(false)}
-                    position="right"
-                  />
+            <div>
+              <p className="gray-c p-medium">
+                {t("AoUrRsg")}{" "}
+                {replyOn.pubkey === userKeys.pub ? (
+                  t("Aesj4ga")
+                ) : (
+                  <>
+                    {convo.display_name?.substring(0, 10) ||
+                      convo.name?.substring(0, 10) ||
+                      convo.pubkey.substring(0, 10)}
+                  </>
                 )}
-              </div>
-              <UploadFile
-                round={false}
-                setImageURL={(data) => setMessage(`${message} ${data}`)}
-                setIsUploadsLoading={() => null}
-              />
+              </p>
+              <p className=" p-one-line" style={{ width: "min(90%, 500px)" }}>
+                {replyOn.raw_content}
+              </p>
+            </div>
+            <div
+              className="close"
+              style={{ position: "static" }}
+              onClick={() => setReplyOn(false)}
+            >
+              <div></div>
             </div>
           </div>
-          <div className="round-icon" onClick={handleSendMessage}>
-            <div className="send-24"></div>
+        )}
+        {multiDeletion.length === 0 && (
+          <div className="fit-container box-pad-h-m box-pad-v-m fx-scattered">
+            <form
+              className="fit-container fx-scattered fx-end-v"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+            >
+              <div
+                className="sc-s-18 fx-centered fx-end-v fit-container"
+                style={{
+                  overflow: "visible",
+                  backgroundColor: "transparent",
+                  gap: 0,
+                }}
+              >
+                <textarea
+                  // type="text"
+                  className="if ifs-full if-no-border"
+                  placeholder={t("A7a54es")}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  ref={inputFieldRef}
+                  disabled={showProgress}
+                  onKeyDown={handleKeyDown}
+                  autoFocus
+                  cols={5}
+                  style={{
+                    padding: ".75rem 0rem .75rem .75rem",
+                    maxHeight: "200px",
+                    borderRadius: 0,
+                  }}
+                />
+                <div className="fx-centered" style={{ padding: ".75rem" }}>
+                  <Emojis
+                    position="right"
+                    setEmoji={(data) =>
+                      setMessage(message ? `${message} ${data} ` : `${data} `)
+                    }
+                  />
+                  <div style={{ position: "relative" }}>
+                    <div
+                      className="p-small box-pad-v-s box-pad-h-s pointer fx-centered"
+                      style={{
+                        padding: ".125rem .25rem",
+                        border: "1px solid var(--gray)",
+                        borderRadius: "6px",
+                        backgroundColor: showGifs
+                          ? "var(--black)"
+                          : "transparent",
+                        color: showGifs ? "var(--white)" : "",
+                      }}
+                      onClick={() => {
+                        setShowGifs(!showGifs);
+                      }}
+                    >
+                      GIFs
+                    </div>
+                    {showGifs && (
+                      <Gifs
+                        setGif={(data) => {
+                          setMessage(message ? `${message} ${data}` : data);
+                          setShowGifs(false);
+                        }}
+                        exit={() => setShowGifs(false)}
+                        position="right"
+                      />
+                    )}
+                  </div>
+                  <UploadFile
+                    round={false}
+                    setImageURL={(data) => setMessage(`${message} ${data}`)}
+                    setIsUploadsLoading={() => null}
+                  />
+                </div>
+              </div>
+              <div className="round-icon" onClick={handleSendMessage}>
+                <div className="send-24"></div>
+              </div>
+            </form>
           </div>
-        </form>
+        )}
+        {multiDeletion.length > 0 && (
+          <div className="fit-container box-pad-h-m box-pad-v-m fx-centered">
+            <button
+              className="btn btn-gst-red fx"
+              onClick={() => setMultiDeletion([])}
+            >
+              {t("AB4BSCe")}
+            </button>
+            <button
+              className="btn btn-red fx"
+              onClick={() => setShowDelete(true)}
+            >
+              {t("ARlLMMl")}
+            </button>
+          </div>
+        )}
       </div>
-    </div>
+    </>
   );
 }
 

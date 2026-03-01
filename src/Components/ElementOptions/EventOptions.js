@@ -25,12 +25,15 @@ import Link from "next/link";
 import RelayImage from "../RelayImage";
 import useIsPinnedNote from "@/Hooks/useIsPinnedNote";
 import { removeEventStats } from "@/Helpers/DB";
+import DatePicker from "../DatePicker";
+import { publishScheduledEvent } from "@/Helpers/EventSchedulerHelper";
 
 export default function EventOptions({
   event,
   component,
   border,
   refreshAfterDeletion,
+  deleteTags = [],
 }) {
   const { t } = useTranslation();
   const { userProfile } = useUserProfile(event.pubkey);
@@ -55,6 +58,10 @@ export default function EventOptions({
   const [showEditCuration, setShowEditCuration] = useState(false);
   const [selectWalletToLink, setSelectWalletToLink] = useState(false);
   const [showDeletionWallet, setShowDeletionWallet] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedScheduleDate, setSelectedScheduleDate] = useState(
+    event.created_at,
+  );
 
   const rawEvent = {
     id: event.id,
@@ -81,6 +88,18 @@ export default function EventOptions({
     >
       <div className="add-note-24"></div>
       <p>{t("AB8DnjO")}</p>
+    </div>
+  );
+  const reschedule = (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        setShowDatePicker(event);
+      }}
+      className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
+    >
+      <div className="calendar-24"></div>
+      <p>{t("A9x72MB")}</p>
     </div>
   );
   const copyID = (
@@ -300,6 +319,18 @@ export default function EventOptions({
     </div>
   );
 
+  const publishNow = (
+    <div
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleRescheduleEvent();
+      }}
+    >
+      <div className="succeeded-events-24"></div>
+      <p>{t("AxIOpkH")}</p>
+    </div>
+  );
   const editVideo = (
     <div
       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
@@ -498,6 +529,8 @@ export default function EventOptions({
           shareLink,
           toDeleteEvent,
         ];
+      case "dashboardSchedule":
+        return [publishNow, reschedule, toDeleteEvent];
       case "dashboardSW":
         return [
           postAsNote,
@@ -637,6 +670,49 @@ export default function EventOptions({
     }
   };
 
+  const handleRescheduleEvent = async (rescheduleDate) => {
+    if (rescheduleDate) setSelectedScheduleDate(rescheduleDate);
+    let deleteEventTags = [["e", event.id], ...deleteTags];
+    let eventDelInitEx = await InitEvent(5, "Reschedule job", deleteEventTags);
+    if (!eventDelInitEx) {
+      setIsLoading(false);
+      return;
+    }
+    dispatch(
+      setToPublish({
+        eventInitEx: eventDelInitEx,
+        allRelays: event.relays,
+      }),
+    );
+    let dateToPublish = rescheduleDate || Math.ceil(Date.now() / 1000);
+    let eventInitEx = await InitEvent(
+      1,
+      event.content,
+      event.tags,
+      dateToPublish,
+    );
+
+    if (!eventInitEx) {
+      setIsLoading(false);
+      return;
+    }
+    if (rescheduleDate) {
+      let status = await publishScheduledEvent({
+        event: eventInitEx,
+        relays: event.relays,
+      });
+      if (status) refreshAfterDeletion();
+      return;
+    }
+    dispatch(
+      setToPublish({
+        eventInitEx: eventInitEx,
+        allRelays: event.relays,
+      }),
+    );
+    refreshAfterDeletion();
+  };
+
   const optionsItem = getOptionsItem();
 
   return (
@@ -669,6 +745,7 @@ export default function EventOptions({
           refresh={refreshAfterDeletion_}
           cancel={() => setDeleteEvent(false)}
           aTag={event.aTag}
+          tags={deleteTags}
         />
       )}
       {showRawEvent && (
@@ -678,6 +755,17 @@ export default function EventOptions({
         <LinkWallet
           exit={() => setSelectWalletToLink(false)}
           handleLinkWallet={linkWallet}
+        />
+      )}
+      {showDatePicker && (
+        <DatePicker
+          close={() => setShowDatePicker(false)}
+          remove={false}
+          selected={selectedScheduleDate}
+          onSelect={(data) => {
+            setShowDatePicker(false);
+            handleRescheduleEvent(data);
+          }}
         />
       )}
       {showDeletionWallet && (
@@ -690,162 +778,25 @@ export default function EventOptions({
           wallet={event}
         />
       )}
-      <OptionsDropdown
-        options={optionsItem}
-        border={border}
-        minWidth={180}
-        vertical={false}
-      />
+      {!(
+        showDeletionWallet ||
+        showEditVideo ||
+        showEditCuration ||
+        showAddArticleToCuration ||
+        postToNote ||
+        deleteEvent ||
+        showRawEvent
+      ) && (
+        <OptionsDropdown
+          options={optionsItem}
+          border={border}
+          minWidth={180}
+          vertical={false}
+        />
+      )}
     </>
   );
 }
-
-// const BroadcastEvent = ({ event }) => {
-//   const { t } = useTranslation();
-//   const dispatch = useDispatch();
-//   const userRelays = useSelector((state) => state.userRelays);
-//   const userKeys = useSelector((state) => state.userKeys);
-//   const isProtected = event.isProtected && userKeys.pub !== event.pubkey;
-//   const userFavRelays = useSelector((state) => state.userFavRelays);
-//   const [showRelays, setShowRelays] = useState(false);
-//   const allRelays = useMemo(() => {
-//     return [...new Set([...userRelays, ...(userFavRelays?.relays || [])])];
-//   }, [userRelays, userFavRelays]);
-
-//   const handleRepublish = async (relay) => {
-//     let rawEvent = {
-//       id: event.id,
-//       pubkey: event.pubkey,
-//       created_at: event.created_at,
-//       kind: event.kind,
-//       tags: event.tags,
-//       content: event.content,
-//       sig: event.sig,
-//     };
-//     dispatch(
-//       setToPublish({
-//         eventInitEx: rawEvent,
-//         allRelays: [relay],
-//       })
-//     );
-//     setShowRelays(false);
-//   };
-
-//   if (allRelays.length === 0) return null;
-//   return (
-//     <div
-//       onClick={(e) => {
-//         e.stopPropagation();
-//         setShowRelays(!showRelays);
-//       }}
-//       style={{
-//         position: "relative",
-//         cursor: isProtected ? "not-allowed" : "pointer",
-//       }}
-//       className="pointer fx-scattered fit-container box-pad-h-s box-pad-v-s option-no-scale"
-//       onMouseEnter={() => setShowRelays(true)}
-//       onMouseLeave={() => setShowRelays(false)}
-//     >
-//       {showRelays && !isProtected && (
-//         <div
-//           style={{
-//             position: "absolute",
-//             top: "50%",
-//             left: "-5px",
-//             minWidth: "max-content",
-//             transform: "translate(-100%, -50%)",
-//             maxHeight: "400px",
-//             overflow: "scroll",
-//             gap: 0,
-//           }}
-//           onMouseLeave={() => setShowRelays(false)}
-//           className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
-//         >
-//           <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
-//           {userFavRelays?.relays.map((_) => {
-//             return (
-//               <div
-//                 key={_}
-//                 className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
-//                 onClick={() => handleRepublish(_)}
-//               >
-//                 <div style={{ position: "relative" }}>
-//                   <RelayImage url={_} size={30} />
-//                   <div
-//                     style={{
-//                       position: "absolute",
-//                       right: "-10px",
-//                       bottom: "-10px",
-//                       zIndex: 10,
-//                       scale: ".65",
-//                     }}
-//                   >
-//                     <div
-//                       className="round-icon-small round-icon-tooltip"
-//                       data-tooltip={t("Ay0vA4Z")}
-//                       style={{
-//                         backgroundColor: "var(--white)",
-//                         border: "none",
-//                       }}
-//                     >
-//                       <div className="star-24"></div>
-//                     </div>
-//                   </div>
-//                 </div>
-//                 <p className="p-one-line">{_}</p>
-//               </div>
-//             );
-//           })}
-//           {userRelays.map((_) => {
-//             if (!userFavRelays?.relays.includes(_))
-//               return (
-//                 <div
-//                   key={_}
-//                   className="fx-shrink  fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
-//                   onClick={() => handleRepublish(_)}
-//                 >
-//                   <RelayImage url={_} size={30} />
-//                   <p className="p-one-line">{_}</p>
-//                 </div>
-//               );
-//           })}
-//         </div>
-//       )}
-//       {showRelays && isProtected && (
-//         <div
-//           style={{
-//             position: "absolute",
-//             top: "50%",
-//             left: "-5px",
-//             width: "200px",
-//             transform: "translate(-100%, -50%)",
-//             maxHeight: "600px",
-//             overflow: "scroll",
-//             gap: 0,
-//           }}
-//           onMouseLeave={() => setShowRelays(false)}
-//           className=" fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-m"
-//         >
-//           <div className="fx-centered fx-centered fx-col">
-//             <div className="protected-2-24"></div>
-//             <p className="gray-c p-centered">{t("AqqpEOw")}</p>
-//           </div>
-//         </div>
-//       )}
-//       <div className="fx-centered">
-//         <div
-//           className="republish-24"
-//           style={{ opacity: isProtected ? 0.5 : 1 }}
-//         ></div>
-//         <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
-//       </div>
-//       <div
-//         className="arrow"
-//         style={{ rotate: "-90deg", opacity: isProtected ? 0.5 : 1 }}
-//       ></div>
-//     </div>
-//   );
-// };
 
 const BroadcastEvent = ({ event }) => {
   const { t } = useTranslation();

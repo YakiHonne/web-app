@@ -14,16 +14,20 @@ export default function NotificationCenter({
 }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const { newNotifications } = useNotifications();
 
-  const { notReadNotifications, newNotifications } = useNotifications();
   useEffect(() => {
-    if (newNotifications.lenght > 0) {
-      dispatch(
-        setToast({
-          type: 1,
-          desc: t("AtbtAF9"),
-        })
-      );
+    if (newNotifications.length > 0) {
+      const createdAt = newNotifications[0].created_at;
+      const current = Math.floor(Date.now() / 1000);
+      if (current - createdAt < 10) {
+        dispatch(
+          setToast({
+            type: 1,
+            desc: t("AtbtAF9"),
+          }),
+        );
+      }
     }
   }, [newNotifications]);
 
@@ -51,7 +55,7 @@ export default function NotificationCenter({
           </div>
         )}
       </div>
-      {notReadNotifications !== 0 && (
+      {newNotifications.length !== 0 && (
         <div
           className="fx-centered p-bold link-label"
           style={{
@@ -62,11 +66,11 @@ export default function NotificationCenter({
             fontSize: "14px",
           }}
         >
-          {notReadNotifications > 99
+          {newNotifications.length > 99
             ? `+99`
-            : notReadNotifications >= 10
-            ? `${notReadNotifications}`
-            : `0${notReadNotifications}`}
+            : newNotifications.length >= 10
+              ? `${newNotifications.length}`
+              : `0${newNotifications.length}`}
         </div>
       )}
     </SidebarNavItem>

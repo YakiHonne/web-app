@@ -1,11 +1,7 @@
-// decryptDMS.worker.js
-
-// import { saveUsers } from "../Helpers/DB.js";
 import { decrypt04, unwrapGiftWrap } from "../Helpers/DMsSypher";
 
 onmessage = async (e) => {
   const { inbox, userKeys } = e.data;
-
   try {
     let authors = [];
     let until = Math.floor(Date.now() / 1000);
@@ -59,6 +55,7 @@ onmessage = async (e) => {
               let replyID = reply ? reply[1] : "";
 
               let tempEvent = {
+                giftWrapId: event.id,
                 id: unwrappedEvent.id,
                 created_at: unwrappedEvent.created_at,
                 content: unwrappedEvent.content,
@@ -75,7 +72,7 @@ onmessage = async (e) => {
             console.log(err);
           }
         }
-      })
+      }),
     );
 
     // await saveUsers(authors);

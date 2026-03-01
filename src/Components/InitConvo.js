@@ -14,7 +14,7 @@ export default function InitiConvo({ exit, receiver = false }) {
   const [legacy, setLegacy] = useState(
     userKeys.sec || window?.nostr?.nip44
       ? localStorage.getItem("legacy-dm")
-      : true
+      : true,
   );
   const [isLoading, setIsLoading] = useState(false);
 

@@ -29,38 +29,38 @@ export function CustomizationManagement({
   const { query } = useRouter();
   const customSettings = getCustomSettings();
   const [showFeedSettings, setShowFeedSettings] = useState(
-    query.tab === "customization" ? true : false
+    query.tab === "customization" ? true : false,
   );
   const [homeContentSuggestion, setHomeContentSuggestion] = useState(
-    localStorage_?.getItem("hsuggest")
+    localStorage_?.getItem("hsuggest"),
   );
   const [userToFollowSuggestion, setUserToFollowSuggestion] = useState(
-    localStorage_?.getItem("hsuggest1")
+    localStorage_?.getItem("hsuggest1"),
   );
   const [contentSuggestion, setContentSuggestion] = useState(
-    localStorage_?.getItem("hsuggest2")
+    localStorage_?.getItem("hsuggest2"),
   );
   const [interestSuggestion, setInterestSuggestion] = useState(
-    localStorage_?.getItem("hsuggest3")
+    localStorage_?.getItem("hsuggest3"),
   );
   const [collapsedNote, setCollapsedNote] = useState(
     customSettings.collapsedNote === undefined
       ? true
-      : customSettings.collapsedNote
+      : customSettings.collapsedNote,
   );
   const [blurNonFollowedMedia, setBlurNonFollowedMedia] = useState(
     customSettings.blurNonFollowedMedia === undefined
       ? true
-      : customSettings.blurNonFollowedMedia
+      : customSettings.blurNonFollowedMedia,
   );
   const [userHoverPreview, setUserHoverPreview] = useState(
-    customSettings.userHoverPreview
+    customSettings.userHoverPreview,
   );
   const [longPress, setLongPress] = useState(
-    customSettings.longPress || "notes"
+    customSettings.longPress || "notes",
   );
   const [defaultReaction, setDefaultReaction] = useState(
-    customSettings.defaultReaction || "❤️"
+    customSettings.defaultReaction || "❤️",
   );
   const [reactionsSettings, setReactionsSettings] = useState(
     customSettings.reactionsSettings || [
@@ -69,18 +69,16 @@ export function CustomizationManagement({
       { reaction: "repost", status: true },
       { reaction: "quote", status: true },
       { reaction: "zap", status: true },
-    ]
+    ],
   );
   const [oneTapReaction, setOneTapReaction] = useState(
-    customSettings.oneTapReaction || false
+    customSettings.oneTapReaction || false,
   );
-  const [linkPreview, setLinkPreview] = useState(
-    customSettings.linkPreview
-  );
+  const [linkPreview, setLinkPreview] = useState(customSettings.linkPreview);
   const [repliesView, setRepliesView] = useState(
     ["thread", "box"].includes(customSettings.repliesView)
       ? customSettings.repliesView
-      : "thread"
+      : "thread",
   );
 
   const notification = customSettings.notification;
@@ -93,6 +91,10 @@ export function CustomizationManagement({
     {
       display_name: t("AesMg52"),
       value: "articles",
+    },
+    {
+      display_name: t("A0i2SOt"),
+      value: "mu",
     },
     {
       display_name: t("A2mdxcf"),
@@ -511,8 +513,7 @@ const FeedSettings = ({
             <div
               className="fx fx-centered fx-col sc-s-18 bg-sp "
               style={{
-                borderColor:
-                  repliesView !== "thread" ? "" : "var(--c1)",
+                borderColor: repliesView !== "thread" ? "" : "var(--c1)",
               }}
               onClick={() => handleRepliesView("thread")}
             >
@@ -553,10 +554,7 @@ const FeedSettings = ({
             <p>{t("AOk5664")}</p>
             <p className="p-medium gray-c">{t("Adyp37d")}</p>
           </div>
-          <Toggle
-            status={linkPreview}
-            setStatus={handleLinkPreview}
-          />
+          <Toggle status={linkPreview} setStatus={handleLinkPreview} />
         </div>
         <div className="fx-centered fx-col fx-start-h fx-start-v fit-container">
           <div>
@@ -743,7 +741,7 @@ const PostReactionsPreview = () => {
         acc[reaction] = { index, status };
         return acc;
       },
-      {}
+      {},
     );
     return {
       likes: reactionsOrder.likes.status ? reactionsOrder.likes.index + 1 : -1,

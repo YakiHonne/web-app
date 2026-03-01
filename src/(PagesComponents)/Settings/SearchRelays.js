@@ -23,7 +23,6 @@ export function SearchRelays({ setShowRelaysInfo, allRelays }) {
   const suggestedRelays = useMemo(() => {
     let relays = [
       "wss://search.nos.today",
-      "wss://relay.nostr.band",
       "wss://relay.ditto.pub",
       "wss://nostr.polyserv.xyz",
     ];
@@ -49,7 +48,7 @@ export function SearchRelays({ setShowRelaysInfo, allRelays }) {
       setSearchRelaysStatus(
         userSearchRelays.map((item) => {
           return { url: item, connected: false };
-        })
+        }),
       );
     } catch (err) {
       console.log(err);
@@ -70,7 +69,7 @@ export function SearchRelays({ setShowRelaysInfo, allRelays }) {
               let relayStatus = tempNDK.pool.getRelay(relay.url);
               return { url: relay.url, connected: relayStatus.connected };
             }
-          })
+          }),
         );
         setSearchRelaysStatus(res);
       } catch (err) {}
@@ -105,7 +104,7 @@ export function SearchRelays({ setShowRelaysInfo, allRelays }) {
     dispatch(
       setToPublish({
         eventInitEx: event,
-      })
+      }),
     );
   };
 

@@ -1,7 +1,10 @@
 import RelayImage from "@/Components/RelayImage";
 import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 
-export default function ContentFeedCategoryPreview({ category, minimal = false }) {
+export default function ContentFeedCategoryPreview({
+  category,
+  minimal = false,
+}) {
   if (category.group === "cf") {
     return (
       <div className="fx-centered">
@@ -38,6 +41,11 @@ export default function ContentFeedCategoryPreview({ category, minimal = false }
         {category.value === "global" && (
           <div>
             <div className="globe-24"></div>
+          </div>
+        )}
+        {category.value === "trending" && (
+          <div>
+            <div className="trending-up-24"></div>
           </div>
         )}
         <p className="p-maj p-one-line">{category.display_name}</p>
@@ -89,6 +97,37 @@ export default function ContentFeedCategoryPreview({ category, minimal = false }
         <div>
           <p className="p-one-line">{category.title}</p>
           <p className="p-medium gray-c p-one-line">{category.title}</p>
+        </div>
+      </div>
+    );
+  }
+  if (category.group === "pf") {
+    return (
+      <div className="fx-centered">
+        <div
+          style={{
+            minWidth: minimal ? "32px" : "40px",
+            minHeight: minimal ? "32px" : "40px",
+            borderRadius: "var(--border-r-50)",
+            backgroundColor: "var(--white)",
+            backgroundImage: `url(${category.image})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+          className="fx-centered"
+        >
+          {!category.image && (
+            <p
+              className={`p-bold p-caps `}
+              style={{ position: "relative", zIndex: 1 }}
+            >
+              {category.title.charAt(0)}
+            </p>
+          )}
+        </div>
+        <div>
+          <p className="p-one-line">{category.title}</p>
+          <p className="p-medium gray-c p-one-line">{category.description}</p>
         </div>
       </div>
     );

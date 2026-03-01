@@ -6,6 +6,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import axios from "axios";
 import CommunityFeed from "./CommunityFeed";
 import RelaysFeed from "./RelaysFeed";
+import ContentPacks from "./ContentPacks";
 
 const mixedContentDefaultCF = [
   ["top", true],
@@ -44,7 +45,11 @@ export default function CustomizeContentSource({
     let communityIndex = sources.findIndex((_) => _.value === "cf");
     let communityList =
       sources[communityIndex].list.map((_) => [_.value, _.enabled]) ||
-      (type === 1 ? mixedContentDefaultCF : type === 2 ? NotesDefaultCF : MediaDefaultCF);
+      (type === 1
+        ? mixedContentDefaultCF
+        : type === 2
+          ? NotesDefaultCF
+          : MediaDefaultCF);
 
     return {
       ...userAppSettings?.settings,
@@ -64,7 +69,7 @@ export default function CustomizeContentSource({
     const fetchData = async () => {
       try {
         const data = await axios.get(
-          "https://cache-v2.yakihonne.com/api/v1/relays"
+          "https://cache-v2.yakihonne.com/api/v1/relays",
         );
         setAllRelays(data.data);
       } catch {}
@@ -79,11 +84,7 @@ export default function CustomizeContentSource({
   const updateCommunityFeed = async () => {
     try {
       let tempSettings = structuredClone(optionsToSave);
-
-      delete tempSettings.content_sources[
-        contentTypes[type]
-      ].relays;
-
+      delete tempSettings.content_sources[contentTypes[type]].relays;
       const event = {
         kind: 30078,
         content: JSON.stringify(tempSettings),
@@ -101,7 +102,7 @@ export default function CustomizeContentSource({
         event.kind,
         event.content,
         event.tags,
-        undefined
+        undefined,
       );
       if (!eventInitEx) {
         return;
@@ -110,7 +111,7 @@ export default function CustomizeContentSource({
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
       exit();
     } catch (err) {
@@ -133,7 +134,7 @@ export default function CustomizeContentSource({
           overflow: "visible",
           position: "relative",
           marginTop: "3rem",
-          width: "min(100%, 500px)",
+          width: "min(100%, 600px)",
           gap: 0,
         }}
         onClick={(e) => e.stopPropagation()}
@@ -180,18 +181,17 @@ export default function CustomizeContentSource({
             >
               {t("A8Y9rVt")}
             </div>
+            <div
+              className={`list-item-b fx-centered fx ${
+                category === 3 ? "selected-list-item-b" : ""
+              }`}
+              onClick={() => setCategory(3)}
+            >
+              {type !== 3 ? t("AVzZUeP") : t("AusIycI")}
+            </div>
           </div>
         </div>
         {category === 1 && <RelaysFeed allRelays={allRelays} exit={exit} />}
-        {/* {category === 1 && (
-          <RelaysFeed
-            selectedRelaysFeed={selectedRelaysFeed}
-            setSelectedRelaysFeed={setSelectedRelaysFeed}
-            allRelays={allRelays}
-            update={updateRelaysFeed}
-            setSources={setSources}
-          />
-        )} */}
         {category === 2 && (
           <CommunityFeed
             sources={sources}
@@ -199,6 +199,7 @@ export default function CustomizeContentSource({
             update={updateCommunityFeed}
           />
         )}
+        {category === 3 && <ContentPacks exit={exit} type={type} />}
       </div>
     </div>
   );

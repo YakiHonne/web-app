@@ -57,10 +57,7 @@ export default function useNotifications() {
         isNew: false,
       };
     });
-    localStorage.setItem(
-      `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications),
-    );
+    saveInLocalStorage(notifications);
     dispatch(updateNotifications(notifications));
   };
   const handleUnreadAll = () => {
@@ -71,30 +68,21 @@ export default function useNotifications() {
         isNew: false,
       };
     });
-    localStorage.setItem(
-      `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications),
-    );
+    saveInLocalStorage(notifications);
     dispatch(updateNotifications(notifications));
   };
   const handleRead = (index) => {
     let notifications = structuredClone(globalNotifications);
     notifications[index].isRead = true;
     notifications[index].isNew = false;
-    localStorage.setItem(
-      `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications),
-    );
+    saveInLocalStorage(notifications);
     dispatch(updateNotifications(notifications));
   };
   const handleUnRead = (index) => {
     let notifications = structuredClone(globalNotifications);
     notifications[index].isRead = false;
     notifications[index].isNew = false;
-    localStorage.setItem(
-      `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications),
-    );
+    saveInLocalStorage(notifications);
     dispatch(updateNotifications(notifications));
   };
 
@@ -105,11 +93,21 @@ export default function useNotifications() {
         isNew: false,
       };
     });
-    localStorage.setItem(
-      `notificationsSet_${userKeys.pub}`,
-      JSON.stringify(notifications),
-    );
+    saveInLocalStorage(notifications);
     dispatch(updateNotifications(notifications));
+  };
+
+  const saveInLocalStorage = (notifications) => {
+    try {
+      localStorage.setItem(
+        `notificationsSet_${userKeys.pub}`,
+        JSON.stringify(notifications),
+      );
+    } catch (err) {
+      if (notifications.length > 300) {
+        saveInLocalStorage(notifications.slice(0, notifications.length - 20));
+      }
+    }
   };
 
   return {

@@ -55,6 +55,8 @@ if (typeof window !== "undefined") {
     cashuHistory: "",
     sentTokensAsHash: "",
     nutZaps: "",
+    starterPacks: "",
+    mediaPacks: "",
   });
 }
 export { db, ndkdb };
@@ -177,6 +179,29 @@ export const getRelaysSet = async (pubkey) => {
   } else return { last_timestamp: undefined };
 };
 
+export const getStarterPacks = async (pubkey) => {
+  if (db) {
+    try {
+      let relays = await db.table("starterPacks").get(pubkey);
+      return relays || { last_timestamp: undefined };
+    } catch (err) {
+      console.log(err);
+      return { last_timestamp: undefined };
+    }
+  } else return { last_timestamp: undefined };
+};
+export const getMediaPacks = async (pubkey) => {
+  if (db) {
+    try {
+      let relays = await db.table("mediaPacks").get(pubkey);
+      return relays || { last_timestamp: undefined };
+    } catch (err) {
+      console.log(err);
+      return { last_timestamp: undefined };
+    }
+  } else return { last_timestamp: undefined };
+};
+
 export const getPinnedNotes = async (pubkey) => {
   if (db) {
     try {
@@ -231,7 +256,7 @@ export const getFavRelays = async (pubkey) => {
       let fav = await db.table("favrelays").get(pubkey);
       let sets =
         fav && !fav.sets
-          ? fav.tags.filter((tag) => tag[0] === "a").map((tag) => tag[1])
+          ? fav.tags?.filter((tag) => tag[0] === "a").map((tag) => tag[1]) || []
           : fav.sets;
       return { ...fav, sets } || { relays: [], sets: [] };
     } catch (err) {
@@ -841,6 +866,60 @@ export const saveRelaysSet = async (relaysSets, pubkey) => {
   }
 };
 
+export const saveStarterPacks = async (starterPacks, pubkey) => {
+  if (db) {
+    try {
+      if (starterPacks.length === 0) return;
+      let oldMap = await getStarterPacks(pubkey);
+      let last_timestamp = starterPacks.sort(
+        (ev1, ev2) => ev2.created_at - ev1.created_at,
+      )[0].created_at;
+      let fullSets = { last_timestamp: last_timestamp };
+      for (let set of starterPacks) {
+        let identifierTags = set.tags.find((_) => _[0] === "d");
+        let identifier = identifierTags ? identifierTags[1] : nanoid();
+        let aTag = `${set.kind}:${set.pubkey}:${identifier}`;
+        fullSets[aTag] = set;
+      }
+      let setMap = { ...oldMap, ...fullSets };
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.starterPacks, async () => {
+          await db.starterPacks.put(setMap, pubkey);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+
+export const saveMediaPacks = async (mediaPacks, pubkey) => {
+  if (db) {
+    try {
+      if (mediaPacks.length === 0) return;
+      let oldMap = await getMediaPacks(pubkey);
+      let last_timestamp = mediaPacks.sort(
+        (ev1, ev2) => ev2.created_at - ev1.created_at,
+      )[0].created_at;
+      let fullSets = { last_timestamp: last_timestamp };
+      for (let set of mediaPacks) {
+        let identifierTags = set.tags.find((_) => _[0] === "d");
+        let identifier = identifierTags ? identifierTags[1] : nanoid();
+        let aTag = `${set.kind}:${set.pubkey}:${identifier}`;
+        fullSets[aTag] = set;
+      }
+      let setMap = { ...oldMap, ...fullSets };
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.mediaPacks, async () => {
+          await db.mediaPacks.put(setMap, pubkey);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+
 export const deleteRelaysSet = async (setID, pubkey) => {
   if (db) {
     try {
@@ -849,6 +928,36 @@ export const deleteRelaysSet = async (setID, pubkey) => {
       await Dexie.ignoreTransaction(async () => {
         await db.transaction("rw", db.relaysSet, async () => {
           await db.relaysSet.put(currentSet, pubkey);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+export const deleteStarterPack = async (packID, pubkey) => {
+  if (db) {
+    try {
+      let currentSet = await getStarterPacks(pubkey);
+      delete currentSet[packID];
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.starterPacks, async () => {
+          await db.starterPacks.put(currentSet, pubkey);
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+export const deleteMediaPack = async (packID, pubkey) => {
+  if (db) {
+    try {
+      let currentSet = await getMediaPacks(pubkey);
+      delete currentSet[packID];
+      await Dexie.ignoreTransaction(async () => {
+        await db.transaction("rw", db.mediaPacks, async () => {
+          await db.mediaPacks.put(currentSet, pubkey);
         });
       });
     } catch (err) {
@@ -885,7 +994,9 @@ export const saveAppSettings = async (event, pubkey, lastTimestamp) => {
 export const saveUsers = async (pubkeys) => {
   if (db) {
     try {
-      const users_pubkeys = [...new Set(pubkeys)].filter((_) => _);
+      const users_pubkeys = [...new Set(pubkeys)].filter(
+        (_) => typeof _ === "string",
+      );
       const data = await getSubData(
         [{ kinds: [0], authors: users_pubkeys }],
         400,
@@ -1201,6 +1312,24 @@ export const saveCashuHistory = async (event, pubkey, lastTimestamp) => {
   }
 };
 
+export const removeMessage = async ({ ids = [], convoId }) => {
+  try {
+    let convo = await db.table("chatrooms").get(convoId);
+    const chatroomData = {
+      ...convo,
+      convo: convo.convo.filter(
+        (_) => !(ids.includes(_.id) || ids.includes(_.giftWrapId)),
+      ),
+    };
+    await Dexie.ignoreTransaction(async () => {
+      await db.transaction("rw", db.chatrooms, async () => {
+        await db.chatrooms.put(chatroomData, convoId);
+      });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 const removeTokens = async (ids = [], pubkey) => {
   try {
     if (ids?.length === 0) return;

@@ -88,13 +88,13 @@ export default function RelaySetItem({
               className="btn btn-normal btn-gst-red btn-small"
               onClick={() => setInitiateDeletion(false)}
             >
-              Cancel
+              {t("AB4BSCe")}
             </button>
             <button
               className="btn btn-normal btn-red btn-small"
               onClick={() => removeRelaySet(index)}
             >
-              Delete
+              {t("Almq94P")}
             </button>
           </div>
         )}

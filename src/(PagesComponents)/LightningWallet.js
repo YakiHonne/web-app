@@ -23,7 +23,7 @@ import { getZapEventRequest } from "@/Helpers/NostrPublisher";
 import AddWallet from "@/Components/AddWallet";
 import UserSearchBar from "@/Components/UserSearchBar";
 import NProfilePreviewer from "@/Components/NProfilePreviewer";
-import { copyText } from "@/Helpers/Helpers";
+import { copyText, sleepTimer } from "@/Helpers/Helpers";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserBalance } from "@/Store/Slides/UserData";
@@ -168,8 +168,11 @@ export default function LightningWallet() {
 
   useEffect(() => {
     if (route === "/lightning-wallet" && walletBalance) {
+      const w = getWallets();
       localStorage.setItem("selectedWalletType", route);
       dispatch(setUserBalance(walletBalance));
+      setWallets(w);
+      setSelectedWallet(w.find((wallet) => wallet.active));
     }
   }, [route, walletBalance]);
 
@@ -180,15 +183,15 @@ export default function LightningWallet() {
       }
     };
 
-    document.addEventListener("mousedown", handleOffClick);
+    document.addEventListener("click", handleOffClick);
     return () => {
-      document.removeEventListener("mousedown", handleOffClick);
+      document.removeEventListener("click", handleOffClick);
     };
   }, [walletListRef]);
 
   const getBalancWebLN = async () => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       await window.webln.enable();
       let data = await window.webln.getBalance();
       setIsLoading(false);
@@ -200,7 +203,7 @@ export default function LightningWallet() {
   };
   const getAlbyData = async (activeWallet) => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       let checkTokens = await checkAlbyToken(wallets, activeWallet);
       let b = await getBalanceAlbyAPI(
         checkTokens.activeWallet.data.access_token,
@@ -256,7 +259,7 @@ export default function LightningWallet() {
 
   const getNWCData = async (activeWallet) => {
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
       const nwc = new webln.NWC({ nostrWalletConnectUrl: activeWallet.data });
       await nwc.enable();
       const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 90;
@@ -320,6 +323,12 @@ export default function LightningWallet() {
   const handleSelectPageTab = (tab) => {
     if (tab === 1) customHistory("/cashu-wallet");
   };
+
+  const onPaid = (amount) => {
+    setOps("");
+    setWalletBalance(walletBalance + amount);
+  };
+
   return (
     <>
       {showAddWallet && (
@@ -343,6 +352,7 @@ export default function LightningWallet() {
           wallets={wallets}
           selectedWallet={selectedWallet}
           setWallets={setWallets}
+          onPaid={onPaid}
         />
       )}
       <div>
@@ -1453,13 +1463,89 @@ const SendPayment = ({
   );
 };
 
-const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
+const ReceivePayment = ({
+  exit,
+  wallets,
+  selectedWallet,
+  setWallets,
+  onPaid,
+}) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const [comment, setComment] = useState("");
   const [amount, setAmount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [invoiceRequest, setInvoiceRequest] = useState(false);
+  const [triggerNWC, setTriggerNWC] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    let nwcInstance = null;
+
+    const generateWithNWC = async () => {
+      try {
+        if (!triggerNWC) return;
+        setIsLoading(true);
+
+        const nwc = new webln.NWC({
+          nostrWalletConnectUrl: selectedWallet.data,
+        });
+
+        nwcInstance = nwc;
+
+        await nwc.enable();
+
+        if (cancelled) return;
+
+        const invoice = await nwc.makeInvoice({
+          defaultMemo: comment,
+          amount,
+        });
+
+        if (cancelled) return;
+
+        setIsLoading(false);
+        setInvoiceRequest(invoice.paymentRequest);
+
+        while (!cancelled) {
+          const lookup = await nwc.lookupInvoice(invoice);
+          console.log(lookup.paid);
+          if (cancelled) break;
+
+          if (lookup.preimage) {
+            onPaid(amount);
+            break;
+          }
+
+          await sleepTimer(2000);
+        }
+
+        nwc.close();
+      } catch (err) {
+        console.log(err);
+
+        if (!cancelled) {
+          setIsLoading(false);
+
+          if (err?.includes("User rejected")) return;
+
+          dispatch(
+            setToast({
+              type: 2,
+              desc: t("Acr4Slu"),
+            }),
+          );
+        }
+      }
+    };
+
+    generateWithNWC();
+
+    return () => {
+      cancelled = true;
+      if (nwcInstance) nwcInstance.close();
+    };
+  }, [triggerNWC]);
 
   const generateWithWebLN = async () => {
     try {
@@ -1474,7 +1560,7 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
     } catch (err) {
       console.log(err);
       setIsLoading(false);
-      if (err.includes("User rejected")) return;
+      if (err?.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,
@@ -1483,31 +1569,38 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
       );
     }
   };
-  const generateWithNWC = async () => {
-    try {
-      setIsLoading(true);
-      const nwc = new webln.NWC({ nostrWalletConnectUrl: selectedWallet.data });
-      await nwc.enable();
-      const invoice = await nwc.makeInvoice({
-        defaultMemo: comment,
-        amount,
-      });
-      setIsLoading(false);
-      setInvoiceRequest(invoice.paymentRequest);
-      nwc.close();
-    } catch (err) {
-      console.log(err);
-      setIsLoading(false);
-      if (err.includes("User rejected")) return;
-      dispatch(
-        setToast({
-          type: 2,
-          desc: t("Acr4Slu"),
-        }),
-      );
-    }
-  };
-
+  // const generateWithNWC = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const nwc = new webln.NWC({ nostrWalletConnectUrl: selectedWallet.data });
+  //     await nwc.enable();
+  //     const invoice = await nwc.makeInvoice({
+  //       defaultMemo: comment,
+  //       amount,
+  //     });
+  //     setIsLoading(false);
+  //     setInvoiceRequest(invoice.paymentRequest);
+  //     let t = 0;
+  //     while (t !== 1) {
+  //       const lookup = await nwc.lookupInvoice(invoice);
+  //       if (lookup.preimage) {
+  //         t = -1;
+  //       } else t = t + 1;
+  //       await sleepTimer(2000);
+  //     }
+  //     nwc.close();
+  //   } catch (err) {
+  //     console.log(err);
+  //     setIsLoading(false);
+  //     if (err?.includes("User rejected")) return;
+  //     dispatch(
+  //       setToast({
+  //         type: 2,
+  //         desc: t("Acr4Slu"),
+  //       }),
+  //     );
+  //   }
+  // };
   const generateWithAlby = async (code) => {
     try {
       setIsLoading(true);
@@ -1541,7 +1634,8 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
       generateWithAlby(checkTokens.activeWallet.data.access_token);
     }
     if (selectedWallet.kind === 3) {
-      generateWithNWC();
+      setTriggerNWC(Date.now());
+      // generateWithNWC();
     }
   };
 
@@ -1558,7 +1652,10 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
   return (
     <>
       {invoiceRequest && (
-        <div className="fixed-container fx-centered box-pad-h">
+        <div
+          className="fixed-container fx-centered fx-col box-pad-h"
+          style={{ zIndex: 9999999999 }}
+        >
           <div
             className="fx-centered fx-col sc-s-18"
             style={{ width: "min(100%, 500px)" }}
@@ -1577,14 +1674,16 @@ const ReceivePayment = ({ exit, wallets, selectedWallet, setWallets }) => {
                 <p>{shortenKey(invoiceRequest)}</p>
                 <div className="copy-24"></div>
               </div>
-              <button
-                className="btn btn-normal"
-                onClick={() => setInvoiceRequest("")}
-              >
+              <button className="btn btn-normal" onClick={() => exit()}>
                 {t("AoUUBDI")}
               </button>
             </div>
           </div>
+          {triggerNWC && (
+            <div className="fx-centered sc-s bg-sp box-pad-h-m box-pad-v-s">
+              <LoadingDots /> <p className="gray-c">{t("AJ99n5o")}</p>{" "}
+            </div>
+          )}
         </div>
       )}
       <div

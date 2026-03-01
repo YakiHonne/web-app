@@ -29,6 +29,8 @@ import {
   UserCashuTokensReducer,
   UserCashuHistoryReducer,
   UserNutZapsReducer,
+  UserStarterPacksReducer,
+  UserMediaPacksReducer,
 } from "./Slides/UserData";
 import {
   UserFirstLoginYakiChestReducer,
@@ -115,5 +117,7 @@ export const store = configureStore({
     userCashuTokens: UserCashuTokensReducer,
     userCashuHistory: UserCashuHistoryReducer,
     userNutZaps: UserNutZapsReducer,
+    userStarterPacks: UserStarterPacksReducer,
+    userMediaPacks: UserMediaPacksReducer,
   },
 });

@@ -16,6 +16,8 @@ import { customHistory } from "./History";
 import { store } from "@/Store/Store";
 import { setRefreshAppSettings } from "@/Store/Slides/Extras";
 import { nanoid } from "nanoid";
+import { hkdf } from "@noble/hashes/hkdf.js";
+import { sha256 } from "@noble/hashes/sha2.js";
 
 let nostrClients = [
   "nstart.me",
@@ -229,7 +231,8 @@ export function getNoteTree(
     } else if (el?.startsWith("lnurl") && el.length > 30) {
       finalTree.push(<LNURLParsing lnurl={el} key={key} />);
     } else if (el?.startsWith("#")) {
-      const match = el.match(/(#+)([\w-+]+)/);
+      const match = el.match(/(#+)([^\s#]+)/);
+      // const match = el.match(/(#+)([\w-+]+)/);
       if (match) {
         const hashes = match[1];
         const text = match[2];
@@ -594,7 +597,7 @@ export function isVid(url) {
   }
   return false;
 }
-export function getKeys() {
+export const getKeys = () => {
   try {
     let keys = localStorage_.getItem("_nostruserkeys");
     keys = JSON.parse(keys);
@@ -602,7 +605,57 @@ export function getKeys() {
   } catch (err) {
     return false;
   }
-}
+};
+
+const b64uToBytesSafe = (b64u) => {
+  if (!b64u) return new Uint8Array();
+
+  const b64 = b64u
+    .replace(/-/g, "+")
+    .replace(/_/g, "/")
+    .padEnd(Math.ceil(b64u.length / 4) * 4, "=");
+
+  const binary = atob(b64);
+
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return bytes;
+};
+
+export const getDVMMasterKey = (key) => {
+  try {
+    let payload = localStorage_.getItem(key);
+    if (!payload) return false;
+    payload = JSON.parse(payload);
+    if (!payload.kr) return false;
+    let rootkey = b64uToBytesSafe(payload.kr);
+    const salt = new Uint8Array();
+    const ksubmit_info = new TextEncoder().encode("pidgeon:v3:key:submit");
+    const mbox_info = new TextEncoder().encode("pidgeon:v3:key:mailbox");
+    let ksubmit = hkdf(sha256, rootkey, salt, ksubmit_info, 32);
+    let mbox = hkdf(sha256, rootkey, salt, mbox_info, 32);
+    return { ksubmit, mbox, mb: payload.mb, relays: payload.relays };
+  } catch (err) {
+    return false;
+  }
+};
+export const setDVMMasterKey = ({ key, payload }) => {
+  try {
+    localStorage_.setItem(key, JSON.stringify(payload));
+    let rootkey = b64uToBytesSafe(payload.kr);
+    const salt = new Uint8Array();
+    const ksubmit_info = new TextEncoder().encode("pidgeon:v3:key:submit");
+    const mbox_info = new TextEncoder().encode("pidgeon:v3:key:mailbox");
+    let ksubmit = hkdf(sha256, rootkey, salt, ksubmit_info, 32);
+    let mbox = hkdf(sha256, rootkey, salt, mbox_info, 32);
+    return { ksubmit, mbox, mb: payload.mb, relays: payload.relays };
+  } catch (err) {
+    return false;
+  }
+};
 
 export const getMetadataFromCachedAccounts = (pubkey) => {
   let accounts = getConnectedAccounts();

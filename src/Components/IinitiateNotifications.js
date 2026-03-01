@@ -118,7 +118,7 @@ export default function IinitiateNotifications() {
                 ...description,
                 created_at: event.created_at,
                 amount: getZapper(event).amount,
-                isNew: false,
+                isNew: true,
                 isRead: false,
               };
             } else if (event.kind === 6) {
@@ -146,7 +146,7 @@ export default function IinitiateNotifications() {
                   .filter((tag) => tag[0] === "p")
                   .map((tag) => tag[1]);
                 tempAuth.push([...pubkeys, event.pubkey]);
-                return { ...event, isNew: false, isRead: false };
+                return { ...event, isNew: true, isRead: false };
               }
             }
           } else return false;
@@ -154,8 +154,9 @@ export default function IinitiateNotifications() {
         .filter((_) => _);
       let list = saveNotificationsHistory(userKeys.pub, data);
       dispatch(setNotifications({ data: list, pubkey: userKeys.pub }));
-      if (data.length)
+      if (data.length) {
         saveNotificationLastEventTS(userKeys.pub, data[0]?.created_at);
+      }
       dispatch(setIsNotificationsLoading(false));
       saveUsers([...new Set(tempAuth.flat())]);
       filter = getFilter(userFollowings, list[0]?.created_at + 1);
@@ -298,9 +299,9 @@ export default function IinitiateNotifications() {
 
       if (list) {
         list = JSON.parse(list);
-        list = list.map((_) => {
-          return { ..._, isNew: false };
-        });
+        // list = list.map((_) => {
+        //   return { ..._, isNew: false };
+        // });
         if (notificationSettings.hideMentions) {
           list = list.filter(
             (_) => _.tags.filter((_) => _[0] === "p").length <= 10,

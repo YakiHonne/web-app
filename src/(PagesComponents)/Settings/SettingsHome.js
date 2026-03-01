@@ -16,7 +16,6 @@ import YakiChestManagement from "./YakiChestManagement";
 import UserLogout from "./UserLogout";
 import { useRouter } from "next/router";
 import Notifications from "./Notifications";
-import { getSubData } from "@/Helpers/Controlers";
 
 export default function SettingsHome() {
   const router = useRouter();
@@ -37,14 +36,14 @@ export default function SettingsHome() {
           className="fx-centered fit-container fx-start-v"
           style={{ gap: 0 }}
         >
-          <div className="main-middle">
+          <div className="main-middle-wide">
             {userMetadata &&
               (userKeys.sec || userKeys.ext || userKeys.bunker) && (
                 <>
                   <h3 className="box-pad-h box-pad-v-m">{t("ABtsLBp")}</h3>
                   <SettingsHeader userKeys={userKeys} />
                   <div
-                    className="fit-container fx-centered fx-col"
+                    className="fit-container fx-centered fx-col main-middle-wide"
                     style={{ gap: 0 }}
                   >
                     <KeysManagement
