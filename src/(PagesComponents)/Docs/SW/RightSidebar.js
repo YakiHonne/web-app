@@ -12,13 +12,16 @@ export default function RightSidebar({ page, compact = false }) {
   const activeId = useScrollSpy(ids, 85);
 
   const handleOnURIClick = (uri) => {
+    if (typeof document === "undefined") return;
     const el = document.getElementById(uri);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
-    customHistory(window.location.pathname + "#" + uri);
+    if (typeof window !== "undefined") {
+      customHistory(window.location.pathname + "#" + uri);
+    }
   };
-console.log(activeId)
+  console.log(activeId);
   if (!swContent[page]) return;
   if (swContent[page].subtitles.length === 0) return;
   return (
@@ -81,6 +84,7 @@ const useScrollSpy = (ids = [], offset = 80) => {
   const [activeId, setActiveId] = useState("");
 
   useEffect(() => {
+    if (typeof document === "undefined") return;
     const container = document.querySelector(".infinite-scroll");
     if (!container) return;
 

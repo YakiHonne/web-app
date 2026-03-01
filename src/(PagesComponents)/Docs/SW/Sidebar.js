@@ -11,6 +11,7 @@ export default function Sidebar({ page }) {
     return url === currentPath;
   };
   useEffect(() => {
+    if (typeof document === "undefined") return;
     let handleOffClick = (e) => {
       if (mainFrame.current && !mainFrame.current.contains(e.target))
         setIsActive(false);
@@ -24,7 +25,7 @@ export default function Sidebar({ page }) {
   return (
     <>
       <div
-        className="fx-scattered fx-end-v  box-pad-v-m fx-col mb-hide sticky" 
+        className="fx-scattered fx-end-v  box-pad-v-m fx-col mb-hide sticky"
         style={{
           zIndex: isActive ? 1000 : 200,
         }}
