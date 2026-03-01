@@ -4,7 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import { Wallet } from "@cashu/cashu-ts";
-import bip39 from "bip39";
+import * as bip39 from "bip39";
 import useCashu from "@/Hooks/useCachu";
 import { encrypt44 } from "@/Helpers/Encryptions";
 import { InitEvent } from "@/Helpers/Controlers";
@@ -19,7 +19,7 @@ export default function WalletRestoration({ activeMint, exit }) {
   const userKeys = useSelector((state) => state.userKeys);
   const { cashuTokens } = useCashu();
   const [seedPhrase, setSeedPhrase] = useState(
-    Array.from({ length: 12 }).map((_) => "")
+    Array.from({ length: 12 }).map((_) => ""),
   );
   const [isLoading, setIsLoading] = useState(false);
   const [screen, setScreen] = useState(1);
@@ -67,7 +67,7 @@ export default function WalletRestoration({ activeMint, exit }) {
     let unspentProofs = proofs.filter((_, index) => indexes.includes(index));
     let toPublishProofs = filterProofs(
       unspentProofs,
-      cashuTokens[activeMint]?.allProofs || []
+      cashuTokens[activeMint]?.allProofs || [],
     );
     if (toPublishProofs.length === 0) {
       setScreen(3);
@@ -87,7 +87,7 @@ export default function WalletRestoration({ activeMint, exit }) {
       local.set(`${proof.C}-${proof.secret}`, proof);
     });
     return mintProofs.filter(
-      (proof) => !local.has(`${proof.C}-${proof.secret}`)
+      (proof) => !local.has(`${proof.C}-${proof.secret}`),
     );
   };
 
@@ -101,7 +101,7 @@ export default function WalletRestoration({ activeMint, exit }) {
     let encryptedProofs7375 = await encrypt44(
       userKeys,
       userKeys.pub,
-      JSON.stringify(toEncrypt7375)
+      JSON.stringify(toEncrypt7375),
     );
     if (!encryptedProofs7375) return false;
     const eventInitEx = await InitEvent(7375, encryptedProofs7375, []);
@@ -118,7 +118,7 @@ export default function WalletRestoration({ activeMint, exit }) {
     let encryptedProofs7376 = await encrypt44(
       userKeys,
       userKeys.pub,
-      JSON.stringify(toEncrypt7376)
+      JSON.stringify(toEncrypt7376),
     );
     if (!encryptedProofs7376) return;
     const eventInitEx2 = await InitEvent(7376, encryptedProofs7376, tags);
