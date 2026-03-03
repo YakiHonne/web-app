@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import RelayImage from "@/Components/RelayImage";
 import { useTranslation } from "react-i18next";
 import useRelaysMetadata from "@/Hooks/useRelaysMetadata";
@@ -12,17 +12,23 @@ import AddToFavList from "./AddToFavList";
 import useCloseContainer from "@/Hooks/useCloseContainer";
 import { useSelector } from "react-redux";
 import Link from "next/link";
+import RelayReviews from "@/Components/RelayReviews/RelayReviews";
 
-function RelayPreview({ url, favoredList = [], addToFavList = false }) {
+function RelayPreview({
+  url,
+  favoredList = [],
+  addToFavList = false,
+  reviews = false,
+}) {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const { relayMetadata } = useRelaysMetadata(url);
   const { relayStats } = useRelaysStats(url);
   const { containerRef, open, setOpen } = useCloseContainer();
-
+  const [showReviews, setShowReviews] = useState(false);
   return (
     <div
-      className="fit-container fx-scattered fx-col box-pad-h-m box-pad-v-m sc-s bg-sp pointer"
+      className="fit-container fx-scattered fx-col box-pad-h-m box-pad-v-m sc-s-18 bg-sp pointer"
       style={{ overflow: "visible" }}
       onClick={() => {
         setOpen(!open);
@@ -180,6 +186,29 @@ function RelayPreview({ url, favoredList = [], addToFavList = false }) {
             </div>
           </Link>
         </>
+      )}
+      {reviews && (
+        <div
+          className="fit-container"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowReviews(!showReviews);
+          }}
+          style={{
+            borderTop: "1px solid var(--pale-gray)",
+            paddingTop: ".5rem",
+            marginTop: ".5rem",
+          }}
+        >
+          {showReviews && <RelayReviews relay={url} />}
+          <div className="fit-container fx-centered">
+            <div
+              className="arrow"
+              style={{ rotate: showReviews ? "-180deg" : "" }}
+            ></div>
+            <p className="gray-c">{t("AWX2SL5")}</p>
+          </div>
+        </div>
       )}
     </div>
   );

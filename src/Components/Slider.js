@@ -15,7 +15,10 @@ export default function Slider({
   useEffect(() => {
     let carousel_container = noScrollBarContainerMain.current;
     let carousel = noScrollBarContainer.current;
-    if (carousel_container.clientWidth < carousel.scrollWidth && items.length > 3) {
+    if (
+      carousel_container.clientWidth < carousel.scrollWidth &&
+      items.length > 2
+    ) {
       setShowArrows(true);
     } else {
       setShowArrows(false);
@@ -99,7 +102,11 @@ export default function Slider({
         >
           {items.map((item, index) => {
             return (
-              <div className="slider-item" key={index} style={{ width: "max-content" }}>
+              <div
+                className="slider-item"
+                key={index}
+                style={{ width: "max-content" }}
+              >
                 {item}
               </div>
             );

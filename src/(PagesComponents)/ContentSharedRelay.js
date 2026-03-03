@@ -28,6 +28,9 @@ import PostNotePortal from "@/Components/PostNotePortal";
 import RecentPosts from "@/Components/RecentPosts";
 import { Virtuoso } from "react-virtuoso";
 import MediaMasonryList from "@/Components/MediaMasonryList";
+import useRelaysAccess from "@/Hooks/useRelaysAccess";
+import RelayJoinRequest from "./RelayJoinRequest";
+import RelayRequestCode from "@/Components/RelayRequestCode";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -50,7 +53,7 @@ const notesReducer = (notes, action) => {
                     note.relatedEvent.id === _.relatedEvent?.id)) ||
                 (_.kind === 6 &&
                   (_.relatedEvent.id === note.id ||
-                    _.relatedEvent.id === note.relatedEvent?.id))
+                    _.relatedEvent.id === note.relatedEvent?.id)),
             ) === index
           )
             return note;
@@ -64,9 +67,17 @@ const notesReducer = (notes, action) => {
 export default function ContentSharedRelay() {
   const router = useRouter();
   const { t } = useTranslation();
-  //   const selectedFilter = getDefaultFilter(2);
   const extrasRef = useRef(null);
   const relay = router.query.r;
+  const {
+    isMembershipRequired,
+    isMember,
+    handleJoinRequest,
+    handleRequestCode,
+    requestCode,
+    setRequestCode,
+  } = useRelaysAccess({ relay: relay });
+  const [showJoinRequest, setShowJoinRequest] = useState(false);
 
   useEffect(() => {
     if (!extrasRef.current) return;
@@ -89,6 +100,21 @@ export default function ContentSharedRelay() {
 
   return (
     <>
+      {requestCode && (
+        <RelayRequestCode
+          code={requestCode}
+          exit={() => setRequestCode(false)}
+        />
+      )}
+      {showJoinRequest && (
+        <RelayJoinRequest
+          handleJoinRequest={(data) => {
+            handleJoinRequest(data);
+            setShowJoinRequest(false);
+          }}
+          exit={() => setShowJoinRequest(false)}
+        />
+      )}
       <div style={{ overflow: "auto" }}>
         <YakiIntro />
         <ArrowUp />
@@ -119,13 +145,56 @@ export default function ContentSharedRelay() {
                         className="fit-container fx-scattered fx-col"
                         style={{ gap: 0 }}
                       >
-                        <RelayPreview url={relay} addToFavList={true} />
+                        <RelayPreview
+                          url={relay}
+                          addToFavList={true}
+                          reviews={true}
+                        />
                       </div>
                     </div>
-                    <PostNotePortal
-                      protectedRelay={relay}
-                      label={t("AJj3cLI")}
-                    />
+
+                    {isMembershipRequired && isMember && (
+                      <>
+                        <div
+                          className="fit-container fx-centered box-pad-h-s"
+                          style={{ paddingTop: "1rem" }}
+                        >
+                          <button
+                            className="btn btn-gray fx"
+                            onClick={handleRequestCode}
+                          >
+                            {t("ApEvULT")}
+                          </button>
+                          <button className="btn btn-gst-red fx fx-centered">
+                            <div className="logout"></div>
+                            {t("AUmONF7")}
+                          </button>
+                        </div>
+                        <PostNotePortal
+                          protectedRelay={relay}
+                          label={t("AJj3cLI")}
+                        />
+                      </>
+                    )}
+                    {isMembershipRequired && !isMember && (
+                      <div className="fit-container box-pad-h-s box-pad-v-m">
+                        <button
+                          className="btn btn-full btn-gray"
+                          onClick={() => setShowJoinRequest(true)}
+                        >
+                          {t("AZs7Pyp")}
+                        </button>
+                      </div>
+                    )}
+                    {!isMembershipRequired && (
+                      <>
+                        <PostNotePortal
+                          protectedRelay={relay}
+                          label={t("AJj3cLI")}
+                        />
+                      </>
+                    )}
+
                     <HomeFeed relay={relay} />
                   </div>
                 </>
@@ -171,7 +240,7 @@ const HomeFeed = ({ relay }) => {
   const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
   const since = useMemo(
     () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
-    [notes]
+    [notes],
   );
   const virtuosoRef = useRef(null);
 
@@ -191,7 +260,7 @@ const HomeFeed = ({ relay }) => {
 
       let towDaysPeriod = (2 * 24 * 60 * 60 * 1000) / 1000;
       let twoDaysPrior = Math.floor(
-        (Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000
+        (Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000,
       );
       twoDaysPrior = notesLastEventTime
         ? notesLastEventTime - towDaysPeriod
@@ -321,7 +390,7 @@ const HomeFeed = ({ relay }) => {
               if (
                 item.kind === 6 &&
                 ![...userMutedList, ...bannedList].includes(
-                  item.relatedEvent.pubkey
+                  item.relatedEvent.pubkey,
                 )
               )
                 return (

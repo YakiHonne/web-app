@@ -63,6 +63,7 @@ const bytesTohex = (arrayBuffer) => {
   return hexOctets.join("");
 };
 const shortenKey = (key, length = 10) => {
+  if (key.length <= length * 2) return key;
   let firstHalf = key.substring(0, length);
   let secondHalf = key.substring(key.length - length, key.length);
   return `${firstHalf}....${secondHalf}`;
@@ -290,6 +291,27 @@ const getParsedSW = (event) => {
           { value: buttons, type: "button" },
         ],
   };
+};
+
+const getParsedRelayReview = (event) => {
+  let d = event.tags.find((tag) => tag[0] === "d")[1];
+  const event_ = {
+    ...event,
+    d,
+    rating: parseFloat(
+      (
+        parseFloat(event.tags.find((tag) => tag[0] === "rating")[1]) * 5
+      ).toFixed(1),
+    ),
+    naddr: event?.encode
+      ? event?.encode()
+      : nip19.naddrEncode({
+          identifier: d,
+          pubkey: event.pubkey,
+          kind: event.kind,
+        }),
+  };
+  return event_;
 };
 
 const getParsedRepEvent = (event) => {
@@ -1520,6 +1542,7 @@ export {
   getuserMetadata,
   getParsedSW,
   getParsedMedia,
+  getParsedRelayReview,
   sortEvents,
   detectDirection,
   enableTranslation,

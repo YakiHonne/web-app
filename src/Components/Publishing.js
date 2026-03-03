@@ -142,6 +142,15 @@ export default function Publishing({ displayOff = false }) {
     localStorage_.setItem("publishedEvents", JSON.stringify(tempArray));
   }, [publishedEvents]);
 
+  const saveLocal = (events) => {
+    try {
+      localStorage_.setItem("publishedEvents", JSON.stringify(events));
+    } catch (error) {
+      console.log(error);
+      saveLocal(events.slice(0, events.length - 5));
+    }
+  };
+
   useEffect(() => {
     const publishPost = async () => {
       let { kind, content, tags, eventInitEx, allRelays } = toPublish;
