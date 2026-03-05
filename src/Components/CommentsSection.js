@@ -179,9 +179,12 @@ export default function CommentsSection({
       let tempEvents = events.data
         .map((event) => {
           let is_un = event.tags.find((tag) => tag[0] === "l");
-          let is_comment = event.tags.find(
-            (tag) => tag.length > 3 && ["root", "reply"].includes(tag[3]),
-          );
+          let is_comment =
+            event.kind === 1111 ||
+            event.tags.find(
+              (tag) =>
+                tag.length > 3 && ["root", "reply"].includes(tag[3]),
+            );
           let is_quote = event.tags.find((tag) => tag[0] === "q");
           let is_mention = event.tags.filter(
             (tag) => tag.length > 3 && tag[3] === "mention" && tag[1] === id,

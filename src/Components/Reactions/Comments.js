@@ -136,7 +136,8 @@ export default function Comments({
             }
 
             tags.push(["e", replyId, rootEventTag[2] || ""]);
-            tags.push(["k", "1111"]);
+            const isReplyingToRoot = replyId === rootEventTag[1];
+            tags.push(["k", isReplyingToRoot ? String(rootEventKind || "1") : "1111"]);
             tags.push(["p", replyPubkey, ""]);
 
           } else {
