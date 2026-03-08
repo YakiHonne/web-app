@@ -10,7 +10,7 @@ const ClientComponent = dynamic(
   () => import("@/(PagesComponents)/User/UserHome"),
   {
     ssr: false,
-  }
+  },
 );
 
 export default function Page({ event, nprofile }) {
@@ -35,6 +35,9 @@ export async function getStaticProps({ locale, params }) {
   let pubkey = userId.includes("@")
     ? await getAuthPubkeyFromNip05(userId)
     : decodePubkey(userId);
+
+  console.log(pubkey);
+
   if (pubkey) {
     pubkey =
       pubkey.startsWith("npub") || pubkey.startsWith("nprofile")
@@ -98,7 +101,7 @@ const decodePubkey = (pubkey) => {
       return false;
     }
     let hexPubkey =
-      (nip19.decode(pubkey).data.pubkey || nip19.decode(pubkey).data);
+      nip19.decode(pubkey).data.pubkey || nip19.decode(pubkey).data;
     return hexPubkey;
   } catch (err) {
     console.log(pubkey);
