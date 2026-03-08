@@ -21,5 +21,10 @@
         ]
       }
     ]
+  },
+  "webcredentials": {
+    "apps": [
+      "JU5BUTKJC2.com.yakihonne.appyakihonne"
+    ]
   }
 }
