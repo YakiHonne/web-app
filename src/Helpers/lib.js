@@ -3,7 +3,8 @@ import {
   getSSGNdkInstance,
 } from "@/Helpers/SSGNDKInstance";
 import { sortEvents } from "nostr-tools";
-import { sleepTimer } from "./Helpers";
+import { getAuthPubkeyFromNip05, sleepTimer } from "./Helpers";
+import json from "@/nip05Names/nostr.json" assert { type: "json" };
 
 export async function getDataForSSG(
   filter,
@@ -89,4 +90,16 @@ const launchDataFetching = async (
       if (events.length === 0) startTimer();
     });
   });
+};
+
+export const parseNip05 = async (userId) => {
+  if (userId.includes("yakihonne.com")) {
+    const name = userId.split("@")[0];
+    if (json.names[name]) {
+      return json.names[name];
+    }
+    return null;
+  }
+  let pubkey = await getAuthPubkeyFromNip05(userId);
+  return pubkey;
 };
