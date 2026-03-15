@@ -4,7 +4,7 @@ import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 import { nip19 } from "nostr-tools";
-import { getDataForSSG } from "@/Helpers/lib";
+import { getDataForSSG, parseNip05 } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(
   () => import("@/(PagesComponents)/User/UserHome"),
@@ -33,7 +33,7 @@ export default function Page({ event, nprofile }) {
 export async function getStaticProps({ locale, params }) {
   const { userId } = params;
   let pubkey = userId.includes("@")
-    ? await getAuthPubkeyFromNip05(userId)
+    ? await parseNip05(userId)
     : decodePubkey(userId);
 
   console.log(pubkey);
