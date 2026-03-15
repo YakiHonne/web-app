@@ -3,13 +3,14 @@ import {
   getSSGNdkInstance,
 } from "@/Helpers/SSGNDKInstance";
 import { sortEvents } from "nostr-tools";
-import { sleepTimer } from "./Helpers";
+import { getAuthPubkeyFromNip05, sleepTimer } from "./Helpers";
+import json from "@/nip05Names/nostr.json" assert { type: "json" };
 
 export async function getDataForSSG(
   filter,
   timeout = 1000,
   maxEvents = 1,
-  relays = []
+  relays = [],
 ) {
   const ndkInstance = getSSGNdkInstance(relays);
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
@@ -17,7 +18,12 @@ export async function getDataForSSG(
   return data;
 }
 
-export async function getDataForSearch(filter, timeout = 1000, maxEvents = 1, relays = []) {
+export async function getDataForSearch(
+  filter,
+  timeout = 1000,
+  maxEvents = 1,
+  relays = [],
+) {
   const ndkInstance = getSearchNdkInstance(relays);
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
   let data = await Promise.race([
@@ -31,7 +37,7 @@ const launchDataFetching = async (
   filter,
   timeout = 1000,
   maxEvents = 1,
-  ndkInstance
+  ndkInstance,
 ) => {
   return new Promise((resolve) => {
     let events = [];
@@ -84,4 +90,16 @@ const launchDataFetching = async (
       if (events.length === 0) startTimer();
     });
   });
+};
+
+export const parseNip05 = async (userId) => {
+  if (userId.includes("yakihonne.com")) {
+    const name = userId.split("@")[0];
+    if (json.names[name]) {
+      return json.names[name];
+    }
+    return null;
+  }
+  let pubkey = await getAuthPubkeyFromNip05(userId);
+  return pubkey;
 };
