@@ -63,10 +63,13 @@ export default function Note({ event, nevent }) {
       setIsLoading(false);
     };
     if (!event) fetchNote();
-    if (state) {
-      let { triggerTranslation } = state;
-      if (triggerTranslation) translateNote();
+    if (event) {
+      translateNote();
     }
+    // if (state) {
+    //   let { triggerTranslation } = state;
+    //   if (triggerTranslation) translateNote();
+    // }
     straightUp();
   }, [event]);
 
@@ -79,22 +82,22 @@ export default function Note({ event, nevent }) {
     }
     try {
       let res = await translate(note.content);
-      if (res.status === 500) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AZ5VQXL"),
-          }),
-        );
-      }
-      if (res.status === 400) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AJeHuH1"),
-          }),
-        );
-      }
+      // if (res.status === 500) {
+      //   dispatch(
+      //     setToast({
+      //       type: 2,
+      //       desc: t("AZ5VQXL"),
+      //     }),
+      //   );
+      // }
+      // if (res.status === 400) {
+      //   dispatch(
+      //     setToast({
+      //       type: 2,
+      //       desc: t("AJeHuH1"),
+      //     }),
+      //   );
+      // }
       if (res.status === 200) {
         let noteTree = getNoteTree(
           res.res,

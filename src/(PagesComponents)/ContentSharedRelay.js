@@ -31,6 +31,8 @@ import MediaMasonryList from "@/Components/MediaMasonryList";
 import useRelaysAccess from "@/Hooks/useRelaysAccess";
 import RelayJoinRequest from "./RelayJoinRequest";
 import RelayRequestCode from "@/Components/RelayRequestCode";
+import DeleteWarning from "@/Components/DeleteWarning";
+import LoadingDots from "@/Components/LoadingDots";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -74,10 +76,13 @@ export default function ContentSharedRelay() {
     isMember,
     handleJoinRequest,
     handleRequestCode,
+    handleLeaveRely,
+    isRelayAccessLoading,
     requestCode,
     setRequestCode,
   } = useRelaysAccess({ relay: relay });
   const [showJoinRequest, setShowJoinRequest] = useState(false);
+  const [showLeavingWarning, setShowLeavingWarning] = useState(false);
 
   useEffect(() => {
     if (!extrasRef.current) return;
@@ -113,6 +118,18 @@ export default function ContentSharedRelay() {
             setShowJoinRequest(false);
           }}
           exit={() => setShowJoinRequest(false)}
+        />
+      )}
+      {showLeavingWarning && (
+        <DeleteWarning
+          title={t("AoiPb2z")}
+          description={t("AoZBK9d")}
+          handleDelete={() => {
+            handleLeaveRely();
+            setShowLeavingWarning(false);
+          }}
+          exit={() => setShowLeavingWarning(false)}
+          actionButtonLabel={t("AUmONF7")}
         />
       )}
       <div style={{ overflow: "auto" }}>
@@ -162,12 +179,25 @@ export default function ContentSharedRelay() {
                           <button
                             className="btn btn-gray fx"
                             onClick={handleRequestCode}
+                            diabled={isRelayAccessLoading}
                           >
-                            {t("ApEvULT")}
+                            {isRelayAccessLoading ? (
+                              <LoadingDots />
+                            ) : (
+                              t("ApEvULT")
+                            )}
                           </button>
-                          <button className="btn btn-gst-red fx fx-centered">
+                          <button
+                            className="btn btn-gst-red fx fx-centered"
+                            onClick={() => setShowLeavingWarning(true)}
+                            diabled={isRelayAccessLoading}
+                          >
                             <div className="logout"></div>
-                            {t("AUmONF7")}
+                            {isRelayAccessLoading ? (
+                              <LoadingDots />
+                            ) : (
+                              t("AUmONF7")
+                            )}
                           </button>
                         </div>
                         <PostNotePortal
@@ -181,8 +211,13 @@ export default function ContentSharedRelay() {
                         <button
                           className="btn btn-full btn-gray"
                           onClick={() => setShowJoinRequest(true)}
+                          disabled={isRelayAccessLoading}
                         >
-                          {t("AZs7Pyp")}
+                          {isRelayAccessLoading ? (
+                            <LoadingDots />
+                          ) : (
+                            t("AZs7Pyp")
+                          )}
                         </button>
                       </div>
                     )}

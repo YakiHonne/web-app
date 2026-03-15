@@ -24,7 +24,7 @@ export default function useRelaysAccess({ relay }) {
         getSubData(
           [
             {
-              kinds: [8000],
+              kinds: [8000, 8001],
               authors: [relayMetadata.self],
               "#p": [userKeys.pub],
             },
@@ -32,10 +32,12 @@ export default function useRelaysAccess({ relay }) {
           50,
           [relay],
         ).then((data) => {
-          console.log(data.data);
           if (data.data.length > 0) {
-            setIsMember(true);
-          } else setIsMember(false);
+            let isRemoved = data.data[0].kind === 8001;
+            if (!isRemoved) {
+              setIsMember(true);
+            } else setIsMember(false);
+          }
         });
       }
     } else {
@@ -54,37 +56,40 @@ export default function useRelaysAccess({ relay }) {
       setIsRelayAccessLoading(false);
       return;
     }
-    publishJoinRequest({ event: eventInitEx, relay });
+    let status = await publishToRelay({ event: eventInitEx, relay });
+    if (status) setIsMember(true);
   };
 
-  const publishJoinRequest = async ({ event, relay }) => {
-    let relayInstance = ndkInstance.pool.getRelay(relay);
-    let eventInstance = new NDKEvent(ndkInstance, event);
-    await relayInstance.connect();
+  const publishToRelay = async ({ event }) => {
+    return new Promise(async (resolve) => {
+      let relayInstance = ndkInstance.pool.getRelay(relay);
+      let eventInstance = new NDKEvent(ndkInstance, event);
+      await relayInstance.connect();
 
-    let publish = () => {
-      relayInstance
-        .publish(eventInstance)
-        .then((data) => {
-          console.log(data);
-          setIsMember(true);
-          setIsRelayAccessLoading(false);
-        })
-        .catch((err) => {
-          console.log(err);
-          if (err.toString().includes("auth-required")) {
-            relayInstance.authPolicy = ndkInstance.relayAuthDefaultPolicy;
-            relayInstance.on("authed", () => {
-              console.log("authenticated");
-              publish();
-            });
-          } else {
-            dispatch(setToast({ type: 2, desc: err.message }));
+      let publish = () => {
+        relayInstance
+          .publish(eventInstance)
+          .then((data) => {
+            console.log(data);
             setIsRelayAccessLoading(false);
-          }
-        });
-    };
-    publish();
+            resolve(true);
+          })
+          .catch((err) => {
+            console.log(err);
+            if (err.toString().includes("auth-required")) {
+              relayInstance.authPolicy = ndkInstance.relayAuthDefaultPolicy;
+              relayInstance.on("authed", () => {
+                console.log("authenticated");
+                publish();
+              });
+            } else {
+              dispatch(setToast({ type: 2, desc: err.message }));
+              setIsRelayAccessLoading(false);
+            }
+          });
+      };
+      publish();
+    });
   };
 
   const handleRequestCode = async () => {
@@ -108,10 +113,26 @@ export default function useRelaysAccess({ relay }) {
     setIsRelayAccessLoading(false);
   };
 
+  const handleLeaveRely = async () => {
+    setIsRelayAccessLoading(true);
+    let event = {
+      kind: 28936,
+      tags: [["-"]],
+    };
+    let eventInitEx = await InitEvent(event.kind, "", event.tags);
+    if (!eventInitEx) {
+      setIsRelayAccessLoading(false);
+      return;
+    }
+    let status = await publishToRelay({ event: eventInitEx, relay });
+    if (status) setIsMember(false);
+  };
+
   return {
     isMembershipRequired,
     handleJoinRequest,
     handleRequestCode,
+    handleLeaveRely,
     requestCode,
     setRequestCode,
     isMember,

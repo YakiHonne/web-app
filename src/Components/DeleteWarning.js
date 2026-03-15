@@ -6,6 +6,7 @@ export default function DeleteWarning({
   description,
   exit,
   handleDelete,
+  actionButtonLabel,
 }) {
   const { t } = useTranslation();
   return (
@@ -36,7 +37,7 @@ export default function DeleteWarning({
         )}
         <div className="fx-centered fit-container">
           <button className="fx btn btn-gst-red" onClick={handleDelete}>
-            {t("Almq94P")}
+            {actionButtonLabel || t("Almq94P")}
           </button>
           <button className="fx btn btn-red" onClick={exit}>
             {t("AB4BSCe")}

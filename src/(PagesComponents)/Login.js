@@ -18,7 +18,7 @@ import {
   nip44,
 } from "nostr-tools";
 import * as secp from "@noble/secp256k1";
-import { copyText, FileUpload } from "@/Helpers/Helpers";
+import { copyText, FileUpload, sleepTimer } from "@/Helpers/Helpers";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { setToast } from "@/Store/Slides/Publishers";
 import UserProfilePic from "@/Components/UserProfilePic";

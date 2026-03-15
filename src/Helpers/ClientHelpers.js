@@ -416,13 +416,14 @@ export function getParsedNote(
 ) {
   try {
     if (!event) return;
+    let isExpired = event.tags.find((tag) => tag[0] === "expiration");
+    if (isExpired) return;
     let isNoteLong = event.content.split(" ").length > 150;
     let isCollapsedNoteEnabled = getCustomSettings().collapsedNote;
     isCollapsedNoteEnabled =
       isCollapsedNoteEnabled === undefined ? true : isCollapsedNoteEnabled;
     let isCollapsedNote_ =
       isCollapsedNoteEnabled && isCollapsedNote && isNoteLong;
-
     let isQuote = event.tags.find((tag) => tag[0] === "q");
     let checkForLabel = event.tags.find((tag) => tag[0] === "l");
     let isComment = event.tags.find(

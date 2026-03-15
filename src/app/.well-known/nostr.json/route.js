@@ -3,7 +3,7 @@ import json from "@/nip05Names/nostr.json" assert { type: "json" };
 export async function GET(req) {
   const { searchParams } = new URL(
     req.url,
-    `http://${req.headers.get("host")}`
+    `http://${req.headers.get("host")}`,
   );
   const name = searchParams.get("name");
 
