@@ -6,10 +6,22 @@ import { setToast } from "../../Store/Slides/Publishers";
 
 import Select from "../../Components/Select";
 import AddNewTranslationService from "./AddNewTranslationService";
-import { translationServices, translationServicesEndpoints } from "@/Content/TranslationServices";
+import {
+  translationServices,
+  translationServicesEndpoints,
+} from "@/Content/TranslationServices";
 import { getCustomServices } from "@/Helpers/ClientHelpers";
-import { getAppLang, getContentTranslationConfig, handleAppDirection, updateContentTranslationConfig } from "@/Helpers/Helpers";
-import {supportedLanguage, supportedLanguageKeys} from "@/Content/SupportedLanguages";
+import {
+  getAppLang,
+  getContentTranslationConfig,
+  handleAppDirection,
+  updateContentTranslationConfig,
+} from "@/Helpers/Helpers";
+import {
+  supportedLanguage,
+  supportedLanguageKeys,
+} from "@/Content/SupportedLanguages";
+import Toggle from "@/Components/Toggle";
 
 export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
   const { t } = useTranslation();
@@ -19,9 +31,9 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
   const [transServicePlan, setTransServicePlan] = useState(false);
   const [showAPIKey, setShowAPIKey] = useState(false);
   const [transServiceAPIKey, setTransServiceAPIKey] = useState("");
-  const [customServicesPlan, setCustomServicesPlan] = useState(
-    getCustomServices()
-  );
+  const [autoTranslate, setAutoTranslate] = useState(false);
+  const [customServicesPlan, setCustomServicesPlan] =
+    useState(getCustomServices());
   const customServices = useMemo(() => {
     if (Object.entries(customServicesPlan).length === 0)
       return translationServices;
@@ -62,6 +74,7 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
     setTransServicePlan(transService.plan);
     if (!transService.plan) setTransServiceAPIKey(transService.freeApikey);
     if (transService.plan) setTransServiceAPIKey(transService.proApikey);
+    setAutoTranslate(transService.autoTranslate);
   }, [selectedTransService]);
 
   const handleSwitchLang = (value) => {
@@ -75,18 +88,29 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
         setToast({
           type: 3,
           desc: t("A9WT6DE"),
-        })
+        }),
       );
     }
   };
 
+  const handleAutoTranslate = (value) => {
+    setAutoTranslate(value);
+    updateContentTranslationConfig(
+      selectedTransService,
+      transServicePlan,
+      !transServicePlan ? transServiceAPIKey : undefined,
+      transServicePlan ? transServiceAPIKey : undefined,
+      value,
+    );
+  };
   const handleTransServices = (value, plan, apikey) => {
     setSelectedTransService(value);
     updateContentTranslationConfig(
       value,
       plan,
       !plan ? apikey : undefined,
-      plan ? apikey : undefined
+      plan ? apikey : undefined,
+      autoTranslate,
     );
   };
   const handleTransServicesPlan = (value) => {
@@ -103,7 +127,8 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
       selectedTransService,
       undefined,
       !transServicePlan ? value : undefined,
-      transServicePlan ? value : undefined
+      transServicePlan ? value : undefined,
+      autoTranslate,
     );
   };
   const refreshServices = (data) => {
@@ -130,11 +155,11 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
     }
     localStorage?.setItem(
       `custom-lang-services-${userKeys.pub}`,
-      JSON.stringify(newCustomServicesSet)
+      JSON.stringify(newCustomServicesSet),
     );
     localStorage?.setItem(
       "content-lang-config",
-      JSON.stringify(oldServices.filter((_) => _.service !== value))
+      JSON.stringify(oldServices.filter((_) => _.service !== value)),
     );
     if (value === selectedTransService) {
       handleTransServices("lt");
@@ -159,7 +184,7 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
           borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
           borderRadius: 0,
-          overflow: "visible"
+          overflow: "visible",
         }}
       >
         <div
@@ -278,11 +303,23 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
                 </>
               )}
             </div>
+            <div className="fx-scattered fit-container">
+              <div>
+                <p>{t("AmVfXha")}</p>
+                <p className="p-medium gray-c">{t("Alx2sft")}</p>
+              </div>
+              <div className="fx-centered" style={{ minWidth: "max-content" }}>
+                <Toggle
+                  status={autoTranslate}
+                  setStatus={handleAutoTranslate}
+                />
+              </div>
+            </div>
           </div>
         )}
       </div>
     </>
   );
-};
+}
 
 export default LanguagesManagement;

@@ -9,7 +9,7 @@ import {
   detectDirection,
 } from "@/Helpers/Encryptions";
 import { getComponent } from "@/Helpers/ClientHelpers";
-import { shuffleArray } from "@/Helpers/Helpers";
+import { getContentTranslationConfig, shuffleArray } from "@/Helpers/Helpers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
 import Follow from "@/Components/Follow";
@@ -60,9 +60,9 @@ export default function Article({ event, userProfile, naddrData }) {
   const [isContentTranslating, setIsContentTranslating] = useState(false);
   const containerRef = useRef(null);
   const { muteUnmute, isMuted } = useIsMute(
-    naddrData ? naddrData.pubkey : null
+    naddrData ? naddrData.pubkey : null,
   );
-
+  const customService = getContentTranslationConfig();
   useEffect(() => {
     const handleScroll = () => {
       if (containerRef.current) {
@@ -107,7 +107,7 @@ export default function Article({ event, userProfile, naddrData }) {
         5000,
         naddrData.relays || undefined,
         undefined,
-        1
+        1,
       );
       if (res.data.length === 0) {
         setIsLoading(false);
@@ -125,6 +125,10 @@ export default function Article({ event, userProfile, naddrData }) {
     if (!event && !naddrData) setIsLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (post && customService?.autoTranslate) translateArticle();
+  }, [post]);
+
   const translateArticle = async () => {
     setIsContentTranslating(true);
     if (translatedContent) {
@@ -134,14 +138,14 @@ export default function Article({ event, userProfile, naddrData }) {
     }
     try {
       let res = await translate(
-        [post.title, post.description || " ", post.content].join(" ABCAF ")
+        [post.title, post.description || " ", post.content].join(" ABCAF "),
       );
       if (res.status === 500) {
         dispatch(
           setToast({
             type: 2,
             desc: t("AZ5VQXL"),
-          })
+          }),
         );
       }
       if (res.status === 400) {
@@ -149,7 +153,7 @@ export default function Article({ event, userProfile, naddrData }) {
           setToast({
             type: 2,
             desc: t("AJeHuH1"),
-          })
+          }),
         );
       }
       if (res.status === 200) {
@@ -167,7 +171,7 @@ export default function Article({ event, userProfile, naddrData }) {
         setToast({
           type: 2,
           desc: t("AZ5VQXL"),
-        })
+        }),
       );
     }
   };
@@ -222,9 +226,7 @@ export default function Article({ event, userProfile, naddrData }) {
               <PagePlaceholder page={"muted-user"} onClick={muteUnmute} />
             )}
             {!isMuted && (
-              <div
-                className={`fit-container fx-centered fx-wrap  main-middle`}
-              >
+              <div className={`fit-container fx-centered fx-wrap  main-middle`}>
                 {showCommentsSection && (
                   <RepEventCommentsSection
                     id={post.aTag}
@@ -305,7 +307,7 @@ export default function Article({ event, userProfile, naddrData }) {
                             <ZapTip
                               recipientLNURL={checkForLUDS(
                                 userProfile.lud06,
-                                userProfile.lud16
+                                userProfile.lud16,
                               )}
                               recipientPubkey={userProfile.pubkey}
                               senderPubkey={userKeys.pub}
@@ -335,7 +337,7 @@ export default function Article({ event, userProfile, naddrData }) {
                                   post_d: post.d,
                                   post_content: post.content,
                                   post_published_at: post.published_at,
-                                })
+                                }),
                               );
                             }}
                           >
@@ -406,7 +408,7 @@ export default function Article({ event, userProfile, naddrData }) {
                                 className="sticker sticker-c1 sticker-small"
                                 href={`/search?keyword=${tag.replace(
                                   "#",
-                                  "%23"
+                                  "%23",
                                 )}`}
                                 state={{ tab: "articles" }}
                                 // target={"_blank"}
@@ -453,7 +455,11 @@ export default function Article({ event, userProfile, naddrData }) {
                         }}
                         components={{
                           p: ({ children }) => {
-                            return <div className="box-marg-s">{getComponent(children)}</div>;
+                            return (
+                              <div className="box-marg-s">
+                                {getComponent(children)}
+                              </div>
+                            );
                           },
                           h1: ({ children }) => {
                             return <h1>{children}</h1>;
@@ -489,7 +495,7 @@ export default function Article({ event, userProfile, naddrData }) {
                                   txt.replace(/^\$\$(.*)\$\$/, "$1"),
                                   {
                                     throwOnError: false,
-                                  }
+                                  },
                                 );
                                 return (
                                   <code
@@ -511,7 +517,7 @@ export default function Article({ event, userProfile, naddrData }) {
                               typeof txt === "string" &&
                               typeof className === "string" &&
                               /^language-katex/.test(
-                                className.toLocaleLowerCase()
+                                className.toLocaleLowerCase(),
                               )
                             ) {
                               const html = katex.renderToString(txt, {
@@ -701,7 +707,7 @@ const ReadMore = () => {
         let tempArray = shuffleArray(TopicsTags);
         let tempArray_2 = tempArray.splice(0, 5);
         let tags = shuffleArray(
-          tempArray_2.map((item) => [item.main_tag, ...item.sub_tags]).flat()
+          tempArray_2.map((item) => [item.main_tag, ...item.sub_tags]).flat(),
         );
         let recommendedPosts = await getSubData(
           [
@@ -714,7 +720,7 @@ const ReadMore = () => {
           50,
           undefined,
           undefined,
-          5
+          5,
         );
         if (recommendedPosts.data.length > 0) {
           setReadMore(recommendedPosts.data.map((_) => getParsedRepEvent(_)));

@@ -1507,6 +1507,16 @@ const getInvoiceDetails = (bolt11) => {
   }
 };
 
+const encodeJWT = (data) => {
+  try {
+    const encoded = bech32.encode("jwt", data, 2000);
+    return encoded;
+  } catch (err) {
+    console.log(err);
+    return "";
+  }
+};
+
 export {
   getBech32,
   shortenKey,

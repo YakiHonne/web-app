@@ -117,9 +117,9 @@ export default function OptionsDropdown({
             ref={dropdownRef}
             style={{
               position: "fixed",
-              top: position.top,
+              top: displayAbove ? "auto" : position.top,
+              bottom: displayAbove ? parent.innerHeight - position.top : "auto",
               left: displayLeft ? position.left - minWidth : position.left,
-              transform: displayAbove ? "translateY(-100%)" : "none",
               minWidth,
               width: "max-content",
               zIndex: 999999,

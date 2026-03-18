@@ -10,7 +10,11 @@ import useNoteStats from "@/Hooks/useNoteStats";
 import CommentsSection from "@/Components/CommentsSection";
 import HistorySection from "@/Components/HistorySection";
 import { useTranslation } from "react-i18next";
-import { getNoteTree, getParsedNote } from "@/Helpers/ClientHelpers";
+import {
+  getCustomServices,
+  getNoteTree,
+  getParsedNote,
+} from "@/Helpers/ClientHelpers";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import ZapAd from "@/Components/ZapAd";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
@@ -19,7 +23,7 @@ import useIsMute from "@/Hooks/useIsMute";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import PostReaction from "@/Components/PostReaction";
 import Backbar from "@/Components/Backbar";
-import { straightUp } from "@/Helpers/Helpers";
+import { getContentTranslationConfig, straightUp } from "@/Helpers/Helpers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
@@ -41,6 +45,7 @@ export default function Note({ event, nevent }) {
   const { isMuted: isMutedPubkey, muteUnmute: muteUnmutePubkey } = useIsMute(
     note?.pubkey,
   );
+  const customService = getContentTranslationConfig();
 
   const { userProfile, isNip05Verified } = useUserProfile(note?.pubkey);
   const { postActions } = useNoteStats(note?.id, note?.pubkey);
@@ -63,7 +68,7 @@ export default function Note({ event, nevent }) {
       setIsLoading(false);
     };
     if (!event) fetchNote();
-    if (event) {
+    if (event && customService?.autoTranslate) {
       translateNote();
     }
     // if (state) {

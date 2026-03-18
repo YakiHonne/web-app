@@ -570,6 +570,7 @@ const getContentTranslationConfig = () => {
     selected: true,
     freeApikey: "",
     proApikey: "",
+    autoTranslate: false,
   };
   try {
     let config = localStorage_.getItem("content-lang-config");
@@ -601,6 +602,7 @@ const updateContentTranslationConfig = (
   plan,
   freeApikey,
   proApikey,
+  autoTranslate,
 ) => {
   try {
     let config = localStorage_.getItem("content-lang-config");
@@ -610,6 +612,7 @@ const updateContentTranslationConfig = (
       freeApikey: freeApikey || "",
       proApikey: proApikey || "",
       selected: true,
+      autoTranslate: autoTranslate !== undefined ? autoTranslate : false,
     };
     if (config) {
       config = JSON.parse(config) || [];
@@ -628,6 +631,10 @@ const updateContentTranslationConfig = (
           plan: plan !== undefined ? plan : config[selectedService].plan,
           freeApikey: freeApikey || config[selectedService].freeApikey,
           proApikey: proApikey || config[selectedService].proApikey,
+          autoTranslate:
+            autoTranslate !== undefined
+              ? autoTranslate
+              : config[selectedService].autoTranslate,
           selected: true,
         };
       } else {
