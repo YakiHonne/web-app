@@ -15,6 +15,7 @@ import UserProfilePic from "./UserProfilePic";
 import { nip19 } from "nostr-tools";
 import Link from "next/link";
 import LoadingLogo from "./LoadingLogo";
+import Icon from "@/Components/Icon";
 
 export default function MiniApp({ url, exit, setReturnedData }) {
   const { t } = useTranslation();
@@ -208,11 +209,11 @@ export default function MiniApp({ url, exit, setReturnedData }) {
             <OptionsDropdown
               options={[
                 <div className="fx-centered pointer">
-                  <div className="copy"></div>
+                  <Icon name="copy" />
                   <p onClick={copyURL}>{t("AahCFK4")}</p>
                 </div>,
                 <div className="fx-centered">
-                  <div className="switch-arrows"></div>
+                  <Icon name="switch-arrows" />
                   <p onClick={reloadiFrame}>{t("A0isRl7")}</p>
                 </div>,
               ]}
@@ -294,7 +295,7 @@ const UserPreview = ({ pubkey }) => {
         target="_blank"
         className="box-pad-h-s"
       >
-        <div className="share-icon-24"></div>
+        <Icon name="share-icon" size={24} />
       </Link>
     </div>
   );

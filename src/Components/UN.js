@@ -8,6 +8,7 @@ import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
 export default function UN({
   sealedCauses = [],
@@ -240,13 +241,7 @@ export default function UN({
               )}
               {state === "sealed" && (
                 <>
-                  <div
-                    style={{
-                      minWidth: "12px",
-                      minHeight: "12px",
-                    }}
-                    className="checkmark"
-                  ></div>
+                  <Icon name="checkmark" size={12} />
                   <p className="p-bold p-medium green-c">{t("ALbnctt")}</p>
                 </>
               )}
@@ -351,7 +346,7 @@ export default function UN({
                                 vote === "+" ? "var(--dim-gray)" : "",
                             }}
                           >
-                            <div className="thumbsup-24"></div>
+                            <Icon name="thumbsup" size={24} />
                           </div>
                           <div
                             className="round-icon round-icon-tooltip"
@@ -363,7 +358,7 @@ export default function UN({
                                 vote === "-" ? "var(--dim-gray)" : "",
                             }}
                           >
-                            <div className="thumbsdown-24"></div>
+                            <Icon name="thumbsdown" size={24} />
                           </div>
                         </div>
                       </>
@@ -377,10 +372,7 @@ export default function UN({
                         }}
                       >
                         <div className="fx-centered">
-                          <div
-                            className="checkmark"
-                            style={{ filter: "grayscale(100%)" }}
-                          ></div>
+                          <Icon name="checkmark" />
                           <p className="p-medium">
                             {t(isVoted.content === "+" ? "AyfQZnM" : "AEFDTqE")}
                           </p>
@@ -467,10 +459,7 @@ export default function UN({
           <>
             <hr />
             <div className="fit-container fx-centered fx-start-h box-pad-h-m box-pad-v-s">
-              <div
-                className="msg-bubbles round-icon-tooltip"
-                data-tooltip={state === "sealed" ? t("AIjRDx9") : t("Ac6NF3G")}
-              ></div>
+              <Icon name="msg-bubbles" className="round-icon-tooltip" />
               <div
                 className="fx-centered fx-start-h fx-wrap"
                 style={{ columnGap: "8px", rowGap: 0 }}

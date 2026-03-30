@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import MintDetails from "./MintDetails";
+import Icon from "@/Components/Icon";
 
 export default function MintItem({ mint, isSelected, onClick }) {
   const { t } = useTranslation();
@@ -47,8 +48,8 @@ export default function MintItem({ mint, isSelected, onClick }) {
             className="round-icon-small pointer"
             onClick={() => onClick(mintInfo.url)}
           >
-            {!isSelected && <div className="plus-sign"></div>}
-            {isSelected && <div className="trash"></div>}
+            {!isSelected && <Icon name="plus-sign" />}
+            {isSelected && <Icon name="trash" isColored />}
           </div>
         </div>
       </div>

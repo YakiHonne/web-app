@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import AddPack from "./AddPack";
 import usePacks from "@/Hooks/usePacks";
 import ToDeleteGeneral from "@/Components/ToDeleteGeneral";
+import Icon from "@/Components/Icon";
 
 export default function ContentPacks({ exit, type }) {
   let kind = type === 3 ? 39092 : 39089;
@@ -90,10 +91,12 @@ export default function ContentPacks({ exit, type }) {
                   >
                     {t("AsXohpb")}
                   </button>
-                  <div
-                    className="trash-24"
+                  <Icon
+                    name="trash"
+                    size={24}
+                    isColored
                     onClick={() => setInitDeletion(pack)}
-                  ></div>
+                  />
                 </div>
               </div>
             );

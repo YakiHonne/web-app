@@ -11,6 +11,7 @@ import { exportAllWallets } from "@/Helpers/Controlers";
 import Select from "@/Components/Select";
 import { currencies } from "@/Content/currencies";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import Icon from "@/Components/Icon";
 
 export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
   const { t } = useTranslation();
@@ -78,14 +79,14 @@ export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
         >
           <div className="fx-centered fx-start-h fx-start-v">
             <div className="box-pad-v-s">
-              <div className="wallet-24"></div>
+              <Icon name="wallet" size={24} />
             </div>
             <div>
               <p>{t("ACERu54")}</p>
               <p className="p-medium gray-c">{t("A0ZZIE7")}</p>
             </div>
           </div>
-          <div className="arrow"></div>
+          <Icon name="arrow" />
         </div>
         {selectedTab === "wallets" && (
           <div className="fit-container fx-col fx-centered  box-pad-h-m box-pad-v-m ">
@@ -123,12 +124,12 @@ export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
                   <div className="fx-centered">
                     <div className="fx-centered">
                       {wallet.kind === 1 && (
-                        <div className="webln-logo-24"></div>
+                        <Icon name="webln-logo" size={24} isColored/>
                       )}
                       {wallet.kind === 2 && (
-                        <div className="alby-logo-24"></div>
+                        <Icon name="alby-logo" size={24} isColored/>
                       )}
-                      {wallet.kind === 3 && <div className="nwc-logo-24"></div>}
+                      {wallet.kind === 3 && <Icon name="nwc-logo" size={24} isColored/>}
                       <div className="fx-centered fx-col">
                         <div className="fx-centered">
                           <p>{wallet.entitle}</p>
@@ -154,7 +155,7 @@ export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
                         data-tooltip={t("Ar6TTrh")}
                         onClick={() => handleSelectWallet(wallet.id)}
                       >
-                        <div className="switch-arrows"></div>
+                        <Icon name="switch-arrows" />
                       </div>
                     )}
                     {wallet.kind !== 1 && (

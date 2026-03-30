@@ -1,6 +1,7 @@
 import React from "react";
 import { swContent } from "./content";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 const getPaths = (page) => {
   let currentPath = page;
@@ -37,7 +38,7 @@ export default function Footer({ page }) {
           href={`/docs/sw/${paths.previousPath.path}`}
         >
           <div className="fx-centered" style={{ gap: "20px" }}>
-            <div className="arrow" style={{ rotate: "90deg" }}></div>
+            <Icon name="arrow" transform="rotate(90deg)" />
             <p className="p-maj p-big">{paths.previousPath.title}</p>
           </div>
           <p className="gray-c">Previous</p>
@@ -54,7 +55,7 @@ export default function Footer({ page }) {
         >
           <div className="fx-centered" style={{ gap: "20px" }}>
             <p className="p-maj p-big">{paths.nextPath.title}</p>
-            <div className="arrow" style={{ rotate: "-90deg" }}></div>
+            <Icon name="arrow" transform="rotate(-90deg)" />
           </div>
           <p className="gray-c">Next</p>
         </Link>

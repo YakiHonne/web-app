@@ -3,6 +3,7 @@ import ProgressCirc from "@/Components/ProgressCirc";
 import { useDispatch, useSelector } from "react-redux";
 import { setUserFirstLoginYakiChest } from "@/Store/Slides/YakiChest";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function UserFirsLogin() {
   const userFirstLoginYakiChest = useSelector(
@@ -54,7 +55,7 @@ export default function UserFirsLogin() {
                 key={index}
               >
                 <p className="p-medium">{action.display_name}</p>
-                <div className="checkmark"></div>
+                <Icon name="checkmark" />
               </div>
             );
           })}

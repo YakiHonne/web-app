@@ -1,15 +1,13 @@
 import ZapTip from "@/Components/ZapTip";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export function SettingsFooter({ userKeys }) {
   const { t } = useTranslation();
   return (
     <div className="fit-container fx-centered fx-start-v fx-col">
-      <div
-        className="yaki-logomark"
-        style={{ minWidth: "64px", minHeight: "64px" }}
-      ></div>
+      <Icon name="yaki-logomark" size={64} />
       <p>
         <span className="c1-c p-bold">
           v{process.env.NEXT_PUBLIC_APP_VERSION}
@@ -24,7 +22,7 @@ export function SettingsFooter({ userKeys }) {
         <div className="fit-container fx-centered fx-start-h fx-col">
           <a href="mailto:info@yakihonne.com" className="fit-container ">
             <div className="fx-centered">
-              <div className="env"></div>
+              <Icon name="env" />
               <p className="gray-c">{t("AheSXrs")}</p>
             </div>
           </a>
@@ -34,7 +32,7 @@ export function SettingsFooter({ userKeys }) {
             target="_blank" className="fit-container "
           >
             <div className="fx-centered">
-              <div className="github-logo"></div>
+              <Icon name="github-logo" />
               <p className="gray-c">Github repos</p>
             </div>
           </a>
@@ -44,7 +42,7 @@ export function SettingsFooter({ userKeys }) {
             target="_blank" className="fit-container "
           >
             <div className="fx-centered">
-              <div className="bug"></div>
+              <Icon name="bug" />
               <p className="gray-c">{t("AouRIQH")}</p>
             </div>
           </a>
@@ -74,7 +72,7 @@ export function SettingsFooter({ userKeys }) {
   //     className="fit-container fx-centered fx-col"
   //     style={{ height: "350px" }}
   //   >
-  //     <div className="yaki-logomark" style={{minWidth: "64px", minHeight: "64px"}}></div>
+  //     <Icon name="yaki-logomark" size={64} />
   //     <p className="p-centered gray-c" style={{ maxWidth: "400px" }}>
   //       {t("AFZ1jAD")}
   //     </p>
@@ -95,7 +93,7 @@ export function SettingsFooter({ userKeys }) {
   //           className="round-icon round-icon-tooltip"
   //           data-tooltip={t("AheSXrs")}
   //         >
-  //           <div className="env"></div>
+  //           <Icon name="env" />
   //         </div>
   //       </a>
   //       <a
@@ -106,7 +104,7 @@ export function SettingsFooter({ userKeys }) {
   //           className="round-icon round-icon-tooltip"
   //           data-tooltip={"Github repos"}
   //         >
-  //           <div className="github-logo"></div>
+  //           <Icon name="github-logo" />
   //         </div>
   //       </a>
   //     </div>

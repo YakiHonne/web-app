@@ -34,6 +34,7 @@ let HeroMaintenance =
 let HeroAI = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/ai.png";
 import LoginWithAPI from "@/Components/LoginWithAPI";
 import AddWallet from "@/Components/AddWallet";
+import Icon from "@/Components/Icon";
 
 export default function PagePlaceholder({ page, onClick = null }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -292,10 +293,7 @@ export default function PagePlaceholder({ page, onClick = null }) {
           >
             <div style={{ position: "relative" }}>
               <div className="round-icon" style={{ width: "140px" }}>
-                <div
-                  className="wallet-add"
-                  style={{ width: "60px", height: "60px" }}
-                ></div>
+                <Icon name="wallet-add" size={48} />
               </div>
               <div
                 className="box-pad-h-s box-pad-v-s"
@@ -307,10 +305,7 @@ export default function PagePlaceholder({ page, onClick = null }) {
                   left: 0,
                 }}
               >
-                <div
-                  className="alby-logo-24"
-                  style={{ width: "32px", height: "32px" }}
-                ></div>
+                <Icon name="alby-logo" size={32} isColored />
               </div>
               <div
                 className="box-pad-h-s box-pad-v-s"
@@ -322,10 +317,7 @@ export default function PagePlaceholder({ page, onClick = null }) {
                   bottom: 0,
                 }}
               >
-                <div
-                  className="nwc-logo-24"
-                  style={{ width: "32px", height: "32px" }}
-                ></div>
+                <Icon name="nwc-logo" size={32} isColored />
               </div>
             </div>
 
@@ -337,7 +329,7 @@ export default function PagePlaceholder({ page, onClick = null }) {
                 className="btn btn-orange fx-centered"
                 onClick={() => setShowAddWallet(!showAddWallet)}
               >
-                <div className="plus-sign"></div> {t("A8fEwNq")}
+                <Icon name="plus-sign" /> {t("A8fEwNq")}
               </button>
             )}
           </div>
@@ -488,7 +480,7 @@ export default function PagePlaceholder({ page, onClick = null }) {
                 backgroundColor: "var(--red-main)",
               }}
             >
-              <div className="warning-24"></div>
+              <Icon name="warning" size={24} />
             </div>
             <h4>{t("AawvPaR")}</h4>
           </div>

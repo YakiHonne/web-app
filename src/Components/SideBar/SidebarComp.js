@@ -35,6 +35,7 @@ import { usePathname } from "next/navigation";
 import { customHistory } from "@/Helpers/History";
 import useDirectMessages from "@/Hooks/useDirectMessages";
 import { SidebarNavItem } from "@/Components/SideBar/SidebarNavItem";
+import Icon from "@/Components/Icon";
 
 export default function SidebarComp() {
   const { t } = useTranslation();
@@ -207,15 +208,19 @@ export default function SidebarComp() {
         >
           <div style={{ position: "sticky", top: 0, width: "100%" }}>
             <div className="fx-centered fx-start-h fit-container box-pad-v-s">
-              <div
-                className="yakihonne-logo-128 mb-hide"
+              <Icon
+                name="yakihonne-logo"
+                className="mb-hide"
+                width={128}
+                height={64}
                 onClick={() => customHistory("/", true)}
-              ></div>
-              <div
-                className="yaki-logomark mb-show"
-                style={{ minHeight: "70px", minWidth: "70px" }}
+              />
+              <Icon
+                name="yaki-logomark"
+                className="mb-show"
+                size={70}
                 onClick={() => customHistory("/", true)}
-              ></div>
+              />
             </div>
             <UserBalance />
           </div>
@@ -234,7 +239,7 @@ export default function SidebarComp() {
               }}
               isActive={isPage("/")}
             >
-              <div className={isPage("/") ? "home-bold-24" : "home-24"}></div>
+              <Icon name={isPage("/") ? "home-bold" : "home"} size={24} />
               <div className="link-label">{t("AJDdA3h")}</div>
             </SidebarNavItem>
             <SidebarNavItem
@@ -243,9 +248,10 @@ export default function SidebarComp() {
               }}
               isActive={isPage("/media")}
             >
-              <div
-                className={isPage("/media") ? "media-bold-24" : "media-24"}
-              ></div>
+              <Icon
+                name={isPage("/media") ? "media-bold" : "media"}
+                size={24}
+              />
               <div className="link-label">{t("A0i2SOt")}</div>
             </SidebarNavItem>
             <SidebarNavItem
@@ -254,11 +260,10 @@ export default function SidebarComp() {
               }}
               isActive={isPage("/relay-orbits")}
             >
-              <div
-                className={
-                  isPage("/relay-orbits") ? "orbit-bold-24" : "orbit-24"
-                }
-              ></div>
+              <Icon
+                name={isPage("/relay-orbits") ? "orbit-bold" : "orbit"}
+                size={24}
+              />
               <div className="link-label">{t("AjGFut6")}</div>
             </SidebarNavItem>
             <SidebarNavItem
@@ -267,11 +272,10 @@ export default function SidebarComp() {
               }}
               isActive={isPage("/explore")}
             >
-              <div
-                className={
-                  isPage("/explore") ? "discover-bold-24" : "discover-24"
-                }
-              ></div>
+              <Icon
+                name={isPage("/explore") ? "discover-bold" : "discover"}
+                size={24}
+              />
               <div className="link-label">{t("ABxLOSx")}</div>
             </SidebarNavItem>
             <SidebarNavItem
@@ -280,9 +284,10 @@ export default function SidebarComp() {
               }}
               isActive={isPage("/articles")}
             >
-              <div
-                className={isPage("/articles") ? "posts-bold-24" : "posts-24"}
-              ></div>
+              <Icon
+                name={isPage("/articles") ? "posts-bold" : "posts"}
+                size={24}
+              />
               <div className="link-label">{t("AesMg52")}</div>
             </SidebarNavItem>
 
@@ -292,13 +297,14 @@ export default function SidebarComp() {
               }}
               isActive={isPage("/smart-widgets")}
             >
-              <div
-                className={
+              <Icon
+                name={
                   isPage("/smart-widgets")
-                    ? "smart-widget-bold-24"
-                    : "smart-widget-24"
+                    ? "smart-widget-bold"
+                    : "smart-widget"
                 }
-              ></div>
+                size={24}
+              />
               <div className="link-label">{t("A2mdxcf")}</div>
             </SidebarNavItem>
             <SidebarNavItem
@@ -307,9 +313,10 @@ export default function SidebarComp() {
               onClick={() => customHistory("/messages")}
             >
               <div className="fx-centered">
-                <div
-                  className={isPage("/messages") ? "env-bold-24" : "env-24"}
-                ></div>
+                <Icon
+                  name={isPage("/messages") ? "env-bold" : "env"}
+                  size={24}
+                />
                 <div className="link-label">{t("As2zi6P")}</div>
               </div>
               {isNewMsg && <div className="notification-dot"></div>}
@@ -328,18 +335,19 @@ export default function SidebarComp() {
                 }
                 onClick={handleProfileLink}
               >
-                <div
-                  className={
+                <Icon
+                  name={
                     isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
                     isPage(
                       "/profile/" +
                         nip19.nprofileEncode({ pubkey: userKeys.pub }),
                     ) ||
                     isPage("/profile/" + userMetadata.nip05)
-                      ? "user-bold-24"
-                      : "user-24"
+                      ? "user-bold"
+                      : "user"
                   }
-                ></div>
+                  size={24}
+                />
                 <div className="link-label">{t("AyBBPWE")}</div>
               </SidebarNavItem>
             )}
@@ -350,11 +358,10 @@ export default function SidebarComp() {
                   customHistory("/dashboard");
                 }}
               >
-                <div
-                  className={
-                    isPage("/dashboard") ? "dashboard-bold-24" : "dashboard-24"
-                  }
-                ></div>
+                <Icon
+                  name={isPage("/dashboard") ? "dashboard-bold" : "dashboard"}
+                  size={24}
+                />
                 <div className="link-label">{t("ALBhi3j")}</div>
               </SidebarNavItem>
             )}
@@ -381,7 +388,7 @@ export default function SidebarComp() {
                   }}
                 >
                   <div className="mb-show round-icon">
-                    <div className="setting-24"></div>
+                    <Icon name="setting" size={24} />
                   </div>
                   <div
                     className="fx-centered fx-start-h pointer"
@@ -433,7 +440,7 @@ export default function SidebarComp() {
                         setShowYakiChest(true);
                       }}
                     >
-                      <div className="cup"></div>
+                      <Icon name="cup" />
                     </div>
                   )}
                   {isYakiChestLoaded && yakiChestStats && (
@@ -520,7 +527,7 @@ export default function SidebarComp() {
                         onClick={() => customHistory(`/settings`)}
                         style={{ padding: ".75rem 1rem" }}
                       >
-                        <div className="setting"></div>
+                        <Icon name="setting" />
                         <p className="gray-c">{t("ABtsLBp")}</p>
                       </div>
                       <div
@@ -528,7 +535,7 @@ export default function SidebarComp() {
                         onClick={singleLogout}
                         style={{ padding: ".75rem 1rem" }}
                       >
-                        <div className="logout"></div>
+                        <Icon name="logout" />
                         <p className="fx-centered">
                           {t("AyXwdfE")}
                           <span className="sticker sticker-normal sticker-small sticker-c1-pale">
@@ -660,7 +667,7 @@ export default function SidebarComp() {
                           redirectToLogin();
                         }}
                       >
-                        <div className="plus-sign"></div>
+                        <Icon name="plus-sign" />
                         <p className="gray-c p-medium">{t("AnDg41L")}</p>
                       </div>
                     </div>
@@ -675,7 +682,7 @@ export default function SidebarComp() {
                           borderRadius: "10px",
                         }}
                       >
-                        <div className="logout"></div>
+                        <Icon name="logout" />
                         <p>{t("AWFCAQG")}</p>
                       </div>
                     </div>
@@ -689,7 +696,7 @@ export default function SidebarComp() {
                 onClick={() => redirectToLogin()}
               >
                 <div className="link-label">{t("AmOtzoL")}</div>
-                <div className="connect-24"></div>
+                <Icon name="connect" size={24} />
               </button>
             )}
           </div>
@@ -751,7 +758,7 @@ const ConfirmmationBox = ({ exit, handleOnClick }) => {
             backgroundColor: "var(--orange-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         <h3 className="p-centered">{t("AirKalq")}</h3>
         <p className="p-centered gray-c box-pad-v-m">{t("Ac9JSPk")}</p>
@@ -762,7 +769,7 @@ const ConfirmmationBox = ({ exit, handleOnClick }) => {
             onClick={handleOnClick}
           >
             {t("AHmZKVA")}
-            <div className="export"></div>
+            <Icon name="export" />
           </button>
           <button className="fx btn btn-red" onClick={exit}>
             {t("AB4BSCe")}

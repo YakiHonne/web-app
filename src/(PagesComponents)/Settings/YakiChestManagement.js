@@ -3,6 +3,7 @@ import LoginWithAPI from "@/Components/LoginWithAPI";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import Icon from "@/Components/Icon";
 
 export default function YakiChestManagement() {
   const { t } = useTranslation();
@@ -21,7 +22,7 @@ export default function YakiChestManagement() {
       >
         <div className="fx-centered fx-start-h fx-start-v">
           <div className="box-pad-v-s">
-            <div className="cup-24"></div>
+            <Icon name="cup" size={24} />
           </div>
           <div>
             <p>{t("ACALoWH")}</p>

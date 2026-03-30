@@ -13,6 +13,7 @@ import { getParsedMedia, getParsedPacksEvent } from "@/Helpers/Encryptions";
 import RecentPosts from "@/Components/RecentPosts";
 import MediaMasonryList from "@/Components/MediaMasonryList";
 import PackPreview from "../Explore/PackPreview";
+import Icon from "@/Components/Icon";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -136,14 +137,7 @@ export default function MediaPack({ event }) {
                   className="fit-container fx-centered fx-col"
                   style={{ height: "80vh" }}
                 >
-                  <div
-                    className="yaki-logomark"
-                    style={{
-                      minWidth: "48px",
-                      minHeight: "48px",
-                      opacity: 0.5,
-                    }}
-                  ></div>
+                  <Icon name="yaki-logomark" size={48} />
                   <h4>{t("A2l1JgC")}</h4>
                   <p
                     className="p-centered gray-c"
@@ -253,10 +247,7 @@ const HomeFeed = ({ pubkeys }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="yaki-logomark"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="yaki-logomark" size={48} />
           <h4>{t("A5BPCrj")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("AVSfte8")}

@@ -6,6 +6,7 @@ import ContentRelays from "./ContentRelays";
 import InboxRelays from "./InboxRelays";
 import { useRouter } from "next/router";
 import { SearchRelays } from "./SearchRelays";
+import Icon from "@/Components/Icon";
 
 export function RelaysConfig() {
   const { query } = useRouter();
@@ -86,19 +87,19 @@ export function RelaysConfig() {
         {selectedTab == 0 && (
           <div className="fx-centered" onClick={() => setShowStatus(true)}>
             <p className="c1-c slide-right">{t("AciF91F")}</p>
-            <div className="info-tt" style={{ rotate: "180deg" }}></div>
+            <Icon name="info-tt" isColored />
           </div>
         )}
         {selectedTab == 1 && (
           <div className="fx-centered" onClick={() => setShowStatus(true)}>
             <p className="c1-c slide-right">{t("AEsTMiq")}</p>
-            <div className="info-tt" style={{ rotate: "180deg" }}></div>
+            <Icon name="info-tt" isColored />
           </div>
         )}
         {selectedTab == 2 && (
           <div className="fx-centered" onClick={() => setShowStatus(true)}>
             <p className="c1-c slide-right">{t("AjCr7Wz")}</p>
-            <div className="info-tt" style={{ rotate: "180deg" }}></div>
+            <Icon name="info-tt" isColored />
           </div>
         )}
         <div className="fx-centered">
@@ -106,13 +107,13 @@ export function RelaysConfig() {
             className="round-icon-small"
             onClick={() => setSelectedTab(Math.max(selectedTab - 1, 0))}
           >
-            <div className="arrow" style={{ rotate: "90deg" }}></div>
+            <Icon name="arrow" />
           </div>
           <div
             className="round-icon-small"
             onClick={() => setSelectedTab(Math.min(selectedTab + 1, 2))}
           >
-            <div className="arrow" style={{ rotate: "-90deg" }}></div>
+            <Icon name="arrow" />
           </div>
         </div>
       </div>

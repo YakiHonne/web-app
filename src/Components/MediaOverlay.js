@@ -9,6 +9,7 @@ import PostReaction from "./PostReaction";
 import ZapAd from "./ZapAd";
 import LoadingDots from "./LoadingDots";
 import useVideoVolume from "@/Hooks/useVideoVolume";
+import Icon from "@/Components/Icon";
 
 const getParsedContent = (item) => {
   let content = "";
@@ -61,7 +62,7 @@ export default function MediaOverlay({ item, postActions, full = false }) {
                 <p className="p-bold p-one-line" style={{ margin: 0 }}>
                   {userProfile.display_name || userProfile.name}
                 </p>
-                {isNip05Verified && <div className="checkmark-c1"></div>}
+                {isNip05Verified && <Icon name="checkmark-c1" isColored />}
               </div>
               <p className="gray-c p-medium" style={{ margin: 0 }}>
                 <Date_
@@ -112,7 +113,7 @@ export default function MediaOverlay({ item, postActions, full = false }) {
                     <p className="p-bold p-one-line" style={{ margin: 0 }}>
                       {userProfile.display_name || userProfile.name}
                     </p>
-                    {isNip05Verified && <div className="checkmark-c1"></div>}
+                    {isNip05Verified && <Icon name="checkmark-c1" isColored />}
                   </div>
                   <p className="gray-c p-medium" style={{ margin: 0 }}>
                     <Date_

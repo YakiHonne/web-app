@@ -13,6 +13,7 @@ import Toggle from "@/Components/Toggle";
 import { useRouter } from "next/router";
 import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import Icon from "@/Components/Icon";
 // import PostReactionsPreview from "@/Components/PostReactionsPreview";
 let boxView =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/box-view.png";
@@ -375,14 +376,14 @@ export function CustomizationManagement({
         >
           <div className="fx-centered fx-start-h fx-start-v">
             <div className="box-pad-v-s">
-              <div className="custom-24"></div>
+              <Icon name="custom" size={24} />
             </div>
             <div>
               <p>{t("ARS24Cc")}</p>
               <p className="p-medium gray-c">{t("AvNq0fB")}</p>
             </div>
           </div>
-          <div className="arrow"></div>
+          <Icon name="arrow" />
         </div>
         {selectedTab === "customization" && (
           <div className="fit-container fx-col fx-centered  box-pad-h-m box-pad-v-m ">
@@ -680,31 +681,31 @@ const ReactionItem = ({ item, index, handleChangeReactionStatus }) => {
   const elements = {
     likes: (
       <div className="fx-centered">
-        <div className="heart"></div>
+        <Icon name="heart" />
         <p>{t("Alz0E9Y")}</p>
       </div>
     ),
     replies: (
       <div className="fx-centered">
-        <div className="comment-icon"></div>
+        <Icon name="comment-icon" />
         <p>{t("AENEcn9")}</p>
       </div>
     ),
     repost: (
       <div className="fx-centered">
-        <div className="switch-arrows"></div>
+        <Icon name="switch-arrows" />
         <p>{t("Aai65RJ")}</p>
       </div>
     ),
     quote: (
       <div className="fx-centered">
-        <div className="quote"></div>
+        <Icon name="quote" />
         <p>{t("AuafJAx")}</p>
       </div>
     ),
     zap: (
       <div className="fx-centered">
-        <div className="bolt"></div>
+        <Icon name="bolt" />
         <p>Zaps</p>
       </div>
     ),
@@ -760,37 +761,37 @@ const PostReactionsPreview = () => {
       <div className="fx-centered" style={{ gap: "20px" }}>
         {order.likes > -1 && (
           <div className="fx-centered" style={{ order: order.likes }}>
-            <div className="heart opacity-4"></div>
+            <Icon name="heart" className="opacity-4" />
             <p className="gray-c">0</p>
           </div>
         )}
         {order.replies > -1 && (
           <div className="fx-centered" style={{ order: order.replies }}>
-            <div className="comment-icon opacity-4"></div>
+            <Icon name="comment-icon" className="opacity-4" />
             <p className="gray-c">0</p>
           </div>
         )}
         {order.repost > -1 && (
           <div className="fx-centered" style={{ order: order.repost }}>
-            <div className="switch-arrows opacity-4"></div>
+            <Icon name="switch-arrows" className="opacity-4" />
             <p className="gray-c">0</p>
           </div>
         )}
         {order.quote > -1 && (
           <div className="fx-centered" style={{ order: order.quote }}>
-            <div className="quote opacity-4"></div>
+            <Icon name="quote" className="opacity-4" />
             <p className="gray-c">0</p>
           </div>
         )}
         {order.zap > -1 && (
           <div className="fx-centered" style={{ order: order.zap }}>
-            <div className="bolt opacity-4"></div>
+            <Icon name="bolt" className="opacity-4" />
             <p className="gray-c">0</p>
           </div>
         )}
       </div>
       <div className="fx-centered">
-        <div className="translate-24 opacity-4"></div>
+        <Icon name="translate" size={24} className="opacity-4" />
       </div>
     </div>
   );

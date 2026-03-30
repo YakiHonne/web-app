@@ -28,6 +28,12 @@ import PostNotePortal from "@/Components/PostNotePortal";
 import RecentPosts from "@/Components/RecentPosts";
 import { Virtuoso } from "react-virtuoso";
 import MediaMasonryList from "@/Components/MediaMasonryList";
+import useRelaysAccess from "@/Hooks/useRelaysAccess";
+import RelayJoinRequest from "./RelayJoinRequest";
+import RelayRequestCode from "@/Components/RelayRequestCode";
+import DeleteWarning from "@/Components/DeleteWarning";
+import LoadingDots from "@/Components/LoadingDots";
+import Icon from "@/Components/Icon";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -50,7 +56,7 @@ const notesReducer = (notes, action) => {
                     note.relatedEvent.id === _.relatedEvent?.id)) ||
                 (_.kind === 6 &&
                   (_.relatedEvent.id === note.id ||
-                    _.relatedEvent.id === note.relatedEvent?.id))
+                    _.relatedEvent.id === note.relatedEvent?.id)),
             ) === index
           )
             return note;
@@ -64,9 +70,20 @@ const notesReducer = (notes, action) => {
 export default function ContentSharedRelay() {
   const router = useRouter();
   const { t } = useTranslation();
-  //   const selectedFilter = getDefaultFilter(2);
   const extrasRef = useRef(null);
   const relay = router.query.r;
+  const {
+    isMembershipRequired,
+    isMember,
+    handleJoinRequest,
+    handleRequestCode,
+    handleLeaveRely,
+    isRelayAccessLoading,
+    requestCode,
+    setRequestCode,
+  } = useRelaysAccess({ relay: relay });
+  const [showJoinRequest, setShowJoinRequest] = useState(false);
+  const [showLeavingWarning, setShowLeavingWarning] = useState(false);
 
   useEffect(() => {
     if (!extrasRef.current) return;
@@ -89,6 +106,33 @@ export default function ContentSharedRelay() {
 
   return (
     <>
+      {requestCode && (
+        <RelayRequestCode
+          code={requestCode}
+          exit={() => setRequestCode(false)}
+        />
+      )}
+      {showJoinRequest && (
+        <RelayJoinRequest
+          handleJoinRequest={(data) => {
+            handleJoinRequest(data);
+            setShowJoinRequest(false);
+          }}
+          exit={() => setShowJoinRequest(false)}
+        />
+      )}
+      {showLeavingWarning && (
+        <DeleteWarning
+          title={t("AoiPb2z")}
+          description={t("AoZBK9d")}
+          handleDelete={() => {
+            handleLeaveRely();
+            setShowLeavingWarning(false);
+          }}
+          exit={() => setShowLeavingWarning(false)}
+          actionButtonLabel={t("AUmONF7")}
+        />
+      )}
       <div style={{ overflow: "auto" }}>
         <YakiIntro />
         <ArrowUp />
@@ -119,13 +163,74 @@ export default function ContentSharedRelay() {
                         className="fit-container fx-scattered fx-col"
                         style={{ gap: 0 }}
                       >
-                        <RelayPreview url={relay} addToFavList={true} />
+                        <RelayPreview
+                          url={relay}
+                          addToFavList={true}
+                          reviews={true}
+                        />
                       </div>
                     </div>
-                    <PostNotePortal
-                      protectedRelay={relay}
-                      label={t("AJj3cLI")}
-                    />
+
+                    {isMembershipRequired && isMember && (
+                      <>
+                        <div
+                          className="fit-container fx-centered box-pad-h-s"
+                          style={{ paddingTop: "1rem" }}
+                        >
+                          <button
+                            className="btn btn-gray fx"
+                            onClick={handleRequestCode}
+                            diabled={isRelayAccessLoading}
+                          >
+                            {isRelayAccessLoading ? (
+                              <LoadingDots />
+                            ) : (
+                              t("ApEvULT")
+                            )}
+                          </button>
+                          <button
+                            className="btn btn-gst-red fx fx-centered"
+                            onClick={() => setShowLeavingWarning(true)}
+                            diabled={isRelayAccessLoading}
+                          >
+                            <Icon name="logout" />
+                            {isRelayAccessLoading ? (
+                              <LoadingDots />
+                            ) : (
+                              t("AUmONF7")
+                            )}
+                          </button>
+                        </div>
+                        <PostNotePortal
+                          protectedRelay={relay}
+                          label={t("AJj3cLI")}
+                        />
+                      </>
+                    )}
+                    {isMembershipRequired && !isMember && (
+                      <div className="fit-container box-pad-h-s box-pad-v-m">
+                        <button
+                          className="btn btn-full btn-gray"
+                          onClick={() => setShowJoinRequest(true)}
+                          disabled={isRelayAccessLoading}
+                        >
+                          {isRelayAccessLoading ? (
+                            <LoadingDots />
+                          ) : (
+                            t("AZs7Pyp")
+                          )}
+                        </button>
+                      </div>
+                    )}
+                    {!isMembershipRequired && (
+                      <>
+                        <PostNotePortal
+                          protectedRelay={relay}
+                          label={t("AJj3cLI")}
+                        />
+                      </>
+                    )}
+
                     <HomeFeed relay={relay} />
                   </div>
                 </>
@@ -135,14 +240,7 @@ export default function ContentSharedRelay() {
                   className="fit-container fx-centered fx-col"
                   style={{ height: "80vh" }}
                 >
-                  <div
-                    className="yaki-logomark"
-                    style={{
-                      minWidth: "48px",
-                      minHeight: "48px",
-                      opacity: 0.5,
-                    }}
-                  ></div>
+                  <Icon name="yaki-logomark" size={48} />
                   <h4>{t("A2l1JgC")}</h4>
                   <p
                     className="p-centered gray-c"
@@ -171,7 +269,7 @@ const HomeFeed = ({ relay }) => {
   const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
   const since = useMemo(
     () => (notes.length > 0 ? notes[0].created_at + 1 : undefined),
-    [notes]
+    [notes],
   );
   const virtuosoRef = useRef(null);
 
@@ -191,7 +289,7 @@ const HomeFeed = ({ relay }) => {
 
       let towDaysPeriod = (2 * 24 * 60 * 60 * 1000) / 1000;
       let twoDaysPrior = Math.floor(
-        (Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000
+        (Date.now() - 2 * 24 * 60 * 60 * 1000) / 1000,
       );
       twoDaysPrior = notesLastEventTime
         ? notesLastEventTime - towDaysPeriod
@@ -321,7 +419,7 @@ const HomeFeed = ({ relay }) => {
               if (
                 item.kind === 6 &&
                 ![...userMutedList, ...bannedList].includes(
-                  item.relatedEvent.pubkey
+                  item.relatedEvent.pubkey,
                 )
               )
                 return (
@@ -385,10 +483,7 @@ const HomeFeed = ({ relay }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="yaki-logomark"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="yaki-logomark" size={48} />
           <h4>{t("A5BPCrj")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("AB9jjjH")}
@@ -400,10 +495,7 @@ const HomeFeed = ({ relay }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="link"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="link" size={48} />
           <h4>{t("AZ826Ej")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("A5ebGh9")}

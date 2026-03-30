@@ -28,6 +28,7 @@ import UploadFile from "@/Components/UploadFile";
 import UserSearchBar from "@/Components/UserSearchBar";
 import PaymentGateway from "@/Components/PaymentGateway";
 import LoadingLogo from "@/Components/LoadingLogo";
+import Icon from "@/Components/Icon";
 
 export default function Playground() {
   return (
@@ -124,10 +125,7 @@ const Main = () => {
                 onClick={() => setMbHide(true)}
                 data-tooltip={t("ATB2h6T")}
               >
-                <div
-                  className="arrow"
-                  style={{ rotate: "90deg", scale: ".7" }}
-                ></div>
+                <Icon name="arrow" />
               </div>
               <p>{t("AzZ1GXv")}</p>
             </div>
@@ -175,7 +173,7 @@ const Main = () => {
                     setReceivedLogs([]);
                   }}
                 >
-                  <div className="switch-arrows-v2"></div>
+                  <Icon name="switch-arrows-v2" />
                 </div>
               </div>
             )}
@@ -711,10 +709,7 @@ const GenerateManifestFile = ({ exit }) => {
           }}
         >
           <div className="fx-centered box-pad-v fx-col">
-            <div
-              className="checkmark-tt"
-              style={{ minWidth: "60px", minHeight: "60px" }}
-            ></div>
+            <Icon name="checkmark-tt" size={60} isColored/>
             <h4 className="p-centered" style={{ lineHeight: "150%" }}>
               The file was generated successfully!
             </h4>
@@ -830,7 +825,7 @@ const GenerateManifestFile = ({ exit }) => {
                 onChange={(e) => setTempTag(e.target.value)}
               />
               <div className="round-icon" onClick={handleAddTags}>
-                <div className="plus-sign"></div>
+                <Icon name="plus-sign" />
               </div>
             </form>
             {tags.length > 0 && (
@@ -847,7 +842,7 @@ const GenerateManifestFile = ({ exit }) => {
                         className="box-pad-h-s"
                         onClick={() => removeTag(index)}
                       >
-                        <div className="plus-sign"></div>
+                        <Icon name="plus-sign" />
                       </div>
                     </div>
                   );
@@ -926,7 +921,7 @@ const AppPreview = ({ metadata }) => {
       </div>
       <div>
         <a href={metadata.widget.appUrl} target="_blank">
-          <div className="share-icon"></div>
+          <Icon name="share-icon" />
         </a>
       </div>
     </div>

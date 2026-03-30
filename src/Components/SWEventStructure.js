@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { verifyEvent } from "@/Helpers/Helpers";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function SWEventStructure({ widget }) {
   const { t } = useTranslation();
@@ -65,8 +66,8 @@ const EventStructure = ({ event }) => {
               <p>image</p>
               <p className="gray-c p-three-lines">{event.image || "N/A"}</p>
             </div>
-            {event.image_status && <div className="checkmark-tt-24"></div>}
-            {!event.image_status && <div className="crossmark-tt-24"></div>}
+            {event.image_status && <Icon name="checkmark-tt" size={24} isColored/>}
+            {!event.image_status && <Icon name="crossmark-tt" size={24} isColored/>}
           </div>
           <hr />
           {event.input && (
@@ -76,7 +77,7 @@ const EventStructure = ({ event }) => {
                   <p>input</p>
                   <p className="gray-c">{event.input || "N/A"}</p>
                 </div>
-                <div className="checkmark-tt-24"></div>
+                <Icon name="checkmark-tt" size={24} isColored/>
               </div>
               <hr />
             </>
@@ -97,8 +98,8 @@ const EventStructure = ({ event }) => {
                         </p>
                         <p className="gray-c">{btn.label || "N/A"}</p>
                       </div>
-                      {btn.label && <div className="checkmark-tt-24"></div>}
-                      {!btn.label && <div className="crossmark-tt-24"></div>}
+                      {btn.label && <Icon name="checkmark-tt" size={24} isColored/>}
+                      {!btn.label && <Icon name="crossmark-tt" size={24} isColored/>}
                     </div>
                     <hr />
                     <div className="fit-container fx-scattered fx-start-v">
@@ -109,10 +110,10 @@ const EventStructure = ({ event }) => {
                         <p className="gray-c">{btn.type || "N/A"}</p>
                       </div>
                       {btn.type_status && (
-                        <div className="checkmark-tt-24"></div>
+                        <Icon name="checkmark-tt" size={24} isColored/>
                       )}
                       {!btn.type_status && (
-                        <div className="crossmark-tt-24"></div>
+                        <Icon name="crossmark-tt" size={24} isColored/>
                       )}
                     </div>
                     <hr />
@@ -126,10 +127,10 @@ const EventStructure = ({ event }) => {
                         </p>
                       </div>
                       {btn.url_status && (
-                        <div className="checkmark-tt-24"></div>
+                        <Icon name="checkmark-tt" size={24} isColored/>
                       )}
                       {!btn.url_status && (
-                        <div className="crossmark-tt-24"></div>
+                        <Icon name="crossmark-tt" size={24} isColored/>
                       )}
                     </div>
                   </div>

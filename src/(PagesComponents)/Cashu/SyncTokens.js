@@ -4,6 +4,7 @@ import successJSON from "@/JSONs/success.json";
 import { checkProofsStatus, publishProofs } from "@/Helpers/CashuHelpers";
 import LoadingDots from "@/Components/LoadingDots";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function SyncTokens({ tokens = [], exit, cashuTokens, mint }) {
   const { t } = useTranslation();
@@ -102,10 +103,7 @@ export default function SyncTokens({ tokens = [], exit, cashuTokens, mint }) {
         </div>
         {!isSyncingFinished && (
           <>
-            <div
-              className="warning-24"
-              style={{ minWidth: "48px", minHeight: "48px" }}
-            ></div>
+            <Icon name="warning" size={48} />
             <div className="box-pad-v-s"></div>
             <h4>{t("AlhlIR1")}</h4>
             <p className="gray-c p-centered box-pad-v-s">{t("A2cAhc6")}</p>

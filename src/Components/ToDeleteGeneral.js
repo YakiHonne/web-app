@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
 export default function ToDeleteGeneral({
   title,
@@ -75,7 +76,7 @@ export default function ToDeleteGeneral({
             backgroundColor: "var(--red-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         {title && (
           <h3 className="p-centered" style={{ wordBreak: "break-word" }}>

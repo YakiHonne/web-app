@@ -7,6 +7,7 @@ import { getUser } from "@/Helpers/Controlers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { useTranslation } from "react-i18next";
 import useIsMute from "@/Hooks/useIsMute";
+import Icon from "@/Components/Icon";
 
 export default function KindSix({ event }) {
   const { t } = useTranslation();
@@ -69,7 +70,7 @@ export default function KindSix({ event }) {
           }
           onClick={() => (reposts.length > 1 ? setShowReposts(true) : null)}
         >
-          <div className="switch-arrows"></div>
+          <Icon name="switch-arrows" />
           <UserProfilePic
             size={18}
             mainAccountUser={false}

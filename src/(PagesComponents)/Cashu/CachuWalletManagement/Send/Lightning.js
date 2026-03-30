@@ -11,6 +11,7 @@ import { getInvoiceDetails } from "@/Helpers/Encryptions";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch } from "react-redux";
 import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
+import Icon from "@/Components/Icon";
 
 export default function Lightning({ exit }) {
   const { t } = useTranslation();
@@ -103,7 +104,7 @@ export default function Lightning({ exit }) {
     <div className="fit-container fx-centered fx-col fx-sart-h fx-start-v">
       <div className="fit-container fx-centered fx-start-h" onClick={exit}>
         <div className="round-icon-small">
-          <div className="arrow" style={{ rotate: "90deg" }}></div>
+          <Icon name="arrow" transform="rotate(90deg)" />
         </div>
         <p>{t("ALTSkY5")}</p>
       </div>

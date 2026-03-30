@@ -12,6 +12,7 @@ import { FileUpload } from "@/Helpers/Helpers";
 import Backbar from "@/Components/Backbar";
 import { useTranslation } from "react-i18next";
 import UserProfilePic from "@/Components/UserProfilePic";
+import Icon from "@/Components/Icon";
 
 export default function ProfileEdit() {
   const dispatch = useDispatch();
@@ -46,7 +47,7 @@ export default function ProfileEdit() {
     setRelaysStatus(
       userAllRelays.map((item) => {
         return { url: item.url, connected: false };
-      })
+      }),
     );
   }, [userRelays]);
 
@@ -89,7 +90,7 @@ export default function ProfileEdit() {
         content: JSON.stringify(content),
         tags: [],
         allRelays: userRelays,
-      })
+      }),
     );
   };
 
@@ -114,7 +115,7 @@ export default function ProfileEdit() {
   const uploadImages = async (data, kind) => {
     let file = data.file;
     setImageUploading(true);
-    let url = await FileUpload(file, userKeys);
+    let url = await FileUpload({ file, userKeys });
     if (url) {
       if (kind === "banner") {
         setUserBanner(url);
@@ -129,7 +130,7 @@ export default function ProfileEdit() {
       setToast({
         type: 2,
         desc: t("AxlGS0U"),
-      })
+      }),
     );
     setImageUploading(false);
   };
@@ -218,7 +219,7 @@ export default function ProfileEdit() {
                             element={
                               <div className="fx-centered sticker  sticker-gray-gray">
                                 {t("AmcaRMQ")}
-                                <div className="plus-sign"></div>
+                                <Icon name="plus-sign" />
                               </div>
                             }
                             setFile={(data) => {
@@ -291,10 +292,7 @@ export default function ProfileEdit() {
                                   }}
                                   className="fx-centered pointer toggle fx-col"
                                 >
-                                  <div
-                                    className="image-24"
-                                    style={{ filter: "invert()" }}
-                                  ></div>
+                                  <Icon name="image" size={24} />
                                   <p className="gray-c">{t("AadiJFs")}</p>
                                 </div>
                               </div>
@@ -464,12 +462,7 @@ export default function ProfileEdit() {
                             onClick={() => setShowMore(!showMore)}
                           >
                             <p>{t("Ayc6Y5B")}</p>
-                            <div
-                              className="arrow "
-                              style={{
-                                rotate: !showMore ? "0deg" : "180deg",
-                              }}
-                            ></div>
+                            <Icon name="arrow" />
                           </div>
                           <div className="fx-centered fit-container box-marg">
                             <button

@@ -12,6 +12,7 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { convertDate } from "@/Helpers/Encryptions";
 import { eventKinds } from "@/Content/Extra";
+import Icon from "@/Components/Icon";
 export default function RawEventDisplay({ event, exit }) {
   const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
   const { t } = useTranslation();
@@ -51,7 +52,7 @@ export default function RawEventDisplay({ event, exit }) {
               img={userProfile?.picture}
             />
             <p>{userProfile.display_name || userProfile?.name}</p>
-            {isNip05Verified && <div className="checkmark-c1"></div>}
+            {isNip05Verified && <Icon name="checkmark-c1" isColored />}
           </div>
           <div className="fx-centered fx-start-h">
             <p className="gray-c">{t("AZxuurd")}</p>
@@ -101,7 +102,7 @@ export default function RawEventDisplay({ event, exit }) {
                               handleCopyelement(codeRef);
                             }}
                           >
-                            <div className="copy"></div>
+                            <Icon name="copy" />
                           </div>
                         </div>
                       </div>

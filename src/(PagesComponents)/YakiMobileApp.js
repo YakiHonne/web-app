@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React, { useState } from "react";
+import Icon from "@/Components/Icon";
 
 let s2 = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/s2-yma.png";
 let s1 = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/s1-yma.png";
@@ -59,10 +60,7 @@ export default function YakiMobileApp() {
         className="pointer fx-centered plus-btn round-icon-tooltip"
         onClick={() => setShowTuto(true)}
       >
-        <div
-          className="play-b-24"
-          style={{ filter: "brightness(0) invert()" }}
-        ></div>
+        <Icon name="play-b" size={24} />
       </div>
       <div
         style={{ width: "min(100%,1200px)", rowGap: "24px", columnGap: "24px" }}
@@ -79,22 +77,20 @@ export default function YakiMobileApp() {
           }}
         >
           <Link href={"/"} className="fx-centered">
-            <div
-              className="yakihonne-logo"
-              style={{
-                filter: "brightness(0) invert()",
-                width: "128px",
-                height: "48px",
-              }}
-            ></div>
+              <Icon
+                name="yakihonne-logo"
+                className="yakihonne-logo"
+                style={{
+                  filter: "brightness(0) invert()",
+                  width: "128px",
+                  height: "48px",
+                }}
+              />
           </Link>
           <h5 className="gray-c">Mobile App Preview</h5>
           <div className="fx-centered">
             {/* <button className="btn btn-gst fx-centered">
-              <div
-                className="arrow"
-                style={{ transform: "rotate(90deg)" }}
-              ></div>
+              <Icon name="arrow" />
               <span>Home</span>
             </button> */}
             <Link href={"/yakihonne-mobile-app-links"} target={"_blank"}>
@@ -102,10 +98,7 @@ export default function YakiMobileApp() {
                 className="btn btn-normal fx-centered"
                 style={{ padding: "1rem", height: "32px" }}
               >
-                <div
-                  className="mobile"
-                  style={{ filter: "brightness(0) invert()" }}
-                ></div>
+                <Icon name="mobile" />
                 <span className="p-medium">Get the app</span>
               </button>
             </Link>

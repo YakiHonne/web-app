@@ -2,6 +2,7 @@ import { shortenKey } from "@/Helpers/Encryptions";
 import { copyText } from "@/Helpers/Helpers";
 import { useTranslation } from "react-i18next";
 import QRCode from "react-qr-code";
+import Icon from "@/Components/Icon";
 
 export default function Invoice({
   invoice,
@@ -36,7 +37,7 @@ export default function Invoice({
           onClick={() => copyText(invoice, message || t("AQmhos7"))}
         >
           <p>{shortenKey(invoice)}</p>
-          <div className="copy-24"></div>
+          <Icon name="copy" size={24} />
         </div>
 
         <div className="fit-container fx-centered">

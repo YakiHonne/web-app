@@ -3,6 +3,7 @@ import RelayPreview from "./RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function Followings({
   relays,
@@ -31,10 +32,7 @@ export default function Followings({
         className="fit-container fx-centered fx-col box-pad-v fx-col"
         style={{ height: "60vh" }}
       >
-        <div
-          className="orbit"
-          style={{ minWidth: "58px", minHeight: "58px" }}
-        ></div>
+        <Icon name="orbit" size={58} />
         <div className="fx-centered fx-col box-pad-v-m">
           <h4>{t("AADL1TO")}</h4>
           <p className="gray-c p-centered" style={{ maxWidth: "300px" }}>
@@ -53,7 +51,7 @@ export default function Followings({
         <div className="fit-container ">
           <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-marg-s">
             <div>
-              <div className="eye-opened-24"></div>
+              <Icon name="eye-opened" size={24} />
             </div>
             <div>
               <p>{t("AZKoEWL")}</p>

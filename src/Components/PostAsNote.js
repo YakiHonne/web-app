@@ -1,5 +1,6 @@
 import React from "react";
 import WriteNote from "@/Components/WriteNote";
+import Overlay from "./Overlay";
 
 export default function PostAsNote({
   exit,
@@ -8,13 +9,9 @@ export default function PostAsNote({
   protectedRelay,
 }) {
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <Overlay exit={exit} width={650}>
       <div
         style={{ width: "min(100%, 650px)", overflow: "visible" }}
-        className="sc-s"
         onClick={(e) => e.stopPropagation()}
       >
         <WriteNote
@@ -25,6 +22,6 @@ export default function PostAsNote({
           protectedRelay={protectedRelay}
         />
       </div>
-    </div>
+    </Overlay>
   );
 }

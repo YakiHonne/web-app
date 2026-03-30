@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import useRelaysSet from "@/Hooks/useRelaysSet";
 import AddRelaySet from "./AddRelaySet";
 import RelaysSetSettings from "./RelaysComponents/RelaysSetSettings";
+import Icon from "@/Components/Icon";
 
 export default function RelaysSetPicker({
   selectedRelaysSetFeed,
@@ -67,7 +68,7 @@ export default function RelaysSetPicker({
           ref={optionsRef}
           onClick={() => setShowList(true)}
         >
-          <div className="search"></div>
+          <Icon name="search" />
           <input
             placeholder={t("AaW83Mz")}
             className="if if-no-border ifs-full"
@@ -198,7 +199,7 @@ export default function RelaysSetPicker({
           style={{ position: "relative", zIndex: 2 }}
           onClick={() => setAddRelaysSet(true)}
         >
-          <div className="plus-sign"></div>
+          <Icon name="plus-sign" />
         </div>
       </div>
     </>

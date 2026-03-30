@@ -11,6 +11,7 @@ import ShowPeople from "@/Components/ShowPeople";
 import UserFollowers from "@/Components/UserFollowers";
 import Link from "next/link";
 import ContentCard from "./ContentCard";
+import Icon from "@/Components/Icon";
 
 export default function HomeTab({
   data,
@@ -130,7 +131,7 @@ export default function HomeTab({
                   </div>
                   <Link href={`/yaki-points`}>
                     <button className="btn btn-small btn-normal fx-centered">
-                      <div className="cup"></div> Yaki {t("A4IGG0z")}
+                      <Icon name="cup" /> Yaki {t("A4IGG0z")}
                     </button>
                   </Link>
                 </div>
@@ -153,10 +154,7 @@ export default function HomeTab({
                   }}
                   onClick={() => setShowPeople("following")}
                 >
-                  <div
-                    className="user-followed-24"
-                    style={{ minWidth: "32px", minHeight: "32px" }}
-                  ></div>
+                  <Icon name="user-followed" size={32} />
                   <div className="fx-centered fx-wrap fx-start-h">
                     <p className="p-big">
                       {data.userProfile?.follows_count || 0}
@@ -173,10 +171,7 @@ export default function HomeTab({
                   }}
                   onClick={() => setShowPeople("followers")}
                 >
-                  <div
-                    className="user-followed-24"
-                    style={{ minWidth: "32px", minHeight: "32px" }}
-                  ></div>
+                  <Icon name="user-followed" size={32} />
                   <div className="fx-centered fx-wrap fx-start-h">
                     <p className="p-big">
                       {data.userProfile?.followers_count || 0}
@@ -200,10 +195,7 @@ export default function HomeTab({
                     pubkey: userMetadata.pubkey,
                   })}`}
                 >
-                  <div
-                    className="note-24"
-                    style={{ minWidth: "32px", minHeight: "32px" }}
-                  ></div>
+                  <Icon name="note" size={32} />
                   <div className="fx-centered fx-wrap fx-start-h">
                     <p className="p-big">{data.userProfile?.note_count || 0}</p>
                     <p className="gray-c">{t("AYIXG83")}</p>
@@ -223,10 +215,7 @@ export default function HomeTab({
                     query: { contentType: "replies" },
                   }}
                 >
-                  <div
-                    className="comment-icon"
-                    style={{ minWidth: "32px", minHeight: "32px" }}
-                  ></div>
+                  <Icon name="comment-icon" size={32} />
                   <div className="fx-centered fx-wrap fx-start-h">
                     <p className="p-big">
                       {data.userProfile?.reply_count || 0}
@@ -246,10 +235,7 @@ export default function HomeTab({
                 flex: "1 1 200px",
               }}
             >
-              <div
-                className="bolt-24"
-                style={{ minWidth: "32px", minHeight: "32px" }}
-              ></div>
+              <Icon name="bolt" size={32} />
               <div className="fx-centered">
                 <div>
                   <p className="p-big">
@@ -278,10 +264,7 @@ export default function HomeTab({
                 flex: "1 1 200px",
               }}
             >
-              <div
-                className="bolt-24"
-                style={{ minWidth: "32px", minHeight: "32px" }}
-              ></div>
+              <Icon name="bolt" size={32} />
               <div className="fx-centered">
                 <div>
                   <p className="p-big">

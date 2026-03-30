@@ -15,6 +15,7 @@ import {
   updateMediaUploader,
 } from "@/Helpers/ClientHelpers";
 import WOTExplanation from "./WOTExplanation";
+import Icon from "@/Components/Icon";
 
 export function ContentModerationManagement({
   selectedTab,
@@ -172,14 +173,14 @@ export function ContentModerationManagement({
         >
           <div className="fx-centered fx-start-h fx-start-v">
             <div className="box-pad-v-s">
-              <div className="content-s-24"></div>
+              <Icon name="content-s" size={24} />
             </div>
             <div>
               <p>{t("Ayh6w9C")}</p>
               <p className="p-medium gray-c">{t("Aa4zlCA")}</p>
             </div>
           </div>
-          <div className="arrow"></div>
+          <Icon name="arrow" />
         </div>
         {selectedTab === "moderation" && (
           <div className="fit-container fx-col fx-centered  box-pad-h-m box-pad-v-m ">

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Grid } from "@giphy/react-components";
 import { GiphyFetch } from "@giphy/js-fetch-api";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 const gf = new GiphyFetch(process.env.NEXT_PUBLIC_GHIPHY_API_KEY);
 
@@ -58,7 +59,7 @@ export default function Gifs({ setGif, exit, position = "left" }) {
             border: "1px solid var(--very-dim-gray)",
           }}
         >
-          <div className="search-24"></div>
+          <Icon name="search" size={24} />
           <input
             type="text"
             placeholder={t("AWYdgPH")}

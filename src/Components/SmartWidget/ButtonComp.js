@@ -4,6 +4,7 @@ import ZapTip from "@/Components/ZapTip";
 import { getEmptyuserMetadata, getHex } from "@/Helpers/Encryptions";
 import { useSelector } from "react-redux";
 import { getUser } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
 const getPubkey = (pubkey, url) => {
   if (!url || url.startsWith("lnbc")) return false;
@@ -83,11 +84,11 @@ export default function ButtonComp({
           className="btn btn-normal btn-full fx-centered"
           style={buttonColor}
         >
-          {type === "youtube" && <div className="youtube-logo"></div>}
-          {type === "nostr" && <div className="nostr-icon"></div>}
-          {type === "discord" && <div className="discord-logo"></div>}
-          {type === "x" && <div className="twitter-w-logo"></div>}
-          {type === "telegram" && <div className="telegram-b-logo"></div>}
+          {type === "youtube" && <Icon name="youtube-logo" />}
+          {type === "nostr" && <Icon name="nostr-icon" />}
+          {type === "discord" && <Icon name="discord-logo" />}
+          {type === "x" && <Icon name="twitter-w-logo" />}
+          {type === "telegram" && <Icon name="telegram-b-logo" />}
           {content}
         </button>
       </a>

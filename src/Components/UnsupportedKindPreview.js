@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { copyText } from "@/Helpers/Helpers";
 import { shortenKey } from "@/Helpers/Encryptions";
+import Icon from "@/Components/Icon";
 
 export default function UnsupportedKindPreview({ addr }) {
   const { t } = useTranslation();
@@ -28,14 +29,14 @@ export default function UnsupportedKindPreview({ addr }) {
             copyText(addr, t("AQf5QYH"));
           }}
         >
-          <div className="copy"></div>
+          <Icon name="copy" />
         </div>
         <a href={`https://njump.me/${addr}`} target="_blank">
           <div
             className="round-icon-small round-icon-tooltip"
             data-tooltip={t("Aaa3apb")}
           >
-            <div className="share-icon"></div>
+            <Icon name="share-icon" />
           </div>
         </a>
       </div>

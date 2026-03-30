@@ -1,14 +1,21 @@
-
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = null;
 
 const toastSlice = createSlice({
   name: "toast",
-  initialState,
+  initialState: [],
   reducers: {
-    setToast(state, action) {
-      return action.payload;
+    setToast: (state, action) => {
+      const id = Date.now() + Math.random();
+      state.push({ ...action.payload, id });
+    },
+    clearToast: (state, action) => {
+      if (action.payload?.id) {
+        return state.filter((t) => t.id !== action.payload.id);
+      } else {
+        return [];
+      }
     },
   },
 });
@@ -34,7 +41,7 @@ const isPublishingSlice = createSlice({
   },
 });
 
-export const { setToast } = toastSlice.actions;
+export const { setToast, clearToast } = toastSlice.actions;
 export const { setToPublish } = toPublishSlice.actions;
 export const { setIsPublishing } = isPublishingSlice.actions;
 

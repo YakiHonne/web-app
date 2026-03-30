@@ -17,6 +17,7 @@ import Backbar from "@/Components/Backbar";
 import RelayPreview from "./Relays/RelayPreview/RelayPreview";
 import { useRouter } from "next/router";
 import { Virtuoso } from "react-virtuoso";
+import Icon from "@/Components/Icon";
 
 const MixEvents = (articles, curations, videos) => {
   const interleavedArray = [];
@@ -355,10 +356,7 @@ const ExploreFeed = ({ selectedTab, isLoading, setIsLoading, relay }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="yaki-logomark"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="yaki-logomark" size={48} />
           <h4>{t("A5BPCrj")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("AB9jjjH")}
@@ -370,10 +368,7 @@ const ExploreFeed = ({ selectedTab, isLoading, setIsLoading, relay }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="link"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="link" size={48} />
           <h4>{t("AZ826Ej")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("A5ebGh9")}

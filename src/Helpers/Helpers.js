@@ -570,6 +570,7 @@ const getContentTranslationConfig = () => {
     selected: true,
     freeApikey: "",
     proApikey: "",
+    autoTranslate: false,
   };
   try {
     let config = localStorage_.getItem("content-lang-config");
@@ -588,6 +589,7 @@ const getContentTranslationConfig = () => {
 const isNoteMuted = (event, userMutedList) => {
   if (event.kind !== 1) return false;
   let parsedNote = getParsedNote(event, undefined, false);
+  if (!parsedNote) return false;
   const isMutedId = userMutedList.includes(parsedNote.id);
   const isMutedComment = userMutedList.includes(parsedNote?.isComment);
   const isMutedRoot = userMutedList.includes(
@@ -601,6 +603,7 @@ const updateContentTranslationConfig = (
   plan,
   freeApikey,
   proApikey,
+  autoTranslate,
 ) => {
   try {
     let config = localStorage_.getItem("content-lang-config");
@@ -610,6 +613,7 @@ const updateContentTranslationConfig = (
       freeApikey: freeApikey || "",
       proApikey: proApikey || "",
       selected: true,
+      autoTranslate: autoTranslate !== undefined ? autoTranslate : false,
     };
     if (config) {
       config = JSON.parse(config) || [];
@@ -628,6 +632,10 @@ const updateContentTranslationConfig = (
           plan: plan !== undefined ? plan : config[selectedService].plan,
           freeApikey: freeApikey || config[selectedService].freeApikey,
           proApikey: proApikey || config[selectedService].proApikey,
+          autoTranslate:
+            autoTranslate !== undefined
+              ? autoTranslate
+              : config[selectedService].autoTranslate,
           selected: true,
         };
       } else {
@@ -686,7 +694,7 @@ const getCAEATooltip = (published_at, created_at) => {
   }`;
 };
 
-const FileUpload = async (file, userKeys, cb) => {
+const FileUpload = async ({ file, userKeys, cb, includeImeta = false }) => {
   let service = ["1", "2"].includes(
     localStorage_.getItem(`${userKeys.pub}_media_service`),
   )
@@ -695,14 +703,29 @@ const FileUpload = async (file, userKeys, cb) => {
 
   let result = "";
   if (service === "1")
-    result = await regularServerFileUpload(file, userKeys, cb);
+    result = await regularServerFileUpload({
+      file,
+      userKeys,
+      cb,
+      includeImeta,
+    });
 
   if (service === "2")
-    result = await blossomServerFileUpload(file, userKeys, cb);
+    result = await blossomServerFileUpload({
+      file,
+      userKeys,
+      cb,
+      includeImeta,
+    });
   return result;
 };
 
-const blossomServerFileUpload = async (file, userKeys, cb) => {
+const blossomServerFileUpload = async ({
+  file,
+  userKeys,
+  cb,
+  includeImeta,
+}) => {
   let mirror = localStorage_.getItem(`${userKeys.pub}_mirror_blossom_servers`);
   let servers = store.getState().userBlossomServers;
   let serverURL =
@@ -755,13 +778,30 @@ const blossomServerFileUpload = async (file, userKeys, cb) => {
         if (cb) cb(percentCompleted);
       },
     });
-    mirrorBlossomServerFileUpload(
-      mirror,
-      servers,
-      encodeB64,
-      imageURL.data.url,
-    );
-    return imageURL.data.url;
+
+    let url = imageURL.data.url;
+    if (includeImeta) {
+      let dim = await getImageDimensions(file);
+      let mirrors = await mirrorBlossomServerFileUpload(
+        mirror,
+        servers,
+        encodeB64,
+        url,
+      );
+      return {
+        url,
+        imeta: [
+          "imeta",
+          `url ${url}`,
+          `x ${imageURL.data.sha256}`,
+          `m ${imageURL.data.type}`,
+          `dim ${dim.width}x${dim.height}`,
+          ...mirrors.map((mirror) => `fallback ${mirror}`),
+        ],
+      };
+    }
+    mirrorBlossomServerFileUpload(mirror, servers, encodeB64, url);
+    return url;
   } catch (err) {
     console.log(err);
     store.dispatch(
@@ -772,6 +812,72 @@ const blossomServerFileUpload = async (file, userKeys, cb) => {
     );
     return false;
   }
+};
+
+const getDominantColor = (imageUrl) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "Anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      ).data;
+      let r = 0,
+        g = 0,
+        b = 0;
+      for (let i = 0; i < imageData.length; i += 4) {
+        r += imageData[i];
+        g += imageData[i + 1];
+        b += imageData[i + 2];
+      }
+      r = Math.floor(r / (imageData.length / 4));
+      g = Math.floor(g / (imageData.length / 4));
+      b = Math.floor(b / (imageData.length / 4));
+      resolve(`rgb(${r},${g},${b})`);
+    };
+    img.onerror = () => resolve("var(--c1)");
+    img.src = imageUrl;
+  });
+};
+
+const filterImetas = ({ note, imetas }) => {
+  if (!note || imetas.length === 0) return [];
+
+  const urlRegex = /(https?:\/\/[^\s\n]+)/g;
+  const urlsInNote = note.match(urlRegex) || [];
+
+  const filtered = imetas.filter((imeta) => {
+    const urlTag = imeta.find((tag) => tag.startsWith("url "));
+    if (!urlTag) return false;
+
+    const url = urlTag.replace("url ", "").trim();
+    return urlsInNote.some((noteUrl) => noteUrl.includes(url));
+  });
+
+  return filtered;
+};
+
+const getImageDimensions = async (file) => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      resolve({ width: img.width, height: img.height });
+
+      URL.revokeObjectURL(url);
+    };
+
+    img.src = url;
+  });
 };
 
 const mirrorBlossomServerFileUpload = async (
@@ -790,42 +896,33 @@ const mirrorBlossomServerFileUpload = async (
             url: fileUrl,
           };
           try {
-            await axios.put(endpoint, data, {
+            let res = await axios.put(endpoint, data, {
               headers: {
                 Authorization: `Nostr ${eventHash}`,
               },
             });
+            return res.data.url;
           } catch (err) {
             console.log(err);
           }
         }),
       );
+      return promises
+        .map((_) => (_.status === "fulfilled" ? _.value : false))
+        .filter((_) => _);
     }
+    return [];
   } catch (err) {
     console.log(err);
   }
 };
 
-async function downloadBlobAsArrayBuffer(fileUrl) {
-  try {
-    const response = await fetch(fileUrl);
-    if (!response.ok) {
-      throw new Error("Failed to download the file.");
-    }
-    const arrayBuffer = await response.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const remoteSha256 = hashArray
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
-
-    return remoteSha256;
-  } catch (error) {
-    console.error("Error downloading file:", error);
-    return null;
-  }
-}
-const regularServerFileUpload = async (file, userKeys, cb) => {
+const regularServerFileUpload = async ({
+  file,
+  userKeys,
+  cb,
+  includeImeta,
+}) => {
   let servers = getMediaUploader();
   let selected = getSelectedServer();
   const nip96Endpoints = servers.find((_) => _.value === selected);
@@ -877,8 +974,17 @@ const regularServerFileUpload = async (file, userKeys, cb) => {
         if (cb) cb(percentCompleted);
       },
     });
-
-    return imageURL.data.nip94_event.tags.find((tag) => tag[0] === "url")[1];
+    let url = imageURL.data.nip94_event.tags.find((tag) => tag[0] === "url")[1];
+    if (includeImeta) {
+      return {
+        url,
+        imeta: [
+          "imeta",
+          ...imageURL.data.nip94_event.tags.map((tag) => `${tag[0]} ${tag[1]}`),
+        ],
+      };
+    }
+    return url;
   } catch (err) {
     store.dispatch(
       setToast({
@@ -1286,12 +1392,13 @@ const createLightningInvoice = async ({ amount, message, recipientAddr }) => {
   let sats = amount * 1000;
   try {
     let url = decodeUrlOrAddress(recipientAddr);
-    if (!url) return;
+
     const data = await axios.get(url);
     const callback = data.data.callback;
     const res = await axios(
-      `${callback}${callback.includes("?") ? "&" : "?"}amount=${sats}&lnurl=${tempRecipientLNURL}`,
+      `${callback}${callback.includes("?") ? "&" : "?"}amount=${sats}&lnurl=${tempRecipientLNURL}&comment=${encodeURIComponent(message)}`,
     );
+
     if (res.data.status === "ERROR") {
       store.dispatch(
         setToast({
@@ -1301,9 +1408,10 @@ const createLightningInvoice = async ({ amount, message, recipientAddr }) => {
       );
       return;
     }
-    lnbcInvoice = res.data.pr;
+    let lnbcInvoice = res.data.pr;
     return lnbcInvoice;
   } catch (err) {
+    console.log(err);
     store.dispatch(
       setToast({
         type: 2,
@@ -1352,6 +1460,15 @@ const parsNutZap = (event) => {
   };
 };
 
+const formatTime = (seconds) => {
+  const d = Math.floor(seconds / (24 * 3600));
+  const h = Math.floor((seconds % (24 * 3600)) / 3600);
+  const min = Math.floor((seconds % 3600) / 60);
+  const s_ = Math.floor(seconds % 60);
+
+  return `${String(d).padStart(2, "0")}d ${String(h).padStart(2, "0")}h ${String(min).padStart(2, "0")}m ${String(s_).padStart(2, "0")}s`;
+};
+
 export {
   getLinkFromAddr,
   getAuthPubkeyFromNip05,
@@ -1394,4 +1511,7 @@ export {
   getPrimaryColor,
   createLightningInvoice,
   parsNutZap,
+  formatTime,
+  filterImetas,
+  getDominantColor,
 };

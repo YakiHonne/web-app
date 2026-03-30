@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import ManageInterest from "./ManageInterest";
+import Icon from "@/Components/Icon";
 
 const getInterestList = (list) => {
   let tempList = [];
@@ -55,7 +56,7 @@ export default function Interests() {
               className="btn btn-normal fx-centered"
               onClick={() => setIsManage(true)}
             >
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
               {t("AIUAUcP")}
             </button>
           </div>

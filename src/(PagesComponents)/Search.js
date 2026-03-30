@@ -23,6 +23,7 @@ import { getDataForSearch } from "@/Helpers/lib";
 import Link from "next/link";
 import { Virtuoso } from "react-virtuoso";
 import MediaMasonryList from "@/Components/MediaMasonryList";
+import Icon from "@/Components/Icon";
 
 const getKeyword = () => {
   let keyword = new URLSearchParams(window.location.search).get("keyword");
@@ -355,7 +356,7 @@ export default function Search() {
                   }}
                   onSubmit={handleSearch}
                 >
-                  <div className="search-24"></div>
+                  <Icon name="search" size={24} />
                   <input
                     type="text"
                     placeholder="Search people, notes and content"
@@ -372,7 +373,7 @@ export default function Search() {
                     href={"/settings?tab=relays&relaysType=2"}
                     state={{ relaysTab: 1, tab: "relays" }}
                   >
-                    <div className="setting-24"></div>
+                    <Icon name="setting" size={24} />
                   </Link>
                 </form>
               )}
@@ -408,7 +409,7 @@ export default function Search() {
                         >
                           {!followed && (
                             <>
-                              {t("ARWeWgJ")} <div className="plus-sign"></div>
+                              {t("ARWeWgJ")} <Icon name="plus-sign" />
                             </>
                           )}
                           {followed && (
@@ -508,10 +509,7 @@ export default function Search() {
                 className="fit-container fx-col fx-centered"
                 style={{ height: "80vh" }}
               >
-                <div
-                  className="search"
-                  style={{ minWidth: "48px", minHeight: "48px" }}
-                ></div>
+                <Icon name="search" size={48} />
                 <h4 className="box-pad-v-s">{t("AjlW15t")}</h4>
                 <p className="gray-c">{t("A0RqaoC")}</p>
               </div>
@@ -548,7 +546,7 @@ const InterestList = ({
         onClick={() => setShowInterest(!showInterest)}
       >
         <p className="c1-c">{t("AvcFYqP")}</p>
-        <div className="arrow"></div>
+        <Icon name="arrow" />
       </div>
       {showInterest && (
         <Slider

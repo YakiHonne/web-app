@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { nip19 } from "nostr-tools";
 import LoadingDots from "@/Components/LoadingDots";
@@ -7,6 +6,7 @@ import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
 export default function AddZapPoll({ exit, setNevent }) {
   const dispatch = useDispatch();
@@ -64,7 +64,7 @@ export default function AddZapPoll({ exit, setNevent }) {
         setToast({
           type: 3,
           desc: t("A27e02j"),
-        })
+        }),
       );
       return;
     }
@@ -73,7 +73,7 @@ export default function AddZapPoll({ exit, setNevent }) {
         setToast({
           type: 3,
           desc: t("A8kBPLg"),
-        })
+        }),
       );
       return;
     }
@@ -82,7 +82,7 @@ export default function AddZapPoll({ exit, setNevent }) {
         setToast({
           type: 3,
           desc: t("AGMAEDk"),
-        })
+        }),
       );
       return;
     }
@@ -91,7 +91,7 @@ export default function AddZapPoll({ exit, setNevent }) {
         setToast({
           type: 3,
           desc: t("ABcXmEu"),
-        })
+        }),
       );
       return;
     }
@@ -120,14 +120,14 @@ export default function AddZapPoll({ exit, setNevent }) {
       tempEvent.kind,
       tempEvent.content,
       tempEvent.tags,
-      tempEvent.created_at
+      tempEvent.created_at,
     );
-    if(!eventInitEx) return
+    if (!eventInitEx) return;
     dispatch(
       setToPublish({
         eventInitEx: eventInitEx,
         allRelays: relaysToPublish,
-      })
+      }),
     );
     let nEvent = nip19.neventEncode({
       id: tempEvent.id,
@@ -143,7 +143,7 @@ export default function AddZapPoll({ exit, setNevent }) {
         setToast({
           type: 1,
           desc: t("AcX6TcC"),
-        })
+        }),
       );
       setNevent(nEvent);
       sub.stop();
@@ -212,7 +212,7 @@ export default function AddZapPoll({ exit, setNevent }) {
                   data-tooltip={t("Almq94P")}
                   onClick={() => handleDeleteOption(index)}
                 >
-                  <div className="trash"></div>
+                  <Icon name="trash" isColored />
                 </div>
               </div>
             );
@@ -232,7 +232,7 @@ export default function AddZapPoll({ exit, setNevent }) {
               data-tooltip={t("AI4ia0I")}
               onClick={handleAddOption}
             >
-              <div className="plus-sign" style={{ cursor: "unset" }}></div>
+              <Icon name="plus-sign" />
             </div>
           </div>
           <button className="btn btn-normal btn-full" onClick={postPoll}>

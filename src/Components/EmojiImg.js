@@ -1,7 +1,11 @@
 import React from "react";
+import Icon from "./Icon";
 
 export default function EmojiImg({ content }) {
-  if (!content) return <div className={"heart-bold-24"}></div>;
+  if (!content)
+    return (
+      <Icon name={"heart-bold"} isColored size={24} isBoldThemeColor={true} />
+    );
   if (content.startsWith("http"))
     return (
       <div
@@ -14,6 +18,8 @@ export default function EmojiImg({ content }) {
       ></div>
     );
   if (["+", "-"].includes(content))
-    return <div className={"heart-bold-24"}></div>;
+    return (
+      <Icon name={"heart-bold"} isColored size={24} isBoldThemeColor={true} />
+    );
   return <p>{content}</p>;
 }

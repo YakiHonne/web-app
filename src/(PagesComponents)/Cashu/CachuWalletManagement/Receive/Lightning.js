@@ -8,6 +8,7 @@ import { Wallet } from "@cashu/cashu-ts";
 import { publishProofs } from "@/Helpers/CashuHelpers";
 import Invoice from "../Invoice";
 import LightningWalletsSelect from "@/Components/LightningWalletsSelect";
+import Icon from "@/Components/Icon";
 
 export default function Lightning({ exit }) {
   const { t } = useTranslation();
@@ -69,7 +70,7 @@ export default function Lightning({ exit }) {
       <div className="fit-container fx-centered fx-col fx-start-h fx-start-v">
         <div className="fit-container fx-centered fx-start-h" onClick={exit}>
           <div className="round-icon-small">
-            <div className="arrow" style={{ rotate: "90deg" }}></div>
+            <Icon name="arrow" transform="rotate(90deg)" />
           </div>
           <p>{t("AykhAgD")}</p>
         </div>
@@ -161,7 +162,7 @@ export default function Lightning({ exit }) {
                   <LoadingDots />
                 ) : (
                   <>
-                    <div className="qrcode-24"></div>
+                    <Icon name="qrcode" size={24} />
                     <p>{t("AvEHTiP")}</p>
                   </>
                 )}

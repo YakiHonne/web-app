@@ -13,6 +13,7 @@ import { getUser } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function BrowseSmartWidgets({ setWidget, exit }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -272,7 +273,7 @@ const WidgetCard = ({ setWidget, widget }) => {
             className="round-icon-small round-icon-tooltip"
             data-tooltip={t("AcXhvAu")}
           >
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </div>
       </div>

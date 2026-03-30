@@ -47,7 +47,7 @@ export function clearRelayMetadata(key) {
 export const getEmptyRelaysData = (url) => {
   return {
     url,
-    name: url.replace("wss://", "").replace("https://", "").replace("/", ""),
+    name: url?.replace("wss://", "")?.replace("https://", "")?.replace("/", ""),
     description: url,
     pubkey: "",
     contact: "",

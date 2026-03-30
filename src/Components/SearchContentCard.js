@@ -11,6 +11,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { getLinkFromAddr } from "@/Helpers/Helpers";
 import { nEventEncode } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function SearchContentCard({ event, exit, userProfile = true }) {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
@@ -57,7 +58,7 @@ export default function SearchContentCard({ event, exit, userProfile = true }) {
           <div className="fx-centered" style={{ gap: "3px" }}>
             <div className="fx-centered" style={{ gap: "3px" }}>
               <p className="p-medium">{user.display_name || user.name}</p>
-              {isNip05Verified && <div className="checkmark-c1"></div>}
+              {isNip05Verified && <Icon name="checkmark-c1" isColored />}
             </div>
             <p className="gray-c p-medium">
               <Date_ toConvert={new Date(event.created_at * 1000)} />
@@ -82,12 +83,12 @@ export default function SearchContentCard({ event, exit, userProfile = true }) {
             style={{ minWidth: "48px", aspectRatio: "1/1" }}
           >
             {[30004, 30005].includes(event.kind) && (
-              <div className="curation-24"></div>
+              <Icon name="curation" size={24} />
             )}
-            {[30023].includes(event.kind) && <div className="posts-24"></div>}
-            {[34235, 21, 22].includes(event.kind) && <div className="play-24"></div>}
+            {[30023].includes(event.kind) && <Icon name="posts" size={24} />}
+            {[34235, 21, 22].includes(event.kind) && <Icon name="play" size={24} />}
             {[30031].includes(event.kind) && (
-              <div className="smart-widget-24"></div>
+              <Icon name="smart-widget" size={24} />
             )}
           </div>
         )}
@@ -130,7 +131,7 @@ export default function SearchContentCard({ event, exit, userProfile = true }) {
         <div className="fx-centered" style={{ gap: "3px" }}>
           <div className="fx-centered" style={{ gap: "3px" }}>
             <p className="p-medium">{user.display_name || user.name}</p>
-            {isNip05Verified && <div className="checkmark-c1"></div>}
+            {isNip05Verified && <Icon name="checkmark-c1" isColored />}
           </div>
           <p className="p-medium gray-c">|</p>
           <DynamicIndicator item={event} />

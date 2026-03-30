@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import useRelaysSet from "@/Hooks/useRelaysSet";
 import { getParsedRelaySet } from "@/Helpers/Encryptions";
 import { useState } from "react";
+import Icon from "@/Components/Icon";
 
 export default function RelaySetItem({
   item,
@@ -66,7 +67,7 @@ export default function RelaySetItem({
         >
           {metadata.relays.length}{" "}
           {metadata.relays.length === 1 ? "relay" : "relays"}{" "}
-          <div className="arrow-12"></div>
+          <Icon name="arrow" size={12} />
         </div>
         {!initiateDeletion && (
           <div
@@ -79,7 +80,7 @@ export default function RelaySetItem({
                 : setInitiateDeletion(true)
             }
           >
-            <div className="trash"></div>
+            <Icon name="trash" isColored />
           </div>
         )}
         {initiateDeletion && (

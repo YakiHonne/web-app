@@ -3,6 +3,7 @@ import Select from "./Select";
 import { useTranslation } from "react-i18next";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch } from "react-redux";
+import Overlay from "./Overlay";
 
 const currentYear = new Date().getFullYear();
 
@@ -112,17 +113,10 @@ export default function DatePicker({
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad"
-      onClick={(e) => {
-        e.stopPropagation();
-        close();
-      }}
-      id="date-picker"
-    >
+    <Overlay exit={close} width={500} id="date-picker">
       <div
-        className="box-pad-h box-pad-v fx-centered fx-col fx-start-h fx-start-v sc-s bg-sp slide-up"
-        style={{ width: "min(100%, 500px)", overflow: "visible" }}
+        className="box-pad-h box-pad-v fx-centered fx-col fx-start-h fx-start-v"
+        style={{ overflow: "visible" }}
         onClick={(e) => {
           e.stopPropagation();
         }}
@@ -192,6 +186,6 @@ export default function DatePicker({
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

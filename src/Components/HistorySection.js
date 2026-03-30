@@ -19,10 +19,10 @@ const traceEventPath = (id, all, mainEventID, tagKind) => {
     let parsedEvent = getParsedNote(event, true);
     path.unshift(parsedEvent);
     const parentRoot = event.tags.find(
-      (tag) => tag.length > 3 && tag[3] === "root"
+      (tag) => tag.length > 3 && tag[3] === "root",
     );
     const parentReply = event.tags.find(
-      (tag) => tag.length > 3 && tag[3] === "reply"
+      (tag) => tag.length > 3 && tag[3] === "reply",
     );
 
     if (!(parentRoot && parentReply)) break;
@@ -113,7 +113,7 @@ export default function HistorySection({
           since: Math.floor(Date.now() / 1000),
         },
       ],
-      { cacheUsage: "CACHE_FIRST", groupable: false }
+      { cacheUsage: "CACHE_FIRST", groupable: false },
     );
 
     sub.on("event", (event) => {
@@ -123,7 +123,7 @@ export default function HistorySection({
         setComments((prev) => {
           let newCom = [...prev, event.rawEvent()];
           return newCom.sort(
-            (item_1, item_2) => item_2.created_at - item_1.created_at
+            (item_1, item_2) => item_2.created_at - item_1.created_at,
           );
         });
         saveUsers([event.pubkey]);

@@ -12,6 +12,7 @@ import OptionsDropdown from "@/Components/OptionsDropdown";
 import LoadingDots from "@/Components/LoadingDots";
 import ShareLink from "@/Components/ShareLink";
 import AddPack from "@/Components/ContentSettings/ContentSource/AddPack";
+import Icon from "@/Components/Icon";
 
 export default function PackPreview({ pack, noRedirect = false }) {
   let url = pack.kind === 39089 ? "/pack/s?d=" + pack.d : "/pack/m?d=" + pack.d;
@@ -70,7 +71,7 @@ export default function PackPreview({ pack, noRedirect = false }) {
                 </div>
                 <div className="fx-centered">
                   <div className="round-icon-small">
-                    <div className="arrow"></div>
+                    <Icon name="arrow" />
                   </div>
                   <OptionsDropdown
                     options={[
@@ -87,12 +88,12 @@ export default function PackPreview({ pack, noRedirect = false }) {
                           <>
                             {!isAllFollowing ? (
                               <>
-                                <div className="user-to-follow-24"></div>
+                                <Icon name="user-to-follow" size={24} />
                                 <p>{t("AzkUxnd")}</p>
                               </>
                             ) : (
                               <>
-                                <div className="user-to-unfollow-24"></div>
+                                <Icon name="user-to-unfollow" size={24} />
                                 <p>{t("AyohNeT")}</p>
                               </>
                             )}
@@ -106,7 +107,7 @@ export default function PackPreview({ pack, noRedirect = false }) {
                           setShowAddPack(true);
                         }}
                       >
-                        <div className="clone-24"></div>
+                        <Icon name="clone" size={24} />
                         <p>{t("AyWVBDx")}</p>
                       </div>,
                       <div
@@ -195,7 +196,7 @@ export default function PackPreview({ pack, noRedirect = false }) {
           >
             <p className="gray-c">{t("AER5KJi")}</p>
             <div>
-              <div className="share-icon"></div>
+              <Icon name="share-icon" />
             </div>
           </Link>
         )}

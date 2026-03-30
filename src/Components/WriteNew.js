@@ -7,6 +7,8 @@ import LoginSignup from "@/Components/LoginSignup";
 import PostAsNote from "./PostAsNote";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import PostMedia from "./PostMedia/PostMedia";
+import Icon from "@/Components/Icon";
+import Overlay from "./Overlay";
 
 export default function WriteNew({ exit }) {
   const { t } = useTranslation();
@@ -65,8 +67,14 @@ export default function WriteNew({ exit }) {
             exit();
           }}
           internalExit={() => setRedirectLinks(false)}
-          setShowPostNote={() => setShowPostNote(true)}
-          setShowPostMedia={() => setShowPostMedia(true)}
+          setShowPostNote={() => {
+            setShowPostNote(true);
+            setRedirectLinks(false);
+          }}
+          setShowPostMedia={() => {
+            setShowPostMedia(true);
+            setRedirectLinks(false);
+          }}
         />
       )}
       {showPostNote && <PostAsNote exit={() => setShowPostNote(false)} />}
@@ -85,7 +93,7 @@ export default function WriteNew({ exit }) {
         onTouchStart={handlePressStart}
         onTouchEnd={handlePressEnd}
       >
-        <div className="plus-sign-w"></div>
+        <Icon name="plus-sign-w" />
         <div className="link-label">{t("AAxCaYH")}</div>
       </button>
     </>
@@ -100,18 +108,16 @@ const RedictingLinks = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      style={{ zIndex: "1000" }}
-      onClick={(e) => {
-        e.stopPropagation();
-        internalExit();
-      }}
-    >
-      <div
-        className="sc-s box-pad-h box-pad-v fx-centered fx-col bg-sp slide-up"
-        style={{ width: "min(100%,400px)", position: "relative" }}
-      >
+    // <div
+    //   className="fixed-container fx-centered box-pad-h"
+    //   style={{ zIndex: "1000" }}
+    //   onClick={(e) => {
+    //     e.stopPropagation();
+    //     internalExit();
+    //   }}
+    // >
+    <Overlay exit={internalExit} width={400}>
+      <div className="box-pad-h box-pad-v fx-centered fx-col bg-sp slide-up pos-relative">
         <div
           className="close"
           onClick={(e) => {
@@ -132,10 +138,7 @@ const RedictingLinks = ({
               padding: "2rem",
             }}
           >
-            <div
-              className="note-plus-24"
-              style={{ width: "48px", height: "48px" }}
-            ></div>
+            <Icon name="note-plus" size={40} />
             <div className="gray-c">{t("Az5ftet")}</div>
           </div>
           <div
@@ -150,10 +153,7 @@ const RedictingLinks = ({
               padding: "2rem",
             }}
           >
-            <div
-              className="posts-plus-24"
-              style={{ width: "48px", height: "48px" }}
-            ></div>
+            <Icon name="posts-plus" size={40} />
             <div className="gray-c">{t("AyYkCrS")}</div>
           </div>
           <div
@@ -165,10 +165,7 @@ const RedictingLinks = ({
               padding: "2rem",
             }}
           >
-            <div
-              className="media-24"
-              style={{ width: "48px", height: "48px" }}
-            ></div>
+            <Icon name="media" size={40} />
             <div className="gray-c">{t("A0i2SOt")}</div>
           </div>
           <Link
@@ -181,16 +178,13 @@ const RedictingLinks = ({
               borderRadius: "16px",
             }}
           >
-            <div
-              className="smart-widget-add-24"
-              style={{ width: "48px", height: "48px" }}
-            ></div>
+            <Icon name="smart-widget-add" size={40} />
             <div style={{ width: "max-content" }} className="gray-c">
               {t("AkvXmyz")}
             </div>
           </Link>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import PostAsNote from "@/Components/PostAsNote";
 import { customHistory } from "@/Helpers/History";
+import Icon from "@/Components/Icon";
 
 export default function PostNoteWithWidget({ widget, exit, onlyNext = true }) {
   const [next, setNext] = useState(onlyNext);
@@ -53,10 +54,7 @@ export default function PostNoteWithWidget({ widget, exit, onlyNext = true }) {
               style={{ height: "200px" }}
               href={"/smart-widgets"}
             >
-              <div
-                className="arrow"
-                style={{ minWidth: "36px", height: "64px", rotate: "90deg" }}
-              ></div>
+              <Icon name="arrow" size={36} transform="rotate(-90deg)" />
               <p className="gray-c">{t("AJCyqKE")}</p>
             </Link>
             <div
@@ -64,10 +62,7 @@ export default function PostNoteWithWidget({ widget, exit, onlyNext = true }) {
               style={{ height: "200px" }}
               onClick={() => setNext(true)}
             >
-              <div
-                className="note"
-                style={{ minWidth: "36px", height: "64px" }}
-              ></div>
+              <Icon name="note" size={36} />
               <h4>{t("ALNe7ey")}</h4>
               <p className="gray-c p-centered box-pad-h">{t("AztCQ11")}</p>
             </div>

@@ -7,6 +7,7 @@ import { setToast } from "@/Store/Slides/Publishers";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function WalletNWC() {
   const dispatch = useDispatch();
@@ -100,7 +101,7 @@ export default function WalletNWC() {
               href={"/lightning-wallet"}
             >
               <div className="round-icon">
-                <div className="arrow" style={{ rotate: "90deg" }}></div>
+                <Icon name="arrow" />
               </div>
             </Link>
             <div className="fx-centered fx-col fx-start-h box-pad-v-m">

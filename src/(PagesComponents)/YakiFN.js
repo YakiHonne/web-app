@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import Icon from "@/Components/Icon";
 let s1 =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/FN/add-flash-news.png";
 let s2 =
@@ -94,7 +95,7 @@ export default function YakiFN() {
                 className="btn btn-normal fx-centered"
                 style={{ padding: "1rem", height: "32px" }}
               >
-                <div className="note" style={{ filter: "invert()" }}></div>
+                <Icon name="note" />
                 {/* <span className="p-medium">Check Uncensored Notes</span> */}
               </button>
             </Link>

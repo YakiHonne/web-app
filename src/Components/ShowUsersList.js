@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
 const getBulkListStats = (list) => {
   let toFollow = list.filter((item) => item.to_follow).length;
@@ -45,14 +46,14 @@ export default function ShowUsersList({
         let returnedPubkeys = data.pubkeys;
         let returnedData = data.data;
         returnedData = data.data.sort(
-          (ev1, ev2) => ev2.created_at - ev1.created_at
+          (ev1, ev2) => ev2.created_at - ev1.created_at,
         );
         returnedData = data.data.filter((item, index, arr) => {
           if (arr.findIndex((_item) => item.pubkey === _item.pubkey) === index)
             return item;
         });
         let tempUsers = authorsPubkeys.map((_) => {
-          let zapperData =  getZaps(_) || {};
+          let zapperData = getZaps(_) || {};
           return returnedPubkeys.includes(_)
             ? {
                 ...getParsedAuthor(returnedData.find((__) => __.pubkey === _)),
@@ -92,7 +93,7 @@ export default function ShowUsersList({
     let sats = extras.reduce(
       (total, item) =>
         item.pubkey === pubkey ? (total += item.amount) : (total = total),
-      0
+      0,
     );
     let content = extras
       .filter((_) => _.pubkey === pubkey)
@@ -113,7 +114,7 @@ export default function ShowUsersList({
       let tempTags = Array.from(
         userFollowings
           ?.filter((item) => !toUnfollowList.includes(item))
-          .map((_) => ["p", _]) || []
+          .map((_) => ["p", _]) || [],
       );
       for (let item of bulkList) {
         if (item.to_follow) tempTags.push(["p", item.pubkey]);
@@ -126,7 +127,7 @@ export default function ShowUsersList({
           content: "",
           tags: tempTags,
           allRelays: userRelays,
-        })
+        }),
       );
       exit();
     } catch (err) {
@@ -191,10 +192,7 @@ export default function ShowUsersList({
                         className="fx-centered  round-icon"
                         style={{ gap: "6px", border: "none" }}
                       >
-                        <div
-                          className="bolt-bold"
-                          style={{ minWidth: "16px", minHeight: "16px" }}
-                        ></div>
+                        <Icon name="bolt-bold" isColored />
                         <span className="c1-c p-bold">
                           <NumberShrink value={item.amount} />
                         </span>
@@ -333,7 +331,7 @@ const ArrowUp = () => {
       className="pointer fx-centered slide-up"
       onClick={straightUp}
     >
-      <div className="arrow" style={{ transform: "rotate(180deg)" }}></div>
+      <Icon name="arrow" transform="rotate(180deg)" />
     </div>
   );
 };

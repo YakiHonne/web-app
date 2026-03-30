@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { customHistory } from "@/Helpers/History";
+import Icon from "@/Components/Icon";
 
 export default function Sidebar({ page }) {
   const mainFrame = useRef(null);
@@ -36,10 +37,11 @@ export default function Sidebar({ page }) {
         >
           <div className="fx-start-h fx-centered fx-col fit-container">
             <div className="fx-centered fx-start-h fit-container">
-              <div
+              <Icon
+                name="yakihonne-logo"
                 className="yakihonne-logo-128"
                 onClick={() => customHistory("/")}
-              ></div>
+              />
               <div className="sticker sticker-c1 sticker-small">DOCS</div>
             </div>
             <div className="mb-show" style={{ height: "200px" }}></div>
@@ -158,7 +160,7 @@ export default function Sidebar({ page }) {
                 className={`pointer fit-container fx-start-h fx-centered`}
               >
                 <div className="link-label gray-c">Basic dynamic widgets</div>
-                <div className="share-icon"></div>
+                <Icon name="share-icon" />
               </a>
             </div>
           </div>

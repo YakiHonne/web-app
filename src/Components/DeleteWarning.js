@@ -1,11 +1,13 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function DeleteWarning({
   title,
   description,
   exit,
   handleDelete,
+  actionButtonLabel,
 }) {
   const { t } = useTranslation();
   return (
@@ -24,7 +26,7 @@ export default function DeleteWarning({
             backgroundColor: "var(--red-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         {title && (
           <h3 className="p-centered" style={{ wordBreak: "break-word" }}>
@@ -36,7 +38,7 @@ export default function DeleteWarning({
         )}
         <div className="fx-centered fit-container">
           <button className="fx btn btn-gst-red" onClick={handleDelete}>
-            {t("Almq94P")}
+            {actionButtonLabel || t("Almq94P")}
           </button>
           <button className="fx btn btn-red" onClick={exit}>
             {t("AB4BSCe")}

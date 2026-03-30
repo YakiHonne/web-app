@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Icon from "@/Components/Icon";
 
 let targetTimestamp = 1723813200;
 
@@ -171,10 +172,7 @@ export default function CountDownToNewProduct() {
             style={{ borderColor: "var(--dim-gray)" }}
             onClick={() => setShowTuto(true)}
           >
-            <div
-              className="play-b-24"
-              style={{ filter: "brightness(0) invert()" }}
-            ></div>
+            <Icon name="play-b" size={24} />
             <span className="slide-left">Watch the teaser</span>
           </button>
         </div>

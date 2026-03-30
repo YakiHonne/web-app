@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function FooterWrapper() {
   const { t } = useTranslation();
@@ -42,23 +43,23 @@ export default function FooterWrapper() {
             }
             target="_blank"
           >
-            <div className="nostr-icon"></div>
+            <Icon name="nostr-icon" />
           </Link>
           <p className="p-small gray-c">&#9679;</p>
 
           <a href="https://t.me/YakiHonne" target="_blank">
-            <div className="msg-icon"></div>
+            <Icon name="msg-icon" />
           </a>
           <p className="p-small gray-c">&#9679;</p>
 
           <a href="https://t.me/YakiHonne_Daily_Featured/1" target="_blank">
-            <div className="telegram-logo"></div>
+            <Icon name="telegram-logo" />
           </a>
 
           <p className="p-small gray-c">&#9679;</p>
 
           <a href="https://twitter.com/YakiHonne" target="_blank">
-            <div className="twitter-logo"></div>
+            <Icon name="twitter-logo" />
           </a>
         </div>
       </div>

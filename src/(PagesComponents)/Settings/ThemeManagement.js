@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "next-themes";
 import { changePrimary, getPrimaryColor } from "@/Helpers/Helpers";
 import { primaryColors } from "@/Content/PrimaryColors";
+import Icon from "@/Components/Icon";
 
 export function ThemeManagement({ selectedTab, setSelectedTab }) {
   const { t } = useTranslation();
@@ -34,14 +35,14 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
       >
         <div className="fx-centered fx-start-h fx-start-v">
           <div className="box-pad-v-s">
-            <div className="theme-24"></div>
+            <Icon name="theme" size={24} />
           </div>
           <div>
             <p>{t("A1iiDWU")}</p>
             <p className="p-medium gray-c">{t("Aayzo1w")}</p>
           </div>
         </div>
-        <div className="arrow"></div>
+        <Icon name="arrow" />
       </div>
       {selectedTab === "theme" && (
         <div className="fit-container fx-scattered fx-wrap">
@@ -61,14 +62,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               onClick={() => setTheme("dark")}
             >
               <div className="box-pad-h box-pad-v-m fx-centered fx-col">
-                <div
-                  className="yaki-logomark"
-                  style={{
-                    filter: "brightness(0) invert()",
-                    minWidth: "40px",
-                    minHeight: "40px",
-                  }}
-                ></div>
+                <Icon name="yaki-logomark" size={40} />
                 <p className="p-medium" style={{ color: "white" }}>
                   Noir
                 </p>
@@ -83,14 +77,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               onClick={() => setTheme("gray")}
             >
               <div className="box-pad-h box-pad-v-m fx-centered fx-col">
-                <div
-                  className="yaki-logomark"
-                  style={{
-                    filter: "brightness(0) invert()",
-                    minWidth: "40px",
-                    minHeight: "40px",
-                  }}
-                ></div>
+                <Icon name="yaki-logomark" size={40} />
                 <p className="p-medium" style={{ color: "white" }}>
                   Graphite
                 </p>
@@ -107,14 +94,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               onClick={() => setTheme("light")}
             >
               <div className="box-pad-h box-pad-v-m fx-centered fx-col">
-                <div
-                  className="yaki-logomark"
-                  style={{
-                    filter: "brightness(0) ",
-                    minWidth: "40px",
-                    minHeight: "40px",
-                  }}
-                ></div>
+                <Icon name="yaki-logomark" size={40} />
                 <p className="p-medium" style={{ color: "black" }}>
                   Neige
                 </p>
@@ -129,14 +109,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               onClick={() => setTheme("creamy")}
             >
               <div className="box-pad-h box-pad-v-m fx-centered fx-col">
-                <div
-                  className="yaki-logomark"
-                  style={{
-                    filter: "brightness(0) ",
-                    minWidth: "40px",
-                    minHeight: "40px",
-                  }}
-                ></div>
+                <Icon name="yaki-logomark" size={40} />
                 <p
                   className="p-medium"
                   style={{ color: "black", width: "max-content" }}

@@ -6,6 +6,7 @@ import QRCode from "react-qr-code";
 import { getBech32, shortenKey } from "@/Helpers/Encryptions";
 import { useTranslation } from "react-i18next";
 import { nip19 } from "nostr-tools";
+import Icon from "@/Components/Icon";
 
 export default function QRSharing({ user, exit, isVerified }) {
   const dispatch = useDispatch();
@@ -97,11 +98,11 @@ export default function QRSharing({ user, exit, isVerified }) {
               )
             }
           >
-            <div className="link-24"></div>
+            <Icon name="link" size={24} />
             <p className="p-one-line">{`https://yakihonne.com/profile/${
               isVerified ? user.nip05 : getBech32("npub", user.pubkey)
             }`}</p>
-            <div className="copy-24"></div>
+            <Icon name="copy" size={24} />
           </div>
           <div
             className={"fx-scattered if pointer fit-container dashed-onH"}
@@ -110,9 +111,9 @@ export default function QRSharing({ user, exit, isVerified }) {
               copyKey(t("AzSXXQm"), `nostr:${getBech32("npub", user?.pubkey)}`)
             }
           >
-            <div className="key-icon-24"></div>
+            <Icon name="key-icon" size={24} />
             <p>{shortenKey(`nostr:${getBech32("npub", user?.pubkey)}`)}</p>
-            <div className="copy-24"></div>
+            <Icon name="copy" size={24} />
           </div>
           {user?.lud16 && (
             <div
@@ -120,9 +121,9 @@ export default function QRSharing({ user, exit, isVerified }) {
               style={{ borderStyle: "dashed" }}
               onClick={() => copyKey(t("ALR84Tq"), user?.lud16)}
             >
-              <div className="bolt-24"></div>
+              <Icon name="bolt" size={24} />
               <p className="p-one-line">{user?.lud16}</p>
-              <div className="copy-24"></div>
+              <Icon name="copy" size={24} />
             </div>
           )}
         </div>

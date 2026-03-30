@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function OptionsDropdown({
   options,
@@ -106,7 +107,7 @@ export default function OptionsDropdown({
               </p>
             </div>
           )}
-          {icon === "arrow" && <div className="arrow" />}
+          {icon === "arrow" && <Icon name="arrow" />}
         </div>
       </div>
 
@@ -117,9 +118,9 @@ export default function OptionsDropdown({
             ref={dropdownRef}
             style={{
               position: "fixed",
-              top: position.top,
+              top: displayAbove ? "auto" : position.top,
+              bottom: displayAbove ? parent.innerHeight - position.top : "auto",
               left: displayLeft ? position.left - minWidth : position.left,
-              transform: displayAbove ? "translateY(-100%)" : "none",
               minWidth,
               width: "max-content",
               zIndex: 999999,

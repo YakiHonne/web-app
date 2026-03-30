@@ -2,6 +2,7 @@ import EventOptions from "@/Components/ElementOptions/EventOptions";
 import { compactContent } from "@/Helpers/ClientHelpers";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function ScheduledEventCard({ job, refreshAfterDeletion }) {
   const { t } = useTranslation();
@@ -27,7 +28,7 @@ export default function ScheduledEventCard({ job, refreshAfterDeletion }) {
     >
       <div className="fx-centered fx-start-v">
         <div className="round-icon">
-          <div className="note-24"></div>
+          <Icon name="note" size={24} />
         </div>
         <div className="fx-centered fx-col fx-start-h fx-start-v">
           <div className="fx-centered">
@@ -58,7 +59,7 @@ export default function ScheduledEventCard({ job, refreshAfterDeletion }) {
             )}
             {event.kind === 6 && (
               <div className="sticker sticker-normal sticker-gray-black fx-centered">
-                {t("AqWa0gF")} <div className="switch-arrows"></div>
+                {t("AqWa0gF")} <Icon name="switch-arrows" />
               </div>
             )}
           </div>

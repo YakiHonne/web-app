@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { getBech32, downloadAsFile, shortenKey } from "../../Helpers/Encryptions";
 import { copyText } from "../../Helpers/Helpers";
+import Icon from "@/Components/Icon";
 
 export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
   const { t } = useTranslation();
@@ -44,14 +45,14 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
       >
         <div className="fx-centered fx-start-h fx-start-v">
           <div className="box-pad-v-s">
-            <div className="key-icon-24"></div>
+            <Icon name="key-icon" size={24} />
           </div>
           <div>
             <p>{t("Adl0miS")}</p>
             <p className="p-medium gray-c">{t("AXq8Vb3")}</p>
           </div>
         </div>
-        <div className="arrow"></div>
+        <Icon name="arrow" />
       </div>
 
       {selectedTab === "keys" && (
@@ -80,7 +81,7 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
                 </span>
               )}
             </p>
-            {userKeys.sec && <div className="copy-24"></div>}
+            {userKeys.sec && <Icon name="copy" size={24} />}
           </div>
           <div>
             <p className="c1-c p-left fit-container">{t("AZRwERj")}</p>
@@ -94,12 +95,12 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
             }
           >
             <p>{shortenKey(getBech32("npub", userKeys.pub))}</p>
-            <div className="copy-24"></div>
+            <Icon name="copy" size={24} />
           </div>
           <div className="fit-container fx-end-h" onClick={exportKeys}>
             <div className="fx-centered">
               <p className="btn-text-gray">{t("ADv1bgl")}</p>
-              <div className="export"></div>
+              <Icon name="export" />
             </div>
           </div>
         </div>

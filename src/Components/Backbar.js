@@ -1,5 +1,6 @@
 import React from "react";
 import { useRouter } from "next/navigation";
+import Icon from "@/Components/Icon";
 
 export default function Backbar() {
   const router = useRouter();
@@ -15,7 +16,7 @@ export default function Backbar() {
           className="btn btn-normal btn-gray"
           style={{ padding: "0 1rem" }}
         >
-          <div className="arrow arrow-back"></div>
+          <Icon name="arrow" transform="rotate(90deg)" />
         </button>
       </div>
     </div>

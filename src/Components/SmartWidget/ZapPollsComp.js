@@ -25,6 +25,7 @@ import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
+import Icon from "@/Components/Icon";
 
 export default function ZapPollsComp({
   event,
@@ -94,7 +95,7 @@ export default function ZapPollsComp({
           undefined,
           undefined,
           undefined,
-          event.pubkey
+          event.pubkey,
         );
         if (closedAt !== null)
           setClosingTime({
@@ -139,7 +140,7 @@ export default function ZapPollsComp({
             undefined,
             undefined,
             undefined,
-            event.pubkey
+            event.pubkey,
           );
           if (closedAt !== null)
             setClosingTime({
@@ -191,8 +192,8 @@ export default function ZapPollsComp({
         zapLNBCAmount = zapLNBCAmount
           ? parseInt(
               decode(zapLNBCAmount[1]).sections.find(
-                (section) => section.name === "amount"
-              ).value
+                (section) => section.name === "amount",
+              ).value,
             ) / 1000
           : null;
         zapEvent = zapEvent ? JSON.parse(zapEvent[1]) : null;
@@ -228,7 +229,7 @@ export default function ZapPollsComp({
               ) {
                 if (tempZapEvent.pubkey === userKeys.pub) setIsVoted(option);
                 let checkExistantIndex = events.findIndex(
-                  (ev) => ev.pubkey === tempZapEvent.pubkey
+                  (ev) => ev.pubkey === tempZapEvent.pubkey,
                 );
                 if (checkExistantIndex === -1) events.push(tempZapEvent);
                 else {
@@ -238,7 +239,7 @@ export default function ZapPollsComp({
                 if (eose) {
                   setVotes(events);
                   setTotalSats(
-                    events.reduce((total, event) => (total += event.amount), 0)
+                    events.reduce((total, event) => (total += event.amount), 0),
                   );
                 }
               }
@@ -250,7 +251,7 @@ export default function ZapPollsComp({
         eose = true;
         setVotes(events);
         setTotalSats(
-          events.reduce((total, event) => (total += event.amount), 0)
+          events.reduce((total, event) => (total += event.amount), 0),
         );
         // sub.close();
         setVotesLoading(false);
@@ -274,7 +275,7 @@ export default function ZapPollsComp({
         setToast({
           type: 3,
           desc: t("AekHS26"),
-        })
+        }),
       );
       return;
     }
@@ -283,7 +284,7 @@ export default function ZapPollsComp({
         setToast({
           type: 3,
           desc: t("AvjhH4g"),
-        })
+        }),
       );
       return;
     }
@@ -292,7 +293,7 @@ export default function ZapPollsComp({
         setToast({
           type: 3,
           desc: t("AxcgWsO"),
-        })
+        }),
       );
       return;
     }
@@ -304,7 +305,7 @@ export default function ZapPollsComp({
         setToast({
           type: 3,
           desc: t("AlfSF0h"),
-        })
+        }),
       );
       return;
     }
@@ -344,10 +345,13 @@ export default function ZapPollsComp({
         />
       )}
       {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
-      <div className="fit-container fx-centered fx-col" onClick={(e) => {
-        e.stopPropagation()
-        e.preventDefault()
-      }}>
+      <div
+        className="fit-container fx-centered fx-col"
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+        }}
+      >
         <div
           className="fit-container poll-content-box"
           style={{ "--p-color": content_text_color }}
@@ -367,7 +371,7 @@ export default function ZapPollsComp({
             <div
               className="round-icon-small round-icon-tooltip"
               data-tooltip={t(
-                percentageType === "user" ? "AL9yjtS" : "AcAPQ8H"
+                percentageType === "user" ? "AL9yjtS" : "AcAPQ8H",
               )}
               onClick={() =>
                 percentageType === "user"
@@ -375,8 +379,8 @@ export default function ZapPollsComp({
                   : setPercentageType("user")
               }
             >
-              {percentageType === "user" && <div className="user"></div>}
-              {percentageType === "zaps" && <div className="bolt"></div>}
+              {percentageType === "user" && <Icon name="user" />}
+              {percentageType === "zaps" && <Icon name="bolt" />}
             </div>
           </div>
         )}
@@ -423,8 +427,8 @@ export default function ZapPollsComp({
                     width: edit
                       ? "30%"
                       : isVoted || poll.pubkey === userKeys.pub
-                      ? `${percentage}%`
-                      : 0,
+                        ? `${percentage}%`
+                        : 0,
                     border: "none",
                     backgroundColor:
                       options_foreground_color || "var(--orange-main)",
@@ -524,7 +528,7 @@ const Cashier = ({
   const [invoice, setInvoice] = useState("");
   const [wallets, setWallets] = useState(getWallets());
   const [selectedWallet, setSelectedWallet] = useState(
-    wallets.find((wallet) => wallet.active)
+    wallets.find((wallet) => wallet.active),
   );
   const [confirmation, setConfirmation] = useState("initiated");
   const [showWalletsList, setShowWalletList] = useState(false);
@@ -550,7 +554,7 @@ const Cashier = ({
         setToast({
           type: 3,
           desc: t("AlfSF0h"),
-        })
+        }),
       );
       exit();
       return;
@@ -560,7 +564,7 @@ const Cashier = ({
         setToast({
           type: 3,
           desc: t("AxcgWsO"),
-        })
+        }),
       );
       exit();
       return;
@@ -580,7 +584,7 @@ const Cashier = ({
           setToast({
             type: 2,
             desc: t("AbnA22A"),
-          })
+          }),
         );
         return;
       }
@@ -603,7 +607,7 @@ const Cashier = ({
         : recipientLNURL;
 
       const res = await axios(
-        `${callback}?amount=${sats}&nostr=${event}&lnurl=${tempRecipientLNURL}`
+        `${callback}?amount=${sats}&nostr=${event}&lnurl=${tempRecipientLNURL}`,
       );
 
       if (res.data.status === "ERROR") {
@@ -611,7 +615,7 @@ const Cashier = ({
           setToast({
             type: 2,
             desc: t("AZ43zpG"),
-          })
+          }),
         );
         return;
       }
@@ -630,7 +634,7 @@ const Cashier = ({
             since: Math.floor(Date.now() / 1000 - 10),
           },
         ],
-        { groupable: false, cacheUsage: "CACHE_FIRST" }
+        { groupable: false, cacheUsage: "CACHE_FIRST" },
       );
 
       sub.on("event", (event) => {
@@ -664,7 +668,7 @@ const Cashier = ({
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
     }
   };
@@ -682,7 +686,7 @@ const Cashier = ({
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
     }
   };
@@ -695,7 +699,7 @@ const Cashier = ({
           headers: {
             Authorization: `Bearer ${code}`,
           },
-        }
+        },
       );
       return;
     } catch (err) {
@@ -709,7 +713,7 @@ const Cashier = ({
       setToast({
         type: 1,
         desc: `${t("AS0m8W5")} 👏`,
-      })
+      }),
     );
   };
 
@@ -825,10 +829,7 @@ const Cashier = ({
           </div>
           <div style={{ position: "relative", width: "30%" }}>
             {confirmation === "confirmed" && (
-              <div
-                className="checkmark slide-left"
-                style={{ scale: "3" }}
-              ></div>
+              <Icon name="checkmark" className="slide-left" />
             )}
             {confirmation !== "confirmed" && (
               <div className="arrows-animated">
@@ -873,7 +874,7 @@ const Cashier = ({
                     <p className="gray-c p-medium">{t("A7r9XS1")}</p>
                     <p>{selectedWallet.entitle}</p>
                   </div>
-                  <div className="arrow"></div>
+                  <Icon name="arrow" />
                 </div>
               )}
               {showWalletsList && (
@@ -996,7 +997,7 @@ const Cashier = ({
               onClick={() => copyKey(invoice)}
             >
               <p>{shortenKey(invoice)}</p>
-              <div className="copy-24"></div>
+              <Icon name="copy" size={24} />
             </div>
             <div className="fit-container fx-centered">
               <p className="gray-c p-medium">{t("A1ufjMM")}</p>
@@ -1047,7 +1048,7 @@ const checkAlbyToken = async (wallets, activeWallet) => {
         headers: {
           "Content-Type": "multipart/form-data",
         },
-      }
+      },
     );
     let tempWallet = { ...activeWallet };
     tempWallet.data = {

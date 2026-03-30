@@ -6,6 +6,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import RelaysPicker from "@/Components/RelaysPicker";
 import RelayImage from "@/Components/RelayImage";
+import Icon from "@/Components/Icon";
 
 export function ContentRelays({ setShowRelaysInfo, allRelays }) {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
       setRelaysStatus(
         userAllRelays.map((item) => {
           return { url: item.url, connected: false };
-        })
+        }),
       );
     } catch (err) {
       console.log(err);
@@ -52,7 +53,7 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
               let relayStatus = tempNDK.pool.getRelay(relay.url);
               return { url: relay.url, connected: relayStatus.connected };
             }
-          })
+          }),
         );
         setRelaysStatus(res);
       } catch (err) {}
@@ -88,7 +89,7 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
           allRelays: tempUserRelays
             .filter((relay) => relay.write)
             .map((relay) => relay.url),
-        })
+        }),
       );
       return true;
     } catch (err) {
@@ -211,14 +212,7 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
                       ></div>
                       <RelayImage url={relay.url} />
                       <p>{relay.url}</p>
-                      <div
-                        className="info-tt"
-                        style={{
-                          filter: "brightness(0) invert()",
-                          rotate: "180deg",
-                          opacity: 0.9,
-                        }}
-                      ></div>
+                      <Icon name="info-tt" isColored />
                     </div>
                     {!isNew && (
                       <div>
@@ -227,7 +221,7 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
                             onClick={() => removeRelayFromList(false, index)}
                             className="round-icon-small"
                           >
-                            <div className="logout-red"></div>
+                            <Icon name="logout-red" />
                           </div>
                         )}
                         {relay.toDelete && (
@@ -235,7 +229,7 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
                             onClick={() => removeRelayFromList(true, index)}
                             className="round-icon-small"
                           >
-                            <div className="undo"></div>
+                            <Icon name="undo" />
                           </div>
                         )}
                       </div>
@@ -244,9 +238,9 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
                       <div
                         onClick={() => removePermanently(index)}
                         className="round-icon-small"
-                        style={{borderColor: "var(--red-main)"}}
+                        style={{ borderColor: "var(--red-main)" }}
                       >
-                        <div className="trash"></div>
+                        <Icon name="trash" isColored />
                       </div>
                     )}
                   </div>

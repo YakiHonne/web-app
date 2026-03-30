@@ -24,6 +24,7 @@ import RecentPosts from "@/Components/RecentPosts";
 import { straightUp } from "@/Helpers/Helpers";
 import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
 import { Virtuoso } from "react-virtuoso";
+import Icon from "@/Components/Icon";
 
 export default function Articles() {
   const [selectedFilter, setSelectedFilter] = useState(getDefaultFilter());
@@ -279,7 +280,7 @@ const ExploreFeed = ({
           <div className="fit-container ">
             <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-marg-s">
               <div>
-                <div className="eye-opened-24"></div>
+                <Icon name="eye-opened" size={24} />
               </div>
               <div>
                 <p>{t("AZKoEWL")}</p>
@@ -328,7 +329,7 @@ const ExploreFeed = ({
           className="fit-container fx-centered fx-col"
           style={{ height: "30vh" }}
         >
-          <div className="search"></div>
+          <Icon name="search" />
           <h4>{t("AUrhqmn")}</h4>
           <p className="gray-c">{t("AtL4qoU")}</p>
         </div>
@@ -338,10 +339,7 @@ const ExploreFeed = ({
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="link"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="link" size={48} />
           <h4>{t("AZ826Ej")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("A5ebGh9")}

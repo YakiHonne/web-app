@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function MediaUploadArea({ setFile }) {
   const { t } = useTranslation();
@@ -74,10 +75,7 @@ export default function MediaUploadArea({ setFile }) {
           zIndex: 10,
         }}
       />
-      <div
-        className="media-24"
-        style={{ minHeight: "48px", minWidth: "48px" }}
-      ></div>
+      <Icon name="media" size={48} />
       <p className="gray-c p-centered">{t("Au51R0k")}</p>
       <button className="btn btn-normal btn-small">{t("AgG9rzS")}</button>
     </label>
