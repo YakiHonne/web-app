@@ -29,7 +29,7 @@ export default function Icon({
         minHeight: height || size,
         cursor: onClick ? "pointer" : "initial",
         filter: !isColored
-          ? resolvedTheme === "dark"
+          ? ["dark", "gray"].includes(resolvedTheme)
             ? "brightness(0) invert()"
             : "brightness(0)"
           : "",
