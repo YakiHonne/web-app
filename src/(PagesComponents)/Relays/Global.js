@@ -3,6 +3,7 @@ import RelayPreview from "./RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
 import LoadingDots from "@/Components/LoadingDots";
 import { trimRelay } from "@/Helpers/Helpers";
+import Icon from "@/Components/Icon";
 
 export default function Global({
   relays,
@@ -40,7 +41,7 @@ export default function Global({
   return (
     <div className="fit-container fx-centered fx-col box-pad-v">
       <div className="box-pad-h-m box-pad-v-s sc-s-18 bg-sp fx-centered fit-container">
-        <div className="search"></div>
+        <Icon name="search" />
         <input
           type="text"
           className="if ifs-full if-no-border"

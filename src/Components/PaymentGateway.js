@@ -24,6 +24,7 @@ import { saveUsers } from "@/Helpers/DB";
 import successJSON from "@/JSONs/success.json";
 import useCashu from "@/Hooks/useCachu";
 import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
+import Icon from "@/Components/Icon";
 
 export default function PaymentGateway({
   recipientAddr,
@@ -140,10 +141,7 @@ export default function PaymentGateway({
           <div className="close" onClick={exit}>
             <div></div>
           </div>
-          <div
-            className="crossmark-tt"
-            style={{ minWidth: "50px", minHeight: "50px" }}
-          ></div>
+          <Icon name="crossmark-tt" size={50} isColored/>
           <h4>{t("AI8bhpw")}</h4>
           <p className="box-pad-h gray-c p-centered">{t("ACOXf0z")}</p>
         </div>
@@ -535,17 +533,17 @@ const Cashier = ({
                       <div className="fx-centered">
                         {selectedWallet.kind === 1 && (
                           <div className="round-icon-small">
-                            <div className="webln-logo-24"></div>
+                            <Icon name="webln-logo" size={24} isColored/>
                           </div>
                         )}
                         {selectedWallet.kind === 2 && (
                           <div className="round-icon-small">
-                            <div className="alby-logo-24"></div>
+                            <Icon name="alby-logo" size={24} isColored/>
                           </div>
                         )}
                         {selectedWallet.kind === 3 && (
                           <div className="round-icon-small">
-                            <div className="nwc-logo-24"></div>
+                            <Icon name="nwc-logo" size={24} isColored/>
                           </div>
                         )}
                         {selectedWallet.kind === -1 && (
@@ -571,7 +569,7 @@ const Cashier = ({
                         </div>
                       </div>
                       <div className="box-pad-h-s"></div>
-                      <div className="arrow"></div>
+                      <Icon name="arrow" />
                     </div>
                   )}
                   {showWalletsList && (
@@ -616,7 +614,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <div className="webln-logo-24"></div>
+                                  <Icon name="webln-logo" size={24} isColored/>
                                 </div>
                               )}
                               {wallet.kind === 2 && (
@@ -627,7 +625,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <div className="alby-logo-24"></div>
+                                  <Icon name="alby-logo" size={24} isColored/>
                                 </div>
                               )}
                               {wallet.kind === 3 && (
@@ -638,7 +636,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <div className="nwc-logo-24"></div>
+                                  <Icon name="nwc-logo" size={24} isColored/>
                                 </div>
                               )}
                               <p className="p-one-line">{wallet.entitle}</p>
@@ -786,7 +784,7 @@ const Cashier = ({
                   <LoadingDots />
                 ) : (
                   <>
-                    <div className="qrcode-24"></div>
+                    <Icon name="qrcode" size={24} />
                     <p>{t("AvEHTiP")}</p>
                   </>
                 )}
@@ -836,7 +834,7 @@ const Cashier = ({
               onClick={() => copyKey(invoice)}
             >
               <p>{shortenKey(invoice)}</p>
-              <div className="copy-24"></div>
+              <Icon name="copy" size={24} />
             </div>
             {!onlyInvoice && (
               <div className="fit-container fx-centered box-pad-v-s">
@@ -880,10 +878,7 @@ const Cashier = ({
             className="fx-centered fx-col fit-container"
             style={{ height: "16vh" }}
           >
-            <div
-              className="crossmark-tt"
-              style={{ minHeight: "50px", minWidth: "50px" }}
-            ></div>
+            <Icon name="crossmark-tt" size={50} isColored/>
             <h4 className="slide-down box-pad-v-m">{t("AI8bhpw")}</h4>
             <button className="btn btn-normal slide-up" onClick={exit}>
               {t("Acglhzb")}
@@ -943,7 +938,7 @@ const ReceiverInfo = ({ pubkey, isLNBC, recipientAddr }) => {
         >
           <div className="fx-centered fx-start-h">
             <p className="p-maj">{userProfile?.display_name}</p>
-            {isNip05Verified && <div className="checkmark-c1"></div>}
+            {isNip05Verified && <Icon name="checkmark-c1" isColored />}
           </div>
           {!isLNBC && (
             <p className="p-one-line gray-c">

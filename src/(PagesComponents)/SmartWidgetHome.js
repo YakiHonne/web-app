@@ -10,6 +10,7 @@ import axiosInstance from "@/Helpers/HTTP_Client";
 import { t } from "i18next";
 import LaunchSW from "@/Components/LaunchSW";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function SWhome() {
   return (
@@ -42,14 +43,7 @@ const Main = () => {
         style={{ gap: 0, minHeight: "100vh" }}
       >
         <div className="box-pad-v fx-centered">
-          <div
-            className="smart-widget-24"
-            style={{
-              minWidth: "44px",
-              minHeight: "44px",
-              animation: "1.5s infinite rotate",
-            }}
-          ></div>
+          <Icon name="smart-widget" size={44} />
           <h3>{t("A2mdxcf")}</h3>
         </div>
 
@@ -71,14 +65,7 @@ const Main = () => {
             onClick={() => setShowtips(!showTips)}
           >
             <p>{t("A9Mca7S")}</p>
-            <div
-              className="plus-sign"
-              style={{
-                rotate: showTips ? "45deg" : "0deg",
-                minWidth: "14px",
-                minHeight: "14px",
-              }}
-            ></div>
+            <Icon name="plus-sign" size={14} />
           </div>
           {showTips && (
             <>
@@ -121,7 +108,7 @@ const Main = () => {
                         className="fx"
                       >
                         <div className="box-pad-h-m box-pad-v-s sc-s fx-centered bg-sp option pointer fx">
-                          <div className="github-logo"></div>
+                          <Icon name="github-logo" />
                           <p style={{ minWidth: "max-content" }}>
                             {t("AvcFvUD")}
                           </p>
@@ -129,7 +116,7 @@ const Main = () => {
                       </Link>
                       <Link href={"/docs/sw/intro"} className="fx">
                         <div className="box-pad-h-m box-pad-v-s sc-s fx-centered bg-sp option pointer">
-                          <div className="posts"></div>
+                          <Icon name="posts" />
                           <p style={{ minWidth: "max-content" }}>
                             {t("As9snfY")}
                           </p>
@@ -315,7 +302,7 @@ const SWSet = ({ external }) => {
               onClick={handleLastEventTS}
             >
               <p>{t("AnWFKlu")}</p>
-              <div className="arrow"></div>
+              <Icon name="arrow" />
             </div>
           )}
           {isEnded && (
@@ -339,10 +326,7 @@ const SWSet = ({ external }) => {
               className="fit-container fx-centered fx-col"
               style={{ height: "150px" }}
             >
-              <div
-                className="yaki-logomark"
-                style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-              ></div>
+              <Icon name="yaki-logomark" size={48} />
               <p className="gray-c">{t("ANA9vN0")}</p>
             </div>
           )}
@@ -440,7 +424,7 @@ function InputField({ status = true, handleSearch }) {
             }}
             href={"/smart-widgets"}
           >
-            <div className="search"></div>
+            <Icon name="search" />
             {t("AYZh36g")}
           </Link>
           <Link
@@ -452,7 +436,7 @@ function InputField({ status = true, handleSearch }) {
             }}
             href={"/sw-ai"}
           >
-            <div className="ringbell"></div>
+            <Icon name="ringbell" />
             {t("A6U9fNT")}
           </Link>
         </div>
@@ -471,7 +455,7 @@ function InputField({ status = true, handleSearch }) {
               }
             }}
           >
-            <div className="send"></div>
+            <Icon name="send" />
           </div>
         )}
       </div>

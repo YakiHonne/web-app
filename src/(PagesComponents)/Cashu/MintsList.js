@@ -1,5 +1,6 @@
 import React from "react";
 import useCloseContainer from "@/Hooks/useCloseContainer";
+import Icon from "@/Components/Icon";
 
 export default function Mintslist({
   list,
@@ -38,7 +39,7 @@ export default function Mintslist({
       >
         <div className="fit-container fx-scattered">
           <p className=" p-bold">{label}</p>
-          <div className="arrow"></div>
+          <Icon name="arrow" />
         </div>
         <div className="fit-container fx-scattered">
           <div className="fx-centered">

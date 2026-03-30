@@ -5,6 +5,7 @@ import useRepEventStats from "@/Hooks/useRepEventStats";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
+import Icon from "@/Components/Icon";
 
 export default function RepCard({ event, refreshAfterDeletion }) {
   const { t } = useTranslation();
@@ -45,14 +46,14 @@ export default function RepCard({ event, refreshAfterDeletion }) {
         {!event.image && event.kind !== 20 && (
           <div className="round-icon">
             {[30004, 30005].includes(event.kind) && (
-              <div className="curation-24"></div>
+              <Icon name="curation" size={24} />
             )}
-            {[30023].includes(event.kind) && <div className="posts-24"></div>}
+            {[30023].includes(event.kind) && <Icon name="posts" size={24} />}
             {[34235, 21, 22].includes(event.kind) && (
-              <div className="play-24"></div>
+              <Icon name="play" size={24} />
             )}
             {[30033].includes(event.kind) && (
-              <div className="smart-widget-24"></div>
+              <Icon name="smart-widget" size={24} />
             )}
           </div>
         )}
@@ -90,15 +91,15 @@ export default function RepCard({ event, refreshAfterDeletion }) {
           </p>
           <div className="fx-centered">
             <div className="fx-centered">
-              <div className="heart"></div>
+              <Icon name="heart" />
               <div className="gray-c">{postActions.likes.likes.length}</div>
             </div>
             <div className="fx-centered">
-              <div className="comment-icon"></div>
+              <Icon name="comment-icon" />
               <p className="gray-c">{postActions.replies.replies.length}</p>
             </div>
             <div className="fx-centered">
-              <div className="bolt"></div>
+              <Icon name="bolt" />
               <p className="gray-c">{postActions.zaps.total}</p>
             </div>
             <div className="box-pad-h-s">

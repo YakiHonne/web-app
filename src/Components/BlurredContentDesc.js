@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function BlurredContentDesc({ toBlur, label = true }) {
   const { t } = useTranslation();
@@ -31,10 +32,7 @@ export default function BlurredContentDesc({ toBlur, label = true }) {
           bottom: 0,
         }}
       >
-        <div
-          className="eye-closed-24"
-          style={{ filter: "brightness(0) invert()" }}
-        ></div>
+        <Icon name="eye-closed" size={24} />
         {label && <p style={{ color: "white" }}>{t("ABMZqcX")}</p>}
       </div>
       <div
@@ -48,10 +46,7 @@ export default function BlurredContentDesc({ toBlur, label = true }) {
         onClick={handleOpenSettings}
       >
         <div className="box-pad-h-m box-pad-v-m">
-          <div
-            className="setting"
-            style={{ filter: "brightness(0) invert()" }}
-          ></div>
+          <Icon name="setting" />
         </div>
       </div>
     </>
@@ -80,10 +75,7 @@ const DescriptiveWarning = ({ exit }) => {
           <div></div>
         </div>
         <div>
-          <div
-            className="eye-closed"
-            style={{ minWidth: "48px", minHeight: "48px" }}
-          ></div>
+          <Icon name="eye-closed" size={48} />
         </div>
         <h4>{t("AfTjNox")}</h4>
         <p className="gray-c p-centered box-pad-h box-pad-v-s">

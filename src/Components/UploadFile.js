@@ -5,6 +5,7 @@ import { FileUpload } from "@/Helpers/Helpers";
 import { useTranslation } from "react-i18next";
 import ProgressCirc from "@/Components/ProgressCirc";
 import { nanoid } from "nanoid";
+import Icon from "./Icon";
 
 export default function UploadFile({
   kind = "audio/*,video/*,image/*",
@@ -13,6 +14,7 @@ export default function UploadFile({
   setImageURL,
   setIsUploadsLoading = () => null,
   setFileMetadata = null,
+  setImetas = null,
 }) {
   const inputID = nanoid();
   const userKeys = useSelector((state) => state.userKeys);
@@ -30,12 +32,13 @@ export default function UploadFile({
     let index = 0;
     setFilesCount(files.length);
     let images = [];
+    let imetas = [];
     if (!files && (!userKeys.sec || !userKeys.ext || !userKeys.bunker)) {
       dispatch(
         setToast({
           type: 2,
           desc: t("AhWOujw"),
-        })
+        }),
       );
       return;
     }
@@ -43,8 +46,17 @@ export default function UploadFile({
       setCurrentCount(index);
       setIsLoading(true);
       setIsUploadsLoading(true);
-      let url = await FileUpload(file, userKeys, setProgress);
-      if (url) images.push(url);
+      let uploadefFile = await FileUpload({
+        file,
+        userKeys,
+        cb: setProgress,
+        includeImeta: true,
+      });
+
+      if (uploadefFile) {
+        images.push(uploadefFile.url);
+        imetas.push(uploadefFile.imeta);
+      }
       if (setFileMetadata) setFileMetadata(file);
       setIsLoading(false);
       setIsUploadsLoading(false);
@@ -52,6 +64,7 @@ export default function UploadFile({
       index += 1;
     }
     setImageURL(images.join(" "));
+    if (setImetas) setImetas(imetas);
   };
 
   useEffect(() => {
@@ -191,7 +204,7 @@ export default function UploadFile({
             // <LoadingDots />
           )
         ) : (
-          <div className={small ? "image" : "image-24"}></div>
+          <Icon name={"image"} size={small ? 16 : 24} />
         )}
       </label>
     </>

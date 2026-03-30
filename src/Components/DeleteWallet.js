@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { setToast } from "@/Store/Slides/Publishers";
 import { shortenKey } from "@/Helpers/Encryptions";
+import Icon from "@/Components/Icon";
 
 export default function DeleteWallet({ exit, handleDelete, wallet }) {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export default function DeleteWallet({ exit, handleDelete, wallet }) {
             backgroundColor: "var(--red-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         <h3 className="p-centered">{t("APJU882")}</h3>
         <p className="p-centered gray-c box-pad-v-m">{t("AOlHR1d")}</p>
@@ -42,7 +43,7 @@ export default function DeleteWallet({ exit, handleDelete, wallet }) {
           onClick={() => copyText(t("A6Pj02S"), wallet.data)}
         >
           <p>{shortenKey(wallet.data, 15)}</p>
-          <div className="copy-24"></div>
+          <Icon name="copy" size={24} />
         </div>
         <p className="c1-c p-medium p-centered box-pad-h-m">{t("AshEtUl")}</p>
         <div className="fx-centered fit-container">

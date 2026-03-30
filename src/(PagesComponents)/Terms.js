@@ -1,6 +1,7 @@
 import React from "react";
 import Footer from "@/Components/Footer";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function Terms() {
   return (
@@ -24,10 +25,11 @@ export default function Terms() {
             }}
           >
             <Link href={"/"} className="fx-centered">
-            <div
+              <Icon
+                name="yakihonne-logo"
                 className="yakihonne-logo"
                 style={{ filter: "brightness(0) invert()", height: "64px" }}
-              ></div>
+              />
             </Link>
           </div>
           <h2 style={{ color: "white" }}>

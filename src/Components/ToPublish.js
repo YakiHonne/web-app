@@ -7,18 +7,19 @@ import UserSearchBar from "@/Components/UserSearchBar";
 import NProfilePreviewer from "@/Components/NProfilePreviewer";
 import { useDispatch } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
-import { extractNip19 } from "@/Helpers/Helpers";
+import { extractNip19, filterImetas } from "@/Helpers/Helpers";
 import { removeArticleDraft } from "@/Helpers/ClientHelpers";
 import UploadFile from "@/Components/UploadFile";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
 import { useRouter } from "next/router";
+import Icon from "@/Components/Icon";
 
 const getSuggestions = (custom) => {
   if (!custom) return [];
   let list = TopicsTags.map((item) => [item.main_tag, ...item.sub_tags]).flat();
   return list.filter((item) =>
-    item.toLowerCase().includes(custom.toLowerCase())
+    item.toLowerCase().includes(custom.toLowerCase()),
   );
 };
 
@@ -35,6 +36,7 @@ export default function ToPublish({
   exit,
   warning = false,
   userKeys,
+  imetas,
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -44,7 +46,7 @@ export default function ToPublish({
       ? tags
       : extractNip19(postContent)
           .tags.filter((_) => _[0] === "t" && _[1])
-          .map((_) => _[1])
+          .map((_) => _[1]),
   );
   const [thumbnail, setThumbnail] = useState("");
   const [thumbnailPrev, setThumbnailPrev] = useState(postThumbnail || "");
@@ -56,7 +58,7 @@ export default function ToPublish({
   const [zapSplit, setZapSplit] = useState([["zap", userKeys.pub, "", "100"]]);
   const [zapSplitEnabled, setZapSplitEnabled] = useState(false);
   const [deleteDraft, setDeleteDraft] = useState(
-    postKind === 30024 ? true : false
+    postKind === 30024 ? true : false,
   );
   const topicSuggestions = useMemo(() => {
     return getSuggestions(tempTag);
@@ -103,12 +105,15 @@ export default function ToPublish({
       let processedContent = extractNip19(postContent);
       const imageRegex =
         /(?<!\!\[image\]\()https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp|bmp|svg)(?!\))/g;
-
       let tempEvent = {
         created_at,
         kind: kind,
         content: processedContent.content.replace(imageRegex, "![image]($&)"),
-        tags: [...tags, ...processedContent.tags.filter((_) => _[0] !== "t")],
+        tags: [
+          ...tags,
+          ...processedContent.tags.filter((_) => _[0] !== "t"),
+          ...imetas,
+        ],
       };
 
       let eventInitEx = await InitEvent(
@@ -116,7 +121,7 @@ export default function ToPublish({
         tempEvent.content,
         tempEvent.tags,
         tempEvent.created_at,
-        userKeys
+        userKeys,
       );
       if (!eventInitEx) {
         setIsLoading(false);
@@ -126,7 +131,7 @@ export default function ToPublish({
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
       if (deleteDraft) {
         setTimeout(async () => {
@@ -142,7 +147,7 @@ export default function ToPublish({
             tempEvent.content,
             tempEvent.tags,
             tempEvent.created_at,
-            userKeys
+            userKeys,
           );
           if (!eventInitEx) {
             router.push({
@@ -157,7 +162,7 @@ export default function ToPublish({
             setToPublish({
               eventInitEx,
               allRelays: [],
-            })
+            }),
           );
           removeArticleDraft();
           setIsLoading(false);
@@ -177,12 +182,12 @@ export default function ToPublish({
         return;
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
       dispatch(
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
       setIsLoading(false);
     }
@@ -257,10 +262,7 @@ export default function ToPublish({
             onClick={exit}
           >
             <div className="round-icon-small">
-              <div
-                className="arrow-12"
-                style={{ transform: "rotate(90deg)" }}
-              ></div>
+              <Icon name="arrow" size={12} transform="rotate(90deg)" />
             </div>
             <p className="gray-c">{t("ATB2h6T")}</p>
           </div>
@@ -300,7 +302,7 @@ export default function ToPublish({
                   className="fx-centered pointer"
                   onClick={initThumbnail}
                 >
-                  <div className="trash"></div>
+                  <Icon name="trash" isColored />
                 </div>
               )}
 
@@ -366,7 +368,7 @@ export default function ToPublish({
                                 setToast({
                                   type: 3,
                                   desc: t("Axk4fkj"),
-                                })
+                                }),
                               );
 
                           setTempTag("");
@@ -392,7 +394,7 @@ export default function ToPublish({
                         setToast({
                           type: 3,
                           desc: t("Axk4fkj"),
-                        })
+                        }),
                       );
                   setTempTag("");
                 }}

@@ -15,6 +15,7 @@ import { useTranslation } from "react-i18next";
 import Follow from "@/Components/Follow";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import AvatarPlaceholder from "./AvatarPlaceholder";
+import Icon from "@/Components/Icon";
 
 export default function UserProfilePic({
   user_id,
@@ -207,19 +208,19 @@ export default function UserProfilePic({
               </div>
               <div className="fx-centered">
                 <h4>{metadata.display_name || metadata.name}</h4>
-                {isNip05Verified && <div className="checkmark-c1-24"></div>}
+                {isNip05Verified && <Icon name="checkmark-c1" size={24} isColored />}
               </div>
               <div
                 className="fx-centered fx-wrap fx-start-h"
                 style={{ rowGap: "3px" }}
               >
                 <div className="fx-centered fx-start-h">
-                  <div className="nip05"></div>
+                  <Icon name="nip05" />
                   <p>{metadata.nip05 || "N/A"}</p>
                 </div>
                 {metadata.website && (
                   <div className="fx-centered fx-start-h">
-                    <div className="link"></div>
+                    <Icon name="link" />
                     <a
                       href={
                         metadata.website.toLowerCase().includes("http")
@@ -340,14 +341,14 @@ export default function UserProfilePic({
             </div>
             <div className="fx-centered">
               <h4>{metadata.display_name || metadata.name}</h4>
-              {isNip05Verified && <div className="checkmark-c1-24"></div>}
+              {isNip05Verified && <Icon name="checkmark-c1" size={24} isColored />}
             </div>
             <div
               className="fx-centered fx-wrap fx-start-h"
               style={{ rowGap: "3px" }}
             >
               <div className="fx-centered fx-start-h">
-                <div className="nip05"></div>
+                <Icon name="nip05" />
                 <p>
                   {metadata.nip05 && typeof metadata.nip05 === "string"
                     ? metadata.nip05
@@ -356,7 +357,7 @@ export default function UserProfilePic({
               </div>
               {metadata.website && (
                 <div className="fx-centered fx-start-h">
-                  <div className="link"></div>
+                  <Icon name="link" />
                   <a
                     href={
                       metadata.website.toLowerCase().includes("http")

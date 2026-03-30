@@ -1,3 +1,22 @@
+# (v5.8.0) 30/03/2026
+
+- Relay invitations via join requests for easier access to private relays.
+- Relay reviews added to help evaluate and discover relays.
+- Sats gift packets can now be sent directly in messages.
+- Expired notes are now automatically removed from the feed.
+- Auto-translation applied when opening notes or articles.
+- Fixed issues when visiting profiles via NIP-05 URLs. (Yakihonne NIP-05 users)
+- Fixed problems when adding Alby wallet accounts.
+- Fixed bunker connection issues.
+- Fixed follow status detection in search results.
+- Redesigned toast messages for clearer feedback.
+- Fixed QR code payments for paid notes and added wallet selection options.
+- Added imeta support for uploaded files in notes and articles.
+- Fixed incomplete or partially loaded thread fetching issues.
+- Improved URL preview metadata fetching for better accuracy.
+- Fixed UI issues when note options position changes.
+- General bug fixes and optimizations across the app.
+
 # (v5.7.0) 01/01/2026
 
 - Explore page featuring media packs and starter packs.

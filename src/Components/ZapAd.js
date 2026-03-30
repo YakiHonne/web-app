@@ -11,12 +11,13 @@ import InitiConvo from "@/Components/InitConvo";
 import { useTranslation } from "react-i18next";
 import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
+import Icon from "@/Components/Icon";
 
 const getZaps = (zappers, pubkey) => {
   let sats = zappers.reduce(
     (total, item) =>
       item.pubkey === pubkey ? (total += item.amount) : (total = total),
-    0
+    0,
   );
   let content = zappers
     .filter((_) => _.pubkey === pubkey)
@@ -133,7 +134,7 @@ const HighestZapper = ({ data, onClick }) => {
               onClick={onClick}
             >
               <div className="fx-centered">
-                <div className="bolt-bold"></div>
+                <Icon name="bolt-bold" isColored />
                 <div style={{ border: "none" }}>
                   <p className="c1-c" style={{ minWidth: "max-content" }}>
                     <NumberShrink value={data.amount} />
@@ -160,11 +161,11 @@ const HighestZapper = ({ data, onClick }) => {
                       onClick={() =>
                         customHistory(
                           "/profile/" +
-                            nip19.nprofileEncode({ pubkey: author.pubkey })
+                            nip19.nprofileEncode({ pubkey: author.pubkey }),
                         )
                       }
                     >
-                      <div className="user-24"></div>
+                      <Icon name="user" size={24} />
                       <p className="p-medium">{t("AyBBPWE")}</p>
                     </div>
                     <div
@@ -177,7 +178,7 @@ const HighestZapper = ({ data, onClick }) => {
                       }}
                       onClick={() => setInitConv(true)}
                     >
-                      <div className="env-24"></div>
+                      <Icon name="env" size={24} />
                       <p className="p-medium">{t("AN0NVU3")}</p>
                     </div>
                     <div
@@ -188,7 +189,7 @@ const HighestZapper = ({ data, onClick }) => {
                       <ZapTip
                         recipientLNURL={checkForLUDS(
                           author.lud16,
-                          author.lud06
+                          author.lud06,
                         )}
                         recipientPubkey={author.pubkey}
                         senderPubkey={userKeys.pub}

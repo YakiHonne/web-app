@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import Icon from "@/Components/Icon";
 export default function CheckNIP05({
   address = "",
   pubkey = "",
@@ -34,7 +35,7 @@ export default function CheckNIP05({
           {address}
         </div>
       )}
-      {isChecked && <div className="checkmark-c1"></div>}
+      {isChecked && <Icon name="checkmark-c1" isColored />}
     </div>
   );
 }

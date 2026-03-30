@@ -19,6 +19,7 @@ import ProfilesPicker from "@/Components/ProfilesPicker";
 import Router, { useRouter } from "next/router";
 import { useTheme } from "next-themes";
 import { detectDirection } from "@/Helpers/Encryptions";
+import Icon from "@/Components/Icon";
 
 const getUploadsHistory = () => {
   let history = localStorage?.getItem("YakihonneUploadsHistory");
@@ -60,11 +61,12 @@ export default function WritingArticle() {
   const [seenOn, setSeenOn] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [imetas, setImetas] = useState([]);
   const [uploadsHistory, setUploadsHistory] = useState(getUploadsHistory());
   const [showUploadsHistory, setShowUploadsHistory] = useState(false);
   const [showClearEditPopup, setShowClearEditPopup] = useState(false);
   const [selectedTab, setSelectedTab] = useState(
-    ["ar", "he", "fa", "ur"].includes(getAppLang()) ? 1 : 0
+    ["ar", "he", "fa", "ur"].includes(getAppLang()) ? 1 : 0,
   );
   const [isEdit, setIsEdit] = useState(true);
   const [triggerHTMLWarning, setTriggerHTMLWarning] = useState(false);
@@ -77,11 +79,11 @@ export default function WritingArticle() {
   useEffect(() => {
     if (userKeys && !post_id) {
       let draft = getArticleDraft();
-      let direction = detectDirection(draft.content)
-      if(direction === "RTL") {
-        setSelectedTab(1)
+      let direction = detectDirection(draft.content);
+      if (direction === "RTL") {
+        setSelectedTab(1);
       } else {
-        setSelectedTab(0)
+        setSelectedTab(0);
       }
       setDraftData(draft);
       setTitle(draft.title);
@@ -117,7 +119,7 @@ export default function WritingArticle() {
     return new Promise(async (resolve, reject) => {
       if (file) {
         setIsLoading(true);
-        let imgPath = await FileUpload(file, userKeys);
+        let imgPath = await FileUpload({ file, userKeys });
         setIsLoading(false);
         resolve(imgPath);
       } else {
@@ -127,42 +129,20 @@ export default function WritingArticle() {
         input.onchange = async (e) => {
           if (e.target.files[0]) {
             setIsLoading(true);
-            let imgPath = await FileUpload(e.target.files[0], userKeys);
+            let uploadedFile = await FileUpload({
+              file: e.target.files[0],
+              userKeys,
+              includeImeta: true,
+            });
             setIsLoading(false);
-            resolve(imgPath);
+            setImetas((prev) => [...prev, uploadedFile.imeta]);
+            resolve(uploadedFile.url);
           } else {
             resolve(false);
           }
         };
       }
     });
-  };
-
-  const uploadToS3 = async (img) => {
-    if (img) {
-      try {
-        let fd = new FormData();
-        fd.append("file", img);
-        fd.append("pubkey", userKeys.pub);
-        let data = await axiosInstance.post("/api/v1/file-upload", fd, {
-          headers: { "Content-Type": "multipart/formdata" },
-        });
-        localStorage?.setItem(
-          "YakihonneUploadsHistory",
-          JSON.stringify([...uploadsHistory, data.data.image_path])
-        );
-        setUploadsHistory([...uploadsHistory, data.data.image_path]);
-        return data.data.image_path;
-      } catch {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("ANFYp9V"),
-          })
-        );
-        return false;
-      }
-    }
   };
 
   const hasHTMLOutsideCodeblocks = () => {
@@ -186,11 +166,11 @@ export default function WritingArticle() {
   };
 
   const handleSetContent = (data) => {
-    let direction = detectDirection(data)
-    if(direction === "RTL") {
-      setSelectedTab(1)
+    let direction = detectDirection(data);
+    if (direction === "RTL") {
+      setSelectedTab(1);
     } else {
-      setSelectedTab(0)
+      setSelectedTab(0);
     }
     updateArticleDraft({ title, content: data });
     setContent(data);
@@ -226,6 +206,7 @@ export default function WritingArticle() {
           postKind={post_kind}
           postPublishedAt={post_published_at}
           userKeys={selectedProfile}
+          imetas={imetas}
         />
       )}
       {showPublishingDraftScreen && (
@@ -272,7 +253,10 @@ export default function WritingArticle() {
                                   style={{ padding: "0 1rem" }}
                                   onClick={() => Router.back()}
                                 >
-                                  <div className="arrow arrow-back"></div>
+                                  <Icon
+                                    name="arrow"
+                                    transform="rotate(90deg)"
+                                  />
                                 </button>
                                 {!isSaving && (
                                   <button
@@ -320,10 +304,7 @@ export default function WritingArticle() {
                                       }
                                       data-tooltip={t("AP17LmU")}
                                     >
-                                      <div
-                                        className="posts"
-                                        style={{ filter: "invert()" }}
-                                      ></div>
+                                      <Icon name="posts" />
                                       {/* <p>Uploads history</p> */}
                                     </div>
                                   </div>
@@ -447,7 +428,7 @@ const UploadHistoryList = ({ exit, list = [] }) => {
       setToast({
         type: 1,
         desc: `${t("AfnTOQk")} 👏`,
-      })
+      }),
     );
   };
   return (
@@ -495,7 +476,7 @@ const UploadHistoryList = ({ exit, list = [] }) => {
                 className="fx-centered pointer"
                 onClick={() => copyLink(item)}
               >
-                <div className="copy-24"></div>
+                <Icon name="copy" size={24} />
               </div>
             </div>
           );
@@ -522,7 +503,7 @@ const ClearEditPopup = ({ handleClearOptions }) => {
             backgroundColor: "var(--red-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         <h3 className="p-centered" style={{ wordBreak: "break-word" }}>
           {t("AirKalq")}

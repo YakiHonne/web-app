@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { getEventStatAfterEOSE, InitEvent } from "@/Helpers/Controlers";
 import { saveEventStats } from "@/Helpers/DB";
-import { extractNip19 } from "@/Helpers/Helpers";
+import { extractNip19, filterImetas } from "@/Helpers/Helpers";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import LoadingDots from "@/Components/LoadingDots";
 import UploadFile from "@/Components/UploadFile";
@@ -34,6 +34,7 @@ export default function Comments({
   const [isLoading, setIsLoading] = useState(false);
   const [eventID, setEventID] = useState(false);
   const [imgsSet, setImgsSet] = useState([]);
+  const [imetas, setImetas] = useState([]);
   const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
   const [showGIFs, setShowGIFs] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
@@ -103,8 +104,9 @@ export default function Comments({
         tags.push([tagKind, replyId, "", "root"]);
         tags.push(["p", replyPubkey]);
       }
+      let imetasTags = filterImetas({ note: content, imetas });
 
-      tags = [...tags, ...extracted.tags];
+      tags = [...tags, ...extracted.tags, ...imetasTags];
       let eventInitEx = await InitEvent(
         1,
         content,
@@ -363,6 +365,7 @@ export default function Comments({
                 small={false}
                 setImageURL={handleAddImage}
                 setIsUploadsLoading={() => null}
+                setImetas={setImetas}
               />
               <Emojis setEmoji={(data) => handleInsertTextInPosition(data)} />
               <div style={{ position: "relative" }}>

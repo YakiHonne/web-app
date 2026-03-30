@@ -18,7 +18,7 @@ const filterStatsByWot = (stats) => {
         let scoreStatus = getWOTScoreForPubkeyLegacy(
           like.pubkey,
           reactions,
-          score
+          score,
         );
         if (scoreStatus.status) return true;
       }),
@@ -131,7 +131,7 @@ const useNoteStats = (noteID, notePubkey) => {
               : (event.tags.find((tag) => `:${tag[1]}:` === event.content) ||
                   [])[2] || "+";
             let checkValid7 = event.tags.find(
-              (tag) => tag[0] === "e" && tag[1] === noteID
+              (tag) => tag[0] === "e" && tag[1] === noteID,
             );
             checkValid7 =
               checkValid7.length > 3
@@ -155,7 +155,7 @@ const useNoteStats = (noteID, notePubkey) => {
                 (tag) =>
                   tag.length > 3 &&
                   tag[1] === noteID &&
-                  ["root", "reply"].includes(tag[3])
+                  ["root", "reply"].includes(tag[3]),
               ),
             };
             if (

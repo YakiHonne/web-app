@@ -6,6 +6,7 @@ import ToDeleteGeneral from "@/Components/ToDeleteGeneral";
 import { useTranslation } from "react-i18next";
 import BookmarkCard from "./BookmarkCard";
 import BookmarkContent from "./BookmarkContent";
+import Icon from "@/Components/Icon";
 
 export default function Bookmarks() {
   const userKeys = useSelector((state) => state.userKeys);
@@ -60,7 +61,7 @@ export default function Bookmarks() {
             className="btn btn-normal"
             onClick={() => setShowAddBookmark(true)}
           >
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </button>
         </div>
         <div className="fit-container fx-centered fx-col fx-start-v box-pad-h">

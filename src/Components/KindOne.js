@@ -32,6 +32,7 @@ import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
 import Link from "next/link";
 import LinkRepEventPreview from "./LinkRepEventPreview";
+import Icon from "@/Components/Icon";
 import {
   getEventFromCache,
   setEventFromCache,
@@ -354,7 +355,9 @@ function KindOne({
                       <p className="p-bold p-one-line" style={{ margin: 0 }}>
                         {userProfile.display_name || userProfile.name}
                       </p>
-                      {isNip05Verified && <div className="checkmark-c1"></div>}
+                      {isNip05Verified && (
+                        <Icon name="checkmark-c1" isColored />
+                      )}
                     </div>
                     <p className="gray-c p-medium" style={{ margin: 0 }}>
                       &#8226;
@@ -456,7 +459,11 @@ function KindOne({
                           data-tooltip={t("AdHV2qJ")}
                           onClick={translateNote}
                         >
-                          <div className="translate-24 opacity-4"></div>
+                          <Icon
+                            name="translate"
+                            size={24}
+                            className="opacity-4"
+                          />
                         </div>
                       )}
                       {!isNoteTranslating && showTranslation && (
@@ -465,7 +472,11 @@ function KindOne({
                           data-tooltip={t("AE08Wte")}
                           onClick={() => setShowTranslation(false)}
                         >
-                          <div className="translate-24 opacity-4"></div>
+                          <Icon
+                            name="translate"
+                            size={24}
+                            className="opacity-4"
+                          />
                         </div>
                       )}
                       {isNoteTranslating && <LoadingDots />}
@@ -665,14 +676,15 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
               </span>
             </p>
             {relatedEvent && (
-              <div
-                className="arrow-12"
-                style={{ rotate: showNote ? "-180deg" : "0deg" }}
+              <Icon
+                name="arrow"
+                size={12}
+                transform={showNote ? "rotate(-180deg)" : "rotate(0deg)"}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowNote(!showNote);
                 }}
-              ></div>
+              />
             )}
           </div>
         ) : (

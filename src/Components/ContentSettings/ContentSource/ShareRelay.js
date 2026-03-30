@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import RelayImage from "@/Components/RelayImage";
 import { copyText } from "@/Helpers/Helpers";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function ShareRelay({ relay, exit, type = 1 }) {
   const { t } = useTranslation();
@@ -40,7 +41,7 @@ export default function ShareRelay({ relay, exit, type = 1 }) {
               <p className="gray-c p-medium">{t("AhWzd8L")}</p>
               <p className="p-two-lines">{fullURL}</p>
             </div>
-            <div className="copy"></div>
+            <Icon name="copy" />
           </div>
           <div
             className="sc-s-d fit-container fx-scattered box-pad-h-m box-pad-v-s pointer"
@@ -51,7 +52,7 @@ export default function ShareRelay({ relay, exit, type = 1 }) {
               <p className="gray-c p-medium">{t("A6JlaiX")}</p>
               <p className="p-two-lines">{relay}</p>
             </div>
-            <div className="copy"></div>
+            <Icon name="copy" />
           </div>
         </div>
         <Link href={fullURL} target="_blank" className="fit-container">

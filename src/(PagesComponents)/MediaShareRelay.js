@@ -25,6 +25,7 @@ import PostNotePortal from "@/Components/PostNotePortal";
 import { Virtuoso } from "react-virtuoso";
 import { getParsedMedia } from "@/Helpers/Encryptions";
 import MediaMasonryList from "@/Components/MediaMasonryList";
+import Icon from "@/Components/Icon";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -127,14 +128,7 @@ export default function MediaShareRelay() {
                   className="fit-container fx-centered fx-col"
                   style={{ height: "80vh" }}
                 >
-                  <div
-                    className="yaki-logomark"
-                    style={{
-                      minWidth: "48px",
-                      minHeight: "48px",
-                      opacity: 0.5,
-                    }}
-                  ></div>
+                  <Icon name="yaki-logomark" size={48} />
                   <h4>{t("A2l1JgC")}</h4>
                   <p
                     className="p-centered gray-c"
@@ -229,7 +223,7 @@ const HomeFeed = ({ relay }) => {
             <hr />
             <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-pad-v-m">
               <div>
-                <div className="eye-opened-24"></div>
+                <Icon name="eye-opened" size={24} />
               </div>
               <div>
                 <p>{t("AZKoEWL")}</p>
@@ -245,10 +239,7 @@ const HomeFeed = ({ relay }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="yaki-logomark"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="yaki-logomark" size={48} />
           <h4>{t("A5BPCrj")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("AB9jjjH")}
@@ -260,10 +251,7 @@ const HomeFeed = ({ relay }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="link"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="link" size={48} />
           <h4>{t("AZ826Ej")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("A5ebGh9")}

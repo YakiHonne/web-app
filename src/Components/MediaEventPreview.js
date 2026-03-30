@@ -4,6 +4,7 @@ import Date_ from "./Date_";
 import UserProfilePic from "./UserProfilePic";
 import { getLinkFromAddr } from "@/Helpers/Helpers";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function MediaEventPreview({ event }) {
   const { userProfile, isNip05Verified } = useUserProfile(event.pubkey);
@@ -40,7 +41,7 @@ export default function MediaEventPreview({ event }) {
                     <p className="p-bold p-one-line" style={{ margin: 0 }}>
                       {userProfile.display_name || userProfile.name}
                     </p>
-                    {isNip05Verified && <div className="checkmark-c1"></div>}
+                    {isNip05Verified && <Icon name="checkmark-c1" isColored />}
                   </div>
                   <p className="gray-c p-medium" style={{ margin: 0 }}>
                     &#8226;

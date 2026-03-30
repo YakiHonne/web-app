@@ -6,6 +6,8 @@ import LoadingDots from "@/Components/LoadingDots";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 
+import Icon from "@/Components/Icon";
+
 export default function ToUpdateRelay({ exit }) {
   const dispatch = useDispatch();
   const userRelays = useSelector((state) => state.userRelays);
@@ -265,10 +267,11 @@ export default function ToUpdateRelay({ exit }) {
                   className="if fit-container fx-scattered fx-shrink pointer"
                 >
                   <p>{relay}</p>
-                  <div
-                    className="trash"
+                  <Icon
+                    name="trash"
+                    isColored
                     onClick={() => deleteRelay(relay)}
-                  ></div>
+                  />
                 </div>
               );
             })}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import ECash from "./ECash";
 import Lightning from "./Lightning";
+import Icon from "@/Components/Icon";
 
 export default function ReceiveTokens({ exit }) {
   const { t } = useTranslation();
@@ -52,7 +53,7 @@ export default function ReceiveTokens({ exit }) {
                     borderRadius: "50%",
                   }}
                 >
-                  <div className="redeem-ecash-24"></div>
+                  <Icon name="redeem-ecash" size={24} />
                 </div>
                 <div>
                   <p>{t("AUmPqw7")}</p>
@@ -74,7 +75,7 @@ export default function ReceiveTokens({ exit }) {
                     borderRadius: "50%",
                   }}
                 >
-                  <div className="deposit-sats-24"></div>
+                  <Icon name="deposit-sats" size={24} />
                 </div>
                 <div>
                   <p>{t("AykhAgD")}</p>

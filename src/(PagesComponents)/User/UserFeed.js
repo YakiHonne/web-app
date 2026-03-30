@@ -22,6 +22,7 @@ import { Virtuoso } from "react-virtuoso";
 import { SelectTabsNoIndex } from "@/Components/SelectTabsNoIndex";
 import MediaMasonryList from "@/Components/MediaMasonryList";
 import { useSelector } from "react-redux";
+import Icon from "@/Components/Icon";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -287,10 +288,7 @@ export default function UserFeed({ user }) {
             >
               <h4>{t("Aezm5AZ")}</h4>
               <p className="gray-c">{t("A6rkFum")}</p>
-              <div
-                className="note-2-24"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
+              <Icon name="note-2" size={24} />
             </div>
           )}
         </>
@@ -304,10 +302,7 @@ export default function UserFeed({ user }) {
             >
               <h4>{t("Aezm5AZ")}</h4>
               <p className="gray-c">{t("A8pbTGs", { name: user?.name })}</p>
-              <div
-                className="curation-24"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
+              <Icon name="curation" size={24} />
             </div>
           )}
         </>
@@ -321,10 +316,7 @@ export default function UserFeed({ user }) {
             >
               <h4>{t("AUBYIOq")}</h4>
               <p className="gray-c">{t("AkqCrW5", { name: user?.name })}</p>
-              <div
-                className="posts"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
+              <Icon name="posts" />
             </div>
           )}
         </>
@@ -338,10 +330,7 @@ export default function UserFeed({ user }) {
             >
               <h4>{t("A3QrgxE")}</h4>
               <p className="gray-c">{t("A70xEba", { name: user?.name })}</p>
-              <div
-                className="play-24"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
+              <Icon name="play" size={24} />
             </div>
           )}
         </>
@@ -355,10 +344,7 @@ export default function UserFeed({ user }) {
             >
               <h4>{t("Aezm5AZ")}</h4>
               <p className="gray-c">{t("A1MlrcU", { name: user?.name })}</p>
-              <div
-                className="smart-widget-24"
-                style={{ width: "48px", height: "48px" }}
-              ></div>
+              <Icon name="smart-widget" size={24} />
             </div>
           )}
         </>

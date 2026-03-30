@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import RelayImage from "@/Components/RelayImage";
 import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 import { saveRelayMetadata } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
 export default function RelayItem({
   item,
@@ -45,7 +46,7 @@ export default function RelayItem({
             style={{ cursor: "pointer" }}
             onClick={() => removeRelay(index)}
           >
-            <div className="trash"></div>
+            <Icon name="trash" isColored />
           </div>
         )}
         {allowDrag && (

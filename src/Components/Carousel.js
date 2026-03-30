@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ProgressBar from "@/Components/ProgressBar";
+import Icon from "@/Components/Icon";
 
 export default function Carousel({ imgs, selectedImage, back }) {
   const [currentImg, setCurrentImg] = useState(selectedImage);
@@ -57,14 +58,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
                 : setCurrentImg(imgs.length - 1);
             }}
           >
-            <div
-              className="arrow-24"
-              style={{
-                transform: "rotate(90deg)",
-                minHeight: "38px",
-                minWidth: "38px",
-              }}
-            ></div>
+            <Icon name="arrow" size={38} transform="rotate(90deg)" />
           </div>
         )}
         <div className="fit-height fit-container slide-up">
@@ -120,14 +114,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
               filter: "drop-shadow(0px 0px 2px rgba(0,0,0,1))",
             }}
           >
-            <div
-              className="arrow-24"
-              style={{
-                transform: "rotate(-90deg)",
-                minHeight: "38px",
-                minWidth: "38px",
-              }}
-            ></div>
+            <Icon name="arrow" size={38} transform="rotate(-90deg)" />
           </div>
         )}
       </div>

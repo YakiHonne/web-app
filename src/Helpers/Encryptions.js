@@ -11,6 +11,7 @@ import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
 import { localStorage_ } from "./utils/clientLocalStorage";
+import jwt from "jsonwebtoken";
 
 const LNURL_REGEX =
   /^(?:http.*[&?]lightning=|lightning:)?(lnurl[0-9]{1,}[02-9ac-hj-np-z]+)/;
@@ -63,6 +64,8 @@ const bytesTohex = (arrayBuffer) => {
   return hexOctets.join("");
 };
 const shortenKey = (key, length = 10) => {
+  if (!key) return key;
+  if (key.length <= length * 2) return key;
   let firstHalf = key.substring(0, length);
   let secondHalf = key.substring(key.length - length, key.length);
   return `${firstHalf}....${secondHalf}`;
@@ -290,6 +293,27 @@ const getParsedSW = (event) => {
           { value: buttons, type: "button" },
         ],
   };
+};
+
+const getParsedRelayReview = (event) => {
+  let d = event.tags.find((tag) => tag[0] === "d")[1];
+  const event_ = {
+    ...event,
+    d,
+    rating: parseFloat(
+      (
+        parseFloat(event.tags.find((tag) => tag[0] === "rating")[1]) * 5
+      ).toFixed(1),
+    ),
+    naddr: event?.encode
+      ? event?.encode()
+      : nip19.naddrEncode({
+          identifier: d,
+          pubkey: event.pubkey,
+          kind: event.kind,
+        }),
+  };
+  return event_;
 };
 
 const getParsedRepEvent = (event) => {
@@ -1485,6 +1509,78 @@ const getInvoiceDetails = (bolt11) => {
   }
 };
 
+// const encodeJWT = (data) => {
+//   try {
+//     const secret = process.env.NEXT_PUBLIC_ENC_SECRET || "fallback_secret";
+//     const encoded = jwt.sign(data, secret);
+//     return encoded;
+//   } catch (err) {
+//     console.log(err);
+//     return "";
+//   }
+// };
+
+// src/Helpers/Encryptions.js
+
+const encodeJWT = (data) => {
+  try {
+    const secret = process.env.NEXT_PUBLIC_ENC_SECRET || "fallback_secret";
+    const header = { alg: "HS256", typ: "JWT" };
+
+    // Helper for base64url encoding (standard for JWT)
+    const base64url = (source) => {
+      let encoded = CryptoJS.enc.Base64.stringify(source);
+      return encoded.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
+    };
+
+    const h = base64url(CryptoJS.enc.Utf8.parse(JSON.stringify(header)));
+    const p = base64url(CryptoJS.enc.Utf8.parse(JSON.stringify(data)));
+    const s = base64url(CryptoJS.HmacSHA256(h + "." + p, secret));
+
+    return `${h}.${p}.${s}`;
+  } catch (err) {
+    console.error("JWT Encoding error:", err);
+    return "";
+  }
+};
+
+const decodeJWT = (token) => {
+  if (!token || typeof token !== "string") return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+
+  try {
+    const payload = parts[1];
+    if (!/^[A-Za-z0-9_-]+$/.test(payload)) return null;
+
+    const decoded = CryptoJS.enc.Base64.parse(
+      payload.replace(/-/g, "+").replace(/_/g, "/"),
+    );
+    const utf8Content = decoded.toString(CryptoJS.enc.Utf8);
+    if (
+      !utf8Content ||
+      !utf8Content.startsWith("{") ||
+      !utf8Content.endsWith("}")
+    )
+      return null;
+    return JSON.parse(utf8Content);
+  } catch (err) {
+    return null;
+  }
+};
+
+const checkJWT = (token) => {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return false;
+
+    const payload = decodeJWT(token);
+    return !!payload;
+  } catch (err) {
+    return false;
+  }
+};
+
 export {
   getBech32,
   shortenKey,
@@ -1520,6 +1616,7 @@ export {
   getuserMetadata,
   getParsedSW,
   getParsedMedia,
+  getParsedRelayReview,
   sortEvents,
   detectDirection,
   enableTranslation,
@@ -1533,4 +1630,7 @@ export {
   getEmptyRelaysStats,
   getInvoiceDetails,
   getParsedPacksEvent,
+  encodeJWT,
+  checkJWT,
+  decodeJWT,
 };

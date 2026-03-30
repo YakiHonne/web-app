@@ -7,6 +7,7 @@ import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSugg
 import { useTranslation } from "react-i18next";
 import { DraggableComp } from "@/Components/DraggableComp";
 import InterestItem from "./InterestItem";
+import Icon from "@/Components/Icon";
 
 const getInterestList = (list) => {
   let tempList = [];
@@ -105,8 +106,8 @@ export default function ManageInterest({ exit }) {
     <div className="fx-centered fit-container fx-col ">
       <div className="fit-container fx-scattered box-marg-s box-pad-h ">
         <div className="fx-centered fx-start-h pointer" onClick={exit}>
-          <div className="round-icon">
-            <div className="arrow" style={{ transform: "rotate(90deg)" }}></div>
+          <div className="round-icon" transform="rotate(90deg)">
+            <Icon name="arrow" />
           </div>
           <p>{t("ARsUd9r")}</p>
         </div>
@@ -125,7 +126,7 @@ export default function ManageInterest({ exit }) {
           }}
           className="if fit-container fx-scattered"
         >
-          <div className="search-24"></div>
+          <Icon name="search" size={24} />
           <input
             value={newInterest}
             onChange={(e) => setNewInterest(e.target.value)}

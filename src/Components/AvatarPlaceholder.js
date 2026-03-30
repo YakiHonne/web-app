@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "@/Components/Icon";
 
 export default function AvatarPlaceholder({ size }) {
   let iconSize = Math.floor(size - (size * 50) / 100);
@@ -11,10 +12,7 @@ export default function AvatarPlaceholder({ size }) {
       }}
       className="fx-centered"
     >
-      <div
-        className="user-24"
-        style={{ minWidth: `${iconSize}px`, minHeight: `${iconSize}px` }}
-      ></div>
+      <Icon name="user" size={24} />
     </div>
   );
 }

@@ -27,6 +27,7 @@ import useIsPinnedNote from "@/Hooks/useIsPinnedNote";
 import { removeEventStats } from "@/Helpers/DB";
 import DatePicker from "../DatePicker";
 import { publishScheduledEvent } from "@/Helpers/EventSchedulerHelper";
+import Icon from "@/Components/Icon";
 
 export default function EventOptions({
   event,
@@ -86,7 +87,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="add-note-24"></div>
+      <Icon name="add-note" size={24} />
       <p>{t("AB8DnjO")}</p>
     </div>
   );
@@ -98,7 +99,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="calendar-24"></div>
+      <Icon name="calendar" size={24} />
       <p>{t("A9x72MB")}</p>
     </div>
   );
@@ -110,7 +111,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="hashtag-24"></div>
+      <Icon name="hashtag" size={24} />
       <p>{t("AYFAFKs")}</p>
     </div>
   );
@@ -122,7 +123,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="hashtag-24"></div>
+      <Icon name="hashtag" size={24} />
       <p>{t("ApPw14o", { item: "naddr" })}</p>
     </div>
   );
@@ -134,7 +135,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="key-icon-24"></div>
+      <Icon name="key-icon" size={24} />
       <p>{t("AHrJpSX")}</p>
     </div>
   );
@@ -146,7 +147,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="copy-24"></div>
+      <Icon name="copy" size={24} />
       <p>{t("AUkCrth")}</p>
     </div>
   );
@@ -158,7 +159,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="pub-hex-24"></div>
+      <Icon name="pub-hex" size={24} />
       <p>{t("AHrJpSX")}</p>
     </div>
   );
@@ -171,7 +172,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="raw-event-24"></div>
+      <Icon name="raw-event" size={24} />
       <p>{t("AUrrk1e")}</p>
     </div>
   );
@@ -184,7 +185,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="curation-plus-24"></div>
+      <Icon name="curation-plus" size={24} />
       <p>{t("A89Qqmt")}</p>
     </div>
   );
@@ -197,7 +198,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="copy-24"></div>
+      <Icon name="copy" size={24} />
       <p>{t("Aoq0uKa")}</p>
     </div>
   );
@@ -210,7 +211,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="copy-24"></div>
+      <Icon name="copy" size={24} />
       <p>{t("ArCMp34")}</p>
     </div>
   );
@@ -224,7 +225,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="share-icon-24"></div>
+      <Icon name="share-icon" size={24} />
       <p>{t("A4A5psW")}</p>
     </div>
   );
@@ -237,7 +238,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="link-24"></div>
+      <Icon name="link" size={24} />
       <span>{t("AmQVpu4")}</span>
     </div>
   );
@@ -250,7 +251,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <div className="trash-24"></div>
+      <Icon name="trash" isColored size={24} />
       <span className="red-c">{t("AawdN9R")}</span>
     </div>
   );
@@ -260,7 +261,7 @@ export default function EventOptions({
       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       href={`/smart-widget-checker?naddr=${event.naddr}`}
     >
-      <div className="smart-widget-checker-24"></div>
+      <Icon name="smart-widget-checker" size={24} />
       <p>{t("AavUrQj")}</p>
     </Link>
   );
@@ -273,7 +274,7 @@ export default function EventOptions({
         localStorage.setItem(event.naddr, JSON.stringify(event));
       }}
     >
-      <div className="clone-24"></div>
+      <Icon name="clone" size={24} />
       <p>{t("AyWVBDx")}</p>
     </Link>
   );
@@ -286,7 +287,7 @@ export default function EventOptions({
         localStorage.setItem(event.naddr, JSON.stringify(event));
       }}
     >
-      <div className="edit-24"></div>
+      <Icon name="edit" size={24} />
       <p>{t("AsXohpb")}</p>
     </Link>
   );
@@ -314,7 +315,7 @@ export default function EventOptions({
         navigate.push("/write-article?edit=" + event.naddr);
       }}
     >
-      <div className="edit-24"></div>
+      <Icon name="edit" size={24} />
       <p>{t("AsXohpb")}</p>
     </div>
   );
@@ -327,7 +328,7 @@ export default function EventOptions({
         handleRescheduleEvent();
       }}
     >
-      <div className="succeeded-events-24"></div>
+      <Icon name="succeeded-events" size={24} />
       <p>{t("AxIOpkH")}</p>
     </div>
   );
@@ -339,7 +340,7 @@ export default function EventOptions({
         setShowEditVideo(true);
       }}
     >
-      <div className="edit-24"></div>
+      <Icon name="edit" size={24} />
       <p>{t("AsXohpb")}</p>
     </div>
   );
@@ -351,7 +352,7 @@ export default function EventOptions({
         setShowEditCuration(true);
       }}
     >
-      <div className="edit-24"></div>
+      <Icon name="edit" size={24} />
       <p>{t("AsXohpb")}</p>
     </div>
   );
@@ -392,12 +393,12 @@ export default function EventOptions({
       >
         {isMutedPubkey ? (
           <>
-            <div className="unmute-24"></div>
+            <Icon name="unmute" size={24} />
             <p className="red-c">{t("AKELUbQ")}</p>
           </>
         ) : (
           <>
-            <div className="mute-24"></div>
+            <Icon name="mute" size={24} isColored />
             <p className="red-c">{t("AGMxuQ0")}</p>
           </>
         )}
@@ -413,12 +414,12 @@ export default function EventOptions({
       >
         {!isPinned ? (
           <>
-            <div className="pin-24"></div>
+            <Icon name="pin" size={24} />
             <p>{t("AZKwkIB")}</p>
           </>
         ) : (
           <>
-            <div className="unpin-24"></div>
+            <Icon name="unpin" size={24} />
             <p>{t("AXGyCxz")}</p>
           </>
         )}
@@ -433,12 +434,12 @@ export default function EventOptions({
     >
       {isMutedId ? (
         <>
-          <div className="unmute-24"></div>
+          <Icon name="unmute" size={24} />
           <p className="red-c">{t("AnddeNp")}</p>
         </>
       ) : (
         <>
-          <div className="mute-24"></div>
+          <Icon name="mute" size={24} isColored />
           <p className="red-c">{t("AydqZTl")}</p>
         </>
       )}
@@ -456,7 +457,7 @@ export default function EventOptions({
           setDeleteEvent(event);
         }}
       >
-        <div className="trash-24"></div>
+        <Icon name="trash" isColored size={24} />
         <p className="red-c">{t("Almq94P")}</p>
       </div>
     ) : (
@@ -910,7 +911,7 @@ const BroadcastEvent = ({ event }) => {
                       border: "none",
                     }}
                   >
-                    <div className="star-24"></div>
+                    <Icon name="star" size={24} />
                   </div>
                 </div>
               </div>
@@ -951,7 +952,7 @@ const BroadcastEvent = ({ event }) => {
           className="fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-m"
         >
           <div className="fx-centered fx-col">
-            <div className="protected-2-24"></div>
+            <Icon name="protected-2" size={24} />
             <p className="gray-c p-centered">{t("AqqpEOw")}</p>
           </div>
         </div>
@@ -959,17 +960,11 @@ const BroadcastEvent = ({ event }) => {
 
       {/* Main button */}
       <div className="fx-centered">
-        <div
-          className="republish-24"
-          style={{ opacity: isProtected ? 0.5 : 1 }}
-        ></div>
+        <Icon name="republish" size={24} />
         <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
       </div>
 
-      <div
-        className="arrow"
-        style={{ rotate: "-90deg", opacity: isProtected ? 0.5 : 1 }}
-      ></div>
+      <Icon name="arrow" />
     </div>
   );
 };

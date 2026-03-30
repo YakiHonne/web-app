@@ -12,6 +12,7 @@ import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import { getParsedNote, getWotConfig } from "@/Helpers/ClientHelpers";
+import Icon from "@/Components/Icon";
 
 const filterComments = (all, id, isRoot) => {
   if (isRoot) return filterRootComments(all);
@@ -307,10 +308,7 @@ export default function CommentsSection({
               className="fit-container fx-centered fx-col"
               style={{ height: "20vh" }}
             >
-              <div
-                className="yaki-logomark"
-                style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-              ></div>
+              <Icon name="yaki-logomark" size={48} />
               <p className="p-centered gray-c">{t("A84Nx8y")}</p>
             </div>
             // <div
@@ -319,7 +317,7 @@ export default function CommentsSection({
             // >
             //   <h4>{t("ARe2fkn")}</h4>
             //   <p className="p-centered gray-c">{t("AkLuU1q")}</p>
-            //   <div className="comment-24"></div>
+            //   <Icon name="comment" size={24} />
             // </div>
           )}
         </div>
@@ -430,7 +428,7 @@ const Comment = ({
               className="fx-centered box-pad-h-s box-pad-v-s sc-s-18 option"
               style={{ padding: ".25rem .5rem" }}
             >
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
               <p className="gray-c p-medium">
                 {t("ADBrveA", { count: allRepliesCount })}
               </p>

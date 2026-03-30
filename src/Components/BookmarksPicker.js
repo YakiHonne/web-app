@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import { convertDate } from "@/Helpers/Encryptions";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function BookmarksPicker({
   kind,
@@ -161,9 +162,10 @@ export default function BookmarksPicker({
                     </div>
                   </div>
                   <div className="box-pad-h-s">
-                    <div
-                      className={status ? "bookmark-24-b" : "bookmark-24"}
-                    ></div>
+                      <Icon
+                        name={status ? "bookmark-b" : "bookmark"}
+                        size={24}
+                      />
                   </div>
                 </div>
               );

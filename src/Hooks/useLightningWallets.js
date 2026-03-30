@@ -4,18 +4,22 @@ import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import axios from "axios";
+import { webln } from "@getalby/sdk";
 
 export default function () {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [wallets, setWallets] = useState(getWallets());
+  const [isSendingLoading, setIsSendingLoading] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState(
     wallets.find((wallet) => wallet.active),
   );
 
   const sendPayment = async (addr) => {
+    setIsSendingLoading(true);
     if (selectedWallet.kind === 1) {
       let res = await sendWithWebLN(addr);
+      setIsSendingLoading(false);
       return res;
     }
     if (selectedWallet.kind === 2) {
@@ -25,10 +29,14 @@ export default function () {
         addr,
         checkTokens.activeWallet.data.access_token,
       );
+      setIsSendingLoading(false);
+
       return res;
     }
     if (selectedWallet.kind === 3) {
       let res = await sendWithNWC(addr);
+      setIsSendingLoading(false);
+
       return res;
     }
   };
@@ -42,7 +50,8 @@ export default function () {
         preImage: res.preimage,
       };
     } catch (err) {
-      if (err.includes("User rejected")) return;
+      console.log(err);
+      // if (err?.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,
@@ -239,5 +248,6 @@ export default function () {
     setSelectedWallet,
     sendPayment,
     generateInvoice,
+    isSendingLoading,
   };
 }

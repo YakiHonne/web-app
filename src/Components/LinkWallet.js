@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function LinkWallet({ exit, handleLinkWallet }) {
   const { t } = useTranslation();
@@ -19,7 +20,7 @@ export default function LinkWallet({ exit, handleLinkWallet }) {
             backgroundColor: "var(--red-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         <h3 className="p-centered">{t("AmQVpu4")}</h3>
         <p className="p-centered gray-c box-pad-v-m">{t("AIgKsNh")}</p>

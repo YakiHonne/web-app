@@ -4,6 +4,7 @@ import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Link from "next/link";
 import { getUser } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
 export default function NProfilePreviewer({
   pubkey,
@@ -40,7 +41,7 @@ export default function NProfilePreviewer({
           href={`/profile/${nip19.nprofileEncode({ pubkey })}`}
           target="_blank"
         >
-          <div className="share-icon-24"></div>
+          <Icon name="share-icon" size={24} />
         </Link>
       )}
       {close && !custom && (

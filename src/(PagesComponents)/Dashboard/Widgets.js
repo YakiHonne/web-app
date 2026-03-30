@@ -13,6 +13,7 @@ import SWActionPreview from "@/Components/SWActionPreview";
 import LaunchSW from "@/Components/LaunchSW";
 import Link from "next/link";
 import ContentCard from "./ContentCard";
+import Icon from "@/Components/Icon";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -248,7 +249,7 @@ export default function Widgets({ setPostToNote, localDrafte }) {
           <h4 className="p-caps">{t("A2mdxcf")}</h4>
           <div className="fx-centered">
             <button className="btn btn-normal" onClick={handleAddContent}>
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
             </button>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { setToast } from "@/Store/Slides/Publishers";
 import { SidebarNavItem } from "./SidebarNavItem";
 import useNotifications from "@/Hooks/useNotifications";
+import Icon from "@/Components/Icon";
 
 export default function NotificationCenter({
   icon = false,
@@ -47,8 +48,8 @@ export default function NotificationCenter({
       }}
     >
       <div className="fx-centered">
-        {!isCurrent && <div className="ringbell-24"></div>}
-        {isCurrent && <div className="ringbell-bold-24"></div>}
+        {!isCurrent && <Icon name="ringbell" size={24} />}
+        {isCurrent && <Icon name="ringbell-bold" size={24} />}
         {!icon && (
           <div className={`link-label ${mobile ? "p-big" : ""}`}>
             {t("ASSFfFZ")}

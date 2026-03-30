@@ -4,6 +4,7 @@ import { compactContent } from "@/Helpers/ClientHelpers";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function DraftCardOthers({
   event,
@@ -51,9 +52,9 @@ export default function DraftCardOthers({
     >
       <div className="fx-centered fx-start-v">
         <div className="round-icon">
-          {event.kind === 11 && <div className="note-24"></div>}
+          {event.kind === 11 && <Icon name="note" size={24} />}
           {event.kind === 300331 && !event.content.image && (
-            <div className="smart-widget-24"></div>
+            <Icon name="smart-widget" size={24} />
           )}
 
           {event.kind === 300331 && event.content.image && (

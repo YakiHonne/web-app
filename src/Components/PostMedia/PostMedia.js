@@ -16,6 +16,8 @@ import { useTranslation } from "react-i18next";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { nip19 } from "nostr-tools";
 import { customHistory } from "@/Helpers/History";
+import Icon from "@/Components/Icon";
+import Overlay from "../Overlay";
 
 const applyImageFilter = (file, filter = "grayscale(1)") => {
   return new Promise((resolve) => {
@@ -145,17 +147,17 @@ export default function PostMedia({ exit }) {
         : { ...userKeys };
       let cover = false;
       if (!isImg)
-        cover = await FileUpload(
-          base64ToFile(videoCover, "cover.jpg"),
-          userKeys_,
-          setVideoCoverUploadPerc
-        );
+        cover = await FileUpload({
+          file: base64ToFile(videoCover, "cover.jpg"),
+          userKeys: userKeys_,
+          cb: setVideoCoverUploadPerc,
+        });
       if (!isImg && !cover) {
         dispatch(
           setToast({
             type: 2,
             desc: t("A7s0kOG"),
-          })
+          }),
         );
         setIsLoading(false);
         setVideoCoverUploadPerc(0);
@@ -164,17 +166,17 @@ export default function PostMedia({ exit }) {
       let file_ = isImg
         ? await applyImageFilter(file, IMAGE_FILTERS[filter])
         : await trimVideoFile(file, range);
-      let toUpload = await FileUpload(
-        file_.file,
-        userKeys_,
-        setMainPostUploadPerc
-      );
+      let toUpload = await FileUpload({
+        file: file_.file,
+        userKeys: userKeys_,
+        cb: setMainPostUploadPerc,
+      });
       if (!toUpload) {
         dispatch(
           setToast({
             type: 2,
             desc: t("A7s0kOG"),
-          })
+          }),
         );
         setIsLoading(false);
         setMainPostUploadPerc(0);
@@ -210,14 +212,14 @@ export default function PostMedia({ exit }) {
         description,
         tags,
         published_at,
-        selectedProfile
+        selectedProfile,
       );
       if (!eventInitEx) {
         dispatch(
           setToast({
             type: 2,
             desc: t("Acr4Slu"),
-          })
+          }),
         );
         setIsLoading(false);
         setVideoCoverUploadPerc(0);
@@ -227,7 +229,7 @@ export default function PostMedia({ exit }) {
       dispatch(
         setToPublish({
           eventInitEx,
-        })
+        }),
       );
       let timer = setTimeout(() => {
         if (isImg)
@@ -244,7 +246,7 @@ export default function PostMedia({ exit }) {
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
       setIsLoading(false);
       setVideoCoverUploadPerc(0);
@@ -253,17 +255,10 @@ export default function PostMedia({ exit }) {
   };
 
   return (
-    <div
-      className="fixed-container box-pad-h fx-centered"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={file ? 1000 : 500}>
       <div
-        className="fx-centered fx-start-h fx-strt-v sc-s bg-sp fx-stretch fx-wrap slide-up"
+        className="fx-centered fx-start-h fx-strt-v fx-stretch fx-wrap slide-up"
         style={{
-          width: file ? "min(100%,1000px)" : "min(100%,500px)",
           maxHeight: "85vh",
           overflowY: "scroll",
           position: "relative",
@@ -353,11 +348,7 @@ export default function PostMedia({ exit }) {
                   onClick={clearWorkspace}
                   disabled={isLoading}
                 >
-                  {isLoading ? (
-                    <LoadingDots />
-                  ) : (
-                    <div className="arrow" style={{ rotate: "90deg" }}></div>
-                  )}
+                  {isLoading ? <LoadingDots /> : <Icon name="arrow" />}
                 </button>
                 <button
                   className={`btn btn-normal btn-full ${
@@ -373,7 +364,7 @@ export default function PostMedia({ exit }) {
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 }
 

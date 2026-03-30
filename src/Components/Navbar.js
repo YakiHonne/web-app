@@ -6,10 +6,11 @@ import { redirectToLogin } from "@/Helpers/Helpers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import SearchNetwork from "@/Components/SearchNetwork";
 import { useRouter } from "next/router";
+import Icon from "@/Components/Icon";
 
 export default function Navbar() {
   const userKeys = useSelector((state) => state.userKeys);
-  const router = useRouter()
+  const router = useRouter();
   const [showSearchMobile, setShowSearchMobile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
@@ -48,20 +49,14 @@ export default function Navbar() {
         style={{ borderBottom: "1px solid var(--very-dim-gray)" }}
       >
         <Link href={"/"}>
-          <div
-            className="yakihonne-logo"
-            style={{
-              width: "100px",
-              height: "50px",
-            }}
-          ></div>
+          <Icon name="yakihonne-logo" width={100} height={50} />
         </Link>
         <div className="fx-centered">
           <div
             className="menu-toggle"
             onClick={() => setShowSearchMobile(!showSearchMobile)}
           >
-            <div className="search-24"></div>
+            <Icon name="search" size={24} />
           </div>
           <div
             className={"menu-toggle"}
@@ -75,7 +70,7 @@ export default function Navbar() {
                 size={38}
               />
             ) : (
-              <div className="menu-24"></div>
+              <Icon name="menu" size={24} />
             )}
           </div>
         </div>

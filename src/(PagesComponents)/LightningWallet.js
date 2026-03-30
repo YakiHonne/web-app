@@ -36,6 +36,7 @@ import EventOptions from "@/Components/ElementOptions/EventOptions";
 import { SelectTabsNoIndex } from "@/Components/SelectTabsNoIndex";
 import { customHistory } from "@/Helpers/History";
 import { useRouter } from "next/router";
+import Icon from "@/Components/Icon";
 
 export default function LightningWallet() {
   const dispatch = useDispatch();
@@ -438,7 +439,7 @@ export default function LightningWallet() {
                                     }
                                   >
                                     {selectedWallet.entitle}
-                                    <div className="copy"></div>
+                                    <Icon name="copy" />
                                   </div>
                                 )}
                             </div>
@@ -482,7 +483,7 @@ export default function LightningWallet() {
                                   }
                                 >
                                   <p>{selectedWallet.entitle}</p>
-                                  <div className="arrow-12"></div>
+                                  <Icon name="arrow" size={12} />
                                 </div>
                               )}
                               {showWalletsList && (
@@ -506,7 +507,7 @@ export default function LightningWallet() {
                                       // data-tooltip={t("A8fEwNq")}
                                       onClick={() => setShowAddWallet(true)}
                                     >
-                                      <div className="plus-sign"></div>
+                                      <Icon name="plus-sign" />
                                       <p>{t("A8fEwNq")}</p>
                                     </div>
                                   </div>
@@ -711,7 +712,7 @@ export default function LightningWallet() {
                                             : setDisplayMessage(transaction.id)
                                         }
                                       >
-                                        <div className="comment-not"></div>
+                                        <Icon name="comment-not" />
                                       </div>
                                     )}
                                   </div>
@@ -889,7 +890,7 @@ export default function LightningWallet() {
                                               )
                                         }
                                       >
-                                        <div className="comment-not"></div>
+                                        <Icon name="comment-not" />
                                       </div>
                                     )}
                                   </div>
@@ -1067,7 +1068,7 @@ export default function LightningWallet() {
                                               )
                                         }
                                       >
-                                        <div className="comment-not"></div>
+                                        <Icon name="comment-not" />
                                       </div>
                                     )}
                                   </div>
@@ -1672,7 +1673,7 @@ const ReceivePayment = ({
                 onClick={() => copyText(invoiceRequest)}
               >
                 <p>{shortenKey(invoiceRequest)}</p>
-                <div className="copy-24"></div>
+                <Icon name="copy" size={24} />
               </div>
               <button className="btn btn-normal" onClick={() => exit()}>
                 {t("AoUUBDI")}

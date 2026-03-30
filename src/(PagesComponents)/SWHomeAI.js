@@ -15,6 +15,7 @@ import { nanoid } from "nanoid";
 import { t } from "i18next";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 const getSavedConversation = () => {
   const getUserKeys = getKeys();
@@ -300,7 +301,7 @@ const ChatWindow = ({ message, setMessage, setStatus }) => {
           <div className="close" onClick={() => setQuotaMessage("")}>
             <div></div>
           </div>
-          <div className="info"></div>
+          <Icon name="info" isColored />
           <p className="c1-c">{t(quotaMessage)}</p>
         </div>
       )}
@@ -393,7 +394,7 @@ function InputField({ status = true, handleSearch }) {
             } fx-centered`}
             href={"/smart-widgets"}
           >
-            <div className="search"></div>
+            <Icon name="search" />
             {t("AYZh36g")}
           </Link>
           <Link
@@ -405,7 +406,7 @@ function InputField({ status = true, handleSearch }) {
             }}
             href={"/sw-ai"}
           >
-            <div className="ringbell"></div>
+            <Icon name="ringbell" />
             {t("A6U9fNT")}
           </Link>
         </div>
@@ -424,7 +425,7 @@ function InputField({ status = true, handleSearch }) {
               }
             }}
           >
-            <div className="send"></div>
+            <Icon name="send" />
           </div>
         )}
       </div>

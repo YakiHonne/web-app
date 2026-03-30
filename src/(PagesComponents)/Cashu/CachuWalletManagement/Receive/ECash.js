@@ -17,6 +17,7 @@ import { encrypt44 } from "@/Helpers/Encryptions";
 import { InitEvent } from "@/Helpers/Controlers";
 import { getPublicKey } from "nostr-tools";
 import { getEncodedTokenV4 } from "@cashu/cashu-ts";
+import Icon from "@/Components/Icon";
 
 export default function ECash({ exit }) {
   const { t } = useTranslation();
@@ -169,7 +170,7 @@ export default function ECash({ exit }) {
     <div className="fit-container fx-centered fx-col fx-sart-h fx-start-v">
       <div className="fit-container fx-centered fx-start-h" onClick={exit}>
         <div className="round-icon-small">
-          <div className="arrow" style={{ rotate: "90deg" }}></div>
+          <Icon name="arrow" />
         </div>
         <p>{t("AUmPqw7")}</p>
       </div>
@@ -193,7 +194,7 @@ export default function ECash({ exit }) {
                 data-tooltip={t("AD5fCOZ")}
                 onClick={handlePaste}
               >
-                <div className="copy-24"></div>
+                <Icon name="copy" size={24} />
               </div>
             </div>
           </div>
@@ -288,7 +289,7 @@ export default function ECash({ exit }) {
               className="fit-container fx-centered box-pad-h-m box-pad-v-m sc-s-18 bg-sp"
               style={{ borderColor: "var(--green-main)" }}
             >
-              <div className="checkmark-24"></div>
+              <Icon name="checkmark" size={24} />
               <p className="green-c">{t("A3Dn0HW")}</p>
             </div>
           )}

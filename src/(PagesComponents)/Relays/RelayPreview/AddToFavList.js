@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
 import LoadingDots from "@/Components/LoadingDots";
+import Icon from "@/Components/Icon";
 
 export default function AddToFavList({ url }) {
     let relay = url.endsWith("/") ? url : url + "/";
@@ -70,7 +71,7 @@ export default function AddToFavList({ url }) {
             <LoadingDots />
           ) : (
             <>
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
               {t("AZaUNnH")}
             </>
           )}

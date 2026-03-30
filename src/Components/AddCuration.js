@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { nip19 } from "nostr-tools";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,6 +8,7 @@ import LoadingDots from "@/Components/LoadingDots";
 import { getSubData, InitEvent } from "@/Helpers/Controlers";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function AddCuration({ event, exit }) {
   const dispatch = useDispatch();
@@ -20,7 +20,7 @@ export default function AddCuration({ event, exit }) {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPostsLoading, setIsPostsLoading] = useState(
-    event && event?.items.length > 0 ? true : false
+    event && event?.items.length > 0 ? true : false,
   );
   const [showPostsList, setShowPostsList] = useState(false);
   const [kind, setKind] = useState(30004);
@@ -44,7 +44,7 @@ export default function AddCuration({ event, exit }) {
 
       let subData = await getSubData(
         [{ kinds, authors: pubkeys, "#d": dTags }],
-        200
+        200,
       );
       setPosts(subData.data.map((_) => getParsedRepEvent(_)));
       setIsPostsLoading(false);
@@ -74,7 +74,7 @@ export default function AddCuration({ event, exit }) {
       dispatch(
         setToPublish({
           eventInitEx: eventInitEx,
-        })
+        }),
       );
       exit();
     } catch (err) {
@@ -83,7 +83,7 @@ export default function AddCuration({ event, exit }) {
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
     }
   };
@@ -96,7 +96,7 @@ export default function AddCuration({ event, exit }) {
         setToast({
           type: 2,
           desc: t("AxXOv2P"),
-        })
+        }),
       );
       return false;
     }
@@ -192,7 +192,7 @@ export default function AddCuration({ event, exit }) {
                   className="fx-centered pointer"
                   onClick={initThumbnail}
                 >
-                  <div className="trash"></div>
+                  <Icon name="trash" isColored />
                 </div>
               )}
             </div>
@@ -265,7 +265,7 @@ export default function AddCuration({ event, exit }) {
                   className="round-icon-small"
                   onClick={() => setShowPostsList(true)}
                 >
-                  <div className="plus-sign"></div>
+                  <Icon name="plus-sign" />
                 </div>
               </div>
               {posts.length === 0 && (
@@ -275,9 +275,7 @@ export default function AddCuration({ event, exit }) {
                 >
                   <div className="fx-centered fx-col" style={{ gap: 0 }}>
                     <p>{t("AWyOpX1")}</p>
-                    <p className="gray-c">
-                      {t("Ayi84Sy")}
-                    </p>
+                    <p className="gray-c">{t("Ayi84Sy")}</p>
                   </div>
                 </div>
               )}
@@ -316,7 +314,7 @@ export default function AddCuration({ event, exit }) {
                           className="box-pad-h-s"
                           onClick={() => removeItem(index)}
                         >
-                          <div className="trash"></div>
+                          <Icon name="trash" isColored />
                         </div>
                       </div>
                     );
@@ -347,7 +345,7 @@ const AddArticlesToCuration = ({
   setPosts_,
 }) => {
   const dispatch = useDispatch();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [posts, setPosts] = useState(posts_);
   const [NostrPosts, setNostrPosts] = useState([]);
   const [searchedPostsByNaddr, setSearchedPostByNaddr] = useState([]);
@@ -378,7 +376,7 @@ const AddArticlesToCuration = ({
                 limit: 10,
                 until: lastEventTime,
               },
-            ]
+            ],
       );
       setNostrPosts((prev) => [
         ...prev,
@@ -419,8 +417,8 @@ const AddArticlesToCuration = ({
     }
     let tempArray = Array.from(
       NostrPosts.filter((item) =>
-        item.title.toLowerCase().includes(search.toLowerCase())
-      )
+        item.title.toLowerCase().includes(search.toLowerCase()),
+      ),
     );
     setSearchRes(tempArray);
   };
@@ -458,10 +456,8 @@ const AddArticlesToCuration = ({
         dispatch(
           setToast({
             type: 2,
-            desc: arts
-              ? t("A7ggsnQ")
-              : t("AzAG7f8"),
-          })
+            desc: arts ? t("A7ggsnQ") : t("AzAG7f8"),
+          }),
         );
       }
       setIsLoading(false);
@@ -471,7 +467,7 @@ const AddArticlesToCuration = ({
         setToast({
           type: 2,
           desc: t("As0d1J3"),
-        })
+        }),
       );
     }
   };
@@ -607,7 +603,7 @@ const AddArticlesToCuration = ({
                               >
                                 <p className="gray-c p-medium">
                                   {new Date(
-                                    item.created_at * 1000
+                                    item.created_at * 1000,
                                   ).toISOString()}
                                 </p>
                                 <p className="p-one-line fit-container">
@@ -620,7 +616,7 @@ const AddArticlesToCuration = ({
                                 </div>
                               ) : (
                                 <div className="box-pad-h-m">
-                                  <div className="plus-sign"></div>
+                                  <Icon name="plus-sign" />
                                 </div>
                               )}
                             </div>
@@ -670,7 +666,7 @@ const AddArticlesToCuration = ({
                               >
                                 <p className="gray-c p-medium">
                                   {new Date(
-                                    item.created_at * 1000
+                                    item.created_at * 1000,
                                   ).toISOString()}
                                 </p>
                                 <p className="p-one-line">{item.title}</p>
@@ -681,7 +677,7 @@ const AddArticlesToCuration = ({
                                 </div>
                               ) : (
                                 <div className="box-pad-h-m">
-                                  <div className="plus-sign"></div>
+                                  <Icon name="plus-sign" />
                                 </div>
                               )}
                             </div>
@@ -756,7 +752,7 @@ const AddArticlesToCuration = ({
                           </div>
                         ) : (
                           <div className="box-pad-h-m">
-                            <div className="plus-sign"></div>
+                            <Icon name="plus-sign" />
                           </div>
                         )}
                       </div>
@@ -775,12 +771,12 @@ const AddArticlesToCuration = ({
                 className="btn btn-gst"
                 onClick={() => {
                   setLastEventTime(
-                    NostrPosts[NostrPosts.length - 1].created_at
+                    NostrPosts[NostrPosts.length - 1].created_at,
                   );
                   setIsLoading(true);
                 }}
               >
-             {t("AxJRrkn")}
+                {t("AxJRrkn")}
               </button>
             )}
             <button
@@ -791,10 +787,7 @@ const AddArticlesToCuration = ({
               onClick={() => setPosts_(posts)}
             >
               {t("Aopt3V9")}
-              <div
-                className="arrow"
-                style={{ filter: "invert()", rotate: "-90deg" }}
-              ></div>
+              <Icon name="arrow" />
             </button>
           </div>
         </div>

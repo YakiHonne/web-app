@@ -22,6 +22,7 @@ import {
   getEventFromCache,
   setEventFromCache,
 } from "@/Helpers/utils/eventsCache";
+import Icon from "@/Components/Icon";
 
 export default function NotificationCenterMain() {
   const {
@@ -141,12 +142,7 @@ export default function NotificationCenterMain() {
                 data-tooltip={t("AkQpkMC")}
                 onClick={handleRefreshNotifications}
               >
-                <div
-                  className="switch-arrows-v2"
-                  style={{
-                    cursor: isNotificationsLoading ? "not-allowed" : "pointer",
-                  }}
-                ></div>
+                <Icon name="switch-arrows-v2" />
               </div>
               <OptionsDropdown
                 options={[

@@ -5,6 +5,7 @@ import React, { useMemo, useState } from "react";
 import { Virtuoso } from "react-virtuoso";
 import UserProfilePic from "./UserProfilePic";
 import MediaOverlay from "./MediaOverlay";
+import Icon from "@/Components/Icon";
 
 export default function MediaMasonryList({ events, setLastEventTime }) {
   const media = useMemo(
@@ -278,7 +279,7 @@ const Image = React.memo(({ item, aspectRatio }) => {
         }}
         className="fx-centered"
       >
-        <div className="broken-image-24"></div>
+        <Icon name="broken-image" size={24} />
       </div>
     );
   return (
@@ -362,15 +363,15 @@ const PostOverlay = ({ postActions, pubkey }) => {
           style={{ gap: "1rem" }}
         >
           <div className="fx-centered">
-            <div className="heart-24"></div>
+            <Icon name="heart" size={24} />
             <p>{postActions.likes.likes.length}</p>
           </div>
           <div className="fx-centered">
-            <div className="comment-24"></div>
+            <Icon name="comment" size={24} />
             <p>{postActions.replies.replies.length}</p>
           </div>
           <div className="fx-centered">
-            <div className="bolt-24"></div>
+            <Icon name="bolt" size={24} />
             <p>{postActions.zaps.total}</p>
           </div>
         </div>

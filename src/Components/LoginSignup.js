@@ -21,7 +21,9 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { relaysOnPlatform } from "@/Content/Relays";
 import LoadingDots from "@/Components/LoadingDots";
 import { getUser, getUserFromNOSTR } from "@/Helpers/Controlers";
-let profilePlaceholder = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
+import Icon from "@/Components/Icon";
+let profilePlaceholder =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 
 export default function LoginSignup({ exit }) {
   const { t } = useTranslation();
@@ -37,7 +39,7 @@ export default function LoginSignup({ exit }) {
     ) {
       const main = document.querySelector("main");
       const nostrContainer = document.querySelector(
-        ".main-page-nostr-container"
+        ".main-page-nostr-container",
       );
 
       main.style.overflow = "visible";
@@ -47,7 +49,7 @@ export default function LoginSignup({ exit }) {
     return () => {
       const main = document.querySelector("main");
       const nostrContainer = document.querySelector(
-        ".main-page-nostr-container"
+        ".main-page-nostr-container",
       );
 
       main.style.overflow = "scroll";
@@ -136,7 +138,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
           setToast({
             type: 2,
             desc: t("AiHLMRi"),
-          })
+          }),
         );
       }
     }
@@ -164,7 +166,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
           setToast({
             type: 2,
             desc: t("AC5ByUA"),
-          })
+          }),
         );
       }
     }
@@ -188,7 +190,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
       setToast({
         type: 2,
         desc: t("AC5ByUA"),
-      })
+      }),
     );
   };
   const onLoginWithExt = async () => {
@@ -225,7 +227,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
         setToast({
           type: 2,
           desc: t("AiHLMRi"),
-        })
+        }),
       );
     }
   };
@@ -329,7 +331,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
           setToast({
             type: 3,
             desc: t("AQ12OQz"),
-          })
+          }),
         );
       return false;
     }
@@ -342,7 +344,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
           setToast({
             type: 2,
             desc: t("AdrCWCj"),
-          })
+          }),
         );
         return;
       }
@@ -352,27 +354,27 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
       if (enableWalletLinking && isWalletCreated.toSave.length === 0) return;
       setIsLoading(true);
       let picture_ = pictureFile
-        ? await FileUpload(pictureFile, userKeys)
+        ? await FileUpload({ file: pictureFile, userKeys })
         : "";
       if (picture_ === false) {
         dispatch(
           setToast({
             type: 2,
             desc: t("AfM6xbs"),
-          })
+          }),
         );
 
         return;
       }
       let banner_ = bannerFile
-        ? await FileUpload(bannerFile, userKeys)
+        ? await FileUpload({ file: bannerFile, userKeys })
         : "";
       if (banner_ === false) {
         dispatch(
           setToast({
             type: 2,
             desc: t("AnmPNHc"),
-          })
+          }),
         );
         setIsLoading(false);
         return;
@@ -390,7 +392,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
         "text/plain",
         `account-credentials.txt`,
         t("AdoWp0E"),
-        false
+        false,
       );
 
       let signer = new NDKPrivateKeySigner(userKeys.sec);
@@ -521,7 +523,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
                 element={
                   <div className="fx-centered sticker  sticker-gray-gray">
                     {t("A1HsCqp")}
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </div>
                 }
                 setFile={(data) => {
@@ -575,10 +577,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
                     }}
                     className="fx-centered pointer toggle fx-col"
                   >
-                    <div
-                      className="image-24"
-                      style={{ filter: "invert()" }}
-                    ></div>
+                    <Icon name="image" size={24} />
                     <p className="gray-c">{t("AnD39Ci")}</p>
                   </div>
                 </div>
@@ -679,7 +678,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
           )}
           {NWCAddr && (
             <div className="fx-centered sc-s-18 box-pad-h-s box-pad-v-s fit-container">
-              <div className="bolt"></div>
+              <Icon name="bolt" />
               {NWCAddr}
             </div>
           )}

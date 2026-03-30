@@ -12,6 +12,7 @@ import Select from "@/Components/Select";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function ContentFilter({
   selectedFilter,
@@ -27,7 +28,7 @@ export default function ContentFilter({
   const filters = useMemo(() => {
     if (userAppSettings && userAppSettings?.settings?.content_filters) {
       let filters = userAppSettings.settings.content_filters.filter(
-        (_) => _.type === type
+        (_) => _.type === type,
       );
       return filters;
     }
@@ -55,7 +56,7 @@ export default function ContentFilter({
       setSelectedFilter({ ...filters[0], index: 0 });
     } else if (!selectedFilter.default && filters.length > 0) {
       let checkFilter = filters.find(
-        (_) => JSON.stringify(_) === JSON.stringify(selectedFilter)
+        (_) => JSON.stringify(_) === JSON.stringify(selectedFilter),
       );
       if (!checkFilter) setSelectedFilter({ ...filters[0], index: 0 });
     } else {
@@ -74,7 +75,7 @@ export default function ContentFilter({
         ...(userAppSettings.settings || { content_sources: {} }),
         content_filters: [
           ...(userAppSettings?.settings?.content_filters.filter(
-            (_, _index) => _index !== index
+            (_, _index) => _index !== index,
           ) || []),
         ],
       };
@@ -95,7 +96,7 @@ export default function ContentFilter({
         event.kind,
         event.content,
         event.tags,
-        undefined
+        undefined,
       );
       if (!eventInitEx) {
         return;
@@ -104,7 +105,7 @@ export default function ContentFilter({
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
       setShowFilters(false);
     } catch (err) {
@@ -204,7 +205,7 @@ export default function ContentFilter({
               <p className="gray-c">|</p>
             </>
           )} */}
-          <div className="filter"></div>
+          <Icon name="filter" />
         </div>
         {showFilters && (
           <div
@@ -232,7 +233,7 @@ export default function ContentFilter({
             >
               <p className="gray-c">{t("AMx89Qm")}</p>
               <div onClick={() => setShowAddFilter(true)}>
-                <div className="plus-sign"></div>
+                <Icon name="plus-sign" />
               </div>
             </div>
             <div
@@ -259,13 +260,13 @@ export default function ContentFilter({
                     <p className="p-maj p-one-line">{filter.title}</p>
                     <div className="fx-centered">
                       {selectedFilter.index === index && (
-                        <div className="check-24"></div>
+                        <Icon name="check" size={24} />
                       )}
                       <OptionsDropdown
                         vertical={false}
                         options={[
                           <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
-                            <div className="edit"></div>
+                            <Icon name="edit" />
                             <p
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -278,7 +279,7 @@ export default function ContentFilter({
                           </div>,
                           <hr style={{ margin: "4px 0", padding: "0 5px" }} />,
                           <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
-                            <div className="trash"> </div>
+                            <Icon name="trash" isColored />
                             <p
                               className="red-c"
                               onClick={(e) => {
@@ -328,31 +329,31 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
   const [title, setTitle] = useState(filter.title || "");
   const [tempIncludedWord, setTempIncludedWord] = useState("");
   const [includedWords, setIncludedWords] = useState(
-    filter.included_words || []
+    filter.included_words || [],
   );
   const [tempExcludedWord, setTempExcludedWord] = useState("");
   const [excludedWords, setExcludedWords] = useState(
-    filter.excluded_words || []
+    filter.excluded_words || [],
   );
   const [postedBy, setPostedBy] = useState(
-    getUsersFromPubkeys(filter.posted_by) || []
+    getUsersFromPubkeys(filter.posted_by) || [],
   );
   const [hideSensitive, setHideSensitive] = useState(
-    filter.hide_sensitive || false
+    filter.hide_sensitive || false,
   );
   const [thumbnail, setThumbnail] = useState(filter.thumbnail || false);
   const [artMinWord, setArtMinWord] = useState(
-    filter.for_articles?.min_words || 150
+    filter.for_articles?.min_words || 150,
   );
   const [artWithMedia, setArtWithMedia] = useState(
-    filter.for_articles?.media_only || false
+    filter.for_articles?.media_only || false,
   );
   const [curtItemCount, setCurtItemCount] = useState(
-    filter.for_curations?.min_items || 4
+    filter.for_curations?.min_items || 4,
   );
   const [curtType, setCurtType] = useState(filter.for_curations?.type || "all");
   const [vidSource, setVidSource] = useState(
-    filter.for_videos?.source || "all"
+    filter.for_videos?.source || "all",
   );
   const [from, setFrom] = useState(filter.from || null);
   const [to, setTo] = useState(filter.to || null);
@@ -367,7 +368,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("A49050m"),
-        })
+        }),
       );
       return;
     }
@@ -383,7 +384,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("AobQ9pm"),
-        })
+        }),
       );
       return;
     }
@@ -396,7 +397,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("AxzAeS0"),
-        })
+        }),
       );
       return;
     }
@@ -447,7 +448,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
         event.kind,
         event.content,
         event.tags,
-        undefined
+        undefined,
       );
       if (!eventInitEx) {
         setIsLoading(false);
@@ -457,7 +458,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
       exit();
     } catch (err) {
@@ -513,7 +514,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
             onChange={(e) => setTempIncludedWord(e.target.value)}
           />
           <div className="round-icon-small" onClick={handleIncludeWords}>
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </form>
         {includedWords.length > 0 && (
@@ -532,7 +533,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
                       setIncludedWords((prev) => prev.filter((_) => _ !== tag))
                     }
                   >
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </div>
                 </div>
               );
@@ -551,7 +552,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
             onChange={(e) => setTempExcludedWord(e.target.value)}
           />
           <div className="round-icon-small" onClick={handleIExcludeWords}>
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </form>
         {excludedWords.length > 0 && (
@@ -570,7 +571,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
                       setExcludedWords((prev) => prev.filter((_) => _ !== tag))
                     }
                   >
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </div>
                 </div>
               );
@@ -603,7 +604,7 @@ const MixedContentFilter = ({ exit, filter, prevSettings }) => {
                     style={{ top: "-5px", right: "-5px" }}
                     onClick={() =>
                       setPostedBy((prev) =>
-                        prev.filter((__) => __.pubkey !== _.pubkey)
+                        prev.filter((__) => __.pubkey !== _.pubkey),
                       )
                     }
                   >
@@ -709,14 +710,14 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
   const [title, setTitle] = useState(filter.title || "");
   const [tempIncludedWord, setTempIncludedWord] = useState("");
   const [includedWords, setIncludedWords] = useState(
-    filter.included_words || []
+    filter.included_words || [],
   );
   const [tempExcludedWord, setTempExcludedWord] = useState("");
   const [excludedWords, setExcludedWords] = useState(
-    filter.excluded_words || []
+    filter.excluded_words || [],
   );
   const [postedBy, setPostedBy] = useState(
-    getUsersFromPubkeys(filter.posted_by) || []
+    getUsersFromPubkeys(filter.posted_by) || [],
   );
   const [mediaOnly, setMediaOnly] = useState(filter.media_only || false);
   const [from, setFrom] = useState(filter.from || false);
@@ -732,7 +733,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("A49050m"),
-        })
+        }),
       );
       return;
     }
@@ -748,7 +749,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("AobQ9pm"),
-        })
+        }),
       );
       return;
     }
@@ -761,7 +762,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("AxzAeS0"),
-        })
+        }),
       );
       return;
     }
@@ -800,7 +801,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
         event.kind,
         event.content,
         event.tags,
-        undefined
+        undefined,
       );
       if (!eventInitEx) {
         setIsLoading(false);
@@ -810,7 +811,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
       exit();
     } catch (err) {
@@ -831,7 +832,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
           onChange={(e) => setTitle(e.target.value)}
         />
         <div className="fit-container fx-centered fx-wrap">
-          <div style={{flex: "1 1 100px"}}>
+          <div style={{ flex: "1 1 100px" }}>
             <p className="gray-c">{t("AZFMiVf")}</p>
             <input
               type="date"
@@ -842,7 +843,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
               className="if ifs-full"
             />
           </div>
-          <div style={{flex: "1 1 100px"}}>
+          <div style={{ flex: "1 1 100px" }}>
             <p className="gray-c">{t("AWUmU6P")}</p>
             <input
               type="date"
@@ -866,7 +867,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
             onChange={(e) => setTempIncludedWord(e.target.value)}
           />
           <div className="round-icon-small" onClick={handleIncludeWords}>
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </form>
         {includedWords.length > 0 && (
@@ -885,7 +886,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
                       setIncludedWords((prev) => prev.filter((_) => _ !== tag))
                     }
                   >
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </div>
                 </div>
               );
@@ -904,7 +905,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
             onChange={(e) => setTempExcludedWord(e.target.value)}
           />
           <div className="round-icon-small" onClick={handleIExcludeWords}>
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </form>
         {excludedWords.length > 0 && (
@@ -923,7 +924,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
                       setExcludedWords((prev) => prev.filter((_) => _ !== tag))
                     }
                   >
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </div>
                 </div>
               );
@@ -953,7 +954,7 @@ const NotesFilter = ({ exit, filter, prevSettings }) => {
                     style={{ top: "-5px", right: "-5px" }}
                     onClick={() =>
                       setPostedBy((prev) =>
-                        prev.filter((__) => __.pubkey !== _.pubkey)
+                        prev.filter((__) => __.pubkey !== _.pubkey),
                       )
                     }
                   >
@@ -984,16 +985,18 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
   const [title, setTitle] = useState(filter.title || "");
   const [tempIncludedWord, setTempIncludedWord] = useState("");
   const [includedWords, setIncludedWords] = useState(
-    filter.included_words || []
+    filter.included_words || [],
   );
   const [tempExcludedWord, setTempExcludedWord] = useState("");
   const [excludedWords, setExcludedWords] = useState(
-    filter.excluded_words || []
+    filter.excluded_words || [],
   );
   const [postedBy, setPostedBy] = useState(
-    getUsersFromPubkeys(filter.posted_by) || []
+    getUsersFromPubkeys(filter.posted_by) || [],
   );
-  const [hideSensitive, setHideSensitive] = useState(filter.hide_sensitive || false);
+  const [hideSensitive, setHideSensitive] = useState(
+    filter.hide_sensitive || false,
+  );
   const [from, setFrom] = useState(filter.from || false);
   const [to, setTo] = useState(filter.to || false);
   const [isLoading, setIsLoading] = useState(false);
@@ -1007,7 +1010,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("A49050m"),
-        })
+        }),
       );
       return;
     }
@@ -1023,7 +1026,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("AobQ9pm"),
-        })
+        }),
       );
       return;
     }
@@ -1036,7 +1039,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
         setToast({
           type: 2,
           desc: t("AxzAeS0"),
-        })
+        }),
       );
       return;
     }
@@ -1075,7 +1078,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
         event.kind,
         event.content,
         event.tags,
-        undefined
+        undefined,
       );
       if (!eventInitEx) {
         setIsLoading(false);
@@ -1085,7 +1088,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
       exit();
     } catch (err) {
@@ -1106,7 +1109,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
           onChange={(e) => setTitle(e.target.value)}
         />
         <div className="fit-container fx-centered fx-wrap">
-          <div style={{flex: "1 1 100px"}}>
+          <div style={{ flex: "1 1 100px" }}>
             <p className="gray-c">{t("AZFMiVf")}</p>
             <input
               type="date"
@@ -1117,7 +1120,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
               className="if ifs-full"
             />
           </div>
-          <div style={{flex: "1 1 100px"}}>
+          <div style={{ flex: "1 1 100px" }}>
             <p className="gray-c">{t("AWUmU6P")}</p>
             <input
               type="date"
@@ -1141,7 +1144,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
             onChange={(e) => setTempIncludedWord(e.target.value)}
           />
           <div className="round-icon-small" onClick={handleIncludeWords}>
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </form>
         {includedWords.length > 0 && (
@@ -1160,7 +1163,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
                       setIncludedWords((prev) => prev.filter((_) => _ !== tag))
                     }
                   >
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </div>
                 </div>
               );
@@ -1179,7 +1182,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
             onChange={(e) => setTempExcludedWord(e.target.value)}
           />
           <div className="round-icon-small" onClick={handleIExcludeWords}>
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </form>
         {excludedWords.length > 0 && (
@@ -1198,7 +1201,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
                       setExcludedWords((prev) => prev.filter((_) => _ !== tag))
                     }
                   >
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </div>
                 </div>
               );
@@ -1228,7 +1231,7 @@ const MediaFilter = ({ exit, filter, prevSettings }) => {
                     style={{ top: "-5px", right: "-5px" }}
                     onClick={() =>
                       setPostedBy((prev) =>
-                        prev.filter((__) => __.pubkey !== _.pubkey)
+                        prev.filter((__) => __.pubkey !== _.pubkey),
                       )
                     }
                   >

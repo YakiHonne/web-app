@@ -22,6 +22,7 @@ import ProgressCirc from "./ProgressCirc";
 import { useTranslation } from "react-i18next";
 import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import { eventKinds } from "@/Content/Extra";
+import Icon from "@/Components/Icon";
 
 const PUBLISHING_TIMEOUT = 3000;
 
@@ -139,8 +140,17 @@ export default function Publishing({ displayOff = false }) {
     if (JSON.stringify(tempArray) !== JSON.stringify(publishedEvents)) {
       setPublishedEvents(tempArray);
     }
-    localStorage_.setItem("publishedEvents", JSON.stringify(tempArray));
+    saveLocal(tempArray);
   }, [publishedEvents]);
+
+  const saveLocal = (events) => {
+    try {
+      localStorage_.setItem("publishedEvents", JSON.stringify(events));
+    } catch (error) {
+      console.log(error);
+      saveLocal(events.slice(0, events.length - 5));
+    }
+  };
 
   useEffect(() => {
     const publishPost = async () => {
@@ -549,21 +559,21 @@ export default function Publishing({ displayOff = false }) {
             <div className="fit-container fx-scattered">
               <div className="fx-centered fx sc-s-18 bg-sp box-pad-h box-pad-v fx-col">
                 <div className="fx-centered">
-                  <div className="total-events-24"></div>
+                  <Icon name="total-events" size={24} />
                   <h4>{publishedEvents.length}</h4>
                 </div>
                 <p className="gray-c">Events</p>
               </div>
               <div className="fx-centered fx sc-s-18 bg-sp box-pad-h box-pad-v fx-col">
                 <div className="fx-centered">
-                  <div className="succeeded-events-24"></div>
+                  <Icon name="succeeded-events" size={24} />
                   <h4>{succeededEvents}</h4>
                 </div>
                 <p className="gray-c">{t("ATJXba6")}</p>
               </div>
               <div className="fx-centered fx sc-s-18 bg-sp box-pad-h box-pad-v fx-col">
                 <div className="fx-centered">
-                  <div className="failed-events-24"></div>
+                  <Icon name="failed-events" size={24} />
                   <h4>{failedEvents}</h4>
                 </div>
                 <p className="gray-c">{t("AOxW08J")}</p>
@@ -578,7 +588,7 @@ export default function Publishing({ displayOff = false }) {
                     data-tooltip={t("AUdbtv8")}
                     onClick={() => setPublishedEvents([])}
                   >
-                    <div className="trash"></div>
+                    <Icon name="trash" isColored />
                   </div>
                 </div>
                 {publishedEvents
@@ -643,13 +653,18 @@ export default function Publishing({ displayOff = false }) {
                                   {relay.status === 1 && <p>{relay.url}</p>}
                                   {relay.status === 0 && <LoadingDots />}
                                   {relay.status === 2 && (
-                                    <div
-                                      className="crossmark-tt-24"
-                                      data-tooltip={relay.msg || ""}
-                                    ></div>
+                                    <Icon
+                                      name="crossmark-tt"
+                                      size={24}
+                                      isColored
+                                    />
                                   )}
                                   {relay.status === 1 && (
-                                    <div className="checkmark-tt-24"></div>
+                                    <Icon
+                                      name="checkmark-tt"
+                                      size={24}
+                                      isColored
+                                    />
                                   )}
                                 </div>
                               );
@@ -719,7 +734,7 @@ export default function Publishing({ displayOff = false }) {
         onClick={() => setShowDetails(true)}
       >
         <div className="round-icon">
-          <div className="succeeded-events"></div>
+          <Icon name="succeeded-events" />
         </div>
       </div>
       <div
@@ -740,15 +755,15 @@ export default function Publishing({ displayOff = false }) {
           {/* <p className="gray-c p-medium">Publishing status</p> */}
           <div className="fit-container fx-scattered">
             <div className="fx-centered">
-              <div className="total-events-24"></div>
+              <Icon name="total-events" size={24} />
               <p className="gray-c">{publishedEvents.length}</p>
             </div>
             <div className="fx-centered">
-              <div className="succeeded-events-24"></div>
+              <Icon name="succeeded-events" size={24} />
               <p className="gray-c">{succeededEvents}</p>
             </div>
             <div className="fx-centered">
-              <div className="failed-events-24"></div>
+              <Icon name="failed-events" size={24} />
               <p className={failedEvents > 0 ? "red-c" : "gray-c"}>
                 {failedEvents}
               </p>

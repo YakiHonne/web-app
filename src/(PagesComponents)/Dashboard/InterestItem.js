@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "@/Components/Icon";
 
 export default function InterestItem({ item, handleItemInList, index }) {
   return (
@@ -37,7 +38,7 @@ export default function InterestItem({ item, handleItemInList, index }) {
             onClick={() => handleItemInList(false, index)}
             className="round-icon-small"
           >
-            <div className="trash"></div>
+            <Icon name="trash" isColored />
           </div>
         )}
         {item.toDelete && (
@@ -45,7 +46,7 @@ export default function InterestItem({ item, handleItemInList, index }) {
             onClick={() => handleItemInList(true, index)}
             className="round-icon-small"
           >
-            <div className="undo"></div>
+            <Icon name="undo" />
           </div>
         )}
         <div

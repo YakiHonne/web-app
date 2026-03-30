@@ -5,6 +5,7 @@ import UserSearchBar from "@/Components/UserSearchBar";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { sendMessage } from "@/Helpers/DMHelpers";
+import Icon from "@/Components/Icon";
 
 export default function InitiConvo({ exit, receiver = false }) {
   const { t } = useTranslation();
@@ -110,7 +111,7 @@ export default function InitiConvo({ exit, receiver = false }) {
           </div>
           {legacy && (
             <div className="box-pad-h-m box-pad-v-m fx-centered fx-start-h fit-container sc-s-18">
-              <div className="info-tt-24"></div>
+              <Icon name="info-tt" size={24} isColored />
               <div>
                 <p className="c1-c p-medium">{t("AakbxOk")}</p>
               </div>

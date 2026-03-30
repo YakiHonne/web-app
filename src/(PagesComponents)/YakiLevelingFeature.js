@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ProgressBar from "../Components/ProgressBar";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 let screenOne =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-1.png";
 let screenTwo =
@@ -129,10 +130,7 @@ export default function YakiLevelingFeature() {
                         borderColor: "#343434",
                       }}
                     >
-                      <div
-                        className="arrow"
-                        style={{ filter: "brightness(0) invert()" }}
-                      ></div>
+                      <Icon name="arrow" />
                     </div>
                   </div>
                   <div
@@ -192,10 +190,7 @@ export default function YakiLevelingFeature() {
                         borderColor: "#343434",
                       }}
                     >
-                      <div
-                        className="arrow"
-                        style={{ filter: "brightness(0) invert()" }}
-                      ></div>
+                      <Icon name="arrow" />
                     </div>
                   </div>
                   <div
@@ -258,10 +253,7 @@ export default function YakiLevelingFeature() {
                         borderColor: "#343434",
                       }}
                     >
-                      <div
-                        className="arrow"
-                        style={{ filter: "brightness(0) invert()" }}
-                      ></div>
+                      <Icon name="arrow" />
                     </div>
                   </div>
                   <div
@@ -327,10 +319,7 @@ export default function YakiLevelingFeature() {
                         borderColor: "#343434",
                       }}
                     >
-                      <div
-                        className="arrow"
-                        style={{ filter: "brightness(0) invert()" }}
-                      ></div>
+                      <Icon name="arrow" />
                     </div>
                   </div>
                   <div

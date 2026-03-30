@@ -33,6 +33,7 @@ import widget from "@/JSONs/widgets.json";
 import { useRouter } from "next/router";
 import { getPostToEdit } from "@/Helpers/ClientHelpers";
 import { DraggableComp } from "@/Components/DraggableComp";
+import Icon from "@/Components/Icon";
 const SWT_YAKIHONNE = "https://swt.yakihonne.com";
 
 const getLocalSWv2Drafts = () => {
@@ -65,7 +66,7 @@ export default function SmartWidgetEditor() {
   const [buildOption, setBuildOption] = useState("normal");
   const [buildOptions, setBuildOptions] = useState(query ? false : true);
   const [template, setTemplate] = useState(
-    toEdit || toClone ? toEdit || toClone : getLocalSWv2CDraft()
+    toEdit || toClone ? toEdit || toClone : getLocalSWv2CDraft(),
   );
   const [identifier, setIdentifier] = useState(edit ? true : false);
   const [templates, setTemplates] = useState([]);
@@ -182,7 +183,7 @@ const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
             onClick={() => setTemplate(false, true)}
           >
             <div className="round-icon">
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
             </div>
             <p className="gray-c">{t("AbvONJd")}</p>
           </div>
@@ -191,10 +192,7 @@ const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
             style={{ height: "200px" }}
             onClick={() => setBuildOption("drafts")}
           >
-            <div
-              className="smart-widget-draft"
-              style={{ minWidth: "36px", height: "64px" }}
-            ></div>
+            <Icon name="smart-widget-draft" size={36} />
             <p className="gray-c">{t("AaXbNvT")}</p>
           </div>
           <div
@@ -202,10 +200,7 @@ const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
             style={{ height: "200px" }}
             onClick={() => setBuildOption("template")}
           >
-            <div
-              className="frames"
-              style={{ minWidth: "36px", height: "64px" }}
-            ></div>
+            <Icon name="frames" size={36} />
             <p className="gray-c">{t("A60QDNZ")}</p>
           </div>
         </div>
@@ -215,7 +210,7 @@ const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
               className="round-icon-small roun-icon-tooltip"
               data-tooltip={t("AufOzcc")}
             >
-              <div className="arrow" style={{ rotate: "90deg" }}></div>
+              <Icon name="arrow" transform="rotate(90deg)" />
             </div>
             <p className="orange-c">{t("ARVqa3s")}</p>
           </div>
@@ -254,12 +249,12 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
   const [preview, setPreview] = useState(false);
   const [swImage, setSwImage] = useState(template ? template.image : "");
   const [swInput, setSwInput] = useState(
-    template ? template.input : t("AEyQqPE")
+    template ? template.input : t("AEyQqPE"),
   );
   const [swButtons, setSwButtons] = useState(
     template
       ? template.buttons
-      : [{ type: "redirect", label: "Button", url: "" }]
+      : [{ type: "redirect", label: "Button", url: "" }],
   );
   const [swComponents, setSwComponents] = useState(
     template
@@ -268,7 +263,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
           { value: swImage, type: "image" },
           { value: swInput, type: "input" },
           { value: swButtons, type: "button" },
-        ]
+        ],
   );
   const [widgetToPostInNote, setWidgetToPostInNote] = useState(false);
   const swTypes = [
@@ -384,7 +379,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         setToast({
           type: 2,
           desc: t("AbfIPKv"),
-        })
+        }),
       );
       return;
     }
@@ -415,14 +410,14 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
       setToPublish({
         eventInitEx,
         allRelays: [],
-      })
+      }),
     );
     let sub = ndkInstance.subscribe(
       [{ kinds: [30033], ids: [eventInitEx.id] }],
       {
         closeOnEose: true,
         cacheUsage: "CACHE_FIRST",
-      }
+      },
     );
 
     sub.on("event", (event) => {
@@ -432,7 +427,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         identifier: d,
       });
       setWidgetToPostInNote(
-        `https://yakihonne.com/smart-widget-checker?naddr=${naddr}`
+        `https://yakihonne.com/smart-widget-checker?naddr=${naddr}`,
       );
       sub.stop();
     });
@@ -444,7 +439,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         setToast({
           type: 2,
           desc: t("AbfIPKv"),
-        })
+        }),
       );
       return;
     }
@@ -474,14 +469,14 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
       setToPublish({
         eventInitEx,
         allRelays: [],
-      })
+      }),
     );
     let sub = ndkInstance.subscribe(
       [{ kinds: [30033], ids: [eventInitEx.id] }],
       {
         closeOnEose: true,
         cacheUsage: "CACHE_FIRST",
-      }
+      },
     );
 
     sub.on("event", (event) => {
@@ -491,7 +486,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         identifier: d,
       });
       setWidgetToPostInNote(
-        `https://yakihonne.com/smart-widget-checker?naddr=${naddr}`
+        `https://yakihonne.com/smart-widget-checker?naddr=${naddr}`,
       );
       sub.stop();
     });
@@ -502,8 +497,8 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
     let inputTag = swInput
       ? ["input", swInput]
       : swComponents.length > 2
-      ? false
-      : true;
+        ? false
+        : true;
     let buttonsTag = swButtons.filter((_) => _.label && _.url);
     buttonsTag =
       buttonsTag.length > 0
@@ -515,7 +510,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         setToast({
           type: 2,
           desc: t("Ar85kI3"),
-        })
+        }),
       );
       return;
     }
@@ -524,7 +519,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         setToast({
           type: 2,
           desc: t("AKIvtnO"),
-        })
+        }),
       );
       return;
     }
@@ -533,7 +528,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         setToast({
           type: 2,
           desc: t("ASEZMzR"),
-        })
+        }),
       );
       return;
     }
@@ -563,14 +558,14 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
           setSelectedComp(`button:${Math.max(0, selectedCompIndex - 1)}`);
         else if (res.destination.index < selectedCompIndex)
           setSelectedComp(
-            `button:${Math.min(swButtons.length - 1, selectedCompIndex + 1)}`
+            `button:${Math.min(swButtons.length - 1, selectedCompIndex + 1)}`,
           );
         else if (res.destination.index === selectedCompIndex) {
           if (res.source.index < selectedCompIndex)
             setSelectedComp(`button:${Math.max(0, selectedCompIndex - 1)}`);
           else
             setSelectedComp(
-              `button:${Math.min(swButtons.length - 1, selectedCompIndex + 1)}`
+              `button:${Math.min(swButtons.length - 1, selectedCompIndex + 1)}`,
             );
         }
       }
@@ -595,7 +590,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
           setToast({
             type: 2,
             desc: t("AOF2uGu"),
-          })
+          }),
         );
         return;
       }
@@ -621,7 +616,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
           setToast({
             type: 2,
             desc: t("AOF2uGu"),
-          })
+          }),
         );
         return;
       }
@@ -647,7 +642,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         setToast({
           type: 2,
           desc: t("AOF2uGu"),
-        })
+        }),
       );
     }
   };
@@ -687,7 +682,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                 data-tooltip={t("AufOzcc")}
                 onClick={handleBack}
               >
-                <div className="arrow" style={{ rotate: "90deg" }}></div>
+                <Icon name="arrow" transform="rotate(90deg)" />
               </div>
               {preview && (
                 <button
@@ -722,7 +717,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                 data-tooltip={t("A3AtiVD")}
                 onClick={() => setMbHide(false)}
               >
-                <div className="layers"></div>
+                <Icon name="layers" />
               </div>
             </div>
           </div>
@@ -761,7 +756,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                       className="fit-container fx-centered"
                       style={{ aspectRatio: "16/9" }}
                     >
-                      <div className="image-24"></div>
+                      <Icon name="image" size={24} />
                     </div>
                   )}
                 </div>
@@ -795,7 +790,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                         placeholder={swInput}
                       />
                       {/* <div className="round-icon" onClick={handleInputInCompSet}>
-                      <div className="trash"></div>
+                      <Icon name="trash" isColored />
                     </div> */}
                     </div>
                   )}
@@ -809,7 +804,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                         }}
                         onClick={handleInputInCompSet}
                       >
-                        <div className="plus-sign"></div>{" "}
+                        <Icon name="plus-sign" />{" "}
                         <p className="gray-c">{t("AqrGbmn")}</p>
                       </div>
                     </>
@@ -840,7 +835,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                             setSelectedComp(
                               selectedComp === `button:${index}`
                                 ? ""
-                                : `button:${index}`
+                                : `button:${index}`,
                             )
                           }
                           key={index}
@@ -878,7 +873,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                               setSelectedComp(
                                 selectedComp === `button:${index}`
                                   ? ""
-                                  : `button:${index}`
+                                  : `button:${index}`,
                               )
                             }
                             key={index}
@@ -900,7 +895,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                     }}
                     onClick={handleAddButton}
                   >
-                    <div className="plus-sign"></div>{" "}
+                    <Icon name="plus-sign" />{" "}
                     <p className="gray-c">{t("Amg4EKo")}</p>
                   </div>
                 )}
@@ -934,7 +929,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                         className="fit-container fx-centered"
                         style={{ aspectRatio: "16/9" }}
                       >
-                        <div className="image-24"></div>
+                        <Icon name="image" size={24} />
                       </div>
                     )}
                   </div>
@@ -960,14 +955,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                       className="fit-container fx-centered"
                       style={{ aspectRatio: "16/9" }}
                     >
-                      <div
-                        className="smart-widget-24"
-                        style={{
-                          animation: "1.5s infinite rotate",
-                          minWidth: "40px",
-                          minHeight: "40px",
-                        }}
-                      ></div>
+                      <Icon name="smart-widget" size={40} />
                     </div>
                   </div>
                 </>
@@ -1012,10 +1000,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
               onClick={() => setMbHide(true)}
               data-tooltip={t("ATB2h6T")}
             >
-              <div
-                className="arrow"
-                style={{ rotate: "90deg", scale: ".7" }}
-              ></div>
+              <Icon name="arrow" />
             </div>
             <p>{t("AzZ1GXv")}</p>
           </div>
@@ -1124,10 +1109,10 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                           e.stopPropagation();
                           comp.type === "button"
                             ? setSelectedComp(
-                                selectedComp === `button:0` ? "" : `button:0`
+                                selectedComp === `button:0` ? "" : `button:0`,
                               )
                             : setSelectedComp(
-                                selectedComp === comp.type ? "" : comp.type
+                                selectedComp === comp.type ? "" : comp.type,
                               );
                         }}
                       >
@@ -1142,10 +1127,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                           <p>{comp.type}</p>
                         </div>
                         {comp.type === "input" && (
-                          <div
-                            className="trash"
-                            onClick={handleInputInCompSet}
-                          ></div>
+                          <Icon name="trash" onClick={handleInputInCompSet} />
                         )}
                       </div>
                       {Array.isArray(comp.value) && (
@@ -1208,7 +1190,7 @@ const ButtonItem = ({
       onClick={(e) => {
         e.stopPropagation();
         setSelectedComp(
-          selectedComp === `button:${index}` ? "" : `button:${index}`
+          selectedComp === `button:${index}` ? "" : `button:${index}`,
         );
       }}
     >
@@ -1268,7 +1250,7 @@ const AppPreview = ({ metadata }) => {
       </div>
       <div>
         <a href={metadata.widget.appUrl} target="_blank">
-          <div className="share-icon"></div>
+          <Icon name="share-icon" />
         </a>
       </div>
     </div>
@@ -1506,7 +1488,7 @@ const CustomFunctionRequiredData = ({ url, setUrl }) => {
 const CountdownFunction = ({ url, setUrl }) => {
   let { time } = Object.fromEntries(new URL(url).searchParams.entries());
   const [date, setDate] = useState(
-    time ? new Date(time * 1000).toISOString().slice(0, 16) : ""
+    time ? new Date(time * 1000).toISOString().slice(0, 16) : "",
   );
   return (
     <>
@@ -1519,7 +1501,7 @@ const CountdownFunction = ({ url, setUrl }) => {
           setDate(e.target.value);
           setUrl(
             url.split("?")[0] +
-              `?time=${Math.floor(new Date(e.target.value).getTime() / 1000)}`
+              `?time=${Math.floor(new Date(e.target.value).getTime() / 1000)}`,
           );
         }}
         min={new Date().toISOString().slice(0, 16)}
@@ -1530,10 +1512,10 @@ const CountdownFunction = ({ url, setUrl }) => {
 
 const HighestZapperFunction = ({ url, setUrl }) => {
   let { lud16, ends_at } = Object.fromEntries(
-    new URL(url).searchParams.entries()
+    new URL(url).searchParams.entries(),
   );
   const [date, setDate] = useState(
-    ends_at ? new Date(ends_at * 1000).toISOString().slice(0, 16) : ""
+    ends_at ? new Date(ends_at * 1000).toISOString().slice(0, 16) : "",
   );
   const [addr, setAddr] = useState(lud16 || "");
   return (
@@ -1548,12 +1530,12 @@ const HighestZapperFunction = ({ url, setUrl }) => {
           setUrl(
             url.split("?")[0] +
               `?lud16=${e.target.value}&starts_at=${Math.floor(
-                new Date().getTime() / 1000
+                new Date().getTime() / 1000,
               )}${
                 date
                   ? `&ends_at=${Math.floor(new Date(date).getTime() / 1000)}`
                   : ""
-              }`
+              }`,
           );
         }}
         min={new Date().toISOString().slice(0, 16)}
@@ -1568,10 +1550,10 @@ const HighestZapperFunction = ({ url, setUrl }) => {
           setUrl(
             url.split("?")[0] +
               `?lud16=${addr}&starts_at=${Math.floor(
-                new Date().getTime() / 1000
+                new Date().getTime() / 1000,
               )}&ends_at=${Math.floor(
-                new Date(e.target.value).getTime() / 1000
-              )}`
+                new Date(e.target.value).getTime() / 1000,
+              )}`,
           );
         }}
         min={new Date().toISOString().slice(0, 16)}
@@ -1586,8 +1568,8 @@ const UserProfiles = ({ url, setUrl }) => {
     profiles && Array.isArray(profiles)
       ? profiles.map((_) => nip19.decode(_).data)
       : profiles.map((_) => nip19.decode(_).data)
-      ? [nip19.decode(profiles).data]
-      : []
+        ? [nip19.decode(profiles).data]
+        : [],
   );
   const handleAddProfiles = (data) => {
     let pubkeys_ = Array.from(pubkeys);
@@ -1669,7 +1651,7 @@ const SWTemplates = ({ templates, setTemplate, setBuildOption }) => {
               data-tooltip={t("AufOzcc")}
               onClick={setBuildOption}
             >
-              <div className="arrow" style={{ rotate: "90deg" }}></div>
+              <Icon name="arrow" />
             </div>
             <h3>{t("A60QDNZ")}</h3>
           </div>
@@ -1724,7 +1706,7 @@ const SaveDraft = ({ exit, swButtons, swImage, swInput, swComponents }) => {
         setToast({
           type: 1,
           desc: t("AawZhvj"),
-        })
+        }),
       );
       exit();
     } catch (err) {
@@ -1733,7 +1715,7 @@ const SaveDraft = ({ exit, swButtons, swImage, swInput, swComponents }) => {
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
     }
   };
@@ -1784,7 +1766,7 @@ const SWDrafts = ({ back, setTemplate }) => {
             data-tooltip={t("Afnv5k6")}
             onClick={() => back("normal")}
           >
-            <div className="arrow" style={{ rotate: "90deg" }}></div>
+            <Icon name="arrow" transform="rotate(90deg)" />
           </div>
           <h3>{t("Ayh5F4w")}</h3>
         </div>
@@ -1822,14 +1804,14 @@ const SWDrafts = ({ back, setTemplate }) => {
                           minHeight: "60px",
                         }}
                       >
-                        <div className="image-24"></div>
+                        <Icon name="image" size={24} />
                       </div>
                     )}
                     <div className="fx-col fx-centered fx-start-v">
                       <p className="gray-c p-medium">
                         {t("AcKscQl", {
                           date: timeAgo(
-                            new Date(draft?.created_at || Date.now())
+                            new Date(draft?.created_at || Date.now()),
                           ),
                         })}
                       </p>

@@ -12,6 +12,7 @@ import RepEventCommentsSection from "@/Components/RepEventCommentsSection";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import PostReaction from "./PostReaction";
+import Icon from "@/Components/Icon";
 
 const checkFollowing = (list, toFollowKey) => {
   if (!list) return false;
@@ -73,7 +74,7 @@ export default function RepEventPreviewCard({
             }}
           >
             {(item.kind === 34235 || item.kind === 21 || item.kind === 22) && (
-              <div className="play-vid-58"></div>
+              <Icon name="play-vid" size={58} />
             )}
           </div>
           <div
@@ -144,7 +145,7 @@ export default function RepEventPreviewCard({
                     className="round-icon-small round-icon-tooltip"
                     data-tooltip={t("A9TqNxQ")}
                   >
-                    <div className="user-followed"></div>
+                    <Icon name="user-followed" />
                   </div>
                 )}
               </div>
@@ -198,7 +199,7 @@ export default function RepEventPreviewCard({
                       height: "100%",
                     }}
                   >
-                    <div className="play-vid-58"></div>
+                    <Icon name="play-vid" size={58} />
                   </div>
                 )}
               </div>
@@ -224,7 +225,7 @@ const AuthorPreview = ({ author, item, isNip05Verified }) => {
       <div>
         <div className="fx-centered fx-start-h" style={{ gap: "3px" }}>
           <p className="p-bold">{author.display_name || author.name}</p>
-          {isNip05Verified && <div className="checkmark-c1"></div>}
+          {isNip05Verified && <Icon name="checkmark-c1" isColored />}
         </div>
         <DynamicIndicator item={item} />
       </div>
@@ -245,7 +246,7 @@ const AuthorPreviewMinimal = ({ author, isNip05Verified }) => {
         <p className="p-bold p-medium p-one-line">
           {author.display_name || author.name}
         </p>
-        {isNip05Verified && <div className="checkmark-c1"></div>}
+        {isNip05Verified && <Icon name="checkmark-c1" isColored />}
       </div>
     </div>
   );

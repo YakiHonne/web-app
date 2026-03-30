@@ -1,6 +1,7 @@
-import useCloseContainer from "@/Hooks/useCloseContainer";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function LightningWalletsSelect({
   selectedWallet,
@@ -10,7 +11,59 @@ export default function LightningWalletsSelect({
   label = true,
 }) {
   const { t } = useTranslation();
-  const { containerRef, open, setOpen } = useCloseContainer();
+  const containerRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleOffClick = (e) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    };
+
+    const updatePosition = () => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        setPosition({
+          top: rect.bottom + 5,
+          left: rect.left,
+          width: rect.width,
+        });
+      }
+    };
+
+    updatePosition();
+    document.addEventListener("mousedown", handleOffClick);
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOffClick);
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [open]);
+
+  const toggleOpen = () => {
+    if (!open && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 5,
+        left: rect.left,
+        width: rect.width,
+      });
+    }
+    setOpen((v) => !v);
+  };
 
   const handleSelectWallet = (walletID) => {
     let index = wallets.findIndex((wallet) => wallet.id == walletID);
@@ -26,12 +79,12 @@ export default function LightningWalletsSelect({
     setWallets(tempWallets);
     setOpen(false);
   };
+
   return (
-    <div className="fit-container  fx-centered" style={{ gap: 0 }}>
+    <div className="fit-container fx-centered" style={{ gap: 0 }}>
       <div
         style={{
           position: "relative",
-          // width: open ? "350px" : "200px",
           transition: "width .2s ease-in-out",
         }}
         className="fit-container"
@@ -40,28 +93,28 @@ export default function LightningWalletsSelect({
         {selectedWallet && (
           <div
             className="box-pad-h-m box-pad-v-m sc-s-18 bg-sp fx-centered fx-col option pointer fit-container"
-            onClick={() => setOpen(!open)}
+            onClick={toggleOpen}
           >
             <div className="fit-container fx-scattered">
               <div>
                 {label && <p className="p-bold">{label || t("A7r9XS1")}</p>}
               </div>
-              <div className="arrow"></div>
+              <Icon name="arrow" />
             </div>
             <div className="fx-centered fx-start-h fit-container">
               {selectedWallet.kind === 1 && (
                 <div className="round-icon-small">
-                  <div className="webln-logo-24"></div>
+                  <Icon name="webln-logo" size={24} isColored/>
                 </div>
               )}
               {selectedWallet.kind === 2 && (
                 <div className="round-icon-small">
-                  <div className="alby-logo-24"></div>
+                  <Icon name="alby-logo" size={24} isColored/>
                 </div>
               )}
               {selectedWallet.kind === 3 && (
                 <div className="round-icon-small">
-                  <div className="nwc-logo-24"></div>
+                  <Icon name="nwc-logo" size={24} isColored/>
                 </div>
               )}
               <div>
@@ -70,19 +123,27 @@ export default function LightningWalletsSelect({
             </div>
           </div>
         )}
-        {open && (
+      </div>
+
+      {open &&
+        position &&
+        createPortal(
           <div
-            className="fx-centered fx-col sc-s-18 bg-sp  box-pad-h-s box-pad-v-s fx-start-v fx-start-h fit-container"
+            ref={dropdownRef}
+            className="fx-centered fx-col sc-s-18 bg-sp box-pad-h-s box-pad-v-s fx-start-v fx-start-h"
             style={{
-              // width: "400px",
               backgroundColor: "var(--c1-side)",
-              position: "absolute",
-              right: "0",
-              top: "calc(100% + 5px)",
+              position: "fixed",
+              left: position.left,
+              top: position.top,
+              minWidth: position.width,
+              width: "max-content",
+              maxWidth: "90vw",
               rowGap: 0,
-              overflow: "scroll",
+              overflow: "auto",
               maxHeight: "300px",
-              zIndex: 100,
+              zIndex: 999999,
+              boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
             }}
           >
             <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
@@ -121,9 +182,10 @@ export default function LightningWalletsSelect({
                 </div>
               );
             })}
-          </div>
+          </div>,
+          document.body,
         )}
-      </div>
     </div>
   );
 }
+

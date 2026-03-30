@@ -2,6 +2,7 @@ import { shortenKey } from "@/Helpers/Encryptions";
 import { copyText } from "@/Helpers/Helpers";
 import { t } from "i18next";
 import React, { useState } from "react";
+import Icon from "@/Components/Icon";
 
 export default function MintDetails({ mintInfo, exit }) {
   const [showAbout, setShowabout] = useState(false);
@@ -73,12 +74,12 @@ export default function MintDetails({ mintInfo, exit }) {
                       <div className="fx-centered">
                         {["x", "twitter"].includes(
                           contact.method.toLowerCase()
-                        ) && <div className="twitter-w-logo-24"></div>}
+                        ) && <Icon name="twitter-w-logo" size={24} />}
                         {["email"].includes(contact.method.toLowerCase()) && (
-                          <div className="env-24"></div>
+                          <Icon name="env" size={24} />
                         )}
                         {["nostr"].includes(contact.method.toLowerCase()) && (
-                          <div className="nostr-icon-24"></div>
+                          <Icon name="nostr-icon" size={24} />
                         )}
                         <p className="p-one-line">{contact.info}</p>
                       </div>

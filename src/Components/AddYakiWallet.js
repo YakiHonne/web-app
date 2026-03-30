@@ -1,4 +1,3 @@
-
 import axios from "axios";
 import React, { useState } from "react";
 import { setToast } from "@/Store/Slides/Publishers";
@@ -7,6 +6,7 @@ import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import LoadingDots from "@/Components/LoadingDots";
 import { useTranslation } from "react-i18next";
 import { downloadAsFile } from "@/Helpers/Encryptions";
+import Icon from "@/Components/Icon";
 
 export default function AddYakiWallet({ refresh }) {
   const dispatch = useDispatch();
@@ -18,7 +18,7 @@ export default function AddYakiWallet({ refresh }) {
   const [showEmptyUNMessage, setShowMessageEmtpyUN] = useState(false);
   const [showInvalidMessage, setShowInvalidMessage] = useState(false);
   const [userName, setUserName] = useState(
-    userMetadata?.display_name || userMetadata?.name || ""
+    userMetadata?.display_name || userMetadata?.name || "",
   );
 
   const handleCreateWallet = async (e) => {
@@ -44,7 +44,7 @@ export default function AddYakiWallet({ refresh }) {
         "text/plain",
         `${url.data.lightningAddress}-NWC.txt`,
         t("AIzBCBb"),
-        false
+        false,
       );
       setIsLoading(false);
       let wallet = {
@@ -79,7 +79,7 @@ export default function AddYakiWallet({ refresh }) {
       updateWallets([nwcNode]);
       refresh();
     } catch (err) {
-      console.log(err)
+      console.log(err);
       setIsLoading(false);
       if (err.response?.status) {
         setShowMessageError(true);
@@ -88,7 +88,7 @@ export default function AddYakiWallet({ refresh }) {
           setToast({
             type: 3,
             desc: t("AQ12OQz"),
-          })
+          }),
         );
       }
     }
@@ -120,10 +120,7 @@ export default function AddYakiWallet({ refresh }) {
         }}
       >
         <div className="fx-centered">
-          <div
-            className="yaki-logomark"
-            style={{ width: "48px", height: "48px" }}
-          ></div>
+          <Icon name="yaki-logomark" size={24} />
 
           <div>
             <p>{t("AXj1AXD")}</p>
@@ -131,10 +128,7 @@ export default function AddYakiWallet({ refresh }) {
           </div>
         </div>
         <div className="box-pad-h-s">
-          <div
-            className="plus-sign"
-            style={{ rotate: showMore ? "45deg" : "0deg" }}
-          ></div>
+          <Icon name="plus-sign" />
         </div>
       </div>
       {showMore && (

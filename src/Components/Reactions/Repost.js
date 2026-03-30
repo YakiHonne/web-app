@@ -6,6 +6,7 @@ import { saveEventStats } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
+import Icon from "@/Components/Icon";
 
 export default function Repost({ isReposted, event, actions }) {
   const dispatch = useDispatch();
@@ -27,7 +28,7 @@ export default function Repost({ isReposted, event, actions }) {
           event_,
           "reposts",
           actions,
-          undefined
+          undefined,
         );
 
         saveEventStats(event.id, stats);
@@ -59,7 +60,7 @@ export default function Repost({ isReposted, event, actions }) {
             eventInitEx,
             allRelays: [],
             toRemoveFromCache: { kind: "reposts", eventId: event.id },
-          })
+          }),
         );
         setEventID(false);
         setIsLoading(false);
@@ -89,7 +90,7 @@ export default function Repost({ isReposted, event, actions }) {
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
 
       setIsLoading(false);
@@ -108,11 +109,13 @@ export default function Repost({ isReposted, event, actions }) {
         data-tooltip={t("AUvmzyU")}
         onClick={reactToNote}
       >
-        <div
-          className={
-            isReposted ? "switch-arrows-bold-24" : "switch-arrows-24 opacity-4"
-          }
-        ></div>
+        <Icon
+          name={isReposted ? "switch-arrows-bold" : "switch-arrows"}
+          size={24}
+          className={!isReposted ? "opacity-4" : ""}
+          isColored={isReposted}
+          isBoldThemeColor={isReposted}
+        />
       </div>
     </>
   );

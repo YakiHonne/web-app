@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import SmartWidgetsSystem from "@/Components/YakiNewFeatureIntroComponents/SmartWidgetsSystem";
+import Icon from "@/Components/Icon";
 
 export default function YakiNewFeatureIntro() {
   const [isDisplayed, setIsDisplayed] = useState(
@@ -36,7 +37,7 @@ export default function YakiNewFeatureIntro() {
             zIndex: 100,
           }}
         >
-          <div className="arrow" style={{ rotate: "90deg" }}></div>{" "}
+          <Icon name="arrow" />{" "}
         </div>
         <div
           className="browsing-arrow slide-right carousel-arrows"
@@ -48,7 +49,7 @@ export default function YakiNewFeatureIntro() {
             zIndex: 100,
           }}
         >
-          <div className="arrow" style={{ rotate: "-90deg" }}></div>{" "}
+          <Icon name="arrow" />{" "}
         </div>
         {/* </div> */}
         <div

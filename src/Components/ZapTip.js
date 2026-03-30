@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import LoginSignup from "@/Components/LoginSignup";
 import PaymentGateway from "@/Components/PaymentGateway";
 import { nip19 } from "nostr-tools";
+import Icon from "@/Components/Icon";
 
 const getNostrEventIDEncode = (aTag, eTag) => {
   try {
@@ -39,7 +40,7 @@ export default function ZapTip({
   const [isLogin, setIsLogin] = useState(false);
   const nostrEventIDEncode = useMemo(
     () => getNostrEventIDEncode(aTag, eTag),
-    [aTag, eTag]
+    [aTag, eTag],
   );
 
   if (custom) {
@@ -94,14 +95,20 @@ export default function ZapTip({
     return (
       <>
         {onlyIcon && !zapLabel && (
-          <div
-            className={smallIcon ? "bolt" : "bolt-24 opacity-4"}
+          <Icon
+            name="bolt"
+            size={smallIcon ? 18 : 24}
+            className="opacity-4"
             style={{ opacity: ".2" }}
-          ></div>
+          />
         )}
         {zapLabel && (
           <div>
-            <div className={smallIcon ? "bolt" : "bolt-24 opacity-4"}></div>
+            <Icon
+              name="bolt"
+              size={smallIcon ? 18 : 24}
+              className="opacity-4"
+            />
             <p className="p-medium">Zap</p>
           </div>
         )}
@@ -112,10 +119,11 @@ export default function ZapTip({
             }  round-icon-tooltip if-disabled`}
             data-tooltip="Zap"
           >
-            <div
-              className={smallIcon ? "lightning" : "lightning-24"}
+            <Icon
+              name="lightning"
+              size={smallIcon ? 18 : 24}
               style={{ cursor: "not-allowed" }}
-            ></div>
+            />
           </div>
         )}
       </>
@@ -125,24 +133,29 @@ export default function ZapTip({
       <>
         {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
         {onlyIcon && !zapLabel && (
-          <div
-            className={smallIcon ? "bolt" : "bolt-24 opacity-4"}
+          <Icon
+            name="bolt"
+            size={smallIcon ? 18 : 24}
+            className="opacity-4"
             onClick={() => setIsLogin(true)}
-          ></div>
+          />
         )}
         {zapLabel && (
           <div onClick={() => setIsLogin(true)}>
-            <div
-              className={
+            <Icon
+              name={
                 smallIcon
                   ? isZapped
                     ? "bolt-bold"
                     : "bolt"
                   : isZapped
-                  ? "bolt-bold-24"
-                  : "bolt-24"
+                    ? "bolt-bold"
+                    : "bolt"
               }
-            ></div>
+              isColored={isZapped}
+              isBoldThemeColor={isZapped}
+              size={smallIcon ? 18 : 24}
+            />
             <p className="p-medium">Zap</p>
           </div>
         )}
@@ -154,7 +167,7 @@ export default function ZapTip({
             onClick={() => setIsLogin(true)}
             data-tooltip="Zap"
           >
-            <div className={smallIcon ? "lightning" : "lightning-24"}></div>
+            <Icon name="lightning" size={smallIcon ? 18 : 24} />
           </div>
         )}
       </>
@@ -173,18 +186,14 @@ export default function ZapTip({
         />
       )}
       {onlyIcon && !zapLabel && (
-        <div
-          className={
-            smallIcon
-              ? isZapped
-                ? "bolt-bold"
-                : "bolt opacity-4"
-              : isZapped
-              ? "bolt-bold-24"
-              : "bolt-24 opacity-4"
-          }
+        <Icon
+          name={isZapped ? "bolt-bold" : "bolt"}
+          isColored={isZapped}
+          isBoldThemeColor={isZapped}
+          size={smallIcon ? 18 : 24}
+          className={!isZapped ? "opacity-4" : ""}
           onClick={() => setCashier(true)}
-        ></div>
+        />
       )}
       {!onlyIcon && !zapLabel && (
         <div
@@ -198,22 +207,17 @@ export default function ZapTip({
             setCashier(true);
           }}
         >
-          <div className={smallIcon ? "lightning" : "lightning-24"}></div>
+          <Icon name="lightning" size={smallIcon ? 18 : 24} />
         </div>
       )}
       {zapLabel && (
         <div onClick={() => setCashier(true)}>
-          <div
-            className={
-              smallIcon
-                ? isZapped
-                  ? "bolt-bold"
-                  : "bolt"
-                : isZapped
-                ? "bolt-bold-24"
-                : "bolt-24"
-            }
-          ></div>
+          <Icon
+            name={isZapped ? "bolt-bold" : "bolt"}
+            size={smallIcon ? 18 : 24}
+            isColored={isZapped}
+            isBoldThemeColor={isZapped}
+          />
           <p className="p-medium">Zap</p>
         </div>
       )}

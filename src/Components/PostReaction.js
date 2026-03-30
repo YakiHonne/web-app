@@ -8,6 +8,7 @@ import Repost from "./Reactions/Repost";
 import Quote from "./Reactions/Quote";
 import Zap from "./Reactions/Zap";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import Icon from "@/Components/Icon";
 
 export default function PostReaction({
   event,
@@ -27,7 +28,7 @@ export default function PostReaction({
         acc[reaction] = { index, status };
         return acc;
       },
-      {}
+      {},
     );
     return {
       likes: reactionsOrder.likes.status ? reactionsOrder.likes.index + 1 : -1,
@@ -41,7 +42,6 @@ export default function PostReaction({
       zap: reactionsOrder.zap.status ? reactionsOrder.zap.index + 1 : -1,
     };
   }, [reactionsSettings]);
-
 
   const isLiked = useMemo(() => {
     return userKeys
@@ -77,7 +77,7 @@ export default function PostReaction({
           extrasType={usersList.extrasType}
         />
       )}
-      <div className="fx-centered" style={{ columnGap: "14px" }}>
+      <div className="fx-centered" style={{ columnGap: "24px" }}>
         {order.likes > -1 && (
           <div
             className={`fx-centered pointer `}
@@ -115,10 +115,12 @@ export default function PostReaction({
             style={{ columnGap: "8px", order: order.replies }}
           >
             <div className="round-icon-tooltip" data-tooltip={t("ADHdLfJ")}>
-              <div
+              <Icon
+                name="comment"
+                size={24}
                 className="comment-24 opacity-4"
                 onClick={() => setOpenComment(!openComment)}
-              ></div>
+              />
             </div>
             <div className="round-icon-tooltip" data-tooltip={t("AMBxvKP")}>
               <div onClick={() => setShowComments(true)} className="opacity-4">
@@ -146,7 +148,7 @@ export default function PostReaction({
                   setUsersList({
                     title: t("Aai65RJ"),
                     list: postActions.reposts.reposts.map(
-                      (item) => item.pubkey
+                      (item) => item.pubkey,
                     ),
                     extras: [],
                   });

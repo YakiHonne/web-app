@@ -4,6 +4,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import InterestSuggestions from "@/Content/InterestSuggestions";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function InterestSuggestionsCards({
   list = [],
@@ -175,7 +176,7 @@ export default function InterestSuggestionsCards({
                       className="btn btn-gray btn-small btn-full fx-centered"
                       onClick={() => saveSingleInterestList(item.main_tag)}
                     >
-                      <div className="plus-sign"></div> {t("APkD8MP")}
+                      <Icon name="plus-sign" /> {t("APkD8MP")}
                     </button>
                   </div>
                 </div>
@@ -235,7 +236,7 @@ export default function InterestSuggestionsCards({
                 </div>
                 {!isAdded && (
                   <button className=" btn-normal btn-small-round fx-centered">
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </button>
                 )}
                 {isAdded && (
@@ -243,10 +244,7 @@ export default function InterestSuggestionsCards({
                     className=" btn-normal btn-small-round fx-centered"
                     style={{ backgroundColor: "var(--green-main)" }}
                   >
-                    <div
-                      className="check-24"
-                      style={{ filter: "brightness(0) invert()" }}
-                    ></div>
+                    <Icon name="check" size={24} />
                   </button>
                 )}
               </div>
@@ -296,7 +294,7 @@ export default function InterestSuggestionsCards({
                   </div>
                   {!isAdded && (
                     <button className=" btn-normal btn-small-round fx-centered">
-                      <div className="plus-sign"></div>
+                      <Icon name="plus-sign" />
                     </button>
                   )}
                   {isAdded && (
@@ -304,10 +302,7 @@ export default function InterestSuggestionsCards({
                       className=" btn-normal btn-small-round fx-centered"
                       style={{ backgroundColor: "var(--green-main)" }}
                     >
-                      <div
-                        className="check"
-                        style={{ filter: "brightness(0) invert()" }}
-                      ></div>
+                      <Icon name="check" />
                     </button>
                   )}
                 </div>

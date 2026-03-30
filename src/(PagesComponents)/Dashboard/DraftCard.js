@@ -3,6 +3,7 @@ import { timeAgo } from "@/Helpers/Encryptions";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
+import Icon from "@/Components/Icon";
 
 export default function DraftCard({ event, refreshAfterDeletion }) {
   const { t } = useTranslation();
@@ -41,7 +42,7 @@ export default function DraftCard({ event, refreshAfterDeletion }) {
     >
       <div className="fx-centered fx-start-v">
         <div className="round-icon">
-          <div className="posts-24"></div>
+          <Icon name="posts" size={24} />
         </div>
 
         <div className="fx-centered fx-col fx-start-h fx-start-v">

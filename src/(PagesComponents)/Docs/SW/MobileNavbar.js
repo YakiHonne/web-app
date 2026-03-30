@@ -4,6 +4,7 @@ import OptionsDropdown from "@/Components/OptionsDropdown";
 import { customHistory } from "@/Helpers/History";
 import { swContent } from "./content";
 import RightSidebar from "./RightSidebar";
+import Icon from "@/Components/Icon";
 
 export default function MobileNavbar({ page }) {
   const currentPath = `/docs/sw/${page}`;
@@ -15,13 +16,14 @@ export default function MobileNavbar({ page }) {
   return (
     <div className="fit-container fx-centered fx-col desk-hide-1200 box-pad-h-m box-pad-v-m">
       <div className="fit-container fx-scattered">
-        <div
+        <Icon
+          name="yakihonne-logo"
           className="yakihonne-logo"
           style={{
             width: "100px",
             height: "50px",
           }}
-        ></div>
+        />
         <SearchEngine sticky={false} />
       </div>
       <hr />
@@ -128,7 +130,7 @@ export default function MobileNavbar({ page }) {
                 <p className="p-bold">Useful links</p>
                 <div className={`pointer fit-container fx-start-h fx-centered`}>
                   <div className="link-label gray-c">Basic dynamic widgets</div>
-                  <div className="share-icon"></div>
+                  <Icon name="share-icon" />
                 </div>
               </div>,
             ]}

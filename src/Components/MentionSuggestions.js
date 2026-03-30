@@ -6,6 +6,7 @@ import { isHex } from "@/Helpers/Helpers";
 import SearchUserCard from "@/Components/SearchUserCard";
 import { useTranslation } from "react-i18next";
 import useSearchUsers from "@/Hooks/useSearchUsers";
+import Icon from "@/Components/Icon";
 
 export default function MentionSuggestions({
   mention,
@@ -147,7 +148,7 @@ export default function MentionSuggestions({
                 onClick={(e) => e.stopPropagation()}
                 target="_blank"
               >
-                <div className="share-icon"></div>
+                <Icon name="share-icon" />
               </Link>
             </div>
           );

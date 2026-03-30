@@ -15,6 +15,7 @@ import Select from "@/Components/Select";
 import Toggle from "@/Components/Toggle";
 import AddBlossomServer from "./AddBlossomServer";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
+import Icon from "@/Components/Icon";
 
 export function MediaUploader({ exit }) {
   const { t } = useTranslation();
@@ -23,16 +24,16 @@ export function MediaUploader({ exit }) {
   const userBlossomServers = useSelector((state) => state.userBlossomServers);
   const [selectedTab, setSelectedTab] = useState("0");
   const [mirrorOption, setMirrorOption] = useState(
-    localStorage?.getItem(`${userKeys.pub}_mirror_blossom_servers`)
+    localStorage?.getItem(`${userKeys.pub}_mirror_blossom_servers`),
   );
   const [selectedService, setSelectedService] = useState(
     ["1", "2"].includes(localStorage?.getItem(`${userKeys.pub}_media_service`))
       ? localStorage?.getItem(`${userKeys.pub}_media_service`)
-      : "1"
+      : "1",
   );
   const [mediaUploader, setMediaUploader] = useState(getMediaUploader());
   const [selectedMediaServer, setSelectedMediaServer] = useState(
-    getSelectedServer() || mediaUploader[0].value
+    getSelectedServer() || mediaUploader[0].value,
   );
   const [isLoading, setIsLoading] = useState(false);
   const [customServer, setCustomServer] = useState(false);
@@ -100,7 +101,7 @@ export function MediaUploader({ exit }) {
         setToast({
           type: 2,
           desc: t("AQIc1lO"),
-        })
+        }),
       );
       setIsLoading(false);
     } catch (err) {
@@ -109,7 +110,7 @@ export function MediaUploader({ exit }) {
           setToast({
             type: 2,
             desc: t("AQIc1lO"),
-          })
+          }),
         );
         setIsLoading(false);
         return;
@@ -138,7 +139,7 @@ export function MediaUploader({ exit }) {
       tempArray,
       selectedMediaServer === server
         ? mediaUploader[0].value
-        : selectedMediaServer
+        : selectedMediaServer,
     );
     setMediaUploader(getMediaUploader());
   };
@@ -156,7 +157,7 @@ export function MediaUploader({ exit }) {
       setMirrorOption(true);
       localStorage?.setItem(
         `${userKeys.pub}_mirror_blossom_servers`,
-        `${Date.now()}`
+        `${Date.now()}`,
       );
     }
   };
@@ -175,13 +176,13 @@ export function MediaUploader({ exit }) {
       const eventInitEx = await InitEvent(
         event.kind,
         event.content,
-        event.tags
+        event.tags,
       );
       dispatch(
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
       setServersToDelete([]);
     } catch (_) {
@@ -204,7 +205,7 @@ export function MediaUploader({ exit }) {
       const eventInitEx = await InitEvent(
         event.kind,
         event.content,
-        event.tags
+        event.tags,
       );
       if (!eventInitEx) {
         return;
@@ -213,7 +214,7 @@ export function MediaUploader({ exit }) {
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
       setServersToDelete([]);
     } catch (_) {
@@ -265,7 +266,7 @@ export function MediaUploader({ exit }) {
               onClick={() => setSelectedTab("1")}
             >
               <p className="gray-c">{t("ATCstom")}</p>
-              <div className="arrow"></div>
+              <Icon name="arrow" />
             </div>
 
             {selectedTab === "1" && (
@@ -287,7 +288,7 @@ export function MediaUploader({ exit }) {
                         data-tooltip={t("ALyj7Li")}
                         onClick={() => setCustomServer("")}
                       >
-                        <div className="plus-sign"></div>
+                        <Icon name="plus-sign" />
                       </div>
                     )}
                     {customServer !== false && (
@@ -340,7 +341,7 @@ export function MediaUploader({ exit }) {
               onClick={() => setSelectedTab("2")}
             >
               <p className="gray-c">{t("A0n1wDK")}</p>
-              <div className="arrow"></div>
+              <Icon name="arrow" />
             </div>
 
             {selectedTab === "2" && (
@@ -386,7 +387,7 @@ export function MediaUploader({ exit }) {
                           data-tooltip={t("ALyj7Li")}
                           onClick={() => setBlossomCustomServer(true)}
                         >
-                          <div className="plus-sign"></div>
+                          <Icon name="plus-sign" />
                         </div>
                       )}
                       {blossomCustomServer && (
@@ -428,11 +429,11 @@ export function MediaUploader({ exit }) {
                               className="round-icon-small"
                               onClick={() =>
                                 setServersToDelete((prev) =>
-                                  prev.filter((__) => __ !== _)
+                                  prev.filter((__) => __ !== _),
                                 )
                               }
                             >
-                              <div className="undo"></div>
+                              <Icon name="undo" />
                             </div>
                           )}
                           {!status && (
@@ -443,7 +444,7 @@ export function MediaUploader({ exit }) {
                                 setServersToDelete((prev) => [...prev, _])
                               }
                             >
-                              <div className="trash"></div>
+                              <Icon name="trash" isColored />
                             </div>
                           )}
                         </div>

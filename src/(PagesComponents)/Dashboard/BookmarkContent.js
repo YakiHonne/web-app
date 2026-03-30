@@ -8,6 +8,7 @@ import BookmarkEvent from "@/Components/BookmarkEvent";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function BookmarkContent({ bookmark, exit }) {
   const { t } = useTranslation();
@@ -127,10 +128,7 @@ export default function BookmarkContent({ bookmark, exit }) {
         <div className="fit-container fx-scattered box-marg-s">
           <div className="fx-centered fx-start-h pointer" onClick={exit}>
             <div className="round-icon">
-              <div
-                className="arrow"
-                style={{ transform: "rotate(90deg)" }}
-              ></div>
+              <Icon name="arrow" transform="rotate(90deg)" />
             </div>
             <p>{t("A8VdJyb")}</p>
           </div>
@@ -217,7 +215,7 @@ export default function BookmarkContent({ bookmark, exit }) {
                         target={"_blank"}
                         href={`/${item.naddr || item.nevent}`}
                       >
-                        <div className="share-icon-24"></div>
+                        <Icon name="share-icon" size={24} />
                       </Link>
                       <BookmarkEvent
                         pubkey={item.pubkey}
@@ -246,7 +244,7 @@ export default function BookmarkContent({ bookmark, exit }) {
                           minWidth: "64px",
                         }}
                       >
-                        <div className="note-24"></div>
+                        <Icon name="note" size={24} />
                       </div>
                       <div>
                         <p className="p-medium gray-c">
@@ -267,7 +265,7 @@ export default function BookmarkContent({ bookmark, exit }) {
                         target={"_blank"}
                         href={`/${item.naddr || item.nevent}`}
                       >
-                        <div className="share-icon-24"></div>
+                        <Icon name="share-icon" size={24} />
                       </Link>
                       <BookmarkEvent
                         pubkey={item.id}
@@ -311,7 +309,7 @@ export default function BookmarkContent({ bookmark, exit }) {
                         target={"_blank"}
                         href={`/${item.naddr || item.nevent}`}
                       >
-                        <div className="share-icon-24"></div>
+                        <Icon name="share-icon" size={24} />
                       </Link>
                       <BookmarkEvent
                         pubkey={item.pubkey}
@@ -340,9 +338,9 @@ export default function BookmarkContent({ bookmark, exit }) {
                         }}
                       >
                         {tag.kind === 2 ? (
-                          <div className="link-24"></div>
+                          <Icon name="link" size={24} />
                         ) : (
-                          <div className="hashtag-24"></div>
+                          <Icon name="hashtag" size={24} />
                         )}
                       </div>
                       <div>
@@ -373,7 +371,7 @@ export default function BookmarkContent({ bookmark, exit }) {
                             : `/search?keyword=${tag.value[1]}`
                         }
                       >
-                        <div className="share-icon-24"></div>
+                        <Icon name="share-icon" size={24} />
                       </Link>
                       <BookmarkEvent
                         pubkey={tag.value[1]}

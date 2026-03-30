@@ -6,6 +6,7 @@ import { getStorageEstimate, makeReadableNumber } from "../../Helpers/Helpers";
 import { clearDBCache } from "../../Helpers/DB";
 import LoadingDots from "../../Components/LoadingDots";
 import Toggle from "@/Components/Toggle";
+import Icon from "@/Components/Icon";
 
 export function CacheManagement({ selectedTab, setSelectedTab }) {
   const { t } = useTranslation();
@@ -73,14 +74,14 @@ export function CacheManagement({ selectedTab, setSelectedTab }) {
       >
         <div className="fx-centered fx-start-h fx-start-v">
           <div className="box-pad-v-s">
-            <div className="cache-24"></div>
+            <Icon name="cache" size={24} />
           </div>
           <div>
             <p>{t("AZEJWnf")}</p>
             <p className="p-medium gray-c">{t("AHV4nwK")}</p>
           </div>
         </div>
-        <div className="arrow"></div>
+        <Icon name="arrow" />
       </div>
       {selectedTab === "cache" && (
         <div className="fit-container fx-col fx-centered box-pad-h-m box-pad-v-m">

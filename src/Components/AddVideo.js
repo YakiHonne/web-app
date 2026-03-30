@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
@@ -9,6 +8,7 @@ import UploadFile from "@/Components/UploadFile";
 import { getVideoFromURL } from "@/Helpers/Helpers";
 import LoadingDots from "@/Components/LoadingDots";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function AddVideo({ exit, event }) {
   const dispatch = useDispatch();
@@ -33,7 +33,7 @@ export default function AddVideo({ exit, event }) {
             setToast({
               type: 2,
               desc: t("AVqYqwu"),
-            })
+            }),
           );
           return;
         }
@@ -47,7 +47,7 @@ export default function AddVideo({ exit, event }) {
             setToast({
               type: 2,
               desc: t("ABNCz9e"),
-            })
+            }),
           );
           setIsLoading(false);
           return;
@@ -65,7 +65,7 @@ export default function AddVideo({ exit, event }) {
             setToast({
               type: 2,
               desc: t("A2eNUTw"),
-            })
+            }),
           );
           setIsLoading(false);
           return;
@@ -75,7 +75,7 @@ export default function AddVideo({ exit, event }) {
             setToast({
               type: 2,
               desc: t("AW6UnXx"),
-            })
+            }),
           );
           setIsLoading(false);
           return;
@@ -90,7 +90,7 @@ export default function AddVideo({ exit, event }) {
           setToast({
             type: 2,
             desc: t("A01W0qK"),
-          })
+          }),
         );
         return;
       }
@@ -98,8 +98,8 @@ export default function AddVideo({ exit, event }) {
   };
 
   useEffect(() => {
-    if(event) validate()
-  }, [])
+    if (event) validate();
+  }, []);
 
   return (
     <>
@@ -137,7 +137,7 @@ export default function AddVideo({ exit, event }) {
                   onClick={() => setType("link")}
                 >
                   <div className="round-icon">
-                    <div className="link-24"></div>
+                    <Icon name="link" size={24} />
                   </div>
                   <p className="p-medium gray-c">{t("AgSNaRf")}</p>
                 </div>
@@ -148,7 +148,7 @@ export default function AddVideo({ exit, event }) {
                   onClick={() => setType("1063")}
                 >
                   <div className="round-icon">
-                    <div className="share-icon-2-24"></div>
+                    <Icon name="share-icon-2" size={24} />
                   </div>
                   <p className="p-medium gray-c">{t("Awm7WWX")}</p>
                 </div>
@@ -169,7 +169,7 @@ export default function AddVideo({ exit, event }) {
                     setVideoURL("");
                   }}
                 >
-                  <div className="trash"></div>
+                  <Icon name="trash" isColored />
                 </div>
               </div>
               {getVideoFromURL(videoURL)}
