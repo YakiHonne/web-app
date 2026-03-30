@@ -8,6 +8,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import SWEventStructure from "@/Components/SWEventStructure";
 import SWCard from "@/Components/SWCard";
+import Icon from "@/Components/Icon";
 
 const getNaddrParam = () => {
   let naddr = new URLSearchParams(window.location.search).get("naddr");
@@ -39,7 +40,7 @@ export default function SmartWidgetChecker() {
               "#d": [data.identifier],
             },
           ],
-          { cacheUsage: "CACHE_FIRST", groupable: false }
+          { cacheUsage: "CACHE_FIRST", groupable: false },
         );
 
         sub.on("event", async (event) => {
@@ -67,7 +68,7 @@ export default function SmartWidgetChecker() {
           setToast({
             type: 2,
             desc: t("As0d1J3"),
-          })
+          }),
         );
         setIsLoading(false);
       }
@@ -98,7 +99,7 @@ export default function SmartWidgetChecker() {
                     pointerEvents: widget ? "none" : "auto",
                   }}
                 >
-                  <div className="search"></div>
+                  <Icon name="search" />
                   <input
                     type="text"
                     className="if if-no-border ifs-full"
@@ -119,7 +120,7 @@ export default function SmartWidgetChecker() {
                       {isLoading ? (
                         <LoadingDots />
                       ) : (
-                        <div className="trash"></div>
+                        <Icon name="trash" isColored />
                       )}
                     </div>
                   )}
@@ -128,7 +129,7 @@ export default function SmartWidgetChecker() {
                     data-tooltip={t("AZBr1AS")}
                     onClick={() => setMbHide(false)}
                   >
-                    <div className="curation"></div>
+                    <Icon name="curation" />
                   </div>
                 </div>
               </div>
@@ -170,7 +171,7 @@ export default function SmartWidgetChecker() {
                       onClick={() => setMbHide(true)}
                       data-tooltip={t("ATB2h6T")}
                     >
-                      <div className="arrow arrow-back"></div>
+                      <Icon name="arrow" transform="rotate(90deg)" />
                     </div>
                     <h4>{t("AYmIvXo")}</h4>
                   </div>

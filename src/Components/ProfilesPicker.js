@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { getConnectedAccounts } from "@/Helpers/ClientHelpers";
 import { useSelector } from "react-redux";
 import UserProfilePic from "@/Components/UserProfilePic";
+import Icon from "@/Components/Icon";
 
 export default function ProfilesPicker({ setSelectedProfile }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -86,16 +87,16 @@ export default function ProfilesPicker({ setSelectedProfile }) {
             <div
               onClick={() => setShowConnectedAccounts(!showconnectedAccounts)}
             >
-              {!showconnectedAccounts && <div className="arrow slide-up"></div>}
+              {!showconnectedAccounts && (
+                <Icon
+                  name="arrow"
+                  transform="rotate(180deg)"
+                  className="slide-up"
+                />
+              )}
               {showconnectedAccounts && (
                 <div className="round-icon-small">
-                  <div
-                    className="arrow slide-down"
-                    style={{
-                      animationDelay: `calc(0.01s * ${connectedAccounts.length} + 0.01s)`,
-                      rotate: "180deg",
-                    }}
-                  ></div>
+                  <Icon name="arrow" className="slide-down" />
                 </div>
               )}
             </div>

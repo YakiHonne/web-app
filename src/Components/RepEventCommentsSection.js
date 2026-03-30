@@ -4,6 +4,7 @@ import { eventKinds } from "@/Content/Extra";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import { useTranslation } from "react-i18next";
 import useRepEventStats from "@/Hooks/useRepEventStats";
+import Icon from "@/Components/Icon";
 
 export default function RepEventCommentsSection({
   event,
@@ -15,7 +16,10 @@ export default function RepEventCommentsSection({
   kind,
 }) {
   const { t } = useTranslation();
-  const { postActions } = useRepEventStats(event.aTag || event.id, event.pubkey);
+  const { postActions } = useRepEventStats(
+    event.aTag || event.id,
+    event.pubkey,
+  );
 
   return (
     <div
@@ -34,17 +38,17 @@ export default function RepEventCommentsSection({
         <div
           className="fx-centered fit-container fx-start-h box-pad-v-m sticky"
           onClick={exit}
-          style={{padding: "1rem"}}
+          style={{ padding: "1rem" }}
         >
           <button
             className="btn btn-normal btn-gray"
             style={{ padding: "0 1rem" }}
           >
-            <div className="arrow arrow-back"></div>
+            <Icon name="arrow" transform="rotate(90deg)" />
           </button>
           <p>{t("ATB2h6T")}</p>
         </div>
-        <div className="fit-container box-pad-h-m box-marg-s" >
+        <div className="fit-container box-pad-h-m box-marg-s">
           {event && <LinkRepEventPreview allowClick={false} event={event} />}
         </div>
         <CommentsSection

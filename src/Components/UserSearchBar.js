@@ -3,6 +3,7 @@ import { nip19 } from "nostr-tools";
 import { getHex } from "@/Helpers/Encryptions";
 import MentionSuggestions from "./MentionSuggestions";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function UserSearchBar({
   onClick,
@@ -61,7 +62,7 @@ export default function UserSearchBar({
           paddingRight: "0",
         }}
       >
-        <div className="search-24"></div>
+        <Icon name="search" size={24} />
         <input
           id="search-input"
           type="search"

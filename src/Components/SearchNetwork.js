@@ -15,6 +15,7 @@ import SearchContentCard from "@/Components/SearchContentCard";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
 import Slider from "@/Components/Slider";
+import Icon from "@/Components/Icon";
 
 function isValidUrl(url) {
   const regex = /^(wss?:\/\/)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:\d+)?(\/.*)?$/;
@@ -297,7 +298,7 @@ export default function SearchNetwork({ exit }) {
               top: 0,
             }}
           >
-            <div className="search-24"></div>
+            <Icon name="search" size={24} />
             <input
               type="text"
               placeholder={t("APAkDF0")}
@@ -330,7 +331,7 @@ export default function SearchNetwork({ exit }) {
                 }}
               >
                 <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18 bg-sp fx-centered fx-start-h pointer">
-                  <div className="search"></div>{" "}
+                  <Icon name="search" />{" "}
                   <p className="p-one-line">
                     {t("AvpIWa1")}{" "}
                     <span className="p-bold ">
@@ -354,7 +355,7 @@ export default function SearchNetwork({ exit }) {
                 }}
               >
                 <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18  bg-sp fx-centered fx-start-h pointer">
-                  <div className="server"></div>{" "}
+                  <Icon name="server" />{" "}
                   <p className="p-one-line">
                     {t("AlQx13z")}{" "}
                     <span className="p-bold ">
@@ -420,7 +421,7 @@ export default function SearchNetwork({ exit }) {
               className="fit-container fx-col fx-centered"
               style={{ height: "300px" }}
             >
-              <div className="search-24"></div>
+              <Icon name="search" size={24} />
               <h4>{t("AjlW15t")}</h4>
               <p className="gray-c">{t("A0RqaoC")}</p>
             </div>

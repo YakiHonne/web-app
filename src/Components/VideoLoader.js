@@ -5,6 +5,7 @@ import LoadingBar from "./LoadingBar";
 import OptionsDropdown from "./OptionsDropdown";
 import { useTranslation } from "react-i18next";
 import { copyText } from "@/Helpers/Helpers";
+import Icon from "@/Components/Icon";
 
 const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   const videoRef = useRef();
@@ -251,8 +252,8 @@ const CustomVideoControls = ({ videoRef, src, setIsFullScreen }) => {
             className="pointer round-icon-small"
             style={{ border: "none" }}
           >
-            {isPaused && <div className="video-play-24"></div>}
-            {!isPaused && <div className="video-pause-24"></div>}
+            {isPaused && <Icon name="video-play" size={24} />}
+            {!isPaused && <Icon name="video-pause" size={24} />}
             {/* {isPaused && <p>▶</p>}
             {!isPaused && <p>⏸</p>} */}
           </div>
@@ -346,9 +347,9 @@ const VideoVolume = ({ videoRef }) => {
   return (
     <div className="fx-centered sc-s video-volume box-pad-h-s box-pad-v-s">
       <div onClick={handleMuteUnmute}>
-        {!isMuted && <div className="volume-normal-24"></div>}
+        {!isMuted && <Icon name="volume-normal" size={24} />}
         {isMuted && (
-          <div className="volume-muted-24" style={{ opacity: ".5" }}></div>
+          <Icon name="volume-muted" size={24} />
         )}
       </div>
       <div className="video-volume-range slide-left">

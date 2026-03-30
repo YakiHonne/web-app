@@ -18,6 +18,9 @@ import { setRefreshAppSettings } from "@/Store/Slides/Extras";
 import { nanoid } from "nanoid";
 import { hkdf } from "@noble/hashes/hkdf.js";
 import { sha256 } from "@noble/hashes/sha2.js";
+import { checkJWT, decodeJWT } from "./Encryptions";
+import RedPacketBox from "@/Components/RedPacket/RedPacketBox";
+import Icon from "@/Components/Icon";
 
 let nostrClients = [
   "nstart.me",
@@ -172,7 +175,7 @@ export function getNoteTree(
             onClick={(e) => e.stopPropagation()}
           >
             <p>{el}</p>
-            <div className="share-icon"></div>
+            <Icon name="share-icon" />
           </a>{" "}
         </Fragment>,
       );
@@ -250,24 +253,58 @@ export function getNoteTree(
               onClick={(e) => e.stopPropagation()}
             >
               <p>{`${hashes.slice(-1)}${text}`}</p>
-              <div className="share-icon"></div>
+              <Icon name="share-icon" />
             </Link>{" "}
             {ifMore && <span>{ifMore} </span>}
           </React.Fragment>,
         );
       }
     } else {
-      finalTree.push(
-        <span
-          style={{
-            wordBreak: "break-word",
-            color: "var(--dark-gray)",
-          }}
-          key={key}
-        >
-          {el}{" "}
-        </span>,
-      );
+      let jwt = checkJWT(el);
+      if (jwt) {
+        let { s, s_addr, r, m, a, c_at, pi, img } = decodeJWT(el);
+        if (s && s_addr && r && a && c_at && pi) {
+          finalTree.push(
+            <RedPacketBox
+              key={key}
+              data={{
+                s,
+                s_addr,
+                r,
+                m,
+                a,
+                c_at,
+                pi,
+                img,
+              }}
+            />,
+          );
+        } else {
+          finalTree.push(
+            <span
+              style={{
+                wordBreak: "break-word",
+                color: "var(--dark-gray)",
+              }}
+              key={key}
+            >
+              {el}{" "}
+            </span>,
+          );
+        }
+      } else {
+        finalTree.push(
+          <span
+            style={{
+              wordBreak: "break-word",
+              color: "var(--dark-gray)",
+            }}
+            key={key}
+          >
+            {el}{" "}
+          </span>,
+        );
+      }
     }
   }
 

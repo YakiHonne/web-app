@@ -13,6 +13,7 @@ import { handleUpdateConversation, sendMessage } from "@/Helpers/DMHelpers";
 import useDirectMessages from "@/Hooks/useDirectMessages";
 import { ConversationBox } from "@/Components/ConversationBox";
 import { Virtuoso } from "react-virtuoso";
+import Icon from "@/Components/Icon";
 
 const getFilterDMByTime = (type) => {
   let filterType =
@@ -249,11 +250,11 @@ export default function Messages() {
             <div className="fx-centered">
               {!showSearch && (
                 <div onClick={handleShowSearch}>
-                  <div className="search-24"></div>
+                  <Icon name="search" size={24} />
                 </div>
               )}
               <div onClick={() => setInitConv(true)}>
-                <div className="env-edit-24"></div>
+                <Icon name="env-edit" size={24} />
               </div>
               <OptionsDropdown
                 options={[
@@ -287,7 +288,7 @@ export default function Messages() {
                               {type.display_name}
                             </span>
                             {filterByTimeType == type.value && (
-                              <div className="check-24"></div>
+                              <Icon name="check" size={24} />
                             )}
                           </div>
                         );

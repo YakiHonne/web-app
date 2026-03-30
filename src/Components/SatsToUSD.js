@@ -5,6 +5,7 @@ import useCloseContainer from "@/Hooks/useCloseContainer";
 import { currencies, currenciesSymbols } from "@/Content/currencies";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import { updateCustomSettings } from "@/Helpers/ClientHelpers";
+import Icon from "@/Components/Icon";
 
 const SatsToUSD = ({ sats, isHidden, selector }) => {
   const [fiatRate, setFiatRate] = useState(null);
@@ -102,7 +103,7 @@ const FiatSelector = ({ isHidden, fiatValue, currency, setCurrency }) => {
           {!isHidden ? fiatValue.toFixed(2) : "***"}
         </h2>
         <span className="gray-c p-caps">{currency?.toUpperCase()}</span>
-        <div className="arrow-12"></div>
+        <Icon name="arrow" size={12} />
       </div>
       {open && (
         <div

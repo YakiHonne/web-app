@@ -3,6 +3,7 @@ import React, { useMemo, useState } from "react";
 import BookmarksPicker from "@/Components/BookmarksPicker";
 import { useSelector } from "react-redux";
 import LoginSignup from "@/Components/LoginSignup";
+import Icon from "@/Components/Icon";
 
 export default function   BookmarkEvent({
   pubkey = "",
@@ -53,9 +54,10 @@ export default function   BookmarkEvent({
           !userKeys ? setIsLogin(true) : setShowBookmarksPicker(true);
         }}
       >
-        <div
-          className={isBookmarked ? "bookmark-i-b-24" : "bookmark-i-24"}
-          ></div>
+        <Icon
+          name={isBookmarked ? "bookmark-i-b" : "bookmark-i"}
+          size={24}
+        />
           {label && <p>{label}</p>}
       </div>
     </>

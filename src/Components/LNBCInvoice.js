@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useStore } from "react-redux";
 import ZapTip from "@/Components/ZapTip";
 import { convertDate, getInvoiceDetails } from "@/Helpers/Encryptions";
+import Icon from "@/Components/Icon";
 
 export default function LNBCInvoice({ lnbc }) {
   const { t } = useTranslation();
@@ -69,7 +70,7 @@ export default function LNBCInvoice({ lnbc }) {
           </p>
         )}
         <div className="fx-centered fx-start-h">
-          <div className="bolt-bold-24"></div>
+          <Icon name="bolt-bold" size={24} isColored />
           <h3>{amount} Sats</h3>
         </div>
         <p className="gray-c">

@@ -12,6 +12,7 @@ import { saveRelayMetadata } from "@/Helpers/Controlers";
 import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 import RelayMetadataPreview from "./RelayMetadataPreview";
 import { Virtuoso } from "react-virtuoso";
+import Icon from "@/Components/Icon";
 
 export default function RelaysPicker({
   allRelays,
@@ -59,7 +60,7 @@ export default function RelaysPicker({
         ref={optionsRef}
         onClick={() => setShowList(true)}
       >
-        <div className="search"></div>
+        <Icon name="search" />
         <input
           placeholder={t("ALPrAZz")}
           className="if if-no-border ifs-full"
@@ -128,7 +129,7 @@ export default function RelaysPicker({
                 <p>{searchedRelay}</p>
                 <div className="fx-centered">
                   <div className="sticker sticker-gray-black">
-                    <div className="plus-sign"></div>
+                    <Icon name="plus-sign" />
                   </div>
                   {/* <div className="sticker sticker-gray-black">{t("ARWeWgJ")}</div> */}
                 </div>
@@ -202,7 +203,7 @@ const RelayItem = React.memo(
               className="round-icon-small"
               style={{ backgroundColor: "var(--dim-gray)" }}
             >
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
             </div>
             <div
               className="round-icon-small slide-down"
@@ -212,7 +213,7 @@ const RelayItem = React.memo(
                 setOpen(!open);
               }}
             >
-              <div className="arrow "></div>
+              <Icon name="arrow" />
             </div>
           </div>
         </div>

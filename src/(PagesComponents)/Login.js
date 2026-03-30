@@ -46,6 +46,7 @@ import Router from "next/router";
 import useRecommendedPacks from "@/Hooks/useRecommendedPacks";
 import PackPreview from "./Explore/PackPreview";
 import PackPreviewOnboarding from "@/Components/PackPreviewOnboarding";
+import Icon from "@/Components/Icon";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 let s8e =
@@ -182,7 +183,7 @@ const Bunker = () => {
         return;
       }
       const bunker = BunkerSigner.fromBunker(
-        localKeys.privateKey,
+        hexToUint8Array(localKeys.privateKey),
         bunkerPointer,
         {
           onauth: (url) => {
@@ -200,7 +201,7 @@ const Bunker = () => {
       let toSave = {
         localKeys: {
           sec: localKeys.privateKey,
-          pub: getPublicKey(localKeys.privateKey),
+          pub: getPublicKey(hexToUint8Array(localKeys.privateKey)),
         },
         pub: pubkey,
         bunker: bunkerUrl,
@@ -227,7 +228,7 @@ const Bunker = () => {
     }
     setIsLoading(true);
     const bunker = BunkerSigner.fromBunker(
-      localKeys.privateKey,
+      hexToUint8Array(localKeys.privateKey),
       bunkerPointer,
       {
         onauth: (url) => {
@@ -245,7 +246,7 @@ const Bunker = () => {
     let toSave = {
       localKeys: {
         sec: localKeys.privateKey,
-        pub: getPublicKey(localKeys.privateKey),
+        pub: getPublicKey(hexToUint8Array(localKeys.privateKey)),
       },
       pub: pubkey,
       bunker: bunkerURL,
@@ -280,7 +281,7 @@ const Bunker = () => {
                 onClick={() => copyText(nostrConnectURI, t("AB1PYvA"))}
               >
                 <p className="p-one-line gray-c">{nostrConnectURI}</p>
-                <div className="copy"></div>
+                <Icon name="copy" />
               </div>
             </div>
             <div className="fit-container fx-centered">
@@ -493,10 +494,10 @@ const LoginScreen = ({ switchScreen }) => {
           <div className="fx-centered pointer">
             {isNewAccount ? (
               <div className="round-icon-small">
-                <div className="arrow arrow-back"></div>
+                <Icon name="arrow" transform="rotate(90deg)" />
               </div>
             ) : (
-              <div className="user-24"></div>
+              <Icon name="user" size={24} />
             )}{" "}
             <p className="gray-c" onClick={() => Router.back()}>
               {isNewAccount ? t("AB4BSCe") : t("AVCdQku")}
@@ -628,7 +629,9 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
   const initializeAccount = async () => {
     try {
       setStep(6);
-      let picture_ = pictureFile ? await FileUpload(pictureFile, userKeys) : "";
+      let picture_ = pictureFile
+        ? await FileUpload({ file: pictureFile, userKeys })
+        : "";
       if (picture_ === false) {
         dispatch(
           setToast({
@@ -640,7 +643,9 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
 
         return;
       }
-      let banner_ = bannerFile ? await FileUpload(bannerFile, userKeys) : "";
+      let banner_ = bannerFile
+        ? await FileUpload({ file: bannerFile, userKeys })
+        : "";
       if (banner_ === false) {
         dispatch(
           setToast({
@@ -873,7 +878,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
                     element={
                       <div className="fx-centered sticker  sticker-gray-gray">
                         {t("A1HsCqp")}
-                        <div className="plus-sign"></div>
+                        <Icon name="plus-sign" />
                       </div>
                     }
                     setFile={(data) => {
@@ -929,10 +934,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
                         }}
                         className="fx-centered pointer toggle fx-col"
                       >
-                        <div
-                          className="image-24"
-                          style={{ filter: "invert()" }}
-                        ></div>
+                        <Icon name="image" size={24} />
                         <p className="gray-c">{t("AnD39Ci")}</p>
                       </div>
                     </div>
@@ -1054,13 +1056,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
                           className="round-icon-small"
                           style={{ backgroundColor: "var(--c1)" }}
                         >
-                          <div
-                            className="plus-sign"
-                            style={{
-                              rotate:
-                                selectedInterest === index ? "-45deg" : "0deg",
-                            }}
-                          ></div>
+                          <Icon name="plus-sign" />
                         </div>
                       </div>
                     </div>
@@ -1148,7 +1144,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
               )}
               {NWCURL && (
                 <div className="fx-centered sc-s-18 box-pad-h-s box-pad-v-s">
-                  <div className="bolt"></div>
+                  <Icon name="bolt" />
                   {NWAddr}
                 </div>
               )}
@@ -1229,7 +1225,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
                 style={{ maxWidth: "400px", gap: "16px" }}
               >
                 <div className="round-icon">
-                  <div className="key-icon-24"></div>
+                  <Icon name="key-icon" size={24} />
                 </div>
                 <p className="c1-c">
                   {NWAddr && t("AZfj4DI")}
@@ -1280,7 +1276,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
       <div className="fx-scattered  fit-container box-pad-v-m">
         <div className="fx-centered pointer">
           <div className="round-icon-small">
-            <div className="arrow arrow-back"></div>{" "}
+            <Icon name="arrow" transform="rotate(90deg)" />{" "}
           </div>
           <p className="gray-c" onClick={() => Router.back()}>
             {isNewAccount ? t("AB4BSCe") : t("AVCdQku")}

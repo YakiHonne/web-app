@@ -297,11 +297,11 @@
 
 @keyframes slide-down {
     0% {
-        transform: translateX(0);
+        transform: translateY(0);
     }
 
     100% {
-        transform: translateX(50%);
+        transform: translateY(50%);
         opacity: 0;
     }
 }
@@ -409,7 +409,9 @@
 }
 
 @keyframes shadow {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1, 1);
     }
 
@@ -444,7 +446,8 @@
         transform: scaleY(1.02) scaleX(0.98);
     }
 
-    97%, 100% {
+    97%,
+    100% {
         -webkit-transform: scale(1);
         transform: scale(1);
     }

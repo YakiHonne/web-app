@@ -9,6 +9,7 @@ import {
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
+import Icon from "@/Components/Icon";
 
 export default function NoteCard({ event, refreshAfterDeletion }) {
   const { t } = useTranslation();
@@ -38,7 +39,7 @@ export default function NoteCard({ event, refreshAfterDeletion }) {
     >
       <div className="fx-centered fx-start-v">
         <div className="round-icon">
-          <div className="note-24"></div>
+          <Icon name="note" size={24} />
         </div>
         <div className="fx-centered fx-col fx-start-h fx-start-v">
           <div className="fx-centered">
@@ -53,15 +54,15 @@ export default function NoteCard({ event, refreshAfterDeletion }) {
           </p>
           <div className="fx-centered">
             <div className="fx-centered">
-              <div className="heart"></div>
+              <Icon name="heart" />
               <div className="gray-c">{postActions.likes.likes.length}</div>
             </div>
             <div className="fx-centered">
-              <div className="comment-icon"></div>
+              <Icon name="comment-icon" />
               <p className="gray-c">{postActions.replies.replies.length}</p>
             </div>
             <div className="fx-centered">
-              <div className="bolt"></div>
+              <Icon name="bolt" />
               <p className="gray-c">{postActions.zaps.total}</p>
             </div>
             {isFlashNews && (
@@ -71,7 +72,7 @@ export default function NoteCard({ event, refreshAfterDeletion }) {
             )}
             {event.kind === 6 && (
               <div className="sticker sticker-normal sticker-gray-black fx-centered">
-                {t("AqWa0gF")} <div className="switch-arrows"></div>
+                {t("AqWa0gF")} <Icon name="switch-arrows" />
               </div>
             )}
           </div>

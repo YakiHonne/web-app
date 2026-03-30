@@ -13,6 +13,7 @@ import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import { timeAgo } from "@/Helpers/Encryptions";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 let chart_ = [
   { action: "flashnews_post", all_time_points: 0, last_updated: null },
@@ -505,7 +506,7 @@ export default function UserLevels() {
                                   {(item.user_stat?.all_time_points || 0) ===
                                     item.points[0] *
                                       (item.user_stat?.count || 1) && (
-                                    <div className="checkmark"></div>
+                                    <Icon name="checkmark" />
                                   )}
                                 </div>
                               </div>
@@ -588,7 +589,7 @@ export default function UserLevels() {
                                           })}
                                         </p>
                                       ) : (
-                                        <div className="infinity"></div>
+                                        <Icon name="infinity" />
                                       )
                                     }
                                     tooltip={

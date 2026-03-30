@@ -1,6 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function OptionsDropdown({
   options,
@@ -106,7 +107,7 @@ export default function OptionsDropdown({
               </p>
             </div>
           )}
-          {icon === "arrow" && <div className="arrow" />}
+          {icon === "arrow" && <Icon name="arrow" />}
         </div>
       </div>
 

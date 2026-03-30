@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import Icon from "@/Components/Icon";
 
 export default function Slider({
   items = [],
@@ -75,7 +76,7 @@ export default function Slider({
               border: "none",
             }}
           >
-            <div className="arrow" style={{ transform: "rotate(90deg)" }}></div>
+            <Icon name="arrow" transform="rotate(90deg)" />
           </div>
         </div>
       )}
@@ -134,10 +135,7 @@ export default function Slider({
               border: "none",
             }}
           >
-            <div
-              className="arrow"
-              style={{ transform: "rotate(-90deg)" }}
-            ></div>
+            <Icon name="arrow" transform="rotate(-90deg)" />
           </div>
         </div>
       )}

@@ -7,6 +7,7 @@ import useCashu from "@/Hooks/useCachu";
 import { getSubData } from "@/Helpers/Controlers";
 import LoadingDots from "@/Components/LoadingDots";
 import { sendP2PKLockedToken } from "@/Helpers/CashuHelpers";
+import Icon from "@/Components/Icon";
 
 export default function NutZap({ exit }) {
   const { t } = useTranslation();
@@ -89,7 +90,7 @@ export default function NutZap({ exit }) {
     >
       <div className="fit-container fx-centered fx-start-h" onClick={exit}>
         <div className="round-icon-small">
-          <div className="arrow" style={{ rotate: "90deg" }}></div>
+          <Icon name="arrow" transform="rotate(90deg)" />
         </div>
         <p>NutZap</p>
       </div>
@@ -115,10 +116,7 @@ export default function NutZap({ exit }) {
               className="fit-container fx-centered fx-col box-pad-h "
               style={{ height: "20vh" }}
             >
-              <div
-                className="user"
-                style={{ minHeight: "32px", minWidth: "32px" }}
-              ></div>
+              <Icon name="user" size={32} />
               <h4>{t("AwsMysv")}</h4>
               <p className="p-centered gray-c">{t("AAVtClb")}</p>
             </div>

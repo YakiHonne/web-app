@@ -12,6 +12,7 @@ import { compactContent, nEventEncode } from "@/Helpers/ClientHelpers";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function ContentSuggestionsCards({
   content,
@@ -160,7 +161,7 @@ const NoteCard = ({ event }) => {
             <p className="p-bold p-one-line" style={{ width: "max-content" }}>
               {user.display_name || user.name}
             </p>
-            {isNip05Verified && <div className="checkmark-c1"></div>}
+            {isNip05Verified && <Icon name="checkmark-c1" isColored />}
           </div>
         </div>
         <OptionsDropdown

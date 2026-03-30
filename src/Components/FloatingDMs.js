@@ -12,6 +12,7 @@ import { getNoteTree } from "@/Helpers/ClientHelpers";
 import InitiConvo from "./InitConvo";
 import LoadingDots from "./LoadingDots";
 import { Virtuoso } from "react-virtuoso";
+import Icon from "@/Components/Icon";
 
 export default function FloatingDMs() {
   const { t } = useTranslation();
@@ -110,7 +111,7 @@ export default function FloatingDMs() {
             className="sc-s fx-centered fx-start-h box-pad-h-m box-pad-v-m option slide-right"
             onClick={() => setOpen(true)}
           >
-            <div className="send-24"></div>
+            <Icon name="send" size={24} />
             <p className="box-pad-h-s">{t("As2zi6P")}</p>
             {isNewMsg && (
               <div
@@ -150,10 +151,7 @@ export default function FloatingDMs() {
               className="round-icon-small box-pad-h-s fx-col fx-centered"
               style={{ border: "none" }}
             >
-              <div
-                className="arrow"
-                style={{ transform: "rotate(180deg)" }}
-              ></div>
+              <Icon name="arrow" />
               {isNewMsg && (
                 <div
                   style={{
@@ -197,10 +195,7 @@ export default function FloatingDMs() {
                     setSelectedConvo(false);
                   }}
                 >
-                  <div
-                    className="arrow-24"
-                    style={{ transform: "rotate(90deg)" }}
-                  ></div>
+                  <Icon name="arrow" size={24} transform="rotate(90deg)" />
                   <div>
                     <UserProfilePic
                       img={selectedConvo.picture}
@@ -224,13 +219,14 @@ export default function FloatingDMs() {
               {!selectedConvo && <p className="p-big">{t("As2zi6P")}</p>}
               <div className="fx-centered">
                 {!selectedConvo && (
-                  <div
-                    className="env-edit-24"
+                  <Icon
+                    name="env-edit"
+                    size={24}
                     onClick={(e) => {
                       e.stopPropagation();
                       setInitConv(true);
                     }}
-                  ></div>
+                  />
                 )}
                 <div
                   className="close"
@@ -434,10 +430,7 @@ export default function FloatingDMs() {
                   className="fit-container fx-centered fx-col"
                   style={{ height: "300px" }}
                 >
-                  <div
-                    className="env-edit-24"
-                    style={{ minHeight: "32px", minWidth: "32px" }}
-                  ></div>
+                  <Icon name="env-edit" size={32} />
                   <div className="p-centered box-pad-h box-pad-v-s">
                     <p>{t("A1jvSxI")}</p>
                     <p className="gray-c box-pad-h-m">{t("ALgHcrS")}</p>

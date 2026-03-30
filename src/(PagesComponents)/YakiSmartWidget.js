@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Footer from "@/Components/Footer";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 let icon1 =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/icons/no-code.svg";
@@ -285,10 +286,7 @@ export default function YakiSmartWidgets() {
               >
                 <div className="fit-container fx-scattered">
                   <p style={{ color: "white" }}>{feature.title}</p>
-                  <div
-                    className="arrow"
-                    style={{ filter: "brightness(0) invert()" }}
-                  ></div>
+                  <Icon name="arrow" />
                 </div>
                 {selectedFaq === index && (
                   <div className="fit-container">
@@ -302,10 +300,7 @@ export default function YakiSmartWidgets() {
         <div className="fx-centered">
           <Link href={"/smart-widgets"}>
             <button className="btn btn-orange fx-centered">
-              <div
-                className="smart-widget-24"
-                style={{ filter: "brightness(0) invert()" }}
-              ></div>{" "}
+              <Icon name="smart-widget" size={24} />{" "}
               /Community smart widgets
             </button>
           </Link>

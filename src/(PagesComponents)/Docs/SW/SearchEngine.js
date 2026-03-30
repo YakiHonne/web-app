@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { swContent } from "./content";
 import { customHistory } from "@/Helpers/History";
 import slugify from "slugify";
+import Icon from "@/Components/Icon";
 
 export default function SearchEngine({ sticky = true }) {
   const [searchWindow, setSearchWindow] = useState(false);
@@ -31,7 +32,7 @@ export default function SearchEngine({ sticky = true }) {
           style={{ width: "250px", height: "40px", padding: "0 .75rem" }}
         >
           <div className="fx-centered">
-            <div className="search"></div>
+            <Icon name="search" />
             <p className="gray-c">Search</p>
           </div>
           <div
@@ -88,7 +89,7 @@ const SearchWindow = ({ exit }) => {
       >
         <div className="if fx-scattered fit-container pointer sw-search-box sc-s-18">
           <div className="fx-centered">
-            <div className="search"></div>
+            <Icon name="search" />
             <input
               type="text"
               className="if if-no-border ifs-full"

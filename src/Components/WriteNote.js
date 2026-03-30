@@ -4,7 +4,7 @@ import LoadingDots from "@/Components/LoadingDots";
 import MentionSuggestions from "@/Components/MentionSuggestions";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
-import { extractNip19 } from "@/Helpers/Helpers";
+import { extractNip19, filterImetas } from "@/Helpers/Helpers";
 import { getNoteDraft, updateNoteDraft } from "@/Helpers/ClientHelpers";
 import { InitEvent } from "@/Helpers/Controlers";
 import { getZapEventRequest } from "@/Helpers/NostrPublisher";
@@ -27,6 +27,13 @@ import LinkRepEventPreview from "./LinkRepEventPreview";
 import { customHistory } from "@/Helpers/History";
 import { publishScheduledEvent } from "@/Helpers/EventSchedulerHelper";
 import DatePicker from "./DatePicker";
+import Icon from "@/Components/Icon";
+import useLightningWallets from "@/Hooks/useLightningWallets";
+import LightningWalletsSelect from "./LightningWalletsSelect";
+import Overlay from "./Overlay";
+import { nip19 } from "nostr-tools";
+
+const PAID_NOTE_AMOUNT = process.env.NEXT_PUBLIC_PAID_NOTE_AMOUNT;
 
 export default function WriteNote({
   exit,
@@ -42,6 +49,14 @@ export default function WriteNote({
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
   const userRelays = useSelector((state) => state.userRelays);
+  const {
+    selectedWallet,
+    setSelectedWallet,
+    wallets,
+    sendPayment,
+    setWallets,
+    isSendingLoading,
+  } = useLightningWallets();
   const { t } = useTranslation();
   const [note, setNote] = useState(content);
   const [mention, setMention] = useState("");
@@ -57,6 +72,7 @@ export default function WriteNote({
   const textareaRef = useRef(null);
   const [selectedProfile, setSelectedProfile] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [imetas, setImetas] = useState([]);
   const [selectedScheduleDate, setSelectedScheduleDate] = useState(undefined);
   const ref = useRef();
 
@@ -147,16 +163,18 @@ export default function WriteNote({
         tags.push(["-"]);
       }
 
+      let imetasTags = filterImetas({ note, imetas });
+
       if (isPaid) {
         publishAsPaid(
           processedContent.content,
-          [...tags, ...processedTags],
+          [...tags, ...processedTags, ...imetasTags],
           isProtected && protectedRelay ? protectedRelay : false,
         );
       } else {
         publishAsFree(
           processedContent.content,
-          [...tags, ...processedTags],
+          [...tags, ...processedTags, ...imetasTags],
           isProtected && protectedRelay ? protectedRelay : false,
         );
       }
@@ -203,8 +221,11 @@ export default function WriteNote({
     let timer = setTimeout(() => {
       if (window.location.pathname !== "/" && !selectedScheduleDate)
         customHistory("/");
-      if (selectedScheduleDate) customHistory("/dashboard?tabNumber=9");
-      // navigateTo.push("/dashboard", { state: { tabNumber: 1, filter: "notes" } });
+      if (selectedScheduleDate) navigateTo.push("/dashboard?tabNumber=9");
+      navigateTo.push(
+        "/profile/" +
+          nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+      );
       exit();
       setIsLoading(false);
       clearTimeout(timer);
@@ -233,7 +254,7 @@ export default function WriteNote({
         setIsLoading(false);
         return;
       }
-      let sats = 800 * 1000;
+      let sats = PAID_NOTE_AMOUNT * 1000;
 
       let zapTags = [
         ["relays", ...userRelays],
@@ -244,7 +265,7 @@ export default function WriteNote({
       ];
 
       var zapEvent = await getZapEventRequest(
-        userKeys,
+        selectedProfile || userKeys,
         `${userMetadata.name} paid for a paid note.`,
         zapTags,
       );
@@ -270,18 +291,6 @@ export default function WriteNote({
 
       setInvoice(res.data.pr);
 
-      const { webln } = window;
-      if (webln) {
-        try {
-          await webln.enable();
-          await webln.sendPayment(res.data.pr);
-        } catch (err) {
-          console.log(err);
-          setIsLoading(false);
-          setInvoice("");
-        }
-      }
-
       let sub = ndkInstance.subscribe(
         [
           {
@@ -295,6 +304,12 @@ export default function WriteNote({
 
       sub.on("event", () => {
         setInvoice("");
+        dispatch(
+          setToast({
+            type: 1,
+            desc: t("ACDUO1d"),
+          }),
+        );
         if (selectedScheduleDate)
           publishScheduledEvent({
             event: eventInitEx,
@@ -309,9 +324,10 @@ export default function WriteNote({
           );
         sub.stop();
         updateNoteDraft("root", "");
-        navigateTo.push("/dashboard", {
-          state: { tabNumber: 1, filter: "notes" },
-        });
+        navigateTo.push(
+          "/profile/" +
+            nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+        );
         exit();
         setIsLoading(false);
       });
@@ -416,12 +432,28 @@ export default function WriteNote({
     }
   };
 
+  const handlePayInvoice = async () => {
+    try {
+      let res = await sendPayment(invoice);
+      if (!res.status) {
+        dispatch(
+          setToast({
+            type: 2,
+            desc: t("AQzOW0J"),
+          }),
+        );
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <>
       {showWarningBox && (
-        <div className="fixed-container fx-centered box-pad-h">
+        <Overlay exit={() => setShowWarningBox(false)} width={500}>
           <div
-            className="sc-s bg-sp box-pad-h box-pad-v fx-centered"
+            className="box-pad-h box-pad-v fx-centered"
             style={{ width: "min(100%, 500px)" }}
           >
             <div className="fx-centered fx-col">
@@ -457,7 +489,7 @@ export default function WriteNote({
               </div>
             </div>
           </div>
-        </div>
+        </Overlay>
       )}
       {showSmartWidgets && (
         <BrowseSmartWidgetsV2
@@ -466,14 +498,15 @@ export default function WriteNote({
         />
       )}
       {invoice && (
-        <div
-          className="fixed-container fx-centered box-pad-h fx-col"
-          style={{ zIndex: 10001 }}
-        >
+        <Overlay exit={() => setInvoice("")} width={420}>
           <div
-            className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h box-pad-v"
-            style={{ width: "420px", gap: "1rem" }}
+            className="fx-centered fx-col fit-container pos-relative  box-pad-h box-pad-v"
+            style={{ gap: "1rem" }}
           >
+            <div className="close" onClick={() => setInvoice("")}>
+              <div></div>
+            </div>
+            <p className="gray-c">{t("AUCtylD")}</p>
             <div
               style={{
                 width: "100%",
@@ -494,23 +527,39 @@ export default function WriteNote({
               onClick={() => copyKey(invoice)}
             >
               <p>{shortenKey(invoice)}</p>
-              <div className="copy-24"></div>
+              <Icon name="copy" size={24} />
             </div>
+            {selectedWallet && (
+              <>
+                <p className="gray-c">{t("Ax46s4g")}</p>
+                <div className="fx-centered fx-col fit-container ">
+                  <LightningWalletsSelect
+                    selectedWallet={selectedWallet}
+                    setSelectedWallet={setSelectedWallet}
+                    wallets={wallets}
+                    setWallets={setWallets}
+                    label={t("ARXDO1q")}
+                  />
+                  <button
+                    className="btn btn-full btn-normal"
+                    onClick={handlePayInvoice}
+                    disabled={isSendingLoading}
+                  >
+                    {isSendingLoading ? (
+                      <LoadingDots />
+                    ) : (
+                      t("AloNXcI", { amount: PAID_NOTE_AMOUNT })
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
             <div className="fit-container fx-centered ">
-              <p className="gray-c p-medium">{t("A1ufjMM")}</p>
+              <p className="gray-c p-medium">{t("AoXe2Kx")}</p>
               <LoadingDots />
             </div>
           </div>
-          <div className="round-icon-tooltip" data-tooltip={t("AIuHDQy")}>
-            <div
-              style={{ position: "static" }}
-              className="close"
-              onClick={() => setInvoice("")}
-            >
-              <div></div>
-            </div>
-          </div>
-        </div>
+        </Overlay>
       )}
       {showDatePicker && (
         <DatePicker
@@ -523,15 +572,15 @@ export default function WriteNote({
         />
       )}
       <div
-        className="fit-container fx-centered fx-col fx-start-v fx-stretch sc-s  bg-sp"
+        className="fit-container fx-centered fx-col fx-start-v fx-stretch  bg-sp"
         style={{
           overflow: "visible",
           // height: linkedEvent ? "65vh" : "55vh",
           backgroundColor: !border ? "transparent" : "",
-          border: border ? "1px solid var(--very-dim-gray)" : "none",
-          borderBottom: borderBottom
-            ? "1px solid var(--very-dim-gray)"
-            : "none",
+          // border: border ? "1px solid var(--very-dim-gray)" : "none",
+          // borderBottom: borderBottom
+          //   ? "1px solid var(--very-dim-gray)"
+          //   : "none",
         }}
         ref={ref}
         onClick={() => {
@@ -668,7 +717,7 @@ export default function WriteNote({
             className="fit-container fx-centered fx-start-h btn-text box-pad-h-m pointer"
             onClick={() => setShowDatePicker(true)}
           >
-            <div className="calendar"></div>
+            <Icon name="calendar" />
             <p>
               {t("Al2pbNK")}{" "}
               {new Intl.DateTimeFormat("en-US", {
@@ -692,6 +741,7 @@ export default function WriteNote({
               <UploadFile
                 setImageURL={handleAddImage}
                 setIsUploadsLoading={() => null}
+                setImetas={(data) => setImetas((prev) => [...prev, ...data])}
               />
               <Emojis setEmoji={(data) => handleInsertTextInPosition(data)} />
               <div style={{ position: "relative" }}>
@@ -722,7 +772,7 @@ export default function WriteNote({
                 setData={(data) => handleInsertTextInPosition(data)}
               />
               <div onClick={() => setShowDatePicker(true)}>
-                <div className="calendar-24"></div>
+                <Icon name="calendar" size={24} />
               </div>
               <div className="fx-centered sc-s-18 bg-sp box-pad-h-s ">
                 <p

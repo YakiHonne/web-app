@@ -22,6 +22,7 @@ import {
   supportedLanguageKeys,
 } from "@/Content/SupportedLanguages";
 import Toggle from "@/Components/Toggle";
+import Icon from "@/Components/Icon";
 
 export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
   const { t } = useTranslation();
@@ -195,14 +196,14 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
         >
           <div className="fx-centered fx-start-h fx-start-v">
             <div className="box-pad-v-s">
-              <div className="translate-24"></div>
+              <Icon name="translate" size={24} />
             </div>
             <div>
               <p>{t("ALGYjOG")}</p>
               <p className="p-medium gray-c">{t("A0yvMQi")}</p>
             </div>
           </div>
-          <div className="arrow"></div>
+          <Icon name="arrow" />
         </div>
         {selectedTab === "lang" && (
           <div className="fit-container fx-col fx-centered  box-pad-h-m box-pad-v-m ">
@@ -241,7 +242,7 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
                   className="round-icon-small"
                   onClick={() => setShowAddCustomService(true)}
                 >
-                  <div className="plus-sign"></div>
+                  <Icon name="plus-sign" />
                 </div>
               </div>
             </div>

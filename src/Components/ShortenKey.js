@@ -2,6 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function ShortenID({ id }) {
   const dispatch = useDispatch();
@@ -36,10 +37,7 @@ export default function ShortenID({ id }) {
         }}
         className="copy-icon fx-centered"
       >
-        <div
-          className="copy-24"
-          style={{ filter: "invert()", minWidth: "18px", minHeight: "18px" }}
-        ></div>
+        <Icon name="copy" size={18} />
       </div>
     </span>
   );

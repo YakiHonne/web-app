@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import NumberShrink from "@/Components/NumberShrink";
 import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import useCashu from "@/Hooks/useCachu";
+import Icon from "@/Components/Icon";
 
 export default function UserBalance() {
   const { t } = useTranslation();
@@ -145,10 +146,7 @@ export default function UserBalance() {
         style={{ borderLeft: "2px solid var(--orange-main)", margin: ".75rem" }}
         href={walletUrl}
       >
-        <div
-          className="wallet-add"
-          style={{ width: "32px", height: "32px" }}
-        ></div>
+        <Icon name="wallet-add" size={24} />
         <p>{t("A8fEwNq")}</p>
       </Link>
     );
@@ -178,10 +176,10 @@ export default function UserBalance() {
         <SatsToUSD sats={userBalance} isHidden={isHidden} />
       </div>
       {!isHidden && (
-        <div className="eye-closed-24" onClick={handleSatsDisplay}></div>
+        <Icon name="eye-closed" size={24} onClick={handleSatsDisplay} />
       )}
       {isHidden && (
-        <div className="eye-opened-24" onClick={handleSatsDisplay}></div>
+        <Icon name="eye-opened" size={24} onClick={handleSatsDisplay} />
       )}
     </div>
   );

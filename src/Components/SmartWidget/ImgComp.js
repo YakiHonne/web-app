@@ -1,4 +1,5 @@
 import React from "react";
+import Icon from "@/Components/Icon";
 
 export default function ImgComp({ url = "", aspectRatio }) {
   return (
@@ -11,7 +12,7 @@ export default function ImgComp({ url = "", aspectRatio }) {
           border: "none",
         }}
       >
-        {!url && <div className="image-24"></div>}
+        {!url && <Icon name="image" size={24} />}
       </div>
     </div>
   );

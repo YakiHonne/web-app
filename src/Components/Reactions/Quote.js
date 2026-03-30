@@ -6,13 +6,14 @@ import WriteNote from "@/Components/WriteNote";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import LoginSignup from "@/Components/LoginSignup";
+import Icon from "@/Components/Icon";
 
 export default function Quote({ isQuoted, event, actions }) {
   const { t } = useTranslation();
-  const userKeys = useSelector(state => state.userKeys)
+  const userKeys = useSelector((state) => state.userKeys);
   const [eventID, setEventID] = useState(false);
   const [showQuoteBox, setShowQuoteBox] = useState(false);
-const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
   useEffect(() => {
     const updateDb = async () => {
       let subscription = ndkInstance.subscribe([{ ids: [eventID] }], {
@@ -49,11 +50,15 @@ const [isLogin, setIsLogin] = useState(false);
       <div
         className={"round-icon-tooltip"}
         data-tooltip={t("A5XLJln")}
-        onClick={() => userKeys ? setShowQuoteBox(true) : setIsLogin(true)}
+        onClick={() => (userKeys ? setShowQuoteBox(true) : setIsLogin(true))}
       >
-        <div
-          className={isQuoted ? "quote-bold-24 pointer" : "quote-24 opacity-4 pointer"}
-        ></div>
+        <Icon
+          name={isQuoted ? "quote-bold" : "quote"}
+          size={24}
+          className={`pointer ${!isQuoted ? "opacity-4" : ""}`}
+          isColored={isQuoted}
+          isBoldThemeColor={isQuoted}
+        />
       </div>
     </>
   );

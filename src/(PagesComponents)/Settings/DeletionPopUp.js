@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { copyText } from "../../Helpers/Helpers";
 import { shortenKey } from "../../Helpers/Encryptions";
+import Icon from "@/Components/Icon";
 
 export function DeletionPopUp({ exit, handleDelete, wallet }) {
   const { t } = useTranslation();
@@ -21,7 +22,7 @@ export function DeletionPopUp({ exit, handleDelete, wallet }) {
             backgroundColor: "var(--red-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         <h3 className="p-centered">{t("APJU882")}</h3>
         <p className="p-centered gray-c box-pad-v-s">{t("AOlHR1d")}</p>
@@ -31,7 +32,7 @@ export function DeletionPopUp({ exit, handleDelete, wallet }) {
           onClick={() => copyText(wallet.data, t("A6Pj02S"))}
         >
           <p>{shortenKey(wallet.data, 20)}</p>
-          <div className="copy-24"></div>
+          <Icon name="copy" size={24} />
         </div>
         <div className="fx-centered fit-container">
           <button className="fx btn btn-gst-red" onClick={handleDelete}>

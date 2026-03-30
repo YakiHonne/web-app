@@ -1,10 +1,6 @@
-
 import React, { useEffect, useState } from "react";
 import { nip19 } from "nostr-tools";
-import {
-  getEmptyuserMetadata,
-  getParsedSW,
-} from "@/Helpers/Encryptions";
+import { getEmptyuserMetadata, getParsedSW } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import LoadingDots from "@/Components/LoadingDots";
 import PreviewWidget from "@/Components/SmartWidget/PreviewWidget";
@@ -14,6 +10,8 @@ import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import WidgetCardV2 from "./WidgetCardV2";
+import Icon from "@/Components/Icon";
+import Overlay from "./Overlay";
 
 export default function BrowseSmartWidgetsV2({ setWidget, exit }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -113,7 +111,7 @@ export default function BrowseSmartWidgetsV2({ setWidget, exit }) {
         return;
       }
       setMyWidgetsLE(
-        comWidgets[comWidgets.length - 1]?.created_at || undefined
+        comWidgets[comWidgets.length - 1]?.created_at || undefined,
       );
       setComWidgetsLE(myWidgets[myWidgets.length - 1]?.created_at || undefined);
     };
@@ -133,18 +131,10 @@ export default function BrowseSmartWidgetsV2({ setWidget, exit }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered fx-start-v"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-      id="sw-browser"
-    >
+    <Overlay exit={exit} width={550}>
       <div
-        className="fit-height overlay-container fx-centered fx-start-v fx-start-h fx-col sc-s-18 bg-sp"
+        className="fit-height overlay-container fx-centered fx-start-v fx-start-h fx-col"
         style={{
-          width: "min(100%,550px)",
           overflow: "scroll",
           borderRadius: "0",
           border: "1px solid var(--pale-gray)",
@@ -225,7 +215,7 @@ export default function BrowseSmartWidgetsV2({ setWidget, exit }) {
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 
@@ -274,7 +264,7 @@ const WidgetCard = ({ setWidget, widget }) => {
             className="round-icon-small round-icon-tooltip"
             data-tooltip={t("AcXhvAu")}
           >
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </div>
       </div>

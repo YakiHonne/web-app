@@ -2,6 +2,7 @@ import React from "react";
 import { timeAgo } from "@/Helpers/Encryptions";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function BookmarkCard({
   event,
@@ -26,7 +27,7 @@ export default function BookmarkCard({
       <div className="fx-centered fx-start-v">
         {!event.image && (
           <div className="round-icon">
-            <div className="bookmark-24"></div>
+            <Icon name="bookmark" size={24} />
           </div>
         )}
         {event.image && (

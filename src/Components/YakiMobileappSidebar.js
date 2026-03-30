@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 let ymaQR = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/yma-qr.png";
 
 export default function YakiMobileappSidebar() {
@@ -20,7 +21,7 @@ export default function YakiMobileappSidebar() {
           className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s inactive-link`}
         >
           <div className="fx-centered">
-            <div className={"mobile-24"}></div>
+            <Icon name="mobile" size={24} />
             <div className="link-label">{t("A70sntU")}</div>
           </div>
         </div>
@@ -97,7 +98,7 @@ const MobileDemo = ({ exit }) => {
                 target="_blank"
               >
                 <button className="btn btn-gray fx-centered">
-                  <div className="apple"></div> {t("AGpzpu6")}
+                  <Icon name="apple" /> {t("AGpzpu6")}
                 </button>
               </a>
               <a
@@ -105,7 +106,7 @@ const MobileDemo = ({ exit }) => {
                 target="_blank"
               >
                 <button className="btn btn-gray fx-centered">
-                  <div className="google"></div> {t("ArHaw72")}
+                  <Icon name="google" /> {t("ArHaw72")}
                 </button>
               </a>
               <a
@@ -113,7 +114,7 @@ const MobileDemo = ({ exit }) => {
                 target="_blank"
               >
                 <button className="btn btn-gray fx-centered">
-                  <div className="zapstore"></div> {t("Aggp9CS")}
+                  <Icon name="zapstore" /> {t("Aggp9CS")}
                 </button>
               </a>
             </div>
@@ -135,7 +136,7 @@ const MobileDemo = ({ exit }) => {
                   className="btn btn-gray fx-centered"
                   style={{ aspectRatio: "1/1", padding: "0" }}
                 >
-                  <div className="github-logo"></div>
+                  <Icon name="github-logo" />
                 </button>
               </a>
             </div>

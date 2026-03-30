@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import Invoice from "./CachuWalletManagement/Invoice";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import DeleteWarning from "@/Components/DeleteWarning";
+import Icon from "@/Components/Icon";
 
 export default function CashuSentTokensAsHash({ cashuTokens }) {
   const { t } = useTranslation();
@@ -124,7 +125,7 @@ const Token = ({ token, updateStatus, removeToken, cashuTokens }) => {
           )}
           {status === "spent" && (
             <div className="fx-centered">
-              <div className="checkmark"></div>
+              <Icon name="checkmark" />
               <p className="green-c p-medium">{t("A3Dn0HW")}</p>
             </div>
           )}

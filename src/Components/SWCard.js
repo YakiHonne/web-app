@@ -4,6 +4,7 @@ import { customHistory } from "@/Helpers/History";
 import { useSelector } from "react-redux";
 import MiniApp from "@/Components/MiniApp";
 import PaymentGateway from "@/Components/PaymentGateway";
+import Icon from "@/Components/Icon";
 
 export default function SWCard({ widget, onNextWidget }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -339,10 +340,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //             <>
 //               <div style={{ position: "relative", width: "30%" }}>
 //                 {confirmation === "confirmed" && (
-//                   <div
-//                     className="checkmark slide-left"
-//                     style={{ scale: "3" }}
-//                   ></div>
+//                   <Icon name="checkmark" className="slide-left" />
 //                 )}
 //                 {confirmation !== "confirmed" && (
 //                   <div className="arrows-animated">
@@ -389,7 +387,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //                     <p className="gray-c p-medium">{t("A7r9XS1")}</p>
 //                     <p>{selectedWallet.entitle}</p>
 //                   </div>
-//                   <div className="arrow"></div>
+//                   <Icon name="arrow" />
 //                 </div>
 //               )}
 //               {showWalletsList && (
@@ -512,7 +510,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //                       t("AloNXcI", { amount: amount })
 //                     ) : (
 //                       <>
-//                         <div className="bolt"></div> Zap
+//                         <Icon name="bolt" /> Zap
 //                       </>
 //                     )}
 //                   </>
@@ -534,7 +532,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //               onClick={() => copyKey(invoice)}
 //             >
 //               <p>{shortenKey(invoice)}</p>
-//               <div className="copy-24"></div>
+//               <Icon name="copy" size={24} />
 //             </div>
 //             {!onlyInvoice && (
 //               <div className="fit-container fx-centered box-pad-v-s">

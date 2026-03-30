@@ -11,6 +11,7 @@ import { customHistory } from "@/Helpers/History";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import ContentCard from "./ContentCard";
+import Icon from "@/Components/Icon";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -260,7 +261,7 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
             )}
             {["articles", "drafts", "notes"].includes(contentFrom) && (
               <button className="btn btn-normal" onClick={handleAddContent}>
-                <div className="plus-sign"></div>
+                <Icon name="plus-sign" />
               </button>
             )}
           </div>

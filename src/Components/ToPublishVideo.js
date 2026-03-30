@@ -8,6 +8,7 @@ import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { nanoid } from "nanoid";
 import { InitEvent } from "@/Helpers/Controlers";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function ToPublishVideo({
   videoURL,
@@ -20,13 +21,17 @@ export default function ToPublishVideo({
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
-  const [selectedCategories, setSelectedCategories] = useState(event?.tTags || []);
+  const [selectedCategories, setSelectedCategories] = useState(
+    event?.tTags || [],
+  );
   const [thumbnailPrev, setThumbnailPrev] = useState(event?.image || "");
   const [thumbnailUrl, setThumbnailUrl] = useState(event?.image || "");
   const [tempTag, setTempTag] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [zapSplit, setZapSplit] = useState(event?.zapSplit ||[]);
-  const [zapSplitEnabled, setZapSplitEnabled] = useState(event?.zapSplit?.length > 1 ? true : false);
+  const [zapSplit, setZapSplit] = useState(event?.zapSplit || []);
+  const [zapSplitEnabled, setZapSplitEnabled] = useState(
+    event?.zapSplit?.length > 1 ? true : false,
+  );
 
   useEffect(() => {
     if (userKeys && event?.zapSplit.length === 0) {
@@ -40,7 +45,7 @@ export default function ToPublishVideo({
         setToast({
           type: 2,
           desc: t("ANdY72a"),
-        })
+        }),
       );
       return;
     }
@@ -62,7 +67,7 @@ export default function ToPublishVideo({
           setToast({
             type: 2,
             desc: t("AjrOVXL"),
-          })
+          }),
         );
         return;
       }
@@ -78,7 +83,12 @@ export default function ToPublishVideo({
         ["url", videoURL],
         ["title", videoTitle],
         ["summary", videoDesc],
-        ["published_at", event.published_at ? `${event.published_at}` : `${Math.floor(Date.now() / 1000)}`],
+        [
+          "published_at",
+          event.published_at
+            ? `${event.published_at}`
+            : `${Math.floor(Date.now() / 1000)}`,
+        ],
         [
           "client",
           "31990:20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3:1700732875747",
@@ -109,7 +119,7 @@ export default function ToPublishVideo({
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
 
       let timeout = setTimeout(() => {
@@ -122,7 +132,7 @@ export default function ToPublishVideo({
         setToast({
           type: 2,
           desc: t("Acr4Slu"),
-        })
+        }),
       );
       setIsLoading(false);
     }
@@ -199,7 +209,7 @@ export default function ToPublishVideo({
                 className="fx-centered pointer"
                 onClick={initThumbnail}
               >
-                <div className="trash"></div>
+                <Icon name="trash" isColored />
               </div>
             )}
 
@@ -239,7 +249,7 @@ export default function ToPublishVideo({
                       setToast({
                         type: 3,
                         desc: t("Axk4fkj"),
-                      })
+                      }),
                     );
                 setTempTag("");
               }}

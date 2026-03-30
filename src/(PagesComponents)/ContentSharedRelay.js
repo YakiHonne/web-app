@@ -33,6 +33,7 @@ import RelayJoinRequest from "./RelayJoinRequest";
 import RelayRequestCode from "@/Components/RelayRequestCode";
 import DeleteWarning from "@/Components/DeleteWarning";
 import LoadingDots from "@/Components/LoadingDots";
+import Icon from "@/Components/Icon";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -192,7 +193,7 @@ export default function ContentSharedRelay() {
                             onClick={() => setShowLeavingWarning(true)}
                             diabled={isRelayAccessLoading}
                           >
-                            <div className="logout"></div>
+                            <Icon name="logout" />
                             {isRelayAccessLoading ? (
                               <LoadingDots />
                             ) : (
@@ -239,14 +240,7 @@ export default function ContentSharedRelay() {
                   className="fit-container fx-centered fx-col"
                   style={{ height: "80vh" }}
                 >
-                  <div
-                    className="yaki-logomark"
-                    style={{
-                      minWidth: "48px",
-                      minHeight: "48px",
-                      opacity: 0.5,
-                    }}
-                  ></div>
+                  <Icon name="yaki-logomark" size={48} />
                   <h4>{t("A2l1JgC")}</h4>
                   <p
                     className="p-centered gray-c"
@@ -489,10 +483,7 @@ const HomeFeed = ({ relay }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="yaki-logomark"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="yaki-logomark" size={48} />
           <h4>{t("A5BPCrj")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("AB9jjjH")}
@@ -504,10 +495,7 @@ const HomeFeed = ({ relay }) => {
           className="fit-container fx-centered fx-col"
           style={{ height: "40vh" }}
         >
-          <div
-            className="link"
-            style={{ minWidth: "48px", minHeight: "48px", opacity: 0.5 }}
-          ></div>
+          <Icon name="link" size={48} />
           <h4>{t("AZ826Ej")}</h4>
           <p className="p-centered gray-c" style={{ maxWidth: "330px" }}>
             {t("A5ebGh9")}

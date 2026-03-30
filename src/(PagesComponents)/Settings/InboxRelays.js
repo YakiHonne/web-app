@@ -7,6 +7,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import RelaysPicker from "@/Components/RelaysPicker";
 import RelayImage from "@/Components/RelayImage";
 import NDK from "@nostr-dev-kit/ndk";
+import Icon from "@/Components/Icon";
 
 export function InboxRelays({ setShowRelaysInfo, allRelays }) {
   const dispatch = useDispatch();
@@ -204,13 +205,7 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
                       ></div>
                       <RelayImage url={relay.url} />
                       <p>{relay.url}</p>
-                      <div
-                        className="info-tt"
-                        style={{
-                          filter: "brightness(0) invert()",
-                          opacity: 0.5,
-                        }}
-                      ></div>
+                      <Icon name="info-tt" isColored />
                     </div>
                     {!isNew && (
                       <div>
@@ -219,7 +214,7 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
                             onClick={() => removeRelayFromList(false, index)}
                             className="round-icon-small"
                           >
-                            <div className="logout-red"></div>
+                            <Icon name="logout-red" />
                           </div>
                         )}
                         {relay.toDelete && (
@@ -227,7 +222,7 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
                             onClick={() => removeRelayFromList(true, index)}
                             className="round-icon-small"
                           >
-                            <div className="undo"></div>
+                            <Icon name="undo" />
                           </div>
                         )}
                       </div>
@@ -238,7 +233,7 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
                         className="round-icon-small"
                         style={{ borderColor: "var(--red-main)" }}
                       >
-                        <div className="trash"></div>
+                        <Icon name="trash" isColored />
                       </div>
                     )}
                   </div>

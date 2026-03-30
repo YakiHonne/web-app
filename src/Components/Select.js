@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Icon from "@/Components/Icon";
 
 export default function Select({
   options,
@@ -59,7 +60,7 @@ export default function Select({
             {selectedValue?.left_el && selectedValue?.left_el}
             <p>{selectedValue?.display_name || defaultLabel}</p>
           </div>
-          <div className="arrow-12"></div>
+          <Icon name="arrow" size={12} />
         </div>
       </div>
       {showOptions && (

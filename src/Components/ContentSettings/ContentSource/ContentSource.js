@@ -8,6 +8,7 @@ import useRelaysSet from "@/Hooks/useRelaysSet";
 import { getParsedRelaySet } from "@/Helpers/Encryptions";
 import usePacks from "@/Hooks/usePacks";
 import SharePackLink from "./SharePackLink";
+import Icon from "@/Components/Icon";
 
 export default function ContentSource({
   selectedCategory,
@@ -257,7 +258,7 @@ export default function ContentSource({
             category={selectedCategory}
             minimal={true}
           />
-          <div className="arrow"></div>
+          <Icon name="arrow" />
         </div>
         {showOptions && (
           <div
@@ -292,7 +293,7 @@ export default function ContentSource({
                   <div
                     onClick={() => setShowFeedMarketPlace(!showFeedMarketplace)}
                   >
-                    <div className="setting"></div>
+                    <Icon name="setting" />
                   </div>
                 )}
             </div>
@@ -332,16 +333,16 @@ export default function ContentSource({
                               />
                               <div className="fx-centered">
                                 {selectedCategory.value === _.value && (
-                                  <div className="check-24"></div>
+                                  <Icon name="check" size={24} />
                                 )}
                                 {option.value === "af" && (
-                                  <div
-                                    className="share-icon"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setshowRelaySharing(_.value);
-                                    }}
-                                  ></div>
+                                    <Icon
+                                      name="share-icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setshowRelaySharing(_.value);
+                                      }}
+                                    />
                                 )}
                               </div>
                             </div>
@@ -403,10 +404,10 @@ export default function ContentSource({
                               {metadata.relays.length === 1
                                 ? "relay"
                                 : "relays"}
-                              {/* <div className="arrow-12"></div> */}
+                              {/* <Icon name="arrow" size={12} /> */}
                             </div>
                             {selectedCategory.value === metadata.aTag && (
-                              <div className="check-24"></div>
+                              <Icon name="check" size={24} />
                             )}
                           </div>
                         </div>
@@ -442,15 +443,15 @@ export default function ContentSource({
                           />
                           <div className="fx-centered">
                             {selectedCategory.value === _.value && (
-                              <div className="check-24"></div>
+                              <Icon name="check" size={24} />
                             )}
-                            <div
-                              className="share-icon"
+                            <Icon
+                              name="share-icon"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setshowRelaySharing(_.value);
                               }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       );
@@ -493,15 +494,15 @@ export default function ContentSource({
                           />
                           <div className="fx-centered">
                             {selectedCategory.value === metadata.aTag && (
-                              <div className="check-24"></div>
+                              <Icon name="check" size={24} />
                             )}
-                            <div
-                              className="share-icon"
+                            <Icon
+                              name="share-icon"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setShowPackSharing(metadata.d);
                               }}
-                            ></div>
+                            />
                           </div>
                         </div>
                       );

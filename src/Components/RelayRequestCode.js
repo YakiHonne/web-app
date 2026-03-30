@@ -2,6 +2,7 @@ import { shortenKey } from "@/Helpers/Encryptions";
 import { copyText } from "@/Helpers/Helpers";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function RelayRequestCode({ code, exit }) {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export default function RelayRequestCode({ code, exit }) {
           onClick={handleCopy}
         >
           <p>{shortenKey(code, 20)}</p>
-          <div className="copy"></div>
+          <Icon name="copy" />
         </div>
       </div>
     </div>

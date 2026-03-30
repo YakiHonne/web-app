@@ -8,6 +8,7 @@ import MinimalPreviewWidget from "@/Components/SmartWidget/MinimalPreviewWidget"
 import useUserProfile from "@/Hooks/useUsersProfile";
 import Date_ from "./Date_";
 import MediaEventPreview from "./MediaEventPreview";
+import Icon from "@/Components/Icon";
 
 export default function LinkRepEventPreview({ event, allowClick = true }) {
   const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
@@ -59,7 +60,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
                   <p className="p-bold p-one-line">
                     {userProfile.display_name || userProfile.name}
                   </p>
-                  {isNip05Verified && <div className="checkmark-c1"></div>}
+                  {isNip05Verified && <Icon name="checkmark-c1" isColored />}
                 </div>
                 <p className="gray-c p-medium">&#8226;</p>
                 <p className="gray-c p-medium">
@@ -111,7 +112,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
         }}
       >
         {(event.kind === 34235 || event.kind === 21 || event.kind === 22) && (
-          <div className="play-vid-58"></div>
+          <Icon name="play-vid" size={58} />
         )}
       </div>
       <div
@@ -136,7 +137,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
             <p className="p-one-line">
               {userProfile.display_name || userProfile.name}
             </p>
-            {isNip05Verified && <div className="checkmark-c1"></div>}
+            {isNip05Verified && <Icon name="checkmark-c1" isColored />}
           </div>
         </div>
       </div>

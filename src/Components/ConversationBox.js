@@ -11,6 +11,8 @@ import { deleteMessage, sendMessage } from "@/Helpers/DMHelpers";
 import OptionsDropdown from "./OptionsDropdown";
 import { copyText } from "@/Helpers/Helpers";
 import DeleteWarning from "./DeleteWarning";
+import RedPacket from "./RedPacket/RedPacketInit/RedPacket";
+import Icon from "@/Components/Icon";
 
 export function ConversationBox({ convo, back, noHeader = false }) {
   let conversationLength = convo.convo.length;
@@ -50,10 +52,11 @@ export function ConversationBox({ convo, back, noHeader = false }) {
     }
   }, [message]);
 
-  const handleSendMessage = async () => {
-    if (!message || !convo.pubkey) return;
+  const handleSendMessage = async ({ content, isRedPacket = false }) => {
+    let messageContent = isRedPacket ? content : message;
+    if (!messageContent || !convo.pubkey) return;
     setShowProgress(true);
-    await sendMessage(convo.pubkey, message, replyOn?.id);
+    await sendMessage(convo.pubkey, messageContent, replyOn?.id);
     setMessage("");
     setReplyOn(false);
   };
@@ -106,6 +109,11 @@ export function ConversationBox({ convo, back, noHeader = false }) {
     setReplyOn(false);
   };
 
+  const handleRedPacket = (data) => {
+    handleSendMessage({ content: data, isRedPacket: true });
+    setMessage(data);
+  };
+
   if (!convo) return;
   return (
     <>
@@ -128,7 +136,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
           >
             <div className="fx-centered">
               <div className="round-icon desk-hide" onClick={back}>
-                <div className="arrow arrow-back"></div>
+                <Icon name="arrow" transform="rotate(90deg)" />
               </div>
               <UserProfilePic
                 img={convo.picture}
@@ -181,7 +189,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
             >
               <div className="fit-container">
                 <div className="box-pad-h-m box-pad-v-m fx-centered fx-start-h fit-container sc-s-18">
-                  <div className="info-tt-24"></div>
+                  <Icon name="info-tt" size={24} isColored />
                   <div>
                     <p className="c1-c p-medium">{t("AakbxOk")}</p>
                   </div>
@@ -246,7 +254,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                       className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fx-start-h fx-start-v fx-col"
                       style={{
                         overflow: "visible",
-                        maxWidth: "min(90%, 500px)",
+                        maxWidth: "min(100%, 500px)",
                       }}
                     >
                       <div>{reply.content}</div>
@@ -273,7 +281,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                                   copyText(convo.raw_content, t("Ae9XEnt"))
                                 }
                               >
-                                <div className="copy"></div>
+                                <Icon name="copy" />
                                 <p>{t("AUkCrth")}</p>
                               </div>,
                               <div
@@ -282,17 +290,14 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                                   handleSelectMessageToDelete(convo, isSelected)
                                 }
                               >
-                                <div
-                                  className="arrow"
-                                  style={{ rotate: "-90deg" }}
-                                ></div>
+                                <Icon name="arrow" transform="rotate(90deg)" />
                                 <p>{t("AbqDpIH")}</p>
                               </div>,
                               <div
                                 className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                                 onClick={() => setShowDelete(convo)}
                               >
-                                <div className="trash"></div>
+                                <Icon name="trash" isColored />
                                 <p className=" red-c">
                                   {convo.kind === 4
                                     ? t("AUyfblR")
@@ -318,25 +323,36 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                       </div>
                     </div>
                   )}
-                  <div className="fx-centered">
+                  <div
+                    className={`fx-centered ${convo.peer ? "fx-end-h" : "fx-start-h"}`}
+                  >
                     <div
-                      className="sc-s-18 box-pad-h-s box-pad-v-s fx-centered fx-start-h fx-start-v fx-col"
+                      className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fx-start-h fx-start-v fx-col"
                       style={{
                         backgroundColor: convo.peer
-                          ? "var(--orange-side)"
-                          : "var(--c1-side)",
+                          ? "var(--c1-side)"
+                          : "transparent",
                         borderBottomLeftRadius: !convo.peer ? 0 : "inital",
                         borderBottomRightRadius: convo.peer ? 0 : "inital",
-                        maxWidth: "min(90%, 500px)",
+                        maxWidth: "min(100%, 500px)",
                         minWidth: "300px",
-                        border: "none",
+                        // width: "fit-content",
+                        border: convo.peer
+                          ? "none"
+                          : "1px solid var(--dim-gray)",
                         overflow: "visible",
                       }}
                     >
-                      {<div className="fit-container">{convo.content}</div> || (
-                        <LoadingDots />
-                      )}
+                      {(
+                        <div
+                          className="fit-container"
+                          style={{ lineHeight: "1.6" }}
+                        >
+                          {convo.content}
+                        </div>
+                      ) || <LoadingDots />}
                       <div
+                        style={{ minWidth: "max-content" }}
                         className="fx-centered fx-start-h round-icon-tooltip pointer fit-container"
                         data-tooltip={
                           convo.kind === 4 ? t("ALZCVV2") : t("ATta6yb")
@@ -345,11 +361,14 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                         {convo.kind === 4 && (
                           <>
                             <div>
-                              <div className="unprotected"></div>
+                              <Icon name="unprotected" />
                             </div>
                             <p
                               className="gray-c p-medium"
-                              style={{ fontStyle: "italic" }}
+                              style={{
+                                fontStyle: "italic",
+                                minWidth: "max-content",
+                              }}
                             >
                               <Date_
                                 toConvert={new Date(convo.created_at * 1000)}
@@ -361,11 +380,14 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                         {convo.kind !== 4 && (
                           <>
                             <div>
-                              <div className="protected"></div>
+                              <Icon name="protected" isColored />
                             </div>
                             <p
                               className="green-c p-medium"
-                              style={{ fontStyle: "italic" }}
+                              style={{
+                                fontStyle: "italic",
+                                minWidth: "max-content",
+                              }}
                             >
                               <Date_
                                 toConvert={new Date(convo.created_at * 1000)}
@@ -387,7 +409,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                           style={{ minWidth: "24px", minHeight: "24px" }}
                           className="sc-s"
                         >
-                          {isSelected && <div className="checkmark-24"></div>}
+                          {isSelected && <Icon name="checkmark" size={24} />}
                         </div>
                       </div>
                     )}
@@ -437,7 +459,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                   </>
                 )}
               </p>
-              <p className=" p-one-line" style={{ width: "min(90%, 500px)" }}>
+              <p className=" p-one-line" style={{ width: "min(100%, 500px)" }}>
                 {replyOn.raw_content}
               </p>
             </div>
@@ -485,6 +507,10 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                   }}
                 />
                 <div className="fx-centered" style={{ padding: ".75rem" }}>
+                  <RedPacket
+                    receipient={convo.pubkey}
+                    onSuccess={handleRedPacket}
+                  />
                   <Emojis
                     position="right"
                     setEmoji={(data) =>
@@ -528,7 +554,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                 </div>
               </div>
               <div className="round-icon" onClick={handleSendMessage}>
-                <div className="send-24"></div>
+                <Icon name="send" size={24} />
               </div>
             </form>
           </div>

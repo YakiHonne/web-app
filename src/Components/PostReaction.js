@@ -8,6 +8,7 @@ import Repost from "./Reactions/Repost";
 import Quote from "./Reactions/Quote";
 import Zap from "./Reactions/Zap";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
+import Icon from "@/Components/Icon";
 
 export default function PostReaction({
   event,
@@ -114,10 +115,12 @@ export default function PostReaction({
             style={{ columnGap: "8px", order: order.replies }}
           >
             <div className="round-icon-tooltip" data-tooltip={t("ADHdLfJ")}>
-              <div
+              <Icon
+                name="comment"
+                size={24}
                 className="comment-24 opacity-4"
                 onClick={() => setOpenComment(!openComment)}
-              ></div>
+              />
             </div>
             <div className="round-icon-tooltip" data-tooltip={t("AMBxvKP")}>
               <div onClick={() => setShowComments(true)} className="opacity-4">

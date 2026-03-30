@@ -50,6 +50,7 @@ import EventOptions from "@/Components/ElementOptions/EventOptions";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { DraggableComp } from "@/Components/DraggableComp";
+import Icon from "@/Components/Icon";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -753,7 +754,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
             )}
             {["articles", "drafts", "notes"].includes(contentFrom) && (
               <button className="btn btn-normal" onClick={handleAddContent}>
-                <div className="plus-sign"></div>
+                <Icon name="plus-sign" />
               </button>
             )}
           </div>
@@ -990,7 +991,7 @@ const Widgets = ({ setPostToNote, localDrafte }) => {
           <h4 className="p-caps">{t("A2mdxcf")}</h4>
           <div className="fx-centered">
             <button className="btn btn-normal" onClick={handleAddContent}>
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
             </button>
           </div>
         </div>
@@ -1149,7 +1150,7 @@ const Bookmarks = () => {
             className="btn btn-normal"
             onClick={() => setShowAddBookmark(true)}
           >
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </button>
         </div>
         <div className="fit-container fx-centered fx-col fx-start-v box-pad-h">
@@ -1214,7 +1215,7 @@ const Interests = () => {
               className="btn btn-normal fx-centered"
               onClick={() => setIsManage(true)}
             >
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
               {t("AIUAUcP")}
             </button>
           </div>
@@ -1378,7 +1379,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                   </div>
                   <Link href={`/yaki-points`}>
                     <button className="btn btn-small btn-normal fx-centered">
-                      <div className="cup"></div> Yaki {t("A4IGG0z")}
+                      <Icon name="cup" /> Yaki {t("A4IGG0z")}
                     </button>
                   </Link>
                 </div>
@@ -1401,10 +1402,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                   }}
                   onClick={() => setShowPeople("following")}
                 >
-                  <div
-                    className="user-followed-24"
-                    style={{ minWidth: "32px", minHeight: "32px" }}
-                  ></div>
+                  <Icon name="user-followed" size={32} />
                   <div className="fx-centered fx-wrap fx-start-h">
                     <p className="p-big">
                       {data.userProfile?.follows_count || 0}
@@ -1421,10 +1419,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                   }}
                   onClick={() => setShowPeople("followers")}
                 >
-                  <div
-                    className="user-followed-24"
-                    style={{ minWidth: "32px", minHeight: "32px" }}
-                  ></div>
+                  <Icon name="user-followed" size={32} />
                   <div className="fx-centered fx-wrap fx-start-h">
                     <p className="p-big">
                       {data.userProfile?.followers_count || 0}
@@ -1448,10 +1443,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                     pubkey: userMetadata.pubkey,
                   })}`}
                 >
-                  <div
-                    className="note-24"
-                    style={{ minWidth: "32px", minHeight: "32px" }}
-                  ></div>
+                  <Icon name="note" size={32} />
                   <div className="fx-centered fx-wrap fx-start-h">
                     <p className="p-big">{data.userProfile?.note_count || 0}</p>
                     <p className="gray-c">{t("AYIXG83")}</p>
@@ -1471,10 +1463,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                     query: { contentType: "replies" },
                   }}
                 >
-                  <div
-                    className="comment-icon"
-                    style={{ minWidth: "32px", minHeight: "32px" }}
-                  ></div>
+                  <Icon name="comment-icon" size={32} />
                   <div className="fx-centered fx-wrap fx-start-h">
                     <p className="p-big">
                       {data.userProfile?.reply_count || 0}
@@ -1494,10 +1483,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                 flex: "1 1 200px",
               }}
             >
-              <div
-                className="bolt-24"
-                style={{ minWidth: "32px", minHeight: "32px" }}
-              ></div>
+              <Icon name="bolt" size={32} />
               <div className="fx-centered">
                 <div>
                   <p className="p-big">
@@ -1526,10 +1512,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                 flex: "1 1 200px",
               }}
             >
-              <div
-                className="bolt-24"
-                style={{ minWidth: "32px", minHeight: "32px" }}
-              ></div>
+              <Icon name="bolt" size={32} />
               <div className="fx-centered">
                 <div>
                   <p className="p-big">
@@ -1741,7 +1724,7 @@ const DraftCard = ({ event, refreshAfterDeletion }) => {
     >
       <div className="fx-centered fx-start-v">
         <div className="round-icon">
-          <div className="posts-24"></div>
+          <Icon name="posts" size={24} />
         </div>
 
         <div className="fx-centered fx-col fx-start-h fx-start-v">
@@ -1817,9 +1800,9 @@ const DraftCardOthers = ({ event, setPostToNote, handleDelete }) => {
     >
       <div className="fx-centered fx-start-v">
         <div className="round-icon">
-          {event.kind === 11 && <div className="note-24"></div>}
+          {event.kind === 11 && <Icon name="note" size={24} />}
           {event.kind === 300331 && !event.content.image && (
-            <div className="smart-widget-24"></div>
+            <Icon name="smart-widget" size={24} />
           )}
 
           {event.kind === 300331 && event.content.image && (
@@ -1921,14 +1904,14 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
         {!event.image && event.kind !== 20 && (
           <div className="round-icon">
             {[30004, 30005].includes(event.kind) && (
-              <div className="curation-24"></div>
+              <Icon name="curation" size={24} />
             )}
-            {[30023].includes(event.kind) && <div className="posts-24"></div>}
+            {[30023].includes(event.kind) && <Icon name="posts" size={24} />}
             {[34235, 21, 22].includes(event.kind) && (
-              <div className="play-24"></div>
+              <Icon name="play" size={24} />
             )}
             {[30033].includes(event.kind) && (
-              <div className="smart-widget-24"></div>
+              <Icon name="smart-widget" size={24} />
             )}
           </div>
         )}
@@ -1966,15 +1949,15 @@ const RepCard = ({ event, refreshAfterDeletion }) => {
           </p>
           <div className="fx-centered">
             <div className="fx-centered">
-              <div className="heart"></div>
+              <Icon name="heart" />
               <div className="gray-c">{postActions.likes.likes.length}</div>
             </div>
             <div className="fx-centered">
-              <div className="comment-icon"></div>
+              <Icon name="comment-icon" />
               <p className="gray-c">{postActions.replies.replies.length}</p>
             </div>
             <div className="fx-centered">
-              <div className="bolt"></div>
+              <Icon name="bolt" />
               <p className="gray-c">{postActions.zaps.total}</p>
             </div>
             <div className="box-pad-h-s">
@@ -2060,7 +2043,7 @@ const NoteCard = ({ event, refreshAfterDeletion }) => {
     >
       <div className="fx-centered fx-start-v">
         <div className="round-icon">
-          <div className="note-24"></div>
+          <Icon name="note" size={24} />
         </div>
         <div className="fx-centered fx-col fx-start-h fx-start-v">
           <div className="fx-centered">
@@ -2075,15 +2058,15 @@ const NoteCard = ({ event, refreshAfterDeletion }) => {
           </p>
           <div className="fx-centered">
             <div className="fx-centered">
-              <div className="heart"></div>
+              <Icon name="heart" />
               <div className="gray-c">{postActions.likes.likes.length}</div>
             </div>
             <div className="fx-centered">
-              <div className="comment-icon"></div>
+              <Icon name="comment-icon" />
               <p className="gray-c">{postActions.replies.replies.length}</p>
             </div>
             <div className="fx-centered">
-              <div className="bolt"></div>
+              <Icon name="bolt" />
               <p className="gray-c">{postActions.zaps.total}</p>
             </div>
             {isFlashNews && (
@@ -2093,7 +2076,7 @@ const NoteCard = ({ event, refreshAfterDeletion }) => {
             )}
             {event.kind === 6 && (
               <div className="sticker sticker-normal sticker-gray-black fx-centered">
-                {t("AqWa0gF")} <div className="switch-arrows"></div>
+                {t("AqWa0gF")} <Icon name="switch-arrows" />
               </div>
             )}
           </div>
@@ -2128,7 +2111,7 @@ const BookmarkCard = ({ event, showDetails, deleteEvent, editEvent }) => {
       <div className="fx-centered fx-start-v">
         {!event.image && (
           <div className="round-icon">
-            <div className="bookmark-24"></div>
+            <Icon name="bookmark" size={24} />
           </div>
         )}
         {event.image && (
@@ -2309,10 +2292,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
         <div className="fit-container fx-scattered box-marg-s">
           <div className="fx-centered fx-start-h pointer" onClick={exit}>
             <div className="round-icon">
-              <div
-                className="arrow"
-                style={{ transform: "rotate(90deg)" }}
-              ></div>
+              <Icon name="arrow" />
             </div>
             <p>{t("A8VdJyb")}</p>
           </div>
@@ -2399,7 +2379,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                         target={"_blank"}
                         href={`/${item.naddr || item.nevent}`}
                       >
-                        <div className="share-icon-24"></div>
+                        <Icon name="share-icon" size={24} />
                       </Link>
                       <BookmarkEvent
                         pubkey={item.pubkey}
@@ -2428,7 +2408,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                           minWidth: "64px",
                         }}
                       >
-                        <div className="note-24"></div>
+                        <Icon name="note" size={24} />
                       </div>
                       <div>
                         <p className="p-medium gray-c">
@@ -2449,7 +2429,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                         target={"_blank"}
                         href={`/${item.naddr || item.nevent}`}
                       >
-                        <div className="share-icon-24"></div>
+                        <Icon name="share-icon" size={24} />
                       </Link>
                       <BookmarkEvent
                         pubkey={item.id}
@@ -2493,7 +2473,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                         target={"_blank"}
                         href={`/${item.naddr || item.nevent}`}
                       >
-                        <div className="share-icon-24"></div>
+                        <Icon name="share-icon" size={24} />
                       </Link>
                       <BookmarkEvent
                         pubkey={item.pubkey}
@@ -2522,9 +2502,9 @@ const BookmarkContent = ({ bookmark, exit }) => {
                         }}
                       >
                         {tag.kind === 2 ? (
-                          <div className="link-24"></div>
+                          <Icon name="link" size={24} />
                         ) : (
-                          <div className="hashtag-24"></div>
+                          <Icon name="hashtag" size={24} />
                         )}
                       </div>
                       <div>
@@ -2555,7 +2535,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
                             : `/search?keyword=${tag.value[1]}`
                         }
                       >
-                        <div className="share-icon-24"></div>
+                        <Icon name="share-icon" size={24} />
                       </Link>
                       <BookmarkEvent
                         pubkey={tag.value[1]}
@@ -2670,7 +2650,7 @@ const ManageInterest = ({ exit }) => {
       <div className="fit-container fx-scattered box-marg-s box-pad-h ">
         <div className="fx-centered fx-start-h pointer" onClick={exit}>
           <div className="round-icon">
-            <div className="arrow" style={{ transform: "rotate(90deg)" }}></div>
+            <Icon name="arrow" />
           </div>
           <p>{t("ARsUd9r")}</p>
         </div>
@@ -2689,7 +2669,7 @@ const ManageInterest = ({ exit }) => {
           }}
           className="if fit-container fx-scattered"
         >
-          <div className="search-24"></div>
+          <Icon name="search" size={24} />
           <input
             value={newInterest}
             onChange={(e) => setNewInterest(e.target.value)}
@@ -2755,7 +2735,7 @@ const InterestItem = ({ item, handleItemInList, index }) => {
             onClick={() => handleItemInList(false, index)}
             className="round-icon-small"
           >
-            <div className="trash"></div>
+            <Icon name="trash" isColored />
           </div>
         )}
         {item.toDelete && (
@@ -2763,7 +2743,7 @@ const InterestItem = ({ item, handleItemInList, index }) => {
             onClick={() => handleItemInList(true, index)}
             className="round-icon-small"
           >
-            <div className="undo"></div>
+            <Icon name="undo" />
           </div>
         )}
         <div

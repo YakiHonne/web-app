@@ -17,6 +17,7 @@ import { customHistory } from "@/Helpers/History";
 import YakiMobileappSidebar from "@/Components/YakiMobileappSidebar";
 import { useTranslation } from "react-i18next";
 import NotificationCenter from "./SideBar/NotificationCenter";
+import Icon from "@/Components/Icon";
 
 export default function MenuMobile({ toggleLogin, exit }) {
   const userMetadata = useSelector((state) => state.userMetadata);
@@ -27,7 +28,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
     return userChatrooms.find((chatroom) => !chatroom.checked);
   }, [userChatrooms]);
   const [pubkey, setPubkey] = useState(
-    userKeys.pub ? getBech32("npub", userKeys.pub) : ""
+    userKeys.pub ? getBech32("npub", userKeys.pub) : "",
   );
   const [dismissed, setDismissed] = useState(false);
   const { t } = useTranslation();
@@ -71,7 +72,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
         onClick={dismiss}
       >
         <div className="close-button">
-          <div className="arrow" style={{ rotate: "-90deg" }}></div>
+          <Icon name="arrow" transform="rotate(90deg)" />
         </div>
       </div>
       {!userMetadata && (
@@ -107,7 +108,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
             isPage("/") ? "active-link" : "inactive-link"
           }`}
         >
-          <div className="home-24"></div>
+          <Icon name="home" size={24} />
           <div className="p-big">{t("AJDdA3h")}</div>
         </div>
         <div
@@ -119,7 +120,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
             isPage("/media") ? "active-link" : "inactive-link"
           }`}
         >
-          <div className="media-24"></div>
+          <Icon name="media" size={24} />
           <div className="p-big">{t("A0i2SOt")}</div>
         </div>
         <div
@@ -131,7 +132,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
             isPage("/relay-orbits") ? "active-link" : "inactive-link"
           }`}
         >
-          <div className="orbit-24"></div>
+          <Icon name="orbit" size={24} />
           <div className="p-big">{t("AjGFut6")}</div>
         </div>
         <div
@@ -143,7 +144,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
             isPage("/articles") ? "active-link" : "inactive-link"
           }`}
         >
-          <div className="posts-24"></div>
+          <Icon name="posts" size={24} />
           <div className="p-big">{t("AesMg52")}</div>
         </div>
         <div
@@ -155,7 +156,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
             isPage("/smart-widgets") ? "active-link" : "inactive-link"
           }`}
         >
-          <div className="smart-widget-24"></div>
+          <Icon name="smart-widget" size={24} />
           <div className="p-big">{t("AkvXmyz")}</div>
         </div>
         <div
@@ -168,7 +169,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
           }`}
         >
           <div className="fx-centered">
-            <div className="env-24"></div>
+            <Icon name="env" size={24} />
             <div className="link-labe p-big">{t("As2zi6P")}</div>
           </div>
           {isNewMsg && (
@@ -200,11 +201,11 @@ export default function MenuMobile({ toggleLogin, exit }) {
               }}
             >
               <div className="fx-centered">
-                <div
-                  className={
-                    isPage("/dashboard") ? "dashboard-bold-24" : "dashboard-24"
-                  }
-                ></div>
+                {isPage("/dashboard") ? (
+                  <Icon name={"dashboard-bold"} size={24} />
+                ) : (
+                  <Icon name={"dashboard"} size={24} />
+                )}
                 <div className="link-label p-big">Dashboard</div>
               </div>
             </div>
@@ -225,19 +226,19 @@ export default function MenuMobile({ toggleLogin, exit }) {
                 className="fit-container fx-centered fx-start-h  box-pad-v-s  box-pad-h-s"
                 onClick={() => {
                   customHistory(
-                    `/profile/${nip19.nprofileEncode({ pubkey: userKeys.pub })}`
+                    `/profile/${nip19.nprofileEncode({ pubkey: userKeys.pub })}`,
                   );
                   dismiss();
                 }}
               >
-                <div className="user-24"></div>
+                <Icon name="user" size={24} />
                 <p className="p-big">{t("AyBBPWE")}</p>
               </div>
               <div
                 className="fit-container fx-centered fx-start-h  box-pad-v-s  box-pad-h-s"
                 onClick={() => customHistory(`/yaki-points`)}
               >
-                <div className="cup-24"></div>
+                <Icon name="cup" size={24} />
                 <p className="p-big">{t("ABsx3n9")}</p>
               </div>
               <div
@@ -247,7 +248,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
                   dismiss();
                 }}
               >
-                <div className="setting-24"></div>
+                <Icon name="setting" size={24} />
                 <p className="p-big">{t("ABtsLBp")}</p>
               </div>
             </div>
@@ -257,7 +258,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
                 userLogout(userKeys.pub);
               }}
             >
-              <div className="logout-24"></div>
+              <Icon name="logout" size={24} />
               <p className="fx-centered p-big">
                 {t("AyXwdfE")}
                 <span className="sticker sticker-normal sticker-orange-side">
@@ -365,7 +366,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
                 dismiss();
               }}
             >
-              <div className="plus-sign"></div>
+              <Icon name="plus-sign" />
               <p className="gray-c">{t("AnDg41L")}</p>
             </div>
             <div
@@ -381,7 +382,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
                   borderRadius: "10px",
                 }}
               >
-                <div className="logout"></div>
+                <Icon name="logout" />
                 <p>{t("AWFCAQG")}</p>
               </div>
             </div>

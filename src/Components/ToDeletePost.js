@@ -4,6 +4,7 @@ import axiosInstance from "@/Helpers/HTTP_Client";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
+import Icon from "@/Components/Icon";
 
 export default function ToDeletePost({
   exit,
@@ -84,7 +85,7 @@ export default function ToDeletePost({
             backgroundColor: "var(--red-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         {title && (
           <h3 className="p-centered" style={{ wordBreak: "break-word" }}>

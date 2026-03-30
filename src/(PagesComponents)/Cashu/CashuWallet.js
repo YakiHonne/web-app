@@ -18,6 +18,7 @@ import { SelectTabsNoIndex } from "@/Components/SelectTabsNoIndex";
 import { customHistory } from "@/Helpers/History";
 import { setUserBalance } from "@/Store/Slides/UserData";
 import { useDispatch } from "react-redux";
+import Icon from "@/Components/Icon";
 
 export default function CashuWallet() {
   const { t } = useTranslation();
@@ -199,7 +200,7 @@ export default function CashuWallet() {
                                   {notInWalletMints.length > 0 && (
                                     <p className="p-bold p-medium">⚠️</p>
                                   )}
-                                  <div className="setting-24"></div>
+                                  <Icon name="setting" size={24} />
                                 </div>
                               </div>
                             )
@@ -224,14 +225,14 @@ export default function CashuWallet() {
                             className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                             onClick={() => setLaunchRestoration(true)}
                           >
-                            <div className="restore"></div>
+                            <Icon name="restore" />
                             <p>{t("ADmoKen")}</p>
                           </div>,
                           <div
                             className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                             onClick={() => setLaunchSyncing(true)}
                           >
-                            <div className="switch-arrows-v2"></div>
+                            <Icon name="switch-arrows-v2" />
                             <p>{t("A7hStNv")}</p>
                           </div>,
                         ]}
@@ -266,7 +267,7 @@ export default function CashuWallet() {
                     disabled={activeMint ? false : true}
                   >
                     <div className="box-pad-v-s">
-                      <div className="switch-arrows-v2"></div>
+                      <Icon name="switch-arrows-v2" />
                     </div>
                     <span>{t("AZE0w8d")}</span>
                   </button>

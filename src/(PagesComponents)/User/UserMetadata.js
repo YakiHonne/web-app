@@ -20,6 +20,7 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import useIsMute from "@/Hooks/useIsMute";
 import { sleepTimer } from "@/Helpers/Helpers";
 import AvatarPlaceholder from "@/Components/AvatarPlaceholder";
+import Icon from "@/Components/Icon";
 
 export default function UserMetadata({ user }) {
   const { t } = useTranslation();
@@ -223,7 +224,7 @@ export default function UserMetadata({ user }) {
                         }}
                         onClick={handleInitConvo}
                       >
-                        <div className="env-edit-24"></div>
+                        <Icon name="env-edit" size={24} />
                       </div>
                     </div>
                   )}
@@ -244,19 +245,19 @@ export default function UserMetadata({ user }) {
           >
             <div className="fx-centered" style={{ gap: "6px" }}>
               <h3 className="p-caps">{user?.display_name || user?.name}</h3>
-              {isNip05Verified && <div className="checkmark-c1-24"></div>}
+              {isNip05Verified && <Icon name="checkmark-c1" size={24} isColored />}
               <div
                 className="fx-centered pointer"
                 onClick={() => setShowQR(true)}
               >
                 <div>
-                  <div className="qrcode"></div>
+                  <Icon name="qrcode" />
                 </div>
               </div>
             </div>
             <div className="fx-centered">
               <div className="fx-centered">
-                <div className="nip05-24"></div>{" "}
+                <Icon name="nip05" size={24} />{" "}
                 {user?.nip05 && (
                   <p className="p-one-line" style={{ minWidth: "max-content" }}>
                     {user?.nip05?.length < 50
@@ -271,7 +272,7 @@ export default function UserMetadata({ user }) {
 
               {user?.website && (
                 <div className="fx-centered fx-start-h">
-                  <div className="link-24"></div>
+                  <Icon name="link" size={24} />
 
                   <a
                     href={
@@ -300,7 +301,7 @@ export default function UserMetadata({ user }) {
                 )}
                 <div className="fx-centered">
                   <div className="fx-centered" style={{ columnGap: "10px" }}>
-                    <div className="user"></div>
+                    <Icon name="user" />
                     <div
                       className="pointer"
                       onClick={() =>

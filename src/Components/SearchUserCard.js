@@ -4,6 +4,7 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import Link from "next/link";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function SearchUserCard({ user, url, exit }) {
   const { t } = useTranslation();
@@ -11,8 +12,7 @@ export default function SearchUserCard({ user, url, exit }) {
   const [verified, setVerified] = useState(false);
   const isFollowing = useMemo(() => {
     return userFollowings.includes(user.pubkey);
-  }, [userFollowings]);
-
+  }, [userFollowings, user]);
   useEffect(() => {
     const verifyUser = async () => {
       if (user.nip05 && typeof user.nip05 === "string") {
@@ -50,7 +50,7 @@ export default function SearchUserCard({ user, url, exit }) {
                 <p className={`p-one-line ${verified ? "c1-c" : ""}`}>
                   {user.display_name || user.name}
                 </p>
-                {verified && <div className="checkmark-c1"></div>}
+                {verified && <Icon name="checkmark-c1" isColored />}
                 {isFollowing && (
                   <div className="sticker sticker-small sticker-gray-black">
                     {t("AOwS3ca")}
@@ -86,7 +86,7 @@ export default function SearchUserCard({ user, url, exit }) {
               <p className={`p-one-line ${verified ? "c1-c" : ""}`}>
                 {user.display_name || user.name}
               </p>
-              {verified && <div className="checkmark-c1"></div>}
+              {verified && <Icon name="checkmark-c1" isColored />}
               {isFollowing && (
                 <div className="sticker sticker-small sticker-gray-black">
                   {t("AOwS3ca")}

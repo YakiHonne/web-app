@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import AddYakiWallet from "@/Components/AddYakiWallet";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function AddWallet({ exit, refresh }) {
   const { t } = useTranslation();
@@ -37,17 +38,14 @@ export default function AddWallet({ exit, refresh }) {
           onClick={exit}
         >
           <div className="fx-centered">
-            <div
-              className="nwc-logo-24"
-              style={{ width: "48px", height: "48px" }}
-            ></div>
+            <Icon name="nwc-logo" size={24} isColored/>
             <div>
               <p>{t("AO3Hd2n")}</p>
               <p className="gray-c p-medium">{t("Ah0bYM3")}</p>
             </div>
           </div>
           <div className="box-pad-h-s">
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </Link>
         <div
@@ -58,17 +56,14 @@ export default function AddWallet({ exit, refresh }) {
           }
         >
           <div className="fx-centered">
-            <div
-              className="alby-logo-24"
-              style={{ width: "48px", height: "48px" }}
-            ></div>
+            <Icon name="alby-logo" size={24} isColored/>
             <div>
               <p>Alby</p>
               <p className="gray-c p-medium">{t("AFB7e2a")}</p>
             </div>
           </div>
           <div className="box-pad-h-s">
-            <div className="plus-sign"></div>
+            <Icon name="plus-sign" />
           </div>
         </div>
         <p className="gray-c p-medium p-centered">{t("APcRx0f")}</p>

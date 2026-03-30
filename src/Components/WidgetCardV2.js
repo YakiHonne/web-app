@@ -19,6 +19,7 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import { nanoid } from "nanoid";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { NDKUser } from "@nostr-dev-kit/ndk";
+import Icon from "@/Components/Icon";
 
 export default function WidgetCardV2({
   widget,
@@ -70,7 +71,7 @@ export default function WidgetCardV2({
       setToast({
         type: 1,
         desc: `${t("AHAP58g")} 👏`,
-      })
+      }),
     );
   };
 
@@ -80,7 +81,11 @@ export default function WidgetCardV2({
       try {
         setIsLoading(true);
         let file = base64ToFile(swMetadata.image);
-        let uploadedFile = await FileUpload(file, userKeys, setProgress);
+        let uploadedFile = await FileUpload({
+          file,
+          userKeys,
+          cb: setProgress,
+        });
         setPostNoteWithWidget(uploadedFile);
         setIsLoading(false);
         setProgress(0);
@@ -159,7 +164,7 @@ export default function WidgetCardV2({
                         onClick={() =>
                           swMetadata.id === widget.id
                             ? setPostNoteWithWidget(
-                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`
+                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
                               )
                             : setInitPublish({
                                 publish: true,
@@ -167,7 +172,7 @@ export default function WidgetCardV2({
                               })
                         }
                       >
-                        <div className="add-note"></div>
+                        <Icon name="add-note" />
                         <p>{t("AB8DnjO")}</p>
                       </div>
                     ),
@@ -187,7 +192,7 @@ export default function WidgetCardV2({
                           </div>
                         ) : (
                           <>
-                            <div className="share-icon"></div>
+                            <Icon name="share-icon" />
                             <p>{t("AznTfYL")}</p>
                           </>
                         )}
@@ -198,7 +203,7 @@ export default function WidgetCardV2({
                         className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                         onClick={copyNaddr}
                       >
-                        <div className="copy"></div>
+                        <Icon name="copy" />
                         <p>{t("ApPw14o", { item: "naddr" })}</p>
                       </div>
                     ),
@@ -211,11 +216,11 @@ export default function WidgetCardV2({
                         onClick={() => {
                           localStorage.setItem(
                             widget.metadata.naddr,
-                            JSON.stringify(swMetadata)
+                            JSON.stringify(swMetadata),
                           );
                         }}
                       >
-                        <div className="clone"></div>
+                        <Icon name="clone" />
                         <p>{t("AyWVBDx")}</p>
                       </Link>
                     ),
@@ -223,7 +228,7 @@ export default function WidgetCardV2({
                       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                       href={`/smart-widget-checker?naddr=${widget.metadata.naddr}`}
                     >
-                      <div className="smart-widget-checker"></div>
+                      <Icon name="smart-widget-checker" />
                       <p>{t("AavUrQj")}</p>
                     </Link>,
                     deleteWidget && userKeys.pub === swMetadata.pubkey && (
@@ -235,11 +240,11 @@ export default function WidgetCardV2({
                         onClick={() => {
                           localStorage.setItem(
                             widget.metadata.naddr,
-                            JSON.stringify(swMetadata)
+                            JSON.stringify(swMetadata),
                           );
                         }}
                       >
-                        <div className="edit"></div>
+                        <Icon name="edit" />
                         <p>{t("AsXohpb")}</p>
                       </Link>
                     ),
@@ -264,7 +269,7 @@ export default function WidgetCardV2({
                         className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                         onClick={deleteWidget}
                       >
-                        <div className="trash"></div>
+                        <Icon name="trash" isColored />
                         <p className="red-c">{t("Almq94P")}</p>
                       </div>
                     ),
@@ -281,7 +286,7 @@ export default function WidgetCardV2({
                   className="round-icon-small round-icon-tooltip"
                   data-tooltip={t("AcXhvAu")}
                 >
-                  <div className="plus-sign"></div>
+                  <Icon name="plus-sign" />
                 </div>
               </div>
             )}
@@ -410,7 +415,7 @@ export default function WidgetCardV2({
                         onClick={() =>
                           swMetadata.id === widget.id
                             ? setPostNoteWithWidget(
-                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`
+                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
                               )
                             : setInitPublish({
                                 publish: true,
@@ -418,7 +423,7 @@ export default function WidgetCardV2({
                               })
                         }
                       >
-                        <div className="add-note"></div>
+                        <Icon name="add-note" />
                         <p>{t("AB8DnjO")}</p>
                       </div>
                     ),
@@ -438,7 +443,7 @@ export default function WidgetCardV2({
                           </div>
                         ) : (
                           <>
-                            <div className="share-icon"></div>
+                            <Icon name="share-icon" />
                             <p>{t("AznTfYL")}</p>
                           </>
                         )}
@@ -449,7 +454,7 @@ export default function WidgetCardV2({
                         className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                         onClick={copyNaddr}
                       >
-                        <div className="copy"></div>
+                        <Icon name="copy" />
                         <p>{t("ApPw14o", { item: "naddr" })}</p>
                       </div>
                     ),
@@ -462,11 +467,11 @@ export default function WidgetCardV2({
                         onClick={() => {
                           localStorage.setItem(
                             widget.metadata.naddr,
-                            JSON.stringify(swMetadata)
+                            JSON.stringify(swMetadata),
                           );
                         }}
                       >
-                        <div className="clone"></div>
+                        <Icon name="clone" />
                         <p>{t("AyWVBDx")}</p>
                       </Link>
                     ),
@@ -474,7 +479,7 @@ export default function WidgetCardV2({
                       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                       href={`/smart-widget-checker?naddr=${widget.metadata.naddr}`}
                     >
-                      <div className="smart-widget-checker"></div>
+                      <Icon name="smart-widget-checker" />
                       <p>{t("AavUrQj")}</p>
                     </Link>,
                     deleteWidget && userKeys.pub === swMetadata.pubkey && (
@@ -486,11 +491,11 @@ export default function WidgetCardV2({
                         onClick={() => {
                           localStorage.setItem(
                             widget.metadata.naddr,
-                            JSON.stringify(swMetadata)
+                            JSON.stringify(swMetadata),
                           );
                         }}
                       >
-                        <div className="edit"></div>
+                        <Icon name="edit" />
                         <p>{t("AsXohpb")}</p>
                       </Link>
                     ),
@@ -515,7 +520,7 @@ export default function WidgetCardV2({
                         className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
                         onClick={deleteWidget}
                       >
-                        <div className="trash"></div>
+                        <Icon name="trash" isColored />
                         <p className="red-c">{t("Almq94P")}</p>
                       </div>
                     ),
@@ -572,14 +577,14 @@ const PublishWidget = ({
       setToPublish({
         eventInitEx,
         allRelays: [],
-      })
+      }),
     );
     let sub = ndkInstance.subscribe(
       [{ kinds: [30033], ids: [eventInitEx.id] }],
       {
         closeOnEose: true,
         cacheUsage: "CACHE_FIRST",
-      }
+      },
     );
     sub.on("event", (event) => {
       let naddr = nip19.naddrEncode({
@@ -605,8 +610,8 @@ const PublishWidget = ({
     let inputTag = widget.input
       ? ["input", widget.input]
       : widget.components.length > 2
-      ? false
-      : true;
+        ? false
+        : true;
     let buttonsTag = widget.buttons.filter((_) => _.label && _.url);
     buttonsTag =
       buttonsTag.length > 0
@@ -626,7 +631,11 @@ const PublishWidget = ({
       try {
         setIsImageLoading(true);
         let file = base64ToFile(widget.image);
-        let uploadedFile = await FileUpload(file, userKeys, setProgress);
+        let uploadedFile = await FileUpload({
+          file,
+          userKeys,
+          cb: setProgress,
+        });
         setPostNoteWithWidget(uploadedFile);
         setIsImageLoading(false);
         setProgress(0);
@@ -659,7 +668,7 @@ const PublishWidget = ({
           <div></div>
         </div>
         <h3 className="box-marg-s p-centered box-pad-h">{widget.title}</h3>
-        {/* <div className="checkmark-tt" style={{minWidth: ""}}></div> */}
+        {/* <Icon name="checkmark-tt" isColored/> */}
         {pWidget && <SWCard widget={pWidget} />}
 
         <div className="fit-container fx-centered">

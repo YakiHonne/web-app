@@ -1,5 +1,6 @@
 import RelayImage from "@/Components/RelayImage";
 import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
+import Icon from "@/Components/Icon";
 
 export default function ContentFeedCategoryPreview({
   category,
@@ -10,42 +11,42 @@ export default function ContentFeedCategoryPreview({
       <div className="fx-centered">
         {category.value === "top" && (
           <div>
-            <div className="medal-24"></div>
+            <Icon name="medal" size={24} />
           </div>
         )}
         {category.value === "widgets" && (
           <div>
-            <div className="smart-widget-24"></div>
+            <Icon name="smart-widget" size={24} />
           </div>
         )}
         {category.value === "recent" && (
           <div>
-            <div className="recent-24"></div>
+            <Icon name="recent" size={24} />
           </div>
         )}
         {category.value === "recent_with_replies" && (
           <div>
-            <div className="recent-wr-24"></div>
+            <Icon name="recent-wr" size={24} />
           </div>
         )}
         {category.value === "paid" && (
           <div>
-            <div className="sats-24"></div>
+            <Icon name="sats" size={24} />
           </div>
         )}
         {category.value === "network" && (
           <div>
-            <div className="posts-24"></div>
+            <Icon name="posts" size={24} />
           </div>
         )}
         {category.value === "global" && (
           <div>
-            <div className="globe-24"></div>
+            <Icon name="globe" size={24} />
           </div>
         )}
         {category.value === "trending" && (
           <div>
-            <div className="trending-up-24"></div>
+            <Icon name="trending-up" size={24} />
           </div>
         )}
         <p className="p-maj p-one-line">{category.display_name}</p>

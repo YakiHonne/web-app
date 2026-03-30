@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import ECash from "./ECash";
 import NutZap from "./NutZap";
 import Lightning from "./Lightning";
+import Icon from "@/Components/Icon";
 
 export default function SendTokens({ exit, cashuTokens }) {
   const { t } = useTranslation();
@@ -53,7 +54,7 @@ export default function SendTokens({ exit, cashuTokens }) {
                     borderRadius: "50%",
                   }}
                 >
-                  <div className="send-ecash-24"></div>
+                  <Icon name="send-ecash" size={24} />
                 </div>
                 <div>
                   <p>{t("AW28wCE")}</p>
@@ -75,7 +76,7 @@ export default function SendTokens({ exit, cashuTokens }) {
                     borderRadius: "50%",
                   }}
                 >
-                  <div className="nut-zap-24"></div>
+                  <Icon name="nut-zap" size={24} />
                 </div>
                 <div>
                   <p>NutZap</p>
@@ -97,7 +98,7 @@ export default function SendTokens({ exit, cashuTokens }) {
                     borderRadius: "50%",
                   }}
                 >
-                  <div className="bolt-24"></div>
+                  <Icon name="bolt" size={24} />
                 </div>
                 <div>
                   <p>{t("ALTSkY5")}</p>

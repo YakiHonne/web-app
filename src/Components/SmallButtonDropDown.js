@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function SmallButtonDropDown({
   options,
@@ -61,7 +62,7 @@ export default function SmallButtonDropDown({
           options.length > 1 &&
           !showSettings) ||
           (options.includes(selectedCategory) && showSettings)) && (
-          <div className="arrow-12"></div>
+          <Icon name="arrow" size={12} />
         )}
       </div>
       {showOptions && (
@@ -104,10 +105,7 @@ export default function SmallButtonDropDown({
               style={{ backgroundColor: "var(--c1-side)" }}
             >
               <p className="p-medium gray-c btn-text-gray">{t("AV40SRR")}</p>
-              <div
-                className="setting"
-                style={{ minWidth: "12px", minHeight: "12px" }}
-              ></div>
+              <Icon name="setting" size={12} />
             </Link>
           )}
         </div>

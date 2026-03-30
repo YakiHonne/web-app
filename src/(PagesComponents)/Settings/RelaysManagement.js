@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { RelaysConfig } from "./RelaysConfig";
+import Icon from "@/Components/Icon";
 
 export function RelaysManagement({ selectedTab, setSelectedTab }) {
   const { t } = useTranslation();
@@ -28,14 +29,14 @@ export function RelaysManagement({ selectedTab, setSelectedTab }) {
       >
         <div className="fx-centered fx-start-h fx-start-v">
           <div className="box-pad-v-s">
-            <div className="server-24"></div>
+            <Icon name="server" size={24} />
           </div>
           <div>
             <p>{t("A23C0Di")}</p>
             <p className="p-medium gray-c">{t("AUE3WRD")}</p>
           </div>
         </div>
-        <div className="arrow"></div>
+        <Icon name="arrow" />
       </div>
 
       {selectedTab === "relays" && (

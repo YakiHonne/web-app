@@ -12,6 +12,7 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import { customHistory } from "@/Helpers/History";
 import QRCodeStyling from "qr-code-styling";
 import { saveUsers } from "@/Helpers/DB";
+import Icon from "@/Components/Icon";
 
 function shuffleArray(arr) {
   const a = arr.slice(); // copy
@@ -117,7 +118,7 @@ export default function ShareLink({
         data-tooltip={t("AGB5vpj")}
         onClick={handleSharing}
       >
-        <div className="share-v2-24"></div>
+        <Icon name="share-v2" size={24} />
         {label && <p>{label}</p>}
       </div>
     </>
@@ -181,7 +182,7 @@ const SharingWindow = ({ path, title, description, exit }) => {
               >
                 <div className="fit-container fx-centered box-pad-h-m box-pad-v-s fx-start-h sc-s-18 bg-sp">
                   {/* <UserSearchBar full={true} /> */}
-                  <div className="search-24"></div>
+                  <Icon name="search" size={24} />
                   <input
                     type="text"
                     placeholder={t("AowMF91")}
@@ -235,10 +236,7 @@ const SharingWindow = ({ path, title, description, exit }) => {
                     className="fit-container fx-centered fx-col"
                     style={{ height: "300px" }}
                   >
-                    <div
-                      className="user"
-                      style={{ minHeight: "60px", minWidth: "60px" }}
-                    ></div>
+                    <Icon name="user" size={60} />
                     <p
                       className="gray-c p-centered box-pad-h"
                       style={{ width: "350px" }}
@@ -255,10 +253,7 @@ const SharingWindow = ({ path, title, description, exit }) => {
               className="fit-container fx-centered fx-col"
               style={{ height: "300px" }}
             >
-              <div
-                className="user"
-                style={{ minHeight: "60px", minWidth: "60px" }}
-              ></div>
+              <Icon name="user" size={60} />
               <p
                 className="gray-c p-centered box-pad-h"
                 style={{ width: "350px" }}
@@ -309,7 +304,7 @@ const SharingWindow = ({ path, title, description, exit }) => {
                             backgroundColor: "var(--green-main)",
                           }}
                         >
-                          <div className="check-24"></div>
+                          <Icon name="check" size={24} />
                         </div>
                       ) : isLoading ? (
                         <div
@@ -389,7 +384,7 @@ const UserShowCard = ({ metadata, onClick }) => {
         <p className="gray-c p-medium p-one-line">
           {metadata.display_name || metadata.name}
         </p>
-        {isNip05Verified && <div className="checkmark-c1"></div>}
+        {isNip05Verified && <Icon name="checkmark-c1" isColored />}
       </div>
     </div>
   );
@@ -479,7 +474,7 @@ const ShareOnOptions = ({ path, title, description }) => {
           style={{ opacity: 1 }}
         >
           <div className="round-icon">
-            <div className="twitter-logo-24"></div>
+            <Icon name="twitter-logo" size={24} />
           </div>
           <p className="gray-c p-medium">{t("AroZoen")}</p>
         </a>
@@ -491,7 +486,7 @@ const ShareOnOptions = ({ path, title, description }) => {
           style={{ opacity: 1 }}
         >
           <div className="round-icon">
-            <div className="whatsapp-icon-24"></div>
+            <Icon name="whatsapp-icon" size={24} />
           </div>
           <p className="gray-c p-medium">WhatsApp</p>
         </a>
@@ -503,7 +498,7 @@ const ShareOnOptions = ({ path, title, description }) => {
           style={{ opacity: 1 }}
         >
           <div className="round-icon">
-            <div className="in-icon-24"></div>
+            <Icon name="in-icon" size={24} />
           </div>
           <p className="gray-c p-medium">LinkedIn</p>
         </a>
@@ -513,7 +508,7 @@ const ShareOnOptions = ({ path, title, description }) => {
         >
           <div className="fx-centered fx-col">
             <div className="round-icon">
-              <div className="env-24"></div>
+              <Icon name="env" size={24} />
             </div>
             <p className="gray-c p-medium">Email</p>
           </div>
@@ -531,13 +526,13 @@ const ShareOnOptions = ({ path, title, description }) => {
           onClick={() => copyText(fullURL, t("AfnTOQk"))}
         >
           <div className="round-icon">
-            <div className="link-24"></div>
+            <Icon name="link" size={24} />
           </div>
           <p className="gray-c p-medium">{t("AahCFK4")}</p>
         </div>
         <div className="fx-centered fx-col" onClick={() => setShowQRCode(true)}>
           <div className="round-icon">
-            <div className="qrcode-24"></div>
+            <Icon name="qrcode" size={24} />
           </div>
           <p className="gray-c p-medium">QR</p>
         </div>
@@ -659,7 +654,7 @@ export const ShareQRCode = ({ path, exit }) => {
           className="btn btn-gray btn-full fx-centered"
           onClick={onDownloadClick}
         >
-          <div className="download-file"></div>
+          <Icon name="download-file" />
           {t("AxyxzkE")}
         </button>
         <button className="btn btn-normal btn-full" onClick={exit}>
@@ -746,7 +741,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //           })}
 //         </div>
 //         <button className="btn btn-gray btn-full fx-centered">
-//           <div className="download-file"></div>
+//           <Icon name="download-file" />
 //           {t("AxyxzkE")}
 //         </button>
 //         <button className="btn btn-normal btn-full">{t("Acglhzb")}</button>
@@ -891,7 +886,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //                     } fx-centered`}
 //                     onClick={() => (isLoading ? null : convert())}
 //                   >
-//                     <div className="download-file"></div> {t("AxyxzkE")}
+//                     <Icon name="download-file" /> {t("AxyxzkE")}
 //                   </button>
 //                 )}
 //               </div>
@@ -912,7 +907,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //                   }
 //                 >
 //                   <p className="p-one-line">{`${window.location.protocol}//${window.location.hostname}${path}`}</p>
-//                   <div className="copy-24"></div>
+//                   <Icon name="copy" size={24} />
 //                 </div>
 //                 <p className="c1-c p-left fit-container">{t("AezhEDd")}</p>
 //                 <div
@@ -921,13 +916,13 @@ export const ShareQRCode = ({ path, exit }) => {
 //                   onClick={() => copyLink(nostrURL)}
 //                 >
 //                   <p className="p-one-line">{nostrURL}</p>
-//                   <div className="copy-24"></div>
+//                   <Icon name="copy" size={24} />
 //                 </div>
 //                 <button
 //                   className="btn btn-normal btn-full fx-centered"
 //                   onClick={() => setShowCopyURL(false)}
 //                 >
-//                   <div className="arrow" style={{ rotate: "90deg" }}></div>
+//                   <Icon name="arrow" />
 //                   {t("ATB2h6T")}
 //                 </button>
 //               </div>
@@ -942,7 +937,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //                   href={`https://twitter.com/intent/tweet?text=${`${window.location.protocol}//${window.location.hostname}${path}`}`}
 //                   target="_blank"
 //                 >
-//                   <div className="twitter-logo-24"></div> {t("AroZoen")}
+//                   <Icon name="twitter-logo" size={24} /> {t("AroZoen")}
 //                 </a>
 //                 <a
 //                   href={`whatsapp://send?text=${`${window.location.protocol}//${window.location.hostname}${path}`}`}
@@ -951,7 +946,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //                   className="twitter-share-button fit-container"
 //                 >
 //                   <button className="btn btn-gray btn-full fx-centered">
-//                     <div className="whatsapp-icon-24"></div> WhatsApp
+//                     <Icon name="whatsapp-icon" size={24} /> WhatsApp
 //                   </button>
 //                 </a>
 //                 <a
@@ -963,14 +958,14 @@ export const ShareQRCode = ({ path, exit }) => {
 //                   className="twitter-share-button fit-container"
 //                 >
 //                   <button className="btn btn-gray btn-full fx-centered">
-//                     <div className="in-icon-24"></div> LinkedIn
+//                     <Icon name="in-icon" size={24} /> LinkedIn
 //                   </button>
 //                 </a>
 //                 <button
 //                   className="btn btn-normal btn-full fx-centered"
 //                   onClick={() => setShowShareSocial(false)}
 //                 >
-//                   <div className="arrow" style={{ rotate: "90deg" }}></div>
+//                   <Icon name="arrow" />
 //                   {t("ATB2h6T")}
 //                 </button>
 //               </div>
@@ -983,7 +978,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //         data-tooltip={t("AGB5vpj")}
 //         onClick={handleSharing}
 //       >
-//         <div className="share-v2"></div>
+//         <Icon name="share-v2" />
 //         {label && <p>{label}</p>}
 //       </div>
 //     </>
@@ -1233,7 +1228,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //                   <p className="orange-c p-medium p-centered">
 //                     {data.author.nip05}
 //                   </p>
-//                   <div className="checkmark-c1"></div>
+//                   <Icon name="checkmark-c1" isColored />
 //                 </div>
 //               )}
 //             </div>
@@ -1321,10 +1316,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //             >
 //               {kind === 30023 && (
 //                 <div className="fx-centered">
-//                   <div
-//                     className="posts"
-//                     style={{ filter: "brightness(0)" }}
-//                   ></div>
+//                   <Icon name="posts" />
 //                   <p className="p-medium" style={{ color: "black" }}>
 //                     Article
 //                   </p>
@@ -1332,10 +1324,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //               )}
 //               {kind === 30004 && (
 //                 <div className="fx-centered">
-//                   <div
-//                     className="curation"
-//                     style={{ filter: "brightness(0)" }}
-//                   ></div>
+//                   <Icon name="curation" />
 //                   <p className="p-medium" style={{ color: "black" }}>
 //                     {t("Ac6UnVb")}
 //                   </p>
@@ -1343,10 +1332,7 @@ export const ShareQRCode = ({ path, exit }) => {
 //               )}
 //               {(kind === 34235 || kind === 21 || kind === 22) && (
 //                 <div className="fx-centered">
-//                   <div
-//                     className="video"
-//                     style={{ filter: "brightness(0)" }}
-//                   ></div>
+//                   <Icon name="video" />
 //                   <p className="p-medium" style={{ color: "black" }}>
 //                     {t("AVdmifm")}
 //                   </p>
@@ -1357,14 +1343,8 @@ export const ShareQRCode = ({ path, exit }) => {
 //                   <p className="p-medium" style={{ color: "black" }}>
 //                     {data.likes}
 //                   </p>
-//                   <div
-//                     className="heart"
-//                     style={{ filter: "brightness(0)" }}
-//                   ></div>
-//                   <div
-//                     className="like"
-//                     style={{ filter: "brightness(0)", rotate: "-180deg" }}
-//                   ></div>
+//                   <Icon name="heart" />
+//                   <Icon name="like" />
 //                   {(kind === 34235 || kind === 21 || kind === 22) && (
 //                     <p className="p-medium" style={{ color: "black" }}>
 //                       {t("AginxGR", { count: data.views })}

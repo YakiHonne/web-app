@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import RelayImage from "@/Components/RelayImage";
 import { copyText } from "@/Helpers/Helpers";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function SharePackLink({ d, exit, type = 1 }) {
   const { t } = useTranslation();
@@ -33,7 +34,7 @@ export default function SharePackLink({ d, exit, type = 1 }) {
             <div>
               <p className="p-two-lines">{fullURL}</p>
             </div>
-            <div className="copy"></div>
+            <Icon name="copy" />
           </div>
         </div>
         <Link href={fullURL} target="_blank" className="fit-container">

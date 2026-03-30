@@ -6,6 +6,7 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Virtuoso } from "react-virtuoso";
+import Icon from "@/Components/Icon";
 
 export default function CashuNutZaps({
   cashuNutZaps,
@@ -143,7 +144,7 @@ const CashuNutZapItem = React.memo(
           )}
           {isRedeemed && (
             <div className="fx-centered">
-              <div className="checkmark"></div>
+              <Icon name="checkmark" />
               <p className="green-c p-medium">{t("A3Dn0HW")}</p>
             </div>
           )}

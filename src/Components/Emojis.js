@@ -1,6 +1,7 @@
 import EmojiPicker from "emoji-picker-react";
 import { useTheme } from "next-themes";
 import React, { useEffect, useRef, useState } from "react";
+import Icon from "@/Components/Icon";
 
 export default function Emojis({ setEmoji, position = "left" }) {
   // const isDarkMode = useSelector((state) => state.isDarkMode);
@@ -24,7 +25,7 @@ export default function Emojis({ setEmoji, position = "left" }) {
   return (
     <div style={{ position: "relative" }} ref={optionsRef}>
       <div className="pointer" onClick={() => setShowEmoji(!showEmoji)}>
-        <div className="emoji-24"></div>
+        <Icon name="emoji" size={24} />
       </div>
       {showEmoji && (
         <div

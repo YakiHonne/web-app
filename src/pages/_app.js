@@ -1,6 +1,5 @@
 import "@/styles/root.css";
 import "@/styles/animations.css";
-import "@/styles/icons.css";
 import "@/styles/notificationsIcons.css";
 import "@/styles/placeholder.css";
 import "@/styles/essentials.css";

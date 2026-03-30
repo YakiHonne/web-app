@@ -13,6 +13,7 @@ import useCloseContainer from "@/Hooks/useCloseContainer";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import RelayReviews from "@/Components/RelayReviews/RelayReviews";
+import Icon from "@/Components/Icon";
 
 function RelayPreview({
   url,
@@ -58,7 +59,7 @@ function RelayPreview({
                 }}
               >
                 <p className="c1-c p-one-line ">{relayMetadata.url}</p>
-                <div className="copy"></div>
+                <Icon name="copy" />
               </div>
             )}
           </div>
@@ -78,12 +79,12 @@ function RelayPreview({
                   customHistory("/r/notes?r=" + url);
                 }}
               >
-                <div className="share-icon"></div>
+                <Icon name="share-icon" />
               </div> */}
             </>
           )}
           {addToFavList && <AddToFavList url={url} />}
-          <div className="arrow"></div>
+          <Icon name="arrow" />
         </div>
       </div>
       {open && <RelayMetadataPreview metadata={relayMetadata} />}
@@ -144,7 +145,7 @@ function RelayPreview({
                   className="round-icon-small round-icon-tooltip"
                   data-tooltip={t("AuCcYnT")}
                 >
-                  <div className="protected-2"></div>
+                  <Icon name="protected-2" />
                 </div>
               )}
               {(relayStats.monitor.isPaymentRequired ||
@@ -182,7 +183,7 @@ function RelayPreview({
           >
             <p className="gray-c">{t("AlQx13z")}</p>
             <div>
-              <div className="share-icon"></div>
+              <Icon name="share-icon" />
             </div>
           </Link>
         </>
@@ -202,10 +203,7 @@ function RelayPreview({
         >
           {showReviews && <RelayReviews relay={url} />}
           <div className="fit-container fx-centered">
-            <div
-              className="arrow"
-              style={{ rotate: showReviews ? "-180deg" : "" }}
-            ></div>
+            <Icon name="arrow" />
             <p className="gray-c">{t("AWX2SL5")}</p>
           </div>
         </div>

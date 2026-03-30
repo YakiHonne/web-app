@@ -1,5 +1,5 @@
-
 import React, { useEffect, useState } from "react";
+import Icon from "@/Components/Icon";
 
 export default function ArrowUp() {
   const [showArrow, setShowArrow] = useState(false);
@@ -20,7 +20,6 @@ export default function ArrowUp() {
     if (!el) return;
     el.scrollTop = 0;
   };
-  
 
   if (!showArrow) return null;
   return (
@@ -39,7 +38,7 @@ export default function ArrowUp() {
       className="pointer fx-centered slide-up"
       onClick={straightUp}
     >
-      <div className="arrow" style={{ transform: "rotate(180deg)" }}></div>
+      <Icon name="arrow" transform="rotate(180deg)" />
     </div>
   );
 }

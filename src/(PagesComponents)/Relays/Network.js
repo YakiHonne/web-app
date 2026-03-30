@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import Link from "next/link";
 import { trimRelay } from "@/Helpers/Helpers";
+import Icon from "@/Components/Icon";
 
 export default function Network({
   relays,
@@ -31,10 +32,7 @@ export default function Network({
         className="fit-container fx-centered fx-col box-pad-v fx-col"
         style={{ height: "60vh" }}
       >
-        <div
-          className="orbit"
-          style={{ minWidth: "58px", minHeight: "58px" }}
-        ></div>
+        <Icon name="orbit" size={58} />
         <div className="fx-centered fx-col box-pad-v-m">
           <h4>{t("AADL1TO")}</h4>
           <p className="gray-c p-centered" style={{ maxWidth: "300px" }}>
@@ -54,10 +52,7 @@ export default function Network({
           className="fit-container fx-col fx-centered"
           style={{ height: "40vh" }}
         >
-          <div
-            className="globe"
-            style={{ minWidth: "48px", minHeight: "48px" }}
-          ></div>
+          <Icon name="globe" size={48} />
           <h4>{t("AnNzdff")}</h4>
           <p className="gray-c p-centered" style={{ maxWidth: "300px" }}>
             {t("ABCjxk3")}

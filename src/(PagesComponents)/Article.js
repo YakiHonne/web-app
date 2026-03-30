@@ -40,6 +40,7 @@ import { customHistory } from "@/Helpers/History";
 import PostReaction from "@/Components/PostReaction";
 import { useTheme } from "next-themes";
 import LoadingLogo from "@/Components/LoadingLogo";
+import Icon from "@/Components/Icon";
 
 export default function Article({ event, userProfile, naddrData }) {
   const { t } = useTranslation();
@@ -690,7 +691,7 @@ const AuthPreview = ({ pubkey }) => {
             <p className="p-big p-caps">
               {userProfile.display_name || userProfile.name}
             </p>
-            {isNip05Verified && <div className="checkmark-c1-24"></div>}
+            {isNip05Verified && <Icon name="checkmark-c1" size={24} isColored />}
           </div>
         </div>
       </div>

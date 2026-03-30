@@ -3,6 +3,7 @@ import Link from "next/link";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch } from "react-redux";
 import DonationBoxSuggestionCards from "./SuggestionsCards/DonationBoxSuggestionCards";
+import Icon from "@/Components/Icon";
 let ymaQR =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/yma-qr.png";
 
@@ -38,15 +39,22 @@ const content = [
 ];
 
 const updatesList = [
-  "ECash support: swipe tokens, deposit, send Nutzups, and restore wallets.",
-  "Zap users using eCash mints",
-  "Copy note text for easy sharing.",
-  "Fixed mobile layout issues when using RTL languages.",
-  "Fixed external URLs with trailing characters.",
-  "Delete notes directly from the note options menu.",
-  "Redesigned video controllers for a cleaner experience.",
-  "Fixed fullscreen video playback in the home feed.",
-  "General bug fixes and improvements.",
+  "Relay invitations via join requests for easier access to private relays.",
+  "Relay reviews added to help evaluate and discover relays.",
+  "Sats gift packets can now be sent directly in messages.",
+  "Expired notes are now automatically removed from the feed.",
+  "Auto-translation applied when opening notes or articles.",
+  "Fixed issues when visiting profiles via NIP-05 URLs. (Yakihonne NIP-05 users)",
+  "Fixed problems when adding Alby wallet accounts.",
+  "Fixed bunker connection issues.",
+  "Fixed follow status detection in search results.",
+  "Redesigned toast messages for clearer feedback.",
+  "Fixed QR code payments for paid notes and added wallet selection options.",
+  "Added imeta support for uploaded files in notes and articles.",
+  "Fixed incomplete or partially loaded thread fetching issues.",
+  "Improved URL preview metadata fetching for better accuracy.",
+  "Fixed UI issues when note options position changes.",
+  "General bug fixes and optimizations across the app.",
 ];
 
 export default function YakiIntro() {
@@ -80,7 +88,7 @@ export default function YakiIntro() {
       >
         {!swipe && (
           <div className="slide-right" onClick={() => setSwipe(!swipe)}>
-            <div className="info-24"></div>
+            <Icon name="info" size={24} isColored />
           </div>
         )}
       </div>
@@ -126,9 +134,9 @@ const MobileAppQR = ({ exit }) => {
             copyKey("Link", `https://yakihonne.com/yakihonne-mobile-app-links`)
           }
         >
-          <div className="link-24"></div>
+          <Icon name="link" size={24} />
           <p className="p-one-line">{`https://yakihonne.com/yakihonne-mobile-app-links`}</p>
-          <div className="copy-24"></div>
+          <Icon name="copy" size={24} />
         </div>
       </div>
     </div>

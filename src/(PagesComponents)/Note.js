@@ -29,9 +29,9 @@ import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
 import LoadingLogo from "@/Components/LoadingLogo";
 import { saveUsers } from "@/Helpers/DB";
+import Icon from "@/Components/Icon";
 
 export default function Note({ event, nevent }) {
-  const { state } = {};
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [showHistory, setShowHistory] = useState(false);
@@ -76,6 +76,7 @@ export default function Note({ event, nevent }) {
     //   if (triggerTranslation) translateNote();
     // }
     straightUp();
+    saveUsers([event.pubkey]);
   }, [event]);
 
   const translateNote = async () => {
@@ -194,12 +195,7 @@ export default function Note({ event, nevent }) {
                         {showHistory && t("ApSnq9V")}
                         {!showHistory && t("AUScjxu")}
                       </p>
-                      <div
-                        className="arrow-12"
-                        style={{
-                          rotate: !showHistory ? "0deg" : "180deg",
-                        }}
-                      ></div>
+                      <Icon name="arrow" size={12} />
                     </div>
                   </div>
                   <HistorySection
@@ -228,7 +224,7 @@ export default function Note({ event, nevent }) {
                       <div className="fx-centered">
                         <h4>{userProfile.display_name || userProfile.name}</h4>
                         {isNip05Verified && (
-                          <div className="checkmark-c1-24"></div>
+                          <Icon name="checkmark-c1" size={24} isColored />
                         )}
                       </div>
                       <p className="gray-c">
@@ -283,7 +279,11 @@ export default function Note({ event, nevent }) {
                           data-tooltip={t("AdHV2qJ")}
                           onClick={translateNote}
                         >
-                          <div className="translate-24 opacity-4"></div>
+                          <Icon
+                            name="translate"
+                            size={24}
+                            className="opacity-4"
+                          />
                         </div>
                       )}
                       {!isNoteTranslating && showTranslation && (
@@ -292,7 +292,11 @@ export default function Note({ event, nevent }) {
                           data-tooltip={t("AE08Wte")}
                           onClick={() => setShowTranslation(false)}
                         >
-                          <div className="translate-24 opacity-4"></div>
+                          <Icon
+                            name="translate"
+                            size={24}
+                            className="opacity-4"
+                          />
                         </div>
                       )}
                       {isNoteTranslating && <LoadingDots />}
@@ -366,7 +370,7 @@ const MutedThreadWarning = ({ event }) => {
       }}
     >
       <div className="fx-centered">
-        <div className="mute-24"></div>
+        <Icon name="mute" size={24} isColored />
         {isMutedId && <p className="red-c">{t("AYDVAzA")}</p>}
         {!isMutedId && (isMutedComment || isMutedRoot) && (
           <p className="red-c">{t("AjbaFuf")}</p>

@@ -8,6 +8,7 @@ import React, { useState, Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
+import Icon from "@/Components/Icon";
 
 export function Notifications({ selectedTab, setSelectedTab }) {
   const { t } = useTranslation();
@@ -89,14 +90,14 @@ export function Notifications({ selectedTab, setSelectedTab }) {
       >
         <div className="fx-centered fx-start-h fx-start-v">
           <div className="box-pad-v-s">
-            <div className="ringbell-24"></div>
+            <Icon name="ringbell" size={24} />
           </div>
           <div>
             <p>{t("ASSFfFZ")}</p>
             <p className="p-medium gray-c">{t("Aaa8NMg")}</p>
           </div>
         </div>
-        <div className="arrow"></div>
+        <Icon name="arrow" />
       </div>
       {selectedTab === "notifications" && (
         <div className="fx-scattered fit-container fx-col fx-start-v box-pad-h box-pad-v-m">

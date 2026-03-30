@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function DeleteWarning({
   title,
@@ -25,7 +26,7 @@ export default function DeleteWarning({
             backgroundColor: "var(--red-main)",
           }}
         >
-          <div className="warning"></div>
+          <Icon name="warning" />
         </div>
         {title && (
           <h3 className="p-centered" style={{ wordBreak: "break-word" }}>

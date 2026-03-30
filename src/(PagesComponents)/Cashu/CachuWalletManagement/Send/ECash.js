@@ -6,6 +6,7 @@ import { generateToken, publishProofs } from "@/Helpers/CashuHelpers";
 import LoadingDots from "@/Components/LoadingDots";
 import Invoice from "../Invoice";
 import useSentTokensAsHash from "@/Hooks/useSentTokensAsHash";
+import Icon from "@/Components/Icon";
 
 export default function ECash({ exit }) {
   const { t } = useTranslation();
@@ -67,7 +68,7 @@ export default function ECash({ exit }) {
       <div className="fit-container fx-centered fx-col fx-sart-h fx-start-v">
         <div className="fit-container fx-centered fx-start-h" onClick={exit}>
           <div className="round-icon-small">
-            <div className="arrow" style={{ rotate: "90deg" }}></div>
+            <Icon name="arrow" transform="rotate(90deg)" />
           </div>
           <p>{t("AW28wCE")}</p>
         </div>

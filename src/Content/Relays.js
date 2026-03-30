@@ -3,6 +3,7 @@ const relaysOnPlatform = [
   "wss://nostr-02.yakihonne.com",
   "wss://relay.damus.io",
   "wss://relay.nsec.app",
+  "wss://nos.lol",
   "wss://monitorlizard.nostr1.com/",
 ];
 

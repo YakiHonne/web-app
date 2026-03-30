@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
 const getBulkListStats = (list) => {
   let toFollow = list.filter((item) => item.to_follow).length;
@@ -38,7 +39,14 @@ export default function ShowPeople({ exit, list, type = "following" }) {
         }
         let sub = await getSubData([{ kinds: [0], authors: list }], 50);
         if (sub.data.length > 0) setIsLoaded(true);
-        setPeople(sub.data.map((_) => getParsedAuthor(_)).filter((_, index, arr) => arr.findIndex((item) => item.pubkey === _.pubkey) === index));
+        setPeople(
+          sub.data
+            .map((_) => getParsedAuthor(_))
+            .filter(
+              (_, index, arr) =>
+                arr.findIndex((item) => item.pubkey === _.pubkey) === index,
+            ),
+        );
       } catch (err) {
         console.log(err);
       }
@@ -55,7 +63,7 @@ export default function ShowPeople({ exit, list, type = "following" }) {
       let tempTags = Array.from(
         userFollowings
           ?.filter((item) => !toUnfollowList.includes(item))
-          .map((item) => ["p", item]) || []
+          .map((item) => ["p", item]) || [],
       );
       for (let item of bulkList) {
         if (item.to_follow)
@@ -69,7 +77,7 @@ export default function ShowPeople({ exit, list, type = "following" }) {
           content: "",
           tags: tempTags,
           allRelays: userRelays,
-        })
+        }),
       );
 
       exit();
@@ -78,7 +86,7 @@ export default function ShowPeople({ exit, list, type = "following" }) {
     }
   };
 
-  console.log(bulkList)
+  console.log(bulkList);
   if (!isLoaded) return <LoadingScreen onClick={exit} />;
   return (
     <>
@@ -230,7 +238,7 @@ const ArrowUp = () => {
       className="pointer fx-centered slide-up"
       onClick={straightUp}
     >
-      <div className="arrow" style={{ transform: "rotate(180deg)" }}></div>
+      <Icon name="arrow" transform="rotate(180deg)" />
     </div>
   );
 };

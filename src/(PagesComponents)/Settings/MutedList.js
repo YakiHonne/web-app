@@ -8,6 +8,7 @@ import { getSubData } from "@/Helpers/Controlers";
 import LoadingDots from "@/Components/LoadingDots";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import Date_ from "@/Components/Date_";
+import Icon from "@/Components/Icon";
 
 export function MutedList({ exit }) {
   const { t } = useTranslation();
@@ -123,7 +124,7 @@ export function MutedList({ exit }) {
             className="fx-centered fx-col fit-container"
             style={{ height: "20vh" }}
           >
-            <div className="user-24"></div>
+            <Icon name="user" size={24} />
             <p>{t("ACzeK4g")}</p>
             <p className="gray-c p-medium p-centered">{t("Ap5S8lY")}</p>
           </div>
@@ -148,7 +149,7 @@ const MutedUser = ({ pubkey }) => {
         <p className="p-centered p-one-line">
           {userProfile.display_name || userProfile.name}
         </p>
-        {isNip05Verified && <div className="checkmark-c1"></div>}
+        {isNip05Verified && <Icon name="checkmark-c1" isColored />}
       </div>
       <p className="gray-c p-medium p-centered p-one-line">
         {userProfile.name || userProfile.display_name}
@@ -157,7 +158,7 @@ const MutedUser = ({ pubkey }) => {
         onClick={muteUnmute}
         className="btn btn-normal btn-small btn-gst-red fx-centered"
       >
-        <div className="unmute"></div>
+        <Icon name="unmute" />
         {t("AKELUbQ")}
       </button>
     </div>
@@ -184,7 +185,7 @@ const MutedNote = ({ event }) => {
               <p className="p-bold p-one-line" style={{ margin: 0 }}>
                 {userProfile.display_name || userProfile.name}
               </p>
-              {isNip05Verified && <div className="checkmark-c1"></div>}
+              {isNip05Verified && <Icon name="checkmark-c1" isColored />}
             </div>
             <p className="gray-c p-medium" style={{ margin: 0 }}>
               &#8226;
@@ -204,7 +205,7 @@ const MutedNote = ({ event }) => {
           onClick={muteUnmute}
           className="btn btn-normal btn-small btn-full btn-gst-red fx-centered"
         >
-          <div className="unmute"></div>
+          <Icon name="unmute" />
           {t("AnddeNp")}
         </button>
       </div>

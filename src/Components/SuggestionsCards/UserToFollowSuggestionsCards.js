@@ -7,6 +7,7 @@ import Slider from "@/Components/Slider";
 import { NDKUser } from "@nostr-dev-kit/ndk";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 const getUsersCard = (users, userFollowings) => {
   if (users.length === 0) return [];
@@ -97,7 +98,7 @@ const UserCard = ({ user }) => {
             <p className="p-bold p-one-line">
               {user.display_name || user.name}
             </p>
-            {isNip05Verified && <span className="checkmark-c1"></span>}
+            {isNip05Verified && <Icon name="checkmark-c1" isColored />}
           </div>
           <p className="gray-c p-medium p-two-lines p-centered">
             {user.about || "N/A"}

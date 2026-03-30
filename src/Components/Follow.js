@@ -7,10 +7,11 @@ import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import { relaysOnPlatform } from "@/Content/Relays";
 import { InitEvent } from "@/Helpers/Controlers";
+import Icon from "@/Components/Icon";
 
-const FOLLOWING = <div className="user-followed-w-24"></div>;
-const FOLLOW = <div className="user-to-follow-24"></div>;
-const UNFOLLOW = <div className="user-to-unfollow-24"></div>;
+const FOLLOWING = <Icon name="user-followed-w" size={24} />;
+const FOLLOW = <Icon name="user-to-follow" size={24} />;
+const UNFOLLOW = <Icon name="user-to-unfollow" size={24} />;
 
 const checkFollowing = (list, toFollowKey) => {
   if (!list) return false;

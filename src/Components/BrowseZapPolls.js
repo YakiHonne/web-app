@@ -9,6 +9,7 @@ import { saveUsers } from "@/Helpers/DB";
 import { getUser } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
+import Icon from "@/Components/Icon";
 
 export default function BrowseZapPolls({ setNevent, exit }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -181,7 +182,7 @@ export default function BrowseZapPolls({ setNevent, exit }) {
                       data-tooltip={t("Afcj438")}
                       onClick={() => setNevent(poll.nEvent)}
                     >
-                      <div className="plus-sign"></div>
+                      <Icon name="plus-sign" />
                     </div>
                   </div>
                   <MinimalZapPollPreview event={poll} />
@@ -211,7 +212,7 @@ export default function BrowseZapPolls({ setNevent, exit }) {
                       data-tooltip={t("Afcj438")}
                       onClick={() => setNevent(poll.nEvent)}
                     >
-                      <div className="plus-sign"></div>
+                      <Icon name="plus-sign" />
                     </div>
                   </div>
                   <MinimalZapPollPreview event={poll} />

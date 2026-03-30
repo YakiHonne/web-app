@@ -10,6 +10,7 @@ import EmojiPicker from "emoji-picker-react";
 import EmojiImg from "@/Components/EmojiImg";
 import { useTheme } from "next-themes";
 import { getCustomSettings } from "@/Helpers/ClientHelpers";
+import Icon from "@/Components/Icon";
 
 export default function Like({ isLiked, event, actions, tagKind = "e" }) {
   const dispatch = useDispatch();
@@ -179,7 +180,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
           onClick={handleClick}
       onDoubleClick={handleDoubleClick}
         >
-          {!isLiked && <div className={"heart-24 opacity-4"}></div>}
+          {!isLiked && <Icon name="heart" size={24} className="opacity-4" />}
           {isLiked && <EmojiImg content={isLiked?.content} />}
         </div>
         {showEmoji && (

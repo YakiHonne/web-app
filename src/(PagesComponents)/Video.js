@@ -23,6 +23,7 @@ import Link from "next/link";
 import PostReaction from "@/Components/PostReaction";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import LoadingLogo from "@/Components/LoadingLogo";
+import Icon from "@/Components/Icon";
 
 export default function Video({ event, userProfile, naddrData }) {
   const { t } = useTranslation();
@@ -325,7 +326,7 @@ export default function Video({ event, userProfile, naddrData }) {
                                         height: "100%",
                                       }}
                                     >
-                                      <div className="play-vid-58"></div>
+                                      <Icon name="play-vid" size={58} />
                                     </div>
                                   </div>
                                   <div>

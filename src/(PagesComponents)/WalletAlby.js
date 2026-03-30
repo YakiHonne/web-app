@@ -1,13 +1,13 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "next/link";
-import { useLocation } from "next/router";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 
 export default function WalletAlby() {
-  const location = useLocation();
+  const location = window.location;
+
   const { t } = useTranslation();
   const [code, setCode] = useState(false);
 
@@ -22,14 +22,14 @@ export default function WalletAlby() {
         let fd = new FormData();
         fd.append("code", code);
         fd.append("grant_type", "authorization_code");
-        fd.append("redirect_uri", import.meta.env.VITE_ALBY_REDIRECT_URL);
+        fd.append("redirect_uri", process.env.NEXT_PUBLIC_ALBY_REDIRECT_URL);
         const access_token = await axios.post(
           "https://api.getalby.com/oauth/token",
           fd,
           {
             auth: {
-              username: import.meta.env.VITE_ALBY_CLIENT_ID,
-              password: import.meta.env.VITE_ALBY_SECRET_ID,
+              username: process.env.NEXT_PUBLIC_ALBY_CLIENT_ID,
+              password: process.env.NEXT_PUBLIC_ALBY_SECRET_ID,
             },
             headers: {
               "Content-Type": "application/x-www-form-urlencoded",
@@ -52,7 +52,7 @@ export default function WalletAlby() {
             created_at: Math.floor(Date.now() / 1000),
           },
         };
-
+        console.log(alby);
         let oldVersion = getWallets();
         if (oldVersion) {
           try {
@@ -63,19 +63,19 @@ export default function WalletAlby() {
             });
             oldVersion.push(alby);
             updateWallets(oldVersion);
-            customHistory.push("/lightning-wallet");
+            customHistory("/lightning-wallet");
             return;
           } catch (err) {
             updateWallets([alby]);
-            customHistory.push("/lightning-wallet");
+            customHistory("/lightning-wallet");
             return;
           }
         }
         updateWallets([alby]);
-        customHistory.push("/lightning-wallet");
+        customHistory("/lightning-wallet");
       } catch (err) {
         console.log(err);
-        customHistory.push("/lightning-wallet");
+        customHistory("/lightning-wallet");
       }
     };
     getMeData();

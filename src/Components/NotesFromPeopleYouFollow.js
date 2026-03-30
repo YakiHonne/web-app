@@ -11,6 +11,7 @@ import { compactContent, nEventEncode } from "@/Helpers/ClientHelpers";
 import Slider from "@/Components/Slider";
 import Link from "next/link";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
+import Icon from "@/Components/Icon";
 
 export default function NotesFromPeopleYouFollow() {
     const { t } = useTranslation();
@@ -106,7 +107,7 @@ const NoteCard = ({ event }) => {
             <p className="p-bold p-one-line" style={{ width: "max-content" }}>
               {user.display_name || user.name}
             </p>
-            {isNip05Verified && <div className="checkmark-c1"></div>}
+            {isNip05Verified && <Icon name="checkmark-c1" isColored />}
           </div>
         </div>
         <OptionsDropdown

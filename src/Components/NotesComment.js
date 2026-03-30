@@ -17,6 +17,7 @@ import PostReaction from "./PostReaction";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import useIsMute from "@/Hooks/useIsMute";
 import Link from "next/link";
+import Icon from "@/Components/Icon";
 
 export default function NotesComment({
   event,
@@ -168,7 +169,7 @@ export default function NotesComment({
                       <p className={isHistory ? "p-bold" : "p-medium"}>
                         {userProfile.display_name || userProfile.name}
                       </p>
-                      {isNip05Verified && <div className="checkmark-c1"></div>}
+                      {isNip05Verified && <Icon name="checkmark-c1" isColored />}
                       <p className="gray-c p-medium">&#8226;</p>
                       <p className="gray-c p-medium">
                         <Date_
@@ -299,7 +300,7 @@ export default function NotesComment({
                               data-tooltip={t("AdHV2qJ")}
                               onClick={translateNote}
                             >
-                              <div className="translate-24 opacity-4"></div>
+                              <Icon name="translate" size={24} className="opacity-4" />
                             </div>
                           )}
                           {!isNoteTranslating && showTranslation && (
@@ -308,7 +309,7 @@ export default function NotesComment({
                               data-tooltip={t("AE08Wte")}
                               onClick={() => setShowTranslation(false)}
                             >
-                              <div className="translate-24 opacity-4"></div>
+                              <Icon name="translate" size={24} className="opacity-4" />
                             </div>
                           )}
                           {isNoteTranslating && <LoadingDots />}
