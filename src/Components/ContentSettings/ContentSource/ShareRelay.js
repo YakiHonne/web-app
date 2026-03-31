@@ -12,9 +12,7 @@ export default function ShareRelay({ relay, exit, type = 1 }) {
     2: "notes",
     3: "media",
   };
-  let fullURL = `${window.location.protocol}//${window.location.host}/r/${
-    types[type]
-  }?r=${relay}`;
+  let fullURL = `${window.location.protocol}//${window.location.host}/r/${"content"}?r=${relay}`;
   return (
     <div className="fixed-container fx-centered box-pad-h">
       <div
