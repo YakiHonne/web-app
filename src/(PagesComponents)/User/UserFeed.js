@@ -75,6 +75,7 @@ export default function UserFeed({ user }) {
   const { isMuted } = useIsMute(pubkey);
   const userKeys = useSelector((state) => state.userKeys);
   const pinnedNotes = useSelector((state) => state.userPinnedNotes);
+  const [userPinnedNotes, setUserPinnedNotes] = useState([]);
   const isCurrentUser = userKeys?.pub === pubkey;
   const [events, dispatchEvents] = useReducer(
     eventsReducer,
@@ -91,7 +92,7 @@ export default function UserFeed({ user }) {
   const virtuosoRef = useRef(null);
 
   const getNotesFilter = () => {
-    let pinnedNotesIds = isCurrentUser ? pinnedNotes : user.pinned;
+    let pinnedNotesIds = isCurrentUser ? pinnedNotes : userPinnedNotes;
     let kinds = {
       notes: [1, 6],
       replies: [1],
@@ -226,6 +227,19 @@ export default function UserFeed({ user }) {
     if (!pubkey) return;
     fetchData();
   }, [lastEventTime, contentFrom, pubkey]);
+
+  useEffect(() => {
+    if (userPinnedNotes?.length === 0) {
+      getSubData([{ authors: [user.pubkey], kinds: [10001] }], 1000, 3).then(
+        (_) => {
+          if (_.data.length > 0)
+            setUserPinnedNotes(
+              _.data[0].tags.filter((_) => _[0] === "e").map((_) => _[1]),
+            );
+        },
+      );
+    }
+  }, [user]);
 
   const switchSelectedTab = (type) => {
     straightUp();
