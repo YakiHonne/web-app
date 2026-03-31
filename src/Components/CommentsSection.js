@@ -26,16 +26,16 @@ const filterRepliesComments = (all, id) => {
         (item) =>
           item[0] === "e" &&
           item[1] === id &&
-          ["reply", "root"].includes(item[3])
+          ["reply", "root"].includes(item[3]),
       )
     ) {
       let note_tree = getParsedNote(comment, true);
       let replies = countReplies(comment.id, all);
-
-      temp.push({
-        ...note_tree,
-        replies,
-      });
+      if (note_tree)
+        temp.push({
+          ...note_tree,
+          replies,
+        });
     }
   }
   return temp;
@@ -46,10 +46,10 @@ const filterRootComments = (all) => {
 
   for (let comment of all) {
     let isRoot = comment.tags.find(
-      (item) => item[0] === "e" && item[3] === "root"
+      (item) => item[0] === "e" && item[3] === "root",
     );
     let isReply = comment.tags.find(
-      (item) => item[0] === "e" && item[3] === "reply"
+      (item) => item[0] === "e" && item[3] === "reply",
     );
     if (
       !isReply ||
@@ -59,11 +59,11 @@ const filterRootComments = (all) => {
     ) {
       let note_tree = getParsedNote(comment, true);
       let replies = countReplies(comment.id, all);
-
-      temp.push({
-        ...note_tree,
-        replies,
-      });
+      if (note_tree)
+        temp.push({
+          ...note_tree,
+          replies,
+        });
     }
   }
   return temp;
@@ -74,15 +74,17 @@ const countReplies = (id, all) => {
 
   for (let comment of all) {
     let ev = comment.tags.find(
-      (item) => item[3] === "reply" && item[0] === "e" && item[1] === id
+      (item) => item[3] === "reply" && item[0] === "e" && item[1] === id,
     );
     if (ev) {
       let nestedReplies = countReplies(comment.id, all);
       let _ = getParsedNote(comment, true);
-      replies.push({
-        ..._,
-        replies: nestedReplies,
-      });
+      if (_) {
+        replies.push({
+          ..._,
+          replies: nestedReplies,
+        });
+      }
     }
   }
 
@@ -126,7 +128,7 @@ export default function CommentsSection({
   useEffect(() => {
     let parsedCom = () => {
       let res = filterComments(comments, id, isRoot);
-      setNetComments(res);
+      setNetComments(res.filter((_) => _.id));
       if (res.length !== 0 || comments.length > 0) setIsLoading(false);
     };
     parsedCom();
@@ -143,22 +145,22 @@ export default function CommentsSection({
             [`#${tagKind}`]: [rootData ? rootData[1] : id],
           },
         ],
-        300
+        300,
       );
       let tempEvents = events.data
         .map((event) => {
           let is_un = event.tags.find((tag) => tag[0] === "l");
           let is_comment = event.tags.find(
-            (tag) => tag.length > 3 && ["root", "reply"].includes(tag[3])
+            (tag) => tag.length > 3 && ["root", "reply"].includes(tag[3]),
           );
           let is_quote = event.tags.find((tag) => tag[0] === "q");
           let is_mention = event.tags.filter(
-            (tag) => tag.length > 3 && tag[3] === "mention" && tag[1] === id
+            (tag) => tag.length > 3 && tag[3] === "mention" && tag[1] === id,
           );
           let scoreStatus = getWOTScoreForPubkeyLegacy(
             event.pubkey,
             reactions,
-            score
+            score,
           );
           if (
             !(
@@ -191,7 +193,7 @@ export default function CommentsSection({
           since: Math.floor(Date.now() / 1000),
         },
       ],
-      { cacheUsage: "ONLY_RELAY", groupable: false }
+      { cacheUsage: "ONLY_RELAY", groupable: false },
     );
 
     sub.on("event", (event) => {
@@ -201,7 +203,7 @@ export default function CommentsSection({
         setComments((prev) => {
           let newCom = [...prev, event.rawEvent()];
           return newCom.sort(
-            (item_1, item_2) => item_2.created_at - item_1.created_at
+            (item_1, item_2) => item_2.created_at - item_1.created_at,
           );
         });
         saveUsers([event.pubkey]);

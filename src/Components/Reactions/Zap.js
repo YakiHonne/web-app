@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getEventStatAfterEOSE,
@@ -14,7 +14,12 @@ import { setUpdatedActionFromYakiChest } from "@/Store/Slides/YakiChest";
 export default function Zap({ event, user, actions, isZapped }) {
   const dispatch = useDispatch();
   const userMetadata = useSelector((state) => state.userMetadata);
-
+  const forContent = useMemo(() => {
+    let c = "";
+    if (event.title) c = event.title?.substring(0, 40);
+    else if (event.content) c = event.content?.substring(0, 40);
+    return c;
+  }, []);
   const reactToNote = async (filter) => {
     let event_ = await getEvent(filter);
     let zapper = getZapper(event_);
@@ -25,7 +30,7 @@ export default function Zap({ event, user, actions, isZapped }) {
       "zaps",
       actions,
       { amount, content },
-      event_.created_at
+      event_.created_at,
     );
     saveEventStats(event.aTag || event.id, stats);
     updateYakiChest(amount);
@@ -83,11 +88,7 @@ export default function Zap({ event, user, actions, isZapped }) {
       }}
       eTag={event.aTag ? "" : event.id}
       aTag={event.aTag ? event.aTag : ""}
-      forContent={
-        event.title
-          ? event.title.substring(0, 40)
-          : event.content.substring(0, 40)
-      }
+      forContent={forContent}
       onlyIcon={true}
       setReceivedEvent={reactToNote}
       isZapped={isZapped}
