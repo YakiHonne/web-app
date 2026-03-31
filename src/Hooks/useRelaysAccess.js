@@ -31,6 +31,10 @@ export default function useRelaysAccess({ relay }) {
           ],
           50,
           [relay],
+          undefined,
+          undefined,
+          undefined,
+          "ONLY_RELAY",
         ).then((data) => {
           if (data.data.length > 0) {
             let isRemoved = data.data[0].kind === 8001;

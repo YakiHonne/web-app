@@ -17,7 +17,7 @@
 - Fixed UI issues when note options position changes.
 - General bug fixes and optimizations across the app.
 
-# (v5.7.0) 01/01/2026
+# (v5.7.0) 01/03/2026
 
 - Explore page featuring media packs and starter packs.
 - Custom feed support for media and starter packs.
