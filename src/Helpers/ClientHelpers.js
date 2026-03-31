@@ -455,7 +455,7 @@ export function getParsedNote(
     if (!event) return;
     let expiration = event.tags.find((tag) => tag[0] === "expiration");
     let isExpired = expiration && parseInt(expiration[1]) < Date.now() / 1000;
-    if (expiration) return;
+    if (isExpired) return;
     let isNoteLong = event.content.split(" ").length > 150;
     let isCollapsedNoteEnabled = getCustomSettings().collapsedNote;
     isCollapsedNoteEnabled =
