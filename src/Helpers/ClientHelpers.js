@@ -170,7 +170,7 @@ export function getNoteTree(
           <a
             style={{ position: "relative", display: "inline-flex" }}
             className="fx-centered pointer sticker sticker-normal sticker-green-side"
-            href={`/r/notes?r=${el}`}
+            href={`/r/content?r=${el}`}
             target="_blank"
             onClick={(e) => e.stopPropagation()}
           >

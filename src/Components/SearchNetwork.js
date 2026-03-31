@@ -89,7 +89,7 @@ export default function SearchNetwork({ exit }) {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_CACHE_BASE_URL;
 
       let data = await axios.get(
-        `${API_BASE_URL}/api/v1/users/search/${searchKeyword}`
+        `${API_BASE_URL}/api/v1/users/search/${searchKeyword}`,
       );
       saveFetchedUsers(data.data);
       setResults((prev) => {
@@ -98,7 +98,7 @@ export default function SearchNetwork({ exit }) {
           if (
             !bannedList.includes(event.pubkey) &&
             tempData.findIndex(
-              (event_) => event_.pubkey === event.pubkey && !event.kind
+              (event_) => event_.pubkey === event.pubkey && !event.kind,
             ) === index &&
             isHex(event.pubkey)
           )
@@ -140,7 +140,7 @@ export default function SearchNetwork({ exit }) {
           )
             return user;
         }),
-        searchKeyword
+        searchKeyword,
       ).slice(0, 30);
       if (checkFollowings.length > 0) {
         filteredUsers = structuredClone(checkFollowings);
@@ -171,7 +171,7 @@ export default function SearchNetwork({ exit }) {
               )
                 return user;
             }),
-            searchKeyword
+            searchKeyword,
           ).slice(0, 30),
         ];
       }
@@ -234,7 +234,7 @@ export default function SearchNetwork({ exit }) {
         { kinds: [1], limit: 10, "#t": tags },
         { kinds: [30023, 34235, 21, 22], limit: 30, "#t": tags },
       ],
-      500
+      500,
     );
     let content_ = content.data.map((event) => {
       if (event.kind === 1) {
@@ -325,7 +325,7 @@ export default function SearchNetwork({ exit }) {
                 className="fit-container fx-centered"
                 onClick={() => {
                   customHistory(
-                    `/search?keyword=${searchKeyword?.replace("#", "%23")}`
+                    `/search?keyword=${searchKeyword?.replace("#", "%23")}`,
                   );
                   exit();
                 }}
@@ -346,10 +346,10 @@ export default function SearchNetwork({ exit }) {
                 className="fit-container fx-centered"
                 onClick={() => {
                   customHistory(
-                    `/r/notes?r=wss://${searchKeyword
+                    `/r/content?r=wss://${searchKeyword
                       ?.replace("#", "%23")
                       .replace("ws://", "")
-                      .replace("wss://", "")}`
+                      .replace("wss://", "")}`,
                   );
                   exit();
                 }}
@@ -381,7 +381,7 @@ export default function SearchNetwork({ exit }) {
                       <div
                         onClick={() => {
                           customHistory(
-                            `/search?keyword=${interest?.replace("#", "%23")}`
+                            `/search?keyword=${interest?.replace("#", "%23")}`,
                           );
                           exit();
                         }}

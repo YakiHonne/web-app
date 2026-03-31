@@ -29,6 +29,11 @@ export default function RedPacketEnv({
   );
   const [isLoading, setIsLoading] = useState(false);
   const mainCardColor = useImageDominantColor(data.img);
+
+  useEffect(() => {
+    if (!addr) setAddr(userMetadata.lud16);
+  }, [userMetadata]);
+
   const handleClaim = async () => {
     if (preview) return;
     if (!addr) {
