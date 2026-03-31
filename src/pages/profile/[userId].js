@@ -36,8 +36,6 @@ export async function getStaticProps({ locale, params }) {
     ? await parseNip05(userId)
     : decodePubkey(userId);
 
-  console.log(pubkey);
-
   if (pubkey) {
     pubkey =
       pubkey.startsWith("npub") || pubkey.startsWith("nprofile")
