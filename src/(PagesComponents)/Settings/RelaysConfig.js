@@ -16,7 +16,7 @@ export function RelaysConfig() {
   const [allSearchRelays, setAllSearchRelays] = useState([]);
   const [showStatus, setShowStatus] = useState(false);
   const [selectedTab, setSelectedTab] = useState(
-    query?.relaysType ? query.relaysType : 0
+    query?.relaysType ? query.relaysType : 0,
   );
 
   useEffect(() => {
@@ -107,13 +107,13 @@ export function RelaysConfig() {
             className="round-icon-small"
             onClick={() => setSelectedTab(Math.max(selectedTab - 1, 0))}
           >
-            <Icon name="arrow" />
+            <Icon name="arrow" transform="rotate(90deg)" />
           </div>
           <div
             className="round-icon-small"
             onClick={() => setSelectedTab(Math.min(selectedTab + 1, 2))}
           >
-            <Icon name="arrow" />
+            <Icon name="arrow" transform="rotate(-90deg)" />
           </div>
         </div>
       </div>
