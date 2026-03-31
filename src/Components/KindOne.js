@@ -530,6 +530,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
     relatedEvent ? true : false,
   );
   const [isUnsupported, setIsUnsupported] = useState(false);
+  const [isNotFound, setIsNotFound] = useState(false);
   const [showNote, setShowNote] = useState(false);
 
   useEffect(() => {
@@ -573,16 +574,22 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
           } else {
             parsedEvent = getParsedRepEvent(post);
           }
-          if (
-            ![
-              0, 1, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21, 20,
-            ].includes(parsedEvent.kind)
-          ) {
-            setIsUnsupported(true);
-          } else {
-            let key =
-              kind === 0 ? ids : `${kind}:${ids.pubkey}:${ids.identifier}`;
-            setEventFromCache(key, post.rawEvent());
+          if (!parsedEvent.id) {
+            setIsNotFound(true);
+          }
+          if (parsedEvent.id) {
+            if (
+              ![
+                0, 1, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21,
+                20,
+              ].includes(parsedEvent.kind)
+            ) {
+              setIsUnsupported(true);
+            } else {
+              let key =
+                kind === 0 ? ids : `${kind}:${ids.pubkey}:${ids.identifier}`;
+              setEventFromCache(key, post.rawEvent());
+            }
           }
           setRelatedEvent(parsedEvent);
           setIsRelatedEventPubkey(post.pubkey);
@@ -617,7 +624,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
   if (isThread)
     return relatedEvent ? (
       <div className=" fit-container">
-        {!isUnsupported && (
+        {!isUnsupported && !isNotFound && (
           <>
             {relatedEvent.kind === 1 && (
               <NotesComment
@@ -640,10 +647,17 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
             )}
           </>
         )}
-        {isUnsupported && (
+        {isUnsupported && !isNotFound && (
           <UnsupportedKindPreview
             addr={relatedEvent.nEvent || relatedEvent.naddr}
           />
+        )}
+        {isNotFound && (
+          <div className="box-pad-h-m fx-centered fx-start-h box-pad-v-m">
+            <div className=" fx-scattered bg-sp  box-pad-h-m box-pad-v-s sc-s">
+              <p className="gray-c">{t("AAbA1Xn")}</p>
+            </div>
+          </div>
         )}
       </div>
     ) : (
