@@ -8,7 +8,7 @@ export default function UnsupportedKindPreview({ addr }) {
   const { t } = useTranslation();
   return (
     <div
-      className="fit-container fx-scattered box-pad-h-m box-pad-v-s sc-s-18"
+      className="fit-container fx-scattered bg-sp  box-pad-h-m box-pad-v-s sc-s-18"
       style={{ margin: ".5rem 0", overflow: "visible" }}
       onClick={(e) => {
         e.stopPropagation();

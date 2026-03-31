@@ -65,7 +65,7 @@ export default function HistorySection({
   useEffect(() => {
     let parsedCom = () => {
       let res = traceEventPath(targetedEventID, comments, id, tagKind);
-      setNetComments(res);
+      setNetComments(res.filter((_) => _?.id));
       if (res.length !== 0) setIsLoading(false);
     };
     parsedCom();
