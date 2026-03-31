@@ -831,10 +831,13 @@ export default function AppInit() {
           : await decryptDMSWorker([event.rawEvent()], userKeys);
 
         tempInbox.push(...result.inbox);
-        tempAuthors.push(...result.authors);
+        let usersToFetch = result.authors.filter(
+          (author) => !tempAuthors.includes(author),
+        );
+        tempAuthors = [...new Set([...tempAuthors, ...usersToFetch])];
 
         saveChatrooms(tempInbox, userKeys.pub);
-        saveUsers(tempAuthors);
+        saveUsers(usersToFetch);
       } finally {
         isProcessing = false;
         processQueue();
@@ -902,7 +905,7 @@ export default function AppInit() {
     if (!userKeys || (!userKeys.ext && !userKeys.sec)) return;
 
     let isCancelled = false;
-
+    let inboxUsers = [];
     const fetchData = async () => {
       const timeFrames = [
         604800, 1209600, 2592000, 7776000, 15552000, 31536000,
@@ -969,7 +972,11 @@ export default function AppInit() {
               : await decryptDMSWorker(dmsData.data, userKeys);
             if (isCancelled) return;
             await saveChatrooms(tempInbox.inbox, userKeys.pub);
-            saveUsers(tempInbox.authors);
+            let usersTofetch = tempInbox.authors.filter(
+              (author) => !inboxUsers.includes(author),
+            );
+            inboxUsers = [...new Set([...inboxUsers, ...usersTofetch])];
+            saveUsers(usersTofetch);
             until = tempInbox.until ? tempInbox.until : until;
             since = until ? until - 604800 : since;
             timePeriodIndex = 0;
@@ -1262,8 +1269,6 @@ export default function AppInit() {
         }
       }
     }
-
-    await saveUsers(authors);
     return { inbox: tempInbox.filter((_) => _), authors, until: until - 1 };
   };
 
