@@ -491,8 +491,6 @@ export const getNutZaps = async (pubkey) => {
 
 export const saveChatrooms = async (inbox, pubkey) => {
   if (db) {
-    let usersPubkeys = inbox.map((inbox) => inbox.pubkey);
-    saveUsers(usersPubkeys);
     let oldAggregatedchatrooms = await getChatrooms(pubkey);
     let sortedInbox = aggregateUsers(inbox, oldAggregatedchatrooms, pubkey);
     const chatroomData = sortedInbox.map((ibx) => ({
@@ -994,6 +992,7 @@ export const saveAppSettings = async (event, pubkey, lastTimestamp) => {
 export const saveUsers = async (pubkeys) => {
   if (db) {
     try {
+      if (!pubkeys || pubkeys.length === 0) return;
       const users_pubkeys = [...new Set(pubkeys)].filter(
         (_) => typeof _ === "string",
       );

@@ -43,7 +43,7 @@ export default function useDirectMessages() {
         let isKnown = false;
         if (!isFollowing) {
           isUnknown = chatroom.convo.find(
-            (conv) => conv.pubkey === userKeys.pub
+            (conv) => conv.pubkey === userKeys.pub,
           )
             ? false
             : "unknown";
@@ -70,8 +70,7 @@ export default function useDirectMessages() {
 
     setMsgsCount({ followings, known, unknown });
     setSortedInbox(tempChatrooms);
-
   }, [userChatrooms, userFollowings, nostrAuthors]);
 
-  return { sortedInbox, msgsCount, userChatrooms , isNewMsg};
+  return { sortedInbox, msgsCount, userChatrooms, isNewMsg };
 }
