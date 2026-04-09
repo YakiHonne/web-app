@@ -53,6 +53,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
   }, [message]);
 
   const handleSendMessage = async ({ content, isRedPacket = false }) => {
+    console.log("first");
     let messageContent = isRedPacket ? content : message;
     if (!messageContent || !convo.pubkey) return;
     setShowProgress(true);
@@ -81,7 +82,7 @@ export function ConversationBox({ convo, back, noHeader = false }) {
     if (e.key === "Enter") {
       if (!e.shiftKey) {
         e.preventDefault();
-        handleSendMessage();
+        handleSendMessage({ isRedPacket: false });
       }
     }
   };
@@ -477,8 +478,8 @@ export function ConversationBox({ convo, back, noHeader = false }) {
             <form
               className="fit-container fx-scattered fx-end-v"
               onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
+                // e.preventDefault();
+                handleSendMessage({ isRedPacket: false });
               }}
             >
               <div
@@ -553,7 +554,10 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                   />
                 </div>
               </div>
-              <div className="round-icon" onClick={handleSendMessage}>
+              <div
+                className="round-icon"
+                onClick={() => handleSendMessage({ isRedPacket: false })}
+              >
                 <Icon name="send" size={24} />
               </div>
             </form>
