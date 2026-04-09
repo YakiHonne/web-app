@@ -15,7 +15,7 @@ import { getParsedNote, getWotConfig } from "@/Helpers/ClientHelpers";
 import Icon from "@/Components/Icon";
 
 const filterComments = (all, id, isRoot) => {
-  if (isRoot) return filterRootComments(all);
+  if (isRoot) return filterRootComments(all, id);
   return filterRepliesComments(all, id);
 };
 const filterRepliesComments = (all, id) => {
@@ -41,7 +41,7 @@ const filterRepliesComments = (all, id) => {
   return temp;
 };
 
-const filterRootComments = (all) => {
+const filterRootComments = (all, id) => {
   let temp = [];
 
   for (let comment of all) {
@@ -55,7 +55,8 @@ const filterRootComments = (all) => {
       !isReply ||
       (Array.isArray(isReply) &&
         Array.isArray(isRoot) &&
-        isReply[1] === isRoot[1])
+        isReply[1] === isRoot[1]) ||
+      (Array.isArray(isReply) && !isRoot && isReply[1] === id)
     ) {
       let note_tree = getParsedNote(comment, true);
       let replies = countReplies(comment.id, all);
@@ -147,6 +148,7 @@ export default function CommentsSection({
         ],
         300,
       );
+
       let tempEvents = events.data
         .map((event) => {
           let is_un = event.tags.find((tag) => tag[0] === "l");
