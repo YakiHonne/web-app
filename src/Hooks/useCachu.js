@@ -67,14 +67,16 @@ export default function useCashu() {
         )
         .map((token) => {
           return {
-            proofs: token.token.content.proofs.map((_) => {
-              return { ..._, amount: parseInt(_.amount) };
-            }),
-            amount: token.token.content.proofs.reduce(
-              (total, proof) => total + parseInt(proof.amount),
-              0,
-            ),
-            id: token.token.id,
+            proofs:
+              token?.token?.content?.proofs?.map((_) => {
+                return { ..._, amount: parseInt(_.amount) };
+              }) || [],
+            amount:
+              token?.token?.content?.proofs?.reduce(
+                (total, proof) => total + parseInt(proof.amount),
+                0,
+              ) || 0,
+            id: token.token?.id,
             del: token.token.content?.del || [],
           };
         });
