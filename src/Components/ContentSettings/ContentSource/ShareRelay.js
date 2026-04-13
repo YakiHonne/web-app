@@ -4,19 +4,25 @@ import RelayImage from "@/Components/RelayImage";
 import { copyText } from "@/Helpers/Helpers";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
-import Overlay from "@/Components/Overlay";
 
 export default function ShareRelay({ relay, exit, type = 1 }) {
   const { t } = useTranslation();
-
+  const types = {
+    1: "discover",
+    2: "notes",
+    3: "media",
+  };
   let fullURL = `${window.location.protocol}//${window.location.host}/r/${"content"}?r=${relay}`;
   return (
-    <Overlay exit={exit} width={400}>
-      <div className="box-pad-h box-pad-v fx-centered fx-col fx-start-h">
+    <div className="fixed-container fx-centered box-pad-h">
+      <div
+        className="sc-s bg-sp box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up"
+        style={{ width: "min(100%, 400px)", position: "relative" }}
+      >
         <div className="close" onClick={exit}>
           <div></div>
         </div>
-        <div className="fit-container fx-centered">
+        <div className="fit-container fx-scattered">
           <div className="fx-centered fx-col">
             <RelayImage url={relay} size={40} />
             <p className="p-centered box-pad-h-m p-big">{relay}</p>
@@ -51,6 +57,6 @@ export default function ShareRelay({ relay, exit, type = 1 }) {
           <button className="btn btn-normal btn-full">{t("AlQx13z")}</button>
         </Link>
       </div>
-    </Overlay>
+    </div>
   );
 }

@@ -6,7 +6,6 @@ import { NDKEvent, NDKRelay } from "@nostr-dev-kit/ndk";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch } from "react-redux";
-import { sleepTimer } from "@/Helpers/Helpers";
 
 export default function useRelaysAccess({ relay }) {
   const dispatch = useDispatch();
@@ -22,46 +21,33 @@ export default function useRelaysAccess({ relay }) {
       let isLocked = relayMetadata.supported_nips.includes(43);
       if (isLocked) {
         setIsMembershipRequired(true);
-        setIsRelayAccessLoading(true);
-        checkMember({
-          relayPubkey: relayMetadata.self,
-          userPubkey: userKeys.pub,
-        }).then((status) => {
-          console.log(status);
-          setIsMember(status);
-          setIsRelayAccessLoading(false);
+        getSubData(
+          [
+            {
+              kinds: [8000, 8001],
+              authors: [relayMetadata.self],
+              "#p": [userKeys.pub],
+            },
+          ],
+          50,
+          [relay],
+          undefined,
+          undefined,
+          undefined,
+          "ONLY_RELAY",
+        ).then((data) => {
+          if (data.data.length > 0) {
+            let isRemoved = data.data[0].kind === 8001;
+            if (!isRemoved) {
+              setIsMember(true);
+            } else setIsMember(false);
+          }
         });
       }
     } else {
       setIsMember(isMember);
     }
   }, [relayMetadata, userKeys]);
-
-  const checkMember = async ({ relayPubkey, userPubkey }) => {
-    let data = await getSubData(
-      [
-        {
-          kinds: [8000, 8001],
-          authors: [relayPubkey],
-          "#p": [userPubkey],
-        },
-      ],
-      50,
-      [relay],
-      undefined,
-      undefined,
-      undefined,
-      "ONLY_RELAY",
-    );
-
-    if (data.data.length > 0) {
-      let isRemoved = data.data[0].kind === 8001;
-      if (!isRemoved) {
-        return true;
-      } else return false;
-    }
-    return false;
-  };
 
   const handleJoinRequest = async (code) => {
     setIsRelayAccessLoading(true);
@@ -75,11 +61,7 @@ export default function useRelaysAccess({ relay }) {
       return;
     }
     let status = await publishToRelay({ event: eventInitEx, relay });
-    if (status) {
-      let v = await verifyMembership();
-      setIsMember(v);
-    }
-    setIsRelayAccessLoading(false);
+    if (status) setIsMember(true);
   };
 
   const publishToRelay = async ({ event }) => {
@@ -92,6 +74,8 @@ export default function useRelaysAccess({ relay }) {
         relayInstance
           .publish(eventInstance)
           .then((data) => {
+            console.log(data);
+            setIsRelayAccessLoading(false);
             resolve(true);
           })
           .catch((err) => {
@@ -104,7 +88,7 @@ export default function useRelaysAccess({ relay }) {
               });
             } else {
               dispatch(setToast({ type: 2, desc: err.message }));
-              resolve(false);
+              setIsRelayAccessLoading(false);
             }
           });
       };
@@ -145,27 +129,7 @@ export default function useRelaysAccess({ relay }) {
       return;
     }
     let status = await publishToRelay({ event: eventInitEx, relay });
-    if (status) {
-      let v = await verifyMembership();
-      setIsMember(v);
-    }
-    setIsRelayAccessLoading(false);
-  };
-
-  const verifyMembership = async () => {
-    let attempt = 0;
-    while (attempt < 5) {
-      let status = await checkMember({
-        relayPubkey: relayMetadata.self,
-        userPubkey: userKeys.pub,
-      });
-      if (status) {
-        return true;
-      }
-      sleepTimer(1000);
-      attempt++;
-    }
-    return false;
+    if (status) setIsMember(false);
   };
 
   return {

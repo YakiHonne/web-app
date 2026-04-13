@@ -782,12 +782,12 @@ const blossomServerFileUpload = async ({
     let url = imageURL.data.url;
     if (includeImeta) {
       let dim = await getImageDimensions(file);
-      let mirrors = await mirrorBlossomServerFileUpload({
-        isMirror: mirror,
-        serversList: servers,
-        eventHash: encodeB64,
-        fileUrl: url,
-      });
+      let mirrors = await mirrorBlossomServerFileUpload(
+        mirror,
+        servers,
+        encodeB64,
+        url,
+      );
       return {
         url,
         imeta: [
@@ -800,12 +800,7 @@ const blossomServerFileUpload = async ({
         ],
       };
     }
-    mirrorBlossomServerFileUpload({
-      isMirror: mirror,
-      serversList: servers,
-      eventHash: encodeB64,
-      fileUrl: url,
-    });
+    mirrorBlossomServerFileUpload(mirror, servers, encodeB64, url);
     return url;
   } catch (err) {
     console.log(err);
@@ -885,20 +880,15 @@ const getImageDimensions = async (file) => {
   });
 };
 
-export const mirrorBlossomServerFileUpload = async ({
+const mirrorBlossomServerFileUpload = async (
   isMirror,
   serversList,
   eventHash,
   fileUrl,
-  excludeFirst = true,
-}) => {
+) => {
   try {
-    if (
-      (isMirror && serversList.length > 1 && excludeFirst) ||
-      (isMirror && serversList.length > 0 && !excludeFirst)
-    ) {
-      if (excludeFirst)
-        serversList = serversList.filter((_, index) => index !== 0);
+    if (isMirror && serversList.length > 1) {
+      serversList = serversList.filter((_, index) => index !== 0);
       let promises = await Promise.allSettled(
         serversList.map(async (server, index) => {
           let endpoint = `${server}/mirror`;
@@ -911,28 +901,9 @@ export const mirrorBlossomServerFileUpload = async ({
                 Authorization: `Nostr ${eventHash}`,
               },
             });
-            let url = res.data.url;
-            if (!url) {
-              store.dispatch(
-                setToast({
-                  type: 2,
-                  desc: `Could not mirror to ${server}`,
-                }),
-              );
-            }
-            return url;
+            return res.data.url;
           } catch (err) {
             console.log(err);
-            store.dispatch(
-              setToast({
-                type: 2,
-                desc:
-                  err?.response?.data?.message ||
-                  err?.response?.data ||
-                  err?.response ||
-                  `Could not mirror to ${server}`,
-              }),
-            );
           }
         }),
       );
@@ -943,52 +914,6 @@ export const mirrorBlossomServerFileUpload = async ({
     return [];
   } catch (err) {
     console.log(err);
-    store.dispatch(
-      setToast({
-        type: 2,
-        desc: "Could not mirror in one or more servers",
-      }),
-    );
-  }
-};
-export const deleteBlossomFile = async ({ sha256, serversList, eventHash }) => {
-  try {
-    if (serversList.length > 0) {
-      let promises = await Promise.allSettled(
-        serversList.map(async (server, index) => {
-          let endpoint = `${server}/${sha256}`;
-          try {
-            let res = await axios.delete(endpoint, {
-              headers: {
-                Authorization: `Nostr ${eventHash}`,
-              },
-            });
-
-            return true;
-          } catch (err) {
-            console.log(err);
-            store.dispatch(
-              setToast({
-                type: 2,
-                desc: `Could not delete from ${server}`,
-              }),
-            );
-          }
-        }),
-      );
-      return promises
-        .map((_) => (_.status === "fulfilled" ? _.value : false))
-        .filter((_) => _);
-    }
-    return [];
-  } catch (err) {
-    console.log(err);
-    store.dispatch(
-      setToast({
-        type: 2,
-        desc: "Could not delete file from one or more servers",
-      }),
-    );
   }
 };
 
@@ -1068,44 +993,6 @@ const regularServerFileUpload = async ({
       }),
     );
     return false;
-  }
-};
-
-export const generateAuthorizationHeaderForBlossomServer = async ({
-  servers,
-  tTag,
-  sha256,
-}) => {
-  try {
-    const tTagsContent = {
-      list: "List Image",
-      delete: "Delete Image",
-      upload: "Upload Image",
-    };
-    let expiration = `${Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7}`;
-    let event = {
-      kind: 24242,
-      content: tTagsContent[tTag],
-      created_at: Math.floor(Date.now() / 1000),
-      tags: [
-        ["t", tTag],
-        ...(sha256 ? [["x", sha256]] : []),
-        ...servers.map((server) => ["server", server]),
-        ["expiration", expiration],
-      ],
-    };
-    event = await InitEvent(
-      event.kind,
-      event.content,
-      event.tags,
-      event.created_at,
-    );
-    if (!event) return;
-    let encodeB64 = encodeBase64URL(JSON.stringify(event));
-    return encodeB64;
-  } catch (err) {
-    console.log(err);
-    return err;
   }
 };
 
@@ -1227,7 +1114,7 @@ const copyText = (value, message, event) => {
   store.dispatch(
     setToast({
       type: 1,
-      desc: `${message}`,
+      desc: `${message} 👏`,
     }),
   );
 };
@@ -1355,13 +1242,6 @@ const verifyEvent = (event) => {
     aTag,
   };
 };
-
-export function getMediaType(type) {
-  if (!type) return "other";
-  if (type.startsWith("image/")) return "image";
-  if (type.startsWith("video/")) return "video";
-  return "other";
-}
 
 export const isURLValid = (url, type) => {
   let emailAddrRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -1589,43 +1469,7 @@ const formatTime = (seconds) => {
   return `${String(d).padStart(2, "0")}d ${String(h).padStart(2, "0")}h ${String(min).padStart(2, "0")}m ${String(s_).padStart(2, "0")}s`;
 };
 
-const formatBytes = (bytes, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-};
-
-const downloadFile = async (url, filename) => {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Network response was not ok");
-    const blob = await response.blob();
-    const blobUrl = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = filename || url.split("/").pop() || "file";
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(blobUrl);
-  } catch (error) {
-    console.error("Download failed:", error);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename || "";
-    a.target = "_blank";
-    a.click();
-  }
-};
-
 export {
-  formatBytes,
   getLinkFromAddr,
   getAuthPubkeyFromNip05,
   getAIFeedContent,
@@ -1670,5 +1514,4 @@ export {
   formatTime,
   filterImetas,
   getDominantColor,
-  downloadFile,
 };
