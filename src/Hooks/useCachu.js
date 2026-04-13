@@ -100,40 +100,44 @@ export default function useCashu() {
     let history = userCashuHistory?.history || [];
     let senders = [];
     let tokensRedeemed = [];
-    history = history.map((h) => {
-      let content = h.history.content;
-      let sent = false;
-      let amount = 0;
-      let state = "created";
-      let sender = "";
-      let redeemed = "";
-      for (let c of content) {
-        if (c[0] === "direction" && c[1] === "out") sent = true;
-        if (c[0] === "amount") amount = parseInt(c[1]) || 0;
-        if (c[0] === "state") state = c[1];
-      }
-      let isRedeemed = h.history.tags.find(
-        (tag) => tag[0] === "e" && tag[3] === "redeemed",
-      );
-      let isSender = h.history.tags.find((tag) => tag[0] === "p");
-      if (isSender) {
-        sender = isSender[1];
-        senders.push(isSender[1]);
-      }
-      if (isRedeemed) {
-        redeemed = isRedeemed[1];
-        tokensRedeemed.push(isRedeemed[1]);
-      }
-      return {
-        id: h.history.id,
-        sent,
-        amount,
-        state,
-        created_at: h.history.created_at,
-        sender,
-        redeemed,
-      };
-    });
+    history = history
+      .filter((h) => {
+        return Array.isArray(h?.history?.content);
+      })
+      .map((h) => {
+        let content = h.history.content;
+        let sent = false;
+        let amount = 0;
+        let state = "created";
+        let sender = "";
+        let redeemed = "";
+        for (let c of content) {
+          if (c[0] === "direction" && c[1] === "out") sent = true;
+          if (c[0] === "amount") amount = parseInt(c[1]) || 0;
+          if (c[0] === "state") state = c[1];
+        }
+        let isRedeemed = h.history.tags.find(
+          (tag) => tag[0] === "e" && tag[3] === "redeemed",
+        );
+        let isSender = h.history.tags.find((tag) => tag[0] === "p");
+        if (isSender) {
+          sender = isSender[1];
+          senders.push(isSender[1]);
+        }
+        if (isRedeemed) {
+          redeemed = isRedeemed[1];
+          tokensRedeemed.push(isRedeemed[1]);
+        }
+        return {
+          id: h.history.id,
+          sent,
+          amount,
+          state,
+          created_at: h.history.created_at,
+          sender,
+          redeemed,
+        };
+      });
     if (senders.length > 0) {
       saveUsers(senders);
     }
