@@ -21,14 +21,23 @@ const filterComments = (all, id, isRoot) => {
 const filterRepliesComments = (all, id) => {
   let temp = [];
   for (let comment of all) {
-    if (
+    let hasNip10Tag = comment.tags.find(
+      (item) =>
+        item[0] === "e" &&
+        item[1] === id &&
+        ["reply", "root"].includes(item[3]),
+    );
+
+    let hasNip22Tag =
+      comment.kind === 1111 &&
       comment.tags.find(
         (item) =>
-          item[0] === "e" &&
+          (item[0] === "e" || item[0] === "a") &&
           item[1] === id &&
-          ["reply", "root"].includes(item[3]),
-      )
-    ) {
+          (!item[3] || item[3] === ""),
+      );
+
+    if (hasNip10Tag || hasNip22Tag) {
       let note_tree = getParsedNote(comment, true);
       let replies = countReplies(comment.id, all);
       if (note_tree)
@@ -45,19 +54,28 @@ const filterRootComments = (all, id) => {
   let temp = [];
 
   for (let comment of all) {
-    let isRoot = comment.tags.find(
-      (item) => item[0] === "e" && item[3] === "root",
-    );
-    let isReply = comment.tags.find(
-      (item) => item[0] === "e" && item[3] === "reply",
-    );
-    if (
-      !isReply ||
-      (Array.isArray(isReply) &&
-        Array.isArray(isRoot) &&
-        isReply[1] === isRoot[1]) ||
-      (Array.isArray(isReply) && !isRoot && isReply[1] === id)
-    ) {
+    let isTopLevel = false;
+
+    if (comment.kind === 1111) {
+      let parentKindTag = comment.tags.find((item) => item[0] === "k");
+      let parentKind = parentKindTag ? parentKindTag[1] : null;
+      isTopLevel = parentKind !== "1111";
+    } else {
+      let isRoot = comment.tags.find(
+        (item) => item[0] === "e" && item[3] === "root",
+      );
+      let isReply = comment.tags.find(
+        (item) => item[0] === "e" && item[3] === "reply",
+      );
+      isTopLevel =
+        !isReply ||
+        (Array.isArray(isReply) &&
+          Array.isArray(isRoot) &&
+          isReply[1] === isRoot[1]) ||
+        (Array.isArray(isReply) && !isRoot && isReply[1] === id);
+    }
+
+    if (isTopLevel) {
       let note_tree = getParsedNote(comment, true);
       let replies = countReplies(comment.id, all);
       if (note_tree)
@@ -74,10 +92,15 @@ const countReplies = (id, all) => {
   let replies = [];
 
   for (let comment of all) {
-    let ev = comment.tags.find(
+    let hasNip10Reply = comment.tags.find(
       (item) => item[3] === "reply" && item[0] === "e" && item[1] === id,
     );
-    if (ev) {
+    
+    let hasNip22Reply = comment.kind === 1111 && comment.tags.find(
+      (item) => item[0] === "e" && item[1] === id && (!item[3] || item[3] === "")
+    );
+    
+    if (hasNip10Reply || hasNip22Reply) {
       let nestedReplies = countReplies(comment.id, all);
       let _ = getParsedNote(comment, true);
       if (_) {
@@ -113,6 +136,7 @@ export default function CommentsSection({
   tagKind = "e",
   leaveComment = false,
   rootData,
+  rootKind = null,
 }) {
   const userKeys = useSelector((state) => state.userKeys);
   const { userMutedList } = useSelector((state) => state.userMutedList);
@@ -139,10 +163,13 @@ export default function CommentsSection({
     const fetchData = async () => {
       setIsLoading(true);
       const { score, reactions } = getWotConfig();
+
+      const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+      
       const events = await getSubData(
         [
           {
-            kinds: [1],
+            kinds: commentKinds,
             [`#${tagKind}`]: [rootData ? rootData[1] : id],
           },
         ],
@@ -152,9 +179,12 @@ export default function CommentsSection({
       let tempEvents = events.data
         .map((event) => {
           let is_un = event.tags.find((tag) => tag[0] === "l");
-          let is_comment = event.tags.find(
-            (tag) => tag.length > 3 && ["root", "reply"].includes(tag[3]),
-          );
+          let is_comment =
+            event.kind === 1111 ||
+            event.tags.find(
+              (tag) =>
+                tag.length > 3 && ["root", "reply"].includes(tag[3]),
+            );
           let is_quote = event.tags.find((tag) => tag[0] === "q");
           let is_mention = event.tags.filter(
             (tag) => tag.length > 3 && tag[3] === "mention" && tag[1] === id,
@@ -187,10 +217,12 @@ export default function CommentsSection({
   useEffect(() => {
     if (isLoading) return;
 
+    const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+
     const sub = ndkInstance.subscribe(
       [
         {
-          kinds: [1],
+          kinds: commentKinds,
           [`#${tagKind}`]: [rootData ? rootData[1] : id],
           since: Math.floor(Date.now() / 1000),
         },
@@ -254,6 +286,7 @@ export default function CommentsSection({
                   replyPubkey={eventPubkey}
                   actions={postActions}
                   tagKind={tagKind}
+                  rootKind={rootKind}
                 />
               </div>
             )}
@@ -304,6 +337,8 @@ export default function CommentsSection({
                 noteID={id}
                 eventPubkey={author.pubkey}
                 kind={"article"}
+                tagKind={tagKind}
+                rootKind={rootKind}
               />
             );
           })}
@@ -336,6 +371,8 @@ const Comment = ({
   isReply = false,
   isReplyBorder = false,
   index = 0,
+  tagKind = "e",
+  rootKind = null,
 }) => {
   const { t } = useTranslation();
   const { userMutedList } = useSelector((state) => state.userMutedList);
@@ -387,6 +424,8 @@ const Comment = ({
         hasReplies={comment.replies.length > 0}
         isReply={isReply}
         isReplyBorder={isReplyBorder}
+        tagKind={tagKind}
+        rootKind={rootKind}
       />
       {comment.replies.length > 0 && index < 3 && (
         <div className="fit-container fx-centered fx-end-h">
@@ -406,6 +445,8 @@ const Comment = ({
                   eventPubkey={eventPubkey}
                   isReply={true}
                   isReplyBorder={index_ < comment.replies.length - 1}
+                  tagKind={tagKind}
+                  rootKind={rootKind}
                 />
               );
             })}
