@@ -103,7 +103,6 @@ export function getNoteTree(
               key={key}
               isCommonPlatform={isURLCommonPlatformVid.isYT ? "yt" : "vm"}
               src={isURLCommonPlatformVid.videoId}
-              poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
             />,
           );
         }
@@ -114,12 +113,7 @@ export function getNoteTree(
               finalTree.push(<IMGElement src={cleanUrl} key={key} />);
             } else if (checkURL.type === "video") {
               finalTree.push(
-                <VideoLoader
-                  pubkey={pubkey}
-                  key={key}
-                  src={cleanUrl}
-                  poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                />,
+                <VideoLoader pubkey={pubkey} key={key} src={cleanUrl} />,
               );
             }
           } else if (
@@ -400,13 +394,7 @@ export function getComponent(children) {
             );
           }
           if (checkURL.type === "video") {
-            res.push(
-              <VideoLoader
-                key={key}
-                src={children[i].props?.href}
-                poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-              />,
-            );
+            res.push(<VideoLoader key={key} src={children[i].props?.href} />);
           }
         }
         if (!checkURL) {
