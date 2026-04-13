@@ -337,6 +337,8 @@ export default function CommentsSection({
                 noteID={id}
                 eventPubkey={author.pubkey}
                 kind={"article"}
+                tagKind={tagKind}
+                rootKind={rootKind}
               />
             );
           })}
@@ -369,6 +371,8 @@ const Comment = ({
   isReply = false,
   isReplyBorder = false,
   index = 0,
+  tagKind = "e",
+  rootKind = null,
 }) => {
   const { t } = useTranslation();
   const { userMutedList } = useSelector((state) => state.userMutedList);
@@ -420,6 +424,8 @@ const Comment = ({
         hasReplies={comment.replies.length > 0}
         isReply={isReply}
         isReplyBorder={isReplyBorder}
+        tagKind={tagKind}
+        rootKind={rootKind}
       />
       {comment.replies.length > 0 && index < 3 && (
         <div className="fit-container fx-centered fx-end-h">
@@ -439,6 +445,8 @@ const Comment = ({
                   eventPubkey={eventPubkey}
                   isReply={true}
                   isReplyBorder={index_ < comment.replies.length - 1}
+                  tagKind={tagKind}
+                  rootKind={rootKind}
                 />
               );
             })}

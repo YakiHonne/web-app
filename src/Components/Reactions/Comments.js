@@ -112,7 +112,15 @@ export default function Comments({
         if (noteTags) {
           if (!rootEventTag) {
             rootEventTag = noteTags.find(
-              (tag) => (tag[0] === "a" || tag[0] === "e") && tag.length > 3 && tag[3] === "root"
+              (tag) =>
+                (tag[0] === "a" || tag[0] === "e") &&
+                tag.length > 3 &&
+                tag[3] === "root",
+            );
+          }
+          if (!rootEventTag) {
+            rootEventTag = noteTags.find(
+              (tag) => tag[0] === "A" || tag[0] === "E",
             );
           }
           if (rootEventTag) {
@@ -130,6 +138,10 @@ export default function Comments({
             }
 
             tags.push([rootTagType.toUpperCase(), rootEventTag[1], rootEventTag[2] || ""]);
+            if (rootTagType === "a") {
+              // Keep lowercase `a` so article-thread subscriptions by `#a` include nested comments.
+              tags.push(["a", rootEventTag[1], rootEventTag[2] || ""]);
+            }
             tags.push(["K", String(rootEventKind || "")]);
             if (rootEventPubkey) {
               tags.push(["P", rootEventPubkey, ""]);
