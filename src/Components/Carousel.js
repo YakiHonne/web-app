@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
 import ProgressBar from "@/Components/ProgressBar";
 import Icon from "@/Components/Icon";
+import { createPortal } from "react-dom";
 
 export default function Carousel({ imgs, selectedImage, back }) {
   const [currentImg, setCurrentImg] = useState(selectedImage);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   useEffect(() => {
     setCurrentImg(selectedImage);
   }, [selectedImage]);
@@ -29,7 +35,8 @@ export default function Carousel({ imgs, selectedImage, back }) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [imgs.length, back]);
-  return (
+
+  const content = (
     <div
       className="fixed-container fx-centered box-pad-h-s fx-col slide-up"
       onClick={back}
@@ -144,4 +151,11 @@ export default function Carousel({ imgs, selectedImage, back }) {
       )}
     </div>
   );
+
+  return mounted
+    ? createPortal(
+        content,
+        document.getElementById("portal-root") || document.body,
+      )
+    : null;
 }

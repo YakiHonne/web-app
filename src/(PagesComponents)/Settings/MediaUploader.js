@@ -96,7 +96,8 @@ export function MediaUploader({ exit }) {
     if (!customServer) return;
     setIsLoading(true);
     try {
-      const test = await axios.post(customServer);
+      const server = customServer.trim();
+      const test = await axios.post(server);
       dispatch(
         setToast({
           type: 2,
@@ -105,6 +106,7 @@ export function MediaUploader({ exit }) {
       );
       setIsLoading(false);
     } catch (err) {
+      console.log(err);
       if (err.response.status === 404) {
         dispatch(
           setToast({
@@ -115,15 +117,14 @@ export function MediaUploader({ exit }) {
         setIsLoading(false);
         return;
       }
-      let domain = customServer.split("/")[2];
-
-      setSelectedMediaServer(customServer);
+      let domain = server.split("/")[2];
+      setSelectedMediaServer(server);
       let checkExistance = mediaUploader.find((_) => _.display_name === domain);
       if (!checkExistance) {
-        updateMediaUploader([domain, customServer], customServer);
+        updateMediaUploader([domain, server], server);
         setMediaUploader(getMediaUploader());
       } else {
-        updateMediaUploader(undefined, customServer);
+        updateMediaUploader(undefined, server);
       }
       setCustomServer(false);
       setIsLoading(false);

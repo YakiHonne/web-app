@@ -84,7 +84,13 @@ body {
 
 /* text size */
 
-h1, h2, h3, h4, h5, .h0, .h00 {
+h1,
+h2,
+h3,
+h4,
+h5,
+.h0,
+.h00 {
     font-weight: 900;
     line-height: 100%;
     color: var(--black);
@@ -552,7 +558,8 @@ hr:last-child {
     color: white;
 }
 
-.btn-orange:hover, .btn-gray:hover {
+.btn-orange:hover,
+.btn-gray:hover {
     opacity: .8;
 }
 
@@ -697,7 +704,8 @@ hr:last-child {
     border: 1px solid var(--gray);
 }
 
-.btn-plus, .btn-minus {
+.btn-plus,
+.btn-minus {
     position: relative;
     height: var(--54);
     width: var(--54);
@@ -725,7 +733,8 @@ hr:last-child {
     transform: translateX(-50%) translateY(-50%);
 }
 
-.btn-plus:hover, .btn-minus:hover {
+.btn-plus:hover,
+.btn-minus:hover {
     filter: invert();
 }
 
@@ -1147,7 +1156,13 @@ a:not(.no-hover):hover {
 
 /* toggles */
 
-.toggle-c3, .toggle-c1, .toggle-green, .toggle-dim-gray, .toggle-orange, .toggle-c2, .toggle-dim-gray-th {
+.toggle-c3,
+.toggle-c1,
+.toggle-green,
+.toggle-dim-gray,
+.toggle-orange,
+.toggle-c2,
+.toggle-dim-gray-th {
     position: relative;
     min-height: var(--32);
     min-width: 3.75rem;
@@ -1184,11 +1199,14 @@ a:not(.no-hover):hover {
     background-color: var(--orange-main);
 }
 
-.toggle-dim-gray, .toggle-dim-gray-th {
+.toggle-dim-gray,
+.toggle-dim-gray-th {
     background-color: var(--dim-gray);
 }
 
-.toggle-dim-gray::after, .toggle-c2::after, .toggle-orange::after {
+.toggle-dim-gray::after,
+.toggle-c2::after,
+.toggle-orange::after {
     position: absolute;
     content: '';
     right: .125rem;
@@ -1216,7 +1234,9 @@ a:not(.no-hover):hover {
     transition: .2s ease-in-out;
 }
 
-.toggle-c1::after, .toggle-c3::after, .toggle-green::after {
+.toggle-c1::after,
+.toggle-c3::after,
+.toggle-green::after {
     position: absolute;
     content: '';
     right: .125rem;
@@ -1293,7 +1313,8 @@ a:not(.no-hover):hover {
 
 /* others */
 
-.overlay-bg, .overlay-bg-gradient {
+.overlay-bg,
+.overlay-bg-gradient {
     position: relative;
 }
 
@@ -1320,17 +1341,22 @@ a:not(.no-hover):hover {
 }
 
 
-.overlay-bg *, .overlay-bg-gradient * {
+.overlay-bg *,
+.overlay-bg-gradient * {
     position: relative;
     z-index: 1;
 }
 
-.title-mark, .title-mark-c1, .title-mark-primary {
+.title-mark,
+.title-mark-c1,
+.title-mark-primary {
     position: relative;
     padding-left: 1.5rem;
 }
 
-.title-mark::before, .title-mark-c1::before, .title-mark-primary::before {
+.title-mark::before,
+.title-mark-c1::before,
+.title-mark-primary::before {
     position: absolute;
     content: '';
     left: 0px;
@@ -1391,7 +1417,8 @@ a:not(.no-hover):hover {
     transition: .2s ease-in-out;
 }
 
-.sc-s-d:hover, .sc-s-d-18:hover {
+.sc-s-d:hover,
+.sc-s-d-18:hover {
     border-color: var(--c1);
 }
 
@@ -1564,7 +1591,8 @@ textarea:focus {
     outline: none;
 }
 
-textarea::placeholder, .if::placeholder {
+textarea::placeholder,
+.if::placeholder {
     color: var(--gray);
 }
 
@@ -1671,7 +1699,8 @@ textarea::placeholder, .if::placeholder {
     width: 100%
 }
 
-[data-theme='dark'] input[type="date"]::-webkit-calendar-picker-indicator, [data-theme='gray'] input[type="date"]::-webkit-calendar-picker-indicator {
+[data-theme='dark'] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme='gray'] input[type="date"]::-webkit-calendar-picker-indicator {
     position: relative;
     transform: translateY(-25%);
     filter: invert();
@@ -1684,4 +1713,33 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     transform: translateY(-25%);
     opacity: 1;
     cursor: pointer;
+}
+
+.bg {
+    background-color: var(--c1-side);
+}
+
+.pos-relative {
+    position: relative;
+}
+
+.pos-absolute {
+    position: absolute;
+}
+
+.right-0 {
+    right: 0;
+
+}
+
+.top-0 {
+    top: 0
+}
+
+.left-0 {
+    left: 0;
+}
+
+.bottom-0 {
+    bottom: 0;
 }
