@@ -348,9 +348,7 @@ const VideoVolume = ({ videoRef }) => {
     <div className="fx-centered sc-s video-volume box-pad-h-s box-pad-v-s">
       <div onClick={handleMuteUnmute}>
         {!isMuted && <Icon name="volume-normal" size={24} />}
-        {isMuted && (
-          <Icon name="volume-muted" size={24} />
-        )}
+        {isMuted && <Icon name="volume-muted" size={24} />}
       </div>
       <div className="video-volume-range slide-left">
         <input

@@ -1,3 +1,4 @@
+import { generateAuthorizationHeaderForBlossomServer } from "@/Helpers/Helpers";
 import axios from "axios";
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -8,6 +9,8 @@ export default function useBlossomManagement() {
   const [blobs, setBlobs] = useState([]);
   const [allBlobs, setAllBlobs] = useState([]);
   const [isBlobsLoading, setIsBlobsLoading] = useState(true);
+  const [authHeader, setAuthHeader] = useState(null);
+  const [timestamp, setTimeStamp] = useState(null);
   const blossomColors = useMemo(() => {
     return userBlossomServers.map((_, index) => {
       return `hsl(${index * 30}, 70%, 60%)`;
@@ -17,9 +20,21 @@ export default function useBlossomManagement() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        let token = authHeader;
+        if (!token) {
+          token = await generateAuthorizationHeaderForBlossomServer({
+            servers: userBlossomServers,
+            tTag: "list",
+          });
+          setAuthHeader(token);
+        }
         let response = await Promise.allSettled(
-          userBlossomServers.map((_) => {
-            return axios.get(`${_}/list/${userKeys.pub}`);
+          userBlossomServers.map((_, index) => {
+            return axios.get(`${_}/list/${userKeys.pub}`, {
+              headers: {
+                Authorization: `Nostr ${token}`,
+              },
+            });
           }),
         );
         response = response.map((_, index) => {
@@ -55,7 +70,18 @@ export default function useBlossomManagement() {
       setBlobs([]);
       setAllBlobs([]);
     }
-  }, [userKeys, userBlossomServers]);
+  }, [userKeys, userBlossomServers, timestamp]);
 
-  return { userBlossomServers, blobs, allBlobs, isBlobsLoading, blossomColors };
+  const refreshLists = () => {
+    setTimeStamp(Date.now());
+  };
+
+  return {
+    userBlossomServers,
+    blobs,
+    allBlobs,
+    isBlobsLoading,
+    blossomColors,
+    refreshLists,
+  };
 }

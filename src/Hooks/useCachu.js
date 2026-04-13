@@ -101,7 +101,7 @@ export default function useCashu() {
     let senders = [];
     let tokensRedeemed = [];
     history = history.map((h) => {
-      let content = h.history.content;
+      let content = h.history.content || [];
       let sent = false;
       let amount = 0;
       let state = "created";
