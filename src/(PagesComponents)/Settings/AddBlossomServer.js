@@ -15,14 +15,13 @@ export function AddBlossomServer({ exit }) {
   const addNewServer = async () => {
     if (!customServer) return;
     try {
-      const server = customServer.trim();
-      new URL(server);
+      new URL(customServer);
       setIsLoading(true);
       const event = {
         kind: 10063,
         content: "",
         tags: [
-          ...[...new Set([...userBlossomServers, server])].map((url) => [
+          ...[...new Set([...userBlossomServers, customServer])].map((url) => [
             "server",
             url,
           ]),
@@ -31,13 +30,13 @@ export function AddBlossomServer({ exit }) {
       const eventInitEx = await InitEvent(
         event.kind,
         event.content,
-        event.tags,
+        event.tags
       );
       dispatch(
         setToPublish({
           eventInitEx,
           allRelays: [],
-        }),
+        })
       );
       setIsLoading(false);
       exit();
@@ -46,7 +45,7 @@ export function AddBlossomServer({ exit }) {
         setToast({
           type: 2,
           desc: t("A2l1JgC"),
-        }),
+        })
       );
       setIsLoading(false);
       return false;

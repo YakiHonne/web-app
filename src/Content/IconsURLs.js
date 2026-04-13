@@ -236,8 +236,6 @@ const iconsUrls = {
   "yakihonne-logo": `${baseURL}/yakihonne_logo.svg`,
   "youtube-logo": `${baseURL}/youtube.svg`,
   zapstore: `${baseURL}/Zapstore.svg`,
-  "grid-4": `${baseURL}/grid-4.svg`,
-  "grid-2": `${baseURL}/grid-2.svg`,
 };
 
 const getIcon = (name) => {
