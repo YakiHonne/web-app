@@ -210,24 +210,37 @@ function RelayPreview({
           </>
         )}
         {reviews && (
-          <div
-            className="fit-container"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowReviews(!showReviews);
-            }}
-            style={{
-              borderTop: "1px solid var(--pale-gray)",
-              paddingTop: ".5rem",
-              marginTop: ".5rem",
-            }}
-          >
+          <>
+            <hr style={{ margin: ".5rem 0" }} />
             {showReviews && <RelayReviews relay={url} />}
             <div className="fit-container fx-centered">
-              <Icon name="arrow" />
-              <p className="gray-c">{t("AWX2SL5")}</p>
+              <div
+                className=" fx-centered pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowReviews(!showReviews);
+                }}
+              >
+                <div className="fit-container fx-centered">
+                  <Icon name="arrow" />
+                  <p className="gray-c">{t("AWX2SL5")}</p>
+                </div>
+              </div>
+              <p className=" gray-c">|</p>
+              <div
+                className=" fx-centered pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowRelaySharing(true);
+                }}
+              >
+                <p className="gray-c">{t("A6JlaiX")}</p>
+                <div>
+                  <Icon name="share-v2" />
+                </div>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </>
