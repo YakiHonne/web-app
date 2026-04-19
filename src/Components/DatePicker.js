@@ -113,7 +113,7 @@ export default function DatePicker({
   };
 
   return (
-    <Overlay exit={close} width={500} id="date-picker">
+    <Overlay exit={close} width={500} id="date-picker" allowOverFlow={true}>
       <div
         className="box-pad-h box-pad-v fx-centered fx-col fx-start-h fx-start-v"
         style={{ overflow: "visible" }}

@@ -81,7 +81,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
               kind: "likes",
               eventId: event.aTag || event.id,
             },
-          })
+          }),
         );
         setEventID(false);
         setIsLoading(false);
@@ -103,7 +103,7 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
         setToPublish({
           eventInitEx,
           allRelays: [],
-        })
+        }),
       );
 
       setIsLoading(false);
@@ -178,9 +178,9 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
           className={"round-icon-tooltip pointer"}
           data-tooltip={t("AJW1vH9")}
           onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
+          onDoubleClick={handleDoubleClick}
         >
-          {!isLiked && <Icon name="heart" size={24} className="opacity-4" />}
+          {!isLiked && <Icon name="heart" size={24} opacity={0.4} />}
           {isLiked && <EmojiImg content={isLiked?.content} />}
         </div>
         {showEmoji && (

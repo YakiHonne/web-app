@@ -12,6 +12,7 @@ export default function Icon({
   transform = "unset",
   className = "",
   isBoldThemeColor = false,
+  opacity = "initial",
 }) {
   const { resolvedTheme } = useTheme();
   let icon = getIcon(name);
@@ -25,6 +26,7 @@ export default function Icon({
         backgroundPosition: "center center",
         backgroundRepeat: "no-repeat",
         transition: ".2s ease-in-out",
+        opacity: opacity || "initial",
         minWidth: width || size,
         minHeight: height || size,
         cursor: onClick ? "pointer" : "initial",

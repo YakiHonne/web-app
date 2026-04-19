@@ -32,7 +32,7 @@ export default function Slider({
       )
     )
       slideLeft();
-  }, [items]);
+  }, []);
 
   const slideRight = () => {
     let carousel_container = noScrollBarContainerMain.current;

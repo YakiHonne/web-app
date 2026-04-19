@@ -16,6 +16,7 @@ import Toggle from "@/Components/Toggle";
 import AddBlossomServer from "./AddBlossomServer";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
 import Icon from "@/Components/Icon";
+import Link from "next/link";
 
 export function MediaUploader({ exit }) {
   const { t } = useTranslation();
@@ -96,7 +97,8 @@ export function MediaUploader({ exit }) {
     if (!customServer) return;
     setIsLoading(true);
     try {
-      const test = await axios.post(customServer);
+      const server = customServer.trim();
+      const test = await axios.post(server);
       dispatch(
         setToast({
           type: 2,
@@ -105,6 +107,7 @@ export function MediaUploader({ exit }) {
       );
       setIsLoading(false);
     } catch (err) {
+      console.log(err);
       if (err.response.status === 404) {
         dispatch(
           setToast({
@@ -115,15 +118,14 @@ export function MediaUploader({ exit }) {
         setIsLoading(false);
         return;
       }
-      let domain = customServer.split("/")[2];
-
-      setSelectedMediaServer(customServer);
+      let domain = server.split("/")[2];
+      setSelectedMediaServer(server);
       let checkExistance = mediaUploader.find((_) => _.display_name === domain);
       if (!checkExistance) {
-        updateMediaUploader([domain, customServer], customServer);
+        updateMediaUploader([domain, server], server);
         setMediaUploader(getMediaUploader());
       } else {
-        updateMediaUploader(undefined, customServer);
+        updateMediaUploader(undefined, server);
       }
       setCustomServer(false);
       setIsLoading(false);
@@ -458,6 +460,13 @@ export function MediaUploader({ exit }) {
               </div>
             )}
           </div>
+          <Link
+            className="fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s"
+            href={"/blossom"}
+          >
+            <p className="c1-c pointer">{t("APLT1zZ")}</p>
+            <Icon name="share-icon" />
+          </Link>
         </div>
       </div>
     </div>

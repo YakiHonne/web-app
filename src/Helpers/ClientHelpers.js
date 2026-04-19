@@ -103,7 +103,6 @@ export function getNoteTree(
               key={key}
               isCommonPlatform={isURLCommonPlatformVid.isYT ? "yt" : "vm"}
               src={isURLCommonPlatformVid.videoId}
-              poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
             />,
           );
         }
@@ -114,12 +113,7 @@ export function getNoteTree(
               finalTree.push(<IMGElement src={cleanUrl} key={key} />);
             } else if (checkURL.type === "video") {
               finalTree.push(
-                <VideoLoader
-                  pubkey={pubkey}
-                  key={key}
-                  src={cleanUrl}
-                  poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-                />,
+                <VideoLoader pubkey={pubkey} key={key} src={cleanUrl} />,
               );
             }
           } else if (
@@ -400,13 +394,7 @@ export function getComponent(children) {
             );
           }
           if (checkURL.type === "video") {
-            res.push(
-              <VideoLoader
-                key={key}
-                src={children[i].props?.href}
-                poster="https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630"
-              />,
-            );
+            res.push(<VideoLoader key={key} src={children[i].props?.href} />);
           }
         }
         if (!checkURL) {
@@ -585,19 +573,19 @@ export function isImageUrl(url) {
     if (/^data:video/.test(url)) return { type: "video" };
     if (/(https?:\/\/[^ ]*\.(gif|png|jpg|jpeg|webp))/i.test(url))
       return { type: "image" };
-    if (/(https?:\/\/[^ ]*\.(mp4|mov|webm|ogg|avi|qt))/i.test(url))
+    if (/(https?:\/\/[^ ]*\.(mp4|mov|webm|ogg|avi|qt|m3u8))/i.test(url))
       return { type: "video" };
     if (
       /(\/images\/|cdn\.|img\.|\/media\/|\/uploads\/|encrypted-tbn0\.gstatic\.com\/images|i\.insider\.com\/)/i.test(
         url,
       ) &&
-      !/\.(mp4|mov|webm|ogg|avi)$/i.test(url)
+      !/\.(mp4|mov|webm|ogg|avi|qt|m3u8)$/i.test(url)
     ) {
       return { type: "image" };
     }
     if (
       /([?&]format=image|[?&]type=image)/i.test(url) &&
-      !/\.(mp4|mov|webm|ogg|avi)$/i.test(url)
+      !/\.(mp4|mov|webm|ogg|avi|qt|m3u8)$/i.test(url)
     ) {
       return { type: "image" };
     }
@@ -1171,19 +1159,18 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
   let currentImages = [];
   // Helpers
   const isImage = (el) =>
-    el &&
-    typeof el.type !== "string" &&
-    el.props?.src &&
-    el.props?.poster === undefined;
+    el && typeof el.type !== "string" && el.type === IMGElement;
 
   const isVideo = (el) =>
     el &&
     typeof el.type !== "string" &&
-    el.props?.src &&
-    el.props?.poster !== undefined;
+    (el.type === VideoLoader || el.props?.poster !== undefined);
 
   const isComponent = (el) =>
-    el && typeof el.type !== "string" && !el.props?.src;
+    el &&
+    typeof el.type !== "string" &&
+    el.type !== IMGElement &&
+    el.type !== VideoLoader;
 
   const isMediaOrComponent = (el) =>
     isImage(el) || isVideo(el) || isComponent(el);

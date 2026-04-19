@@ -118,7 +118,8 @@ export default function PostReaction({
               <Icon
                 name="comment"
                 size={24}
-                className="comment-24 opacity-4"
+                className="comment-24"
+                opacity={0.4}
                 onClick={() => setOpenComment(!openComment)}
               />
             </div>
