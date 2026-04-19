@@ -53,7 +53,7 @@ export default function BlossomFileViewer({ blob, exit, blobType }) {
           className="btn btn-normal fx-centered btn-full"
           onClick={() => downloadFile(blob.url)}
         >
-          <Icon name={"download"} />
+          <Icon name={"download"} size={20} />
           {t("AdKpCLS")}
         </button>
       </div>

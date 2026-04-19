@@ -39,14 +39,19 @@ export default function useBlossomManagement() {
         );
         response = response.map((_, index) => {
           if (_.status === "fulfilled" && Array.isArray(_.value.data))
-            return { url: userBlossomServers[index], blobs: _.value.data };
+            return {
+              url: userBlossomServers[index],
+              blobs: _.value.data.sort((a, b) => b.uploaded - a.uploaded),
+            };
           else return { url: userBlossomServers[index], blobs: [] };
         });
         const allBlobsMap = new Map();
         response.forEach((serverData, serverIndex) => {
           serverData.blobs.forEach((blob) => {
             if (allBlobsMap.has(blob.sha256)) {
-              allBlobsMap.get(blob.sha256).seen.push(serverIndex);
+              allBlobsMap.get(blob.sha256).seen = [
+                ...new Set([...allBlobsMap.get(blob.sha256).seen, serverIndex]),
+              ];
             } else {
               allBlobsMap.set(blob.sha256, { ...blob, seen: [serverIndex] });
             }

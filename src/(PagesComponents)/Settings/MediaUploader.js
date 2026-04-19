@@ -16,6 +16,7 @@ import Toggle from "@/Components/Toggle";
 import AddBlossomServer from "./AddBlossomServer";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
 import Icon from "@/Components/Icon";
+import Link from "next/link";
 
 export function MediaUploader({ exit }) {
   const { t } = useTranslation();
@@ -459,6 +460,13 @@ export function MediaUploader({ exit }) {
               </div>
             )}
           </div>
+          <Link
+            className="fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s"
+            href={"/blossom"}
+          >
+            <p className="c1-c pointer">{t("APLT1zZ")}</p>
+            <Icon name="share-icon" />
+          </Link>
         </div>
       </div>
     </div>

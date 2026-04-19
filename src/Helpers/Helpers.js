@@ -732,37 +732,15 @@ const blossomServerFileUpload = async ({
     servers.length > 0 ? `${servers[0]}` : "https://blossom.yakihonne.com";
   let endpoint = serverURL + "/upload";
 
-  const arrayBuffer = await file.arrayBuffer();
-  const blob = new Blob([arrayBuffer], {
-    type: file.type || "application/octet-stream",
-  });
-  const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const localSha256 = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  let hash = await getHashFromFile(file);
+  let x = hash.x;
+  let blob = hash.blob;
 
-  let x = localSha256;
-  let expiration = `${Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7}`;
-  let event = {
-    kind: 24242,
-    content: "File upload",
-    created_at: Math.floor(Date.now() / 1000),
-    tags: [
-      ["t", "upload"],
-      ["x", x],
-      ["expiration", expiration],
-      ["u", serverURL],
-    ],
-  };
-  event = await InitEvent(
-    event.kind,
-    event.content,
-    event.tags,
-    event.created_at,
-  );
-  if (!event) return;
-  let encodeB64 = encodeBase64URL(JSON.stringify(event));
+  let encodeB64 = await generateAuthorizationHeaderForBlossomServer({
+    servers: [serverURL],
+    tTag: "upload",
+    sha256: x,
+  });
 
   try {
     let imageURL = await axios.put(endpoint, blob, {
@@ -1075,8 +1053,14 @@ export const generateAuthorizationHeaderForBlossomServer = async ({
   servers,
   tTag,
   sha256,
+  file,
 }) => {
   try {
+    let sha256_ = sha256;
+    if (file) {
+      let hash = await getHashFromFile(file);
+      sha256_ = hash?.x;
+    }
     const tTagsContent = {
       list: "List Image",
       delete: "Delete Image",
@@ -1089,7 +1073,7 @@ export const generateAuthorizationHeaderForBlossomServer = async ({
       created_at: Math.floor(Date.now() / 1000),
       tags: [
         ["t", tTag],
-        ...(sha256 ? [["x", sha256]] : []),
+        ...(sha256_ ? [["x", sha256_]] : []),
         ...servers.map((server) => ["server", server]),
         ["expiration", expiration],
       ],
@@ -1107,6 +1091,24 @@ export const generateAuthorizationHeaderForBlossomServer = async ({
     console.log(err);
     return err;
   }
+};
+
+export const getHashFromFile = async (file) => {
+  const arrayBuffer = await file.arrayBuffer();
+  const blob = new Blob([arrayBuffer], {
+    type: file.type || "application/octet-stream",
+  });
+  const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const localSha256 = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  let x = localSha256;
+  return {
+    x,
+    blob,
+  };
 };
 
 const extractNip19 = (note) => {

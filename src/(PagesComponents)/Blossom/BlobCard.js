@@ -99,61 +99,119 @@ export default function BlobCard({
 
   if (display === 1)
     return (
-      <div
-        className="fx-centered fx-end-v fx-end-h box-pad-h-s box-pad-v-s sc-s-18 bg-img cover-bg pos-relative"
-        style={{
-          backgroundImage: `url(${thumbnail})`,
-          flex: "1 1 200px",
-          aspectRatio: "1/1",
-          overflow: "visible",
-        }}
-      >
-        {blobType === "video" && (
-          <div
-            style={{
-              position: "absolute",
-              top: "16px",
-              right: "16px",
+      <>
+        {showPostInNote && (
+          <PostAsNote
+            content={blob.url}
+            exit={() => setShowPostInNote(false)}
+          />
+        )}
+        {showPreviewer && (
+          <BlossomFileViewer
+            blob={blob}
+            blobType={blobType}
+            exit={() => setShowPreviewer(false)}
+          />
+        )}
+        {ops && (
+          <BlossomOps
+            ops={ops}
+            exit={() => setOps(false)}
+            servers={userBlossomServers}
+            blobData={{ ...blob, thumbnail }}
+            seenOn={
+              blob.seen
+                ? blob.seen.map((_) => userBlossomServers[_])
+                : [selectedServer]
+            }
+            refreshLists={() => {
+              setOps(false);
+              refreshLists();
             }}
-          >
-            <svg
-              aria-label="Reel"
-              fill="white"
-              height="24"
-              role="img"
-              viewBox="0 0 24 24"
-              width="24"
+          />
+        )}
+
+        <div
+          className="fx-centered fx-end-v fx-end-h box-pad-h-s box-pad-v-s sc-s-18 bg-img cover-bg pos-relative display-on-hover-parent"
+          style={{
+            backgroundImage: `url(${thumbnail})`,
+            flex: "1 1 200px",
+            aspectRatio: "1/1",
+            overflow: "visible",
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowPreviewer(true);
+          }}
+        >
+          {blobType === "video" && (
+            <div
               style={{
-                boxShadow: "0 0 5px rgba(0, 0, 0, 0.55)",
-                borderRadius: "10px",
-                backgroundColor: "#888",
+                position: "absolute",
+                top: "16px",
+                right: "16px",
               }}
             >
-              <path d="M22.942 7.464c-.062-1.36-.306-2.143-.511-2.671a5.366 5.366 0 0 0-1.272-1.952 5.364 5.364 0 0 0-1.951-1.27c-.53-.207-1.312-.45-2.673-.513-1.2-.054-1.557-.066-4.535-.066s-3.336.012-4.536.066c-1.36.062-2.143.306-2.672.511-.769.3-1.371.692-1.951 1.272s-.973 1.182-1.27 1.951c-.207.53-.45 1.312-.513 2.673C1.004 8.665.992 9.022.992 12s.012 3.336.066 4.536c.062 1.36.306 2.143.511 2.671.298.77.69 1.373 1.272 1.952.58.581 1.182.974 1.951 1.27.53.207 1.311.45 2.673.513 1.199.054 1.557.066 4.535.066s3.336-.012 4.536-.066c1.36-.062 2.143-.306 2.671-.511a5.368 5.368 0 0 0 1.953-1.273c.58-.58.972-1.181 1.27-1.95.206-.53.45-1.312.512-2.673.054-1.2.066-1.557.066-4.535s-.012-3.336-.066-4.536Zm-7.085 6.055-5.25 3c-1.167.667-2.619-.175-2.619-1.519V9c0-1.344 1.452-2.186 2.619-1.52l5.25 3c1.175.672 1.175 2.368 0 3.04Z"></path>
-            </svg>
+              <svg
+                aria-label="Reel"
+                fill="white"
+                height="24"
+                role="img"
+                viewBox="0 0 24 24"
+                width="24"
+                style={{
+                  boxShadow: "0 0 5px rgba(0, 0, 0, 0.55)",
+                  borderRadius: "10px",
+                  backgroundColor: "#888",
+                }}
+              >
+                <path d="M22.942 7.464c-.062-1.36-.306-2.143-.511-2.671a5.366 5.366 0 0 0-1.272-1.952 5.364 5.364 0 0 0-1.951-1.27c-.53-.207-1.312-.45-2.673-.513-1.2-.054-1.557-.066-4.535-.066s-3.336.012-4.536.066c-1.36.062-2.143.306-2.672.511-.769.3-1.371.692-1.951 1.272s-.973 1.182-1.27 1.951c-.207.53-.45 1.312-.513 2.673C1.004 8.665.992 9.022.992 12s.012 3.336.066 4.536c.062 1.36.306 2.143.511 2.671.298.77.69 1.373 1.272 1.952.58.581 1.182.974 1.951 1.27.53.207 1.311.45 2.673.513 1.199.054 1.557.066 4.535.066s3.336-.012 4.536-.066c1.36-.062 2.143-.306 2.671-.511a5.368 5.368 0 0 0 1.953-1.273c.58-.58.972-1.181 1.27-1.95.206-.53.45-1.312.512-2.673.054-1.2.066-1.557.066-4.535s-.012-3.336-.066-4.536Zm-7.085 6.055-5.25 3c-1.167.667-2.619-.175-2.619-1.519V9c0-1.344 1.452-2.186 2.619-1.52l5.25 3c1.175.672 1.175 2.368 0 3.04Z"></path>
+              </svg>
+            </div>
+          )}
+          {blob?.seen?.length > 0 && (
+            <div className="fx-centered fx-start-h fx-start-v ">
+              {blob.seen.map((_, index) => {
+                return (
+                  <div
+                    key={index}
+                    className="round-icon-tooltip pointer"
+                    data-tooltip={userBlossomServers[_]}
+                  >
+                    <Dot color={blossomColors[_]} />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {!thumbnail && (
+            <div className="pos-absolute top-0 right-0 fx-centered fit-container fit-height">
+              <Icon name={"posts"} size={32} opacity={0.6} />
+            </div>
+          )}
+          <div
+            className="pos-absolute top-0 right-0 fx-centered fit-container fx-col fit-height display-on-hover-child"
+            style={{ backgroundColor: "var(--white-transparent)" }}
+          >
+            <button
+              className="btn btn-gray"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyText(blob.url, t("AxBmdge"));
+              }}
+            >
+              {t("A4oCm1O")}
+            </button>
+            <button
+              className="btn btn-normal"
+              onClick={() => setShowPreviewer(true)}
+            >
+              {t("AYO6i7Y")}
+            </button>
+            <OptionsDropdown options={options} vertical={false} />
           </div>
-        )}
-        {blob?.seen?.length > 0 && (
-          <div className="fx-centered fx-start-h fx-start-v ">
-            {blob.seen.map((_, index) => {
-              return (
-                <div
-                  key={index}
-                  className="round-icon-tooltip pointer"
-                  data-tooltip={userBlossomServers[_]}
-                >
-                  <Dot color={blossomColors[_]} />
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {!thumbnail && (
-          <div className="pos-absolute top-0 right-0 fx-centered fit-container fit-height">
-            <Icon name={"posts"} size={32} opacity={0.6} />
-          </div>
-        )}
-      </div>
+        </div>
+      </>
     );
 
   return (
@@ -241,7 +299,19 @@ export default function BlobCard({
             </div>
           </div>
         )}
-        <OptionsDropdown options={options} />
+        <div className="fx-centered">
+          <div
+            className="round-icon-tooltip"
+            data-tooltip={t("A4oCm1O")}
+            onClick={(e) => {
+              e.stopPropagation();
+              copyText(blob.url, t("AxBmdge"));
+            }}
+          >
+            <Icon name={"copy"} size={20} opacity={0.6} />
+          </div>
+          <OptionsDropdown options={options} />
+        </div>
       </div>
     </>
   );

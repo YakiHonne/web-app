@@ -12,7 +12,7 @@ export default function FileDragAndDropWrapper({
   isLoading,
   fileUrl,
   label,
-  stretchPreview = false,
+  fileType,
 }) {
   const { t } = useTranslation();
   const [dragging, setDragging] = useState(false);
@@ -47,17 +47,31 @@ export default function FileDragAndDropWrapper({
   if (fileUrl)
     return (
       <div className=" sc-s-18 bg-sp fx-centered fx-start-h  fit-container pointer box-pad-h-m box-pad-v-m">
-        <div
-          style={{
-            width: stretchPreview ? "100%" : "120px",
-            height: stretchPreview ? "200px" : "120px",
-            backgroundImage: `url(${fileUrl})`,
-          }}
-          className="sc-s-18 bg-sp bg-img bg-cover"
-        ></div>
+        {fileType === "video" && (
+          <video
+            controls
+            src={fileUrl}
+            className="sc-s-18 fit-container"
+            style={{ aspectRatio: "16/9" }}
+          />
+        )}
+        {fileType === "image" && (
+          <img
+            className="fit-container sc-s-18"
+            src={fileUrl}
+            alt={fileUrl}
+            style={{ aspectRatio: "16/9", objectFit: "contain" }}
+          />
+        )}
+        {!["image", "video"].includes(fileType) && (
+          <div className="fit-container fx-centered sc-s-18 bg-sp fx-col fit-height box-pad-h box-pad-v fx-centered">
+            <Icon name={"posts"} size={48} opacity={0.5} />
+            <p className="gray-c">{fileType}</p>
+          </div>
+        )}
         <div className="fx-centered fx-col fx-start-h fx-start-v fx-gap-v-m">
           <p className="gray-c">{label || t("AsXohpb")}</p>
-          <button className="btn btn-gray">
+          <button className="btn btn-gray" onClick={() => onChange(null)}>
             {isLoading ? <LoadingDots /> : t("AkzjyNm")}
           </button>
         </div>
@@ -77,7 +91,7 @@ export default function FileDragAndDropWrapper({
         const file = e.dataTransfer.files?.[0];
         if (file) onChange(file);
       }}
-      className="sc-s-d bg-sp fx-centered fx-col fit-container pointer"
+      className="sc-s-d fx-centered fx-col fit-container pointer"
       style={{
         backgroundColor: dragging ? "var(--c1-side)" : "",
         height: "300px",

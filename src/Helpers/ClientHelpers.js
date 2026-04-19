@@ -573,19 +573,19 @@ export function isImageUrl(url) {
     if (/^data:video/.test(url)) return { type: "video" };
     if (/(https?:\/\/[^ ]*\.(gif|png|jpg|jpeg|webp))/i.test(url))
       return { type: "image" };
-    if (/(https?:\/\/[^ ]*\.(mp4|mov|webm|ogg|avi|qt))/i.test(url))
+    if (/(https?:\/\/[^ ]*\.(mp4|mov|webm|ogg|avi|qt|m3u8))/i.test(url))
       return { type: "video" };
     if (
       /(\/images\/|cdn\.|img\.|\/media\/|\/uploads\/|encrypted-tbn0\.gstatic\.com\/images|i\.insider\.com\/)/i.test(
         url,
       ) &&
-      !/\.(mp4|mov|webm|ogg|avi)$/i.test(url)
+      !/\.(mp4|mov|webm|ogg|avi|qt|m3u8)$/i.test(url)
     ) {
       return { type: "image" };
     }
     if (
       /([?&]format=image|[?&]type=image)/i.test(url) &&
-      !/\.(mp4|mov|webm|ogg|avi)$/i.test(url)
+      !/\.(mp4|mov|webm|ogg|avi|qt|m3u8)$/i.test(url)
     ) {
       return { type: "image" };
     }
@@ -1159,19 +1159,18 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
   let currentImages = [];
   // Helpers
   const isImage = (el) =>
-    el &&
-    typeof el.type !== "string" &&
-    el.props?.src &&
-    el.props?.poster === undefined;
+    el && typeof el.type !== "string" && el.type === IMGElement;
 
   const isVideo = (el) =>
     el &&
     typeof el.type !== "string" &&
-    el.props?.src &&
-    el.props?.poster !== undefined;
+    (el.type === VideoLoader || el.props?.poster !== undefined);
 
   const isComponent = (el) =>
-    el && typeof el.type !== "string" && !el.props?.src;
+    el &&
+    typeof el.type !== "string" &&
+    el.type !== IMGElement &&
+    el.type !== VideoLoader;
 
   const isMediaOrComponent = (el) =>
     isImage(el) || isVideo(el) || isComponent(el);

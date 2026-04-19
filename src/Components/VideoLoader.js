@@ -11,7 +11,6 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   const videoRef = useRef();
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
-
   // const { toBlur, setIsOpened } = useToBlurMedia({ pubkey });
   const toBlur = false;
   useEffect(() => {

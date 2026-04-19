@@ -95,20 +95,11 @@ export default function ZapTip({
     return (
       <>
         {onlyIcon && !zapLabel && (
-          <Icon
-            name="bolt"
-            size={smallIcon ? 18 : 24}
-            className="opacity-4"
-            style={{ opacity: ".2" }}
-          />
+          <Icon name="bolt" size={smallIcon ? 18 : 24} opacity={0.4} />
         )}
         {zapLabel && (
           <div>
-            <Icon
-              name="bolt"
-              size={smallIcon ? 18 : 24}
-              className="opacity-4"
-            />
+            <Icon name="bolt" size={smallIcon ? 18 : 24} opacity={0.4} />
             <p className="p-medium">Zap</p>
           </div>
         )}
@@ -136,7 +127,7 @@ export default function ZapTip({
           <Icon
             name="bolt"
             size={smallIcon ? 18 : 24}
-            className="opacity-4"
+            opacity={0.4}
             onClick={() => setIsLogin(true)}
           />
         )}
@@ -191,7 +182,7 @@ export default function ZapTip({
           isColored={isZapped}
           isBoldThemeColor={isZapped}
           size={smallIcon ? 18 : 24}
-          className={!isZapped ? "opacity-4" : ""}
+          opacity={!isZapped ? 0.4 : "initial"}
           onClick={() => setCashier(true)}
         />
       )}

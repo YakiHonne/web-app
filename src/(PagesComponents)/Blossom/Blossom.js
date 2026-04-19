@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import BlobCard from "./BlobCard";
 import UploadBlossom from "./UploadBlossom";
+import { VirtuosoGrid } from "react-virtuoso";
 
 export default function Blossom() {
   const { t } = useTranslation();
@@ -23,11 +24,20 @@ export default function Blossom() {
   const [showUpload, setShowUpload] = useState(false);
   return (
     <>
-      {showUpload && <UploadBlossom exit={() => setShowUpload(false)} />}
+      {showUpload && (
+        <UploadBlossom
+          exit={() => setShowUpload(false)}
+          servers={userBlossomServers}
+          refreshLists={() => {
+            setShowUpload(false);
+            refreshLists();
+          }}
+        />
+      )}
       <div className="fit-container box-pad-h box-pad-v">
         <div className="fit-container fx-scattered ">
           <div className="fx-centered fx-col fx-start-h fx-start-v">
-            <h3>{t("AGYERPI")}</h3>
+            <h4>{t("AGYERPI")}</h4>
             <p className="gray-c">{t("AEYOiv7")}</p>
           </div>
           <button
@@ -80,27 +90,57 @@ export default function Blossom() {
                   className={`round-icon pointer fx-centered ${display === 1 ? "bg" : "bg-sp"}`}
                   onClick={() => setDisplay(1)}
                 >
-                  <Icon
-                    name={"grid-4"}
-                    size={20}
-                    onClick={() => setDisplay(1)}
-                  />
+                  <Icon name={"grid-4"} size={20} />
                 </div>
                 <div
                   className={`round-icon pointer fx-centered ${display === 2 ? "bg" : "bg-sp"}`}
                   onClick={() => setDisplay(2)}
                 >
-                  <Icon
-                    name={"grid-2"}
-                    size={20}
-                    onClick={() => setDisplay(2)}
-                  />
+                  <Icon name={"grid-2"} size={20} />
                 </div>
               </div>
             </div>
           )}
         </div>
-        <div className="fit-container fx-centered fx-wrap">
+        {((selectedTab === false && allBlobs.length > 0) ||
+          (selectedTab !== false &&
+            blobs[userBlossomServers[selectedTab]].length > 0)) && (
+          <VirtuosoGrid
+            key={`${display}-${selectedTab}`}
+            style={{ width: "100%", height: "100vh" }}
+            overscan={200}
+            useWindowScroll={true}
+            skipAnimationFrameInResizeObserver={true}
+            increaseViewportBy={300}
+            totalCount={
+              selectedTab === false
+                ? allBlobs.length
+                : blobs[userBlossomServers[selectedTab]].length
+            }
+            listClassName={`fx-centered fx-start-h fx-wrap ${display === 1 ? "fx-gap-v" : ""}`}
+            itemClassName={
+              display === 1 ? "grid-item-blossom-1" : "grid-item-blossom-2"
+            }
+            itemContent={(index) => {
+              let _ =
+                selectedTab === false
+                  ? allBlobs[index]
+                  : blobs[userBlossomServers[selectedTab]][index];
+              return (
+                <BlobCard
+                  key={_.sha256}
+                  blob={_}
+                  userBlossomServers={userBlossomServers}
+                  blossomColors={blossomColors}
+                  display={display}
+                  refreshLists={refreshLists}
+                  selectedServer={userBlossomServers[selectedTab]}
+                />
+              );
+            }}
+          />
+        )}
+        {/* <div className="fit-container fx-centered fx-wrap">
           {selectedTab === false &&
             allBlobs.map((_, index) => {
               return (
@@ -129,7 +169,19 @@ export default function Blossom() {
                 />
               );
             })}
-        </div>
+          {selectedTab !== false &&
+            blobs[userBlossomServers[selectedTab]].length === 0 && (
+              <div className="fit-container fx-centered box-pad-v">
+                <p className="gray-c">{t("AimYE39")}</p>
+              </div>
+            )}
+        </div> */}
+        {selectedTab !== false &&
+          blobs[userBlossomServers[selectedTab]].length === 0 && (
+            <div className="fit-container fx-centered box-pad-v">
+              <p className="gray-c">{t("AimYE39")}</p>
+            </div>
+          )}
       </div>
     </>
   );

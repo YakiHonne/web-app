@@ -18,12 +18,9 @@ export default function Quote({ isQuoted, event, actions }) {
     const updateDb = async () => {
       let subscription = ndkInstance.subscribe([{ ids: [eventID] }], {
         groupable: false,
-        // skipVerification: true,
-        // skipValidation: true,
       });
       subscription.on("event", (event_) => {
         let stats = getEventStatAfterEOSE(event_, "quotes", actions, undefined);
-
         saveEventStats(event.aTag || event.id, stats);
         subscription.stop();
         setEventID(false);
@@ -55,8 +52,9 @@ export default function Quote({ isQuoted, event, actions }) {
         <Icon
           name={isQuoted ? "quote-bold" : "quote"}
           size={24}
-          className={`pointer ${!isQuoted ? "opacity-4" : ""}`}
+          opacity={!isQuoted ? 0.4 : "initial"}
           isColored={isQuoted}
+          className={"pointer"}
           isBoldThemeColor={isQuoted}
         />
       </div>

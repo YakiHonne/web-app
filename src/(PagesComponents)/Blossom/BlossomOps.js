@@ -29,6 +29,7 @@ export default function BlossomOps({
   };
 
   const handleMirror = async () => {
+    if (!(selectedServers.length > 0)) return;
     setIsLoading(true);
     let token = await generateAuthorizationHeaderForBlossomServer({
       servers: [seenOn[0]],
@@ -57,6 +58,7 @@ export default function BlossomOps({
   };
 
   const handleDelete = async () => {
+    if (!(selectedServers.length > 0)) return;
     setIsLoading(true);
 
     let token = await generateAuthorizationHeaderForBlossomServer({
@@ -135,19 +137,19 @@ export default function BlossomOps({
                     htmlFor={server}
                     key={index}
                     className="fx-centered fx-start-h pointer if ifs-full"
-                    onChange={() =>
-                      setSelectedServers((prev) =>
-                        isSelected
-                          ? prev.filter((s) => s !== server)
-                          : [...prev, server],
-                      )
-                    }
                   >
                     <input
                       type="checkbox"
                       id={server}
                       value={isSelected}
                       checked={isSelected}
+                      onChange={() =>
+                        setSelectedServers((prev) =>
+                          isSelected
+                            ? prev.filter((s) => s !== server)
+                            : [...prev, server],
+                        )
+                      }
                     />
                     <p>{server}</p>
                   </label>
@@ -163,21 +165,21 @@ export default function BlossomOps({
                     htmlFor={server}
                     key={index}
                     className="fx-centered fx-start-h pointer if ifs-full"
-                    onChange={() =>
-                      isSeen
-                        ? null
-                        : setSelectedServers((prev) =>
-                            isSelected
-                              ? prev.filter((s) => s !== server)
-                              : [...prev, server],
-                          )
-                    }
                   >
                     <input
                       type="checkbox"
                       id={server}
                       value={isSeen ? true : isSelected}
                       checked={isSeen ? true : isSelected}
+                      onChange={() =>
+                        isSeen
+                          ? null
+                          : setSelectedServers((prev) =>
+                              isSelected
+                                ? prev.filter((s) => s !== server)
+                                : [...prev, server],
+                            )
+                      }
                     />
                     <p>{server}</p>
                   </label>

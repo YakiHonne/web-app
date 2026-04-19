@@ -1743,3 +1743,29 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .bottom-0 {
     bottom: 0;
 }
+
+.display-on-hover-parent {
+    cursor: pointer;
+}
+
+.display-on-hover-parent .display-on-hover-child {
+    /* display: none; */
+    opacity: 0;
+    transition: .2s ease-in-out;
+}
+
+.display-on-hover-parent:hover .display-on-hover-child {
+    /* display: flex; */
+    opacity: 1;
+}
+
+.grid-item-blossom-1 {
+    display: flex;
+    flex: 1 0 200px;
+    max-width: 250px;
+}
+
+.grid-item-blossom-2 {
+    display: flex;
+    width: 100%;
+}
