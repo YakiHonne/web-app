@@ -257,6 +257,7 @@ export function getNoteTree(
       let jwt = checkJWT(el);
       if (jwt) {
         let { s, s_addr, r, m, a, c_at, pi, img } = decodeJWT(el);
+
         if (s && s_addr && r && a && c_at && pi) {
           finalTree.push(
             <RedPacketBox
