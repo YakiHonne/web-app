@@ -507,7 +507,7 @@ const getPreviouslyFetchedEvent = (id) => {
   let event = getEventFromCache(id);
   let parsedEvent = false;
   if (!event) return false;
-  if (event.kind === 1) {
+  if (event.kind === 1 || event.kind === 1111) {
     parsedEvent = getParsedNote(event);
     parsedEvent = { ...parsedEvent, isComment: false };
   } else if ([22, 21, 20].includes(event.kind)) {
@@ -566,7 +566,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
           let post = event_.data[0];
           saveUsers([post.pubkey]);
           let parsedEvent;
-          if (post.kind === 1) {
+          if (post.kind === 1 || post.kind === 1111) {
             parsedEvent = getParsedNote(post);
             parsedEvent = { ...parsedEvent, isComment: false };
           } else if ([22, 21, 20].includes(post.kind)) {
@@ -580,8 +580,8 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
           if (parsedEvent.id) {
             if (
               ![
-                0, 1, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21,
-                20,
+                0, 1, 1111, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22,
+                21, 20,
               ].includes(parsedEvent.kind)
             ) {
               setIsUnsupported(true);
@@ -626,7 +626,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
       <div className=" fit-container">
         {!isUnsupported && !isNotFound && (
           <>
-            {relatedEvent.kind === 1 && (
+            {(relatedEvent.kind === 1 || relatedEvent.kind === 1111) && (
               <NotesComment
                 event={relatedEvent}
                 hasReplies={true}
@@ -634,7 +634,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
                 noReactions={!reactions}
               />
             )}
-            {relatedEvent.kind !== 1 && (
+            {relatedEvent.kind !== 1 && relatedEvent.kind !== 1111 && (
               <div className="box-pad-h-m">
                 <div>
                   <LinkRepEventPreview event={relatedEvent} />
@@ -715,10 +715,10 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
         >
           {!isUnsupported && (
             <>
-              {relatedEvent.kind === 1 && (
+              {(relatedEvent.kind === 1 || relatedEvent.kind === 1111) && (
                 <KindOne event={relatedEvent} reactions={reactions} />
               )}
-              {relatedEvent.kind !== 1 && (
+              {relatedEvent.kind !== 1 && relatedEvent.kind !== 1111 && (
                 <div className="fit-container box-pad-h-m">
                   <LinkRepEventPreview event={relatedEvent} />
                 </div>

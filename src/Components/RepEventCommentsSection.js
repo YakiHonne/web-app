@@ -59,6 +59,7 @@ export default function RepEventCommentsSection({
           isRoot={true}
           tagKind={"a"}
           kind={eventKinds[kind]}
+          rootKind={kind}
           postActions={postActions}
         />
       </div>
