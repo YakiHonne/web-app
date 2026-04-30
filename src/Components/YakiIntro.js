@@ -39,22 +39,18 @@ const content = [
 ];
 
 const updatesList = [
-  "Relay invitations via join requests for easier access to private relays.",
-  "Relay reviews added to help evaluate and discover relays.",
-  "Sats gift packets can now be sent directly in messages.",
-  "Expired notes are now automatically removed from the feed.",
-  "Auto-translation applied when opening notes or articles.",
-  "Fixed issues when visiting profiles via NIP-05 URLs. (Yakihonne NIP-05 users)",
-  "Fixed problems when adding Alby wallet accounts.",
-  "Fixed bunker connection issues.",
-  "Fixed follow status detection in search results.",
-  "Redesigned toast messages for clearer feedback.",
-  "Fixed QR code payments for paid notes and added wallet selection options.",
-  "Added imeta support for uploaded files in notes and articles.",
-  "Fixed incomplete or partially loaded thread fetching issues.",
-  "Improved URL preview metadata fetching for better accuracy.",
-  "Fixed UI issues when note options position changes.",
-  "General bug fixes and optimizations across the app.",
+  "Dedicated BLOSSOM file management page for easier handling of uploaded and mirrored files.",
+  "Fixed join relay requests changing status without proper confirmation.",
+  "Added the ability to share relay URLs directly from Relay Orbit.",
+  "Shared relay URLs now open the full content page for that specific relay.",
+  "Fixed direct messages not sending when using the Enter key on the keyboard.",
+  "Fixed the comments section where some replies were not appearing correctly.",
+  "Fixed BLOSSOM media URLs failing when unsupported characters were included.",
+  "Resolved gallery images overlapping with message boxes inside the chatbox.",
+  "Added support for HLS video playback.",
+  "Added support for NIP-22 comments.",
+  "The Smart widget Playground page is now mobile responsive",
+  "General improvements and bug fixes.",
 ];
 
 export default function YakiIntro() {
