@@ -30,6 +30,8 @@ export default function PaymentGateway({
   recipientAddr,
   paymentAmount,
   recipientPubkey,
+  specificRelays = [],
+  extraMetadataTags = [],
   nostrEventIDEncode,
   setReceivedEvent = () => null,
   setConfirmPayment = () => null,
@@ -141,7 +143,7 @@ export default function PaymentGateway({
           <div className="close" onClick={exit}>
             <div></div>
           </div>
-          <Icon name="crossmark-tt" size={50} isColored/>
+          <Icon name="crossmark-tt" size={50} isColored />
           <h4>{t("AI8bhpw")}</h4>
           <p className="box-pad-h gray-c p-centered">{t("ACOXf0z")}</p>
         </div>
@@ -151,6 +153,7 @@ export default function PaymentGateway({
     <Cashier
       recipientAddr={recipientAddr}
       recipientPubkey={recipientPubkey}
+      extraMetadataTags={extraMetadataTags}
       callback={callback}
       recipientInfo={userProfile}
       nostrEventIDEncode={nostrEventIDEncode}
@@ -159,6 +162,7 @@ export default function PaymentGateway({
       exit={exit}
       setReceivedEvent={setReceivedEvent}
       setConfirmPayment={setConfirmPayment}
+      specificRelays={specificRelays}
     />
   );
 }
@@ -166,6 +170,7 @@ export default function PaymentGateway({
 const Cashier = ({
   recipientAddr,
   recipientPubkey,
+  extraMetadataTags,
   callback,
   nostrEventIDEncode,
   paymentAmount,
@@ -173,6 +178,7 @@ const Cashier = ({
   exit,
   setReceivedEvent,
   setConfirmPayment,
+  specificRelays,
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -223,11 +229,16 @@ const Cashier = ({
       if (!isLNBC) {
         let sats = amount * 1000;
         let tags = [
-          ["relays", ...relaysOnPlatform],
+          [
+            "relays",
+            ...(specificRelays.length > 0 ? specificRelays : relaysOnPlatform),
+          ],
           ["amount", sats.toString()],
           ["lnurl", recipientAddr],
           ["p", recipientPubkey],
+          ...extraMetadataTags,
         ];
+
         let extraTags = nostrEventIDEncode
           ? getNostrEventInfo(nostrEventIDEncode)
           : [];
@@ -533,17 +544,17 @@ const Cashier = ({
                       <div className="fx-centered">
                         {selectedWallet.kind === 1 && (
                           <div className="round-icon-small">
-                            <Icon name="webln-logo" size={24} isColored/>
+                            <Icon name="webln-logo" size={24} isColored />
                           </div>
                         )}
                         {selectedWallet.kind === 2 && (
                           <div className="round-icon-small">
-                            <Icon name="alby-logo" size={24} isColored/>
+                            <Icon name="alby-logo" size={24} isColored />
                           </div>
                         )}
                         {selectedWallet.kind === 3 && (
                           <div className="round-icon-small">
-                            <Icon name="nwc-logo" size={24} isColored/>
+                            <Icon name="nwc-logo" size={24} isColored />
                           </div>
                         )}
                         {selectedWallet.kind === -1 && (
@@ -614,7 +625,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <Icon name="webln-logo" size={24} isColored/>
+                                  <Icon name="webln-logo" size={24} isColored />
                                 </div>
                               )}
                               {wallet.kind === 2 && (
@@ -625,7 +636,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <Icon name="alby-logo" size={24} isColored/>
+                                  <Icon name="alby-logo" size={24} isColored />
                                 </div>
                               )}
                               {wallet.kind === 3 && (
@@ -636,7 +647,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <Icon name="nwc-logo" size={24} isColored/>
+                                  <Icon name="nwc-logo" size={24} isColored />
                                 </div>
                               )}
                               <p className="p-one-line">{wallet.entitle}</p>
@@ -878,7 +889,7 @@ const Cashier = ({
             className="fx-centered fx-col fit-container"
             style={{ height: "16vh" }}
           >
-            <Icon name="crossmark-tt" size={50} isColored/>
+            <Icon name="crossmark-tt" size={50} isColored />
             <h4 className="slide-down box-pad-v-m">{t("AI8bhpw")}</h4>
             <button className="btn btn-normal slide-up" onClick={exit}>
               {t("Acglhzb")}

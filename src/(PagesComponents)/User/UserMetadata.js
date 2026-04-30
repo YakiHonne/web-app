@@ -21,6 +21,8 @@ import useIsMute from "@/Hooks/useIsMute";
 import { sleepTimer } from "@/Helpers/Helpers";
 import AvatarPlaceholder from "@/Components/AvatarPlaceholder";
 import Icon from "@/Components/Icon";
+import useCreatorSubscription from "@/Hooks/useCreatorSubscription";
+import SubscriptionButton from "@/Components/SubscriptionButton";
 
 export default function UserMetadata({ user }) {
   const { t } = useTranslation();
@@ -28,6 +30,9 @@ export default function UserMetadata({ user }) {
   const userKeys = useSelector((state) => state.userKeys);
   const { isNip05Verified } = useUserProfile(user.pubkey);
   const { muteUnmute, isMuted } = useIsMute(user.pubkey);
+  // const { isSubChekingLoading, providers } = useCreatorSubscription({
+  //   pubkey: user.pubkey,
+  // });
   const [showPeople, setShowPeople] = useState(false);
   const [timestamp, setTimestamp] = useState(new Date().getTime());
   const [userFollowers, setUserFollowers] = useState(0);
@@ -245,7 +250,9 @@ export default function UserMetadata({ user }) {
           >
             <div className="fx-centered" style={{ gap: "6px" }}>
               <h3 className="p-caps">{user?.display_name || user?.name}</h3>
-              {isNip05Verified && <Icon name="checkmark-c1" size={24} isColored />}
+              {isNip05Verified && (
+                <Icon name="checkmark-c1" size={24} isColored />
+              )}
               <div
                 className="fx-centered pointer"
                 onClick={() => setShowQR(true)}
@@ -263,8 +270,8 @@ export default function UserMetadata({ user }) {
                     {user?.nip05?.length < 50
                       ? user?.nip05
                       : typeof user?.nip05 === "string"
-                      ? shortenKey(user?.nip05, 15)
-                      : "N/A"}
+                        ? shortenKey(user?.nip05, 15)
+                        : "N/A"}
                   </p>
                 )}
                 {!user?.nip05 && <p>N/A</p>}
@@ -326,6 +333,9 @@ export default function UserMetadata({ user }) {
               </div>
             </div>
           </div>
+        </div>
+        <div className="fit-container box-pad-h-m">
+          <SubscriptionButton pubkey={id} />
         </div>
       </div>
     </>

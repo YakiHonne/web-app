@@ -1,0 +1,176 @@
+.subscribe-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+  gap: 3rem;
+  min-height: 80vh;
+}
+
+.user-metadata-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+  max-width: 600px;
+}
+
+.user-metadata-section .about {
+  color: var(--gray);
+  line-height: 1.6;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+.plans-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 2.5rem;
+}
+
+.tabs-container {
+  min-width: 320px;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  width: 100%;
+  justify-items: center;
+  margin-bottom: 4rem;
+}
+
+.plan-card {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid var(--dim-gray);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+.plan-card:hover {
+  transform: translateY(-12px);
+  border-color: var(--orange-main);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+}
+
+.plan-card.premium {
+  border: 2px solid var(--orange-main);
+  background: linear-gradient(to bottom, var(--white), var(--orange-side));
+}
+
+.plan-card .plan-badge {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: var(--orange-main);
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(238, 119, 0, 0.3);
+}
+
+.plan-card .plan-name {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: capitalize;
+  color: var(--black);
+}
+
+.plan-card .plan-price-container {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.plan-card .plan-price {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--black);
+  letter-spacing: -1px;
+}
+
+.plan-card .plan-currency {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--gray);
+  margin-right: 0.25rem;
+}
+
+.plan-card .plan-interval {
+  color: var(--gray);
+  font-size: 1.1rem;
+  font-weight: 500;
+  min-width: max-content;
+}
+
+.plan-card .plan-discount {
+  background: var(--green-side);
+  color: var(--green-main);
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  align-self: flex-start;
+  border: 1px solid rgba(0, 192, 77, 0.1);
+}
+
+.plan-card .plan-cta {
+  margin-top: 1.5rem;
+  height: 3.5rem;
+  font-weight: 800;
+  font-size: 1.1rem;
+  border-radius: 16px;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--dim-gray);
+  border-bottom-color: var(--orange-main);
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.gap-s {
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .subscribe-container {
+    padding: 2rem 1rem;
+  }
+
+  .plan-card {
+    max-width: 100%;
+  }
+}
