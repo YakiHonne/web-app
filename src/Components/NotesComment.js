@@ -26,6 +26,8 @@ export default function NotesComment({
   hasReplies = false,
   isReply = false,
   isHistory = false,
+  tagKind = "e",
+  rootKind = null,
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -325,6 +327,8 @@ export default function NotesComment({
                     replyId={event.id}
                     replyPubkey={event.pubkey}
                     actions={postActions}
+                    tagKind={tagKind}
+                    rootKind={rootKind}
                   />
                 )}
               </>
