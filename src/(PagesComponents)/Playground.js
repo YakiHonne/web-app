@@ -1,13 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import SWHandler from "smart-widget-handler";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  addWidgetPathToUrl,
-  assignClientTag,
-} from "@/Helpers/Helpers";
-import {
-  getWallets,
-} from "@/Helpers/ClientHelpers";
+import { addWidgetPathToUrl, assignClientTag } from "@/Helpers/Helpers";
+import { getWallets } from "@/Helpers/ClientHelpers";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { getUser, InitEvent, publishEvent } from "@/Helpers/Controlers";
@@ -18,10 +13,7 @@ import { nanoid } from "nanoid";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import { saveUsers } from "@/Helpers/DB";
 import axios from "axios";
-import {
-  downloadAsFile,
-  getEmptyuserMetadata,
-} from "@/Helpers/Encryptions";
+import { downloadAsFile, getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import LoadingDots from "@/Components/LoadingDots";
 import UploadFile from "@/Components/UploadFile";
@@ -61,7 +53,7 @@ const Main = () => {
       setToast({
         type: 2,
         desc: "Invalid URL",
-      })
+      }),
     );
   };
 
@@ -69,224 +61,256 @@ const Main = () => {
     <>
       {!userKeys && <PagePlaceholder page={"nostr-not-connected"} />}
       {userKeys && (
-        <div className="fit-container fx-centered fx-start-h fx-start-v">
-          <div
-            style={{ width: "min(100%,800px)", flex: 1.5 }}
-            className={`${
-              !mbHide ? "mb-hide-800" : ""
-            } fx-centered box-marg-full`}
-          >
-            {!urlToCheck && (
-              <section
-                className="fx-centered fx-col sc-s-18"
-                style={{
-                  width: "400px",
-                  borderRadius: "10px",
-                  overflow: "hidden",
-                  gap: 0,
-                  aspectRatio: "10/16",
-                }}
-              ></section>
-            )}
-            {urlToCheck && (
-              <MiniApp
-                url={urlToCheck}
-                setReceivedLogs={setReceivedLogs}
-                refresh={refresh}
-              />
-            )}
-          </div>
-          <div
-            style={{
-              height: "100vh",
-              backgroundColor: "var(--pale-gray)",
-              width: "1px",
-              position: "sticky",
-              top: 0,
-              margin: "0 .5rem",
-            }}
-            className="mb-hide-800"
-          ></div>
-          <div
-            style={{
-              width: "min(100%,400px)",
-              height: "100vh",
-              overflow: "scroll",
-              padding: "1rem .5rem",
-              flex: 1,
-            }}
-            className={`box-pad-h-m box-pad-v sticky ${
-              mbHide ? "mb-hide-800" : ""
-            }`}
-          >
-            <div className="fx-centered fx-start-h fit-container box-marg-s desk-hide">
-              <div
-                className="round-icon-small  round-icon-tooltip "
-                onClick={() => setMbHide(true)}
-                data-tooltip={t("ATB2h6T")}
-              >
-                <Icon name="arrow" />
-              </div>
-              <p>{t("AzZ1GXv")}</p>
-            </div>
-            <div className="fit-container fx-scattered">
-              <h4 className=" box-marg-s fit-container">
-                Your Mini App's domain
-              </h4>
-            </div>
-            <input
-              className={`if ifs-full ${
-                urlToCheck ? "if-disabled" : ""
-              } box-marg-s`}
-              type="text"
-              placeholder="https://example.com or http://localhost:3000"
-              value={url}
-              onChange={(e) => {
-                setUrl(e.target.value);
-              }}
-              disabled={urlToCheck}
-            />
-            {!urlToCheck && (
-              <button
-                className="btn btn-normal btn-full"
-                onClick={handleSetUrlToCheck}
-              >
-                Test app
-              </button>
-            )}
-            {urlToCheck && (
-              <div className="fx-centered">
-                <button
-                  className="btn btn-red btn-full slide-up"
-                  onClick={() => {
-                    setUrlToCheck("");
-                    setReceivedLogs([]);
-                  }}
-                >
-                  Test another app
-                </button>
-                <div
-                  className="round-icon-small round-icon-tooltip slide-right"
-                  data-tooltip={"Refresh"}
-                  onClick={() => {
-                    setSetRefresh(Date.now());
-                    setReceivedLogs([]);
-                  }}
-                >
-                  <Icon name="switch-arrows-v2" />
-                </div>
-              </div>
-            )}
+        <div className="fit-container fx-centered fx-col">
+          <div className="desk-hide fit-container fx-centered box-pad-v">
             <div
-              className="fit-container fx-centered fx-col fx-start-h fx-start-v box-pad-v"
-              style={{ rowGap: "5px" }}
+              className="fx-centered sc-s-18 "
+              style={{
+                backgroundColor: "var(--very-dim-gray)",
+                padding: "4px",
+                borderRadius: "100px",
+                border: "1px solid var(--pale-gray)",
+              }}
             >
-              {receivedLogs.length > 0 && <h4>App logs</h4>}
-              <div className="box-pad-v-s"></div>
-              {receivedLogs.map((log, index) => {
-                return (
-                  <div
-                    className="fit-container fx-centered fx-col fx-start-h fx-start-v"
-                    key={index}
+              <button
+                className={`btn btn-small ${
+                  mbHide ? "btn-normal" : "btn-text-gray"
+                }`}
+                style={{
+                  borderRadius: "100px",
+                  minWidth: "120px",
+                  transition: ".3s",
+                }}
+                onClick={() => setMbHide(true)}
+              >
+                App
+              </button>
+              <button
+                className={`btn btn-small ${
+                  !mbHide ? "btn-normal" : "btn-text-gray"
+                }`}
+                style={{
+                  borderRadius: "100px",
+                  minWidth: "120px",
+                  transition: ".3s",
+                }}
+                onClick={() => setMbHide(false)}
+              >
+                Logs
+              </button>
+            </div>
+          </div>
+          <div className="fit-container fx-centered fx-start-h fx-start-v">
+            <div
+              style={{ width: "min(100%,800px)", flex: 1.5 }}
+              className={`${
+                !mbHide ? "mb-hide-800" : ""
+              } fx-centered box-marg-full`}
+            >
+              {!urlToCheck && (
+                <section
+                  className="fx-centered fx-col sc-s-18"
+                  style={{
+                    width: "400px",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    gap: 0,
+                    aspectRatio: "10/16",
+                  }}
+                ></section>
+              )}
+              {urlToCheck && (
+                <MiniApp
+                  url={urlToCheck}
+                  setReceivedLogs={setReceivedLogs}
+                  refresh={refresh}
+                />
+              )}
+            </div>
+            <div
+              style={{
+                height: "100vh",
+                backgroundColor: "var(--pale-gray)",
+                width: "1px",
+                position: "sticky",
+                top: 0,
+                margin: "0 .5rem",
+              }}
+              className="mb-hide-800"
+            ></div>
+            <div
+              style={{
+                width: "min(100%,400px)",
+                height: "100vh",
+                overflow: "scroll",
+                padding: "1rem .5rem",
+                flex: 1,
+              }}
+              className={`box-pad-h-m box-pad-v sticky ${
+                mbHide ? "mb-hide-800" : ""
+              }`}
+            >
+              <div className="fit-container fx-scattered">
+                <h4 className=" box-marg-s fit-container">
+                  Your Mini App's domain
+                </h4>
+              </div>
+              <input
+                className={`if ifs-full ${
+                  urlToCheck ? "if-disabled" : ""
+                } box-marg-s`}
+                type="text"
+                placeholder="https://example.com or http://localhost:3000"
+                value={url}
+                onChange={(e) => {
+                  setUrl(e.target.value);
+                }}
+                disabled={urlToCheck}
+              />
+              {!urlToCheck && (
+                <button
+                  className="btn btn-normal btn-full"
+                  onClick={handleSetUrlToCheck}
+                >
+                  Test app
+                </button>
+              )}
+              {urlToCheck && (
+                <div className="fx-centered">
+                  <button
+                    className="btn btn-red btn-full slide-up"
+                    onClick={() => {
+                      setUrlToCheck("");
+                      setReceivedLogs([]);
+                    }}
                   >
-                    <div className="fx-centered fx-start-h">
-                      <p>
-                        Kind: <span className="gray-c">{log.kind}</span>
-                      </p>
-                      {!log.client && (
-                        <div
-                          className="fx-centered box-pad-h-s sc-s-18"
-                          style={{
-                            borderColor: "var(--green-main)",
-                            backgroundColor: "transparent",
-                            height: "25px",
-                          }}
-                        >
-                          {" "}
-                          <p className="p-italic green-c p-medium">Sent data</p>
-                        </div>
-                      )}
-                      {log.client && (
-                        <div
-                          className="fx-centered box-pad-h-s sc-s-18"
-                          style={{
-                            borderColor: "var(--c1)",
-                            backgroundColor: "transparent",
-                            height: "25px",
-                          }}
-                        >
-                          <p className="p-italic c1-c p-medium">
-                            Received data
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    {log.data && (
-                      <ReactMarkdown
-                        children={
-                          typeof log.data === "string"
-                            ? log.data
-                            : "```json\n" +
-                              JSON.stringify(log.data, null, 2) +
-                              "\n```"
-                        }
-                        remarkPlugins={[remarkGfm]}
-                        rehypePlugins={[rehypeHighlight]}
-                        components={{
-                          code({
-                            node,
-                            inline,
-                            className,
-                            children,
-                            ...props
-                          }) {
-                            const match = /language-(\w+)/.exec(
-                              className || ""
-                            );
-                            const codeRef = nanoid();
-                            return !inline ? (
-                              <pre
-                                style={{ padding: "0", width: "350px" }}
-                                className="fit-container"
-                              >
-                                <div
-                                  className="sc-s-18 box-pad-v-s box-pad-h-m fit-container fx-scattered"
-                                  style={{
-                                    borderBottomRightRadius: 0,
-                                    borderBottomLeftRadius: 0,
-                                    top: "0px",
-                                    position: "sticky",
-                                    border: "none",
-                                  }}
+                    Test another app
+                  </button>
+                  <div
+                    className="round-icon-small round-icon-tooltip slide-right"
+                    data-tooltip={"Refresh"}
+                    onClick={() => {
+                      setSetRefresh(Date.now());
+                      setReceivedLogs([]);
+                    }}
+                  >
+                    <Icon name="switch-arrows-v2" />
+                  </div>
+                </div>
+              )}
+              <div
+                className="fit-container fx-centered fx-col fx-start-h fx-start-v box-pad-v"
+                style={{ rowGap: "5px" }}
+              >
+                {receivedLogs.length > 0 && <h4>App logs</h4>}
+                <div className="box-pad-v-s"></div>
+                {receivedLogs.map((log, index) => {
+                  return (
+                    <div
+                      className="fit-container fx-centered fx-col fx-start-h fx-start-v"
+                      key={index}
+                    >
+                      <div className="fx-centered fx-start-h">
+                        <p>
+                          Kind: <span className="gray-c">{log.kind}</span>
+                        </p>
+                        {!log.client && (
+                          <div
+                            className="fx-centered box-pad-h-s sc-s-18"
+                            style={{
+                              borderColor: "var(--green-main)",
+                              backgroundColor: "transparent",
+                              height: "25px",
+                            }}
+                          >
+                            {" "}
+                            <p className="p-italic green-c p-medium">
+                              Sent data
+                            </p>
+                          </div>
+                        )}
+                        {log.client && (
+                          <div
+                            className="fx-centered box-pad-h-s sc-s-18"
+                            style={{
+                              borderColor: "var(--c1)",
+                              backgroundColor: "transparent",
+                              height: "25px",
+                            }}
+                          >
+                            <p className="p-italic c1-c p-medium">
+                              Received data
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      {log.data && (
+                        <ReactMarkdown
+                          children={
+                            typeof log.data === "string"
+                              ? log.data
+                              : "```json\n" +
+                                JSON.stringify(log.data, null, 2) +
+                                "\n```"
+                          }
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeHighlight]}
+                          components={{
+                            code({
+                              node,
+                              inline,
+                              className,
+                              children,
+                              ...props
+                            }) {
+                              const match = /language-(\w+)/.exec(
+                                className || "",
+                              );
+                              const codeRef = nanoid();
+                              return !inline ? (
+                                <pre
+                                  style={{ padding: "0", width: "350px" }}
+                                  className="fit-container"
                                 >
-                                  <p className="gray-c p-italic">
-                                    {match?.length > 0 ? match[1] : ""}
-                                  </p>
-                                </div>
+                                  <div
+                                    className="sc-s-18 box-pad-v-s box-pad-h-m fit-container fx-scattered"
+                                    style={{
+                                      borderBottomRightRadius: 0,
+                                      borderBottomLeftRadius: 0,
+                                      top: "0px",
+                                      position: "sticky",
+                                      border: "none",
+                                    }}
+                                  >
+                                    <p className="gray-c p-italic">
+                                      {match?.length > 0 ? match[1] : ""}
+                                    </p>
+                                  </div>
+                                  <code
+                                    className={`hljs ${className} fit-container`}
+                                    {...props}
+                                    id={codeRef}
+                                  >
+                                    {children}
+                                  </code>
+                                </pre>
+                              ) : (
                                 <code
-                                  className={`hljs ${className} fit-container`}
+                                  className="inline-code fit-container"
                                   {...props}
-                                  id={codeRef}
+                                  style={{ margin: "1rem 0" }}
                                 >
                                   {children}
                                 </code>
-                              </pre>
-                            ) : (
-                              <code
-                                className="inline-code fit-container"
-                                {...props}
-                                style={{ margin: "1rem 0" }}
-                              >
-                                {children}
-                              </code>
-                            );
-                          },
-                        }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
+                              );
+                            },
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -318,7 +342,7 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
               { ...userMetadata, hasWallet: wallets.length > 0 },
               window.location.origin,
               url,
-              iframeRef.current
+              iframeRef.current,
             );
             setReceivedLogs((prev) => [
               ...prev,
@@ -333,7 +357,7 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
             SWHandler.host.sendError(
               "The user is not connected",
               url,
-              iframeRef.current
+              iframeRef.current,
             );
             setReceivedLogs((prev) => [
               ...prev,
@@ -350,14 +374,14 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
             let signedEvent = await InitEvent(
               event.data.kind,
               event.data.content,
-              assignClientTag(event.data.tags)
+              assignClientTag(event.data.tags),
             );
             if (signedEvent) {
               SWHandler.host.sendEvent(
                 signedEvent,
                 "success",
                 url,
-                iframeRef.current
+                iframeRef.current,
               );
               setReceivedLogs((prev) => [
                 ...prev,
@@ -371,7 +395,7 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
               SWHandler.host.sendError(
                 "Signing event failed",
                 url,
-                iframeRef.current
+                iframeRef.current,
               );
               setReceivedLogs((prev) => [
                 ...prev,
@@ -387,7 +411,7 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
               setToast({
                 type: 2,
                 desc: t("Acr4Slu"),
-              })
+              }),
             );
           }
         }
@@ -396,13 +420,13 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
             let signedEvent = await InitEvent(
               event.data.kind,
               event.data.content,
-              assignClientTag(event.data.tags)
+              assignClientTag(event.data.tags),
             );
             if (!signedEvent) {
               SWHandler.host.sendError(
                 "Signing event failed",
                 url,
-                iframeRef.current
+                iframeRef.current,
               );
               setReceivedLogs((prev) => [
                 ...prev,
@@ -418,7 +442,7 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
                 signedEvent,
                 publisedEvent ? "success" : "error",
                 url,
-                iframeRef.current
+                iframeRef.current,
               );
               setReceivedLogs((prev) => [
                 ...prev,
@@ -434,7 +458,7 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
               setToast({
                 type: 2,
                 desc: t("Acr4Slu"),
-              })
+              }),
             );
           }
         }
@@ -673,7 +697,7 @@ const GenerateManifestFile = ({ exit }) => {
         setToast({
           type: 2,
           desc: "Please fill all the required fields",
-        })
+        }),
       );
       return;
     }
@@ -709,7 +733,7 @@ const GenerateManifestFile = ({ exit }) => {
           }}
         >
           <div className="fx-centered box-pad-v fx-col">
-            <Icon name="checkmark-tt" size={60} isColored/>
+            <Icon name="checkmark-tt" size={60} isColored />
             <h4 className="p-centered" style={{ lineHeight: "150%" }}>
               The file was generated successfully!
             </h4>
