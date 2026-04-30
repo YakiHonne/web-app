@@ -10,7 +10,7 @@
 - Resolved gallery images overlapping with message boxes inside the chatbox.
 - Added support for HLS video playback.
 - Added support for NIP-22 comments.
-- The Smart widget Playgroud page is now mobile responsive
+- The Smart widget Playground page is now mobile responsive
 - General improvements and bug fixes.
 
 # (v5.8.0) 30/03/2026
