@@ -112,7 +112,7 @@ export default function Repost({ isReposted, event, actions }) {
         <Icon
           name={isReposted ? "switch-arrows-bold" : "switch-arrows"}
           size={24}
-          className={!isReposted ? "opacity-4" : ""}
+          opacity={!isReposted ? 0.4 : "initial"}
           isColored={isReposted}
           isBoldThemeColor={isReposted}
         />

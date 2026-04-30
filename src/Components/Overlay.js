@@ -1,7 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-export default function Overlay({ children, width = 600, exit, id = "" }) {
+export default function Overlay({
+  children,
+  width = 600,
+  exit,
+  id = "",
+  allowOverFlow = false,
+}) {
   const windowRef = useRef(null);
   const [mounted, setMounted] = useState(false);
 
@@ -39,7 +45,7 @@ export default function Overlay({ children, width = 600, exit, id = "" }) {
           width: `min(100%, ${width}px)`,
           position: "relative",
           maxHeight: "80vh",
-          overflow: "scroll",
+          overflow: allowOverFlow ? "visible" : "scroll",
         }}
         onClick={(e) => e.stopPropagation()}
         className="slide-up no-scrollbar sc-s bg-sp"

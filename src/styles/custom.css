@@ -1046,7 +1046,7 @@ main {
     position: relative;
     /* opacity: .5; */
     /* transition: .2s ease-in-out; */
-    padding: .75rem;
+    padding: .65rem;
     border-radius: var(--border-r-32);
     border: 1px solid transparent;
 }
@@ -1100,7 +1100,6 @@ main {
     transition: .2s ease-in-out;
     cursor: pointer;
 } */
-
 
 /* 
 .sign-in-screen section .close:hover {

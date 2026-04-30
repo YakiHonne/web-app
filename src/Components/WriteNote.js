@@ -32,6 +32,7 @@ import useLightningWallets from "@/Hooks/useLightningWallets";
 import LightningWalletsSelect from "./LightningWalletsSelect";
 import Overlay from "./Overlay";
 import { nip19 } from "nostr-tools";
+import Link from "next/link";
 
 const PAID_NOTE_AMOUNT = process.env.NEXT_PUBLIC_PAID_NOTE_AMOUNT;
 
@@ -733,7 +734,7 @@ export default function WriteNote({
           </div>
         )}
         <div
-          className="fit-container fx-centered fx-start-v box-pad-h box-pad-v-m"
+          className="fit-container fx-centered fx-col box-pad-h box-pad-v-m"
           style={{ borderTop: "1px solid var(--pale-gray)" }}
         >
           <div className="fit-container fx-scattered fx-wrap">

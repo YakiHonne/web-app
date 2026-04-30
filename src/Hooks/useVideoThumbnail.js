@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
-import { getVideoThumbnailFromCache, setVideoThumbnailFromCache } from "@/Helpers/utils/videoThumbnailCache";
+import {
+  getVideoThumbnailFromCache,
+  setVideoThumbnailFromCache,
+} from "@/Helpers/utils/videoThumbnailCache";
 
-export function useVideoThumbnail(url, time = .5, width = 300, image) {
-  const [dataUrl, setDataUrl] = useState(getVideoThumbnailFromCache(url));
+export function useVideoThumbnail(url, time = 0.5, width = 300, image) {
+  const [dataUrl, setDataUrl] = useState(
+    url ? getVideoThumbnailFromCache(url) : false,
+  );
   useEffect(() => {
-    if(image) {
-      setDataUrl(image)
-      return
+    if (image) {
+      setDataUrl(image);
+      return;
     }
-    if(dataUrl) return
+    if (!url) return;
+    if (dataUrl) return;
     let mounted = true;
     const v = document.createElement("video");
     v.crossOrigin = "anonymous"; // needs remote server CORS
@@ -28,13 +34,13 @@ export function useVideoThumbnail(url, time = .5, width = 300, image) {
         ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
         const d = canvas.toDataURL("image/jpeg", 0.5);
         if (mounted) {
-            setDataUrl(d);
-            setVideoThumbnailFromCache(url, d);
+          setDataUrl(d);
+          setVideoThumbnailFromCache(url, d);
         }
         v.pause();
         v.src = "";
       } catch (err) {
-        console.log(err)
+        console.log(err);
       }
     };
 
@@ -50,7 +56,6 @@ export function useVideoThumbnail(url, time = .5, width = 300, image) {
       v.removeEventListener("seeked", onSeeked);
       v.src = "";
     };
-
   }, [url, time, width]);
 
   return dataUrl;
