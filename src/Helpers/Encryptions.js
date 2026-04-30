@@ -1552,7 +1552,6 @@ const decodeJWT = (token) => {
   try {
     const payload = parts[1];
     if (!/^[A-Za-z0-9_-]+$/.test(payload)) return null;
-
     const decoded = CryptoJS.enc.Base64.parse(
       payload.replace(/-/g, "+").replace(/_/g, "/"),
     );
@@ -1565,12 +1564,15 @@ const decodeJWT = (token) => {
       return null;
     return JSON.parse(utf8Content);
   } catch (err) {
+    console.log(token);
+    console.log(err);
     return null;
   }
 };
 
 const checkJWT = (token) => {
   try {
+    if (!token.startsWith("ey")) return false;
     const parts = token.split(".");
     if (parts.length !== 3) return false;
 
