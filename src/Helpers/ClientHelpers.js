@@ -800,7 +800,7 @@ export function getDefaultSettings(pubkey) {
       { tab: "reactions", isHidden: false },
       { tab: "reposts", isHidden: false },
       { tab: "zaps", isHidden: false },
-      { tab: "following", isHidden: false },
+      { tab: "following", isHidden: true },
     ],
   };
 }
