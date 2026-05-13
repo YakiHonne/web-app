@@ -73,7 +73,7 @@ export default function Home() {
         });
       } else if (key === "price") {
         prices.push({
-          methodId: values[0],
+          method: values[0],
           id: values[1],
           name: values[2],
           amount: values[3],
@@ -87,7 +87,7 @@ export default function Home() {
     const parsedMethods = Array.from(methodsMap.values());
     parsedMethods.forEach((m) => {
       m.plans = prices
-        .filter((p) => p.methodId === m.id)
+        .filter((p) => p.method === m.id)
         .map((p) => ({
           ...p,
           currency: currencies[m.id] || "",
@@ -172,6 +172,7 @@ function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
     return checkForLUDS(metadata.lud06, metadata.lud16);
   }, [metadata]);
   const handleSubscription = () => {
+    console.log(plan);
     if (plan.method === "fiat") handleFiatSubscribe();
     else handleLightningSubscribe();
   };
