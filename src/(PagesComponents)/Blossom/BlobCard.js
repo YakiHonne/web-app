@@ -41,6 +41,7 @@ export default function BlobCard({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <Icon name={"eye-opened"} size={24} />
       <p>{t("AYO6i7Y")}</p>
     </div>,
     <div
@@ -49,6 +50,7 @@ export default function BlobCard({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <Icon name={"download-file"} size={24} />
       <p>{t("AdKpCLS")}</p>
     </div>,
     <div
@@ -57,6 +59,7 @@ export default function BlobCard({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <Icon name={"add-note"} size={24} />
       <p>{t("AB8DnjO")}</p>
     </div>,
     <div
@@ -65,6 +68,7 @@ export default function BlobCard({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <Icon name={"hashtag"} size={24} />
       <p>{t("A1S5EmZ")}</p>
     </div>,
     <div
@@ -73,6 +77,7 @@ export default function BlobCard({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <Icon name={"copy"} size={24} />
       <p>{t("A4oCm1O")}</p>
     </div>,
     blob.seen?.length !== userBlossomServers.length ? (
@@ -82,6 +87,7 @@ export default function BlobCard({
         }}
         className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
       >
+        <Icon name={"clone"} size={24} />
         <p>{t("A1C3sNc")}</p>
       </div>
     ) : (
@@ -93,6 +99,7 @@ export default function BlobCard({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
+      <Icon name={"trash"} size={24} isColored />
       <p className="red-c">{t("AUhNvsT")}</p>
     </div>,
   ];

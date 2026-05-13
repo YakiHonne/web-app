@@ -185,9 +185,9 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
               maxWidth: "100%",
               objectFit: "fit",
               maxHeight: "600px",
-              // pointerEvents: toBlur ? "none" : "auto",
+              pointerEvents: "auto",
             }}
-            src={carouselItems[0]}
+            src={`${carouselItems[0]}`}
             alt="el"
             // loading="lazy"
           />

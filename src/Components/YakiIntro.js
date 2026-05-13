@@ -39,18 +39,9 @@ const content = [
 ];
 
 const updatesList = [
-  "Dedicated BLOSSOM file management page for easier handling of uploaded and mirrored files.",
-  "Fixed join relay requests changing status without proper confirmation.",
-  "Added the ability to share relay URLs directly from Relay Orbit.",
-  "Shared relay URLs now open the full content page for that specific relay.",
-  "Fixed direct messages not sending when using the Enter key on the keyboard.",
-  "Fixed the comments section where some replies were not appearing correctly.",
-  "Fixed BLOSSOM media URLs failing when unsupported characters were included.",
-  "Resolved gallery images overlapping with message boxes inside the chatbox.",
-  "Added support for HLS video playback.",
-  "Added support for NIP-22 comments.",
-  "The Smart widget Playground page is now mobile responsive",
-  "General improvements and bug fixes.",
+  "Resolved the image pasting overlay issue where pasted images were hidden during note creation.",
+  "Fixed fetching articles, videos and curations with Yakihonne NIP-05 URL.",
+  "Added icons to the BLOSSOM options for a clearer and more intuitive interface.",
 ];
 
 export default function YakiIntro() {
