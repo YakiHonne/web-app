@@ -1,3 +1,9 @@
+# (v5.9.1) 13/05/2026
+
+- Resolved the image pasting overlay issue where pasted images were hidden during note creation.
+- Fixed fetching articles, videos and curations with Yakihonne NIP-05 URL.
+- Added icons to the BLOSSOM options for a clearer and more intuitive interface.
+
 # (v5.9.0) 30/04/2026
 
 - Dedicated BLOSSOM file management page for easier handling of uploaded and mirrored files.

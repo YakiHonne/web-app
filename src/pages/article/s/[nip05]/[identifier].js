@@ -8,7 +8,7 @@ import {
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
-import { getDataForSSG } from "@/Helpers/lib";
+import { getDataForSSG, parseNip05 } from "@/Helpers/lib";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Article"), {
   ssr: false,
@@ -43,7 +43,7 @@ export default function Page({ event, author, naddrData, naddr }) {
 
 export async function getStaticProps({ params }) {
   const { nip05, identifier } = params;
-  let pubkey = await getAuthPubkeyFromNip05(decodeURIComponent(nip05));
+  let pubkey = await parseNip05(decodeURIComponent(nip05));
   const res = pubkey
     ? await getDataForSSG(
         [
@@ -54,7 +54,7 @@ export async function getStaticProps({ params }) {
           },
         ],
         5000,
-        1
+        1,
       )
     : null;
   let event =
@@ -64,11 +64,7 @@ export async function getStaticProps({ params }) {
         }
       : null;
   const author = pubkey
-    ? await getDataForSSG(
-        [{ authors: [pubkey], kinds: [0] }],
-        1000,
-        1
-      )
+    ? await getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata(pubkey);
   return {
     props: {

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import ProgressCirc from "@/Components/ProgressCirc";
 import { nanoid } from "nanoid";
 import Icon from "./Icon";
+import Overlay from "./Overlay";
 
 export default function UploadFile({
   kind = "audio/*,video/*,image/*",
@@ -114,11 +115,8 @@ export default function UploadFile({
   return (
     <>
       {pastedImgURL && (
-        <div className="fixed-container fx-centered box-pad-h">
-          <div
-            className="sc-s-18 bg-sp slide-up"
-            style={{ width: "min(100%, 550px)" }}
-          >
+        <Overlay width={550}>
+          <div>
             <div
               className="bg-img cover-bg fit-container"
               style={{
@@ -141,7 +139,7 @@ export default function UploadFile({
               </button>
             </div>
           </div>
-        </div>
+        </Overlay>
       )}
       <label
         htmlFor={inputID}
