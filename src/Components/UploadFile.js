@@ -115,7 +115,7 @@ export default function UploadFile({
   return (
     <>
       {pastedImgURL && (
-        <Overlay width={550}>
+        <Overlay width={550} id={"pasted-img"}>
           <div>
             <div
               className="bg-img cover-bg fit-container"
