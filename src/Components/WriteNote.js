@@ -404,11 +404,13 @@ export default function WriteNote({
       e.stopPropagation();
       let swbrowser = document.getElementById("sw-browser");
       let datepicker = document.getElementById("date-picker");
+      let pastedImg = document.getElementById("pasted-img");
       if (
         ref.current &&
         !ref.current.contains(e.target) &&
         !swbrowser?.contains(e.target) &&
         !datepicker?.contains(e.target) &&
+        !pastedImg?.contains(e.target) &&
         !invoice
       ) {
         if (!note) {
