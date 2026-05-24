@@ -195,6 +195,7 @@ export default function LightningWallet() {
       // setIsLoading(true);
       await window.webln.enable();
       let data = await window.webln.getBalance();
+      console.log(data)
       setIsLoading(false);
       setWalletBalance(data.balance);
     } catch (err) {
@@ -432,9 +433,9 @@ export default function LightningWallet() {
                                     onClick={() =>
                                       selectedWallet.entitle.includes("@")
                                         ? copyText(
-                                            selectedWallet.entitle,
-                                            t("ALR84Tq"),
-                                          )
+                                          selectedWallet.entitle,
+                                          t("ALR84Tq"),
+                                        )
                                         : walletWarning()
                                     }
                                   >
@@ -756,10 +757,10 @@ export default function LightningWallet() {
                               let isZap = transaction.metadata?.zap_request;
                               let author = isZap
                                 ? nostrAuthors.find(
-                                    (author) =>
-                                      author.pubkey ===
-                                      transaction.metadata.zap_request.pubkey,
-                                  )
+                                  (author) =>
+                                    author.pubkey ===
+                                    transaction.metadata.zap_request.pubkey,
+                                )
                                 : false;
                               return (
                                 <div
@@ -775,25 +776,25 @@ export default function LightningWallet() {
                                       {(!isZap ||
                                         (isZap &&
                                           transaction.type === "outgoing")) && (
-                                        <>
-                                          {transaction.type === "outgoing" && (
-                                            <div
-                                              className="round-icon round-icon-tooltip"
-                                              data-tooltip={t("AkPQ73T")}
-                                            >
-                                              <p className="red-c">&#8593;</p>
-                                            </div>
-                                          )}
-                                          {transaction.type !== "outgoing" && (
-                                            <div
-                                              className="round-icon round-icon-tooltip"
-                                              data-tooltip={t("A4G4OJ7")}
-                                            >
-                                              <p className="green-c">&#8595;</p>
-                                            </div>
-                                          )}
-                                        </>
-                                      )}
+                                          <>
+                                            {transaction.type === "outgoing" && (
+                                              <div
+                                                className="round-icon round-icon-tooltip"
+                                                data-tooltip={t("AkPQ73T")}
+                                              >
+                                                <p className="red-c">&#8593;</p>
+                                              </div>
+                                            )}
+                                            {transaction.type !== "outgoing" && (
+                                              <div
+                                                className="round-icon round-icon-tooltip"
+                                                data-tooltip={t("A4G4OJ7")}
+                                              >
+                                                <p className="green-c">&#8595;</p>
+                                              </div>
+                                            )}
+                                          </>
+                                        )}
                                       {isZap &&
                                         transaction.type !== "outgoing" && (
                                           <>
@@ -835,7 +836,7 @@ export default function LightningWallet() {
                                             toConvert={
                                               new Date(
                                                 transaction.creation_date *
-                                                  1000,
+                                                1000,
                                               )
                                             }
                                             time={true}
@@ -845,29 +846,29 @@ export default function LightningWallet() {
                                           {(!isZap ||
                                             (isZap &&
                                               transaction.type ===
-                                                "outgoing")) && (
-                                            <>
-                                              {transaction.type === "outgoing"
-                                                ? t("ATyFagO")
-                                                : t("AyVA6Q3")}
-                                            </>
-                                          )}
+                                              "outgoing")) && (
+                                              <>
+                                                {transaction.type === "outgoing"
+                                                  ? t("ATyFagO")
+                                                  : t("AyVA6Q3")}
+                                              </>
+                                            )}
                                           {(isZap ||
                                             (isZap &&
                                               transaction.type !==
-                                                "outgoing")) && (
-                                            <>
-                                              {t("AdrOPfO", {
-                                                name: author
-                                                  ? author.display_name ||
+                                              "outgoing")) && (
+                                              <>
+                                                {t("AdrOPfO", {
+                                                  name: author
+                                                    ? author.display_name ||
                                                     author.name
-                                                  : getBech32(
+                                                    : getBech32(
                                                       "npub",
                                                       isZap.pubkey,
                                                     ).substring(0, 10),
-                                              })}
-                                            </>
-                                          )}
+                                                })}
+                                              </>
+                                            )}
                                           <span className="orange-c">
                                             {" "}
                                             {transaction.amount}{" "}
@@ -878,25 +879,25 @@ export default function LightningWallet() {
                                     </div>
                                     {(transaction.memo ||
                                       transaction.comment) && (
-                                      <div
-                                        className="round-icon-small round-icon-tooltip"
-                                        data-tooltip={t("AYMJ2uj")}
-                                        onClick={() =>
-                                          displayMessage ===
-                                          transaction.identifier
-                                            ? setDisplayMessage(false)
-                                            : setDisplayMessage(
+                                        <div
+                                          className="round-icon-small round-icon-tooltip"
+                                          data-tooltip={t("AYMJ2uj")}
+                                          onClick={() =>
+                                            displayMessage ===
+                                              transaction.identifier
+                                              ? setDisplayMessage(false)
+                                              : setDisplayMessage(
                                                 transaction.identifier,
                                               )
-                                        }
-                                      >
-                                        <Icon name="comment-not" />
-                                      </div>
-                                    )}
+                                          }
+                                        >
+                                          <Icon name="comment-not" />
+                                        </div>
+                                      )}
                                   </div>
                                   {(transaction.memo || transaction.comment) &&
                                     displayMessage ===
-                                      transaction.identifier && (
+                                    transaction.identifier && (
                                       <div
                                         className="fit-container sc-s box-pad-h-s box-pad-v-s p-medium"
                                         style={{
@@ -936,10 +937,10 @@ export default function LightningWallet() {
                               let isZap = transaction.metadata?.zap_request;
                               let author = isZap
                                 ? nostrAuthors.find(
-                                    (author) =>
-                                      author.pubkey ===
-                                      transaction.metadata.zap_request.pubkey,
-                                  )
+                                  (author) =>
+                                    author.pubkey ===
+                                    transaction.metadata.zap_request.pubkey,
+                                )
                                 : false;
                               return (
                                 <div
@@ -955,25 +956,25 @@ export default function LightningWallet() {
                                       {(!isZap ||
                                         (isZap &&
                                           transaction.type === "outgoing")) && (
-                                        <>
-                                          {transaction.type === "outgoing" && (
-                                            <div
-                                              className="round-icon round-icon-tooltip"
-                                              data-tooltip={t("AkPQ73T")}
-                                            >
-                                              <p className="red-c">&#8593;</p>
-                                            </div>
-                                          )}
-                                          {transaction.type !== "outgoing" && (
-                                            <div
-                                              className="round-icon round-icon-tooltip"
-                                              data-tooltip={t("A4G4OJ7")}
-                                            >
-                                              <p className="green-c">&#8595;</p>
-                                            </div>
-                                          )}
-                                        </>
-                                      )}
+                                          <>
+                                            {transaction.type === "outgoing" && (
+                                              <div
+                                                className="round-icon round-icon-tooltip"
+                                                data-tooltip={t("AkPQ73T")}
+                                              >
+                                                <p className="red-c">&#8593;</p>
+                                              </div>
+                                            )}
+                                            {transaction.type !== "outgoing" && (
+                                              <div
+                                                className="round-icon round-icon-tooltip"
+                                                data-tooltip={t("A4G4OJ7")}
+                                              >
+                                                <p className="green-c">&#8595;</p>
+                                              </div>
+                                            )}
+                                          </>
+                                        )}
                                       {isZap &&
                                         transaction.type !== "outgoing" && (
                                           <>
@@ -1024,29 +1025,29 @@ export default function LightningWallet() {
                                           {(!isZap ||
                                             (isZap &&
                                               transaction.type ===
-                                                "outgoing")) && (
-                                            <>
-                                              {transaction.type === "outgoing"
-                                                ? t("ATyFagO")
-                                                : t("AyVA6Q3")}
-                                            </>
-                                          )}
+                                              "outgoing")) && (
+                                              <>
+                                                {transaction.type === "outgoing"
+                                                  ? t("ATyFagO")
+                                                  : t("AyVA6Q3")}
+                                              </>
+                                            )}
                                           {(isZap ||
                                             (isZap &&
                                               transaction.type !==
-                                                "outgoing")) && (
-                                            <>
-                                              {t("AdrOPfO", {
-                                                name: author
-                                                  ? author.display_name ||
+                                              "outgoing")) && (
+                                              <>
+                                                {t("AdrOPfO", {
+                                                  name: author
+                                                    ? author.display_name ||
                                                     author.name
-                                                  : getBech32(
+                                                    : getBech32(
                                                       "npub",
                                                       isZap.pubkey,
                                                     ).substring(0, 10),
-                                              })}
-                                            </>
-                                          )}
+                                                })}
+                                              </>
+                                            )}
 
                                           <span className="orange-c">
                                             {" "}
@@ -1064,8 +1065,8 @@ export default function LightningWallet() {
                                           displayMessage === transaction.invoice
                                             ? setDisplayMessage(false)
                                             : setDisplayMessage(
-                                                transaction.invoice,
-                                              )
+                                              transaction.invoice,
+                                            )
                                         }
                                       >
                                         <Icon name="comment-not" />
@@ -1289,8 +1290,8 @@ const SendPayment = ({
         let event = getEvent(sats, addr_, hex);
         const res = isZap
           ? await axios(
-              `${callback}?amount=${sats}&nostr=${event}&lnurl=${addr_}`,
-            )
+            `${callback}?amount=${sats}&nostr=${event}&lnurl=${addr_}`,
+          )
           : await axios(`${callback}?amount=${sats}&lnurl=${addr_}`);
 
         if (selectedWallet.kind === 1) {
@@ -1380,9 +1381,8 @@ const SendPayment = ({
         >
           <p>{t("AI19tdC")}</p>
           <div
-            className={`toggle ${invoiceData ? "toggle-dim-gray" : ""} ${
-              !invoiceData ? "toggle-c1" : "toggle-dim-gray"
-            }`}
+            className={`toggle ${invoiceData ? "toggle-dim-gray" : ""} ${!invoiceData ? "toggle-c1" : "toggle-dim-gray"
+              }`}
           ></div>
         </div>
 
@@ -1424,11 +1424,10 @@ const SendPayment = ({
                 className="if p-bold if-no-border ifs-full p-centered"
                 placeholder={t("AcDgXKI")}
                 style={{
-                  fontSize: `max(${
-                    amount.toString().length > 5
-                      ? `${80 - (amount.toString().length - 6) * 10}px`
-                      : "80px"
-                  },50px)`,
+                  fontSize: `max(${amount.toString().length > 5
+                    ? `${80 - (amount.toString().length - 6) * 10}px`
+                    : "80px"
+                    },50px)`,
                   height: "80px",
                 }}
                 value={amount}
@@ -1712,11 +1711,10 @@ const ReceivePayment = ({
               className="if p-bold if-no-border ifs-full p-centered"
               placeholder={t("AcDgXKI")}
               style={{
-                fontSize: `max(${
-                  amount.toString().length > 5
-                    ? `${80 - (amount.toString().length - 6) * 10}px`
-                    : "80px"
-                },50px)`,
+                fontSize: `max(${amount.toString().length > 5
+                  ? `${80 - (amount.toString().length - 6) * 10}px`
+                  : "80px"
+                  },50px)`,
                 height: "80px",
               }}
               value={amount}
