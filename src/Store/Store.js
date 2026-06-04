@@ -39,6 +39,7 @@ import {
   IsYakiChestLoadedReducer,
   UpdatedActionFromYakiChestSliceReducer,
 } from "./Slides/YakiChest";
+import { SubscriptionReducer } from "./Slides/Subscription";
 import { NostrAuthorsReducer, NostrClientsReducer } from "./Slides/Profiles";
 import {
   ToastReducer,
@@ -119,5 +120,6 @@ export const store = configureStore({
     userNutZaps: UserNutZapsReducer,
     userStarterPacks: UserStarterPacksReducer,
     userMediaPacks: UserMediaPacksReducer,
+    subscription: SubscriptionReducer,
   },
 });

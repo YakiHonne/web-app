@@ -13,6 +13,8 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import { convertDate } from "@/Helpers/Encryptions";
 import { eventKinds } from "@/Content/Extra";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
+
 export default function RawEventDisplay({ event, exit }) {
   const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
   const { t } = useTranslation();
@@ -26,16 +28,9 @@ export default function RawEventDisplay({ event, exit }) {
     copyText(codeText, "Code is copied");
   };
   return (
-    <div
-      className="fixed-container box-pad-h fx-centered fx-col"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="box-pad-h box-pad-v bg-sp fx-centered fx-col sc-s slide-up"
-        style={{ width: "min(100%, 500px)", position: "relative" }}
+        className="box-pad-h box-pad-v fx-centered fx-col slide-up"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -135,6 +130,6 @@ export default function RawEventDisplay({ event, exit }) {
           </div>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

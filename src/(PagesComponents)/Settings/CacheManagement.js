@@ -55,15 +55,14 @@ export function CacheManagement({ selectedTab, setSelectedTab }) {
 
   return (
     <div
-      className={`fit-container fx-scattered fx-col pointer ${
-        selectedTab === "cache" ? "sc-s box-pad-h-s box-pad-v-s" : ""
-      }`}
+      className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "cache" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+        }`}
       style={{
-        borderBottom: "1px solid var(--very-dim-gray)",
+        // borderBottom: "1px solid var(--very-dim-gray)",
         gap: 0,
-        borderColor: "var(--very-dim-gray)",
+        // borderColor: "var(--very-dim-gray)",
         transition: "0.2s ease-in-out",
-        borderRadius: 0
+        // borderRadius: 0
       }}
     >
       <div

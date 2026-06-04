@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { webln } from "@getalby/sdk";
 import ArrowUp from "@/Components/ArrowUp";
 import axios from "axios";
@@ -37,6 +38,7 @@ import { SelectTabsNoIndex } from "@/Components/SelectTabsNoIndex";
 import { customHistory } from "@/Helpers/History";
 import { useRouter } from "next/router";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function LightningWallet() {
   const dispatch = useDispatch();
@@ -58,8 +60,12 @@ export default function LightningWallet() {
   const [isLoading, setIsLoading] = useState(false);
   const [showAddWallet, setShowAddWallet] = useState(false);
   const [showWalletsList, setShowWalletList] = useState(false);
+  const [dismissingWallets, setDismissingWallets] = useState(false);
   const [timestamp, setTimestamp] = useState(Date.now());
   const walletListRef = useRef(null);
+  const walletTriggerRef = useRef(null);
+  const walletPortalRef = useRef(null);
+  const [walletDropPos, setWalletDropPos] = useState(null);
   const pageTabs = [
     {
       display_name: t("AQtRwt6"),
@@ -291,6 +297,30 @@ export default function LightningWallet() {
     }
   };
 
+  const closeWalletsList = () => {
+    setDismissingWallets(true);
+    setTimeout(() => { setShowWalletList(false); setDismissingWallets(false); }, 220);
+  };
+
+  useEffect(() => {
+    if (!showWalletsList) return;
+    const handleClick = (e) => {
+      if (
+        walletPortalRef.current && !walletPortalRef.current.contains(e.target) &&
+        walletTriggerRef.current && !walletTriggerRef.current.contains(e.target)
+      ) {
+        closeWalletsList();
+      }
+    };
+    const handleScroll = () => closeWalletsList();
+    document.addEventListener("mousedown", handleClick);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [showWalletsList]);
+
   const handleSelectWallet = (walletID) => {
     let index = wallets.findIndex((wallet) => wallet.id == walletID);
 
@@ -305,7 +335,7 @@ export default function LightningWallet() {
     setWallets(tempWallets);
     updateWallets(tempWallets);
     setOps("");
-    setShowWalletList(false);
+    closeWalletsList();
   };
 
   const refreshAfterDeletion = (w) => {
@@ -474,30 +504,37 @@ export default function LightningWallet() {
                               </p>
                               {selectedWallet && (
                                 <div
+                                  ref={walletTriggerRef}
                                   className="fit-container fx-scattered if if-no-border option pointer"
                                   style={{
                                     height: "var(--40)",
                                     padding: "1rem",
                                   }}
-                                  onClick={() =>
-                                    setShowWalletList(!showWalletsList)
-                                  }
+                                  onClick={() => {
+                                    if (showWalletsList) { closeWalletsList(); return; }
+                                    if (walletTriggerRef.current) {
+                                      const r = walletTriggerRef.current.getBoundingClientRect();
+                                      setWalletDropPos({ top: r.bottom + 6, left: r.left, width: r.width });
+                                    }
+                                    setShowWalletList(true);
+                                  }}
                                 >
                                   <p>{selectedWallet.entitle}</p>
                                   <Icon name="arrow" size={12} />
                                 </div>
                               )}
-                              {showWalletsList && (
+                              {showWalletsList && walletDropPos && typeof document !== "undefined" && createPortal(
                                 <div
-                                  className="fx-centered fx-col sc-s-18 bg-sp box-pad-v-s box-pad-h-s fx-start-v drop-down"
+                                  ref={walletPortalRef}
                                   style={{
-                                    width: "400px",
-                                    backgroundColor: "var(--c1-side)",
-                                    position: "absolute",
-                                    top: "calc(100% + 5px)",
-                                    rowGap: 0,
-                                    overflow: "visible",
+                                    position: "fixed",
+                                    top: walletDropPos.top,
+                                    left: walletDropPos.left,
+                                    minWidth: walletDropPos.width,
+                                    width: "300px",
+                                    zIndex: 99999,
                                   }}
+                                  className={`bg-dropdown di-wrapper${dismissingWallets ? " dismissing" : ""}`}
                                 >
                                   <div className="fit-container fx-scattered">
                                     <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
@@ -570,7 +607,8 @@ export default function LightningWallet() {
                                       </div>
                                     );
                                   })}
-                                </div>
+                                </div>,
+                                document.body
                               )}
                             </div>
                           </div>
@@ -1354,17 +1392,10 @@ const SendPayment = ({
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v slide-up"
-        style={{ marginTop: "1rem", width: "min(100%, 500px)" }}
-        onClick={(e) => e.stopPropagation()}
+        className="fx-centered fx-col box-pad-h box-pad-v"
+        style={{ marginTop: "1rem" }}
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -1459,7 +1490,7 @@ const SendPayment = ({
           {isLoading ? <LoadingDots /> : t("A14LwWS")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 };
 
@@ -1652,14 +1683,8 @@ const ReceivePayment = ({
   return (
     <>
       {invoiceRequest && (
-        <div
-          className="fixed-container fx-centered fx-col box-pad-h"
-          style={{ zIndex: 9999999999 }}
-        >
-          <div
-            className="fx-centered fx-col sc-s-18"
-            style={{ width: "min(100%, 500px)" }}
-          >
+        <Overlay exit={exit} width={500}>
+          <div className="fx-centered fx-col">
             <QRCode
               style={{ width: "100%", aspectRatio: "1/1" }}
               size={500}
@@ -1680,23 +1705,16 @@ const ReceivePayment = ({
             </div>
           </div>
           {triggerNWC && (
-            <div className="fx-centered sc-s bg-sp box-pad-h-m box-pad-v-s">
+            <div className="fx-centered box-pad-h-m box-pad-v-s">
               <LoadingDots /> <p className="gray-c">{t("AJ99n5o")}</p>{" "}
             </div>
           )}
-        </div>
+        </Overlay>
       )}
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={500}>
         <div
-          className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v slide-up"
-          style={{ marginTop: "1rem", width: "min(100%, 500px)" }}
-          onClick={(e) => e.stopPropagation()}
+          className="fx-centered fx-col box-pad-h box-pad-v"
+          style={{ marginTop: "1rem" }}
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -1744,7 +1762,7 @@ const ReceivePayment = ({
             {isLoading ? <LoadingDots /> : t("AuOH50L")}
           </button>
         </div>
-      </div>
+      </Overlay>
     </>
   );
 };

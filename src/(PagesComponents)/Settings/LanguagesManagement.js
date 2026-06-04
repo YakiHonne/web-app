@@ -178,13 +178,13 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
         />
       )}
       <div
-        className={`fit-container fx-scattered fx-col pointer ${selectedTab === "lang" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
+        className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "lang" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
         style={{
-          borderBottom: "1px solid var(--very-dim-gray)",
+          // borderBottom: "1px solid var(--very-dim-gray)",
           gap: 0,
-          borderColor: "var(--very-dim-gray)",
+          // borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
-          borderRadius: 0,
+          // borderRadius: 0,
           overflow: "visible",
         }}
       >
@@ -250,18 +250,18 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
               {{ ...translationServicesEndpoints, ...customServicesPlan }[
                 selectedTransService
               ]?.plans && (
-                <div className="fx-scattered fit-container">
-                  <div>
-                    <p>{t("AFLFvbx")}</p>
-                    <p className="p-medium gray-c">{t("AsYLJGY")}</p>
+                  <div className="fx-scattered fit-container">
+                    <div>
+                      <p>{t("AFLFvbx")}</p>
+                      <p className="p-medium gray-c">{t("AsYLJGY")}</p>
+                    </div>
+                    <Select
+                      options={transServicesPlans}
+                      value={transServicePlan}
+                      setSelectedValue={handleTransServicesPlan}
+                    />
                   </div>
-                  <Select
-                    options={transServicesPlans}
-                    value={transServicePlan}
-                    setSelectedValue={handleTransServicesPlan}
-                  />
-                </div>
-              )}
+                )}
               {!(selectedTransService === "lt" && !transServicePlan) && (
                 <>
                   <label

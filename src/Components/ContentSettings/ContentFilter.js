@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Toggle from "@/Components/Toggle";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -13,11 +14,14 @@ import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "../Overlay";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function ContentFilter({
   selectedFilter,
   setSelectedFilter,
   type = 1,
+  barRef,
 }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -35,19 +39,27 @@ export default function ContentFilter({
     return [];
   }, [userAppSettings]);
   const [showFilters, setShowFilters] = useState(false);
+  const [dismissingFilter, setDismissingFilter] = useState(false);
+  const [filterPortalPos, setFilterPortalPos] = useState(null);
   const filtersRef = useRef(null);
+  const filterPanelRef = useRef(null);
+
+  const closeFilter = () => {
+    setDismissingFilter(true);
+    setTimeout(() => { setShowFilters(false); setDismissingFilter(false); }, 220);
+  };
 
   useEffect(() => {
+    if (!showFilters) return;
     const handleOffClick = (e) => {
-      e.stopPropagation();
-      if (filtersRef.current && !filtersRef.current.contains(e.target))
-        setShowFilters(false);
+      if (
+        filterPanelRef.current && !filterPanelRef.current.contains(e.target) &&
+        filtersRef.current && !filtersRef.current.contains(e.target)
+      ) closeFilter();
     };
     document.addEventListener("mousedown", handleOffClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOffClick);
-    };
-  }, [filtersRef]);
+    return () => document.removeEventListener("mousedown", handleOffClick);
+  }, [showFilters]);
 
   useEffect(() => {
     let checkFilter = localStorage.getItem(`${type}-selectedFilter`);
@@ -65,8 +77,13 @@ export default function ContentFilter({
   }, [filters]);
 
   const handleFilters = () => {
-    if (filters.length === 0) setShowAddFilter(true);
-    if (filters.length > 0) setShowFilters(!showFilters);
+    if (filters.length === 0) { setShowAddFilter(true); return; }
+    if (showFilters) { closeFilter(); return; }
+    if (barRef?.current) {
+      const bar = barRef.current.getBoundingClientRect();
+      setFilterPortalPos({ top: bar.bottom + 6, centerX: bar.left + bar.width / 2 });
+    }
+    setShowFilters(true);
   };
 
   const handleDeleteFilter = async (index) => {
@@ -119,22 +136,19 @@ export default function ContentFilter({
   return (
     <>
       {showAddFilter && (
-        <div
-          className="fixed-container box-pad-h fx-centered"
-          onClick={(e) => {
+        <Overlay
+
+          exit={(e) => {
             e.stopPropagation();
             setShowAddFilter(!showAddFilter);
             setFilterToEdit(false);
           }}
+          width={450}
+
         >
           <div
-            style={{
-              width: "min(100%,450px)",
-              position: "relative",
-              overflow: "scroll",
-              maxHeight: "75vh",
-            }}
-            className="sc-s bg-sp box-pad-h box-pad-v slide-up"
+
+            className="box-pad-h box-pad-v "
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -158,7 +172,7 @@ export default function ContentFilter({
               type={type}
             />
           </div>
-        </div>
+        </Overlay>
       )}
       <div
         style={{ position: "relative" }}
@@ -205,99 +219,98 @@ export default function ContentFilter({
               <p className="gray-c">|</p>
             </>
           )} */}
-          <Icon name="filter" />
+          <Icon v={2} name={iconsNames.slider_03} size={20} opacity=".5" />
         </div>
-        {showFilters && (
+        {showFilters && filterPortalPos && typeof document !== "undefined" && createPortal(
           <div
             style={{
-              position: "absolute",
-              top: "110%",
-              // right: "0",
-              backgroundColor: "var(--dim-gray)",
+              position: "fixed",
+              top: filterPortalPos.top,
+              left: filterPortalPos.centerX,
+              transform: "translateX(-50%)",
               width: "300px",
-              zIndex: 1000,
-              rowGap: "4px",
-              overflow: "visible",
+              zIndex: 99999,
             }}
-            className="sc-s-18 bg-sp fx-centered fx-col fx-start-v pointer drop-down slide-down"
-            onClick={() => setShowFilters(false)}
+
           >
-            <div
-              className="box-pad-h-s box-pad-v-s sc-s-18 fit-container fx-scattered"
-              style={{
-                backgroundColor: "var(--pale-gray)",
-                borderRadius: "0",
-                borderTopRightRadius: "var(--border-r-18)",
-                borderTopLeftRadius: "var(--border-r-18)",
-              }}
-            >
-              <p className="gray-c">{t("AMx89Qm")}</p>
-              <div onClick={() => setShowAddFilter(true)}>
-                <Icon name="plus-sign" />
+            <div ref={filterPanelRef} className={`bg-dropdown di-wrapper${dismissingFilter ? " dismissing" : ""}`}>
+              <div
+                className="box-pad-h-s box-pad-v-s fit-container fx-scattered"
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.06)",
+                  borderRadius: "16px 16px 0 0",
+                  borderBottom: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <p className="gray-c">{t("AMx89Qm")}</p>
+                <div onClick={(e) => { e.stopPropagation(); setShowAddFilter(true); }}>
+                  <Icon name="plus-sign" />
+                </div>
+              </div>
+              <div
+                className="fx-centered fx-col fx-start-v fit-container"
+                style={{ gap: 0, padding: ".25rem .45rem" }}
+              >
+                {filters.map((filter, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s option-no-scale`}
+                      style={{
+                        height: "35px",
+                        borderRadius: "var(--border-r-18)",
+                        overflow: "visible",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFilter({ ...filter, index });
+                        setShowFilters(false);
+                        localStorage.setItem(`${type}-selectedFilter`, "true");
+                      }}
+                    >
+                      <p className="p-maj p-one-line">{filter.title}</p>
+                      <div className="fx-centered">
+                        {selectedFilter.index === index && (
+                          <Icon name="check" size={24} />
+                        )}
+                        <OptionsDropdown
+                          vertical={false}
+                          options={[
+                            <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
+                              <Icon name="edit" />
+                              <p
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setShowAddFilter(true);
+                                  setFilterToEdit({ ...filter, index });
+                                }}
+                              >
+                                {t("AsXohpb")}
+                              </p>
+                            </div>,
+                            <hr style={{ margin: "4px 0", padding: "0 5px" }} />,
+                            <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
+                              <Icon name="trash" isColored />
+                              <p
+                                className="red-c"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteFilter(index);
+                                }}
+                              >
+                                {t("Almq94P")}
+                              </p>
+                            </div>,
+                          ]}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-            <div
-              className="fx-centered fx-col fx-start-v fit-container"
-              style={{ gap: 0, padding: ".25rem .45rem" }}
-            >
-              {filters.map((filter, index) => {
-                return (
-                  <div
-                    key={index}
-                    className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s option-no-scale`}
-                    style={{
-                      height: "35px",
-                      borderRadius: "var(--border-r-18)",
-                      overflow: "visible",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedFilter({ ...filter, index });
-                      setShowFilters(false);
-                      localStorage.setItem(`${type}-selectedFilter`, "true");
-                    }}
-                  >
-                    <p className="p-maj p-one-line">{filter.title}</p>
-                    <div className="fx-centered">
-                      {selectedFilter.index === index && (
-                        <Icon name="check" size={24} />
-                      )}
-                      <OptionsDropdown
-                        vertical={false}
-                        options={[
-                          <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
-                            <Icon name="edit" />
-                            <p
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowAddFilter(true);
-                                setFilterToEdit({ ...filter, index });
-                              }}
-                            >
-                              {t("AsXohpb")}
-                            </p>
-                          </div>,
-                          <hr style={{ margin: "4px 0", padding: "0 5px" }} />,
-                          <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
-                            <Icon name="trash" isColored />
-                            <p
-                              className="red-c"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteFilter(index);
-                              }}
-                            >
-                              {t("Almq94P")}
-                            </p>
-                          </div>,
-                        ]}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </>

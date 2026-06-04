@@ -11,6 +11,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 const getBulkListStats = (list) => {
   let toFollow = list.filter((item) => item.to_follow).length;
@@ -56,28 +57,28 @@ export default function ShowUsersList({
           let zapperData = getZaps(_) || {};
           return returnedPubkeys.includes(_)
             ? {
-                ...getParsedAuthor(returnedData.find((__) => __.pubkey === _)),
-                created_at: _.created_at,
-                zapContent: zapperData.content,
-                amount:
-                  extras.length > 0 && extrasType === "zap"
-                    ? zapperData.amount
-                    : 0,
-                reaction:
-                  extras.length > 0 && extrasType === "reaction"
-                    ? getReactions(_)
-                    : "",
-              }
+              ...getParsedAuthor(returnedData.find((__) => __.pubkey === _)),
+              created_at: _.created_at,
+              zapContent: zapperData.content,
+              amount:
+                extras.length > 0 && extrasType === "zap"
+                  ? zapperData.amount
+                  : 0,
+              reaction:
+                extras.length > 0 && extrasType === "reaction"
+                  ? getReactions(_)
+                  : "",
+            }
             : {
-                ...getEmptyuserMetadata(_),
-                created_at: 0,
-                zapContent: zapperData.content,
-                amount: zapperData.amount,
-                reaction:
-                  extras.length > 0 && extrasType === "reaction"
-                    ? getReactions(_)
-                    : "",
-              };
+              ...getEmptyuserMetadata(_),
+              created_at: 0,
+              zapContent: zapperData.content,
+              amount: zapperData.amount,
+              reaction:
+                extras.length > 0 && extrasType === "reaction"
+                  ? getReactions(_)
+                  : "",
+            };
         });
         tempUsers = tempUsers.sort((a, b) => b.amount - a.amount);
         setPeople(tempUsers);
@@ -139,30 +140,14 @@ export default function ShowUsersList({
   return (
     <>
       <ArrowUp />
-      <div
-        className="fixed-container fx-centered fx-start-v"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={550}>
         <div
-          className="fx-centered fx-col fx-start-v fx-start-h sc-s-18 bg-sp"
-          style={{
-            overflow: "scroll",
-            scrollBehavior: "smooth",
-            height: "100vh",
-            width: "min(100%, 550px)",
-            position: "relative",
-            borderRadius: 0,
-            gap: 0,
-          }}
+          className="fx-centered fx-col fx-start-v fx-start-h"
         >
           <div
-            className="fit-container fx-centered sticky"
-            style={{ borderBottom: "1px solid var(--very-dim-gray)" }}
+            className="fit-container fx-centered"
           >
-            <div className="fx-scattered fit-container box-pad-h">
+            <div className="fx-scattered fit-container box-pad-h box-pad-v-m">
               <h4 className="p-caps">{title}</h4>
               <div
                 className="close"
@@ -187,17 +172,6 @@ export default function ShowUsersList({
                   key={item.pubkey + item.name}
                 >
                   <div className="fx-centered fx-start-v">
-                    {extras.length > 0 && extrasType === "zap" && (
-                      <div
-                        className="fx-centered  round-icon"
-                        style={{ gap: "6px", border: "none" }}
-                      >
-                        <Icon name="bolt-bold" isColored />
-                        <span className="c1-c p-bold">
-                          <NumberShrink value={item.amount} />
-                        </span>
-                      </div>
-                    )}
                     {extras.length > 0 && extrasType === "reaction" && (
                       <div
                         className="fx-centered  round-icon"
@@ -226,12 +200,9 @@ export default function ShowUsersList({
                         {extras.length > 0 && extrasType === "zap" ? (
                           <>
                             {item.zapContent && (
-                              <div
-                                className="sc-s box-pad-h-m box-pad-v-s"
-                                style={{ border: "none" }}
-                              >
-                                <p className="p-medium">{item.zapContent}</p>
-                              </div>
+                              <p className="gray-c p-medium" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: "100%" }}>
+                                {item.zapContent}
+                              </p>
                             )}
                           </>
                         ) : (
@@ -242,7 +213,13 @@ export default function ShowUsersList({
                       </div>
                     </div>
                   </div>
-                  <div className="fx-centered">
+                  <div className="fx-centered" style={{ columnGap: "12px", flexShrink: 0 }}>
+                    {extras.length > 0 && extrasType === "zap" && item.amount != null && (
+                      <div className="fx-centered" style={{ columnGap: "4px" }}>
+                        <NumberShrink value={item.amount} />
+                        <p className="gray-c p-medium">sats</p>
+                      </div>
+                    )}
                     <Follow
                       toFollowKey={item.pubkey}
                       toFollowName={item.name}
@@ -259,7 +236,7 @@ export default function ShowUsersList({
           </div>
           {bulkList.length > 0 && <div className="box-pad-v"></div>}
         </div>
-      </div>
+      </Overlay>
       {bulkList.length > 0 && (
         <div
           className="fit-container fx-centered fx-col slide-up"

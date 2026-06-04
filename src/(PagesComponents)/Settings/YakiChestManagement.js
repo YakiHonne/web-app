@@ -15,10 +15,10 @@ export default function YakiChestManagement() {
     <>
       {showYakiChest && <LoginWithAPI exit={() => setShowYakiChest(false)} />}
       <div
-        className="fit-container fx-scattered box-pad-h-m box-pad-v-m pointer"
-        style={{
-          borderBottom: "1px solid var(--very-dim-gray)",
-        }}
+        className="sc-s fit-container fx-scattered box-pad-h-m box-pad-v-m pointer"
+      // style={{
+      //   borderBottom: "1px solid var(--very-dim-gray)",
+      // }}
       >
         <div className="fx-centered fx-start-h fx-start-v">
           <div className="box-pad-v-s">
@@ -30,7 +30,7 @@ export default function YakiChestManagement() {
           </div>
         </div>
         {yakiChestStats && isYakiChestLoaded && (
-          <div className="fx-centered" style={{minWidth: "max-content"}}>
+          <div className="fx-centered" style={{ minWidth: "max-content" }}>
             <p className="green-c p-medium">{t("A5aXNG9")}</p>
             <div
               style={{

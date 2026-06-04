@@ -14,7 +14,7 @@ import KindSix from "@/Components/KindSix";
 import { saveUsers } from "@/Helpers/DB";
 import { getSubData } from "@/Helpers/Controlers";
 import { straightUp } from "@/Helpers/Helpers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import KindOne from "@/Components/KindOne";
 import bannedList from "@/Content/BannedList";
 import { useRouter } from "next/router";
@@ -106,7 +106,7 @@ export default function StarterPack({ event }) {
   if (isLoading)
     return (
       <div className="fit-container fx-centered" style={{ height: "100vh" }}>
-        <LoadingLogo size={64} />
+        <Spinner size={32} />
       </div>
     );
 
@@ -376,7 +376,7 @@ const HomeFeed = ({ pubkeys }) => {
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "60vh" }}
         >
-          <LoadingLogo size={64} />
+          <Spinner size={32} />
         </div>
       )}
     </div>

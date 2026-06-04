@@ -3,24 +3,14 @@ import Link from "next/link";
 import AddYakiWallet from "@/Components/AddYakiWallet";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function AddWallet({ exit, refresh }) {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      style={{ zIndex: "1000" }}
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="sc-s box-pad-h box-pad-v fx-centered fx-col bg-sp"
-        style={{ width: "min(100%,500px)", position: "relative" }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -68,6 +58,6 @@ export default function AddWallet({ exit, refresh }) {
         </div>
         <p className="gray-c p-medium p-centered">{t("APcRx0f")}</p>
       </div>
-    </div>
+    </Overlay>
   );
 }

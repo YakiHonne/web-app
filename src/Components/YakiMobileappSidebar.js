@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 let ymaQR = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/yma-qr.png";
 
 export default function YakiMobileappSidebar() {
@@ -33,19 +34,10 @@ export default function YakiMobileappSidebar() {
 const MobileDemo = ({ exit }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered fx-col box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={800}>
       <div
-        style={{ width: "min(100%, 800px)", position: "relative", gap: "16px" }}
-        className="sc-s-18 box-pad-h-s box-pad-v-s bg-sp fx-centered fx-col fx-start-v"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        style={{ gap: "16px" }}
+        className="box-pad-h-s box-pad-v-s fx-centered fx-col fx-start-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -143,6 +135,6 @@ const MobileDemo = ({ exit }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

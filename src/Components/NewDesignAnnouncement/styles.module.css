@@ -1,0 +1,164 @@
+/* ─── Backdrop ─────────────────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: backdropIn 0.3s ease both;
+}
+
+.backdrop.exiting {
+  animation: backdropOut 0.28s ease forwards;
+}
+
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes backdropOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ─── Card — bg-dropdown style ────────────────────────────────────────────── */
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  background-color: rgba(20, 20, 20, 0.7);
+  background: rgba(20, 20, 20, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 4px 6px rgba(0, 0, 0, 0.25),
+    0 12px 24px rgba(0, 0, 0, 0.40),
+    0 32px 48px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  animation: cardIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.card.exiting {
+  animation: cardOut 0.26s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: scale(0.93) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes cardOut {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.95) translateY(6px); }
+}
+
+/* ─── Badge row — centered ─────────────────────────────────────────────────── */
+.badgeRow {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px 4px 9px;
+  background: rgba(238, 119, 0, 0.12);
+  border: 1px solid rgba(238, 119, 0, 0.32);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c1);
+  font-family: 'DM sans', sans-serif;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--c1);
+  flex-shrink: 0;
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.6); }
+}
+
+/* ─── Typography ───────────────────────────────────────────────────────────── */
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 10px;
+  letter-spacing: -0.015em;
+  font-family: 'DM sans', sans-serif;
+  text-align: center;
+}
+
+.brief {
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 20px;
+  font-family: 'DM sans', sans-serif;
+  text-align: center;
+}
+
+/* ─── SVG wrapper ──────────────────────────────────────────────────────────── */
+.svgWrapper {
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(14, 14, 18, 0.6);
+}
+
+.illustration {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* SVG morph animation is driven entirely by inline SVG <animate> elements */
+
+/* ─── CTA button — btn btn-normal ─────────────────────────────────────────── */
+.ctaButton {
+  width: 100%;
+  font-family: 'DM sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 0 24px;
+  height: 42px;
+  border-radius: var(--border-r-18, 10px);
+  cursor: pointer;
+  border: none;
+  background-color: var(--c1);
+  color: #fff;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  letter-spacing: 0.01em;
+}
+
+.ctaButton:hover {
+  opacity: 0.88;
+}
+
+.ctaButton:active {
+  transform: scale(0.97);
+  opacity: 0.75;
+}

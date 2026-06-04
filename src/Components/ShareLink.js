@@ -13,6 +13,7 @@ import { customHistory } from "@/Helpers/History";
 import QRCodeStyling from "qr-code-styling";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 function shuffleArray(arr) {
   const a = arr.slice(); // copy
@@ -125,7 +126,7 @@ export default function ShareLink({
   );
 }
 
-const SharingWindow = ({ path, title, description, exit }) => {
+export const SharingWindow = ({ path, title, description, exit }) => {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
@@ -159,16 +160,12 @@ const SharingWindow = ({ path, title, description, exit }) => {
 
   return (
     <>
-      <div className="fixed-container fx-centered box-pad-h">
+      <Overlay exit={exit} width={550} allowOverFlow={true}>
         <div
-          className=" fx-centered fx-col sc-s bg-sp "
+          className=" fx-centered fx-col "
           style={{
-            position: "relative",
-            width: "min(100%, 550px)",
             gap: 0,
-            overflow: "visible",
           }}
-          onClick={(e) => e.stopPropagation()}
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -360,7 +357,7 @@ const SharingWindow = ({ path, title, description, exit }) => {
             />
           )}
         </div>
-      </div>
+      </Overlay>
     </>
   );
 };
@@ -606,17 +603,9 @@ export const ShareQRCode = ({ path, exit }) => {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h box-pad-v"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-      style={{ zIndex: 100000 }}
-    >
+    <Overlay exit={exit}>
       <div
-        className="box-pad-h-m fx-centered fx-col sc-s box-pad-h box-pad-v bg-sp slide-up"
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h-m fx-centered fx-col box-pad-h box-pad-v slide-up"
       >
         <div
           className="box-pad-h-m box-pad-v-m fx-centered fx-col"
@@ -661,7 +650,7 @@ export const ShareQRCode = ({ path, exit }) => {
           {t("Acglhzb")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 };
 

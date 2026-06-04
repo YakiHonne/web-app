@@ -7,9 +7,8 @@ import { getUser } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import Link from "next/link";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { customHistory } from "@/Helpers/History";
-import { t } from "i18next";
 import { useTranslation } from "react-i18next";
 import Zap from "@/Components/Reactions/Zap";
 import useNoteStats from "@/Hooks/useNoteStats";
@@ -23,6 +22,8 @@ import {
   setEventFromCache,
 } from "@/Helpers/utils/eventsCache";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
+import { createPortal } from "react-dom";
 
 export default function NotificationCenterMain() {
   const {
@@ -39,8 +40,38 @@ export default function NotificationCenterMain() {
     addNewEvents,
   } = useNotifications();
   const { t } = useTranslation();
+  const [contentFromIndex, setContentFromIndex] = useState(0);
   const [contentFrom, setContentFrom] = useState("all");
   const notificationsRef = useRef(null);
+  const barRef = useRef(null);
+  const lastY = useRef(0);
+  const [barHidden, setBarHidden] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setBarHidden(y > lastY.current && y > 80);
+      lastY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const notificationsTypes = [
+    t("AR9ctVs"),
+    t("A8Da0of"),
+    t("AENEcn9"),
+    "Zaps",
+    t("A9TqNxQ"),
+  ];
+  const notificationsTypesKeys = [
+    "all",
+    "mentions",
+    "replies",
+    "zaps",
+    "following",
+  ];
+
   const filteredNotifications = useMemo(() => {
     return notifications.filter((_) => {
       if (contentFrom === "all") return true;
@@ -48,23 +79,16 @@ export default function NotificationCenterMain() {
     });
   }, [notifications, contentFrom]);
 
-  const switchContentSource = (source) => {
-    if (source === contentFrom) return;
-    setContentFrom(source);
+  const switchContentSource = (index) => {
+    if (index === contentFromIndex) return;
+    setContentFromIndex(index);
+    setContentFrom(notificationsTypesKeys[index]);
     notificationsRef.current?.scrollToIndex({
       top: 32,
       align: "start",
       behavior: "instant",
     });
   };
-
-  const notificationsTypes = [
-    { value: "all", display_name: t("AR9ctVs") },
-    { value: "mentions", display_name: t("A8Da0of") },
-    { value: "replies", display_name: t("AENEcn9") },
-    { value: "zaps", display_name: "Zaps" },
-    { value: "following", display_name: t("A9TqNxQ") },
-  ];
 
   const handleRefreshNotifications = () => {
     refreshNotifications();
@@ -78,16 +102,9 @@ export default function NotificationCenterMain() {
   return (
     <>
       <div
-        style={{
-          // width: "min(100%, 600px)",
-          height: "100%",
-          gap: 0,
-          position: "relative",
-        }}
+        style={{ height: "100%", gap: 0, position: "relative" }}
         className="fit-container fx-centered fx-col fx-start-h fx-start-v"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        onClick={(e) => e.stopPropagation()}
       >
         {newNotifications.length > 0 && (
           <div
@@ -95,119 +112,44 @@ export default function NotificationCenterMain() {
             style={{ position: "absolute", left: 0, top: "85px", zIndex: 200 }}
           >
             <div
-              className="sc-s  box-pad-h-s box-pad-v-s fx-scattered pointer"
-              style={{
-                backgroundColor: "var(--c1)",
-                border: "none",
-                gap: "10px",
-              }}
+              className="sc-s box-pad-h-s box-pad-v-s fx-scattered pointer"
+              style={{ backgroundColor: "var(--c1)", border: "none", gap: "10px" }}
               onClick={addNewEvents}
             >
               <UsersGroupProfilePicture
-                pubkeys={[
-                  ...new Set(newNotifications.map((note) => note.pubkey)),
-                ].slice(0, 3)}
+                pubkeys={[...new Set(newNotifications.map((note) => note.pubkey))].slice(0, 3)}
               />
-              <div
-                className="fx-centered"
-                style={{
-                  minWidth: "max-content",
-                  gap: "0",
-                }}
-              >
-                <p className="white-c">
-                  {t("AV9Dfnw", { count: newNotifications.length })}
-                </p>
+              <div className="fx-centered" style={{ minWidth: "max-content", gap: "0" }}>
+                <p className="white-c">{t("AV9Dfnw", { count: newNotifications.length })}</p>
                 <p className="white-c box-pad-h-s">&#8593;</p>
               </div>
             </div>
             <div style={{ width: "42px" }}></div>
           </div>
         )}
-        <div
-          className="fit-container sticky"
-          style={{
-            zIndex: 100,
-            top: "0",
-            padding: 0,
-          }}
-        >
-          <div className="fit-container fx-scattered box-pad-h box-pad-v-m">
-            <h3>{t("ASSFfFZ")}</h3>
-            <div className="fx-centered">
-              <div
-                className={`round-icon-small round-icon-tooltip ${
-                  isNotificationsLoading ? "if-disabled" : ""
-                }`}
-                data-tooltip={t("AkQpkMC")}
-                onClick={handleRefreshNotifications}
-              >
-                <Icon name="switch-arrows-v2" />
-              </div>
-              <OptionsDropdown
-                options={[
-                  <div
-                    className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
-                    onClick={() =>
-                      notReadNotifications ? handleReadAll() : handleUnreadAll()
-                    }
-                  >
-                    {notReadNotifications ? (
-                      <p>{t("A0qY0bf")}</p>
-                    ) : (
-                      <p>{t("A3eHBf0")}</p>
-                    )}
-                  </div>,
-                  <Link
-                    className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
-                    href={"/settings?tab=notifications"}
-                  >
-                    <p>{t("ABtsLBp")}</p>
-                  </Link>,
-                ]}
-              />
-            </div>
-          </div>
-          <div className="fit-container fx-even" style={{ gap: 0 }}>
-            {notificationsTypes.map((type) => (
-              <div
-                className={`list-item-b fx-centered fx  ${
-                  contentFrom === type.value ? "selected-list-item-b" : ""
-                }`}
-                style={{ padding: " .5rem 1rem" }}
-                onClick={() => switchContentSource(type.value)}
-              >
-                {type.display_name}
-              </div>
-            ))}
-          </div>
-          {isNotificationsLoading && filteredNotifications.length > 0 && (
-            <div>
-              <div
-                className="fit-container sc-s-18"
-                style={{
-                  width: "100%",
-                  position: "absolute",
-                  left: 0,
-                  top: "6.5rem",
-                  overflow: "hidden",
-                  zIndex: 211,
-                  height: "20px",
-                  border: "none",
-                  backgroundColor: "transparent",
-                }}
-              >
-                <div
-                  style={{ height: "2px", backgroundColor: "var(--c1)" }}
-                  className="v-bounce"
-                ></div>
-              </div>
-            </div>
-          )}
+
+        <div ref={barRef} className={`uplift-filter-bar${barHidden ? " uplift-filter-bar-hidden" : ""}${isNotificationsLoading ? " uplift-filter-bar-loading" : ""}`}>
+          <NotifTypeSelector
+            barRef={barRef}
+            types={notificationsTypes}
+            selectedIndex={contentFromIndex}
+            onSelect={switchContentSource}
+          />
+          <NotifOptionsButton
+            barRef={barRef}
+            isLoading={isNotificationsLoading}
+            notReadNotifications={notReadNotifications}
+            onRefresh={handleRefreshNotifications}
+            onReadAll={handleReadAll}
+            onUnreadAll={handleUnreadAll}
+          />
         </div>
+
+
         {filteredNotifications.length > 0 && (
           <Virtuoso
             style={{ width: "100%", height: "100vh" }}
+            useWindowScroll={true}
             totalCount={filteredNotifications.length}
             increaseViewportBy={200}
             overscan={200}
@@ -216,13 +158,14 @@ export default function NotificationCenterMain() {
             itemContent={(index) => {
               let event = filteredNotifications[index];
               return (
-                <Notification
-                  event={event}
-                  key={event.id}
-                  filterByType={contentFrom !== "all" ? contentFrom : ""}
-                  handleRead={() => handleRead(index)}
-                  handleUnRead={() => handleUnRead(index)}
-                />
+                <div className="fit-container" style={{ marginBottom: ".5rem" }} key={event.id}>
+                  <Notification
+                    event={event}
+                    filterByType={contentFrom !== "all" ? contentFrom : ""}
+                    handleRead={() => handleRead(index)}
+                    handleUnRead={() => handleUnRead(index)}
+                  />
+                </div>
               );
             }}
           />
@@ -234,7 +177,7 @@ export default function NotificationCenterMain() {
         ] && <ActivateNotification />}
         {isNotificationsLoading && filteredNotifications.length === 0 && (
           <div className="fx-centered fit-container" style={{ height: "70vh" }}>
-            <LoadingLogo size={96} />
+            <Spinner size={32} />
           </div>
         )}
       </div>
@@ -242,8 +185,131 @@ export default function NotificationCenterMain() {
   );
 }
 
+function NotifPortalPanel({ barRef, triggerRef, dismissing, onClose, children }) {
+  const panelRef = useRef(null);
+  const [pos, setPos] = useState(null);
+
+  useEffect(() => {
+    if (!barRef?.current) return;
+    const bar = barRef.current.getBoundingClientRect();
+    setPos({ top: bar.bottom + 6, centerX: bar.left + bar.width / 2 });
+  }, [barRef]);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (
+        panelRef.current && !panelRef.current.contains(e.target) &&
+        triggerRef.current && !triggerRef.current.contains(e.target)
+      ) onClose();
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [onClose, triggerRef]);
+
+  if (!pos) return null;
+
+  return createPortal(
+    <div style={{ position: "fixed", top: pos.top, left: pos.centerX, transform: "translateX(-50%)", width: "300px", zIndex: 99999 }}>
+      <div ref={panelRef} className={`bg-dropdown di-wrapper${dismissing ? " dismissing" : ""}`} style={{ maxHeight: "60vh", overflowY: "auto", overflowX: "hidden", borderRadius: "16px", padding: ".25rem .45rem" }}>
+        {children}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+function NotifTypeSelector({ barRef, types, selectedIndex, onSelect }) {
+  const [open, setOpen] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
+  const triggerRef = useRef(null);
+
+  const close = () => {
+    setDismissing(true);
+    setTimeout(() => { setOpen(false); setDismissing(false); }, 220);
+  };
+
+  return (
+    <div ref={triggerRef}>
+      <div
+        className="fx-scattered if pointer"
+        style={{ height: "40px", padding: "0 .5rem", border: "none" }}
+        onClick={(e) => { e.stopPropagation(); open ? close() : setOpen(true); }}
+      >
+        <p style={{ whiteSpace: "nowrap" }}>{types[selectedIndex]}</p>
+        <Icon name="arrow" />
+      </div>
+      {open && (
+        <NotifPortalPanel barRef={barRef} triggerRef={triggerRef} dismissing={dismissing} onClose={close}>
+          {types.map((label, index) => (
+            <div
+              key={index}
+              className="pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale"
+              style={{ borderRadius: "var(--border-r-18)" }}
+              onClick={(e) => { e.stopPropagation(); onSelect(index); close(); }}
+            >
+              <p>{label}</p>
+              {selectedIndex === index && <Icon name="check" size={24} />}
+            </div>
+          ))}
+        </NotifPortalPanel>
+      )}
+    </div>
+  );
+}
+
+function NotifOptionsButton({ barRef, isLoading, notReadNotifications, onRefresh, onReadAll, onUnreadAll }) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
+  const triggerRef = useRef(null);
+
+  const close = () => {
+    setDismissing(true);
+    setTimeout(() => { setOpen(false); setDismissing(false); }, 220);
+  };
+
+  return (
+    <div ref={triggerRef}>
+      <div
+        className={`fx-centered if option pointer${isLoading ? " if-disabled" : ""}`}
+        style={{ height: "40px", width: "40px", borderRadius: "50px", border: "none" }}
+        onClick={(e) => { e.stopPropagation(); open ? close() : setOpen(true); }}
+      >
+        <Icon v={2} name={iconsNames.more_vertical} size={20} opacity=".5" />
+      </div>
+      {open && (
+        <NotifPortalPanel barRef={barRef} triggerRef={triggerRef} dismissing={dismissing} onClose={close}>
+          <div
+            className="pointer fit-container box-pad-h-s box-pad-v-s fx-centered fx-start-h option-no-scale"
+            style={{ borderRadius: "var(--border-r-18)" }}
+            onClick={(e) => { e.stopPropagation(); onRefresh(); close(); }}
+          >
+            <p>{t("AkQpkMC")}</p>
+          </div>
+          <div
+            className="pointer fit-container box-pad-h-s box-pad-v-s fx-centered fx-start-h option-no-scale"
+            style={{ borderRadius: "var(--border-r-18)" }}
+            onClick={(e) => { e.stopPropagation(); notReadNotifications ? onReadAll() : onUnreadAll(); close(); }}
+          >
+            <p>{notReadNotifications ? t("A0qY0bf") : t("A3eHBf0")}</p>
+          </div>
+          <Link
+            className="pointer fit-container box-pad-h-s box-pad-v-s fx-centered fx-start-h option-no-scale"
+            style={{ borderRadius: "var(--border-r-18)" }}
+            href="/settings?tab=notifications"
+            onClick={close}
+          >
+            <p>{t("ABtsLBp")}</p>
+          </Link>
+        </NotifPortalPanel>
+      )}
+    </div>
+  );
+}
+
 const Notification = React.memo(
   ({ event, filterByType = false, handleRead, handleUnRead }) => {
+    const { t } = useTranslation()
     const userKeys = useSelector((state) => state.userKeys);
     const nostrAuthors = useSelector((state) => state.nostrAuthors);
     const user = useMemo(() => {
@@ -269,14 +335,14 @@ const Notification = React.memo(
 
       let filter = notificationsDetails.identifier
         ? [
-            {
-              "#d": [notificationsDetails.identifier],
-              authors: [notificationsDetails.id],
-              kinds: notificationsDetails.kinds
-                ? notificationsDetails.kinds
-                : undefined,
-            },
-          ]
+          {
+            "#d": [notificationsDetails.identifier],
+            authors: [notificationsDetails.id],
+            kinds: notificationsDetails.kinds
+              ? notificationsDetails.kinds
+              : undefined,
+          },
+        ]
         : [{ ids: [notificationsDetails.id] }];
 
       const sub = ndkInstance.subscribe(filter, {
@@ -303,12 +369,13 @@ const Notification = React.memo(
     if (!notificationsDetails) return;
     return (
       <div
-        className="fit-container fx-centered fx-start-v fx-start-h box-pad-v-m box-pad-h  pointer "
+        className="sc-s fit-container fx-centered fx-start-v fx-start-h box-pad-v-m box-pad-h  pointer "
         onClick={handleOnClick}
-        style={{
-          borderTop: "1px solid  var(--c1-side)",
-          borderBottom: "1px solid  var(--c1-side)",
-        }}
+        style={{ border: "none" }}
+      // style={{
+      //   borderTop: "1px solid  var(--c1-side)",
+      //   borderBottom: "1px solid  var(--c1-side)",
+      // }}
       >
         <div
           style={{ position: "relative", gap: "16px" }}
@@ -330,10 +397,10 @@ const Notification = React.memo(
           <div
             style={{
               position: "relative",
-              width: "max-content",
-              height: "max-content",
+              width: "52px",
+              height: "52px",
               border: !event.isRead ? "3px solid var(--c1)" : "none",
-              borderRadius: "var(--border-r-14)",
+              borderRadius: "50%",
             }}
           >
             <UserProfilePic
@@ -350,9 +417,9 @@ const Notification = React.memo(
               position: "absolute",
               right: "-5px",
               bottom: "-5px",
-              backgroundColor: "var(--white)",
+              backgroundColor: "var(--c1-side)",
               border: "none",
-              minWidth: "24px",
+              maxWidth: "24px",
               aspectRatio: "1/1",
             }}
           >

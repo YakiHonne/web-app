@@ -6,6 +6,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import { useDispatch, useSelector } from "react-redux";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 
 export default function AddArticleToCuration({ kind = 30004, d, exit }) {
   const dispatch = useDispatch();
@@ -110,17 +111,9 @@ export default function AddArticleToCuration({ kind = 30004, d, exit }) {
           mandatoryKind={kind}
         />
       )}
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={500}>
         <section
-          className="sc-s-18 bg-sp box-pad-h box-pad-v fx-centered"
-          style={{ width: "min(100%, 500px)", position: "relative" }}
-          onClick={(e) => e.stopPropagation()}
+          className="box-pad-h box-pad-v fx-centered"
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -218,7 +211,7 @@ export default function AddArticleToCuration({ kind = 30004, d, exit }) {
             </div> */}
           </div>
         </section>
-      </div>
+      </Overlay>
     </>
   );
 }

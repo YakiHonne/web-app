@@ -17,6 +17,7 @@ import LoginSignup from "@/Components/LoginSignup";
 import ProfilesPicker from "@/Components/ProfilesPicker";
 import { getNoteDraft, updateNoteDraft } from "@/Helpers/ClientHelpers";
 import { SelectTabs } from "../SelectTabs";
+import Overlay from "@/Components/Overlay";
 
 export default function Comments({
   noteTags = false,
@@ -92,7 +93,7 @@ export default function Comments({
       if (noteTags) {
         rootEventTag = noteTags.find(
           (tag) => (tag[0] === "a" || tag[0] === "e" || tag[0] === "A" || tag[0] === "E") &&
-                   tag.length > 3 && tag[3] === "root"
+            tag.length > 3 && tag[3] === "root"
         );
 
         if (rootEventTag && (rootEventTag[0] === "a" || rootEventTag[0] === "A")) {
@@ -125,7 +126,7 @@ export default function Comments({
           }
           if (rootEventTag) {
             const rootTagType = rootEventTag[0].toLowerCase();
-            
+
             if (rootTagType === "a" && rootEventTag[1]) {
               const addressParts = rootEventTag[1].split(":");
               if (addressParts.length >= 2) {
@@ -178,9 +179,9 @@ export default function Comments({
 
           let otherPTags = noteTags.filter(
             tag => tag[0] === "p" &&
-                   tag[1] !== replyPubkey &&
-                   tag[1] !== rootEventPubkey &&
-                   !tags.find(t => t[0] === "p" && t[1] === tag[1])
+              tag[1] !== replyPubkey &&
+              tag[1] !== rootEventPubkey &&
+              !tags.find(t => t[0] === "p" && t[1] === tag[1])
           );
           tags = [...tags, ...otherPTags];
 
@@ -370,10 +371,9 @@ export default function Comments({
   return (
     <>
       {showWarningBox && (
-        <div className="fixed-container fx-centered box-pad-h">
+        <Overlay exit={() => setShowWarningBox(false)} width={500}>
           <div
-            className="sc-s-18 bg-sp box-pad-h box-pad-v fx-centered"
-            style={{ width: "min(100%, 500px)" }}
+            className="box-pad-h box-pad-v fx-centered"
           >
             <div className="fx-centered fx-col">
               <h4>{t("AGNjoi1")}</h4>
@@ -404,10 +404,10 @@ export default function Comments({
               </div>
             </div>
           </div>
-        </div>
+        </Overlay>
       )}
       <div
-        className="fit-container fx-centered fx-start-v sc-s-18 bg-sp box-pad-h-m box-pad-v-m"
+        className="fit-container fx-centered fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
         // style={{ paddingTop: ".5rem" }}
         style={{
           overflow: "visible",
@@ -439,6 +439,7 @@ export default function Comments({
                   tabs={[t("AsXohpb"), t("Ao1TlO5")]}
                   selectedTab={selectedTab}
                   setSelectedTab={setSelectedTab}
+                  small
                 />
               </div>
               {selectedTab === 0 && (

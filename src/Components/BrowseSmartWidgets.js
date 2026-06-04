@@ -14,6 +14,7 @@ import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function BrowseSmartWidgets({ setWidget, exit }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -136,23 +137,14 @@ export default function BrowseSmartWidgets({ setWidget, exit }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered fx-start-v"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-      id="sw-browser"
-    >
+    <Overlay exit={exit} width={700} id="sw-browser">
       <div
-        className="fit-height overlay-container fx-centered fx-start-v fx-start-h fx-col sc-s-18"
+        className="fit-height overlay-container fx-centered fx-start-v fx-start-h fx-col"
         style={{
-          width: "min(100%,700px)",
           overflow: "scroll",
           borderRadius: "0",
           border: "1px solid var(--pale-gray)",
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div
           className="box-pad-h-m  fit-container fx-col fx-centered fx-start-h fx-start-v"
@@ -224,7 +216,7 @@ export default function BrowseSmartWidgets({ setWidget, exit }) {
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 

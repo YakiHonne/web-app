@@ -9,6 +9,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 const getBulkListStats = (list) => {
   let toFollow = list.filter((item) => item.to_follow).length;
@@ -91,21 +92,13 @@ export default function ShowPeople({ exit, list, type = "following" }) {
   return (
     <>
       <ArrowUp />
-      <div
-        className="fixed-container fx-centered fx-start-v"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={550}>
         <div
-          className="fx-centered fx-col fx-start-v fx-start-h sc-s-18 bg-sp"
+          className="fx-centered fx-col fx-start-v fx-start-h"
           style={{
             overflow: "scroll",
             scrollBehavior: "smooth",
             height: "100vh",
-            width: "min(100%, 550px)",
-            position: "relative",
             borderRadius: 0,
             gap: 0,
           }}
@@ -168,7 +161,7 @@ export default function ShowPeople({ exit, list, type = "following" }) {
             })}
           </div>
         </div>
-      </div>
+      </Overlay>
 
       {bulkList.length > 0 && (
         <div

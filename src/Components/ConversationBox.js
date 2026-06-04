@@ -13,8 +13,9 @@ import { copyText } from "@/Helpers/Helpers";
 import DeleteWarning from "./DeleteWarning";
 import RedPacket from "./RedPacket/RedPacketInit/RedPacket";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
 
-export function ConversationBox({ convo, back, noHeader = false }) {
+export function ConversationBox({ convo, back, noHeader = false, showBack = false }) {
   let conversationLength = convo.convo.length;
   const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
@@ -127,66 +128,80 @@ export function ConversationBox({ convo, back, noHeader = false }) {
         />
       )}
       <div
-        className="fit-container fx-scattered fx-col"
-        style={{ height: "100%", rowGap: 0 }}
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0,
+        }}
       >
-        {!noHeader && (
-          <div
-            className="fit-container fx-scattered box-pad-h-m box-pad-v-m"
-            style={{ position: "sticky", top: 0 }}
-          >
-            <div className="fx-centered">
-              <div className="round-icon desk-hide" onClick={back}>
-                <Icon name="arrow" transform="rotate(90deg)" />
-              </div>
-              <UserProfilePic
-                img={convo.picture}
-                size={40}
-                user_id={convo.pubkey}
-                mainAccountUser={false}
-              />
-              <div>
-                <p>
-                  {convo.display_name?.substring(0, 10) ||
-                    convo.name?.substring(0, 10) ||
-                    convo.pubkey.substring(0, 10)}
-                </p>
-                <p className="p-medium gray-c">
-                  @
-                  {convo.name?.substring(0, 10) ||
-                    convo.display_name?.substring(0, 10)}
-                </p>
-              </div>
-            </div>
-            {(userKeys.sec || window?.nostr?.nip44) && (
-              <div
-                className="fx-centered round-icon-tooltip"
-                data-tooltip={legacy ? t("Al6NH4U") : t("AfN9sMV")}
-              >
-                <p className="p-medium slide-left">{t("ATta6yb")}</p>
-                <div
-                  className={`toggle ${legacy ? "toggle-dim-gray" : ""} ${
-                    !legacy ? "toggle-green" : "toggle-dim-gray"
-                  }`}
-                  onClick={handleLegacyDMs}
-                ></div>
-              </div>
-            )}
-          </div>
-        )}
         <div
-          className="fx-centered fx-start-h fx-col box-pad-h-m box-pad-v-m fit-container"
+          className="box-pad-h-m box-pad-v-m"
           style={{
-            height: noHeader ? "100%" : "calc(100% - 160px)",
+            flex: 1,
+            minHeight: 0,
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
             overflow: "auto",
             paddingTop: 0,
           }}
           ref={convoContainerRef}
         >
+          {!noHeader && (
+            <div
+              className="fit-container fx-scattered box-pad-v-s "
+              style={{ position: "sticky", top: 0, zIndex: 1000, flexShrink: 0 }}
+            >
+              <div className="fit-container fx-scattered box-pad-h-s box-pad-v-s bg-dropdown">
+                <div className="fx-centered">
+                  <div
+                    className={showBack ? "round-icon" : "round-icon desk-hide"}
+                    onClick={back}
+                  >
+                    <Icon name="arrow" transform="rotate(90deg)" />
+                  </div>
+                  <UserProfilePic
+                    img={convo.picture}
+                    size={40}
+                    user_id={convo.pubkey}
+                    mainAccountUser={false}
+                  />
+                  <div>
+                    <p>
+                      {convo.display_name?.substring(0, 10) ||
+                        convo.name?.substring(0, 10) ||
+                        convo.pubkey.substring(0, 10)}
+                    </p>
+                    <p className="p-medium gray-c">
+                      @
+                      {convo.name?.substring(0, 10) ||
+                        convo.display_name?.substring(0, 10)}
+                    </p>
+                  </div>
+                </div>
+                {(userKeys.sec || window?.nostr?.nip44) && (
+                  <div
+                    className="fx-centered round-icon-tooltip"
+                    data-tooltip={legacy ? t("Al6NH4U") : t("AfN9sMV")}
+                  >
+                    <p className="p-medium slide-left">{t("ATta6yb")}</p>
+                    <div
+                      className={`toggle ${legacy ? "toggle-dim-gray" : ""} ${!legacy ? "toggle-green" : "toggle-dim-gray"
+                        }`}
+                      onClick={handleLegacyDMs}
+                    ></div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           {legacy && (
             <div
               className="fit-container"
-              style={{ position: "sticky", zIndex: 100, top: 0 }}
+              style={{ position: "sticky", zIndex: 100, top: "84px" }}
             >
               <div className="fit-container">
                 <div className="box-pad-h-m box-pad-v-m fx-centered fx-start-h fit-container sc-s-18">
@@ -211,25 +226,24 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                 style={
                   reply
                     ? {
-                        borderRight: convo.peer
-                          ? "2px solid var(--orange-main)"
-                          : "",
-                        borderLeft: !convo.peer
-                          ? "2px solid var(--orange-main)"
-                          : "",
-                        paddingRight: convo.peer ? "1rem" : "",
-                        paddingLeft: !convo.peer ? "1rem" : "",
-                        position: "relative",
-                        zIndex,
-                      }
+                      borderRight: convo.peer
+                        ? "2px solid var(--orange-main)"
+                        : "",
+                      borderLeft: !convo.peer
+                        ? "2px solid var(--orange-main)"
+                        : "",
+                      paddingRight: convo.peer ? "1rem" : "",
+                      paddingLeft: !convo.peer ? "1rem" : "",
+                      position: "relative",
+                      zIndex,
+                    }
                     : { position: "relative", zIndex }
                 }
               >
                 {reply && (
                   <div
-                    className={`convo-message fit-container  fx-centered fx-col ${
-                      !convo.peer ? "fx-start-v" : "fx-end-v"
-                    }`}
+                    className={`convo-message fit-container  fx-centered fx-col ${!convo.peer ? "fx-start-v" : "fx-end-v"
+                      }`}
                   >
                     {convo.peer && reply.self && (
                       <p className="p-italic p-medium orange-c">
@@ -263,51 +277,50 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                   </div>
                 )}
                 <div
-                  className={`convo-message fit-container  fx-centered ${
-                    !convo.peer ? "fx-start-h" : "fx-end-h"
-                  }`}
+                  className={`convo-message fit-container  fx-centered ${!convo.peer ? "fx-start-h" : "fx-end-h"
+                    }`}
                 >
                   {convo.peer && (
                     <div className="fx-centered">
                       <div className="convo-options slide-left">
                         {((convo.kind === 4 && convo.id) ||
                           (convo.kind === 14 && convo.giftWrapId)) && (
-                          <OptionsDropdown
-                            displayLeft={false}
-                            parent={convoContainerRef}
-                            options={[
-                              <div
-                                className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
-                                onClick={() =>
-                                  copyText(convo.raw_content, t("Ae9XEnt"))
-                                }
-                              >
-                                <Icon name="copy" />
-                                <p>{t("AUkCrth")}</p>
-                              </div>,
-                              <div
-                                className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
-                                onClick={() =>
-                                  handleSelectMessageToDelete(convo, isSelected)
-                                }
-                              >
-                                <Icon name="arrow" transform="rotate(90deg)" />
-                                <p>{t("AbqDpIH")}</p>
-                              </div>,
-                              <div
-                                className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
-                                onClick={() => setShowDelete(convo)}
-                              >
-                                <Icon name="trash" isColored />
-                                <p className=" red-c">
-                                  {convo.kind === 4
-                                    ? t("AUyfblR")
-                                    : t("AvhC4K1")}
-                                </p>
-                              </div>,
-                            ]}
-                          />
-                        )}
+                            <OptionsDropdown
+                              displayLeft={false}
+                              parent={convoContainerRef}
+                              options={[
+                                <div
+                                  className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                                  onClick={() =>
+                                    copyText(convo.raw_content, t("Ae9XEnt"))
+                                  }
+                                >
+                                  <Icon name="copy" />
+                                  <p>{t("AUkCrth")}</p>
+                                </div>,
+                                <div
+                                  className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                                  onClick={() =>
+                                    handleSelectMessageToDelete(convo, isSelected)
+                                  }
+                                >
+                                  <Icon name="arrow" transform="rotate(90deg)" />
+                                  <p>{t("AbqDpIH")}</p>
+                                </div>,
+                                <div
+                                  className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+                                  onClick={() => setShowDelete(convo)}
+                                >
+                                  <Icon name="trash" isColored />
+                                  <p className=" red-c">
+                                    {convo.kind === 4
+                                      ? t("AUyfblR")
+                                      : t("AvhC4K1")}
+                                  </p>
+                                </div>,
+                              ]}
+                            />
+                          )}
                       </div>
                       <div
                         className="convo-options round-icon slide-left"
@@ -326,35 +339,84 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                   )}
                   <div
                     className={`fx-centered ${convo.peer ? "fx-end-h" : "fx-start-h"}`}
+                    style={{ marginBottom: ".5rem" }}
                   >
-                    <div
-                      className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fx-start-h fx-start-v fx-col"
-                      style={{
-                        backgroundColor: convo.peer
-                          ? "var(--c1-side)"
-                          : "transparent",
-                        borderBottomLeftRadius: !convo.peer ? 0 : "inital",
-                        borderBottomRightRadius: convo.peer ? 0 : "inital",
-                        maxWidth: "min(100%, 500px)",
-                        minWidth: "300px",
-                        // width: "fit-content",
-                        border: convo.peer
-                          ? "none"
-                          : "1px solid var(--dim-gray)",
-                        overflow: "visible",
-                      }}
-                    >
-                      {(
-                        <div
-                          className="fit-container"
-                          style={{ lineHeight: "1.6" }}
-                        >
-                          {convo.content}
-                        </div>
-                      ) || <LoadingDots />}
+                    <div className={`fx-centered fx-col ${convo.peer ? "fx-end-v" : "fx-start-v"}`}>
                       <div
+                        className="sc-s box-pad-h-m box-pad-v-s fx-centered fx-start-h fx-start-v fx-col"
+                        style={{
+                          backgroundColor: convo.peer
+                            ? "var(--dim-gray)"
+                            : "transparent",
+                          borderBottomLeftRadius: !convo.peer ? 0 : "inital",
+                          borderBottomRightRadius: convo.peer ? 0 : "inital",
+                          maxWidth: "min(100%, 500px)",
+                          minWidth: "300px",
+                          // width: "fit-content",
+                          border: convo.peer
+                            ? "none"
+                            : "1px solid var(--dim-gray)",
+                          overflow: "visible",
+                        }}
+                      >
+                        {(
+                          <div
+                            className="fit-container"
+                            style={{ lineHeight: "1.6" }}
+                          >
+                            {convo.content}
+                          </div>
+                        ) || <LoadingDots />}
+                        {/* <div
                         style={{ minWidth: "max-content" }}
                         className="fx-centered fx-start-h round-icon-tooltip pointer fit-container"
+                        data-tooltip={
+                          convo.kind === 4 ? t("ALZCVV2") : t("ATta6yb")
+                        }
+                      >
+                        {convo.kind === 4 && (
+                          <>
+                            <div>
+                              <Icon name="unprotected" />
+                            </div>
+                            <p
+                              className="gray-c p-medium"
+                              style={{
+                                fontStyle: "italic",
+                                minWidth: "max-content",
+                              }}
+                            >
+                              <Date_
+                                toConvert={new Date(convo.created_at * 1000)}
+                                time={true}
+                              />
+                            </p>
+                          </>
+                        )}
+                        {convo.kind !== 4 && (
+                          <>
+                            <div>
+                              <Icon name="protected" isColored />
+                            </div>
+                            <p
+                              className="green-c p-medium"
+                              style={{
+                                fontStyle: "italic",
+                                minWidth: "max-content",
+                              }}
+                            >
+                              <Date_
+                                toConvert={new Date(convo.created_at * 1000)}
+                                time={true}
+                              />
+                            </p>
+                          </>
+                        )}
+                      </div> */}
+                      </div>
+                      <div
+                        style={{ minWidth: "max-content" }}
+                        className={`fx-centered round-icon-tooltip pointer fit-container ${!convo.peer ? "fx-start-h" : "fx-end-h"}`}
                         data-tooltip={
                           convo.kind === 4 ? t("ALZCVV2") : t("ATta6yb")
                         }
@@ -508,27 +570,30 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                   }}
                 />
                 <div className="fx-centered" style={{ padding: ".75rem" }}>
-                  <RedPacket
-                    receipient={convo.pubkey}
-                    onSuccess={handleRedPacket}
-                  />
                   <Emojis
                     position="right"
                     setEmoji={(data) =>
                       setMessage(message ? `${message} ${data} ` : `${data} `)
                     }
                   />
+                  <UploadFile
+                    round={false}
+                    setImageURL={(data) => setMessage(`${message} ${data}`)}
+                    setIsUploadsLoading={() => null}
+                  />
+
                   <div style={{ position: "relative" }}>
                     <div
                       className="p-small box-pad-v-s box-pad-h-s pointer fx-centered"
                       style={{
-                        padding: ".125rem .25rem",
-                        border: "1px solid var(--gray)",
+                        padding: ".07rem .125rem",
+                        border: "2px solid var(--gray)",
                         borderRadius: "6px",
                         backgroundColor: showGifs
                           ? "var(--black)"
                           : "transparent",
                         color: showGifs ? "var(--white)" : "",
+                        fontSize: "10px",
                       }}
                       onClick={() => {
                         setShowGifs(!showGifs);
@@ -547,18 +612,18 @@ export function ConversationBox({ convo, back, noHeader = false }) {
                       />
                     )}
                   </div>
-                  <UploadFile
-                    round={false}
-                    setImageURL={(data) => setMessage(`${message} ${data}`)}
-                    setIsUploadsLoading={() => null}
+                  <RedPacket
+                    receipient={convo.pubkey}
+                    onSuccess={handleRedPacket}
                   />
                 </div>
               </div>
               <div
-                className="round-icon"
+                style={{ height: "54px", width: "54px" }}
+                className="btn btn-normal fx-centered"
                 onClick={() => handleSendMessage({ isRedPacket: false })}
               >
-                <Icon name="send" size={24} />
+                <Icon v={2} name={iconsNames.navigation} transform="rotate(90deg)" size={24} />
               </div>
             </form>
           </div>

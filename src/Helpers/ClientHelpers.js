@@ -6,7 +6,8 @@ import LNBCInvoice from "@/Components/LNBCInvoice";
 import Nip19Parsing from "@/Components/Nip19Parsing";
 import VideoLoader from "@/Components/VideoLoader";
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, createContext, useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { localStorage_ } from "./utils/clientLocalStorage";
 import { nip19 } from "nostr-tools";
 import React from "react";
@@ -21,6 +22,191 @@ import { sha256 } from "@noble/hashes/sha2.js";
 import { checkJWT, decodeJWT } from "./Encryptions";
 import RedPacketBox from "@/Components/RedPacket/RedPacketBox";
 import Icon from "@/Components/Icon";
+import { useVideoThumbnail } from "@/Hooks/useVideoThumbnail";
+import Carousel from "@/Components/Carousel";
+
+const NoteMediaContext = createContext(null);
+
+const NoteTreeWithMedia = ({ children, mediaItems, pubkey, noBlur, sliderPortalId }) => {
+  const [galleryIndex, setGalleryIndex] = useState(null);
+  const [portalTarget, setPortalTarget] = useState(null);
+
+  useEffect(() => {
+    if (!sliderPortalId) return;
+    // The portal target div is rendered by KindOne after the Link — wait one tick for it to mount
+    const el = document.getElementById(sliderPortalId);
+    if (el) setPortalTarget(el);
+  }, [sliderPortalId]);
+
+  const slider = mediaItems.length > 0 && (
+    <MediaSlider mediaItems={mediaItems} onOpen={setGalleryIndex} pubkey={pubkey} noBlur={noBlur} />
+  );
+
+  return (
+    <NoteMediaContext.Provider value={{ mediaItems, openGallery: setGalleryIndex }}>
+      {children}
+      {!portalTarget && slider}
+      {portalTarget && createPortal(slider, portalTarget)}
+      {galleryIndex !== null && (
+        <Carousel
+          imgs={mediaItems}
+          selectedImage={galleryIndex}
+          back={(e) => {
+            if (e) { e.stopPropagation(); e.preventDefault(); }
+            setGalleryIndex(null);
+          }}
+        />
+      )}
+    </NoteMediaContext.Provider>
+  );
+};
+
+const MediaChip = ({ type, url, mediaIndex }) => {
+  const ctx = useContext(NoteMediaContext);
+  const iconName = type === "image" ? "image_01" : "monitor_play";
+  const label = type === "image" ? "image" : "video";
+  return (
+    <span
+      style={{ position: "relative", display: "inline-flex", verticalAlign: "middle" }}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (ctx?.openGallery) ctx.openGallery(mediaIndex);
+      }}
+    >
+      <span
+        className="pointer sticker sticker-normal sticker-small fx-centered"
+        style={{ gap: "4px", transform: "translateY(2px)", cursor: "pointer", color: "var(--gray-c)" }}
+      >
+        <Icon name={iconName} v={2} size={14} />
+        <p style={{ margin: 0 }}>{label}</p>
+      </span>
+    </span>
+  );
+};
+
+// 2.3 items visible: the partial third item hints there's more to scroll
+const SLIDE_WIDTH = "calc((100% - 8px) / 2.3)";
+
+const slideStyle = {
+  position: "relative",
+  flex: `0 0 ${SLIDE_WIDTH}`,
+  width: SLIDE_WIDTH,
+  aspectRatio: "9/16",
+  borderRadius: "var(--border-r-18)",
+  overflow: "hidden",
+  background: "var(--very-dim-gray)",
+  cursor: "pointer",
+};
+
+const VideoThumbnailSlide = ({ url, onOpen, index, onSlideClick }) => {
+  const thumbnail = useVideoThumbnail(url);
+  return (
+    <div
+      className="pointer"
+      style={slideStyle}
+      onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSlideClick(e, index); }}
+    >
+      {thumbnail ? (
+        <img
+          src={thumbnail}
+          alt="video"
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
+        />
+      ) : (
+        <div style={{ width: "100%", height: "100%", background: "var(--very-dim-gray)" }} />
+      )}
+      <div
+        className="fx-centered"
+        style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.3)" }}
+      >
+        <Icon name="play_circle" v={2} size={40} isColored={false} />
+      </div>
+    </div>
+  );
+};
+
+const ImageSlide = ({ url, onOpen, index, onSlideClick }) => (
+  <div
+    className="pointer"
+    style={slideStyle}
+    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSlideClick(e, index); }}
+  >
+    <img
+      src={url}
+      alt="media"
+      draggable={false}
+      onDragStart={(e) => e.preventDefault()}
+      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
+    />
+  </div>
+);
+
+const DRAG_THRESHOLD = 5;
+
+const MediaSlider = ({ mediaItems, onOpen }) => {
+  const trackRef = useRef(null);
+  const didDrag = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const onSlideClick = (_e, index) => {
+    if (didDrag.current) return;
+    onOpen(index);
+  };
+
+  const onMouseDown = (e) => {
+    didDrag.current = false;
+    startX.current = e.pageX;
+    scrollLeft.current = trackRef.current.scrollLeft;
+    trackRef.current.style.cursor = "grabbing";
+    trackRef.current.style.userSelect = "none";
+
+    const onMove = (ev) => {
+      const dx = ev.pageX - startX.current;
+      if (Math.abs(dx) >= DRAG_THRESHOLD) didDrag.current = true;
+      trackRef.current.scrollLeft = scrollLeft.current - dx;
+    };
+
+    const onUp = () => {
+      trackRef.current.style.cursor = "grab";
+      trackRef.current.style.userSelect = "";
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
+  return (
+    <div style={{ marginTop: "12px", width: "100%" }}>
+      <div
+        ref={trackRef}
+        onMouseDown={onMouseDown}
+        style={{
+          display: "flex",
+          gap: "8px",
+          overflowX: "auto",
+          cursor: "grab",
+          paddingBottom: "4px",
+          scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        {mediaItems.map((item, index) =>
+          item.type === "video" ? (
+            <VideoThumbnailSlide key={index} url={item.url} onOpen={onOpen} index={index} onSlideClick={onSlideClick} />
+          ) : (
+            <ImageSlide key={index} url={item.url} onOpen={onOpen} index={index} onSlideClick={onSlideClick} />
+          )
+        )}
+      </div>
+    </div>
+  );
+};
 
 let nostrClients = [
   "nstart.me",
@@ -66,6 +252,7 @@ export function getNoteTree(
   wordsCount = 150,
   pubkey,
   noBlur = false,
+  sliderPortalId = null,
 ) {
   if (!note) return "";
   let tree = note
@@ -74,7 +261,28 @@ export function getNoteTree(
     .flatMap((segment) => (segment === "\n" ? "\n" : segment.split(/\s+/)))
     .filter(Boolean);
 
+  // First pass: count total media items to decide whether to use chip mode
+  let totalMedia = 0;
+  for (let i = 0; i < (isCollapsedNote ? wordsCount : tree.length); i++) {
+    const el_ = tree[i]?.replaceAll("nostr:", "") || "";
+    if (
+      (/(https?:\/\/)/i.test(el_) || el_.startsWith("data:image")) &&
+      !el_.includes("https://yakihonne.com/smart-widget-checker?naddr=") &&
+      !minimal
+    ) {
+      const cleanUrl_ = el_.replace(/[.,|']+$/, "");
+      if (!isVid(cleanUrl_)) {
+        const check_ = isImageUrl(cleanUrl_);
+        if (check_?.type === "image" || check_?.type === "video") totalMedia++;
+      }
+    }
+  }
+  const useChipMode = totalMedia > 1;
+
   let finalTree = [];
+  let mediaItems = [];
+  // track indices in finalTree where chips were inserted, keyed by mediaIndex
+  let chipPositions = [];
   let maxChar = isCollapsedNote ? wordsCount : tree.length;
   for (let i = 0; i < maxChar; i++) {
     const el = tree[i].replaceAll("nostr:", "");
@@ -110,11 +318,39 @@ export function getNoteTree(
           const checkURL = isImageUrl(cleanUrl);
           if (checkURL) {
             if (checkURL.type === "image") {
-              finalTree.push(<IMGElement src={cleanUrl} key={key} />);
+              if (useChipMode) {
+                const mediaIndex = mediaItems.length;
+                mediaItems.push({ url: cleanUrl, type: "image" });
+                chipPositions.push({ mediaIndex, treeIndex: finalTree.length });
+                finalTree.push(
+                  <MediaChip
+                    key={key}
+                    type="image"
+                    url={cleanUrl}
+                    mediaIndex={mediaIndex}
+                  />,
+                );
+              } else {
+                finalTree.push(<IMGElement src={cleanUrl} key={key} />);
+              }
             } else if (checkURL.type === "video") {
-              finalTree.push(
-                <VideoLoader pubkey={pubkey} key={key} src={cleanUrl} />,
-              );
+              if (useChipMode) {
+                const mediaIndex = mediaItems.length;
+                mediaItems.push({ url: cleanUrl, type: "video" });
+                chipPositions.push({ mediaIndex, treeIndex: finalTree.length });
+                finalTree.push(
+                  <MediaChip
+                    key={key}
+                    type="video"
+                    url={cleanUrl}
+                    mediaIndex={mediaIndex}
+                  />,
+                );
+              } else {
+                finalTree.push(
+                  <VideoLoader pubkey={pubkey} key={key} src={cleanUrl} />,
+                );
+              }
             }
           } else if (
             cleanUrl.includes(".mp3") ||
@@ -303,7 +539,42 @@ export function getNoteTree(
     }
   }
 
-  return mergeConsecutivePElements(finalTree, pubkey, noBlur);
+  // Find which chips are "trailing" — all media after the last non-media non-br token
+  let trailingMediaIndices = new Set();
+  if (useChipMode && chipPositions.length > 0) {
+    // Walk finalTree backwards; collect trailing br/MediaChip entries
+    let lastNonMediaIdx = -1;
+    for (let i = finalTree.length - 1; i >= 0; i--) {
+      const el = finalTree[i];
+      const isChip = el?.type === MediaChip;
+      const isBr = el?.type === "br";
+      if (!isChip && !isBr) {
+        lastNonMediaIdx = i;
+        break;
+      }
+    }
+    for (const cp of chipPositions) {
+      if (cp.treeIndex > lastNonMediaIdx) {
+        trailingMediaIndices.add(cp.mediaIndex);
+      }
+    }
+  }
+
+  // Rebuild finalTree replacing trailing chips with hidden placeholders
+  const prunedTree = finalTree.map((el) => {
+    if (el?.type === MediaChip && trailingMediaIndices.has(el.props.mediaIndex)) {
+      return null;
+    }
+    return el;
+  }).filter(Boolean);
+
+  const mergedTree = mergeConsecutivePElements(prunedTree, pubkey, noBlur);
+  if (mediaItems.length === 0) return mergedTree;
+  return (
+    <NoteTreeWithMedia mediaItems={mediaItems} pubkey={pubkey} noBlur={noBlur} sliderPortalId={sliderPortalId}>
+      {mergedTree}
+    </NoteTreeWithMedia>
+  );
 }
 
 export function getComponent(children) {
@@ -313,9 +584,8 @@ export function getComponent(children) {
     if (typeof children[i] === "string") {
       let all = children[i].toString().split(" ");
       for (let child of all) {
-        let key = `${i}-${child}-${
-          Date.now() / Math.floor(Math.random() * 100000)
-        }`;
+        let key = `${i}-${child}-${Date.now() / Math.floor(Math.random() * 100000)
+          }`;
         let child_ = getNIP21FromURL(child.toString());
         if (child_.startsWith("nostr:")) {
           try {
@@ -479,12 +749,14 @@ export function getParsedNote(
     if (event.kind === 1 || event.kind === 1111) {
       let note_tree = parseContent
         ? getNoteTree(
-            event.content,
-            undefined,
-            isCollapsedNote_,
-            undefined,
-            event.pubkey,
-          )
+          event.content,
+          undefined,
+          isCollapsedNote_,
+          undefined,
+          event.pubkey,
+          false,
+          `slider-${event.id}`,
+        )
         : event.content;
 
       return {
@@ -737,22 +1009,22 @@ const checkForNewAddedSettings = (prevSettings) => {
       prevSettings.reactionsSettings !== undefined
         ? prevSettings.reactionsSettings
         : [
-            { reaction: "likes", status: true },
-            { reaction: "replies", status: true },
-            { reaction: "repost", status: true },
-            { reaction: "quote", status: true },
-            { reaction: "zap", status: true },
-          ],
+          { reaction: "likes", status: true },
+          { reaction: "replies", status: true },
+          { reaction: "repost", status: true },
+          { reaction: "quote", status: true },
+          { reaction: "zap", status: true },
+        ],
     notification:
       prevSettings.notification !== undefined
         ? prevSettings.notification
         : [
-            { tab: "mentions", isHidden: false },
-            { tab: "reactions", isHidden: false },
-            { tab: "reposts", isHidden: false },
-            { tab: "zaps", isHidden: false },
-            { tab: "following", isHidden: false },
-          ],
+          { tab: "mentions", isHidden: false },
+          { tab: "reactions", isHidden: false },
+          { tab: "reposts", isHidden: false },
+          { tab: "zaps", isHidden: false },
+          { tab: "following", isHidden: false },
+        ],
   };
   return settings;
 };
@@ -1241,9 +1513,8 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
           typeof tempPrevChildren[tempPrevChildren.length - 1] === "string" &&
           typeof element.props.children === "string"
         ) {
-          tempPrevChildren[tempPrevChildren.length - 1] = `${
-            tempPrevChildren[tempPrevChildren.length - 1]
-          } ${element.props.children}`;
+          tempPrevChildren[tempPrevChildren.length - 1] = `${tempPrevChildren[tempPrevChildren.length - 1]
+            } ${element.props.children}`;
         }
         if (
           typeof tempPrevChildren[tempPrevChildren.length - 1] !== "string" &&

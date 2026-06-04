@@ -1,7 +1,8 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
 import BookmarkEvent from "@/Components/BookmarkEvent";
-import ShareLink from "@/Components/ShareLink";
+import ShareLink, { SharingWindow } from "@/Components/ShareLink";
 import { copyText, getLinkFromAddr } from "@/Helpers/Helpers";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
@@ -63,6 +64,7 @@ export default function EventOptions({
   const [selectedScheduleDate, setSelectedScheduleDate] = useState(
     event.created_at,
   );
+  const [showSharing, setShowSharing] = useState(false);
 
   const rawEvent = {
     id: event.id,
@@ -75,8 +77,8 @@ export default function EventOptions({
   };
   let path = getLinkFromAddr(
     event.naddr ||
-      event.nEvent ||
-      (event.pubkey && nip19.npubEncode(event.pubkey)),
+    event.nEvent ||
+    (event.pubkey && nip19.npubEncode(event.pubkey)),
     event.kind,
   );
   const postAsNote = (
@@ -225,7 +227,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="share-icon" size={24} />
+      <Icon name="share-v2" size={24} />
       <p>{t("A4A5psW")}</p>
     </div>
   );
@@ -375,13 +377,12 @@ export default function EventOptions({
   );
 
   const shareLink = (
-    <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
-      <ShareLink
-        label={t("A6enIP3")}
-        title={event.title || userProfile.display_name || userProfile.name}
-        description={event.description || event.about || event.content || ""}
-        path={path}
-      />
+    <div
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+      onClick={(e) => { e.stopPropagation(); setShowSharing(true); }}
+    >
+      <Icon name="share-v2" size={24} />
+      <p>{t("A6enIP3")}</p>
     </div>
   );
 
@@ -718,6 +719,14 @@ export default function EventOptions({
 
   return (
     <>
+      {showSharing && (
+        <SharingWindow
+          path={path}
+          title={event.title || userProfile.display_name || userProfile.name}
+          description={event.description || event.about || event.content || ""}
+          exit={() => setShowSharing(false)}
+        />
+      )}
       {showEditVideo && (
         <AddVideo exit={() => setShowEditVideo(false)} event={event} />
       )}
@@ -788,13 +797,13 @@ export default function EventOptions({
         deleteEvent ||
         showRawEvent
       ) && (
-        <OptionsDropdown
-          options={optionsItem}
-          border={border}
-          minWidth={180}
-          vertical={false}
-        />
-      )}
+          <OptionsDropdown
+            options={optionsItem}
+            border={border}
+            minWidth={180}
+            vertical={false}
+          />
+        )}
     </>
   );
 }
@@ -807,7 +816,9 @@ const BroadcastEvent = ({ event }) => {
   const isProtected = event.isProtected && userKeys.pub !== event.pubkey;
   const userFavRelays = useSelector((state) => state.userFavRelays);
   const [showRelays, setShowRelays] = useState(false);
+  const [subPos, setSubPos] = useState(null);
   const hideTimeout = useRef(null);
+  const rowRef = useRef(null);
 
   const allRelays = useMemo(() => {
     return [...new Set([...userRelays, ...(userFavRelays?.relays || [])])];
@@ -823,17 +834,20 @@ const BroadcastEvent = ({ event }) => {
       content: event.content,
       sig: event.sig,
     };
-    dispatch(
-      setToPublish({
-        eventInitEx: rawEvent,
-        allRelays: [relay],
-      }),
-    );
+    dispatch(setToPublish({ eventInitEx: rawEvent, allRelays: [relay] }));
     setShowRelays(false);
+  };
+
+  const updateSubPos = () => {
+    if (rowRef.current) {
+      const r = rowRef.current.getBoundingClientRect();
+      setSubPos({ top: r.top + r.height / 2, right: window.innerWidth - r.left + 6 });
+    }
   };
 
   const handleMouseEnter = () => {
     clearTimeout(hideTimeout.current);
+    updateSubPos();
     setShowRelays(true);
   };
 
@@ -845,126 +859,86 @@ const BroadcastEvent = ({ event }) => {
 
   return (
     <div
-      style={{
-        position: "relative",
-        cursor: isProtected ? "not-allowed" : "pointer",
-      }}
+      ref={rowRef}
+      style={{ cursor: isProtected ? "not-allowed" : "pointer" }}
       className="pointer fx-scattered fit-container box-pad-h-s box-pad-v-s option-no-scale"
       onClick={(e) => {
         e.stopPropagation();
-        setShowRelays((prev) => !prev);
+        if (showRelays) { setShowRelays(false); return; }
+        updateSubPos();
+        setShowRelays(true);
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Dropdown */}
-      {showRelays && !isProtected && (
+      <div className="fx-centered">
+        <Icon name="republish" size={24} />
+        <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
+      </div>
+      <Icon name="arrow" />
+
+      {showRelays && subPos && typeof document !== "undefined" && createPortal(
         <div
           style={{
-            position: "absolute",
-            top: "50%",
-            left: "-5px",
-            minWidth: "max-content",
-            transform: "translate(-100%, -50%)",
+            position: "fixed",
+            top: subPos.top,
+            right: subPos.right,
+            transform: "translateY(-50%)",
+            minWidth: "220px",
             maxHeight: "400px",
             overflowY: "auto",
-            gap: 0,
-            zIndex: 100,
+            zIndex: 9999999,
+            borderRadius: "16px",
           }}
-          className="fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-s hover-bridge"
+          className="fx-centered fx-col fx-start-h fx-start-v bg-dropdown box-pad-h-s box-pad-v-s dynamic-island-dropdown"
+          onMouseEnter={() => clearTimeout(hideTimeout.current)}
+          onMouseLeave={handleMouseLeave}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}
         >
-          {/* Hover bridge */}
-          <div
-            style={{
-              position: "absolute",
-              right: "-10px",
-              top: 0,
-              width: "10px",
-              height: "100%",
-            }}
-          ></div>
-
-          <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
-
-          {userFavRelays?.relays.map((_) => (
-            <div
-              key={_}
-              className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
-              onClick={() => handleRepublish(_)}
-            >
-              <div style={{ position: "relative" }}>
-                <RelayImage url={_} size={30} />
-                <div
-                  style={{
-                    position: "absolute",
-                    right: "-10px",
-                    bottom: "-10px",
-                    zIndex: 10,
-                    scale: ".65",
-                  }}
-                >
-                  <div
-                    className="round-icon-small round-icon-tooltip"
-                    data-tooltip={t("Ay0vA4Z")}
-                    style={{
-                      backgroundColor: "var(--white)",
-                      border: "none",
-                    }}
-                  >
-                    <Icon name="star" size={24} />
-                  </div>
-                </div>
-              </div>
-              <p className="p-one-line">{_}</p>
+          {isProtected ? (
+            <div className="fx-centered fx-col box-pad-h-s box-pad-v-m">
+              <Icon name="protected-2" size={24} />
+              <p className="gray-c p-centered">{t("AqqpEOw")}</p>
             </div>
-          ))}
-
-          {userRelays.map((_) => {
-            if (!userFavRelays?.relays.includes(_))
-              return (
+          ) : (
+            <>
+              <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
+              {userFavRelays?.relays.map((_) => (
                 <div
                   key={_}
                   className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
                   onClick={() => handleRepublish(_)}
                 >
-                  <RelayImage url={_} size={30} />
+                  <div style={{ position: "relative" }}>
+                    <RelayImage url={_} size={30} />
+                    <div style={{ position: "absolute", right: "-10px", bottom: "-10px", zIndex: 10, scale: ".65" }}>
+                      <div className="round-icon-small round-icon-tooltip" data-tooltip={t("Ay0vA4Z")} style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "none" }}>
+                        <Icon name="star" size={24} />
+                      </div>
+                    </div>
+                  </div>
                   <p className="p-one-line">{_}</p>
                 </div>
-              );
-          })}
-        </div>
+              ))}
+              {userRelays.map((_) =>
+                !userFavRelays?.relays.includes(_) ? (
+                  <div
+                    key={_}
+                    className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+                    onClick={() => handleRepublish(_)}
+                  >
+                    <RelayImage url={_} size={30} />
+                    <p className="p-one-line">{_}</p>
+                  </div>
+                ) : null
+              )}
+            </>
+          )}
+        </div>,
+        document.body
       )}
-
-      {/* Protected state */}
-      {showRelays && isProtected && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "-5px",
-            width: "200px",
-            transform: "translate(-100%, -50%)",
-            maxHeight: "600px",
-            overflow: "auto",
-            gap: 0,
-            zIndex: 100,
-          }}
-          className="fx-centered fx-col fx-start-h fx-start-v sc-s-18 bg-sp box-pad-h-s box-pad-v-m"
-        >
-          <div className="fx-centered fx-col">
-            <Icon name="protected-2" size={24} />
-            <p className="gray-c p-centered">{t("AqqpEOw")}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Main button */}
-      <div className="fx-centered">
-        <Icon name="republish" size={24} />
-        <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
-      </div>
-
-      <Icon name="arrow" />
     </div>
   );
 };

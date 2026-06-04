@@ -267,7 +267,7 @@ function Nip19Parsing({ addr, minimal = false }) {
           <>
             {(event?.kind === 1 || event?.kind === 1111) && (
               <div
-                className="fit-container sc-s-18 "
+                className="fit-container sc-s "
                 style={{
                   marginTop: ".5rem",
                   backgroundColor: "var(--c1-side)",
@@ -287,7 +287,7 @@ function Nip19Parsing({ addr, minimal = false }) {
                   backgroundColor: "var(--c1-side)",
                   marginTop: ".5rem",
                 }}
-                className="fit-container box-pad-h box-pad-v sc-s-18 fx-centered"
+                className="fit-container box-pad-h box-pad-v sc-s fx-centered"
               >
                 <p className="p-medium gray-c">{t("AgfmpuR")}</p>
                 <LoadingDots />
@@ -299,7 +299,7 @@ function Nip19Parsing({ addr, minimal = false }) {
                   backgroundColor: "var(--c1-side)",
                   marginTop: ".5rem",
                 }}
-                className="fit-container box-pad-h-m box-pad-v-m sc-s-18 fx-centered"
+                className="fit-container box-pad-h-m box-pad-v-m sc-s fx-centered"
               >
                 <p className="p-medium gray-c">{t("AQeXcer")}</p>
               </div>

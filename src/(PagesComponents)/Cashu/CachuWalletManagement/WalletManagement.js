@@ -13,6 +13,7 @@ import { useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { SelectTabsNoIndex } from "@/Components/SelectTabsNoIndex";
 import axios from "axios";
+import Overlay from "@/Components/Overlay";
 
 export default function WalletManagement({
   exit,
@@ -144,24 +145,9 @@ export default function WalletManagement({
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={650}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp "
-        style={{
-          position: "relative",
-          width: "min(100%,650px)",
-          maxHeight: "70vh",
-          overflow: "scroll",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -320,6 +306,6 @@ export default function WalletManagement({
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

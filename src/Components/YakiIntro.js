@@ -4,6 +4,7 @@ import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch } from "react-redux";
 import DonationBoxSuggestionCards from "./SuggestionsCards/DonationBoxSuggestionCards";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 let ymaQR =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/yma-qr.png";
 
@@ -38,47 +39,21 @@ const content = [
   },
 ];
 
-const updatesList = [
+export const updatesList = [
   "Resolved the image pasting overlay issue where pasted images were hidden during note creation.",
   "Fixed fetching articles, videos and curations with Yakihonne NIP-05 URL.",
   "Added icons to the BLOSSOM options for a clearer and more intuitive interface.",
 ];
 
 export default function YakiIntro() {
+  return null;
+}
+
+export function YakiIntroBanner() {
   const [swipe, setSwipe] = useState(false);
-  const [up, setUp] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = (e) => {
-      let el = document.querySelector(".main-page-nostr-container");
-      if (!el) return;
-      if (el.scrollTop >= 600) setUp(true);
-      else setUp(false);
-    };
-    window.addEventListener("scroll", handleScroll, true);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <>
       {swipe && <Banner exit={() => setSwipe(false)} />}
-      <div
-        style={{
-          position: "fixed",
-          right: "38px",
-          bottom: up ? "94px" : "16px",
-          transition: ".2s ease-in-out",
-          zIndex: "1000000",
-        }}
-        className="fx-centered fx-end-h"
-        id="floating-info"
-      >
-        {!swipe && (
-          <div className="slide-right" onClick={() => setSwipe(!swipe)}>
-            <Icon name="info" size={24} isColored />
-          </div>
-        )}
-      </div>
     </>
   );
 }
@@ -95,10 +70,9 @@ const MobileAppQR = ({ exit }) => {
     );
   };
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={350}>
       <div
-        style={{ width: "min(100%, 350px)", position: "relative" }}
-        className="fx-centered fx-col box-pad-h box-pad-v sc-s-18 bg-sp"
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -126,31 +100,19 @@ const MobileAppQR = ({ exit }) => {
           <Icon name="copy" size={24} />
         </div>
       </div>
-    </div>
+    </Overlay>
   );
+};
+
+export const ChangelogBanner = ({ exit }) => {
+  return <Banner exit={exit} />;
 };
 
 const Banner = ({ exit }) => {
   return (
-    <div
-      style={{
-        position: "fixed",
-        right: "0",
-        top: 0,
-        transition: ".2s ease-in-out",
-        width: "100vw",
-        height: "100vh",
-        zIndex: "100000000",
-      }}
-      className="fixed-container fx-centered fx-col fx-end-v  box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={400}>
       <div
         className="fx-scattered box-pad-v-s"
-        style={{ width: "min(100%, 400px)" }}
       >
         <h4>Updates news</h4>
         <div className="close" style={{ position: "static" }} onClick={exit}>
@@ -165,10 +127,7 @@ const Banner = ({ exit }) => {
           backgroundColor: "transparent",
           border: "none",
         }}
-        className="sc-s-18 bg-img cover-bg fx-centered fx-start-v "
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="bg-img cover-bg fx-centered fx-start-v "
       >
         <div
           className="fit-container fit-height fx-centered fx-col fx-start-h fx-start-v box-pad-h-s box-pad-v-s"
@@ -252,6 +211,6 @@ const Banner = ({ exit }) => {
           <DonationBoxSuggestionCards padding={false} />
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

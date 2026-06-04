@@ -9,6 +9,7 @@ import { getSubData, InitEvent } from "@/Helpers/Controlers";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function AddCuration({ event, exit }) {
   const dispatch = useDispatch();
@@ -148,17 +149,10 @@ export default function AddCuration({ event, exit }) {
           exit={() => setShowPostsList(false)}
         />
       )}
-      <div
-        className="fixed-container box-pad-h-h fx-centered"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={600}>
         <section
-          className=" fx-centered fx-col sc-s-18 bg-sp"
-          style={{ rowGap: 0, margin: ".5rem 0", width: "min(100%, 600px)" }}
-          onClick={(e) => e.stopPropagation()}
+          className=" fx-centered fx-col"
+          style={{ rowGap: 0, margin: ".5rem 0" }}
         >
           <div className="fit-container fx-centered fx-col">
             <div
@@ -332,7 +326,7 @@ export default function AddCuration({ event, exit }) {
             </button>
           </div>
         </section>
-      </div>
+      </Overlay>
     </>
   );
 }
@@ -473,35 +467,19 @@ const AddArticlesToCuration = ({
   };
   if (!isLoaded)
     return (
-      <div
-        className="fixed-container fx-centered "
-        style={{ zIndex: "100000" }}
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit}>
         <LoadingDots />
-      </div>
+      </Overlay>
     );
   return (
     <>
-      <section
-        className="fixed-container fx-centered fx-col fx-start-h"
-        style={{ overflow: "scroll", zIndex: "100000" }}
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={600}>
         <div
-          className="fx-centered fx-col sc-s-19 bg-sp  art-t-cur-container"
+          className="fx-centered fx-col art-t-cur-container"
           style={{
-            width: "min(100%, 600px)",
             height: "100vh",
             borderRadius: "0",
           }}
-          onClick={(e) => e.stopPropagation()}
         >
           <div
             className="box-pad-h"
@@ -791,7 +769,7 @@ const AddArticlesToCuration = ({
             </button>
           </div>
         </div>
-      </section>
+      </Overlay>
     </>
   );
 };

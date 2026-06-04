@@ -7,6 +7,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function AddZapPoll({ exit, setNevent }) {
   const dispatch = useDispatch();
@@ -150,14 +151,9 @@ export default function AddZapPoll({ exit, setNevent }) {
     });
   };
   return (
-    <div className="fixed-container box-pad-h fx-centered">
+    <Overlay exit={exit} width={500} allowOverFlow={true}>
       <div
-        className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fx-col bg-sp"
-        style={{
-          width: "min(100%, 500px)",
-          position: "relative",
-          overflow: "visible",
-        }}
+        className="box-pad-h-m box-pad-v-m fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -240,6 +236,6 @@ export default function AddZapPoll({ exit, setNevent }) {
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

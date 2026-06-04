@@ -8,7 +8,7 @@ import useOutboxRelays from "@/Hooks/useOutboxRelays";
 import Followings from "./Followings";
 import Network from "./Network";
 import { sleepTimer } from "@/Helpers/Helpers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 
 export default function Relays() {
   const { t } = useTranslation();
@@ -124,7 +124,7 @@ export default function Relays() {
               className="fit-container box-pad-v fx-centered fx-col"
               style={{ height: "60vh" }}
             >
-              <LoadingLogo />
+              <Spinner size={32} />
             </div>
           )}
           {!isLoading && (

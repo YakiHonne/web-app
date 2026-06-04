@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Overlay from "@/Components/Overlay";
 import LoadingDots from "@/Components/LoadingDots";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { useDispatch, useSelector } from "react-redux";
@@ -71,10 +72,9 @@ export default function ToDeletePost({
   };
 
   return (
-    <section className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={450}>
       <section
-        className="fx-centered fx-col sc-s box-pad-h box-pad-v"
-        style={{ width: "450px" }}
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div
           className="fx-centered box-marg-s"
@@ -126,6 +126,6 @@ export default function ToDeletePost({
           </button>
         </div>
       </section>
-    </section>
+    </Overlay>
   );
 }

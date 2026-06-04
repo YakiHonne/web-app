@@ -1,5 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 import { copyText } from "../../Helpers/Helpers";
 import { shortenKey } from "../../Helpers/Encryptions";
 import Icon from "@/Components/Icon";
@@ -8,10 +9,9 @@ export function DeletionPopUp({ exit, handleDelete, wallet }) {
   const { t } = useTranslation();
 
   return (
-    <section className="fixed-container fx-centered box-pad-h">
-      <section
-        className="fx-centered fx-col sc-s-18 bg-sp box-pad-h box-pad-v"
-        style={{ width: "450px" }}
+    <Overlay exit={exit} width={450}>
+      <div
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div
           className="fx-centered box-marg-s"
@@ -42,8 +42,8 @@ export function DeletionPopUp({ exit, handleDelete, wallet }) {
             {t("AB4BSCe")}
           </button>
         </div>
-      </section>
-    </section>
+      </div>
+    </Overlay>
   );
 };
 

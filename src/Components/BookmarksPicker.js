@@ -6,6 +6,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import { convertDate } from "@/Helpers/Encryptions";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function BookmarksPicker({
   kind,
@@ -109,10 +110,9 @@ export default function BookmarksPicker({
       {showAddBookmark && (
         <AddBookmark exit={() => setShowAddBookmark(false)} />
       )}
-      <div className="fixed-container fx-centered box-pad-h">
+      <Overlay exit={exit} width={500}>
         <section
-          className="sc-s bg-sp box-pad-h box-pad-v fx-centered"
-          style={{ width: "min(100%, 500px)", position: "relative" }}
+          className="box-pad-h box-pad-v fx-centered"
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -182,7 +182,7 @@ export default function BookmarksPicker({
             </div>
           </div>
         </section>
-      </div>
+      </Overlay>
     </>
   );
 }

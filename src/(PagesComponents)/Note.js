@@ -27,9 +27,11 @@ import { getContentTranslationConfig, straightUp } from "@/Helpers/Helpers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
+import EventStats from "@/Components/EventStats";
 
 export default function Note({ event, nevent }) {
   const { t } = useTranslation();
@@ -139,7 +141,7 @@ export default function Note({ event, nevent }) {
         className="fit-container fx-centered fx-col"
         style={{ height: "100vh" }}
       >
-        <LoadingLogo />
+        <Spinner size={32} />
       </div>
     );
 
@@ -183,19 +185,20 @@ export default function Note({ event, nevent }) {
               {note && !note.isRoot && (
                 <>
                   <div
-                    className="fit-container box-pad-h box-pad-v-m box-marg-s fx-centered pointer sticky"
-                    style={{
-                      borderTop: "1px solid var(--very-dim-gray)",
-                      borderBottom: "1px solid var(--very-dim-gray)",
-                    }}
+                    className="bg-dropdown box-marg-s fx-centered pointer sticky"
+                    // style={{
+                    //   borderTop: "1px solid var(--very-dim-gray)",
+                    //   borderBottom: "1px solid var(--very-dim-gray)",
+                    // }}
+                    style={{ top: "94px", width: "max-content" }}
                     onClick={() => setShowHistory(!showHistory)}
                   >
-                    <div className="fx-centered">
-                      <p>
+                    <div className="fx-centered box-pad-h-m" style={{ maxHeight: "0px" }}>
+                      <p className="gray-c">
                         {showHistory && t("ApSnq9V")}
                         {!showHistory && t("AUScjxu")}
                       </p>
-                      <Icon name="arrow" size={12} />
+                      <Icon name="arrow" size={12} transform={showHistory ? "rotate(180deg)" : ""} />
                     </div>
                   </div>
                   <HistorySection
@@ -235,14 +238,29 @@ export default function Note({ event, nevent }) {
                       </p>
                     </div>
                   </div>
-                  {note.isPaidNote && (
-                    <div
-                      className="sticker sticker-c1"
-                      style={{ minWidth: "max-content" }}
-                    >
-                      {t("AAg9D6c")}
-                    </div>
-                  )}
+                  <div className="fx-centered">
+
+
+                    {note.isPaidNote && (
+                      <div
+                        className="sticker sticker-c1"
+                        style={{ minWidth: "max-content" }}
+                      >
+                        {t("AAg9D6c")}
+                      </div>
+                    )}
+                    {!isNoteTranslating && <Icon v={2} name={iconsNames.globe} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                    {isNoteTranslating && <LoadingDots />}
+                    <EventOptions
+                      event={note}
+                      component={"notes"}
+                      refreshAfterDeletion={() =>
+                        customHistory(
+                          `/profile/${nip19.nprofileEncode({ pubkey: event.pubkey })}`,
+                        )
+                      }
+                    />
+                  </div>
                 </div>
                 <div className="fit-container box-pad-h-m" dir="auto">
                   {showTranslation ? translatedNote : note.note_tree}
@@ -273,7 +291,7 @@ export default function Note({ event, nevent }) {
                   />
                   <div className="fx-centered">
                     <div className="fit-container">
-                      {!isNoteTranslating && !showTranslation && (
+                      {/* {!isNoteTranslating && !showTranslation && (
                         <div
                           className="round-icon-tooltip"
                           data-tooltip={t("AdHV2qJ")}
@@ -285,8 +303,8 @@ export default function Note({ event, nevent }) {
                             className="opacity-4"
                           />
                         </div>
-                      )}
-                      {!isNoteTranslating && showTranslation && (
+                      )} */}
+                      {/* {!isNoteTranslating && showTranslation && (
                         <div
                           className="round-icon-tooltip"
                           data-tooltip={t("AE08Wte")}
@@ -299,9 +317,9 @@ export default function Note({ event, nevent }) {
                           />
                         </div>
                       )}
-                      {isNoteTranslating && <LoadingDots />}
+                      {isNoteTranslating && <LoadingDots />} */}
                     </div>
-                    <EventOptions
+                    {/* <EventOptions
                       event={note}
                       component={"notes"}
                       refreshAfterDeletion={() =>
@@ -309,7 +327,8 @@ export default function Note({ event, nevent }) {
                           `/profile/${nip19.nprofileEncode({ pubkey: event.pubkey })}`,
                         )
                       }
-                    />
+                    /> */}
+                    <EventStats postActions={postActions} />
                   </div>
                 </div>
                 <MutedThreadWarning event={note} />

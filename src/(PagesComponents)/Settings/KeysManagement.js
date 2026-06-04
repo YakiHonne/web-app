@@ -28,13 +28,13 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
   };
   return (
     <div
-    className={`fit-container fx-scattered fx-col pointer ${selectedTab === "keys" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
+      className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "keys" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
       style={{
-        borderBottom: "1px solid var(--very-dim-gray)",
+        // borderBottom: "1px solid var(--very-dim-gray)",
         gap: 0,
-        borderColor: "var(--very-dim-gray)",
+        // borderColor: "var(--very-dim-gray)",
         transition: "0.2s ease-in-out",
-        borderRadius: 0
+        // borderRadius: 0
       }}
     >
       <div
@@ -62,9 +62,8 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
             <p className="p-medium gray-c">{t("AnQpdZ9")}</p>
           </div>
           <div
-            className={`fx-scattered if pointer fit-container ${
-              userKeys.sec ? "dashed-onH" : "if-disabled"
-            }`}
+            className={`fx-scattered if pointer fit-container ${userKeys.sec ? "dashed-onH" : "if-disabled"
+              }`}
             style={{ borderStyle: "dashed" }}
             onClick={() =>
               userKeys.sec

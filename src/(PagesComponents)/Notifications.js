@@ -18,6 +18,7 @@ export default function Notification() {
             style={{ gap: 0 }}
             className={`fx-centered  fx-wrap fit-container`}
           >
+            <div style={{ height: "75px" }} className="fit-container"></div>
             {userKeys && <NotificationCenterMain />}
             {!userKeys && <PagePlaceholder page={"nostr-not-connected"} />}
           </div>

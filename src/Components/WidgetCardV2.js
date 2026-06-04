@@ -20,6 +20,7 @@ import { nanoid } from "nanoid";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { NDKUser } from "@nostr-dev-kit/ndk";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function WidgetCardV2({
   widget,
@@ -649,20 +650,15 @@ const PublishWidget = ({
   };
   if (isLoading) {
     return (
-      <div className="fixed-container fx-centered">
+      <Overlay exit={() => {}}>
         <LoadingDots />
-      </div>
+      </Overlay>
     );
   }
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        style={{ width: "min(100%, 500px)", position: "relative" }}
-        className="box-pad-h box-pad-v sc-s-18 bg-sp fx-centered fx-col"
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -695,6 +691,6 @@ const PublishWidget = ({
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

@@ -7,6 +7,7 @@ import ProgressCirc from "@/Components/ProgressCirc";
 import { nanoid } from "nanoid";
 import Icon from "./Icon";
 import Overlay from "./Overlay";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function UploadFile({
   kind = "audio/*,video/*,image/*",
@@ -202,7 +203,7 @@ export default function UploadFile({
             // <LoadingDots />
           )
         ) : (
-          <Icon name={"image"} size={small ? 16 : 24} />
+          <Icon v={2} name={iconsNames.image_01} opacity=".5" size={small ? 16 : 24} />
         )}
       </label>
     </>

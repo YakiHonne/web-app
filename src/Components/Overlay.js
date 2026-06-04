@@ -7,48 +7,54 @@ export default function Overlay({
   exit,
   id = "",
   allowOverFlow = false,
+  maxHeight = 80
 }) {
-  const windowRef = useRef(null);
   const [mounted, setMounted] = useState(false);
+  const [active, setActive] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    // Tiny delay to ensure element is in DOM before starting transitions
+    const timeout = setTimeout(() => {
+      setActive(true);
+    }, 20);
+
     let body = document.querySelector("body");
     body.style.overflow = "hidden";
 
     return () => {
       body.style.overflow = "auto";
+      clearTimeout(timeout);
     };
   }, []);
 
   const handleExit = (e) => {
     e.stopPropagation();
     e.preventDefault();
-    if (!windowRef.current) return;
-    windowRef.current.classList.remove("slide-up");
-    windowRef.current.classList.add("dismiss");
-    let timeout = setTimeout(() => {
+    setActive(false);
+
+    const timeout = setTimeout(() => {
       exit(e);
       clearTimeout(timeout);
-    }, 400);
+    }, 200);
   };
 
   const content = (
     <section
-      className="fixed-container box-pad-h fx-centered fade-out"
+      className={`overlay-backdrop fx-centered box-pad-h ${active ? "active" : ""}`}
       onClick={handleExit}
       id={id}
     >
       <main
-        ref={windowRef}
         style={{
           width: `min(100%, ${width}px)`,
           position: "relative",
-          maxHeight: "80vh",
+          maxHeight: `${maxHeight}vh`,
           overflow: allowOverFlow ? "visible" : "scroll",
+          borderRadius: '24px'
         }}
         onClick={(e) => e.stopPropagation()}
-        className="slide-up no-scrollbar sc-s bg-sp"
+        className={`no-scrollbar bg-dropdown overlay-sheet ${active ? "active" : ""}`}
       >
         {children}
       </main>
@@ -57,8 +63,8 @@ export default function Overlay({
 
   return mounted
     ? createPortal(
-        content,
-        document.getElementById("portal-root") || document.body,
-      )
+      content,
+      document.getElementById("portal-root") || document.body,
+    )
     : null;
 }

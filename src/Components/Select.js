@@ -15,14 +15,24 @@ export default function Select({
   label = false,
 }) {
   const [showOptions, setShowOptions] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   const selectedValue = useMemo(() => {
     return options.find((option) => option?.value === value);
   }, [value, options]);
   const optionsRef = useRef(null);
+
+  const close = () => {
+    setDismissing(true);
+    setTimeout(() => {
+      setShowOptions(false);
+      setDismissing(false);
+    }, 200);
+  };
+
   useEffect(() => {
     const handleOffClick = (e) => {
       if (optionsRef.current && !optionsRef.current.contains(e.target))
-        setShowOptions(false);
+        close();
     };
     document.addEventListener("mousedown", handleOffClick);
     return () => {
@@ -48,7 +58,7 @@ export default function Select({
           border: noBorder ? "none" : "",
           gap: label ? 0 : "4px",
         }}
-        onClick={() => (disabled ? null : setShowOptions(!showOptions))}
+        onClick={() => (disabled ? null : showOptions ? close() : setShowOptions(true))}
       >
         {label && (
           <div>
@@ -69,16 +79,16 @@ export default function Select({
             position: "absolute",
             maxHeight: "350px",
             overflow: "scroll",
-            top: revert ? 0 : "110%",
-            transform: revert ? "translateY(calc(-100% - 5px))" : "none",
-            // border: "none",
+            top: revert ? "auto" : "calc(100% + 6px)",
+            bottom: revert ? "calc(100% + 6px)" : "auto",
             minWidth: fullWidth ? "100%" : "200px",
             width: "max-content",
             zIndex: 1000,
             rowGap: "0",
+            borderRadius: "16px",
+            transformOrigin: revert ? "bottom center" : "top center",
           }}
-          className="sc-s-18 fx-centered fx-col fx-start-v fx-start-h pointer bg-sp drop-down"
-          // className="sc-s-18 fx-centered fx-col fx-start-v fx-start-h pointer box-pad-v-s box-pad-h-s bg-sp drop-down"
+          className={`fx-centered fx-col fx-start-v fx-start-h pointer bg-dropdown dynamic-island-dropdown${dismissing ? " dismissing" : ""}`}
         >
           {header && header}
           <div className="fit-container box-pad-v-s box-pad-h-s">
@@ -88,33 +98,30 @@ export default function Select({
                   key={index}
                   className={`option-no-scale fit-container fx-scattered ${
                     option?.left_el ? "fx-start-h" : ""
-                  }  pointer box-pad-h-m`}
+                  } pointer box-pad-h-m`}
                   style={{
                     border: "none",
                     overflow: "visible",
-                    padding: ".5rem",
+                    padding: ".6rem .75rem",
+                    borderRadius: "10px",
                     cursor: option.disabled ? "not-allowed" : "pointer",
                     opacity: option.disabled ? 0.5 : 1,
                   }}
                   onClick={() => {
                     setSelectedValue(option?.value);
-                    setShowOptions(false);
+                    close();
                   }}
                 >
                   {option?.left_el && option?.left_el}
                   <div
-                    className={
-                      selectedValue?.value === option?.value
-                        ? "orange-c"
-                        : "gray-c"
-                    }
+                    style={{ color: selectedValue?.value === option?.value ? "var(--c1)" : "" }}
                   >
                     {option?.display_name}
                   </div>
                   {option?.right_el && option?.right_el}
                 </div>
               );
-            })}{" "}
+            })}
           </div>
         </div>
       )}

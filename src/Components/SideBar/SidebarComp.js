@@ -36,6 +36,7 @@ import { customHistory } from "@/Helpers/History";
 import useDirectMessages from "@/Hooks/useDirectMessages";
 import { SidebarNavItem } from "@/Components/SideBar/SidebarNavItem";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function SidebarComp() {
   const { t } = useTranslation();
@@ -719,7 +720,7 @@ const AccountSwitching = ({ exit }) => {
   }, []);
 
   return (
-    <div className="fixed-container fx-centered">
+    <Overlay exit={exit}>
       <div className="fx-centered fx-col">
         <div className="fx-centered popout">
           <div style={{ borderRadius: "var(--border-r-50)" }}>
@@ -736,7 +737,7 @@ const AccountSwitching = ({ exit }) => {
           <p className="gray-c">@{userMetadata.name}</p>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };
 
@@ -744,10 +745,9 @@ const ConfirmmationBox = ({ exit, handleOnClick }) => {
   const { t } = useTranslation();
 
   return (
-    <section className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={450}>
       <section
-        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
-        style={{ width: "450px" }}
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div
           className="fx-centered box-marg-s"
@@ -776,6 +776,6 @@ const ConfirmmationBox = ({ exit, handleOnClick }) => {
           </button>
         </div>
       </section>
-    </section>
+    </Overlay>
   );
 };

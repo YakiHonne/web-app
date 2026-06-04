@@ -1,6 +1,7 @@
 import React from "react";
 import { useTheme } from "next-themes";
 import { getIcon } from "@/Content/IconsURLs";
+import { getIconv2 } from "@/Content/IconV2URL";
 
 export default function Icon({
   name,
@@ -13,9 +14,10 @@ export default function Icon({
   className = "",
   isBoldThemeColor = false,
   opacity = "initial",
+  v = 1
 }) {
   const { resolvedTheme } = useTheme();
-  let icon = getIcon(name);
+  let icon = v === 2 ? getIconv2(name) : getIcon(name);
   if (!icon) return null;
   return (
     <div
@@ -38,9 +40,9 @@ export default function Icon({
         transform,
         ...(isBoldThemeColor
           ? {
-              maskImage: `url(${icon})`,
-              WebkitMaskImage: `url(${icon})`,
-            }
+            maskImage: `url(${icon})`,
+            WebkitMaskImage: `url(${icon})`,
+          }
           : { backgroundImage: `url(${icon})` }),
       }}
     ></div>

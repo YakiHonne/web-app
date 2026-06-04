@@ -70,6 +70,7 @@ import {
 import {
   addConnectedAccounts,
   getSubData,
+  initiFirstLoginStats,
   saveFavRelaysListsForUsers,
   saveInboxRelaysListsForUsers,
   saveRelayMetadata,
@@ -88,6 +89,7 @@ import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
 import {
   changePrimary,
   handleAppDirection,
+  LoginToAPI,
   toggleColorScheme,
 } from "@/Helpers/Helpers";
 import {
@@ -107,7 +109,12 @@ import axiosInstance from "@/Helpers/HTTP_Client";
 import {
   setIsConnectedToYaki,
   setIsYakiChestLoaded,
+  setYakiChestStats,
 } from "@/Store/Slides/YakiChest";
+import {
+  setSubscriptionStatus,
+  clearSubscriptionStatus,
+} from "@/Store/Slides/Subscription";
 import { relaysOnPlatform } from "@/Content/Relays";
 import {
   NDKNip07Signer,
@@ -124,6 +131,7 @@ export default function AppInit() {
   const userKeys = useSelector((state) => state.userKeys);
   const initDMS = useSelector((state) => state.initDMS);
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
+  const prevPubkeyRef = useRef(null);
   const chatrooms =
     useLiveQuery(
       async () => (userKeys ? await getChatrooms(userKeys.pub) : []),
@@ -492,6 +500,73 @@ export default function AppInit() {
     }
     dispatch(setIsUserFollowingsLoaded(false));
     dispatch(setUserFollowings([]));
+  }, [userKeys]);
+
+  // Auto-connect to Yaki Chest whenever userKeys changes pubkey
+  useEffect(() => {
+    const pub = userKeys?.pub;
+    const canSign = userKeys && (userKeys.ext || userKeys.sec || userKeys.bunker);
+
+    if (!canSign) {
+      if (prevPubkeyRef.current) {
+        dispatch(setIsConnectedToYaki(false));
+        dispatch(setYakiChestStats(false));
+        dispatch(clearSubscriptionStatus());
+        localStorage.removeItem("connect_yc");
+        axiosInstance.post("/api/v1/logout").catch(() => {});
+      }
+      prevPubkeyRef.current = null;
+      return;
+    }
+
+    if (pub === prevPubkeyRef.current) return;
+
+    const fetchAndStoreSubscription = async () => {
+      try {
+        const { data } = await axiosInstance.get("/api/v1/subscription-status");
+        dispatch(setSubscriptionStatus(data));
+      } catch {
+        dispatch(setSubscriptionStatus(null));
+      }
+    };
+
+    const autoConnect = async () => {
+      // Disconnect previous session if switching accounts
+      if (prevPubkeyRef.current) {
+        dispatch(setIsConnectedToYaki(false));
+        dispatch(setYakiChestStats(false));
+        dispatch(clearSubscriptionStatus());
+        localStorage.removeItem("connect_yc");
+        try { await axiosInstance.post("/api/v1/logout"); } catch {}
+      }
+      prevPubkeyRef.current = pub;
+
+      try {
+        // Check if backend session is already valid for this pubkey
+        const online = await axiosInstance.get("/api/v1/online");
+        const onlineData = online?.data;
+        if (onlineData && (onlineData.pubkey === pub || onlineData.user_stats?.pubkey === pub)) {
+          localStorage.setItem("connect_yc", `${new Date().getTime()}`);
+          if (onlineData.user_stats) updateYakiChestStats(onlineData.user_stats);
+          dispatch(setIsConnectedToYaki(true));
+          fetchAndStoreSubscription();
+          return;
+        }
+      } catch {}
+
+      // Session not valid — perform full login
+      try {
+        const data = await LoginToAPI(pub, userKeys);
+        if (data) {
+          localStorage.setItem("connect_yc", `${new Date().getTime()}`);
+          if (data.is_new) initiFirstLoginStats(data);
+          dispatch(setIsConnectedToYaki(true));
+          fetchAndStoreSubscription();
+        }
+      } catch {}
+    };
+
+    autoConnect();
   }, [userKeys]);
 
   useEffect(() => {

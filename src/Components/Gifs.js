@@ -41,7 +41,7 @@ export default function Gifs({ setGif, exit, position = "left" }) {
         position: "absolute",
         // [position]: 0,
         bottom: "calc(100% + 5px)",
-        width: "200px",
+        width: "300px",
         zIndex: 102,
       }}
       ref={ref}

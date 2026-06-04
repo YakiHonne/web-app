@@ -1,6 +1,6 @@
 import ArrowUp from "@/Components/ArrowUp";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import MediaMasonryList from "@/Components/MediaMasonryList";
 import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
@@ -204,10 +204,10 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           ? await getNDKInstance(selectedCategory.value)
           : selectedCategory.group === "rsf"
             ? await getNDKInstance(
-                selectedCategory.value,
-                selectedCategory.relays,
-                true,
-              )
+              selectedCategory.value,
+              selectedCategory.relays,
+              true,
+            )
             : undefined;
       if (ndk === false) {
         setIsConnected(false);
@@ -331,7 +331,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "60vh" }}
         >
-          <LoadingLogo size={64} />
+          <Spinner size={32} />
         </div>
       )}
     </>

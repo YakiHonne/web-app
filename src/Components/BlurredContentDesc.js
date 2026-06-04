@@ -2,6 +2,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function BlurredContentDesc({ toBlur, label = true }) {
   const { t } = useTranslation();
@@ -56,20 +57,9 @@ export default function BlurredContentDesc({ toBlur, label = true }) {
 const DescriptiveWarning = ({ exit }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={400}>
       <div
-        style={{ width: "min(100%,400px)", position: "relative" }}
-        className="sc-s bg-sp box-pad-h box-pad-v slide-up fx-centered fx-col"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v slide-up fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -85,6 +75,6 @@ const DescriptiveWarning = ({ exit }) => {
           <button className="btn btn-normal">{t("A77m0JH")}</button>
         </Link>
       </div>
-    </div>
+    </Overlay>
   );
 };

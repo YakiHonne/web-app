@@ -7,14 +7,14 @@ export default function Backbar() {
 
   return (
     <div
-      className="fx-centered fit-container fx-start-h box-pad-v-s sticky"
+      className="fx-centered fit-container box-pad-v-s sticky"
       onClick={() => router.back()}
-      style={{ padding: ".5rem" }}
+      style={{ padding: ".5rem", top: "50px", backgroundColor: "transparent", zIndex: 1000 }}
     >
       <div>
         <button
-          className="btn btn-normal btn-gray"
-          style={{ padding: "0 1rem" }}
+          className="btn btn-normal btn-gray fx-centered bg-dropdown"
+          style={{ padding: "0 1rem", borderRadius: "50%", aspectRatio: "1/1", width: "44px", height: "44px" }}
         >
           <Icon name="arrow" transform="rotate(90deg)" />
         </button>

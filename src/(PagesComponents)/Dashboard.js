@@ -40,7 +40,7 @@ import InterestSuggestions from "@/Content/InterestSuggestions";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { customHistory } from "@/Helpers/History";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import ShowPeople from "@/Components/ShowPeople";
 import UserFollowers from "@/Components/UserFollowers";
@@ -51,6 +51,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { DraggableComp } from "@/Components/DraggableComp";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -272,7 +273,7 @@ export default function Dashboard() {
                     style={{ height: "100vh" }}
                   >
                     <div className="fx-centered">
-                      <LoadingLogo />
+                      <Spinner size={32} />
                     </div>
                   </div>
                 )}
@@ -490,22 +491,15 @@ const SideMenuMobile = ({ setSelectedTab, selectedTab }) => {
         ></div>
       </div>
       {showMenu && (
-        <div
-          className="fixed-container fx-centered fx-end-h"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowMenu(false);
-          }}
-        >
+        <Overlay exit={() => setShowMenu(false)}>
           <div
-            className="fx-centered fx-start-h fx-start-v fx-col sc-s-18 slide-right"
+            className="fx-centered fx-start-h fx-start-v fx-col slide-right"
             style={{
               gap: "0",
               width: "70%",
               height: "100vh",
               borderRadius: "0",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             <div className="box-pad-h box-pad-v fx-scattered fit-container">
               <h4>{t("ALBhi3j")}</h4>
@@ -535,7 +529,7 @@ const SideMenuMobile = ({ setSelectedTab, selectedTab }) => {
               );
             })}
           </div>
-        </div>
+        </Overlay>
       )}
     </div>
   );
@@ -828,7 +822,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
               style={{ height: "40vh" }}
             >
               <div className="fx-centered">
-                <LoadingLogo />
+                <Spinner size={32} />
               </div>
             </div>
           )}
@@ -1050,7 +1044,7 @@ const Widgets = ({ setPostToNote, localDrafte }) => {
                   style={{ height: "40vh" }}
                 >
                   <div className="fx-centered">
-                    <LoadingLogo />
+                    <Spinner size={32} />
                   </div>
                 </div>
               )}
@@ -2560,7 +2554,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
         )}
         {isLoading && (
           <div className="fx-centered fit-container" style={{ height: "30vh" }}>
-            <LoadingLogo />
+            <Spinner size={32} />
           </div>
         )}
       </div>

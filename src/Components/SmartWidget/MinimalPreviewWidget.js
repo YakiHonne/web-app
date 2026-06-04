@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PreviewWidget from "@/Components/SmartWidget/PreviewWidget";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 
 export default function MinimalPreviewWidget({ widget }) {
   const [showFullWidget, setShowFullWidget] = useState(false);
@@ -40,15 +41,14 @@ export default function MinimalPreviewWidget({ widget }) {
 
 const FullWidget = ({ widget, exit }) => {
   return (
-    <div className="fixed-container box-pad-h fx-centered">
+    <Overlay exit={exit} width={600}>
       <div
         style={{
-          width: "min(100%, 600px)",
           maxHeight: "95vh",
           overflow: "scroll",
           backgroundColor: "var(--white)",
         }}
-        className="box-pad-h-m sc-s-18"
+        className="box-pad-h-m"
       >
         <div className="sticky fit-container fx-scattered">
           <h4>{widget?.title}</h4>
@@ -60,6 +60,6 @@ const FullWidget = ({ widget, exit }) => {
           <PreviewWidget widget={widget?.metadata} />
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

@@ -8,8 +8,8 @@ export const RedPacketIcon = ({ isOwner, enableClick }) => {
         !animate
           ? false
           : {
-              rotate: [0, -5, 5, -5, 5, 0],
-            }
+            rotate: [0, -5, 5, -5, 5, 0],
+          }
       }
       transition={{
         duration: 0.5,
@@ -56,7 +56,6 @@ export const RedPacketIcon = ({ isOwner, enableClick }) => {
           }}
         />
       </div>
-      {/* Decorative Sheen */}
       <div
         style={{
           position: "absolute",

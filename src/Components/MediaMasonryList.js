@@ -6,6 +6,8 @@ import { Virtuoso } from "react-virtuoso";
 import UserProfilePic from "./UserProfilePic";
 import MediaOverlay from "./MediaOverlay";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function MediaMasonryList({ events, setLastEventTime }) {
   const media = useMemo(
@@ -51,7 +53,7 @@ const RowContent = React.memo(({ items, index }) => {
   return (
     <div
       className="fit-container fx-centered fx-stretch fx-start-v fx-start-h"
-      style={{ padding: ".06rem 0", gap: ".12rem" }}
+      style={{ padding: ".2rem 0", gap: ".4rem" }}
     >
       {items[0] && (
         <div style={{ flex: 1, order: index % 2 ? 2 : 1 }}>
@@ -59,10 +61,10 @@ const RowContent = React.memo(({ items, index }) => {
         </div>
       )}
       <div
-        style={{ flex: 2, order: index % 2 ? 1 : 2, gap: ".12rem" }}
+        style={{ flex: 2, order: index % 2 ? 1 : 2, gap: ".4rem" }}
         className="fx-centered fx-col"
       >
-        <div className="fit-container fx-centered" style={{ gap: ".12rem" }}>
+        <div className="fit-container fx-centered" style={{ gap: ".4rem" }}>
           {items[1] && (
             <div style={{ flex: 1 }}>
               <ItemContent item={items[1]} aspectRatio="1 / 1" />
@@ -74,7 +76,7 @@ const RowContent = React.memo(({ items, index }) => {
             </div>
           )}
         </div>
-        <div className="fit-container fx-centered" style={{ gap: ".12rem" }}>
+        <div className="fit-container fx-centered" style={{ gap: ".4rem" }}>
           {items[3] && (
             <div style={{ flex: 1 }}>
               <ItemContent item={items[3]} aspectRatio="1 / 1" />
@@ -237,7 +239,7 @@ const Video = React.memo(({ item, aspectRatio }) => {
           }}
           loop
           muted
-          // preload="none"
+        // preload="none"
         >
           <source src={item.url} type="video/mp4" />
         </video>
@@ -363,15 +365,15 @@ const PostOverlay = ({ postActions, pubkey }) => {
           style={{ gap: "1rem" }}
         >
           <div className="fx-centered">
-            <Icon name="heart" size={24} />
+            <Icon v={2} name={iconsNames.heart_01} size={24} />
             <p>{postActions.likes.likes.length}</p>
           </div>
           <div className="fx-centered">
-            <Icon name="comment" size={24} />
+            <Icon v={2} name={iconsNames.chat_circle} size={24} />
             <p>{postActions.replies.replies.length}</p>
           </div>
           <div className="fx-centered">
-            <Icon name="bolt" size={24} />
+            <Icon name={"bolt"} size={24} />
             <p>{postActions.zaps.total}</p>
           </div>
         </div>
@@ -382,19 +384,13 @@ const PostOverlay = ({ postActions, pubkey }) => {
 
 const ExpandPost = ({ item, exit, postActions }) => {
   return (
-    <div
-      className="fixed-container box-pad-h box-pad-v fx-centered"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit}>
       <MediaOverlay
         exit={exit}
         item={item}
         postActions={postActions}
         author={{ pubkey: item.pubkey }}
       />
-    </div>
+    </Overlay>
   );
 };

@@ -5,6 +5,7 @@ import LoadingDots from "@/Components/LoadingDots";
 import { swapTokensMinToOtherMint } from "@/Helpers/CashuHelpers";
 import Mintslist from "./MintsList";
 import SyncTokens from "./SyncTokens";
+import Overlay from "@/Components/Overlay";
 
 export default function SwapTokens({ cashuWallet, cashuTokens, exit }) {
   const { t } = useTranslation();
@@ -85,34 +86,14 @@ export default function SwapTokens({ cashuWallet, cashuTokens, exit }) {
 
   if (mints.length === 0 || mintFrom === "" || mintTo === "")
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit}>
         <LoadingDots />
-      </div>
+      </Overlay>
     );
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={650} allowOverFlow={true}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col slide-up"
-        style={{
-          width: "min(100%, 650px)",
-          position: "relative",
-          overflow: "visible",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -195,6 +176,6 @@ export default function SwapTokens({ cashuWallet, cashuTokens, exit }) {
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

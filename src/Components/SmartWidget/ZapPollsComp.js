@@ -26,6 +26,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function ZapPollsComp({
   event,
@@ -781,37 +782,17 @@ const Cashier = ({
 
   if (isVotesLoading)
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit}>
         <div className="fx-centered">
           <p className="gray-c p-medium">{t("AKvHyxG")}</p>
           <LoadingDots />
         </div>
-      </div>
+      </Overlay>
     );
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500} allowOverFlow={true}>
       <section
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        className="sc-s box-pad-h box-pad-v"
-        style={{
-          width: "min(100%, 500px)",
-          position: "relative",
-          overflow: "visible",
-        }}
+        className="box-pad-h box-pad-v"
       >
         <div
           className="close"
@@ -1021,7 +1002,7 @@ const Cashier = ({
           </div>
         )}
       </section>
-    </div>
+    </Overlay>
   );
 };
 

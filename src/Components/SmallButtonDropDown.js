@@ -10,6 +10,7 @@ export default function SmallButtonDropDown({
   showSettings = false,
 }) {
   const [showOptions, setShowOptions] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   const optionsRef = useRef(null);
   const { t } = useTranslation();
   const categoryDisplayName = {
@@ -22,10 +23,19 @@ export default function SmallButtonDropDown({
     explore: t("A9aq49d"),
     following: t("A9TqNxQ"),
   };
+
+  const close = () => {
+    setDismissing(true);
+    setTimeout(() => {
+      setShowOptions(false);
+      setDismissing(false);
+    }, 200);
+  };
+
   useEffect(() => {
     const handleOffClick = (e) => {
       if (optionsRef.current && !optionsRef.current.contains(e.target))
-        setShowOptions(false);
+        close();
     };
     document.addEventListener("mousedown", handleOffClick);
     return () => {
@@ -49,7 +59,7 @@ export default function SmallButtonDropDown({
             options.length > 1 &&
             !showSettings) ||
           (options.includes(selectedCategory) && showSettings)
-            ? setShowOptions(!showOptions)
+            ? showOptions ? close() : setShowOptions(true)
             : setSelectedCategory(options[0])
         }
       >
@@ -69,16 +79,15 @@ export default function SmallButtonDropDown({
         <div
           style={{
             position: "absolute",
-       
-            top: "110%",
-            backgroundColor: "var(--dim-gray)",
-            border: "none",
+            top: "calc(100% + 6px)",
             minWidth: "200px",
             width: "max-content",
             zIndex: 1000,
             rowGap: "0",
+            borderRadius: "16px",
+            transformOrigin: "top left",
           }}
-          className="sc-s-18 fx-centered fx-col fx-start-v pointer drop-down-r"
+          className={`fx-centered fx-col fx-start-v pointer drop-down-r bg-dropdown dynamic-island-dropdown${dismissing ? " dismissing" : ""}`}
         >
           {options.map((option, index) => {
             return (
@@ -86,14 +95,17 @@ export default function SmallButtonDropDown({
                 key={index}
                 onClick={() => {
                   setSelectedCategory(option);
-                  setShowOptions(false);
+                  close();
                 }}
-                className={`box-pad-h-m box-pad-v-s fit-container p-maj p-maj ${
-                  selectedCategory === option ? "c1-c" : " "
+                className={`box-pad-h-m box-pad-v-s fit-container p-maj ${
+                  selectedCategory === option ? "c1-c" : ""
                 }`}
+                style={{
+                  padding: ".6rem 1rem",
+                  borderRadius: "10px",
+                }}
               >
                 {categoryDisplayName[option]}
-                {/* {option.replaceAll("-", " ")} */}
               </p>
             );
           })}
@@ -101,10 +113,14 @@ export default function SmallButtonDropDown({
             <Link
               href="/settings"
               state={{ tab: "customization" }}
-              className="fit-container fx-scattered  pointer box-pad-h-m box-pad-v-s"
-              style={{ backgroundColor: "var(--c1-side)" }}
+              className="fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
+              style={{
+                borderTop: "1px solid rgba(255,255,255,0.08)",
+                padding: ".6rem 1rem",
+                borderRadius: "0 0 16px 16px",
+              }}
             >
-              <p className="p-medium gray-c btn-text-gray">{t("AV40SRR")}</p>
+              <p className="p-medium" style={{ color: "rgba(255,255,255,0.5)" }}>{t("AV40SRR")}</p>
               <Icon name="setting" size={12} />
             </Link>
           )}

@@ -10,6 +10,7 @@ import UserProfilePic from "./UserProfilePic";
 import { useSelector } from "react-redux";
 import Icon from "@/Components/Icon";
 import Overlay from "./Overlay";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function ActionTools({ setData }) {
   const [showActions, setShowActions] = useState(false);
@@ -24,7 +25,7 @@ export default function ActionTools({ setData }) {
           }}
         />
       )}
-      <Icon name="categories" size={24} onClick={() => setShowActions(true)} />
+      <Icon v={2} name={iconsNames.puzzle} size={24} onClick={() => setShowActions(true)} opacity=".5" />
     </>
   );
 }
@@ -76,9 +77,9 @@ const Actions = ({ exit, setReturnedData }) => {
           maxHeight: "60vh",
           overflow: "scroll",
         }}
-        // onClick={(e) => {
-        //   e.stopPropagation();
-        // }}
+      // onClick={(e) => {
+      //   e.stopPropagation();
+      // }}
       >
         <div className="close" onClick={exit}>
           <div></div>

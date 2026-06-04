@@ -7,7 +7,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { saveUsers } from "@/Helpers/DB";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Comments from "@/Components/Reactions/Comments";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
@@ -95,11 +95,11 @@ const countReplies = (id, all) => {
     let hasNip10Reply = comment.tags.find(
       (item) => item[3] === "reply" && item[0] === "e" && item[1] === id,
     );
-    
+
     let hasNip22Reply = comment.kind === 1111 && comment.tags.find(
       (item) => item[0] === "e" && item[1] === id && (!item[3] || item[3] === "")
     );
-    
+
     if (hasNip10Reply || hasNip22Reply) {
       let nestedReplies = countReplies(comment.id, all);
       let _ = getParsedNote(comment, true);
@@ -165,7 +165,7 @@ export default function CommentsSection({
       const { score, reactions } = getWotConfig();
 
       const commentKinds = tagKind === "a" ? [1, 1111] : [1];
-      
+
       const events = await getSubData(
         [
           {
@@ -258,20 +258,17 @@ export default function CommentsSection({
       <div className="fit-container fx-centered fx-col box-marg-s">
         {userKeys && (
           <>
-            <hr />
             {!showWriteNote && (
               <div
                 className="fit-container fx-centered fx-start-h  box-pad-h-m box-pad-v-m pointer"
                 style={{
                   overflow: "visible",
-                  // border: "1px solid var(--very-dim-gray)",
                 }}
                 onClick={() => setShowWriteNote(true)}
               >
                 <UserProfilePic size={40} mainAccountUser={true} />
                 <div className="sc-s-18 box-pad-h-m box-pad-v-s fit-container">
                   <p className="gray-c">
-                    {/* Comment on {author.display_name || author.name}'s {kind} */}
                     {t("AOmRQKF")}
                   </p>
                 </div>
@@ -294,7 +291,6 @@ export default function CommentsSection({
         )}
         {!userKeys && (
           <>
-            <hr />
             <div className="fit-container fx-centered box-pad-v fx-col slide-up">
               <h4>{t("ASt0wnG")}</h4>
               <p className="gray-c">{t("AAWFsjt")}</p>
@@ -308,7 +304,7 @@ export default function CommentsSection({
             </div>
           </>
         )}
-        <hr />
+
         <div
           className="fit-container fx-centered fx-col fx-start-h fx-start-v"
           style={{ gap: 0 }}
@@ -318,7 +314,7 @@ export default function CommentsSection({
               style={{ height: "40vh" }}
               className="fit-container box-pad-h-m fit-height fx-centered"
             >
-              <LoadingLogo size={64} />
+              <Spinner size={32} />
             </div>
           )}
           {netComments.length > 0 && !isCommentsMuted && (
@@ -416,7 +412,7 @@ const Comment = ({
   return (
     <div
       className={`fit-container ${isReplyBorder ? "reply-side-border" : ""}`}
-      // style={{ borderLeft: isReplyBorder ? "1px solid var(--dim-gray)" : "" }}
+    // style={{ borderLeft: isReplyBorder ? "1px solid var(--dim-gray)" : "" }}
     >
       <NotesComment
         event={comment}

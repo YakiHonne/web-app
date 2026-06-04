@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Overlay from "@/Components/Overlay";
 
 export default function IMGElement({ src }) {
   const [resize, setResize] = useState(false);
@@ -6,18 +7,8 @@ export default function IMGElement({ src }) {
   return (
     <>
       {resize && (
-        <div
-          className="fixed-container box-pad-h box-pad-v fx-centered"
-          onClick={(e) => {
-            e.stopPropagation();
-            setResize(false);
-          }}
-        >
+        <Overlay exit={() => setResize(false)} width={1000}>
           <div
-            style={{
-              position: "relative",
-              width: "min(100%, 1000px)",
-            }}
           >
             <div
               className="close"
@@ -37,7 +28,7 @@ export default function IMGElement({ src }) {
               loading="lazy"
             />
           </div>
-        </div>
+        </Overlay>
       )}
       <div className="img-grid">
         <img

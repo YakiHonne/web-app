@@ -4,17 +4,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { getEventStatAfterEOSE, InitEvent } from "@/Helpers/Controlers";
 import { saveEventStats } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
-import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import EmojiPicker from "emoji-picker-react";
 import EmojiImg from "@/Components/EmojiImg";
 import { useTheme } from "next-themes";
 import { getCustomSettings } from "@/Helpers/ClientHelpers";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
+import NumberShrink from "../NumberShrink";
 
-export default function Like({ isLiked, event, actions, tagKind = "e" }) {
+export default function Like({ isLiked, event, actions, tagKind = "e", total }) {
   const dispatch = useDispatch();
-  const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const [isLoading, setIsLoading] = useState(false);
   const [eventID, setEventID] = useState(false);
@@ -175,13 +175,16 @@ export default function Like({ isLiked, event, actions, tagKind = "e" }) {
         ref={optionsRef}
       >
         <div
-          className={"round-icon-tooltip pointer"}
-          data-tooltip={t("AJW1vH9")}
+          className="fx-centered pointer"
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
         >
-          {!isLiked && <Icon name="heart" size={24} opacity={0.4} />}
+          {!isLiked && <Icon name={iconsNames.heart_01} size={20} opacity={0.4} v={2} />}
+          {/* {!isLiked && <Icon name="heart" size={24} opacity={0.4} />} */}
           {isLiked && <EmojiImg content={isLiked?.content} />}
+          <span className={`p-medium ${isLiked ? "orange-c" : "opacity-4"}`}>
+            <NumberShrink value={total} />
+          </span>
         </div>
         {showEmoji && (
           <div

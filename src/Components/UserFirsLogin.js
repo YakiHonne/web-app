@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setUserFirstLoginYakiChest } from "@/Store/Slides/YakiChest";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function UserFirsLogin() {
   const userFirstLoginYakiChest = useSelector(
@@ -14,13 +15,10 @@ export default function UserFirsLogin() {
 
   if (!userFirstLoginYakiChest) return;
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      style={{ zIndex: 10000 }}
-    >
+    <Overlay exit={() => dispatch(setUserFirstLoginYakiChest(false))} width={400}>
       <div
-        className="box-pad-h box-pad-v sc-s fx-col fx-centered"
-        style={{ width: "min(100%, 400px)", rowGap: "16px" }}
+        className="box-pad-h box-pad-v fx-col fx-centered"
+        style={{ rowGap: "16px" }}
       >
         <h1>🎉</h1>
         <h4>{t("APeFTZA")}</h4>
@@ -69,6 +67,6 @@ export default function UserFirsLogin() {
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

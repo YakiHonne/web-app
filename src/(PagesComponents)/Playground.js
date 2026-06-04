@@ -19,8 +19,9 @@ import LoadingDots from "@/Components/LoadingDots";
 import UploadFile from "@/Components/UploadFile";
 import UserSearchBar from "@/Components/UserSearchBar";
 import PaymentGateway from "@/Components/PaymentGateway";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function Playground() {
   return (
@@ -542,7 +543,7 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
                 aspectRatio: "10/16",
               }}
             >
-              <LoadingLogo size={64} />
+              <Spinner size={32} />
             </section>
           )}
         </div>
@@ -717,20 +718,10 @@ const GenerateManifestFile = ({ exit }) => {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       {processDone && (
         <div
-          className="sc-s-18 bg-sp fx-centered slide-up"
-          style={{ width: "min(100%,400px)" }}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          className="fx-centered slide-up"
         >
           <div className="fx-centered box-pad-v fx-col">
             <Icon name="checkmark-tt" size={60} isColored />
@@ -751,11 +742,7 @@ const GenerateManifestFile = ({ exit }) => {
       )}
       {!processDone && (
         <div
-          className="sc-s bg-sp slide-up"
-          style={{ width: "min(100%,500px)" }}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          className="slide-up"
         >
           <div
             className="box-pad-h-m box-pad-v-m fit-container fx-scattered"
@@ -904,7 +891,7 @@ const GenerateManifestFile = ({ exit }) => {
           </div>
         </div>
       )}
-    </div>
+    </Overlay>
   );
 };
 

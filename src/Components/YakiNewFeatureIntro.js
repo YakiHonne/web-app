@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import SmartWidgetsSystem from "@/Components/YakiNewFeatureIntroComponents/SmartWidgetsSystem";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function YakiNewFeatureIntro() {
   const [isDisplayed, setIsDisplayed] = useState(
@@ -22,10 +23,10 @@ export default function YakiNewFeatureIntro() {
 
   if (isDisplayed === "sw") return null;
   return (
-    <div className="fixed-container fx-centered fx-col box-pad-h">
+    <Overlay exit={skipShowcase} width={1000}>
       <div
-        className="sc-s fx-centered carousel"
-        style={{ width: "min(100%, 1000px)", columnGap: 0, maxHeight: "560px" }}
+        className="fx-centered carousel"
+        style={{ columnGap: 0, maxHeight: "560px" }}
       >
         <div
           className="browsing-arrow slide-left carousel-arrows"
@@ -99,6 +100,6 @@ export default function YakiNewFeatureIntro() {
           Skip
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 }

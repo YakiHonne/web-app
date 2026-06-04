@@ -5,7 +5,7 @@ import { convertDate, getParsedRepEvent } from "@/Helpers/Encryptions";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
 import Select from "@/Components/Select";
 import BookmarkEvent from "@/Components/BookmarkEvent";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
@@ -396,7 +396,7 @@ export default function BookmarkContent({ bookmark, exit }) {
         )}
         {isLoading && (
           <div className="fx-centered fit-container" style={{ height: "30vh" }}>
-            <LoadingLogo />
+            <Spinner size={32} />
           </div>
         )}
       </div>

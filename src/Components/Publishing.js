@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import { eventKinds } from "@/Content/Extra";
 import Icon from "@/Components/Icon";
+import Overlay from "./Overlay";
 
 const PUBLISHING_TIMEOUT = 3000;
 
@@ -158,17 +159,17 @@ export default function Publishing({ displayOff = false }) {
       let relaysToPublish =
         allRelays?.length > 0
           ? allRelays.map((relay) => {
-              return {
-                url: relay,
-                status: 0,
-              };
-            })
+            return {
+              url: relay,
+              status: 0,
+            };
+          })
           : userRelays.map((relay) => {
-              return {
-                url: relay,
-                status: 0,
-              };
-            }) || [];
+            return {
+              url: relay,
+              status: 0,
+            };
+          }) || [];
 
       if (relaysToPublish.length === 0)
         relaysToPublish = relaysOnPlatform.map((relay) => {
@@ -466,7 +467,7 @@ export default function Publishing({ displayOff = false }) {
       (tag) =>
         tag[0] === "p" &&
         tag[1] ===
-          "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3",
+        "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3",
     );
     if (receiver) return 44;
     return 4;
@@ -523,23 +524,17 @@ export default function Publishing({ displayOff = false }) {
   return (
     <>
       {showDetails && (
-        <div
-          className="fixed-container fx-centered"
-          onClick={(e) => {
+        <Overlay
+          width={700}
+          exit={(e) => {
             e.stopPropagation();
             setShowDetails(false);
           }}
-          style={{ zIndex: 200000 }}
+
         >
           <div
-            className="fx-centered fx-start-h box-pad-v fx-col slide-up box-pad-h sc-s bg-sp"
-            style={{
-              width: "700px",
-              minHeight: "50vh",
-              maxHeight: "80vh",
-              overflow: "scroll",
-              position: "relative",
-            }}
+            className="fx-centered fx-start-h box-pad-v fx-col  box-pad-h"
+
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -711,7 +706,7 @@ export default function Publishing({ displayOff = false }) {
               </div>
             )}
           </div>
-        </div>
+        </Overlay>
       )}
       {showToast && (
         <div className="fit-container box-pad-v-m box-pad-h-m box-marg-s sc-s-18 slide-up-down fx-scattered link-label">

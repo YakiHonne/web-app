@@ -34,6 +34,7 @@ import { useRouter } from "next/router";
 import { getPostToEdit } from "@/Helpers/ClientHelpers";
 import { DraggableComp } from "@/Components/DraggableComp";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 const SWT_YAKIHONNE = "https://swt.yakihonne.com";
 
 const getLocalSWv2Drafts = () => {
@@ -1639,9 +1640,9 @@ const SWTemplates = ({ templates, setTemplate, setBuildOption }) => {
   return (
     <>
       {isLoading && (
-        <div className="fixed-container fx-centered">
+        <Overlay exit={() => {}}>
           <LoadingDots />
-        </div>
+        </Overlay>
       )}
       <div className="fit-container fx-centered fx-start-h fx-start-v fx-col">
         <div className="fit-container fx-scattered box-marg-s sticky">
@@ -1720,10 +1721,9 @@ const SaveDraft = ({ exit, swButtons, swImage, swInput, swComponents }) => {
     }
   };
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={450}>
       <div
-        style={{ width: "min(100%, 450px)", position: "relative" }}
-        className="box-pad-h box-pad-v fx-centered fx-col sc-s-18 bg-sp"
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -1741,7 +1741,7 @@ const SaveDraft = ({ exit, swButtons, swImage, swInput, swComponents }) => {
           {t("ABg9vzA")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 };
 

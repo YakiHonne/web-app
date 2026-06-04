@@ -14,10 +14,16 @@ export default function LightningWalletsSelect({
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   const [position, setPosition] = useState(null);
 
   useEffect(() => {
     if (!open) return;
+
+    const closeDropdown = () => {
+      setDismissing(true);
+      setTimeout(() => { setOpen(false); setDismissing(false); }, 200);
+    };
 
     const handleOffClick = (e) => {
       if (
@@ -26,7 +32,7 @@ export default function LightningWalletsSelect({
         dropdownRef.current &&
         !dropdownRef.current.contains(e.target)
       ) {
-        setOpen(false);
+        closeDropdown();
       }
     };
 
@@ -54,15 +60,20 @@ export default function LightningWalletsSelect({
   }, [open]);
 
   const toggleOpen = () => {
-    if (!open && containerRef.current) {
+    if (open) {
+      setDismissing(true);
+      setTimeout(() => { setOpen(false); setDismissing(false); }, 200);
+      return;
+    }
+    if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setPosition({
-        top: rect.bottom + 5,
+        top: rect.bottom + 6,
         left: rect.left,
         width: rect.width,
       });
     }
-    setOpen((v) => !v);
+    setOpen(true);
   };
 
   const handleSelectWallet = (walletID) => {
@@ -77,7 +88,8 @@ export default function LightningWalletsSelect({
     tempWallets[index].active = true;
     setSelectedWallet(wallets[index]);
     setWallets(tempWallets);
-    setOpen(false);
+    setDismissing(true);
+    setTimeout(() => { setOpen(false); setDismissing(false); }, 200);
   };
 
   return (
@@ -130,9 +142,8 @@ export default function LightningWalletsSelect({
         createPortal(
           <div
             ref={dropdownRef}
-            className="fx-centered fx-col sc-s-18 bg-sp box-pad-h-s box-pad-v-s fx-start-v fx-start-h"
+            className={`fx-centered fx-col bg-dropdown box-pad-h-s box-pad-v-s fx-start-v fx-start-h dynamic-island-dropdown${dismissing ? " dismissing" : ""}`}
             style={{
-              backgroundColor: "var(--c1-side)",
               position: "fixed",
               left: position.left,
               top: position.top,
@@ -143,7 +154,8 @@ export default function LightningWalletsSelect({
               overflow: "auto",
               maxHeight: "300px",
               zIndex: 999999,
-              boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+              borderRadius: "16px",
+              transformOrigin: "top center",
             }}
           >
             <p className="p-medium gray-c box-pad-h-m box-pad-v-s">

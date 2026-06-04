@@ -1,4 +1,5 @@
 import React from "react";
+import Overlay from "@/Components/Overlay";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
 
@@ -6,10 +7,9 @@ export default function LinkWallet({ exit, handleLinkWallet }) {
   const { t } = useTranslation();
 
   return (
-    <section className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={450}>
       <section
-        className="fx-centered fx-col sc-s-18 bg-sp box-pad-h box-pad-v"
-        style={{ width: "450px" }}
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div
           className="fx-centered box-marg-s"
@@ -33,6 +33,6 @@ export default function LinkWallet({ exit, handleLinkWallet }) {
           </button>
         </div>
       </section>
-    </section>
+    </Overlay>
   );
 }

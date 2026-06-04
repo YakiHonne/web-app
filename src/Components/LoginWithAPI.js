@@ -6,6 +6,7 @@ import { initiFirstLoginStats } from "@/Helpers/Controlers";
 import { setIsConnectedToYaki } from "@/Store/Slides/YakiChest";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 
 export default function LoginWithAPI({ exit }) {
   const dispatch = useDispatch();
@@ -51,19 +52,10 @@ export default function LoginWithAPI({ exit }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={400}>
       <div
-        className="sc-s fx-centered fx-col bg-sp slide-up"
-        style={{ width: "min(100%, 400px)", padding: "2rem" }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="fx-centered fx-col slide-up"
+        style={{ padding: "2rem" }}
       >
         <h4>{t("AzVvVt5")}</h4>
         <p className="gray-c p-centered">{t("AbE7B3Z")}</p>
@@ -81,6 +73,6 @@ export default function LoginWithAPI({ exit }) {
           </button>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 }

@@ -25,6 +25,7 @@ import successJSON from "@/JSONs/success.json";
 import useCashu from "@/Hooks/useCachu";
 import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function PaymentGateway({
   recipientAddr,
@@ -87,27 +88,16 @@ export default function PaymentGateway({
 
   if (isLoading)
     return (
-      <div className="fixed-container fx-centered" style={{ zIndex: 2000000 }}>
+      <Overlay exit={exit}>
         <LoadingDots />
-      </div>
+      </Overlay>
     );
   if (wallets.length === 0)
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        style={{ zIndex: 2000000 }}
-      >
+      <Overlay exit={exit} width={400} allowOverFlow={true}>
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="sc-s bg-sp box-pad-h box-pad-v fx-centered fx-col slide-up"
-          style={{
-            width: "min(100%, 400px)",
-            position: "relative",
-            overflow: "visible",
-            padding: "3rem 1rem",
-          }}
+          className="box-pad-h box-pad-v fx-centered fx-col"
+          style={{ padding: "3rem 1rem" }}
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -117,7 +107,7 @@ export default function PaymentGateway({
             <button className="btn btn-normal">{t("A8fEwNq")}</button>
           </Link>
         </div>
-      </div>
+      </Overlay>
     );
   if (
     !recipientAddr ||
@@ -125,20 +115,9 @@ export default function PaymentGateway({
     (!lnbcAmount && recipientAddr.startsWith("lnbc"))
   )
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        style={{ zIndex: 2000000 }}
-      >
+      <Overlay exit={exit} width={400} allowOverFlow={true}>
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="sc-s bg-sp box-pad-h box-pad-v fx-centered fx-col slide-up"
-          style={{
-            width: "min(100%, 400px)",
-            position: "relative",
-            overflow: "visible",
-          }}
+          className="box-pad-h box-pad-v fx-centered fx-col"
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -147,7 +126,7 @@ export default function PaymentGateway({
           <h4>{t("AI8bhpw")}</h4>
           <p className="box-pad-h gray-c p-centered">{t("ACOXf0z")}</p>
         </div>
-      </div>
+      </Overlay>
     );
   return (
     <Cashier
@@ -476,24 +455,10 @@ const Cashier = ({
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-      style={{ zIndex: 2000000 }}
-    >
+    <Overlay exit={exit} width={400} allowOverFlow={true}>
       <div
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        className="sc-s bg-sp box-pad-h box-pad-v slide-up"
-        style={{
-          width: "min(100%, 400px)",
-          position: "relative",
-          overflow: "visible",
-        }}
+        className="box-pad-h box-pad-v"
+        style={{ position: "relative" }}
       >
         {confirmation === "initiated" && (
           <div className="fx-centered fx-col fit-container fx-start-v">
@@ -897,7 +862,7 @@ const Cashier = ({
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 };
 

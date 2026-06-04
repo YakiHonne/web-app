@@ -12,14 +12,13 @@ import KindOne from "@/Components/KindOne";
 import KindSix from "@/Components/KindSix";
 import { saveUsers } from "@/Helpers/DB";
 import { getSubData } from "@/Helpers/Controlers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
 import { useRouter } from "next/router";
 import useIsMute from "@/Hooks/useIsMute";
-import Slider from "@/Components/Slider";
 import { Virtuoso } from "react-virtuoso";
-import { SelectTabsNoIndex } from "@/Components/SelectTabsNoIndex";
+import { SelectTabs } from "@/Components/SelectTabs";
 import MediaMasonryList from "@/Components/MediaMasonryList";
 import { useSelector } from "react-redux";
 import Icon from "@/Components/Icon";
@@ -90,6 +89,46 @@ export default function UserFeed({ user }) {
   );
   const [lastEventTime, setLastEventTime] = useState(undefined);
   const virtuosoRef = useRef(null);
+  const lastScrollY = useRef(0);
+  const tabBarRef = useRef(null);
+  const [showSubTabDropdown, setShowSubTabDropdown] = useState(false);
+  const [dismissingSubTab, setDismissingSubTab] = useState(false);
+  const subTabBtnRef = useRef(null);
+  const [hidden, setHidden] = useState(false);
+
+  const closeSubTabDropdown = () => {
+    setDismissingSubTab(true);
+    setTimeout(() => { setShowSubTabDropdown(false); setDismissingSubTab(false); }, 200);
+  };
+
+  // useEffect(() => {
+  //   const onScroll = () => {
+  //     const y = window.scrollY;
+  //     const bar = tabBarRef.current;
+  //     if (!bar) { lastScrollY.current = y; return; }
+  //     const rect = bar.getBoundingClientRect();
+  //     // Only hide when the bar is fully out of viewport (scrolled past it)
+  //     if (rect.bottom <= 0) {
+  //       setHidden(y > lastScrollY.current);
+  //     } else {
+  //       setHidden(false);
+  //     }
+  //     lastScrollY.current = y;
+  //   };
+  //   window.addEventListener("scroll", onScroll, { passive: true });
+  //   return () => window.removeEventListener("scroll", onScroll);
+  // }, []);
+
+  // useEffect(() => {
+  //   if (!showSubTabDropdown) return;
+  //   const handleClick = (e) => {
+  //     if (subTabBtnRef.current && !subTabBtnRef.current.contains(e.target)) {
+  //       closeSubTabDropdown();
+  //     }
+  //   };
+  //   document.addEventListener("mousedown", handleClick);
+  //   return () => document.removeEventListener("mousedown", handleClick);
+  // }, [showSubTabDropdown]);
 
   const getNotesFilter = () => {
     let pinnedNotesIds = isCurrentUser ? pinnedNotes : userPinnedNotes;
@@ -257,42 +296,59 @@ export default function UserFeed({ user }) {
     setContentFrom(type);
   };
 
+  const activeSubTab = subTabs[selectedTab]?.find((t) => t.value === contentFrom);
+  const hasSubTabs = subTabs[selectedTab]?.length > 1;
+
   if (isMuted) return;
+  const tabsIndex = tabs.findIndex((t) => t.value === selectedTab);
+  const tabsLabels = tabs.map((t) => t.display_name);
   return (
-    <div className="fx-centered  fit-container fx-wrap" style={{ gap: 0 }}>
+    <div className="fx-centered fit-container fx-wrap" style={{ gap: 0 }}>
+
+      {/* Tab bar — stays in normal flow, sticks to top after profile header scrolls away */}
       <div
-        className="user-feed-tab sticky fit-container"
-        style={{ padding: 0 }}
+        ref={tabBarRef}
+        className="fx-centered fx-col fit-container"
+        style={{
+          gap: "8px",
+          padding: "12px 0",
+          position: "sticky",
+          top: hidden ? "-300px" : "86px",
+          transition: "top 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          zIndex: 200,
+        }}
       >
-        <Slider
-          items={tabs.map((tab) => {
-            return (
-              <div
-                className={`list-item-b fx-centered fx-shrink ${
-                  selectedTab === tab.value ? "selected-list-item-b" : ""
-                }`}
-                onClick={() => switchSelectedTab(tab.value)}
-              >
-                {tab.display_name}
-              </div>
-            );
-          })}
-          slideBy={100}
-          noGap={true}
-        />
-        {subTabs[selectedTab]?.length > 1 && (
-          <div
-            className="fx-centered box-pad-h-s box-pad-v-s fx-start-h"
-            style={{ borderBottom: "1px solid var(--very-dim-gray)" }}
-          >
-            <SelectTabsNoIndex
-              tabs={subTabs[selectedTab]}
-              selectedTab={contentFrom}
-              setSelectedTab={switchContentType}
-            />
+        <div >
+          <SelectTabs
+            selectedTab={tabsIndex}
+            tabs={tabsLabels}
+            setSelectedTab={(i) => switchSelectedTab(tabs[i].value)}
+          />
+        </div>
+        {hasSubTabs && (
+          <div ref={subTabBtnRef} style={{ position: "relative" }}>
+            <div
+              className="uplift-filter-bar fx-scattered if pointer"
+              style={{ height: "40px", padding: "0 1rem", gap: "8px", borderRadius: "9999px", position: "relative", top: "initial" }}
+              onClick={() => showSubTabDropdown ? closeSubTabDropdown() : setShowSubTabDropdown(true)}
+            >
+              <span>{activeSubTab?.display_name}</span>
+              <Icon name="arrow" />
+            </div>
+            {showSubTabDropdown && (
+              <SubTabDropdown
+                btnRef={subTabBtnRef}
+                dismissing={dismissingSubTab}
+                tabs={subTabs[selectedTab]}
+                selectedTab={contentFrom}
+                onSelect={(val) => { switchContentType(val); closeSubTabDropdown(); }}
+              />
+            )}
           </div>
         )}
       </div>
+
+
       {["notes", "replies", "mentions", "pinned"].includes(contentFrom) && (
         <>
           {events[contentFrom].length === 0 && !isLoading && (
@@ -408,9 +464,51 @@ export default function UserFeed({ user }) {
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "60vh" }}
         >
-          <LoadingLogo />
+          <Spinner size={32} />
         </div>
       )}
+    </div>
+  );
+}
+
+function SubTabDropdown({ btnRef, dismissing, tabs, selectedTab, onSelect }) {
+  const panelRef = useRef(null);
+  const [pos, setPos] = useState(null);
+
+  useEffect(() => {
+    if (!btnRef?.current) return;
+    const rect = btnRef.current.getBoundingClientRect();
+    setPos({ top: rect.bottom + 6, centerX: rect.left + rect.width / 2 });
+  }, [btnRef]);
+
+  if (!pos) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: pos.top,
+        left: pos.centerX,
+        transform: "translateX(-50%)",
+        width: "200px",
+        zIndex: 99999,
+      }}
+    >
+      <div ref={panelRef} className={`di-wrapper${dismissing ? " dismissing" : ""}`}>
+        <div className="di-panel" style={{ borderRadius: "16px", overflow: "hidden" }}>
+          {tabs.map((tab) => (
+            <div
+              key={tab.value}
+              className="fx-scattered pointer option-no-scale box-pad-h-s box-pad-v-s"
+              style={{ borderRadius: "10px" }}
+              onClick={() => onSelect(tab.value)}
+            >
+              <span>{tab.display_name}</span>
+              {selectedTab === tab.value && <Icon name="check" size={18} />}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

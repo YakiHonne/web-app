@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Overlay from "@/Components/Overlay";
 import LoadingDots from "@/Components/LoadingDots";
 import { nanoid } from "nanoid";
 import { useDispatch } from "react-redux";
@@ -72,12 +73,9 @@ export default function ToPublishDrafts({
   };
 
   return (
-    <section className="fixed-container fx-centered">
+    <Overlay exit={exit} width={500}>
       <div
-        className="fx-centered fx-col slide-up box-pad-h sc-s-18 box-pad-v bg-sp"
-        style={{
-          width: "500px",
-        }}
+        className="fx-centered fx-col slide-up box-pad-h box-pad-v"
       >
         <div className="fx-centered fx-col">
           <h4 className="p-centered">{t("AmcaCBU")}</h4>
@@ -102,6 +100,6 @@ export default function ToPublishDrafts({
           </button>
         </div>
       </div>
-    </section>
+    </Overlay>
   );
 }

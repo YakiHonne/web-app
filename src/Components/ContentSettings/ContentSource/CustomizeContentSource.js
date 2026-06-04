@@ -7,6 +7,8 @@ import axios from "axios";
 import CommunityFeed from "./CommunityFeed";
 import RelaysFeed from "./RelaysFeed";
 import ContentPacks from "./ContentPacks";
+import Overlay from "@/Components/Overlay";
+import { SelectTabs } from "@/Components/SelectTabs";
 
 const mixedContentDefaultCF = [
   ["top", true],
@@ -39,7 +41,7 @@ export default function CustomizeContentSource({
   const dispatch = useDispatch();
   const userAppSettings = useSelector((state) => state.userAppSettings);
   const [sources, setSources] = useState(optionsList);
-  const [category, setCategory] = useState(1);
+  const [category, setCategory] = useState(0);
   const [allRelays, setAllRelays] = useState([]);
   const optionsToSave = useMemo(() => {
     let communityIndex = sources.findIndex((_) => _.value === "cf");
@@ -72,7 +74,7 @@ export default function CustomizeContentSource({
           "https://cache-v2.yakihonne.com/api/v1/relays",
         );
         setAllRelays(data.data);
-      } catch {}
+      } catch { }
     };
     fetchData();
   }, []);
@@ -120,28 +122,21 @@ export default function CustomizeContentSource({
   };
 
   return (
-    <div
-      className="fixed-container box-pad-h fx-centered fx-start-v"
-      onClick={(e) => {
+    <Overlay
+      exit={(e) => {
         e.stopPropagation();
         exit();
       }}
+      width={600}
     >
       <div
-        className="fx-centered fx-col fx-start-h f-start-v  sc-s bg-sp"
-        style={{
-          minHeight: "30vh",
-          overflow: "visible",
-          position: "relative",
-          marginTop: "3rem",
-          width: "min(100%, 600px)",
-          gap: 0,
-        }}
+
+
         onClick={(e) => e.stopPropagation()}
       >
         <div
           className="sticky fit-container"
-          style={{ padding: 0, borderRadius: "var(--border-r-32)" }}
+          style={{ padding: 0, borderRadius: "var(--border-r-32)", backgroundColor: "transparent" }}
         >
           <div className="fit-container fx-scattered box-pad-h box-pad-v-m">
             <h4>{t("AH4Mub1")}</h4>
@@ -155,7 +150,19 @@ export default function CustomizeContentSource({
               </div>
             </div>
           </div>
-          <div
+          <div className="fx-container fx-centered box-pad-h-s box-pad-v-s">
+
+            <SelectTabs
+              tabs={[
+                t("AhSpIKN"),
+                t("A8Y9rVt"),
+                type !== 3 ? t("AVzZUeP") : t("AusIycI")
+              ]}
+              selectedTab={category}
+              setSelectedTab={setCategory}
+            />
+          </div>
+          {/* <div
             className="fit-container fx-even"
             style={{
               paddingTop: 0,
@@ -166,41 +173,38 @@ export default function CustomizeContentSource({
             }}
           >
             <div
-              className={`list-item-b fx-centered fx ${
-                category === 1 ? "selected-list-item-b" : ""
-              }`}
+              className={`list-item-b fx-centered fx ${category === 1 ? "selected-list-item-b" : ""
+                }`}
               onClick={() => setCategory(1)}
             >
               {t("AhSpIKN")}
             </div>
             <div
-              className={`list-item-b fx-centered fx ${
-                category === 2 ? "selected-list-item-b" : ""
-              }`}
+              className={`list-item-b fx-centered fx ${category === 2 ? "selected-list-item-b" : ""
+                }`}
               onClick={() => setCategory(2)}
             >
               {t("A8Y9rVt")}
             </div>
             <div
-              className={`list-item-b fx-centered fx ${
-                category === 3 ? "selected-list-item-b" : ""
-              }`}
+              className={`list-item-b fx-centered fx ${category === 3 ? "selected-list-item-b" : ""
+                }`}
               onClick={() => setCategory(3)}
             >
               {type !== 3 ? t("AVzZUeP") : t("AusIycI")}
             </div>
-          </div>
+          </div> */}
         </div>
-        {category === 1 && <RelaysFeed allRelays={allRelays} exit={exit} />}
-        {category === 2 && (
+        {category === 0 && <RelaysFeed allRelays={allRelays} exit={exit} />}
+        {category === 1 && (
           <CommunityFeed
             sources={sources}
             setSources={setSources}
             update={updateCommunityFeed}
           />
         )}
-        {category === 3 && <ContentPacks exit={exit} type={type} />}
+        {category === 2 && <ContentPacks exit={exit} type={type} />}
       </div>
-    </div>
+    </Overlay>
   );
 }

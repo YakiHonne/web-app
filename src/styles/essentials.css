@@ -490,21 +490,32 @@ hr:last-child {
 
 .btn {
     font-family: 'DM sans', sans-serif;
+    font-weight: 600;
     font-size: var(--16);
     padding: 0 var(--24);
     height: var(--40);
-    border-radius: var(--border-r-18);
+    border-radius: 30px;
     cursor: pointer;
-    transition: .2s ease-in;
+    transition: box-shadow .2s ease-in, transform .15s ease-in, opacity .2s ease-in;
+}
+
+.btn:hover {
+    transform: scale(1.02);
+}
+
+.btn:active {
+    transform: scale(0.97);
+    transition: transform .07s ease-out;
 }
 
 
 .btn-small {
     font-family: 'DM sans', sans-serif;
+    font-weight: 600;
     font-size: var(--12);
     padding: 0 var(--20);
     height: var(--32);
-    border-radius: var(--border-r-18);
+    border-radius: 30px;
     cursor: pointer;
     transition: .2s ease-in;
 }
@@ -528,28 +539,44 @@ hr:last-child {
     background-color: var(--c1);
     border: none;
     color: white;
+    /* c1 = #ee7700 — ring: lighter orange tint, shadows tinted with orange hue */
+    box-shadow:
+        0 0 0 1px rgba(255, 200, 100, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .btn-normal:hover {
-    /* background-color: var(--orange-side); */
-    opacity: .8;
+    opacity: .85;
+    box-shadow:
+        0 0 0 1px rgba(255, 200, 100, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .btn-gst {
     background-color: transparent;
     border: 1px solid var(--c1);
     color: var(--c1);
+    /* transparent bg, c1 accent — ring uses c1 tint, shadows very faint orange-tinted */
+    box-shadow:
+        0 0 0 1px rgba(238, 119, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .btn-gray {
     background-color: var(--dim-gray);
     border: none;
     color: var(--black);
+    box-shadow:
+        0 0 0 1px rgba(100, 100, 100, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .btn-gst:hover {
     background-color: var(--c1);
     color: white;
+    box-shadow:
+        0 0 0 1px rgba(255, 200, 100, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
 .btn-orange {
@@ -558,9 +585,15 @@ hr:last-child {
     color: white;
 }
 
-.btn-orange:hover,
-.btn-gray:hover {
+.btn-orange:hover {
     opacity: .8;
+}
+
+.btn-gray:hover {
+    opacity: .85;
+    box-shadow:
+        0 0 0 1px rgba(100, 100, 100, 0.55),
+        inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
 .btn-orange-gst {
@@ -619,6 +652,10 @@ hr:last-child {
     background-color: var(--red-main);
     border: none;
     color: white;
+    /* red-main = #FF4A4A — ring: lighter red/pink tint, shadows tinted with red hue */
+    box-shadow:
+        0 0 0 1px rgba(255, 180, 180, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .btn-green {
@@ -631,12 +668,19 @@ hr:last-child {
     background-color: #560101;
     border: none;
     color: var(--red-main);
+    box-shadow:
+        0 0 0 1px rgba(255, 100, 100, 0.20),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
 }
 
 .btn-gst-red {
     background-color: transparent;
     border: 1px solid var(--red-main);
     color: var(--red-main);
+    /* transparent bg, red accent — ring uses red tint, shadows very faint red-tinted */
+    box-shadow:
+        0 0 0 1px rgba(255, 74, 74, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .btn-gst-red-disabled {
@@ -649,6 +693,9 @@ hr:last-child {
 .btn-gst-red:hover {
     background-color: var(--red-main);
     color: white;
+    box-shadow:
+        0 0 0 1px rgba(255, 180, 180, 0.20),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .btn-gst-red:hover div {
@@ -938,7 +985,7 @@ label {
 }
 
 .round-icon {
-    min-width: 3rem;
+    width: 44px;
     aspect-ratio: 1/1;
     border: 1px solid var(--dim-gray);
     border-radius: var(--border-r-50);
@@ -1383,9 +1430,10 @@ a:not(.no-hover):hover {
 
 .sc-s {
     overflow: hidden;
-    border-radius: var(--border-r-32);
+    border-radius: var(--border-r-20);
     border: 1px solid var(--pale-gray);
     background-color: var(--c1-side);
+    
 }
 
 .sc-s-18 {

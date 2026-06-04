@@ -4,6 +4,7 @@ import { Link } from "next/link";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 
 export default function WalletAlby() {
   const location = window.location;
@@ -84,14 +85,16 @@ export default function WalletAlby() {
   if (code === false) return;
   if (code === "")
     return (
-      <div className="fixed-container fx-centered fx-col">
-        <h4>{t("Ao1YlmX")} :(</h4>
-        <p className="gray-c p-centered" style={{ maxWidth: "300px" }}>
-          {t("AWq8fUG")}
-        </p>
-        <Link href={"/"}>
-          <button className="btn btn-normal btn-small">{t("AWroZQj")}</button>
-        </Link>
-      </div>
+      <Overlay exit={() => {}}>
+        <div className="fx-centered fx-col">
+          <h4>{t("Ao1YlmX")} :(</h4>
+          <p className="gray-c p-centered" style={{ maxWidth: "300px" }}>
+            {t("AWq8fUG")}
+          </p>
+          <Link href={"/"}>
+            <button className="btn btn-normal btn-small">{t("AWroZQj")}</button>
+          </Link>
+        </div>
+      </Overlay>
     );
 }

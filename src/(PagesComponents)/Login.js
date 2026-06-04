@@ -32,7 +32,7 @@ import {
   NDKPrivateKeySigner,
 } from "@nostr-dev-kit/ndk";
 import { FilePicker } from "@/Components/FilePicker";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import {
   BUNKER_REGEX,
@@ -43,6 +43,7 @@ import { NostrConnect } from "nostr-tools/kinds";
 import QRCode from "react-qr-code";
 import Link from "next/link";
 import Router from "next/router";
+import Overlay from "@/Components/Overlay";
 import useRecommendedPacks from "@/Hooks/useRecommendedPacks";
 import PackPreview from "./Explore/PackPreview";
 import PackPreviewOnboarding from "@/Components/PackPreviewOnboarding";
@@ -259,10 +260,9 @@ const Bunker = () => {
   return (
     <>
       {nostrConnectURI && (
-        <div className="fixed-container fx-centered box-pad-h">
+        <Overlay exit={() => setNostrConnectURI("")} width={340}>
           <div
-            className="sc-s-18 bg-sp box-pad-h box-pad-v fx-centered fx-col slide-up"
-            style={{ position: "relative", width: "min(100%,340px)" }}
+            className="box-pad-h box-pad-v fx-centered fx-col"
           >
             <div className="close" onClick={() => setNostrConnectURI("")}>
               <div></div>
@@ -312,7 +312,7 @@ const Bunker = () => {
               </div>
             </div>
           </div>
-        </div>
+        </Overlay>
       )}
       <button className="btn btn-gray btn-full" onClick={launchBunkerWindow}>
         {t("A9eQr6B")}
@@ -1299,7 +1299,7 @@ const InitiProfile = () => {
       className="fit-container fx-centered fx-col"
       style={{ height: "500px" }}
     >
-      <LoadingLogo size={200} />
+      <Spinner size={32} />
     </div>
   );
 };

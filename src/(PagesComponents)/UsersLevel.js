@@ -9,11 +9,12 @@ import PagePlaceholder from "@/Components/PagePlaceholder";
 import { getCurrentLevel, levelCount } from "@/Helpers/Helpers";
 import { userLogout } from "@/Helpers/Controlers";
 import { useSelector } from "react-redux";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import { timeAgo } from "@/Helpers/Encryptions";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 let chart_ = [
   { action: "flashnews_post", all_time_points: 0, last_updated: null },
@@ -624,7 +625,7 @@ export default function UserLevels() {
                     className="fit-container fx-centered"
                     style={{ height: "80vh" }}
                   >
-                    <LoadingLogo size={100} />
+                    <Spinner size={32} />
                   </div>
                 )}
               </>
@@ -642,17 +643,9 @@ export default function UserLevels() {
 const TierDemo = ({ tier, exit }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={450}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col fx-start-h slide-up"
-        style={{ width: "min(100%, 450px)" }}
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up"
       >
         <div className="box-pad-h-s box-pad-v-s">
           <div className={tier.image} style={{ width: "180px" }}></div>
@@ -707,25 +700,15 @@ const TierDemo = ({ tier, exit }) => {
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };
 const PointsDesc = ({ exit }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={450}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col fx-start-h slide-up"
-        style={{ width: "min(100%, 450px)" }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up"
       >
         <h3 className="p-centered box-pad-h box-marg-s">{t("AIdLWAb")}</h3>
         <p className="p-centered gray-c">{t("AIjkhSn")}</p>
@@ -739,6 +722,6 @@ const PointsDesc = ({ exit }) => {
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

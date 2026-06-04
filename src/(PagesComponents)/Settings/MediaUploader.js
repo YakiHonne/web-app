@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
@@ -225,23 +226,9 @@ export function MediaUploader({ exit }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500} allowOverFlow={true}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp slide-up"
-        style={{
-          width: "min(100%, 500px)",
-          position: "relative",
-          overflow: "visible",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -469,7 +456,7 @@ export function MediaUploader({ exit }) {
           </Link>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 

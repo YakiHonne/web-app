@@ -10,6 +10,7 @@ import { getUser } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function BrowseZapPolls({ setNevent, exit }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -127,21 +128,13 @@ export default function BrowseZapPolls({ setNevent, exit }) {
     setSelectedOption(source);
   };
   return (
-    <div
-      className="fixed-container fx-centered fx-start-v"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={700}>
       <div
         className="fit-height overlay-container fx-centered fx-start-v fx-start-h fx-col bg-sp"
         style={{
-          width: "min(100%,700px)",
           overflow: "scroll",
           border: "1px solid var(--pale-gray)",
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div
           className="fit-container fx-centered sticky"
@@ -230,7 +223,7 @@ export default function BrowseZapPolls({ setNevent, exit }) {
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 

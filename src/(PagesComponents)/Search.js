@@ -10,7 +10,7 @@ import { customHistory } from "@/Helpers/History";
 import { saveFetchedUsers, saveUsers } from "@/Helpers/DB";
 import axios from "axios";
 import SearchUserCard from "@/Components/SearchUserCard";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import Slider from "@/Components/Slider";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import KindOne from "@/Components/KindOne";
@@ -501,7 +501,7 @@ export default function Search() {
                 className="fit-container fx-centered"
                 style={{ height: "80vh" }}
               >
-                <LoadingLogo />
+                <Spinner size={32} />
               </div>
             )}
             {results.length === 0 && !isLoading && (

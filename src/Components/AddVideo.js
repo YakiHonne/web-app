@@ -9,6 +9,7 @@ import { getVideoFromURL } from "@/Helpers/Helpers";
 import LoadingDots from "@/Components/LoadingDots";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function AddVideo({ exit, event }) {
   const dispatch = useDispatch();
@@ -103,12 +104,9 @@ export default function AddVideo({ exit, event }) {
 
   return (
     <>
-      <div className="fixed-container fx-centered box-pad-h">
+      <Overlay exit={exit} width={600}>
         <div
-          className="sc-s-18 bg-sp"
           style={{
-            position: "relative",
-            width: "min(100%, 600px)",
             height: "100dvh",
             overflow: "scroll",
           }}
@@ -244,7 +242,7 @@ export default function AddVideo({ exit, event }) {
             }}
           />
         </div>
-      </div>
+      </Overlay>
     </>
   );
 }

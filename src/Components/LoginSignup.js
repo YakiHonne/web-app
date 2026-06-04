@@ -22,6 +22,7 @@ import { relaysOnPlatform } from "@/Content/Relays";
 import LoadingDots from "@/Components/LoadingDots";
 import { getUser, getUserFromNOSTR } from "@/Helpers/Controlers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 
@@ -58,22 +59,11 @@ export default function LoginSignup({ exit }) {
   }, []);
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h fx-end-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={450}>
       <div
-        className="sc-s-18 bg-sp box-pad-h box-pad-v fx-scattered fx-col slide-right"
+        className="box-pad-h box-pad-v fx-scattered fx-col slide-right"
         style={{
-          width: "min(100%, 450px)",
-          position: "relative",
           height: "95%",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
         }}
       >
         <div className="close" onClick={exit}>
@@ -103,7 +93,7 @@ export default function LoginSignup({ exit }) {
         </div>
         <div style={{ height: "5vh" }}></div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 

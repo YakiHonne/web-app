@@ -37,6 +37,9 @@ import {
   getEventFromCache,
   setEventFromCache,
 } from "@/Helpers/utils/eventsCache";
+import { iconsNames } from "@/Content/IconV2URL";
+import Overlay from "@/Components/Overlay";
+import EventStats from "./EventStats";
 
 function KindOne({
   event,
@@ -202,6 +205,8 @@ function KindOne({
           undefined,
           undefined,
           event.pubkey,
+          false,
+          `slider-${event.id}`,
         );
         setTranslatedNote(noteTree);
         setShowTranslation(true);
@@ -309,7 +314,7 @@ function KindOne({
       <div
         className="box-pad-v-m fit-container note-item"
         id={event.id}
-        style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
+      // style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
       >
         {event.isComment && isThread && (
           <RelatedEvent
@@ -359,9 +364,7 @@ function KindOne({
                         <Icon name="checkmark-c1" isColored />
                       )}
                     </div>
-                    <p className="gray-c p-medium" style={{ margin: 0 }}>
-                      &#8226;
-                    </p>
+
                     <p className="gray-c p-medium" style={{ margin: 0 }}>
                       <Date_
                         toConvert={new Date(event.created_at * 1000)}
@@ -373,6 +376,8 @@ function KindOne({
                     {event.isPaidNote && (
                       <div className="sticker sticker-c1">{t("AAg9D6c")}</div>
                     )}
+                    {!isNoteTranslating && <Icon v={2} name={iconsNames.globe} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                    {isNoteTranslating && <LoadingDots />}
                     {reactions && (
                       <EventOptions
                         event={event}
@@ -409,6 +414,7 @@ function KindOne({
                     </div>
                   </div>
                 </Link>
+                {!minimal && <div id={`slider-${event.id}`} />}
               </div>
             </div>
             {isClamped !== 10000 && (
@@ -451,7 +457,7 @@ function KindOne({
                     userProfile={userProfile}
                     setShowComments={setShowComments}
                   />
-                  <div className="fx-centered">
+                  {/* <div className="fx-centered">
                     <div className="fit-container">
                       {!isNoteTranslating && !showTranslation && (
                         <div
@@ -481,7 +487,8 @@ function KindOne({
                       )}
                       {isNoteTranslating && <LoadingDots />}
                     </div>
-                  </div>
+                  </div> */}
+                  <EventStats postActions={postActions} />
                 </div>
               </>
             )}
@@ -553,15 +560,15 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
           kind === 0
             ? await getSubData([{ ids: [ids] }], 500)
             : await getSubData(
-                [
-                  {
-                    kinds: [kind],
-                    authors: [ids.pubkey],
-                    "#d": [ids.identifier],
-                  },
-                ],
-                500,
-              );
+              [
+                {
+                  kinds: [kind],
+                  authors: [ids.pubkey],
+                  "#d": [ids.identifier],
+                },
+              ],
+              500,
+            );
         if (event_.data.length > 0) {
           let post = event_.data[0];
           saveUsers([post.pubkey]);
@@ -632,6 +639,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
                 hasReplies={true}
                 isHistory={true}
                 noReactions={!reactions}
+                fromKindOne={true}
               />
             )}
             {relatedEvent.kind !== 1 && relatedEvent.kind !== 1111 && (
@@ -746,29 +754,17 @@ const FastAccessCS = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered fx-start-v"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={550}>
       <div
-        className="fx-centered fx-col fx-start-v fx-start-h sc-s-18 bg-sp"
+        className="fx-centered fx-col fx-start-v fx-start-h"
         style={{
           overflow: "scroll",
           scrollBehavior: "smooth",
-          height: "100vh",
-          width: "min(100%, 550px)",
-          position: "relative",
           borderRadius: 0,
           gap: 0,
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
       >
-        <div
+        {/* <div
           className="fit-container fx-centered sticky"
           style={{ borderBottom: "1px solid var(--very-dim-gray)" }}
         >
@@ -782,6 +778,12 @@ const FastAccessCS = ({
               <div></div>
             </div>
           </div>
+        </div> */}
+        <div
+          className="close"
+          onClick={exit}
+        >
+          <div></div>
         </div>
         <CommentsSection
           noteTags={noteTags}
@@ -791,6 +793,6 @@ const FastAccessCS = ({
           isRoot={isRoot}
         />
       </div>
-    </div>
+    </Overlay>
   );
 };

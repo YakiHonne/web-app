@@ -6,6 +6,7 @@ import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import LoadingDots from "@/Components/LoadingDots";
 import RelayImage from "@/Components/RelayImage";
 import UserProfilePic from "@/Components/UserProfilePic";
+import Overlay from "@/Components/Overlay";
 
 export function RelaysInfo({ url, exit }) {
   const { t } = useTranslation();
@@ -35,13 +36,9 @@ export function RelaysInfo({ url, exit }) {
   }, []);
 
   return (
-    <div className="fixed-container box-pad-h fx-centered">
+    <Overlay exit={exit} width={500}>
       <div
-        className="sc-s-18 bg-sp box-pad-h box-pad-v"
-        style={{
-          width: "min(100%,500px)",
-          position: "relative",
-        }}
+        className="box-pad-h box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -121,7 +118,7 @@ export function RelaysInfo({ url, exit }) {
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 };
 

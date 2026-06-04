@@ -7,6 +7,7 @@ import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function ToUpdateRelay({ exit }) {
   const dispatch = useDispatch();
@@ -136,17 +137,10 @@ export default function ToUpdateRelay({ exit }) {
 
   if (!isLoaded) return <LoadingScreen />;
   return (
-    <section
-      className="fixed-container fx-centered fx-wrap box-pad-h box-pad-v"
-      style={{
-        pointerEvents: isLoading ? "none" : "auto",
-        overflow: "scroll",
-        overflowX: "hidden",
-      }}
-    >
+    <Overlay exit={exit} width={1000}>
       <div
         className="fx-centered fx-wrap fx-start-v "
-        style={{ rowGap: "32px", width: "min(100%, 1000px)" }}
+        style={{ rowGap: "32px", pointerEvents: isLoading ? "none" : "auto" }}
       >
         <div
           className="fx-centered fx-col slide-up"
@@ -308,6 +302,6 @@ export default function ToUpdateRelay({ exit }) {
           </div>
         </div>
       </div>
-    </section>
+    </Overlay>
   );
 }

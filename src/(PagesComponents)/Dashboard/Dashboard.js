@@ -7,7 +7,7 @@ import { getParsedRepEvent, sortEvents } from "@/Helpers/Encryptions";
 import { sleepTimer } from "@/Helpers/Helpers";
 import { getArticleDraft, getNoteDraft } from "@/Helpers/ClientHelpers";
 import PostAsNote from "@/Components/PostAsNote";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useRouter } from "next/router";
 import SideMenu from "./SideMenu";
 import Content from "./Content";
@@ -187,7 +187,7 @@ export default function Dashboard() {
                     style={{ height: "100vh" }}
                   >
                     <div className="fx-centered">
-                      <LoadingLogo />
+                      <Spinner size={32} />
                     </div>
                   </div>
                 )}

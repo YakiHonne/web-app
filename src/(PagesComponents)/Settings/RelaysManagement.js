@@ -7,16 +7,15 @@ export function RelaysManagement({ selectedTab, setSelectedTab }) {
   const { t } = useTranslation();
   return (
     <div
-      className={`fit-container fx-scattered fx-col pointer ${
-        selectedTab === "relays" ? "sc-s box-pad-h-s box-pad-v-s" : ""
-      }`}
+      className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "relays" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+        }`}
       style={{
         overflow: "visible",
-        borderBottom: "1px solid var(--very-dim-gray)",
-        borderColor: "var(--very-dim-gray)",
+        // borderBottom: "1px solid var(--very-dim-gray)",
+        // borderColor: "var(--very-dim-gray)",
         transition: "0.2s ease-in-out",
         gap: 0,
-        borderRadius: 0
+        // borderRadius: 0
       }}
     >
       <div

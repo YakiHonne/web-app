@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function DeleteWarning({
   title,
@@ -11,11 +12,9 @@ export default function DeleteWarning({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={450}>
       <section
-        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
-        style={{ width: "450px" }}
-        onClick={(e) => e.stopPropagation()}
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div
           className="fx-centered box-marg-s"
@@ -45,6 +44,6 @@ export default function DeleteWarning({
           </button>
         </div>
       </section>
-    </div>
+    </Overlay>
   );
 }

@@ -13,6 +13,8 @@ import EventOptions from "@/Components/ElementOptions/EventOptions";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import PostReaction from "./PostReaction";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
+import EventStats from "./EventStats";
 
 const checkFollowing = (list, toFollowKey) => {
   if (!list) return false;
@@ -106,15 +108,15 @@ export default function RepEventPreviewCard({
   return (
     <>
       <div
-        className={"fit-container fx-scattered box-pad-h-m mediacard"}
+        className={"fit-container fx-scattered box-pad-h-m mediacard sc-s box-marg-s"}
         onClick={(e) => e.stopPropagation()}
         style={{
           border: "none",
           position: "relative",
           overflow: "visible",
           columnGap: "16px",
-          paddingBottom: "1rem",
-          borderBottom: border ? "1px solid var(--very-dim-gray)" : "",
+          // paddingBottom: "1rem",
+          // borderBottom: border ? "1px solid var(--very-dim-gray)" : "",
         }}
       >
         {!showContent && (
@@ -177,9 +179,8 @@ export default function RepEventPreviewCard({
                 style={{
                   backgroundColor:
                     "linear-gradient(93deg, #880185 -6.44%, #FA4EFF 138.71%)",
-                  backgroundImage: `url(${
-                    item.image || userProfile.picture || item.imagePP
-                  })`,
+                  backgroundImage: `url(${item.image || userProfile.picture || item.imagePP
+                    })`,
                   width: "max(25%,150px)",
                   aspectRatio: "1/1",
                   border: "none",
@@ -189,19 +190,19 @@ export default function RepEventPreviewCard({
                 {(item.kind === 34235 ||
                   item.kind === 21 ||
                   item.kind === 22) && (
-                  <div
-                    className="fx-centered"
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: 0,
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  >
-                    <Icon name="play-vid" size={58} />
-                  </div>
-                )}
+                    <div
+                      className="fx-centered"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    >
+                      <Icon name="play-vid" size={58} />
+                    </div>
+                  )}
               </div>
             </Link>
           </div>
@@ -270,26 +271,15 @@ const Reactions = ({ post, author }) => {
         />
       )}
       {showCommentsSection && (
-        <div
-          className="fixed-container fx-centered fx-start-v"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowCommentsSections(false);
-          }}
-        >
+        <Overlay exit={() => setShowCommentsSections(false)}>
           <div
-            className="main-middle vox-pad-h fx-centered fx-col fx-start-v fx-start-h sc-s-18 bg-sp"
+            className="vox-pad-h fx-centered fx-col fx-start-v fx-start-h"
             style={{
               overflow: "scroll",
               scrollBehavior: "smooth",
               height: "100vh",
-              // width: "min(100%, 550px)",
-              position: "relative",
               borderRadius: 0,
               gap: 0,
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
             }}
           >
             <RepEventCommentsSection
@@ -302,7 +292,7 @@ const Reactions = ({ post, author }) => {
               event={post}
             />
           </div>
-        </div>
+        </Overlay>
       )}
       <div
         className="fit-container fx-centered fx-col box-pad-v-s"
@@ -329,7 +319,10 @@ const Reactions = ({ post, author }) => {
             postActions={postActions}
             userProfile={author}
           />
-          <EventOptions event={post} component="repEventsCard" />
+          <div className="fx-centered">
+            <EventStats postActions={postActions} />
+            <EventOptions event={post} component="repEventsCard" />
+          </div>
         </div>
       </div>
     </>

@@ -14,8 +14,9 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import UserProfilePic from "./UserProfilePic";
 import { nip19 } from "nostr-tools";
 import Link from "next/link";
-import LoadingLogo from "./LoadingLogo";
+import Spinner from "./Spinner";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function MiniApp({ url, exit, setReturnedData }) {
   const { t } = useTranslation();
@@ -169,25 +170,15 @@ export default function MiniApp({ url, exit, setReturnedData }) {
           setConfirmPayment={handlePaymentResponse}
         />
       )}
-      <div
-        className="fixed-container fx-centered fx-col box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={455}>
         <div
           className="fx-centered fx-col fx-start-v fx-start-h slide-up"
           style={{
-            width: "455px",
             padding: "5px",
             borderRadius: "18px",
             overflow: "hidden",
             backgroundColor: "var(--dim-gray)",
             gap: 0,
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
           }}
         >
           <div
@@ -254,7 +245,7 @@ export default function MiniApp({ url, exit, setReturnedData }) {
                   borderRadius: "18px",
                 }}
               >
-                <LoadingLogo size={64} />
+                <Spinner size={32} />
               </div>
             )}
           </div>
@@ -262,7 +253,7 @@ export default function MiniApp({ url, exit, setReturnedData }) {
         {!isLoading && appMetadata && (
           <UserPreview pubkey={appMetadata?.pubkey} />
         )}
-      </div>
+      </Overlay>
     </>
   );
 }

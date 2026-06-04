@@ -117,11 +117,11 @@ const HighestZapper = ({ data, onClick }) => {
               borderRadius: "20px",
               cursor: "inherit",
               border: "none",
-              backgroundColor: "var(--dim-gray)",
+              // backgroundColor: "var(--dim-gray)",
               overflow: "visible",
               gap: 0,
             }}
-            className="box-pad-h-s box-pad-v-s sc-s fx-centered"
+            className="bg-dropdown  box-pad-v-s sc-s fx-centered"
           >
             <div
               className="fx-centered"
@@ -133,10 +133,10 @@ const HighestZapper = ({ data, onClick }) => {
               }}
               onClick={onClick}
             >
-              <div className="fx-centered">
+              <div className="fx-centered box-pad-h-s">
                 <Icon name="bolt-bold" isColored />
                 <div style={{ border: "none" }}>
-                  <p className="c1-c" style={{ minWidth: "max-content" }}>
+                  <p className="c1-c p-medium" style={{ minWidth: "max-content" }}>
                     <NumberShrink value={data.amount} />
                   </p>
                 </div>
@@ -161,7 +161,7 @@ const HighestZapper = ({ data, onClick }) => {
                       onClick={() =>
                         customHistory(
                           "/profile/" +
-                            nip19.nprofileEncode({ pubkey: author.pubkey }),
+                          nip19.nprofileEncode({ pubkey: author.pubkey }),
                         )
                       }
                     >
@@ -228,6 +228,8 @@ const RankedZappers = ({ users, onClick }) => {
                 transform: `translateX(${8 * (ranked.length - 1 - index)}px)`,
                 outline: "2px solid var(--white)",
                 borderRadius: "50%",
+                width: "25px",
+                height: "25px"
               }}
             >
               <UserProfilePic

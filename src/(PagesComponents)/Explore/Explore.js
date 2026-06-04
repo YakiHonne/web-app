@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
 import { getParsedPacksEvent } from "@/Helpers/Encryptions";
 import { Virtuoso } from "react-virtuoso";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import bannedList from "@/Content/BannedList";
 import { useSelector } from "react-redux";
 import PackPreview from "./PackPreview";
@@ -138,7 +138,7 @@ export default function Explore() {
               className="fit-container box-pad-v fx-centered fx-col"
               style={{ height: "60vh" }}
             >
-              <LoadingLogo size={64} />
+              <Spinner size={32} />
             </div>
           )}
         </div>

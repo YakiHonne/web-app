@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { sendMessage } from "@/Helpers/DMHelpers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function InitiConvo({ exit, receiver = false }) {
   const { t } = useTranslation();
@@ -40,23 +41,12 @@ export default function InitiConvo({ exit, receiver = false }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp"
+        className="box-pad-h box-pad-v"
         style={{
-          position: "relative",
-          width: "min(100%, 500px)",
           borderColor: !legacy ? "var(--green-main)" : "",
           transition: ".2s ease-in-out",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
         }}
       >
         <div className="close" onClick={exit}>
@@ -119,6 +109,6 @@ export default function InitiConvo({ exit, receiver = false }) {
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
 import { useRouter } from "next/router";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 const getSuggestions = (custom) => {
   if (!custom) return [];
@@ -245,15 +246,14 @@ export default function ToPublish({
   };
 
   return (
-    <section className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={700}>
       <div
         style={{
-          width: "min(100%, 700px)",
           height: "100vh",
           overflow: "scroll",
           borderRadius: 0,
         }}
-        className="sc-s-18 fx-col fx-centered fx-start-h fx-start-v bg-sp"
+        className="fx-col fx-centered fx-start-h fx-start-v"
       >
         <div className="box-pad-h-m fit-container fx-centered fx-col">
           <div
@@ -570,6 +570,6 @@ export default function ToPublish({
           </button>
         </div>
       </div>
-    </section>
+    </Overlay>
   );
 }

@@ -60,13 +60,13 @@
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 4px 6px color-mix(in srgb, var(--black) 2%, transparent);
 }
 
 .plan-card:hover {
   transform: translateY(-12px);
   border-color: var(--orange-main);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 50px -12px color-mix(in srgb, var(--black) 10%, transparent);
 }
 
 .plan-card.premium {
@@ -79,12 +79,12 @@
   top: 1.25rem;
   right: 1.25rem;
   background: var(--orange-main);
-  color: white;
+  color: var(--white);
   padding: 0.4rem 1rem;
   border-radius: 50px;
   font-size: 0.75rem;
   font-weight: 800;
-  box-shadow: 0 4px 10px rgba(238, 119, 0, 0.3);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--orange-main) 30%, transparent);
 }
 
 .plan-card .plan-name {
@@ -129,7 +129,7 @@
   font-size: 0.9rem;
   font-weight: 700;
   align-self: flex-start;
-  border: 1px solid rgba(0, 192, 77, 0.1);
+  border: 1px solid color-mix(in srgb, var(--green-main) 10%, transparent);
 }
 
 .plan-card .plan-cta {

@@ -13,7 +13,7 @@ import {
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import { saveUsers } from "@/Helpers/DB";
 import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import UserToFollowSuggestionsCards from "@/Components/SuggestionsCards/UserToFollowSuggestionsCards";
 import ContentSuggestionsCards from "@/Components/SuggestionsCards/ContentSuggestionCards";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
@@ -552,7 +552,7 @@ const ExploreFeed = ({
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "30vh" }}
         >
-          <LoadingLogo />
+          <Spinner size={32} />
         </div>
       )}
       {/* </div> */}

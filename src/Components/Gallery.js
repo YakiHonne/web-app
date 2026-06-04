@@ -168,7 +168,7 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
       {carouselItems.length === 1 && (
         <div
           className="image-grid blur-box"
-          style={{ margin: ".5rem 0 .5rem 0", maxWidth: "95%", opacity: 1 }}
+          style={{ margin: ".5rem 0 .5rem 0", maxWidth: "75%", opacity: 1 }}
           // onClick={handleUnblur}
           onClick={(e) => {
             e.preventDefault();
@@ -189,7 +189,7 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
             }}
             src={`${carouselItems[0]}`}
             alt="el"
-            // loading="lazy"
+          // loading="lazy"
           />
 
           <BlurredContentDesc toBlur={toBlur} />
@@ -204,7 +204,7 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
             gap: "4px",
             border: "none",
           }}
-          // onClick={handleUnblur}
+        // onClick={handleUnblur}
         >
           {carouselItems.map((item, index) => {
             if (index < 5)
@@ -226,9 +226,8 @@ export default function Gallery({ imgs, pubkey, noBlur = false }) {
                     key={
                       typeof item === "string" ? item : item.fileName || index
                     }
-                    className={`bg-img cover-bg pointer fit-container fit-height ${
-                      !toBlur ? "" : "blurred"
-                    }`}
+                    className={`bg-img cover-bg pointer fit-container fit-height ${!toBlur ? "" : "blurred"
+                      }`}
                     style={{
                       backgroundImage: `url(${item})`,
                     }}

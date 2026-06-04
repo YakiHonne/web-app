@@ -159,8 +159,7 @@ export default function UserMetadata({ user }) {
               backgroundColor: "var(--very-dim-gray)",
               overflow: "visible",
               zIndex: 0,
-              borderTopLeftRadius: "0",
-              borderTopRightRadius: "0",
+
               cursor: user?.banner ? "zoom-in" : "default",
             }}
             onClick={() => handleCarouselItems(0)}
@@ -213,9 +212,8 @@ export default function UserMetadata({ user }) {
                         setReceivedEvent={() => null}
                       />
                       <div
-                        className={`round-icon round-icon-tooltip ${
-                          !userKeys || userKeys.bunker ? "if-disabled" : ""
-                        }`}
+                        className={`round-icon round-icon-tooltip ${!userKeys || userKeys.bunker ? "if-disabled" : ""
+                          }`}
                         data-tooltip={
                           userKeys && (userKeys.sec || userKeys.ext)
                             ? t("AEby39n", { name: user?.name || "" })

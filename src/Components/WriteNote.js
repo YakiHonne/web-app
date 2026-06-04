@@ -33,6 +33,7 @@ import LightningWalletsSelect from "./LightningWalletsSelect";
 import Overlay from "./Overlay";
 import { nip19 } from "nostr-tools";
 import Link from "next/link";
+import { iconsNames } from "@/Content/IconV2URL";
 
 const PAID_NOTE_AMOUNT = process.env.NEXT_PUBLIC_PAID_NOTE_AMOUNT;
 
@@ -225,7 +226,7 @@ export default function WriteNote({
       if (selectedScheduleDate) navigateTo.push("/dashboard?tabNumber=9");
       navigateTo.push(
         "/profile/" +
-          nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+        nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
       );
       exit();
       setIsLoading(false);
@@ -327,7 +328,7 @@ export default function WriteNote({
         updateNoteDraft("root", "");
         navigateTo.push(
           "/profile/" +
-            nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+          nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
         );
         exit();
         setIsLoading(false);
@@ -352,8 +353,8 @@ export default function WriteNote({
     if (note)
       setNote(
         note +
-          " " +
-          `https://yakihonne.com/smart-widget-checker?naddr=${data} `,
+        " " +
+        `https://yakihonne.com/smart-widget-checker?naddr=${data} `,
       );
     if (!note)
       setNote(`https://yakihonne.com/smart-widget-checker?naddr=${data} `);
@@ -457,7 +458,7 @@ export default function WriteNote({
         <Overlay exit={() => setShowWarningBox(false)} width={500}>
           <div
             className="box-pad-h box-pad-v fx-centered"
-            style={{ width: "min(100%, 500px)" }}
+
           >
             <div className="fx-centered fx-col">
               <h4>{linkedEvent ? "Heads up!" : "Save draft?"}</h4>
@@ -575,16 +576,16 @@ export default function WriteNote({
         />
       )}
       <div
-        className="fit-container fx-centered fx-col fx-start-v fx-stretch  bg-sp"
-        style={{
-          overflow: "visible",
-          // height: linkedEvent ? "65vh" : "55vh",
-          backgroundColor: !border ? "transparent" : "",
-          // border: border ? "1px solid var(--very-dim-gray)" : "none",
-          // borderBottom: borderBottom
-          //   ? "1px solid var(--very-dim-gray)"
-          //   : "none",
-        }}
+        // className="fit-container fx-centered fx-col fx-start-v fx-stretch  bg-sp"
+        // style={{
+        //   overflow: "visible",
+        //   // height: linkedEvent ? "65vh" : "55vh",
+        //   backgroundColor: !border ? "transparent" : "",
+        //   // border: border ? "1px solid var(--very-dim-gray)" : "none",
+        //   // borderBottom: borderBottom
+        //   //   ? "1px solid var(--very-dim-gray)"
+        //   //   : "none",
+        // }}
         ref={ref}
         onClick={() => {
           textareaRef?.current?.focus();
@@ -737,7 +738,7 @@ export default function WriteNote({
         )}
         <div
           className="fit-container fx-centered fx-col box-pad-h box-pad-v-m"
-          style={{ borderTop: "1px solid var(--pale-gray)" }}
+
         >
           <div className="fit-container fx-scattered fx-wrap">
             <div className="fx-centered" style={{ gap: "12px" }}>
@@ -751,11 +752,12 @@ export default function WriteNote({
                 <div
                   className="p-small box-pad-v-s box-pad-h-s pointer fx-centered"
                   style={{
-                    padding: ".125rem .25rem",
-                    border: "1.5px solid var(--gray)",
+                    padding: ".09rem .125rem",
+                    border: "2px solid var(--black)",
                     borderRadius: "6px",
                     backgroundColor: showGIFs ? "var(--black)" : "transparent",
                     color: showGIFs ? "var(--white)" : "",
+                    opacity: ".5"
                   }}
                   onClick={() => {
                     setShowGIFs(!showGIFs);
@@ -775,7 +777,7 @@ export default function WriteNote({
                 setData={(data) => handleInsertTextInPosition(data)}
               />
               <div onClick={() => setShowDatePicker(true)}>
-                <Icon name="calendar" size={24} />
+                <Icon v={2} opacity=".5" name={iconsNames.calendar} size={24} />
               </div>
               <div className="fx-centered sc-s-18 bg-sp box-pad-h-s ">
                 <p

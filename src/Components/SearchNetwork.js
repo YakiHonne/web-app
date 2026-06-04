@@ -16,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
 import Slider from "@/Components/Slider";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 function isValidUrl(url) {
   const regex = /^(wss?:\/\/)?([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(:\d+)?(\/.*)?$/;
@@ -270,21 +271,12 @@ export default function SearchNetwork({ exit }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit}>
       <div
-        className="sc-s slide-up bg-sp"
+        className="slide-up"
         style={{
-          width: "min(100%,600px)",
           height: "60vh",
-          position: "relative",
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div
           style={{ overflow: "scroll", height: "100%", paddingBottom: "4rem" }}
@@ -453,6 +445,6 @@ export default function SearchNetwork({ exit }) {
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 }
