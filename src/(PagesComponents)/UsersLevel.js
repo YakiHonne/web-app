@@ -212,7 +212,6 @@ export default function UserLevels() {
           className="fx-centered fx-start-v"
         >
           <div
-            // style={{ width: "min(100%, 700px)" }}
             className={`fx-centered  fx-wrap box-pad-h main-middle`}
           >
             {isConnectedToYaki && (
@@ -362,13 +361,13 @@ export default function UserLevels() {
                               {t("ABcjNuL", {
                                 date:
                                   headerStats.xp ===
-                                  headerStats.consumablePoints
+                                    headerStats.consumablePoints
                                     ? "N/A"
                                     : timeAgo(
-                                        new Date(
-                                          headerStats.consumablePointsLU * 1000
-                                        )
-                                      ),
+                                      new Date(
+                                        headerStats.consumablePointsLU * 1000
+                                      )
+                                    ),
                               })}
                             </p>
                           </div>
@@ -410,10 +409,9 @@ export default function UserLevels() {
                                   </p>
                                   <div
                                     style={{
-                                      height: `${
-                                        (item.all_time_points * 100) /
+                                      height: `${(item.all_time_points * 100) /
                                         maxValueInChart
-                                      }%`,
+                                        }%`,
                                       minHeight: "5px",
                                       backgroundColor:
                                         item.all_time_points === maxValueInChart
@@ -458,10 +456,10 @@ export default function UserLevels() {
                                           date: !item.last_updated
                                             ? "N/A"
                                             : timeAgo(
-                                                new Date(
-                                                  item.last_updated * 1000
-                                                )
-                                              ),
+                                              new Date(
+                                                item.last_updated * 1000
+                                              )
+                                            ),
                                         })}
                                       </p>
                                     </div>
@@ -475,7 +473,6 @@ export default function UserLevels() {
                       </div>
                       <div
                         className="fit-container fx-centered fx-col box-marg-s"
-                        // style={{ rowGap: "24px" }}
                       >
                         <div className="fit-container">
                           <p className=" gray-c">{t("A2Tafrd")}</p>
@@ -506,9 +503,9 @@ export default function UserLevels() {
                                   </p>
                                   {(item.user_stat?.all_time_points || 0) ===
                                     item.points[0] *
-                                      (item.user_stat?.count || 1) && (
-                                    <Icon name="checkmark" />
-                                  )}
+                                    (item.user_stat?.count || 1) && (
+                                      <Icon name="checkmark" />
+                                    )}
                                 </div>
                               </div>
 
@@ -524,7 +521,7 @@ export default function UserLevels() {
                                     className={
                                       item.count -
                                         (item.user_stat?.count || 0) ===
-                                      0
+                                        0
                                         ? "red-c"
                                         : "green-c"
                                     }
@@ -544,9 +541,9 @@ export default function UserLevels() {
                         {repeatedRewardsStats.map((item) => {
                           let cooldown = item.user_stat
                             ? getCooldown(
-                                item.user_stat.last_updated,
-                                item.cooldown
-                              )
+                              item.user_stat.last_updated,
+                              item.cooldown
+                            )
                             : 0;
                           return (
                             <div
@@ -576,9 +573,9 @@ export default function UserLevels() {
                                     percentage={
                                       item.cooldown > 0
                                         ? Math.floor(
-                                            (cooldown * 100) /
-                                              (item.cooldown / 60)
-                                          )
+                                          (cooldown * 100) /
+                                          (item.cooldown / 60)
+                                        )
                                         : 100
                                     }
                                     inversed={item.cooldown > 0 ? true : false}
@@ -651,7 +648,6 @@ const TierDemo = ({ tier, exit }) => {
           <div className={tier.image} style={{ width: "180px" }}></div>
         </div>
         <div className="fx-centered fx-col  fit-container">
-          {/* <h3>{tier.display_name}</h3> */}
           <div
             className="fx-centered fx-col fit-container"
             style={{ rowGap: "5px" }}
@@ -712,9 +708,9 @@ const PointsDesc = ({ exit }) => {
       >
         <h3 className="p-centered box-pad-h box-marg-s">{t("AIdLWAb")}</h3>
         <p className="p-centered gray-c">{t("AIjkhSn")}</p>
-          <p className="p-centered gray-c">{"> " + t("A6fM6gw") + " <"}</p>
-          <p className="p-centered gray-c">{"> " + t("AaZQAOK") + " <"}</p>
-          <p className="p-centered gray-c">{"> " + t("Av0e6zQ") + " <"}</p>
+        <p className="p-centered gray-c">{"> " + t("A6fM6gw") + " <"}</p>
+        <p className="p-centered gray-c">{"> " + t("AaZQAOK") + " <"}</p>
+        <p className="p-centered gray-c">{"> " + t("Av0e6zQ") + " <"}</p>
         <p className="green-c p-centered box-pad-h box-marg-s">{t("A3moqWy")}</p>
         <div className="fx-centered fx-col fit-container">
           <button className="btn btn-normal btn-full" onClick={exit}>

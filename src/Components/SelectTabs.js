@@ -36,7 +36,6 @@ export function SelectTabs({ selectedTab, tabs, setSelectedTab, small = false })
     updateSlider();
   }, [updateSlider]);
 
-  // Drag-to-scroll
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -83,91 +82,91 @@ export function SelectTabs({ selectedTab, tabs, setSelectedTab, small = false })
 
   return (
     <div style={{ width: "100%", minWidth: 0 }}>
-    <div
-      ref={containerRef}
-      className="round-corner-m"
-      style={{
-        gap: 0,
-        position: "relative",
-        minHeight: small ? "2rem" : "2.8rem",
-        padding: small ? ".2rem" : "0 .45rem",
-        overflowX: "auto",
-        overflowY: "hidden",
-        display: "flex",
-        flexWrap: "nowrap",
-        alignItems: "center",
-        cursor: "grab",
-        scrollbarWidth: "none",
-        msOverflowStyle: "none",
-        WebkitOverflowScrolling: "touch",
-        backgroundColor: isLight
-          ? "rgba(200, 200, 200, 0.28)"
-          : isCreamy
-          ? "rgba(210, 185, 150, 0.25)"
-          : isGray
-          ? "rgba(255, 255, 255, 0.07)"
-          : "rgba(20, 20, 20, 0.6)",
-        boxShadow: isLight
-          ? "0 0 0 1px rgba(0,0,0,0.10), 0 4px 6px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.80)"
-          : isCreamy
-          ? "0 0 0 1px rgba(160,110,50,0.18), 0 4px 6px rgba(100,70,30,0.06), 0 12px 24px rgba(100,70,30,0.08), inset 0 1px 0 rgba(255,255,255,0.70)"
-          : isGray
-          ? "0 0 0 1px rgba(255,255,255,0.12), 0 4px 6px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06)"
-          : "0 0 0 1px rgba(255,255,255,0.12), 0 4px 6px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.08)",
-        backdropFilter: "blur(10px)",
-        WebkitBackdropFilter: "blur(10px)",
-      }}
-    >
-      {buttonRefs.map((button, index) => (
-        <div
-          className={`box-pad-h pointer`}
-          style={{
-            position: "relative",
-            zIndex: 1,
-            flexShrink: 0,
-            whiteSpace: "nowrap",
-            userSelect: "none",
-            color: isLight
-              ? (selectedTab !== index ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0.88)")
-              : isCreamy
-              ? (selectedTab !== index ? "rgba(30,20,10,0.45)" : "rgba(30,20,10,0.88)")
-              : (selectedTab !== index ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.88)"),
-            transition: "color 0.2s ease",
-          }}
-          key={index}
-          ref={button.ref}
-          onClick={() => setSelectedTab(index)}
-        >
-          {button.display_name}
-        </div>
-      ))}
-      {selectedTab !== -1 && (
-        <div
-          ref={sliderRef}
-          className="button-slider fit-height"
-          style={{
-            position: "absolute",
-            left: 0,
-            bottom: 0,
-            zIndex: 0,
-            transition: ".2s ease-in-out",
-            padding: small ? ".2rem 0" : ".45rem 0",
-          }}
-        >
+      <div
+        ref={containerRef}
+        style={{
+          gap: 0,
+          position: "relative",
+          minHeight: small ? "2rem" : "2.8rem",
+          padding: small ? ".2rem" : "0 .45rem",
+          overflowX: "auto",
+          overflowY: "hidden",
+          display: "flex",
+          flexWrap: "nowrap",
+          alignItems: "center",
+          cursor: "grab",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          WebkitOverflowScrolling: "touch",
+          borderRadius: "40px",
+          backgroundColor: isLight
+            ? "rgba(200, 200, 200, 0.28)"
+            : isCreamy
+              ? "rgba(210, 185, 150, 0.25)"
+              : isGray
+                ? "rgba(255, 255, 255, 0.07)"
+                : "rgba(20, 20, 20, 0.6)",
+          boxShadow: isLight
+            ? "0 0 0 1px rgba(0,0,0,0.10), 0 4px 6px rgba(0,0,0,0.06), 0 12px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.80)"
+            : isCreamy
+              ? "0 0 0 1px rgba(160,110,50,0.18), 0 4px 6px rgba(100,70,30,0.06), 0 12px 24px rgba(100,70,30,0.08), inset 0 1px 0 rgba(255,255,255,0.70)"
+              : isGray
+                ? "0 0 0 1px rgba(255,255,255,0.12), 0 4px 6px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.06)"
+                : "0 0 0 1px rgba(255,255,255,0.12), 0 4px 6px rgba(0,0,0,0.25), 0 12px 24px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.08)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+        }}
+      >
+        {buttonRefs.map((button, index) => (
           <div
-            className="fit-container fit-height sc-s-18"
+            className={`box-pad-h pointer`}
             style={{
-              backgroundColor: isLight
-                ? "rgba(0,0,0,0.09)"
+              position: "relative",
+              zIndex: 1,
+              flexShrink: 0,
+              whiteSpace: "nowrap",
+              userSelect: "none",
+              color: isLight
+                ? (selectedTab !== index ? "rgba(0,0,0,0.45)" : "rgba(0,0,0,0.88)")
                 : isCreamy
-                ? "rgba(160,110,50,0.18)"
-                : "rgba(255,255,255,0.10)",
-              border: "none"
+                  ? (selectedTab !== index ? "rgba(30,20,10,0.45)" : "rgba(30,20,10,0.88)")
+                  : (selectedTab !== index ? "rgba(255,255,255,0.45)" : "rgba(255,255,255,0.88)"),
+              transition: "color 0.2s ease",
             }}
-          ></div>
-        </div>
-      )}
-    </div>
+            key={index}
+            ref={button.ref}
+            onClick={() => setSelectedTab(index)}
+          >
+            {button.display_name}
+          </div>
+        ))}
+        {selectedTab !== -1 && (
+          <div
+            ref={sliderRef}
+            className="button-slider fit-height"
+            style={{
+              position: "absolute",
+              left: 0,
+              bottom: 0,
+              zIndex: 0,
+              transition: ".2s ease-in-out",
+              padding: small ? ".2rem 0" : ".45rem 0",
+            }}
+          >
+            <div
+              className="fit-container fit-height sc-s"
+              style={{
+                backgroundColor: isLight
+                  ? "rgba(0,0,0,0.09)"
+                  : isCreamy
+                    ? "rgba(160,110,50,0.18)"
+                    : "rgba(255,255,255,0.10)",
+                border: "none"
+              }}
+            ></div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

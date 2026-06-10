@@ -126,7 +126,7 @@ export default function ManageInterest({ exit }) {
           }}
           className="if fit-container fx-scattered"
         >
-          <Icon name="search" size={24} />
+          <Icon name="search_magnifying_glass" v={2} size={24} />
           <input
             value={newInterest}
             onChange={(e) => setNewInterest(e.target.value)}

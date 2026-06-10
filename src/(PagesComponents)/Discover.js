@@ -189,12 +189,12 @@ const ExploreFeed = ({
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
           : selectedCategory.group === "rsf"
-          ? await getNDKInstance(
+            ? await getNDKInstance(
               selectedCategory.value,
               selectedCategory.relays,
               true
             )
-          : undefined;
+            : undefined;
       let algoRelay = [];
       if (selectedCategory.group === "af")
         algoRelay.push(selectedCategory.value);
@@ -250,9 +250,9 @@ const ExploreFeed = ({
           selectedCategory.value === "top"
             ? event.content
               ? {
-                  ...getParsedRepEvent(JSON.parse(event.content)),
-                  created_at: event.created_at,
-                }
+                ...getParsedRepEvent(JSON.parse(event.content)),
+                created_at: event.created_at,
+              }
               : false
             : getParsedRepEvent(event)
         )
@@ -303,20 +303,20 @@ const ExploreFeed = ({
       selectedFilter.to && lastEventsTimestamps.articles
         ? Math.min(selectedFilter.to, lastEventsTimestamps.articles)
         : selectedFilter.to
-        ? selectedFilter.to
-        : lastEventsTimestamps.articles;
+          ? selectedFilter.to
+          : lastEventsTimestamps.articles;
     let c_until =
       selectedFilter.to && lastEventsTimestamps.curations
         ? Math.min(selectedFilter.to, lastEventsTimestamps.curations)
         : selectedFilter.to
-        ? selectedFilter.to
-        : lastEventsTimestamps.curations;
+          ? selectedFilter.to
+          : lastEventsTimestamps.curations;
     let v_until =
       selectedFilter.to && lastEventsTimestamps.videos
         ? Math.min(selectedFilter.to, lastEventsTimestamps.videos)
         : selectedFilter.to
-        ? selectedFilter.to
-        : lastEventsTimestamps.videos;
+          ? selectedFilter.to
+          : lastEventsTimestamps.videos;
     let since = selectedFilter.from || undefined;
     let authors =
       selectedFilter.posted_by?.length > 0
@@ -326,36 +326,36 @@ const ExploreFeed = ({
       return {
         artsFilter: [0, 1].includes(selectedTab)
           ? [
-              {
-                kinds: [16],
-                "#k": ["30023"],
-                limit: 100,
-                until: a_until,
-                since,
-              },
-            ]
+            {
+              kinds: [16],
+              "#k": ["30023"],
+              limit: 100,
+              until: a_until,
+              since,
+            },
+          ]
           : [],
         curationsFilter: [0, 2].includes(selectedTab)
           ? [
-              {
-                kinds: [16],
-                "#k": ["30004", "30005"],
-                limit: 100,
-                until: c_until,
-                since,
-              },
-            ]
+            {
+              kinds: [16],
+              "#k": ["30004", "30005"],
+              limit: 100,
+              until: c_until,
+              since,
+            },
+          ]
           : [],
         videosFilter: [0, 3].includes(selectedTab)
           ? [
-              {
-                kinds: [16],
-                "#k": ["34235", "21", "22"],
-                limit: 100,
-                until: v_until,
-                since,
-              },
-            ]
+            {
+              kinds: [16],
+              "#k": ["34235", "21", "22"],
+              limit: 100,
+              until: v_until,
+              since,
+            },
+          ]
           : [],
       };
 
@@ -366,36 +366,36 @@ const ExploreFeed = ({
       return {
         artsFilter: [0, 1].includes(selectedTab)
           ? [
-              {
-                kinds: [30023],
-                limit: 100,
-                authors: authors_,
-                until: a_until,
-                since,
-              },
-            ]
+            {
+              kinds: [30023],
+              limit: 100,
+              authors: authors_,
+              until: a_until,
+              since,
+            },
+          ]
           : [],
         curationsFilter: [0, 2].includes(selectedTab)
           ? [
-              {
-                kinds: [30004, 30005],
-                limit: 100,
-                authors: authors_,
-                until: c_until,
-                since,
-              },
-            ]
+            {
+              kinds: [30004, 30005],
+              limit: 100,
+              authors: authors_,
+              until: c_until,
+              since,
+            },
+          ]
           : [],
         videosFilter: [0, 3].includes(selectedTab)
           ? [
-              {
-                kinds: [34235, 21, 22],
-                limit: 100,
-                authors: authors_,
-                until: v_until,
-                since,
-              },
-            ]
+            {
+              kinds: [34235, 21, 22],
+              limit: 100,
+              authors: authors_,
+              until: v_until,
+              since,
+            },
+          ]
           : [],
       };
     }
@@ -403,36 +403,36 @@ const ExploreFeed = ({
     return {
       artsFilter: [0, 1].includes(selectedTab)
         ? [
-            {
-              kinds: [30023],
-              limit: 100,
-              authors,
-              until: a_until,
-              since,
-            },
-          ]
+          {
+            kinds: [30023],
+            limit: 100,
+            authors,
+            until: a_until,
+            since,
+          },
+        ]
         : [],
       curationsFilter: [0, 2].includes(selectedTab)
         ? [
-            {
-              kinds: [30004, 30005],
-              limit: 100,
-              authors,
-              until: c_until,
-              since,
-            },
-          ]
+          {
+            kinds: [30004, 30005],
+            limit: 100,
+            authors,
+            until: c_until,
+            since,
+          },
+        ]
         : [],
       videosFilter: [0, 3].includes(selectedTab)
         ? [
-            {
-              kinds: [34235, 34236, 21, 22],
-              limit: 100,
-              authors,
-              until: v_until,
-              since,
-            },
-          ]
+          {
+            kinds: [34235, 34236, 21, 22],
+            limit: 100,
+            authors,
+            until: v_until,
+            since,
+          },
+        ]
         : [],
     };
   };
@@ -470,7 +470,6 @@ const ExploreFeed = ({
   };
 
   return (
-    // <InfiniteScroll onRefresh={setTimestamp} events={content}>
     <>
       {userKeys &&
         selectedCategory.value === "network" &&
@@ -497,7 +496,6 @@ const ExploreFeed = ({
           kind="posts"
         />
       )}
-      {/* <div className="fit-container fx-centered fx-col " style={{ gap: 0 }}> */}
       {content.length > 0 && (
         <Virtuoso
           ref={virtuosoRef}
@@ -529,7 +527,7 @@ const ExploreFeed = ({
           className="fit-container fx-centered fx-col"
           style={{ height: "30vh" }}
         >
-          <Icon name="search" />
+          <Icon name="search_magnifying_glass" v={2} />
           <h4>{t("AUrhqmn")}</h4>
           <p className="gray-c">{t("AtL4qoU")}</p>
         </div>
@@ -555,8 +553,6 @@ const ExploreFeed = ({
           <Spinner size={32} />
         </div>
       )}
-      {/* </div> */}
-      {/* </InfiniteScroll> */}
     </>
   );
 };

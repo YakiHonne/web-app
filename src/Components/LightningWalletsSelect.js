@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 export default function LightningWalletsSelect({
   selectedWallet,
@@ -16,6 +18,7 @@ export default function LightningWalletsSelect({
   const [open, setOpen] = useState(false);
   const [dismissing, setDismissing] = useState(false);
   const [position, setPosition] = useState(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!open) return;
@@ -137,7 +140,28 @@ export default function LightningWalletsSelect({
         )}
       </div>
 
-      {open &&
+      {isMobile ? (
+        <MobileSheet open={open} onClose={() => setOpen(false)} title={t("AnXYtQy")}>
+          <div className="fx-centered fx-col fx-start-v fit-container" style={{ padding: "0 8px" }}>
+            {wallets.map((wallet) => (
+              <div
+                key={wallet.id}
+                className={`option-no-scale fit-container fx-scattered pointer ${wallet.active ? "sc-s-18" : ""}`}
+                onClick={(e) => { e.stopPropagation(); handleSelectWallet(wallet.id); }}
+                style={{ padding: "0.85rem 1.25rem", borderRadius: "12px", border: "none" }}
+              >
+                <div className="fx-centered">
+                  {wallet.active && (
+                    <div style={{ minWidth: "8px", aspectRatio: "1/1", backgroundColor: "var(--green-main)", borderRadius: "var(--border-r-50)" }} />
+                  )}
+                  <p className={wallet.active ? "green-c" : ""}>{wallet.entitle}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </MobileSheet>
+      ) : (
+        open &&
         position &&
         createPortal(
           <div
@@ -158,45 +182,26 @@ export default function LightningWalletsSelect({
               transformOrigin: "top center",
             }}
           >
-            <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
-              {t("AnXYtQy")}
-            </p>
-            {wallets.map((wallet) => {
-              return (
-                <div
-                  key={wallet.id}
-                  className={`option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s ${wallet.active ? "sc-s-18" : ""}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectWallet(wallet.id);
-                  }}
-                  style={{
-                    border: "none",
-                    minWidth: "max-content",
-                    overflow: "visible",
-                  }}
-                >
-                  <div className="fx-centered">
-                    {wallet.active && (
-                      <div
-                        style={{
-                          minWidth: "8px",
-                          aspectRatio: "1/1",
-                          backgroundColor: "var(--green-main)",
-                          borderRadius: "var(--border-r-50)",
-                        }}
-                      ></div>
-                    )}
-                    <p className={wallet.active ? "green-c" : ""}>
-                      {wallet.entitle}
-                    </p>
-                  </div>
+            <p className="p-medium gray-c box-pad-h-m box-pad-v-s">{t("AnXYtQy")}</p>
+            {wallets.map((wallet) => (
+              <div
+                key={wallet.id}
+                className={`option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s ${wallet.active ? "sc-s-18" : ""}`}
+                onClick={(e) => { e.stopPropagation(); handleSelectWallet(wallet.id); }}
+                style={{ border: "none", minWidth: "max-content", overflow: "visible" }}
+              >
+                <div className="fx-centered">
+                  {wallet.active && (
+                    <div style={{ minWidth: "8px", aspectRatio: "1/1", backgroundColor: "var(--green-main)", borderRadius: "var(--border-r-50)" }} />
+                  )}
+                  <p className={wallet.active ? "green-c" : ""}>{wallet.entitle}</p>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>,
           document.body,
-        )}
+        )
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-/* ─── Backdrop ─────────────────────────────────────────────────────────────── */
+
 .backdrop {
   position: fixed;
   inset: 0;
@@ -8,8 +8,8 @@
   justify-content: center;
   padding: 16px;
   background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   animation: backdropIn 0.3s ease both;
 }
 
@@ -27,7 +27,6 @@
   to   { opacity: 0; }
 }
 
-/* ─── Card — bg-dropdown style ────────────────────────────────────────────── */
 .card {
   position: relative;
   width: 100%;
@@ -61,7 +60,6 @@
   to   { opacity: 0; transform: scale(0.95) translateY(6px); }
 }
 
-/* ─── Badge row — centered ─────────────────────────────────────────────────── */
 .badgeRow {
   display: flex;
   justify-content: center;
@@ -98,7 +96,6 @@
   50%       { opacity: 0.4; transform: scale(0.6); }
 }
 
-/* ─── Typography ───────────────────────────────────────────────────────────── */
 .title {
   font-size: 1.25rem;
   font-weight: 700;
@@ -119,7 +116,6 @@
   text-align: center;
 }
 
-/* ─── SVG wrapper ──────────────────────────────────────────────────────────── */
 .svgWrapper {
   width: 100%;
   margin-bottom: 20px;
@@ -135,9 +131,6 @@
   display: block;
 }
 
-/* SVG morph animation is driven entirely by inline SVG <animate> elements */
-
-/* ─── CTA button — btn btn-normal ─────────────────────────────────────────── */
 .ctaButton {
   width: 100%;
   font-family: 'DM sans', sans-serif;

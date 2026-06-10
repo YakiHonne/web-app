@@ -1,4 +1,4 @@
-/* ── Editor shell ────────────────────────────────────────────────────── */
+
 .tiptap-shell {
   display: flex;
   flex-direction: column;
@@ -7,7 +7,6 @@
   background: var(--white);
 }
 
-/* ── Sticky toolbar ──────────────────────────────────────────────────── */
 .tiptap-toolbar {
   display: flex;
   align-items: center;
@@ -31,7 +30,6 @@
   flex-shrink: 0;
 }
 
-/* ── Toolbar button ──────────────────────────────────────────────────── */
 .tiptap-tb {
   display: inline-flex;
   align-items: center;
@@ -68,7 +66,6 @@
   cursor: default;
 }
 
-/* ── Link input row ──────────────────────────────────────────────────── */
 .tiptap-link-row {
   display: flex;
   align-items: center;
@@ -94,7 +91,6 @@
   border-color: var(--c1);
 }
 
-/* ── Insert dropdown ─────────────────────────────────────────────────── */
 .tiptap-insert-wrap {
   position: relative;
 }
@@ -154,7 +150,6 @@
   background: var(--dim-gray);
 }
 
-/* ── ProseMirror content ─────────────────────────────────────────────── */
 .tiptap-content {
   padding: 1.5rem 2rem 3rem;
   outline: none;
@@ -259,7 +254,6 @@
   white-space: pre;
 }
 
-/* ── Syntax Highlighting ────────────────────────────────────────────── */
 .hljs-comment,
 .hljs-quote {
   color: #6a737d;
@@ -368,7 +362,6 @@
   color: #d2a8ff;
 }
 
-/* ── Math Formulas (KaTeX) ─────────────────────────────────────────── */
 .math {
   display: block;
   margin: 1.5rem 0;
@@ -457,7 +450,6 @@
   vertical-align: sub;
 }
 
-/* ── Placeholder ─────────────────────────────────────────────────────── */
 .tiptap-content p.is-empty:only-child::before {
   color: var(--gray);
   content: attr(data-placeholder);
@@ -466,12 +458,10 @@
   pointer-events: none;
 }
 
-/* ── Selection ───────────────────────────────────────────────────────── */
 .tiptap-content ::selection {
   background: rgba(238, 119, 0, 0.18);
 }
 
-/* ── Legacy compat ───────────────────────────────────────────────────── */
 .tiptap-editor-wrap .ProseMirror {
   outline: none;
 }
@@ -481,7 +471,6 @@
   display: none;
 }
 
-/* ── Nostr entity embed ───────────────────────────────────────────────── */
 [data-nostr-entity] {
   display: block;
   margin: 1rem 0;
@@ -495,26 +484,14 @@
   border-radius: 10px;
 }
 
-/* ── btn-small ───────────────────────────────────────────────────────── */
-/* .btn-small {
-  font-size: 0.8rem;
-  padding: 0 14px;
-  height: 34px;
-  border-radius: 8px;
-} */
-
-/* ═══════════════════════════════════════════════════════════════════════
-   Article AI Panel
-═══════════════════════════════════════════════════════════════════════ */
-
 .ai-panel-backdrop {
   position: fixed;
   width: max-content;
   height: 100vh;
   right: 0;
   top: 0;
-  
-  z-index: 9998;
+
+  z-index: 10100;
   transition: opacity 0.25s ease;
   pointer-events: none;
   padding: 1rem;
@@ -533,7 +510,7 @@
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
-  z-index: 9999;
+  z-index: 10101;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
@@ -837,10 +814,6 @@
   cursor: not-allowed;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   AI Diff Banner
-═══════════════════════════════════════════════════════════════════════ */
-
 .ai-diff-banner {
   position: sticky;
   top: 0;
@@ -870,10 +843,6 @@
   gap: 8px;
   flex-shrink: 0;
 }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   AI Diff Viewer
-═══════════════════════════════════════════════════════════════════════ */
 
 .ai-diff-viewer {
   padding: 1rem;
@@ -976,17 +945,13 @@
   font-style: italic;
 }
 
-/* ═══════════════════════════════════════════════════════════════════════
-   Second Reader Panel
-═══════════════════════════════════════════════════════════════════════ */
-
 .sr-panel {
   position: fixed;
   top: 0;
   right: 0;
   width: 450px;
   height: 100vh;
-  z-index: 200;
+  z-index: 10100;
   display: flex;
   flex-direction: column;
   padding: 1rem;
@@ -1168,8 +1133,7 @@
   flex-shrink: 0;
   position: relative;
   padding-top: 32px;
-  border-top: 1px solid var(--pale-gray);
-  background: var(--very-dim-gray);
+  border-top: 1px solid var(--dim-border);
 }
 
 .sr-active-avatar-wrap {
@@ -1182,7 +1146,8 @@
 .sr-active-avatar {
   width: 58px;
   height: 58px;
-  border: 2px solid var(--pale-gray);
+  border-radius: 50%;
+  border: 2px solid var(--dim-border);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 

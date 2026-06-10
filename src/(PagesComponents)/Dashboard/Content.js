@@ -53,6 +53,7 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
   const userKeys = useSelector((state) => state.userKeys);
   const [contentFrom, setContentFrom] = useState(filter);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
   const [lastEventTime, setLastEventTime] = useState(undefined);
   const [editEvent, setEditEvent] = useState(false);
   const [showCurationCreator, setShowCurationCreator] = useState(
@@ -91,6 +92,7 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
           return getParsedRepEvent(event);
         });
         dispatchEvents({ type: contentFrom, events: parsedEvents });
+        if (parsedEvents.length === 0) setHasMore(false);
         setIsLoading(false);
       } catch (err) {
         console.log(err);
@@ -122,20 +124,21 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
   useEffect(() => {
     dispatchEvents({ type: "remove-events" });
     setLastEventTime(undefined);
+    setHasMore(true);
   }, [userKeys]);
   useEffect(() => {
     setContentFrom(filter);
+    setHasMore(true);
   }, [filter]);
 
   useEffect(() => {
     const handleScroll = () => {
-      let container = document.querySelector(".feed-container");
+      if (isLoading || !hasMore) return;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const clientHeight = document.documentElement.clientHeight;
+      const scrollHeight = document.documentElement.scrollHeight;
 
-      if (!container) return;
-      if (
-        container.scrollHeight - container.scrollTop - 60 >
-        document.documentElement.offsetHeight
-      ) {
+      if (scrollHeight - scrollTop - clientHeight > 200) {
         return;
       }
       setLastEventTime(
@@ -143,14 +146,9 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
           undefined,
       );
     };
-    document
-      .querySelector(".feed-container")
-      ?.addEventListener("scroll", handleScroll);
-    return () =>
-      document
-        .querySelector(".feed-container")
-        ?.removeEventListener("scroll", handleScroll);
-  }, [isLoading]);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isLoading, hasMore]);
 
   const getFilter = () => {
     let filter = {
@@ -329,10 +327,10 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
               <p className="gray-c">{t("AcPmGuk")}</p>
             </div>
           )}
-          {isLoading && (
+          {(isLoading || (hasMore && events[contentFrom].length > 0)) && (
             <div
               className="fit-container fx-centered"
-              style={{ height: "40vh" }}
+              style={{ height: "80px" }}
             >
               <div className="fx-centered">
                 <Spinner size={32} />

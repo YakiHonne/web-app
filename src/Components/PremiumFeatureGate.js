@@ -6,14 +6,14 @@ import { useSelector } from "react-redux";
 
 const FEATURE_META = {
   ai: {
-    labelKey: "AiGateLabel",
-    descKey: "AiGateDesc",
-    perksKeys: ["AiGatePerk1", "AiGatePerk2", "AiGatePerk3", "AiGatePerk4"],
+    labelKey: "AnvgwWQ",
+    descKey: "AT6bDWL",
+    perksKeys: ["A1gtD6n", "AuyDNyi", "ANOdwQV", "AdCodB3"],
   },
   editor: {
-    labelKey: "EditorGateLabel",
-    descKey: "EditorGateDesc",
-    perksKeys: ["EditorGatePerk1", "EditorGatePerk2", "EditorGatePerk3"],
+    labelKey: "ASmvICL",
+    descKey: "AkMDVZr",
+    perksKeys: ["AhAKR2I", "AFocIWw", "Axg3n56"],
   },
 };
 
@@ -29,7 +29,7 @@ export default function PremiumFeatureGate({ feature, onClose }) {
 
   const handleUpgrade = () => {
     onClose();
-    router.push("/settings");
+    router.push("/subscription");
   };
 
   return (
@@ -112,14 +112,14 @@ export default function PremiumFeatureGate({ feature, onClose }) {
             style={{ width: "100%", fontWeight: 700 }}
             onClick={handleUpgrade}
           >
-            {t("AiGateUpgrade")}
+            {t("Aecr6Vl")}
           </button>
           <button
             className="btn btn-gst"
             style={{ width: "100%" }}
             onClick={onClose}
           >
-            {t("AiGateLater")}
+            {t("A1LK8nl")}
           </button>
         </div>
       </div>

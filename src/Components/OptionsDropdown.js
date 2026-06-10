@@ -1,6 +1,8 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Icon from "@/Components/Icon";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 export default function OptionsDropdown({
   options,
@@ -17,13 +19,12 @@ export default function OptionsDropdown({
   const [position, setPosition] = useState(null);
   const [displayAbove, setDisplayAbove] = useState(false);
   const [displayLeft, setDisplayLeft] = useState(false);
+  const isMobile = useIsMobile();
 
   const close = () => {
+    if (isMobile) { setOpen(false); return; }
     setDismissing(true);
-    setTimeout(() => {
-      setOpen(false);
-      setDismissing(false);
-    }, 200);
+    setTimeout(() => { setOpen(false); setDismissing(false); }, 200);
   };
 
   useEffect(() => {
@@ -46,7 +47,6 @@ export default function OptionsDropdown({
     if (!open) return;
 
     const handleScroll = (e) => {
-      // Don't close if the scroll happened inside the dropdown itself
       if (dropdownRef.current?.contains(e.target)) return;
       close();
     };
@@ -124,7 +124,16 @@ export default function OptionsDropdown({
         </div>
       </div>
 
-      {open &&
+      {isMobile ? (
+        <MobileSheet open={open} onClose={close}>
+          <div className="fx-centered fx-col fx-start-v pointer" style={{ padding: "0 8px" }}>
+            {options.map((option, i) => (
+              <Fragment key={i}>{option}</Fragment>
+            ))}
+          </div>
+        </MobileSheet>
+      ) : (
+        open &&
         position &&
         createPortal(
           <div
@@ -153,7 +162,8 @@ export default function OptionsDropdown({
             </div>
           </div>,
           document.body,
-        )}
+        )
+      )}
     </>
   );
 }

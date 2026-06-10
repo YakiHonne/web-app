@@ -95,7 +95,7 @@ const Token = ({ token, updateStatus, removeToken, cashuTokens }) => {
         />
       )}
       <div
-        className="box-pad-h-m box-pad-v-m sc-s-18 bg-sp fit-container fx-scattered"
+        className="box-pad-h-m box-pad-v-m sc-s fit-container fx-scattered"
         style={{ overflow: "visible" }}
       >
         <div className="fx-centered">
@@ -125,7 +125,7 @@ const Token = ({ token, updateStatus, removeToken, cashuTokens }) => {
           )}
           {status === "spent" && (
             <div className="fx-centered">
-              <Icon name="checkmark" />
+              <Icon name="checkmark" isColored />
               <p className="green-c p-medium">{t("A3Dn0HW")}</p>
             </div>
           )}

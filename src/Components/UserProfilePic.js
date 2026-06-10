@@ -18,8 +18,6 @@ import AvatarPlaceholder from "./AvatarPlaceholder";
 import Icon from "@/Components/Icon";
 import { iconsNames } from "@/Content/IconV2URL";
 
-/* ─── Dynamic Island Profile Card ───────────────────────────────────────── */
-
 const CARD_WIDTH = 300;
 const CARD_HEIGHT = 420;
 
@@ -384,8 +382,6 @@ function ProfileIslandCard({
   );
 }
 
-/* ─── Main component ─────────────────────────────────────────────────────── */
-
 export default function UserProfilePic({
   user_id,
   size,
@@ -395,10 +391,13 @@ export default function UserProfilePic({
   allowPropagation = false,
   metadata = false,
   withName = false,
+  isSwitching = false,
 }) {
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
+  const [displayedPicture, setDisplayedPicture] = useState(userMetadata?.picture || null);
+  const switchTimerRef = useRef(null);
   const [showMetadata, setShowMetada] = useState(false);
   const [fetchedImg, setFetchedImg] = useState(false);
   const [mutualFollows, setMutualFollows] = useState([]);
@@ -417,6 +416,19 @@ export default function UserProfilePic({
     }
   }, [nostrAuthors]);
 
+  useEffect(() => {
+    if (!mainAccountUser) return;
+    if (isSwitching) {
+      clearTimeout(switchTimerRef.current);
+      switchTimerRef.current = setTimeout(() => {
+        setDisplayedPicture(userMetadata?.picture || null);
+      }, 450);
+    } else {
+      setDisplayedPicture(userMetadata?.picture || null);
+    }
+    return () => clearTimeout(switchTimerRef.current);
+  }, [isSwitching, userMetadata?.picture, mainAccountUser]);
+
   const handleClick = async (e) => {
     try {
       if (!allowPropagation) { e.stopPropagation(); e.preventDefault(); }
@@ -426,7 +438,7 @@ export default function UserProfilePic({
         });
         customHistory(`/profile/${pubkey}`);
       }
-    } catch { /* noop */ }
+    } catch { }
   };
 
   const handleInitConvo = () => {
@@ -487,10 +499,10 @@ export default function UserProfilePic({
   if (mainAccountUser)
     return (
       <>
-        {userMetadata.picture
+        {displayedPicture
           ? <div
             className="pointer fx-centered bg-img cover-bg"
-            style={{ ...avatarStyle, backgroundImage: `url(${userMetadata.picture})` }}
+            style={{ ...avatarStyle, backgroundImage: `url(${displayedPicture})` }}
             onClick={handleClick}
           />
           : <div style={{ ...avatarStyle, overflow: "hidden" }} className="pointer fx-centered" onClick={handleClick}>
@@ -523,13 +535,13 @@ export default function UserProfilePic({
           <div
             style={{ opacity: 1, maxWidth: "180px", gap: "4px", transform: "translateY(4px)", alignItems: "center" }}
             onClick={handleClick}
-            className="pointer sticker sticker-normal sticker-small sticker-orange-side"
+            className="pointer sticker sticker-normal sticker-small sticker-gray"
           >
             {(img || fetchedImg)
               ? <div className="pointer fx-centered bg-img cover-bg" style={{ ...avatarStyle, backgroundImage: `url(${img || fetchedImg})` }} />
               : <div style={{ ...avatarStyle, overflow: "hidden" }} className="pointer fx-centered"><AvatarPlaceholder size={size} /></div>
             }
-            <p className="p-one-line" style={{ margin: 0 }}>{withName}</p>
+            <p className="p-one-line gray-c" style={{ margin: 0 }}>{withName}</p>
           </div>
           {showMetadata && metadata && <ProfileIslandCard {...islandProps} />}
         </div>

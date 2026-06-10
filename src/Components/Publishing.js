@@ -313,19 +313,6 @@ export default function Publishing({ displayOff = false }) {
         });
     };
     publish();
-    // if (relay.connected) {
-    //   publish();
-    // } else {
-    //   console.log(relay);
-    //   let ndkFromFav = await getNDKInstance(relay.url);
-    //   let relay_ = ndkFromFav.pool.getRelay(relay.url);
-    //   console.log(relay_)
-    //   publish(relay_);
-    //   // relay.connect().then((res) => {
-    //   //   console.log(res)
-    //   //   publish();
-    //   // });
-    // }
   };
   const initPublishing = async (relays, event, index, action_key) => {
     try {
@@ -412,7 +399,6 @@ export default function Publishing({ displayOff = false }) {
         }
       }
     } catch (err) {
-      // console.log(err);
     }
   };
   const getActionKey = () => {
@@ -725,14 +711,6 @@ export default function Publishing({ displayOff = false }) {
         </div>
       )}
       <div
-        className="fx-centered desk-hide mb-show"
-        onClick={() => setShowDetails(true)}
-      >
-        <div className="round-icon">
-          <Icon name="succeeded-events" />
-        </div>
-      </div>
-      <div
         className="sc-s-18 fit-container fx-centered pointer option link-label"
         style={{
           backgroundColor: "transparent",
@@ -747,7 +725,6 @@ export default function Publishing({ displayOff = false }) {
             position: "relative",
           }}
         >
-          {/* <p className="gray-c p-medium">Publishing status</p> */}
           <div className="fit-container fx-scattered">
             <div className="fx-centered">
               <Icon name="total-events" size={24} />

@@ -62,9 +62,9 @@ function PersonaPicker({ onSelect, isAnalyzing, onClose, lastUsedPersonaId }) {
         <div></div>
       </div>
       <div style={{ padding: "16px 16px 0" }}>
-        <h3>{t("SrTitle")}</h3>
-        <p>{t("SrPickerSubtitle")}</p>
-        <p className="gray-c p-medium">{t("SrPickerDesc")}</p>
+        <h3>{t("AHqnlwE")}</h3>
+        <p>{t("ARCmOET")}</p>
+        <p className="gray-c p-medium">{t("AYKqIP8")}</p>
       </div>
 
       <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
@@ -102,7 +102,7 @@ function PersonaPicker({ onSelect, isAnalyzing, onClose, lastUsedPersonaId }) {
                 </div>
                 {isLastUsed && (
                   <span className="sr-switch-btn" style={{ cursor: "default" }}>
-                    {t("SrLastUsed")}
+                    {t("AaXnygd")}
                   </span>
                 )}
               </div>
@@ -126,7 +126,7 @@ function PersonaPicker({ onSelect, isAnalyzing, onClose, lastUsedPersonaId }) {
           >
             <div className="sr-analyzing-dot" style={{ width: 10, height: 10 }} />
             <p style={{ fontSize: "0.82rem" }} className="gray-c">
-              {t("SrReading")}
+              {t("AXqzNKE")}
             </p>
           </div>
         )}
@@ -174,7 +174,7 @@ function ReactionCard({ reaction, onFocus, onFix, onIgnore }) {
               onFix(reaction);
             }}
           >
-            {t("SrFixWithAI")} →
+            {t("AvGTiVQ")} →
           </button>
           <button
             className="sr-ignore-btn"
@@ -183,13 +183,13 @@ function ReactionCard({ reaction, onFocus, onFix, onIgnore }) {
               onIgnore(reaction);
             }}
           >
-            {t("SrIgnore")}
+            {t("Aza3KHG")}
           </button>
         </div>
       )}
 
-      {isFixed && <p className="sr-ignored-label">✓ {t("SrSentToAI")}</p>}
-      {isIgnored && <p className="sr-ignored-label">{t("SrMarkedRead")}</p>}
+      {isFixed && <p className="sr-ignored-label">✓ {t("A07lIrt")}</p>}
+      {isIgnored && <p className="sr-ignored-label">{t("AzWK36X")}</p>}
     </div>
   );
 }
@@ -215,7 +215,7 @@ function ActiveReader({
 
   return (
     <div
-      className="border-all round-corner-l bg-main"
+      className="bg-dropdown"
       style={{
         display: "flex",
         flexDirection: "column",
@@ -234,28 +234,28 @@ function ActiveReader({
           flexShrink: 0,
         }}
       >
-        {!reduced && <h4>{t("SrTitle")}</h4>}
+        {!reduced && <h4 className="box-pad-h-s box-pad-v-s">{t("AHqnlwE")}</h4>}
         {reduced && <div></div>}
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {reactions.length > 0 && (
             <button
               className="sr-switch-btn"
               onClick={onClear}
-              title={t("SrClearAll")}
+              title={t("AvHdzWg")}
               style={{
                 borderColor: "var(--red-side)",
                 backgroundColor: "var(--red-side)",
                 color: "var(--red-main)",
               }}
             >
-              {t("SrClear")}
+              {t("AUdbtv8")}
             </button>
           )}
 
           <div
             className={reduced ? "enlarge" : "reduce"}
             onClick={onToggleReduced}
-            title={reduced ? t("SrExpand") : t("SrMinimise")}
+            title={reduced ? t("An3se9s") : t("ARulmDc")}
           >
             <div></div>
           </div>
@@ -274,7 +274,7 @@ function ActiveReader({
         <div className="sr-reactions">
           {activeReactions.length === 0 && resolvedReactions.length === 0 ? (
             <div className="sr-empty-state">
-              ✦ {t("SrNoNotes")}
+              ✦ {t("AlYPtj8")}
             </div>
           ) : (
             <>
@@ -291,7 +291,7 @@ function ActiveReader({
               {resolvedReactions.length > 0 && (
                 <>
                   <p style={{ fontSize: "0.68rem", margin: "8px 0 4px" }} className="gray-c">
-                    {t("SrResolved", { count: resolvedReactions.length })}
+                    {t("A9Ifmyg", { count: resolvedReactions.length })}
                   </p>
                   {resolvedReactions.map((r) => (
                     <ReactionCard
@@ -312,7 +312,7 @@ function ActiveReader({
       <div className="sr-active-footer">
         <div className="sr-active-avatar-wrap">
           <div
-            className="sr-active-avatar bg-img bg-cover round-corner-xl"
+            className="sr-active-avatar round-corner-xl bg-img cover-bg"
             style={{ backgroundImage: `url(${persona.image})` }}
           />
         </div>
@@ -332,7 +332,7 @@ function ActiveReader({
                 {isAnalyzingParagraph && (
                   <span className="sr-analyzing-indicator">
                     <span className="sr-analyzing-dot" />
-                    {t("SrReadingParagraph")}
+                    {t("AXyCYKa")}
                   </span>
                 )}
               </div>
@@ -342,7 +342,7 @@ function ActiveReader({
               </p>
             </div>
             <button className="sr-switch-btn" onClick={onSwitch}>
-              {t("SrSwitch")}
+              {t("AZDTbiy")}
             </button>
           </div>
         </div>
@@ -461,7 +461,7 @@ export default function SecondReaderPanel({
       const article = getMarkdown();
       const wordCount = article.trim().split(/\s+/).filter(Boolean).length;
       if (wordCount < 50) {
-        dispatch(setToast({ type: 2, desc: t("SrMinWords") }));
+        dispatch(setToast({ type: 2, desc: t("ACEV9xr") }));
         return;
       }
 

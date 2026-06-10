@@ -32,7 +32,7 @@ export default function SearchEngine({ sticky = true }) {
           style={{ width: "250px", height: "40px", padding: "0 .75rem" }}
         >
           <div className="fx-centered">
-            <Icon name="search" />
+            <Icon name="search_magnifying_glass" v={2} />
             <p className="gray-c">Search</p>
           </div>
           <div
@@ -65,8 +65,7 @@ const SearchWindow = ({ exit }) => {
 
   const handleRedirect = (page, hash) => {
     customHistory(
-      `/docs/sw/${page}${
-        hash ? `#${slugify(hash, { lower: true, strict: true })}` : ""
+      `/docs/sw/${page}${hash ? `#${slugify(hash, { lower: true, strict: true })}` : ""
       }`,
     );
     exit();
@@ -89,7 +88,7 @@ const SearchWindow = ({ exit }) => {
       >
         <div className="if fx-scattered fit-container pointer sw-search-box sc-s-18">
           <div className="fx-centered">
-            <Icon name="search" />
+            <Icon name="search_magnifying_glass" v={2} />
             <input
               type="text"
               className="if if-no-border ifs-full"
@@ -141,7 +140,6 @@ function searchSmartWidgetDocs(docs, keyword) {
   for (const key in docs) {
     const { content, subtitles } = docs[key];
 
-    // Search in markdown content
     const contentIndex = content.toLowerCase().indexOf(keyword.toLowerCase());
     if (contentIndex !== -1) {
       const headerMatch = extractNearestMarkdownHeader(content, contentIndex);
@@ -156,7 +154,6 @@ function searchSmartWidgetDocs(docs, keyword) {
       }
     }
 
-    // Search in titles and subtitles
     const titleMatches = deepSearchTitles(subtitles, keyword, content);
     titleMatches.forEach(({ value, full_tail, context }) => {
       results.push({

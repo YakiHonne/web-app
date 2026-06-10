@@ -154,7 +154,7 @@ export default function ArticleAIPanel({
       const aiMsg = {
         id: nextId(),
         role: "ai",
-        text: err.message || t("AiPanelError"),
+        text: err.message || t("AEH0z9N"),
       };
       setMessages((prev) => [...prev, aiMsg]);
     } finally {
@@ -203,14 +203,14 @@ export default function ArticleAIPanel({
           </div>
 
           <div className="fit-container fx-centered box-pad-v">
-            <h4>{t("AiPanelTitle")}</h4>
+            <h4>{t("AhlYBYo")}</h4>
           </div>
 
           <div className="ai-panel-messages">
             {messages.length === 0 && !isAILoading && (
               <div className="ai-empty-state">
                 <span className="ai-spark" style={{ fontSize: "1.5rem" }}>✦</span>
-                <p>{t("AiPanelEmpty")}</p>
+                <p>{t("AJ7Kigj")}</p>
               </div>
             )}
 
@@ -230,7 +230,7 @@ export default function ArticleAIPanel({
             <textarea
               ref={textareaRef}
               className="ai-textarea no-scrollbar"
-              placeholder={t("AiPanelPlaceholder")}
+              placeholder={t("A79OLjw")}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}

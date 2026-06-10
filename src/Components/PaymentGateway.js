@@ -26,6 +26,7 @@ import useCashu from "@/Hooks/useCachu";
 import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
+import Spinner from "./Spinner";
 
 export default function PaymentGateway({
   recipientAddr,
@@ -88,8 +89,10 @@ export default function PaymentGateway({
 
   if (isLoading)
     return (
-      <Overlay exit={exit}>
-        <LoadingDots />
+      <Overlay exit={exit} width={300}>
+        <div style={{ height: "300px" }} className="fx-centered">
+          <Spinner />
+        </div>
       </Overlay>
     );
   if (wallets.length === 0)
@@ -232,8 +235,7 @@ const Cashier = ({
           : recipientAddr;
         try {
           const res = await axios(
-            `${callback}${callback.includes("?") ? "&" : "?"}amount=${sats}${
-              event ? `&nostr=${event}` : ""
+            `${callback}${callback.includes("?") ? "&" : "?"}amount=${sats}${event ? `&nostr=${event}` : ""
             }&lnurl=${tempRecipientLNURL}`,
           );
           if (res.data.status === "ERROR") {
@@ -552,7 +554,6 @@ const Cashier = ({
                     <div
                       className="fx-centered fx-col sc-s-18 bg-sp box-pad-h-s box-pad-v-s fx-start-v fx-start-h fit-container"
                       style={{
-                        // width: "400px",
                         backgroundColor: "var(--c1-side)",
                         position: "absolute",
                         right: "0",
@@ -577,7 +578,6 @@ const Cashier = ({
                             }}
                             style={{
                               border: "none",
-                              // minWidth: "max-content",
                               overflow: "visible",
                             }}
                           >
@@ -683,11 +683,10 @@ const Cashier = ({
                         className="if p-bold if-no-border ifs-full p-centered"
                         placeholder={t("AcDgXKI")}
                         style={{
-                          fontSize: `max(${
-                            amount.toString().length > 5
-                              ? `${80 - (amount.toString().length - 6) * 10}px`
-                              : "80px"
-                          },50px)`,
+                          fontSize: `max(${amount.toString().length > 5
+                            ? `${80 - (amount.toString().length - 6) * 10}px`
+                            : "80px"
+                            },50px)`,
                           height: "80px",
                         }}
                         value={amount}
@@ -714,15 +713,15 @@ const Cashier = ({
               )}
               {(isLNBC ||
                 (paymentAmount !== 0 && paymentAmount !== undefined)) && (
-                <div className="fx-centered fx-col box-pad-v-m">
-                  <div className="fx-centered fx-col">
-                    <p className="gray-c p-big">{t("A82pzWN")}</p>
+                  <div className="fx-centered fx-col box-pad-v-m">
+                    <div className="fx-centered fx-col">
+                      <p className="gray-c p-big">{t("A82pzWN")}</p>
 
-                    <h1 style={{ fontSize: "80px" }}>{amount}</h1>
-                    <p className="gray-c p-big">Sats</p>
+                      <h1 style={{ fontSize: "80px" }}>{amount}</h1>
+                      <p className="gray-c p-big">Sats</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
             <div className="fit-container fx-centered" style={{ gap: "16px" }}>
               <div
@@ -799,7 +798,6 @@ const Cashier = ({
               className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fit-container"
             >
               <QRCode
-                // style={{ width: "100%", aspectRatio: "1/1" }}
                 size={320}
                 value={invoice}
               />

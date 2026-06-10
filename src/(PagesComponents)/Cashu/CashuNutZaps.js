@@ -74,7 +74,7 @@ const CashuNutZapItem = React.memo(
       setIsLoading(false);
     };
     return (
-      <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m sc-s-18 bg-sp box-marg-s">
+      <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m sc-s" style={{ marginBottom: ".5rem" }}>
         <div className="fx-centered fx-start-h">
           <div
             style={{
@@ -144,7 +144,7 @@ const CashuNutZapItem = React.memo(
           )}
           {isRedeemed && (
             <div className="fx-centered">
-              <Icon name="checkmark" />
+              <Icon name="checkmark" isColored />
               <p className="green-c p-medium">{t("A3Dn0HW")}</p>
             </div>
           )}

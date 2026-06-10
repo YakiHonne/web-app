@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import Global from "./Global";
 import Collections from "./Collections";
@@ -9,18 +9,31 @@ import Followings from "./Followings";
 import Network from "./Network";
 import { sleepTimer } from "@/Helpers/Helpers";
 import Spinner from "@/Components/Spinner";
+import { SelectTabs } from "@/Components/SelectTabs";
 
 export default function Relays() {
   const { t } = useTranslation();
   const { followingsFavRelays } = useFollowingsFavRelays();
   const { outboxRelays } = useOutboxRelays();
-  const [category, setCategory] = useState(1);
+  const [category, setCategory] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [relaysCollections, setRelaysCollections] = useState([]);
   const [globalRelaysBatch, setGlobalRelaysBatch] = useState([]);
   const [outboxRelaysBatch, setOutboxRelaysBatch] = useState([]);
   const [followingsRelaysBatch, setFollowingsRelaysBatch] = useState([]);
   const [relays, setRelays] = useState([]);
+  const [barHidden, setBarHidden] = useState(false);
+  const lastY = useRef(0);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setBarHidden(y > lastY.current && y > 80);
+      lastY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,56 +82,27 @@ export default function Relays() {
         style={{ minHeight: "100vh" }}
       >
         <div className="fit-container fx-centered fx-start-v fx-col box-pad-h-m box-pad-v">
-          <h3>{t("AjGFut6")}</h3>
-          <p className="gray-c p-big">{t("Ab749Ch")}</p>
           <div
-            className="sticky fit-container"
-            style={{ padding: 0, marginTop: "1rem", zIndex: 100 }}
+            style={{
+              position: "fixed",
+              top: "96px",
+              left: "50%",
+              transform: barHidden ? "translateX(-50%) translateY(-24px)" : "translateX(-50%) translateY(0)",
+              opacity: barHidden ? 0 : 1,
+              pointerEvents: barHidden ? "none" : "auto",
+              zIndex: 200,
+              transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease",
+            }}
           >
-            <div
-              className="fit-container fx-even"
-              style={{
-                paddingTop: 0,
-                paddingBottom: 0,
-                columnGap: 0,
-                borderBottom: "1px solid var(--very-dim-gray)",
-                borderTop: "1px solid var(--very-dim-gray)",
-              }}
-            >
-              <div
-                className={`list-item-b fx-centered fx ${
-                  category === 1 ? "selected-list-item-b" : ""
-                }`}
-                onClick={() => setCategory(1)}
-              >
-                {t("A9b04Ry")}
-              </div>
-              <div
-                className={`list-item-b fx-centered fx ${
-                  category === 2 ? "selected-list-item-b" : ""
-                }`}
-                onClick={() => setCategory(2)}
-              >
-                {t("A9TqNxQ")}
-              </div>
-              <div
-                className={`list-item-b fx-centered fx ${
-                  category === 3 ? "selected-list-item-b" : ""
-                }`}
-                onClick={() => setCategory(3)}
-              >
-                {t("AizJ5ib")}
-              </div>
-              <div
-                className={`list-item-b fx-centered fx ${
-                  category === 4 ? "selected-list-item-b" : ""
-                }`}
-                onClick={() => setCategory(4)}
-              >
-                {t("A0gGIxM")}
-              </div>
+            <div>
+              <SelectTabs
+                selectedTab={category}
+                tabs={[t("A9b04Ry"), t("A9TqNxQ"), t("AizJ5ib"), t("A0gGIxM")]}
+                setSelectedTab={setCategory}
+              />
             </div>
           </div>
+          <div style={{ height: "32px" }} />
           {isLoading && (
             <div
               className="fit-container box-pad-v fx-centered fx-col"
@@ -129,7 +113,7 @@ export default function Relays() {
           )}
           {!isLoading && (
             <>
-              {category === 1 && (
+              {category === 0 && (
                 <Network
                   relays={outboxRelays}
                   relaysBatch={outboxRelaysBatch}
@@ -137,11 +121,7 @@ export default function Relays() {
                   favoredList={followingsFavRelays}
                 />
               )}
-            </>
-          )}
-          {!isLoading && (
-            <>
-              {category === 2 && (
+              {category === 1 && (
                 <Followings
                   relays={followingsFavRelays}
                   relaysBatch={followingsRelaysBatch}
@@ -149,26 +129,19 @@ export default function Relays() {
                   favoredList={true}
                 />
               )}
-            </>
-          )}
-          {!isLoading && (
-            <>
-              {category === 3 && (
+              {category === 2 && (
                 <Collections
                   collections={relaysCollections}
                   favoredList={followingsFavRelays}
                 />
               )}
-            </>
-          )}
-          {!isLoading && (
-            <>
-              {category === 4 && (
+              {category === 3 && (
                 <Global
                   relays={relays}
                   relaysBatch={globalRelaysBatch}
                   setRelaysBatch={setGlobalRelaysBatch}
                   favoredList={followingsFavRelays}
+                  barHidden={barHidden}
                 />
               )}
             </>

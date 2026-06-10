@@ -126,12 +126,12 @@ const ExploreFeed = ({
         selectedCategory.group === "af"
           ? await getNDKInstance(selectedCategory.value)
           : selectedCategory.group === "rsf"
-          ? await getNDKInstance(
+            ? await getNDKInstance(
               selectedCategory.value,
               selectedCategory.relays,
               true
             )
-          : undefined;
+            : undefined;
       let algoRelay = [];
       if (selectedCategory.group === "af")
         algoRelay.push(selectedCategory.value);
@@ -157,9 +157,9 @@ const ExploreFeed = ({
           selectedCategory.value === "top"
             ? event.content
               ? {
-                  ...getParsedRepEvent(JSON.parse(event.content)),
-                  created_at: event.created_at,
-                }
+                ...getParsedRepEvent(JSON.parse(event.content)),
+                created_at: event.created_at,
+              }
               : false
             : getParsedRepEvent(event)
         )
@@ -194,8 +194,8 @@ const ExploreFeed = ({
       selectedFilter.to && lastEventsTimestamps
         ? Math.min(selectedFilter.to, lastEventsTimestamps)
         : selectedFilter.to
-        ? selectedFilter.to
-        : lastEventsTimestamps;
+          ? selectedFilter.to
+          : lastEventsTimestamps;
 
     let since = selectedFilter.from || undefined;
     let authors =
@@ -329,7 +329,7 @@ const ExploreFeed = ({
           className="fit-container fx-centered fx-col"
           style={{ height: "30vh" }}
         >
-          <Icon name="search" />
+          <Icon name="search_magnifying_glass" v={2} />
           <h4>{t("AUrhqmn")}</h4>
           <p className="gray-c">{t("AtL4qoU")}</p>
         </div>

@@ -162,37 +162,6 @@ const ChatWindow = ({ message, setMessage, setStatus }) => {
       setLoading(false);
     }
   };
-  // const handleSend = async (input) => {
-  //   if (!input.trim()) return;
-
-  //   const newMessages = [
-  //     ...messages,
-  //     { role: "user", content: input, created_at: Date.now() },
-  //   ];
-  //   setMessages(newMessages);
-  //   setMessage("");
-  //   setLoading(true);
-  //   setStatus(false);
-  //   try {
-  //     const res = await getAnswerFromAIRemoteAPI(userKeys.pub, input)
-  //     // const res = await axios.post("https://yakiai.yakihonne.com/api/v1/ai", {
-  //     //   input,
-  //     // });
-
-  //     // const data = res.data.message.content;
-  //     // saveConversation(userKeys.pub, [
-  //     //   ...newMessages,
-  //     //   { role: "assistant", content: data, created_at: Date.now() },
-  //     // ]);
-  //     // if (stopSnapping) setStopSnapping(false);
-  //     // setLoading(false);
-  //     // animateTyping(data, newMessages);
-  //   } catch (err) {
-  //     console.log(err);
-  //     setStatus(true);
-  //     setLoading(false);
-  //   }
-  // };
 
   const animateTyping = (text, history) => {
     const words = text.split(" ");
@@ -389,18 +358,16 @@ function InputField({ status = true, handleSearch }) {
       <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m">
         <div className="fx-centered">
           <Link
-            className={`sc-s box-pad-h-m box-pad-v-s ${
-              status ? "option pointer" : "if-disabled"
-            } fx-centered`}
+            className={`sc-s box-pad-h-m box-pad-v-s ${status ? "option pointer" : "if-disabled"
+              } fx-centered`}
             href={"/smart-widgets"}
           >
-            <Icon name="search" />
+            <Icon name="search_magnifying_glass" v={2} />
             {t("AYZh36g")}
           </Link>
           <Link
-            className={`sc-s box-pad-h-m box-pad-v-s ${
-              status ? "option pointer" : "if-disabled"
-            } fx-centered`}
+            className={`sc-s box-pad-h-m box-pad-v-s ${status ? "option pointer" : "if-disabled"
+              } fx-centered`}
             style={{
               backgroundColor: "var(--pale-gray)",
             }}

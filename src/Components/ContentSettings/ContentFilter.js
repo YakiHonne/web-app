@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 import Toggle from "@/Components/Toggle";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -43,8 +45,10 @@ export default function ContentFilter({
   const [filterPortalPos, setFilterPortalPos] = useState(null);
   const filtersRef = useRef(null);
   const filterPanelRef = useRef(null);
+  const isMobile = useIsMobile();
 
   const closeFilter = () => {
+    if (isMobile) { setShowFilters(false); return; }
     setDismissingFilter(true);
     setTimeout(() => { setShowFilters(false); setDismissingFilter(false); }, 220);
   };
@@ -208,109 +212,83 @@ export default function ContentFilter({
             height: "40px",
             width: "40px",
             borderRadius: "50px",
-            // width: !selectedFilter.default ? "max-content" : "40px",
-            // borderRadius: !selectedFilter.default ? "" : "50px",
           }}
           onClick={handleFilters}
         >
-          {/* {!selectedFilter.default && (
-            <>
-              <p className="p-maj">{selectedFilter.title}</p>
-              <p className="gray-c">|</p>
-            </>
-          )} */}
           <Icon v={2} name={iconsNames.slider_03} size={20} opacity=".5" />
         </div>
-        {showFilters && filterPortalPos && typeof document !== "undefined" && createPortal(
-          <div
-            style={{
-              position: "fixed",
-              top: filterPortalPos.top,
-              left: filterPortalPos.centerX,
-              transform: "translateX(-50%)",
-              width: "300px",
-              zIndex: 99999,
-            }}
-
-          >
-            <div ref={filterPanelRef} className={`bg-dropdown di-wrapper${dismissingFilter ? " dismissing" : ""}`}>
-              <div
-                className="box-pad-h-s box-pad-v-s fit-container fx-scattered"
-                style={{
-                  backgroundColor: "rgba(255,255,255,0.06)",
-                  borderRadius: "16px 16px 0 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.08)",
-                }}
-              >
-                <p className="gray-c">{t("AMx89Qm")}</p>
+        {isMobile ? (
+          <MobileSheet open={showFilters} onClose={closeFilter} title={t("AMx89Qm")}>
+            <div className="fx-centered fx-col fx-start-v fit-container" style={{ gap: 0, padding: ".25rem .45rem" }}>
+              <div className="fit-container fx-end-h box-pad-h-s" style={{ paddingBottom: "4px" }}>
                 <div onClick={(e) => { e.stopPropagation(); setShowAddFilter(true); }}>
                   <Icon name="plus-sign" />
                 </div>
               </div>
-              <div
-                className="fx-centered fx-col fx-start-v fit-container"
-                style={{ gap: 0, padding: ".25rem .45rem" }}
-              >
-                {filters.map((filter, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s option-no-scale`}
-                      style={{
-                        height: "35px",
-                        borderRadius: "var(--border-r-18)",
-                        overflow: "visible",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedFilter({ ...filter, index });
-                        setShowFilters(false);
-                        localStorage.setItem(`${type}-selectedFilter`, "true");
-                      }}
-                    >
+              {filters.map((filter, index) => (
+                <div
+                  key={index}
+                  className="pointer fit-container fx-scattered box-pad-h-s box-pad-v-s option-no-scale"
+                  style={{ borderRadius: "var(--border-r-18)", fontSize: "1rem" }}
+                  onClick={(e) => { e.stopPropagation(); setSelectedFilter({ ...filter, index }); setShowFilters(false); localStorage.setItem(`${type}-selectedFilter`, "true"); }}
+                >
+                  <p className="p-maj p-one-line">{filter.title}</p>
+                  <div className="fx-centered">
+                    {selectedFilter.index === index && <Icon name="check" size={24} />}
+                    <OptionsDropdown
+                      vertical={false}
+                      options={[
+                        <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
+                          <Icon name="edit" /><p onClick={(e) => { e.stopPropagation(); setShowAddFilter(true); setFilterToEdit({ ...filter, index }); }}>{t("AsXohpb")}</p>
+                        </div>,
+                        <hr style={{ margin: "4px 0", padding: "0 5px" }} />,
+                        <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
+                          <Icon name="trash" isColored /><p className="red-c" onClick={(e) => { e.stopPropagation(); handleDeleteFilter(index); }}>{t("Almq94P")}</p>
+                        </div>,
+                      ]}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </MobileSheet>
+        ) : (
+          showFilters && filterPortalPos && typeof document !== "undefined" && createPortal(
+            <div style={{ position: "fixed", top: filterPortalPos.top, left: filterPortalPos.centerX, transform: "translateX(-50%)", width: "300px", zIndex: 99999 }}>
+              <div ref={filterPanelRef} className={`bg-dropdown di-wrapper${dismissingFilter ? " dismissing" : ""}`}>
+                <div className="fit-container fx-scattered" style={{ padding: "10px 12px 6px", position: "sticky", top: 0, zIndex: 1, borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                  <p className="gray-c p-medium">{t("AMx89Qm")}</p>
+                  <div onClick={(e) => { e.stopPropagation(); setShowAddFilter(true); }}>
+                    <Icon name="plus-sign" size={16} />
+                  </div>
+                </div>
+                <div className="fx-centered fx-col fx-start-v fit-container" style={{ gap: 0, padding: ".25rem .45rem" }}>
+                  {filters.map((filter, index) => (
+                    <div key={index} className="pointer fit-container fx-scattered box-pad-h-s box-pad-v-s option-no-scale" style={{ height: "35px", borderRadius: "var(--border-r-18)", overflow: "visible" }}
+                      onClick={(e) => { e.stopPropagation(); setSelectedFilter({ ...filter, index }); setShowFilters(false); localStorage.setItem(`${type}-selectedFilter`, "true"); }}>
                       <p className="p-maj p-one-line">{filter.title}</p>
                       <div className="fx-centered">
-                        {selectedFilter.index === index && (
-                          <Icon name="check" size={24} />
-                        )}
+                        {selectedFilter.index === index && <Icon name="check" size={24} />}
                         <OptionsDropdown
                           vertical={false}
                           options={[
                             <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
-                              <Icon name="edit" />
-                              <p
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setShowAddFilter(true);
-                                  setFilterToEdit({ ...filter, index });
-                                }}
-                              >
-                                {t("AsXohpb")}
-                              </p>
+                              <Icon name="edit" /><p onClick={(e) => { e.stopPropagation(); setShowAddFilter(true); setFilterToEdit({ ...filter, index }); }}>{t("AsXohpb")}</p>
                             </div>,
                             <hr style={{ margin: "4px 0", padding: "0 5px" }} />,
                             <div className="fit-container fx-centered fx-start-h option-no-scale box-pad-h-s box-pad-v-s">
-                              <Icon name="trash" isColored />
-                              <p
-                                className="red-c"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteFilter(index);
-                                }}
-                              >
-                                {t("Almq94P")}
-                              </p>
+                              <Icon name="trash" isColored /><p className="red-c" onClick={(e) => { e.stopPropagation(); handleDeleteFilter(index); }}>{t("Almq94P")}</p>
                             </div>,
                           ]}
                         />
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            </div>
-          </div>,
-          document.body
+            </div>,
+            document.body
+          )
         )}
       </div>
     </>

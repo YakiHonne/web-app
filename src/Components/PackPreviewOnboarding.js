@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import UsersGroupProfilePicture from "@/Components/UsersGroupProfilePicture";
 import { saveUsers } from "@/Helpers/DB";
-import { Virtuoso } from "react-virtuoso";
 import useUsersProfile from "@/Hooks/useUsersProfile";
 import UserProfilePic from "@/Components/UserProfilePic";
 
@@ -13,153 +13,164 @@ export default function PackPreviewOnboarding({
   selectedPubkeys,
 }) {
   const { t } = useTranslation();
-  const { userProfile } = useUsersProfile(pack.pubkey);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
   const isAllFollowing = useMemo(() => {
-    const supersetSet = new Set(selectedPubkeys);
-    const isAllIncluded = pack.pTags.every((item) => supersetSet.has(item));
-    return isAllIncluded;
+    const s = new Set(selectedPubkeys);
+    return pack.pTags.every((item) => s.has(item));
   }, [selectedPubkeys]);
 
-  const handleShowDetails = () => {
-    setShowDetails(!showDetails);
+  const handleOpen = () => {
+    setShowOverlay(true);
     saveUsers([...pack.pTags, pack.pubkey]);
   };
+
+  useEffect(() => {
+    if (!showOverlay) return;
+    const onKey = (e) => { if (e.key === "Escape") setShowOverlay(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [showOverlay]);
 
   return (
     <>
       <div
-        className="fit-container fx-centered fx-col fx-start-v fx-start-h bg-sp pointer"
-        onClick={(e) => {
-          e.stopPropagation();
-          handleShowDetails();
-        }}
-        style={{ overflow: "visible" }}
+        className="pack-card pointer"
+        onClick={(e) => { e.stopPropagation(); handleOpen(); }}
       >
-        <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m ">
-          <div className="fx-centered fx-start-v fx-start-h fit-container">
-            <div
-              style={{
-                backgroundImage: `url(${pack.image})`,
-                backgroundColor: "var(--pale-gray)",
-                minWidth: "40px",
-                minHeight: "40px",
-                borderRadius: "50%",
-              }}
-              className="bg-img cover-bg"
-            ></div>
-            <div className="fx-centered fx-col fx-start-v fit-container">
-              <div className="fit-container fx-scattered fx-start-v">
-                <div>
-                  <p className="p-maj p-big">{pack.title}</p>
-                  <p className={`gray-c  ${showDetails ? "" : "p-one-line"}`}>
-                    {pack.description || (
-                      <span className="p-italic">{t("AtZrjns")}</span>
-                    )}
-                  </p>
-                </div>
-                <button
-                  className={`btn btn-normal btn-small ${isAllFollowing ? "btn-gst" : "btn-normal"}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMultiSelection({
-                      pubkeys: pack.pTags,
-                      action: isAllFollowing ? "remove" : "add",
-                    });
-                  }}
-                  style={{ minWidth: "max-content" }}
-                >
-                  {isAllFollowing ? t("AyohNeT") : t("AzkUxnd")}
-                </button>
-              </div>
-              {!showDetails && (
-                <div className="fx-centered">
-                  <UsersGroupProfilePicture
-                    pubkeys={pack.pTags}
-                    number={5}
-                    imgSize={24}
-                  />
-                  {pack.pCount > 5 && (
-                    <p className="c1-c">
-                      {t("AZzyBMI", { count: pack.pCount - 5 })}
-                    </p>
-                  )}
-                </div>
-              )}
-              {showDetails && (
-                <div className="fit-container fx-centered fx-col fx-start-h fx-start-v">
-                  <p className="c1-c">{t("AvsIRth")}</p>
-                  <div className="fx-centered">
-                    <div>
-                      <UserProfilePic
-                        pubkey={userProfile.pubkey}
-                        img={userProfile.picture}
-                        size={20}
-                      />
-                    </div>
-                    <div>
-                      <p>{userProfile.display_name || userProfile.name}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {showDetails && (
-                <div className="fit-container fx-centered fx-col fx-start-h fx-start-v">
-                  <p className="c1-c">
-                    {t("AjTO4lm")} ({pack.pCount})
-                  </p>
-                  <Virtuoso
-                    style={{ width: "100%", height: "300px" }}
-                    skipAnimationFrameInResizeObserver={true}
-                    overscan={200}
-                    totalCount={pack.pTags.length}
-                    increaseViewportBy={200}
-                    itemContent={(index) => {
-                      let pubkey = pack.pTags[index];
-                      let isAdded = selectedPubkeys.includes(pubkey);
-                      return (
-                        <UserToFollow
-                          pubkey={pubkey}
-                          onClick={handleSingleSelection}
-                          isAdded={isAdded}
-                        />
-                      );
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+        <div
+          className="pack-card-img"
+          style={{ backgroundImage: `url(${pack.image})`, backgroundColor: "var(--pale-gray)" }}
+        ></div>
+        <div className="pack-card-body">
+          <p className="pack-card-title p-one-line">{pack.title}</p>
+          <div className="pack-card-meta">
+            <UsersGroupProfilePicture pubkeys={pack.pTags} number={3} imgSize={22} />
+            {pack.pCount > 3 && (
+              <p className="gray-c p-medium">{t("AZzyBMI", { count: pack.pCount - 3 })}</p>
+            )}
           </div>
         </div>
+        <div
+          className={`pack-card-btn ${isAllFollowing ? "pack-card-btn--active" : ""}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleMultiSelection({ pubkeys: pack.pTags, action: isAllFollowing ? "remove" : "add" });
+          }}
+        >
+          {isAllFollowing ? t("AyohNeT") : t("AzkUxnd")}
+        </div>
       </div>
+
+      {showOverlay && createPortal(
+        <PackOverlay
+          pack={pack}
+          isAllFollowing={isAllFollowing}
+          handleMultiSelection={handleMultiSelection}
+          handleSingleSelection={handleSingleSelection}
+          selectedPubkeys={selectedPubkeys}
+          onClose={() => setShowOverlay(false)}
+        />,
+        document.body
+      )}
     </>
   );
 }
 
-const UserToFollow = React.memo(({ pubkey, onClick, isAdded }) => {
+function PackOverlay({ pack, isAllFollowing, handleMultiSelection, handleSingleSelection, selectedPubkeys, onClose }) {
   const { t } = useTranslation();
-  const { userProfile } = useUsersProfile(pubkey);
-  const handleOnClick = (e) => {
-    e.stopPropagation();
-    if (isAdded) onClick({ pubkey, action: "remove" });
-    else onClick({ pubkey, action: "add" });
-  };
+  const [descExpanded, setDescExpanded] = useState(false);
+  const [showList, setShowList] = useState(false);
+
+  const descLong = pack.description && pack.description.length > 200;
+
   return (
-    <div className="fit-container fx-scattered box-marg-s">
-      <div className="fx-centered">
-        <div>
-          <UserProfilePic pubkey={pubkey} img={userProfile.picture} size={20} />
-        </div>
-        <div>
-          <p>{userProfile.display_name || userProfile.name}</p>
-        </div>
-      </div>
-      <button
-        onClick={handleOnClick}
-        className={`btn btn-small ${isAdded ? "btn-gst" : "btn-normal"}`}
+    <div className="pack-overlay-backdrop" onClick={onClose}>
+      <div
+        className="pack-overlay-sheet bg-dropdown-t"
+        onClick={(e) => e.stopPropagation()}
       >
-        {isAdded ? t("ASi0a0d") : t("AzkUxnd")}
-      </button>
+        <button className="pack-overlay-close" onClick={onClose}>
+          <span></span><span></span>
+        </button>
+
+        {pack.image && (
+          <div
+            className="pack-overlay-img"
+            style={{ backgroundImage: `url(${pack.image})` }}
+          ></div>
+        )}
+
+        <div className="pack-overlay-content">
+          <h3 className="pack-overlay-title">{pack.title}</h3>
+
+          {pack.description && (
+            <div className="pack-overlay-desc-wrap">
+              <p className={`pack-overlay-desc gray-c ${!descExpanded && descLong ? "pack-overlay-desc--clamped" : ""}`}>
+                {pack.description}
+              </p>
+              {descLong && (
+                <button
+                  className="pack-overlay-see-more"
+                  onClick={() => setDescExpanded((v) => !v)}
+                >
+                  {descExpanded ? t("ASeeLess") : t("AnWFKlu")}
+                </button>
+              )}
+            </div>
+          )}
+
+          <div className="pack-overlay-meta">
+            <UsersGroupProfilePicture pubkeys={pack.pTags} number={5} imgSize={26} />
+            <p className="gray-c p-medium">{pack.pCount} {t("AJ1Zfct")}</p>
+          </div>
+
+          <div
+            className={`pack-overlay-follow-btn ${isAllFollowing ? "pack-overlay-follow-btn--active" : ""}`}
+            onClick={() => handleMultiSelection({ pubkeys: pack.pTags, action: isAllFollowing ? "remove" : "add" })}
+          >
+            {isAllFollowing ? t("AyohNeT") : t("AzkUxnd")}
+          </div>
+
+          <button
+            className="pack-overlay-see-list-btn"
+            onClick={() => setShowList((v) => !v)}
+          >
+            {showList ? t("AHidePackList") : t("ASeeWhoInPack")}
+          </button>
+        </div>
+
+        {showList && (
+          <div className="pack-overlay-list">
+            {pack.pTags.map((pubkey) => {
+              const isAdded = selectedPubkeys.includes(pubkey);
+              return (
+                <OverlayUserRow
+                  key={pubkey}
+                  pubkey={pubkey}
+                  isAdded={isAdded}
+                  onClick={handleSingleSelection}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const OverlayUserRow = React.memo(({ pubkey, isAdded, onClick }) => {
+  const { userProfile } = useUsersProfile(pubkey);
+  return (
+    <div
+      className="pack-user-row"
+      onClick={() => onClick({ pubkey, action: isAdded ? "remove" : "add" })}
+    >
+      <UserProfilePic pubkey={pubkey} img={userProfile.picture} size={36} />
+      <div className="pack-user-info">
+        <p className="pack-user-name">{userProfile.display_name || userProfile.name || "…"}</p>
+      </div>
+      <div className={`pack-user-check ${isAdded ? "pack-user-check--on" : ""}`}></div>
     </div>
   );
 });

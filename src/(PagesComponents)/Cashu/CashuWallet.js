@@ -19,6 +19,7 @@ import { customHistory } from "@/Helpers/History";
 import { setUserBalance } from "@/Store/Slides/UserData";
 import { useDispatch } from "react-redux";
 import Icon from "@/Components/Icon";
+import { SelectTabs } from "@/Components/SelectTabs";
 
 export default function CashuWallet() {
   const { t } = useTranslation();
@@ -38,21 +39,11 @@ export default function CashuWallet() {
   const [launchRestoration, setLaunchRestoration] = useState(false);
   const [launchMintsAdding, setLaunchMintsAdding] = useState(false);
   const [launchSyncing, setLaunchSyncing] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("history");
-  const tabs = [
-    { value: "history", display_name: t("ARgXvNi") },
-    { value: "nutzap", display_name: "Nutzap" },
-    { value: "sentTokens", display_name: t("ASS0LTq") },
-  ];
+  const [selectedTab, setSelectedTab] = useState(0);
+  const tabs = [t("ARgXvNi"), "Nutzap", t("ASS0LTq")];
   const pageTabs = [
-    {
-      display_name: t("AQtRwt6"),
-      value: 0,
-    },
-    {
-      display_name: t("ALrBEok"),
-      value: 1,
-    },
+    t("AQtRwt6"),
+    t("ALrBEok")
   ];
   useEffect(() => {
     if (route === "/cashu-wallet" && cashuTotalBalance) {
@@ -63,9 +54,9 @@ export default function CashuWallet() {
 
   useEffect(() => {
     let tabFromQuery =
-      ["history", "sentTokens", "nutzap"].includes(query?.tab) && query.tab
+      [0, 1, 2].includes(query?.tab) && query.tab
         ? query.tab
-        : "history";
+        : 0;
     if (tabFromQuery) setSelectedTab(tabFromQuery);
   }, [query]);
 
@@ -106,13 +97,15 @@ export default function CashuWallet() {
       {ops === "send" && <SendTokens exit={() => setOps("")} />}
       {ops === "receive" && <ReceiveTokens exit={() => setOps("")} />}
       <div className="box-pad-h box-pad-v">
-        {/* <h3>{t("ALrBEok")}</h3> */}
         <div className="fit-container fx-centered">
-          <SelectTabsNoIndex
-            tabs={pageTabs}
-            selectedTab={1}
-            setSelectedTab={handleSelectPageTab}
-          />
+          <div>
+
+            <SelectTabs
+              tabs={pageTabs}
+              selectedTab={1}
+              setSelectedTab={handleSelectPageTab}
+            />
+          </div>
         </div>
         <div className="fit-container box-pad-v">
           {cashuWallet?.privkey && (
@@ -291,27 +284,17 @@ export default function CashuWallet() {
           {!cashuWallet?.privkey && <CashuWalletCreation />}
         </div>
         <div className="fit-container fx-centered " style={{ gap: 0 }}>
-          {tabs.map((tab) => {
-            return (
-              <div
-                className={`list-item-b fx-centered fx ${
-                  selectedTab === tab.value ? "selected-list-item-b" : ""
-                }`}
-                onClick={() => setSelectedTab(tab.value)}
-                key={tab.value}
-              >
-                {tab.display_name}
-              </div>
-            );
-          })}
+          <div>
+            <SelectTabs tabs={tabs} selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
+          </div>
         </div>
-        {selectedTab === "history" && (
+        {selectedTab === 0 && (
           <CashuHistory cashuHistory={cashuHistory.history} />
         )}
-        {selectedTab === "sentTokens" && (
+        {selectedTab === 2 && (
           <CashuSentTokensAsHash cashuTokens={cashuTokens} />
         )}
-        {selectedTab === "nutzap" && (
+        {selectedTab === 1 && (
           <CashuNutZaps
             cashuNutZaps={cashuNutZaps}
             cashuTokens={cashuTokens}

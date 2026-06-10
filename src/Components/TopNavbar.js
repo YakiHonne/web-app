@@ -38,6 +38,7 @@ import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import { iconsNames } from "@/Content/IconV2URL";
 import { updatesList } from "@/Components/YakiIntro";
 import Overlay from "@/Components/Overlay";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 export default function TopNavbar() {
   const { t } = useTranslation();
@@ -51,18 +52,28 @@ export default function TopNavbar() {
   const { cashuTotalBalance } = useCashu();
   const userSettings = useCustomizationSettings();
 
+  const isMobile = useIsMobile();
   const [showSearch, setShowSearch] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [dismissingProfile, setDismissingProfile] = useState(false);
 
   const closeProfileMenu = () => {
+    if (document.body.classList.contains("ios-sheet-open")) {
+      document.body.classList.replace("ios-sheet-open", "ios-sheet-closing");
+      setTimeout(() => document.body.classList.remove("ios-sheet-closing"), 450);
+    }
+    if (isMobile && profileDropRef.current) {
+      profileDropRef.current.classList.remove("uplift-profile-open");
+    }
+    const dismissDuration = isMobile ? 300 : 220;
     setDismissingProfile(true);
-    setTimeout(() => { setShowProfileMenu(false); setDismissingProfile(false); }, 220);
+    setTimeout(() => { setShowProfileMenu(false); setDismissingProfile(false); }, dismissDuration);
   };
   const [showYakiChest, setShowYakiChest] = useState(false);
   const [showConfirmationBox, setShowConfirmationBox] = useState(false);
   const [isAccountSwitching, setIsAccountSwitching] = useState(false);
+  const switchingTimerRef = useRef(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [showPostNote, setShowPostNote] = useState(false);
   const [showPostMedia, setShowPostMedia] = useState(false);
@@ -86,7 +97,6 @@ export default function TopNavbar() {
 
   const currency = useMemo(() => userSettings.currency || "usd", [userSettings.currency]);
 
-  /* ── Balance fetching ── */
   useEffect(() => {
     if (!userKeys || !(userKeys?.ext || userKeys?.sec || userKeys?.bunker)) return;
     const walletUrl = localStorage_.getItem("selectedWalletType");
@@ -122,7 +132,6 @@ export default function TopNavbar() {
     }
   }, [userKeys, cashuTotalBalance]);
 
-  /* ── Fiat rate fetch ── */
   useEffect(() => {
     axios.get(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=${currency}`)
       .then((res) => setFiatRate(res.data.bitcoin[currency]))
@@ -137,7 +146,6 @@ export default function TopNavbar() {
     }
   }, [fiatRate, userBalance]);
 
-  /* ── Esc closes create menu ── */
   useEffect(() => {
     const handle = (e) => {
       if (e.key === "Escape") setCreateOpen(false);
@@ -146,19 +154,18 @@ export default function TopNavbar() {
     return () => document.removeEventListener("keydown", handle);
   }, []);
 
-  /* ── Hide navbar on scroll-down, show on scroll-up ── */
   const lastScrollY = useRef(0);
   useEffect(() => {
     const onScroll = () => {
+      if (showMore || showProfileMenu || createOpen) return;
       const y = window.scrollY;
       setNavHidden(y > lastScrollY.current && y > 80);
       lastScrollY.current = y;
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [showMore, showProfileMenu, createOpen]);
 
-  /* ── outside-click: profile ── */
   useEffect(() => {
     const handle = (e) => {
       if (
@@ -171,7 +178,6 @@ export default function TopNavbar() {
     return () => document.removeEventListener("mousedown", handle);
   }, []);
 
-  /* ── outside-click: more drawer (click on scrim) ── */
   useEffect(() => {
     const handle = (e) => {
       if (moreDrawerRef.current?.contains(e.target)) return;
@@ -182,7 +188,6 @@ export default function TopNavbar() {
     return () => document.removeEventListener("mousedown", handle);
   }, [showMore]);
 
-  /* ── Hide FloatingDMs bubble while drawer is open ── */
   useEffect(() => {
     const el = document.getElementById("floating-dms");
     if (!el) return;
@@ -191,7 +196,18 @@ export default function TopNavbar() {
     return () => el.classList.remove("uplift-drawer-open-mask");
   }, [showMore]);
 
-  /* ── outside-click: create menu ── */
+  useEffect(() => {
+    const anyOpen = showMore || showProfileMenu || createOpen;
+    if (anyOpen) {
+      document.body.classList.remove("ios-sheet-closing");
+      document.body.classList.add("ios-sheet-open");
+    } else if (document.body.classList.contains("ios-sheet-open")) {
+      document.body.classList.replace("ios-sheet-open", "ios-sheet-closing");
+      const timer = setTimeout(() => document.body.classList.remove("ios-sheet-closing"), 450);
+      return () => clearTimeout(timer);
+    }
+  }, [showMore, showProfileMenu, createOpen]);
+
   useEffect(() => {
     const handle = (e) => {
       if (
@@ -211,7 +227,16 @@ export default function TopNavbar() {
       const top = Math.min(r.bottom + 8, window.innerHeight - dropdownH - 8);
       setProfilePos({ top: Math.max(top, 56), right: window.innerWidth - r.right });
     }
-    if (showProfileMenu) { closeProfileMenu(); } else { setShowProfileMenu(true); }
+    if (showProfileMenu) {
+      closeProfileMenu();
+    } else {
+      setShowProfileMenu(true);
+      if (isMobile) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          if (profileDropRef.current) profileDropRef.current.classList.add("uplift-profile-open");
+        }));
+      }
+    }
   };
 
   const openMore = () => setShowMore((v) => !v);
@@ -294,6 +319,7 @@ export default function TopNavbar() {
     ...(userKeys ? [
       { icon: iconsNames.user_01, iconBold: "user-bold", label: t("AyBBPWE"), path: null, onClick: handleProfileLink },
       { icon: iconsNames.chart_line, iconBold: "dashboard-bold", label: t("ALBhi3j"), path: "/dashboard" },
+      { icon: iconsNames.star, iconBold: "dashboard-bold", label: t("ABsx3n9"), path: "/yaki-points" },
     ] : []),
   ];
 
@@ -358,10 +384,6 @@ export default function TopNavbar() {
       {showConfirmationBox && (
         <ConfirmationBox exit={() => setShowConfirmationBox(false)} handleOnClick={handleLogout} />
       )}
-      {isAccountSwitching && (
-        <AccountSwitching exit={() => setIsAccountSwitching(false)} />
-      )}
-
       <MiniNavbar
         visible={navHidden}
         pathname={pathname}
@@ -371,6 +393,19 @@ export default function TopNavbar() {
         avatarRef={avatarRef}
         onAvatarClick={openProfileMenu}
         onReveal={() => setNavHidden(false)}
+        isAccountSwitching={isAccountSwitching}
+      />
+
+      <MobileBottomNav
+        pathname={pathname}
+        isPage={isPage}
+        navHidden={navHidden}
+        userKeys={userKeys}
+        isNewMsg={isNewMsg}
+        createOpen={createOpen}
+        plusBtnRef={plusBtnRef}
+        toggleCreate={toggleCreate}
+        openMore={openMore}
       />
 
       <nav className={`uplift-navbar${navHidden ? " uplift-navbar-hidden" : ""}`}>
@@ -485,12 +520,13 @@ export default function TopNavbar() {
           </div>
 
           {userKeys ? (
-            <div ref={avatarRef} className="uplift-avatar-btn" onClick={openProfileMenu}>
+            <div ref={avatarRef} className={`uplift-avatar-btn${isAccountSwitching ? " uplift-avatar-switching" : ""}`} onClick={openProfileMenu}>
               <UserProfilePic
                 size={40}
                 mainAccountUser
                 allowClick={false}
                 allowPropagation={true}
+                isSwitching={isAccountSwitching}
               />
             </div>
           ) : (
@@ -539,91 +575,116 @@ export default function TopNavbar() {
 
 
       {showProfileMenu && userKeys && typeof document !== "undefined" && createPortal(
-        <div
-          ref={profileDropRef}
-          className={`bg-dropdown uplift-profile-dropdown-wrapper${dismissingProfile ? " dismissing" : ""}`}
-          style={{ top: profilePos.top, right: profilePos.right }}
-        >
-          <div className="uplift-profile-dropdown">
-            <div className="uplift-dropdown-item" onClick={handleProfileLink}>
-              <Icon name="user" size={18} />
-              <span className="uplift-dropdown-profile-name">
-                My profile
-                <span className="gray-c">
-                  {" @"}{userMetadata?.name || userMetadata?.display_name || minimizeKey(userKeys.pub)}
+        <>
+          <div
+            className="uplift-profile-scrim"
+            onClick={closeProfileMenu}
+          />
+          <div
+            ref={profileDropRef}
+            className={`${isMobile ? "" : "bg-dropdown "}uplift-profile-dropdown-wrapper${dismissingProfile ? " dismissing" : ""}`}
+            style={{ top: profilePos.top, right: profilePos.right }}
+          >
+            <div className="uplift-profile-dropdown">
+              <div className="uplift-dropdown-item" onClick={handleProfileLink}>
+                <Icon name={iconsNames.user_01} v={2} size={18} />
+                <span className="uplift-dropdown-profile-name">
+                  {t("A1HzYJS")}
+                  <span className="gray-c">
+                    {" @"}{userMetadata?.name || userMetadata?.display_name || minimizeKey(userKeys.pub)}
+                  </span>
                 </span>
-              </span>
-            </div>
+              </div>
 
-            <div className="uplift-dropdown-item" onClick={() => { closeProfileMenu(); customHistory("/settings"); }}>
-              <Icon name="setting" size={18} />
-              <span>{t("ABtsLBp")}</span>
-            </div>
+              <div className="uplift-dropdown-item" onClick={() => { closeProfileMenu(); customHistory("/subscription"); }}>
+                <Icon name="cup" size={18} />
+                <span>{t("Ar1oBm3")}</span>
+              </div>
 
-            <div className="uplift-dropdown-item" onClick={() => { singleLogout(); }}>
-              <Icon name="logout" size={18} />
-              <span>{t("AyXwdfE")}</span>
-            </div>
+              <div className="uplift-dropdown-item" onClick={() => { closeProfileMenu(); customHistory("/settings"); }}>
+                <Icon name={iconsNames.settings} v={2} size={18} />
+                <span>{t("ABtsLBp")}</span>
+              </div>
 
-            <div className="uplift-dropdown-divider" />
-            <div className="uplift-dropdown-section-label">{t("AT2OPkx")}</div>
+              <a
+                href="https://pro.yakihonne.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="uplift-dropdown-item"
+                style={{ textDecoration: "none" }}
+                onClick={closeProfileMenu}
+              >
+                <Icon name={iconsNames.wavy_check} v={2} size={18} />
+                <span>YakiPro</span>
+              </a>
 
-            <div className="uplift-dropdown-accounts-list">
-              {accounts.map((account) => (
-                <div
-                  key={account.pubkey}
-                  className={`uplift-dropdown-account-item${userKeys.pub === account.pubkey ? " uplift-account-active" : ""}`}
-                  onClick={() => {
-                    closeProfileMenu();
-                    handleSwitchAccount(account);
-                    setIsAccountSwitching(true);
-                  }}
-                >
-                  <div className="uplift-dropdown-account-info">
-                    <div style={{ pointerEvents: "none", flexShrink: 0 }}>
-                      <UserProfilePic
-                        size={40}
-                        mainAccountUser={false}
-                        img={account.picture}
-                        user_id={account.userKeys.pub}
-                        allowClick={false}
-                      />
-                    </div>
-                    <div className="uplift-dropdown-account-text">
-                      <p className="p-one-line">
-                        {account.display_name || account.name || minimizeKey(account.pubkey)}
-                      </p>
-                      <p className="gray-c p-small p-one-line">
-                        @{account.name || account.display_name || minimizeKey(account.pubkey)}
-                      </p>
-                    </div>
-                  </div>
-                  {userKeys.pub === account.pubkey ? (
-                    <div className="uplift-dropdown-account-dot-active">
-                      <div className="uplift-dropdown-account-dot-inner" />
-                    </div>
-                  ) : (
-                    <div className="uplift-dropdown-account-dot" />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div className="uplift-dropdown-item" onClick={() => { closeProfileMenu(); redirectToLogin(); }}>
-              <Icon name="plus-sign" size={18} />
-              <span className="gray-c">{t("AnDg41L")}</span>
-            </div>
-
-            <div className="uplift-dropdown-divider" />
-
-            <div className="uplift-dropdown-signout-row">
-              <div className="uplift-dropdown-signout-btn" onClick={multiLogout}>
+              <div className="uplift-dropdown-item" onClick={() => { singleLogout(); }}>
                 <Icon name="logout" size={18} />
-                <span>{t("AWFCAQG")}</span>
+                <span>{t("AyXwdfE")}</span>
+              </div>
+
+              <div className="uplift-dropdown-divider" />
+              <div className="uplift-dropdown-section-label">{t("AT2OPkx")}</div>
+
+              <div className="uplift-dropdown-accounts-list">
+                {accounts.map((account) => (
+                  <div
+                    key={account.pubkey}
+                    className={`uplift-dropdown-account-item${userKeys.pub === account.pubkey ? " uplift-account-active" : ""}`}
+                    onClick={() => {
+                      closeProfileMenu();
+                      handleSwitchAccount(account);
+                      clearTimeout(switchingTimerRef.current);
+                      setIsAccountSwitching(true);
+                      switchingTimerRef.current = setTimeout(() => setIsAccountSwitching(false), 900);
+                    }}
+                  >
+                    <div className="uplift-dropdown-account-info">
+                      <div style={{ pointerEvents: "none", flexShrink: 0 }}>
+                        <UserProfilePic
+                          size={40}
+                          mainAccountUser={false}
+                          img={account.picture}
+                          user_id={account.userKeys.pub}
+                          allowClick={false}
+                        />
+                      </div>
+                      <div className="uplift-dropdown-account-text">
+                        <p className="p-one-line">
+                          {account.display_name || account.name || minimizeKey(account.pubkey)}
+                        </p>
+                        <p className="gray-c p-small p-one-line">
+                          @{account.name || account.display_name || minimizeKey(account.pubkey)}
+                        </p>
+                      </div>
+                    </div>
+                    {userKeys.pub === account.pubkey ? (
+                      <div className="uplift-dropdown-account-dot-active">
+                        <div className="uplift-dropdown-account-dot-inner" />
+                      </div>
+                    ) : (
+                      <div className="uplift-dropdown-account-dot" />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="uplift-dropdown-item" onClick={() => { closeProfileMenu(); redirectToLogin(); }}>
+                <Icon name="plus-sign" size={18} />
+                <span className="gray-c">{t("AnDg41L")}</span>
+              </div>
+
+              <div className="uplift-dropdown-divider" />
+
+              <div className="uplift-dropdown-signout-row">
+                <div className="uplift-dropdown-signout-btn" onClick={multiLogout}>
+                  <Icon name="logout" size={18} />
+                  <span>{t("AWFCAQG")}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>,
+        </>,
         document.body
       )}
 
@@ -688,24 +749,26 @@ export default function TopNavbar() {
 }
 
 const PAGE_TITLES = {
-  "/": "Home",
-  "/articles": "Articles",
-  "/messages": "Messages",
-  "/notifications": "Notifications",
-  "/explore": "Explore",
-  "/media": "Media",
-  "/relay-orbits": "Relay Orbits",
-  "/smart-widgets": "Smart Widgets",
-  "/dashboard": "Dashboard",
-  "/settings": "Settings",
-  "/write-article": "Write Article",
-  "/smart-widget-builder": "Widget Builder",
-  "/lightning-wallet": "Wallet",
-  "/cashu-wallet": "Wallet",
+  "/": "AJDdA3h",
+  "/articles": "AesMg52",
+  "/messages": "As2zi6P",
+  "/notifications": "ASSFfFZ",
+  "/explore": "A9aq49d",
+  "/media": "A0i2SOt",
+  "/relay-orbits": "AjGFut6",
+  "/smart-widgets": "A2mdxcf",
+  "/dashboard": "ALBhi3j",
+  "/settings": "ABtsLBp",
+  "/write-article": "AV2yFXl",
+  "/smart-widget-builder": "ARYw3G4",
+  "/lightning-wallet": "Ah1Kxvl",
+  "/cashu-wallet": "Ah1Kxvl",
+  "/subscription": "Ar1oBm3",
 };
 
-const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, avatarRef, onAvatarClick, onReveal }) => {
-  const title = PAGE_TITLES[pathname] || "";
+const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, avatarRef, onAvatarClick, onReveal, isAccountSwitching }) => {
+  const { t } = useTranslation();
+  const title = PAGE_TITLES[pathname] ? t(PAGE_TITLES[pathname]) : "";
   return (
     <div
       className={`uplift-mini-navbar${visible ? " uplift-mini-navbar-visible" : ""}`}
@@ -713,7 +776,7 @@ const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, a
     >
 
       <div className="uplift-mini-logo" onClick={() => customHistory("/", true)}>
-        <Icon name="yakihonne-logo" size={28} width={154} height={28} />
+        <Icon name="yakihonne-logo" size={28} width={100} height={28} />
       </div>
 
 
@@ -740,8 +803,8 @@ const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, a
         </div>
 
         {userKeys && (
-          <div ref={avatarRef} className="uplift-avatar-btn" onClick={onAvatarClick}>
-            <UserProfilePic size={28} mainAccountUser allowClick={false} allowPropagation={true} />
+          <div ref={avatarRef} className={`uplift-avatar-btn${isAccountSwitching ? " uplift-avatar-switching" : ""}`} onClick={onAvatarClick}>
+            <UserProfilePic size={28} mainAccountUser allowClick={false} allowPropagation={true} isSwitching={isAccountSwitching} />
           </div>
         )}
       </div>
@@ -749,28 +812,73 @@ const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, a
   );
 };
 
-const AccountSwitching = ({ exit }) => {
-  const { t } = useTranslation();
-  const userMetadata = useSelector((state) => state.userMetadata);
+const MobileBottomNav = ({ isPage, navHidden, userKeys, isNewMsg, createOpen, plusBtnRef, toggleCreate, openMore }) => {
   useEffect(() => {
-    const timeout = setTimeout(exit, 2000);
-    return () => clearTimeout(timeout);
-  }, []);
+    if (!navHidden) {
+      document.body.classList.add("bottom-nav-visible");
+    } else {
+      document.body.classList.remove("bottom-nav-visible");
+    }
+    return () => document.body.classList.remove("bottom-nav-visible");
+  }, [navHidden]);
+
   return (
-    <Overlay exit={() => { }}>
-      <div className="fx-centered fx-col">
-        <div className="fx-centered popout">
-          <div style={{ borderRadius: "var(--border-r-50)" }}>
-            <UserProfilePic size={200} mainAccountUser allowClick={false} />
-          </div>
-        </div>
-        <div className="box-pad-v fx-centered fx-col">
-          <p className="orange-c p-medium">{t("AhxSvbf")}</p>
-          <h3>{userMetadata.display_name || userMetadata.name}</h3>
-          <p className="gray-c">@{userMetadata.name}</p>
-        </div>
+    <nav className={`uplift-bottom-nav${navHidden ? " uplift-bottom-nav-hidden" : ""}`}>
+      <div
+        className={`uplift-bottom-nav-btn${isPage("/") ? " uplift-active" : ""}`}
+        aria-label="Home"
+        onClick={() => customHistory("/", true)}
+      >
+        <span className="uplift-nav-icon-wrap">
+          <Icon name={iconsNames.house_01} size={24} v={2} opacity={1} />
+        </span>
+        {isPage("/") && <span className="uplift-active-dot" style={{ bottom: 6 }} />}
       </div>
-    </Overlay>
+
+      <div
+        className={`uplift-bottom-nav-btn${isPage("/articles") ? " uplift-active" : ""}`}
+        aria-label="Articles"
+        onClick={() => customHistory("/articles", true)}
+      >
+        <span className="uplift-nav-icon-wrap">
+          <Icon name={iconsNames.file_blank} size={24} v={2} opacity={1} />
+        </span>
+        {isPage("/articles") && <span className="uplift-active-dot" style={{ bottom: 6 }} />}
+      </div>
+
+      <button
+        ref={plusBtnRef}
+        className={`uplift-bottom-nav-plus${createOpen ? " uplift-plus-open" : ""}`}
+        aria-label="Create"
+        onClick={toggleCreate}
+      >
+        <span className="uplift-plus-icon-wrap">
+          <Icon name={iconsNames.add_plus} size={22} v={2} opacity={1} />
+        </span>
+      </button>
+
+      <div
+        className={`uplift-bottom-nav-btn${isPage("/messages") ? " uplift-active" : ""}`}
+        aria-label="Messages"
+        onClick={() => customHistory("/messages")}
+      >
+        <span className="uplift-nav-icon-wrap">
+          <Icon name={iconsNames.chat_conversation} size={24} v={2} opacity={1} />
+        </span>
+        {isNewMsg && <span className="uplift-notif-dot" style={{ top: 4, right: "calc(50% - 20px)" }} />}
+        {isPage("/messages") && <span className="uplift-active-dot" style={{ bottom: 6 }} />}
+      </div>
+
+      <div
+        className="uplift-bottom-nav-btn"
+        aria-label="More"
+        onClick={openMore}
+      >
+        <span className="uplift-nav-icon-wrap">
+          <Icon name={iconsNames.menu_alt_05} size={24} v={2} opacity={1} />
+        </span>
+      </div>
+    </nav>
   );
 };
 

@@ -41,22 +41,16 @@ import {
 } from "nostr-tools/nip46";
 import { NostrConnect } from "nostr-tools/kinds";
 import QRCode from "react-qr-code";
-import Link from "next/link";
 import Router from "next/router";
 import Overlay from "@/Components/Overlay";
 import useRecommendedPacks from "@/Hooks/useRecommendedPacks";
 import PackPreview from "./Explore/PackPreview";
 import PackPreviewOnboarding from "@/Components/PackPreviewOnboarding";
 import Icon from "@/Components/Icon";
+import DotGrid from "@/Components/DotGrid/DotGrid";
+import { SelectTabs } from "@/Components/SelectTabs";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
-let s8e =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/s8-e-yma.png";
-let ymaHero =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/login-yma-hero.png";
-let ymaQR =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/yma-qr.png";
-let stepsNumber = 4;
 let isNewAccount = getWallets().length > 0 ? true : false;
 
 export default function Login() {
@@ -79,39 +73,68 @@ export default function Login() {
   }, []);
 
   return (
-    <div
-      className="fit-container fx-centered"
-      style={{ height: "100vh", gap: 0 }}
-    >
-      <LeftSection />
-      <div
-        className="fx-centered fx-col box-pad-h"
-        style={{ width: "min(100%,500px)" }}
-      >
-        <div className="box-marg-s">
-          {isLogin && <h3 className="slide-up">{t("AITU9z0")}</h3>}
-          {!isLogin && <h3 className="slide-down">{t("AHXrr4Y")}</h3>}
-        </div>
-        {isLogin && (
-          <LoginScreen
-            switchScreen={() => setIsLogin(!isLogin)}
-            userKeys={userKeys}
-          />
-        )}
+    <div className="login-stage">
+      <div className="login-bg-layer">
+        <DotGrid
+          dotSize={7}
+          gap={19}
+          baseColor="#2b2b2b"
+          activeColor="#ff5c27"
+          proximity={270}
+          shockRadius={250}
+          shockStrength={14}
+          resistance={1350}
+          returnDuration={1.7}
+        />
+      </div>
+      <div className="login-vignette"></div>
+      <div className="login-brandmark">
+        <Icon name="yakihonne-logo" width={120} height={42} isColored={false} />
+      </div>
+      <div className="login-stage-content">
+        <div className="login-card bg-dropdown-t">
+          <button
+            className="btn btn-normal btn-gray fx-centered bg-dropdown login-back-btn"
+            onClick={() => Router.back()}
+          >
+            <Icon name="arrow" transform="rotate(90deg)" />
+          </button>
+          <div className="login-card-head">
+            <p className="login-card-eyebrow">{t("ANbrnTP")}</p>
+            <h3 className="login-card-title-plain" key={isLogin ? "login" : "signup"}>
+              {isLogin ? t("AITU9z0") : t("AHXrr4Y")}
+            </h3>
+          </div>
+          <div className="login-mode-tabs fx-centered">
+            <div>
+              <SelectTabs
+                selectedTab={isLogin ? 0 : 1}
+                tabs={[t("AmOtzoL"), t("AHXrr4Y")]}
+                setSelectedTab={(index) => setIsLogin(index === 0)}
+              />
+            </div>
+          </div>
+          {isLogin && (
+            <LoginScreen
+              switchScreen={() => setIsLogin(!isLogin)}
+              userKeys={userKeys}
+            />
+          )}
 
-        {!isLogin && (
-          <SignupScreen
-            switchScreen={() => setIsLogin(!isLogin)}
-            userKeys={userKeys}
-            recommendedStarterPacks={recommendedStarterPacks}
-          />
-        )}
+          {!isLogin && (
+            <SignupScreen
+              switchScreen={() => setIsLogin(!isLogin)}
+              userKeys={userKeys}
+              recommendedStarterPacks={recommendedStarterPacks}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-const Bunker = () => {
+const Bunker = ({ autoLaunch = false }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [nostrConnectURI, setNostrConnectURI] = useState("");
@@ -138,8 +161,6 @@ const Bunker = () => {
       [{ kinds: [NostrConnect], "#p": [localKeys.pubkey] }],
       {
         groupable: false,
-        // skipVerification: true,
-        // skipValidation: true,
       },
     );
 
@@ -257,88 +278,111 @@ const Bunker = () => {
     Router.back();
   };
 
+  useEffect(() => {
+    if (autoLaunch) launchBunkerWindow();
+  }, []);
+
   return (
     <>
       {nostrConnectURI && (
-        <Overlay exit={() => setNostrConnectURI("")} width={340}>
-          <div
-            className="box-pad-h box-pad-v fx-centered fx-col"
-          >
+        <Overlay exit={() => setNostrConnectURI("")} width={360}>
+          <div className="login-bunker-overlay box-pad-h box-pad-v bg-dropdown-t">
             <div className="close" onClick={() => setNostrConnectURI("")}>
               <div></div>
             </div>
-            <div className="fit-container fx-centered fx-col">
-              <h4>{t("A9eQr6B")}</h4>
-              <p className="box-pad-h p-centered gray-c">{t("AJdT1m0")}</p>
-              <div
-                className="sc-s-18 fx-centered box-pad-h-m box-pad-v-m"
-                style={{ backgroundColor: "white" }}
-              >
-                <QRCode value={nostrConnectURI} width={400} />
-              </div>
-              <div
-                className="fit-container fx-scattered box-pad-h-m box-pad-v-s sc-s-d pointer"
-                onClick={() => copyText(nostrConnectURI, t("AB1PYvA"))}
-              >
-                <p className="p-one-line gray-c">{nostrConnectURI}</p>
-                <Icon name="copy" />
-              </div>
+            <h4 className="login-card-title" style={{ fontSize: "1.3rem" }}>
+              {t("A9eQr6B")}
+            </h4>
+            <p className="login-card-subtitle">{t("AJdT1m0")}</p>
+            <div className="login-qr-frame">
+              <QRCode value={nostrConnectURI} width={220} />
             </div>
-            <div className="fit-container fx-centered">
-              <p className="gray-c">{t("Ax46s4g")}</p>
+            <div
+              className="login-bunker-uri"
+              onClick={() => copyText(nostrConnectURI, t("AB1PYvA"))}
+            >
+              <p className="p-one-line gray-c">{nostrConnectURI}</p>
+              <Icon name="copy" />
             </div>
-            <div className="fit-container fx-centered fx-col">
-              <input
-                type="text"
-                className="if ifs-full"
-                placeholder="bunker://..."
-                value={bunkerURL}
-                onChange={(e) => setBunkerURL(e.target.value)}
-              />
-              <div className="fit-container fx-centered">
-                <button
-                  className="btn btn-normal btn-full"
-                  style={{ minWidth: "max-content" }}
-                  onClick={handleBunker}
-                  disabled={isLoading || !bunkerURL}
-                >
-                  {isLoading ? <LoadingDots /> : t("AmOtzoL")}
+            <div className="login-divider-row">
+              <hr />
+              <span>{t("Ax46s4g")}</span>
+              <hr />
+            </div>
+            <input
+              type="text"
+              className="if ifs-full"
+              placeholder="bunker://..."
+              value={bunkerURL}
+              onChange={(e) => setBunkerURL(e.target.value)}
+            />
+            <div className="login-actions fit-container">
+              <button
+                className="btn btn-normal btn-full"
+                onClick={handleBunker}
+                disabled={isLoading || !bunkerURL}
+              >
+                {isLoading ? <LoadingDots /> : t("AmOtzoL")}
+              </button>
+              {isLoading && (
+                <button className="btn btn-gst btn-full">
+                  {t("AB4BSCe")}
                 </button>
-                {isLoading && (
-                  <button className="btn-red btn btn-full">
-                    {t("AB4BSCe")}
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
         </Overlay>
       )}
-      <button className="btn btn-gray btn-full" onClick={launchBunkerWindow}>
-        {t("A9eQr6B")}
-      </button>
+      {!autoLaunch && (
+        <button className="btn btn-gst btn-full" onClick={launchBunkerWindow}>
+          {t("A9eQr6B")}
+        </button>
+      )}
     </>
   );
 };
 
-const LeftSection = () => {
-  return (
-    <div
-      style={{ height: "70vh", width: "700px" }}
-      className="box-pad-h box-pad-v fx-centered mb-hide-800 "
-    >
-      <MobileAd />
-    </div>
-  );
-};
-
-const LoginScreen = ({ switchScreen }) => {
+const LoginScreen = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const [key, setKey] = useState("");
   const [checkExt, setCheckExt] = useState(window.nostr ? true : false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeMethod, setActiveMethod] = useState("");
+
+  const methods = [
+    {
+      id: "key",
+      icon: "key-icon",
+      title: t("AHm6tIw"),
+      desc: t("A7uff0L"),
+    },
+    {
+      id: "ext",
+      icon: "puzzle",
+      iconV: 2,
+      title: t("AHm6tIx"),
+      desc: t("AHm6tIu"),
+      disabled: !checkExt,
+    },
+    {
+      id: "bunker",
+      icon: "bolt",
+      title: t("A9eQr6B"),
+      desc: t("AJdT1m0"),
+    },
+  ];
+  const activeMethodData = methods.find((m) => m.id === activeMethod);
+
+  const handleMethodClick = (method) => {
+    if (method.disabled) return;
+    if (method.id === "ext") {
+      onLoginWithExt();
+      return;
+    }
+    setActiveMethod(method.id);
+  };
 
   const onLogin = async (inputKey) => {
     if (!inputKey) return;
@@ -439,7 +483,6 @@ const LoginScreen = ({ switchScreen }) => {
 
       if (wallet.length > 0) dispatch(setUserKeys(keys));
 
-      // }
       setIsLoading(false);
       Router.back();
       return;
@@ -457,60 +500,66 @@ const LoginScreen = ({ switchScreen }) => {
 
   return (
     <>
-      <div className="fit-container">
-        <input
-          type="text"
-          className="if ifs-full box-marg-s"
-          placeholder="npub, nsec, hex"
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-        />
+      <div className="login-conversation">
+        <p className="login-convo-question fx-centered gray-c">{t("AHm6tIv")}</p>
 
-        <div className="fx-centered fx-col fit-container">
-          <button
-            className="btn btn-normal btn-full"
-            onClick={() => onLogin(key)}
-          >
-            {isLoading ? <LoadingDots /> : <>{t("AmOtzoL")}</>}
-          </button>
-          <p>{t("Ax46s4g")}</p>
-          <Bunker />
-          {checkExt && (
-            <button
-              className="btn btn-gray btn-full"
-              disabled={!checkExt}
-              onClick={onLoginWithExt}
-            >
-              {isLoading ? <LoadingDots /> : <>{t("AgG7T1H")}</>}
-            </button>
-          )}
-          {!checkExt && (
-            <button className="btn btn-disabled btn-full" disabled={true}>
-              <>{t("AgG7T1H")}</>
-            </button>
-          )}
-        </div>
-        <div className="fit-container  box-pad-v-m fx-scattered">
-          <div className="fx-centered pointer">
-            {isNewAccount ? (
-              <div className="round-icon-small">
-                <Icon name="arrow" transform="rotate(90deg)" />
+        {activeMethod !== "key" && (
+          <div className="login-convo-options" key="options">
+            {methods.map((method, index) => (
+              <div
+                key={method.id}
+                className={`login-convo-option bg-dropdown-t ${method.disabled ? "disabled" : ""}`}
+                style={{ "--stagger-i": index }}
+                onClick={() => handleMethodClick(method)}
+                disabled={method.disabled}
+              >
+                <span className="login-convo-option-icon">
+                  <Icon name={method.icon} v={method.iconV || 1} size={26} />
+                </span>
+                <span className="login-convo-option-copy">
+                  <b>{method.title}</b>
+                  <span>{method.desc}</span>
+                </span>
+                <span className="login-convo-option-go">
+                  <Icon name="arrow" size={14} transform="rotate(-90deg)" />
+                </span>
               </div>
-            ) : (
-              <Icon name="user" size={24} />
-            )}{" "}
-            <p className="gray-c" onClick={() => Router.back()}>
-              {isNewAccount ? t("AB4BSCe") : t("AVCdQku")}
-            </p>
+            ))}
           </div>
-          <div className=" fx-centered" onClick={switchScreen}>
-            <p className="gray-c">
-              <span className="orange-c pointer p-bold">
-                {t("AHXrr4Y")}
-              </span>{" "}
-            </p>
+        )}
+        {activeMethod === "bunker" && <Bunker autoLaunch />}
+        {activeMethod === "key" && (
+          <div className="login-convo-answer" key={activeMethod}>
+            <div
+              className="login-convo-back"
+              onClick={() => setActiveMethod("")}
+            >
+              <Icon name="arrow" size={13} transform="rotate(90deg)" />
+              {t("AyGDBDa")}
+            </div>
+
+
+            <div className="login-convo-field">
+              <input
+                type="text"
+                className="if ifs-full"
+                placeholder={t("A7uff0L")}
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+                autoFocus
+              />
+              <div className="login-actions">
+                <button
+                  className="btn btn-normal btn-full"
+                  onClick={() => onLogin(key)}
+                  disabled={isLoading || !key}
+                >
+                  {isLoading ? <LoadingDots /> : <>{t("AmOtzoL")}</>}
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );
@@ -537,23 +586,33 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
   const [userName, setUserName] = useState("");
   const [enableWalletLinking, setEnablingWalletLinking] = useState(true);
   const [selectedPacks, setSelectedPacks] = useState([]);
+
+  const railSteps = [
+    { id: 1, label: t("AyBBPWE") },
+    { id: 2, label: t("AVzZUeP") },
+    { id: 3, label: t("Ah1Kxvl") },
+    { id: 4, label: t("AimqDYY") },
+  ];
+
+  const stepTitles = {
+    1: t("AyBBPWE"),
+    2: t("AVzZUeP"),
+    3: t("AqBdu7X"),
+    4: t("AimqDYY"),
+  };
+
   const handleNextSteps = () => {
-    if (![1, 2, 3, 4].includes(step)) return;
-    if (step == 1) {
+    if (![1, 2, 3].includes(step)) return;
+    if (step === 1) {
       if (!name) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AdrCWCj"),
-          }),
-        );
+        dispatch(setToast({ type: 2, desc: t("AdrCWCj") }));
         return;
       }
     }
     setStep(step + 1);
   };
   const handlePrevSteps = () => {
-    if (![2, 3, 4, 5].includes(step)) return;
+    if (![2, 3, 4].includes(step)) return;
     setStep(step - 1);
   };
 
@@ -611,6 +670,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
         false,
       );
       setIsCreatingWalletLoading(false);
+      setStep(4);
     } catch (err) {
       console.log(err);
       setIsCreatingWalletLoading(false);
@@ -628,7 +688,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
 
   const initializeAccount = async () => {
     try {
-      setStep(6);
+      setStep(5);
       let picture_ = pictureFile
         ? await FileUpload({ file: pictureFile, userKeys })
         : "";
@@ -640,7 +700,6 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
           }),
         );
         setStep(4);
-
         return;
       }
       let banner_ = bannerFile
@@ -653,8 +712,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
             desc: t("AnmPNHc"),
           }),
         );
-
-        setStep(5);
+        setStep(4);
         return;
       }
 
@@ -719,7 +777,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
       metadata.about = about;
       metadata.picture = profilePicture || "";
       metadata.banner = bannerPicture || "";
-      if (NWAddr && enableWalletLinking) metadata.lud16 = NWAddr;
+      if (NWAddr) metadata.lud16 = NWAddr;
       ndkEvent.kind = 0;
       ndkEvent.content = JSON.stringify(metadata);
 
@@ -841,453 +899,176 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
 
   return (
     <>
-      <div
-        className="fit-container sc-s slide-right"
-        style={{ backgroundColor: "transparent" }}
-      >
+      {step <= 4 && (
+        <div className="signup-rail">
+          {railSteps.map((railStep, i) => (
+            <div
+              key={railStep.id}
+              className={`signup-rail-item ${step === railStep.id ? "active" : ""} ${step > railStep.id ? "done" : ""}`}
+            >
+              <span className="signup-rail-marker" style={{ "--marker-i": i }}>
+                {step > railStep.id ? (
+                  <Icon name="check_big" v={2} size={20} isBoldThemeColor />
+                ) : (
+                  railStep.id
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="fit-container signup-step-body" key={step}>
+        {step <= 4 && (
+          <p className="signup-step-title">{stepTitles[step]}</p>
+        )}
         {step === 1 && (
           <>
-            <div
-              className="fit-container fx-centered fx-end-v"
-              style={{ height: "200px", position: "relative" }}
-            >
-              <div
-                className="fit-container bg-img cover-bg sc-s"
-                style={{
-                  backgroundImage: `url(${banner})`,
-                  height: "70%",
-                  zIndex: 0,
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  borderBottom: "1px solid var(--very-dim-gray)",
-                  border: "none",
-                  borderRadius: "0",
-                }}
-              ></div>
-              <div
-                className="fx-centered pointer"
-                style={{
-                  position: "absolute",
-                  right: "16px",
-                  top: "16px",
-                }}
-              >
-                {!banner && (
-                  <FilePicker
-                    element={
-                      <div className="fx-centered sticker  sticker-gray-gray">
-                        {t("A1HsCqp")}
-                        <Icon name="plus-sign" />
-                      </div>
-                    }
-                    setFile={(data) => {
-                      setBannerFile(data.file);
-                      setBanner(data.url);
-                    }}
-                  />
-                )}
-
-                {banner && (
-                  <div
-                    className="close"
-                    onClick={() => setBanner("")}
-                    style={{ position: "static" }}
-                  >
-                    <div></div>
-                  </div>
-                )}
-              </div>
-              <FilePicker
-                element={
-                  <div className="fit-container fx-col fx-centered box-pad-h">
+            <FilePicker
+              element={
+                <div className="fit-container fx-col fx-centered box-pad-h">
+                  <div className="signup-avatar-wrap">
                     <div
-                      style={{
-                        border: "6px solid var(--white)",
-                        borderRadius: "var(--border-r-50)",
-                        position: "relative",
-                        overflow: "hidden",
-                      }}
-                      className="settings-profile-pic"
-                    >
-                      <div
-                        style={{
-                          backgroundImage: `url(${
-                            picture || profilePlaceholder
-                          })`,
-                          border: "none",
-                          minWidth: "128px",
-                          aspectRatio: "1/1",
-                          borderRadius: "50%",
-                        }}
-                        className="bg-img cover-bg sc-s"
-                      ></div>
-                      <div
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          width: "100%",
-                          height: "100%",
-                          zIndex: 1,
-                          backgroundColor: "rgba(0,0,0,.8)",
-                        }}
-                        className="fx-centered pointer toggle fx-col"
-                      >
-                        <Icon name="image" size={24} />
-                        <p className="gray-c">{t("AnD39Ci")}</p>
-                      </div>
+                      className="bg-img cover-bg sc-s signup-avatar-img"
+                      style={{ backgroundImage: `url(${picture || profilePlaceholder})` }}
+                    ></div>
+                    <div className="signup-avatar-overlay fx-centered fx-col pointer toggle">
+                      <Icon name="image" size={24} />
+                      <p className="gray-c">{t("AnD39Ci")}</p>
                     </div>
                   </div>
-                }
-                setFile={(data) => {
-                  setPictureFile(data.file);
-                  setPicture(data.url);
-                }}
-              />
-            </div>
-            <div className="fit-container box-pad-h box-pad-v fx-centered fx-col">
+                </div>
+              }
+              setFile={(data) => {
+                setPictureFile(data.file);
+                setPicture(data.url);
+              }}
+            />
+            <div className="fit-container fx-centered fx-col signup-name-field">
               <input
                 type="text"
-                className="if ifs-full "
+                className="if ifs-full p-bold p-centered if-no-border"
                 placeholder={t("At0Sp8H")}
                 value={name}
                 onChange={(e) => {
                   setUserName(e.target.value);
                   setName(e.target.value);
                 }}
-              />
-              <textarea
-                className="txt-area if ifs-full "
-                placeholder={t("ARTqPc0")}
-                value={about}
-                onChange={(e) => setAbout(e.target.value)}
+                autoFocus
               />
             </div>
           </>
         )}
         {step === 2 && (
-          <>
-            <div className="box-pad-h box-pad-v fx-centered fx-start-v fx-col">
-              <h4>{t("AVzZUeP")}</h4>
-              <p className="gray-c">{t("Aj7xwXe")}</p>
-            </div>
-            <div
-              className="fx-centered fx-end-h fx-wrap box-marg-s"
-              style={{ maxHeight: "50vh", overflow: "scroll", gap: 0 }}
-            >
-              {recommendedStarterPacks.map((_) => {
-                return (
-                  <PackPreviewOnboarding
-                    pack={_}
-                    handleMultiSelection={handleMultiSelection}
-                    handleSingleSelection={handleSingleSelection}
-                    selectedPubkeys={selectedPacks}
-                    key={_.id}
-                  />
-                );
-              })}
-            </div>
-          </>
+          <div className="signup-packs-list">
+            {recommendedStarterPacks.map((_) => (
+              <PackPreviewOnboarding
+                pack={_}
+                handleMultiSelection={handleMultiSelection}
+                handleSingleSelection={handleSingleSelection}
+                selectedPubkeys={selectedPacks}
+                key={_.id}
+              />
+            ))}
+          </div>
         )}
         {step === 3 && (
-          <>
-            <div className="box-pad-h box-pad-v fx-centered fx-start-v fx-col">
-              <h4>{t("A3fxtP2")}</h4>
-              <p className="gray-c">{t("AmiGAX0")}</p>
-            </div>
-            <div
-              className="fx-centered fx-end-h fx-wrap box-marg-s"
-              style={{ maxHeight: "50vh", overflow: "scroll", gap: 0 }}
-            >
-              {InterestSuggestions.map((interest, index) => {
-                let isAdded = selectedInterests.find(
-                  (_) => _.tag === interest.main_tag,
-                );
-                return (
-                  <Fragment key={index}>
-                    <div
-                      className={`fit-container box-pad-h box-pad-v-s fx-scattered pointer ${
-                        selectedInterest === index ? "sc-s-18" : ""
-                      }`}
-                      key={index}
-                      style={{ border: "none", borderRadius: "0" }}
-                      onClick={() => handleSelectedInterest(index)}
-                    >
-                      <div className="fx-centered">
-                        <div
-                          className="sc-s-18 bg-img cover-bg"
-                          style={{
-                            backgroundImage: `url(${interest.icon})`,
-                            border: "none",
-                            aspectRatio: "1/1",
-                            minWidth: "64px",
-                          }}
-                        ></div>
-                        <div>
-                          <p className="">{interest.main_tag}</p>
-                          <div className="fx-centered fx-end-v">
-                            <ProfilePreview
-                              pubkeys={Array.from(interest.pubkeys).splice(
-                                0,
-                                3,
-                              )}
-                            />
-                            <p className="gray-c p-medium">
-                              {t("AZzyBMI", {
-                                count: interest.pubkeys.length - 3,
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="fx-centered">
-                        {isAdded && (
-                          <div
-                            style={{
-                              minWidth: "8px",
-                              aspectRatio: "1/1",
-                              backgroundColor: "var(--c1)",
-                              borderRadius: "var(--border-r-50)",
-                            }}
-                          ></div>
-                        )}
-                        <div
-                          className="round-icon-small"
-                          style={{ backgroundColor: "var(--c1)" }}
-                        >
-                          <Icon name="plus-sign" />
-                        </div>
-                      </div>
-                    </div>
-                    {selectedInterest === index && (
-                      <Suggestions
-                        index={index}
-                        handleSelectInterests={handleSelectInterests}
-                        selectedInterests={selectedInterests}
-                      />
-                    )}
-                  </Fragment>
-                );
-              })}
-            </div>
-          </>
+          <div className="fit-container fx-centered fx-col">
+            <WalletIllustration
+              isLoading={isCreatingWalletLoading}
+              isCreated={NWCURL}
+            />
+            {!NWCURL && (
+              <div className="fit-container fx-centered fx-col slide-up signup-wallet-field">
+                <div className="fit-container fx-centered">
+                  <input
+                    type="text"
+                    className="if ifs-full"
+                    placeholder={t("ALCpv2S")}
+                    value={userName}
+                    onChange={handleInputField}
+                    style={{
+                      borderColor: showErrorMessage || showEmptyUNMessage || showInvalidMessage
+                        ? "var(--red-main)"
+                        : "",
+                    }}
+                  />
+                  <p className="gray-c p-big signup-wallet-domain">@wallet.yakihonne.com</p>
+                </div>
+                {showErrorMessage && (
+                  <p className="red-c p-medium fit-container box-pad-h-m">{t("AgrHddv")}</p>
+                )}
+                {showEmptyUNMessage && (
+                  <p className="red-c p-medium fit-container box-pad-h-m">{t("AhQtS0K")}</p>
+                )}
+                {showInvalidMessage && (
+                  <p className="red-c p-medium fit-container box-pad-h-m">{t("AqSxggD")}</p>
+                )}
+              </div>
+            )}
+            {NWCURL && (
+              <div className="signup-wallet-address">
+                <span className="signup-wallet-address-label">{t("A40BuYB")}</span>
+                <span className="signup-wallet-address-value">{NWAddr}</span>
+              </div>
+            )}
+          </div>
         )}
         {step === 4 && (
-          <>
-            <div className="box-pad-h box-pad-v fx-centered  fx-col">
-              {!NWCURL && (
-                <>
-                  <h4>{t("AqBdu7X")}</h4>
-                  <p
-                    className="p-centered gray-c"
-                    style={{ maxWidth: "400px" }}
-                  >
-                    {t("AOxmFz5")}
-                  </p>
-                </>
-              )}
-              {NWCURL && <h4>{t("AimqDYY")}</h4>}
-
-              <WalletIllustration
-                isLoading={isCreatingWalletLoading}
-                isCreated={NWCURL}
-              />
-              {!NWCURL && (
-                <div className="fit-container fit-container fx-centered fx-col slide-up">
-                  <div className="fit-container fx-centered">
-                    <input
-                      type="text"
-                      className="ifs-full if"
-                      placeholder={t("ALCpv2S")}
-                      value={userName}
-                      onChange={handleInputField}
-                      style={{
-                        borderColor:
-                          showErrorMessage ||
-                          showEmptyUNMessage ||
-                          showInvalidMessage
-                            ? "var(--red-main)"
-                            : "",
-                      }}
-                    />
-                    <p
-                      className="gray-c p-big"
-                      style={{ minWidth: "max-content" }}
-                    >
-                      @wallet.yakihonne.com
-                    </p>
-                  </div>
-                  {showErrorMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AgrHddv")}</p>
-                    </div>
-                  )}
-                  {showEmptyUNMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AhQtS0K")}</p>
-                    </div>
-                  )}
-                  {showInvalidMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AqSxggD")}</p>
-                    </div>
-                  )}
-                  <button
-                    className="btn btn-normal btn-full"
-                    onClick={handleCreateWallet}
-                    disabled={isCreatingWalletLoading}
-                  >
-                    {isCreatingWalletLoading ? <LoadingDots /> : t("AvjCl1G")}
-                  </button>
-                </div>
-              )}
-              {NWCURL && (
-                <div className="fx-centered sc-s-18 box-pad-h-s box-pad-v-s">
-                  <Icon name="bolt" />
-                  {NWAddr}
-                </div>
-              )}
-              {NWCURL && (
-                <>
-                  <label className=" fx-centered" htmlFor="wallet-checkbox">
-                    <input
-                      type="checkbox"
-                      value={enableWalletLinking}
-                      onChange={() =>
-                        setEnablingWalletLinking(!enableWalletLinking)
-                      }
-                      checked={enableWalletLinking}
-                      name="wallet-checkbox"
-                      id="wallet-checkbox"
-                    />
-                    {t("AoR0AIr")}
-                  </label>
-                  <p className="p-centered gray-c">{t("Ag7XtTn")}</p>
-                </>
-              )}
-            </div>
-          </>
-        )}
-        {step === 5 && (
-          <>
-            <div
-              className="fit-container fx-centered fx-end-v"
-              style={{ height: "200px", position: "relative" }}
-            >
+          <div className="fit-container fx-centered fx-col signup-allset">
+            <div className="signup-allset-avatar" style={{ "--allset-i": 0 }}>
               <div
-                className="fit-container bg-img cover-bg sc-s"
-                style={{
-                  backgroundImage: `url(${banner})`,
-                  height: "70%",
-                  zIndex: 0,
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  borderBottom: "1px solid var(--very-dim-gray)",
-                  border: "none",
-                  borderRadius: "0",
-                }}
+                className="bg-img cover-bg sc-s"
+                style={{ backgroundImage: `url(${picture || profilePlaceholder})` }}
               ></div>
-              <div
-                style={{
-                  border: "6px solid var(--white)",
-                  borderRadius: "var(--border-r-50)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-                className="settings-profile-pic"
-              >
-                <div
-                  style={{
-                    backgroundImage: `url(${picture || profilePlaceholder})`,
-                    border: "none",
-                    minWidth: "128px",
-                    aspectRatio: "1/1",
-                    borderRadius: "50%",
-                  }}
-                  className="bg-img cover-bg sc-s"
-                ></div>
+            </div>
+            <h4 className="signup-allset-name" style={{ "--allset-i": 1 }}>{name}</h4>
+            {NWAddr && (
+              <div className="signup-wallet-address signup-wallet-address-sm" style={{ "--allset-i": 2 }}>
+                <span className="signup-wallet-address-label">{t("A40BuYB")}</span>
+                <span className="signup-wallet-address-value">{NWAddr}</span>
               </div>
-            </div>
-            <div className="fit-container fx-centered fx-col box-pad-v-m">
-              <h4>{name}</h4>
-              <p
-                className="gray-c p-centered p-four-lines"
-                style={{ maxWidth: "400px" }}
-              >
-                {about || "N/A"}
-              </p>
-            </div>
-            <div className="fit-container fx-centered box-pad-v">
-              <div
-                className="sc-s-18 box-pad-h-s box-pad-v-m fx-centered"
-                style={{ maxWidth: "400px", gap: "16px" }}
-              >
-                <div className="round-icon">
-                  <Icon name="key-icon" size={24} />
-                </div>
-                <p className="c1-c">
-                  {NWAddr && t("AZfj4DI")}
-                  {!NWAddr && t("AxGSiUc")}
-                </p>
-              </div>
-            </div>
-            {/* <SignUpDataToCopy /> */}
-          </>
+            )}
+          </div>
         )}
-        {step !== 6 && (
-          <>
-            <div className="fit-container fx-scattered box-pad-h box-marg-s">
-              {step > 1 && (
-                <button
-                  className="btn btn-gst slide-right btn-small"
-                  onClick={() => handlePrevSteps()}
-                >
-                  {t("AF7iGeG")}
-                </button>
-              )}
-              {step === 1 && <div></div>}
-
+        {step <= 4 && (
+          <div className={`login-step-nav${step === 3 && !NWCURL ? " login-step-nav--wallet" : ""}`}>
+            {step > 1 && (
               <button
-                className="btn btn-normal btn-small"
-                onClick={() =>
-                  step !== 4 ? handleNextSteps() : initializeAccount()
-                }
+                className="btn btn-gray"
+                onClick={handlePrevSteps}
+                disabled={isCreatingWalletLoading}
+              >
+                {t("AF7iGeG")}
+              </button>
+            )}
+            {step === 3 && !NWCURL && (
+              <button
+                className="btn btn-gray"
+                onClick={handleNextSteps}
+                disabled={isCreatingWalletLoading}
+              >
+                {t("AWallet1")}
+              </button>
+            )}
+            {step === 3 && !NWCURL ? (
+              <button
+                className="btn btn-normal"
+                onClick={handleCreateWallet}
+                disabled={isCreatingWalletLoading}
+              >
+                {isCreatingWalletLoading ? <LoadingDots /> : t("AWallet2")}
+              </button>
+            ) : (
+              <button
+                className="btn btn-normal"
+                onClick={step !== 4 ? handleNextSteps : initializeAccount}
               >
                 {step !== 4 ? t("AgGi8rh") : t("AB0SnxL")}
               </button>
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                bottom: 0,
-                height: "5px",
-                width: `${Math.ceil((step * 100) / stepsNumber)}%`,
-                backgroundColor: "var(--c1)",
-                transition: ".2s ease-in-out",
-              }}
-            ></div>
-          </>
-        )}
-        {step === 6 && <InitiProfile />}
-      </div>
-      <div className="fx-scattered  fit-container box-pad-v-m">
-        <div className="fx-centered pointer">
-          <div className="round-icon-small">
-            <Icon name="arrow" transform="rotate(90deg)" />{" "}
+            )}
           </div>
-          <p className="gray-c" onClick={() => Router.back()}>
-            {isNewAccount ? t("AB4BSCe") : t("AVCdQku")}
-          </p>
-        </div>
-        <div className="fx-centered" onClick={switchScreen}>
-          <p className="gray-c">
-            {t("AKJqtlx")}{" "}
-            <span className="orange-c pointer p-bold">{t("AmOtzoL")}</span>{" "}
-          </p>
-        </div>
+        )}
+        {step === 5 && <InitiProfile />}
       </div>
     </>
   );
@@ -1300,53 +1081,6 @@ const InitiProfile = () => {
       style={{ height: "500px" }}
     >
       <Spinner size={32} />
-    </div>
-  );
-};
-
-const MobileAd = () => {
-  const { t } = useTranslation();
-  return (
-    <div className="login-screen-heros fit-container fx-centered  box-pad-v fit-height">
-      <div
-        className="carousel-card-desc box-pad-h box-pad-v fit-container sc-s fx-even fx-stretch"
-        style={{
-          padding: "2rem 1rem",
-        }}
-      >
-        <div
-          className="fx-centered fx-col box-pad-v"
-          style={{ rowGap: "5px", width: "40%" }}
-        >
-          <p style={{ color: "white" }}>{t("A2MbZUY")}</p>
-          <p className="gray-c p-medium p-centered">{t("AbACpNI")}</p>
-          <div
-            className="fit-container carousel-card-desc box-pad-h-m box-pad-v-m fx-centered sc-s"
-            style={{ background: "#838EAC55" }}
-          >
-            <img
-              className="sc-s-18 fit-container"
-              src={ymaQR}
-              style={{ aspectRatio: "1/1" }}
-            />
-          </div>
-          <Link
-            className="fit-container box-pad-v-m"
-            href="/yakihonne-mobile-app-links"
-            target="_blank"
-          >
-            <img className="fit-container" src={s8e} />
-          </Link>
-        </div>
-        <div className="fx-centered " style={{ width: "40%" }}>
-          <img
-            className="fit-container"
-            style={{ objectFit: "contain" }}
-            src={ymaHero}
-            // style={{ objectFit: "contain" }}
-          />
-        </div>
-      </div>
     </div>
   );
 };
@@ -1458,7 +1192,7 @@ const Suggestions = ({ index, selectedInterests, handleSelectInterests }) => {
     <div
       className="sc-s-18 box-pad-h-m box-pad-v-m fit-container box-marg-s slide-down"
       style={{
-        maxHeight: "33vh",
+        maxHeight: "40vh",
         overflow: "scroll",
         border: "none",
         borderRadius: "0",
@@ -1468,22 +1202,22 @@ const Suggestions = ({ index, selectedInterests, handleSelectInterests }) => {
         <p className="gray-c">{t("AoO5zem")}</p>
         {isInterested?.pubkeys?.length !==
           InterestSuggestions[index].pubkeys.length && (
-          <button
-            className="btn btn-gst btn-small"
-            onClick={() => followUnfollowAll(true)}
-          >
-            {t("AzkUxnd")}
-          </button>
-        )}
+            <button
+              className="btn btn-gst btn-small"
+              onClick={() => followUnfollowAll(true)}
+            >
+              {t("AzkUxnd")}
+            </button>
+          )}
         {isInterested?.pubkeys?.length ===
           InterestSuggestions[index].pubkeys.length && (
-          <button
-            className="btn btn-normal btn-small"
-            onClick={() => followUnfollowAll(false)}
-          >
-            {t("AyohNeT")}
-          </button>
-        )}
+            <button
+              className="btn btn-normal btn-small"
+              onClick={() => followUnfollowAll(false)}
+            >
+              {t("AyohNeT")}
+            </button>
+          )}
       </div>
       <div
         className="fx-centered fx-col fx-start-h fx-start-v"
@@ -1535,18 +1269,9 @@ const Suggestions = ({ index, selectedInterests, handleSelectInterests }) => {
 
 const WalletIllustration = ({ isCreated, isLoading }) => {
   return (
-    <div style={{ position: "relative" }} className="box-pad-v-m">
-      <div
-        className={`round-icon ${isLoading ? "pulse-orange" : ""}`}
-        style={{
-          width: "140px",
-          borderColor: isCreated ? "var(--green-main)" : "",
-        }}
-      >
-        <div
-          className={isCreated ? "wallet-confirm" : "wallet-add"}
-          style={{ width: "60px", height: "60px" }}
-        ></div>
+    <div className="signup-wallet-illustration">
+      <div className={`signup-wallet-ring ${isLoading ? "pulse-orange" : ""} ${isCreated ? "signup-wallet-ring--done" : ""}`}>
+        <span className="signup-wallet-btc">₿</span>
       </div>
     </div>
   );

@@ -77,9 +77,6 @@ const Actions = ({ exit, setReturnedData }) => {
           maxHeight: "60vh",
           overflow: "scroll",
         }}
-      // onClick={(e) => {
-      //   e.stopPropagation();
-      // }}
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -139,7 +136,7 @@ const Actions = ({ exit, setReturnedData }) => {
             </div>
             <div className="fit-container box-pad-v-s">
               <div className="fit-container fx-start-h fx-centered sc-s-18 bg-sp box-pad-h-m">
-                <Icon name="search" />
+                <Icon name="search_magnifying_glass" v={2} />
                 <input
                   type="text"
                   className="if if-no-border ifs-full"

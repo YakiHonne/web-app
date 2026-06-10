@@ -106,7 +106,9 @@ export default function MentionSuggestions({
           width: "100%",
           maxHeight: "200px",
           overflowY: "auto",
+          border: "1px solid var(--dim-gray)",
           zIndex: 100,
+          gap: 0,
         }}
         className="sc-s-18 fx-centered fx-start-v fx-start-h fx-col box-pad-v-s"
       >
@@ -130,9 +132,8 @@ export default function MentionSuggestions({
             <div
               key={user.pubkey}
               ref={(el) => (itemRefs.current[index] = el)}
-              className={`fx-scattered box-pad-v-s box-pad-h-m fit-container pointer search-bar-post ${
-                isHighlighted ? "keyboard-active" : ""
-              }`}
+              className={`fx-scattered box-pad-v-s box-pad-h-m fit-container pointer search-bar-post ${isHighlighted ? "keyboard-active" : ""
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedMention?.(url);

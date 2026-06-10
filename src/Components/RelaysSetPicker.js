@@ -20,8 +20,8 @@ export default function RelaysSetPicker({
   const relaysSets = useMemo(() => {
     return searchedRelay
       ? userRelaysSetSimplified.filter((_) =>
-          _.title.toLowerCase().includes(searchedRelay.toLowerCase())
-        )
+        _.title.toLowerCase().includes(searchedRelay.toLowerCase())
+      )
       : userRelaysSetSimplified;
   }, [userRelaysSetSimplified, searchedRelay]);
   const optionsRef = useRef(null);
@@ -68,7 +68,7 @@ export default function RelaysSetPicker({
           ref={optionsRef}
           onClick={() => setShowList(true)}
         >
-          <Icon name="search" />
+          <Icon name="search_magnifying_glass" v={2} />
           <input
             placeholder={t("AaW83Mz")}
             className="if if-no-border ifs-full"
@@ -83,7 +83,6 @@ export default function RelaysSetPicker({
                 position: "absolute",
                 left: 0,
                 top: "calc(100% + 5px)",
-                // height: selectedRelay ? "600px" : "300px",
                 maxHeight: "300px",
                 overflow: "scroll",
                 zIndex: "200",
@@ -116,9 +115,8 @@ export default function RelaysSetPicker({
                     );
                     return (
                       <div
-                        className={`pointer fit-container fx-scattered  box-pad-h-s box-pad-v-s option-no-scale relay-item ${
-                          relaySet.relays.length === 0 ? "if-disabled" : ""
-                        }`}
+                        className={`pointer fit-container fx-scattered  box-pad-h-s box-pad-v-s option-no-scale relay-item ${relaySet.relays.length === 0 ? "if-disabled" : ""
+                          }`}
                         style={{
                           position: "relative",
                         }}
@@ -159,11 +157,10 @@ export default function RelaysSetPicker({
                         </div>
                         <div className="fx-centered">
                           <div
-                            className={`pointer sticker sticker-normal sticker-small ${
-                              relaySet.relays.length > 0
-                                ? "sticker-green-side"
-                                : "sticker-red-side"
-                            }`}
+                            className={`pointer sticker sticker-normal sticker-small ${relaySet.relays.length > 0
+                              ? "sticker-green-side"
+                              : "sticker-red-side"
+                              }`}
                             style={{ minWidth: "max-content" }}
                           >
                             {relaySet.relays.length} relays

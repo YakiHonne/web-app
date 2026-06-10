@@ -255,17 +255,15 @@ const SWSet = ({ external }) => {
               }}
             >
               <div
-                className={`list-item-b fx-centered fx-shrink ${
-                  type === "tool" ? "selected-list-item-b" : ""
-                }`}
+                className={`list-item-b fx-centered fx-shrink ${type === "tool" ? "selected-list-item-b" : ""
+                  }`}
                 onClick={() => switchContentType("tool")}
               >
                 Tool widgets
               </div>
               <div
-                className={`list-item-b fx-centered fx-shrink ${
-                  type === "basic" ? "selected-list-item-b" : ""
-                }`}
+                className={`list-item-b fx-centered fx-shrink ${type === "basic" ? "selected-list-item-b" : ""
+                  }`}
                 onClick={() => switchContentType("basic")}
               >
                 Basic widgets
@@ -380,7 +378,6 @@ function InputField({ status = true, handleSearch }) {
     <div
       className="sc-s box-pad-h-s box-pad-v-s fx-centered fx-col sw-search-box fit-container"
       style={{
-        // width: "min(100%, 600px)",
         cursor: status ? "unset" : "not-allowed",
         overflow: "visible",
       }}
@@ -416,21 +413,19 @@ function InputField({ status = true, handleSearch }) {
       <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m">
         <div className="fx-centered">
           <Link
-            className={`sc-s box-pad-h-m box-pad-v-s ${
-              status ? "option pointer" : "if-disabled"
-            } fx-centered`}
+            className={`sc-s box-pad-h-m box-pad-v-s ${status ? "option pointer" : "if-disabled"
+              } fx-centered`}
             style={{
               backgroundColor: "var(--pale-gray)",
             }}
             href={"/smart-widgets"}
           >
-            <Icon name="search" />
+            <Icon name="search_magnifying_glass" v={2} />
             {t("AYZh36g")}
           </Link>
           <Link
-            className={`sc-s box-pad-h-m box-pad-v-s ${
-              status ? "option pointer" : "if-disabled"
-            } fx-centered`}
+            className={`sc-s box-pad-h-m box-pad-v-s ${status ? "option pointer" : "if-disabled"
+              } fx-centered`}
             style={{
               backgroundColor: "",
             }}

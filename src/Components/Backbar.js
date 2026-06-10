@@ -7,9 +7,9 @@ export default function Backbar() {
 
   return (
     <div
-      className="fx-centered fit-container box-pad-v-s sticky"
+      className="fx-centered fit-container box-pad-v-s "
       onClick={() => router.back()}
-      style={{ padding: ".5rem", top: "50px", backgroundColor: "transparent", zIndex: 1000 }}
+      style={{ padding: ".5rem", top: "50px", backgroundColor: "transparent", zIndex: 1000, position: "sticky" }}
     >
       <div>
         <button

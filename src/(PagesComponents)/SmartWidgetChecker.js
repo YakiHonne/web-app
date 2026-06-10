@@ -91,15 +91,14 @@ export default function SmartWidgetChecker() {
             >
               <div className="fit-container fx-scattered sticky">
                 <div
-                  className={`fx-centered fx-start-h if ifs-full ${
-                    widget ? "if-disabled" : ""
-                  }`}
+                  className={`fx-centered fx-start-h if ifs-full ${widget ? "if-disabled" : ""
+                    }`}
                   style={{
                     gap: 0,
                     pointerEvents: widget ? "none" : "auto",
                   }}
                 >
-                  <Icon name="search" />
+                  <Icon name="search_magnifying_glass" v={2} />
                   <input
                     type="text"
                     className="if if-no-border ifs-full"
@@ -159,9 +158,8 @@ export default function SmartWidgetChecker() {
                 height: "100vh",
                 overflow: "scroll",
               }}
-              className={`box-pad-h-m box-pad-v sticky ${
-                mbHide ? "mb-hide-800" : ""
-              }`}
+              className={`box-pad-h-m box-pad-v sticky ${mbHide ? "mb-hide-800" : ""
+                }`}
             >
               {widget && (
                 <>

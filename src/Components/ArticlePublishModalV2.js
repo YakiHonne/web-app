@@ -80,7 +80,7 @@ export default function ArticlePublishModalV2({
     setIsCoverUploading(false);
     const url = typeof result === "string" ? result : result?.url;
     if (url) setCoverUrl(url);
-    else dispatch(setToast({ type: 2, desc: t("APMCoverFail") }));
+    else dispatch(setToast({ type: 2, desc: t("AI5bZvP") }));
   };
 
   const handleDrop = (e) => {
@@ -92,11 +92,11 @@ export default function ArticlePublishModalV2({
 
   const publish = async (kind = 30023) => {
     if (!title?.trim()) {
-      dispatch(setToast({ type: 2, desc: t("APMTitleRequired") }));
+      dispatch(setToast({ type: 2, desc: t("A2gbikk") }));
       return;
     }
     if (!postContent?.trim()) {
-      dispatch(setToast({ type: 2, desc: t("APMContentEmpty") }));
+      dispatch(setToast({ type: 2, desc: t("AObcHKL") }));
       return;
     }
     setIsLoading(true);
@@ -156,7 +156,7 @@ export default function ArticlePublishModalV2({
     dispatch(
       setToast({
         type: 1,
-        desc: kind === 30024 ? t("APMDraftSaved") : t("APMPublished"),
+        desc: kind === 30024 ? t("ARWJbjS") : t("Aem28Ji"),
       }),
     );
     exit();
@@ -171,13 +171,13 @@ export default function ArticlePublishModalV2({
     <Overlay exit={exit} width={600}>
       <div className="fx-centered fx-col fit-container fx-gap-v-l">
         <div className="fit-container box-pad-h-m box-pad-v-m">
-          <h3 style={{ margin: 0 }}>{t("APMTitle")}</h3>
+          <h3 style={{ margin: 0 }}>{t("Ag2ZgtO")}</h3>
           <p>
             <span className="c1-c">{words.toLocaleString()}</span>{" "}
-            <span className="gray-c">{t("APMWords")}</span>
+            <span className="gray-c">{t("AFFkPRx")}</span>
             {" ~ "}
             <span className="c1-c">{mins}</span>{" "}
-            <span className="gray-c">{t("APMMinRead")}</span>
+            <span className="gray-c">{t("AN07gUM")}</span>
           </p>
         </div>
 
@@ -185,7 +185,7 @@ export default function ArticlePublishModalV2({
           <input
             type="text"
             className="if ifs-full"
-            placeholder={t("APMTitlePlaceholder")}
+            placeholder={t("AOGCchM")}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             style={{
@@ -200,7 +200,7 @@ export default function ArticlePublishModalV2({
         </div>
 
         <div className="fit-container fx-col box-pad-h-m" style={{ gap: "8px" }}>
-          <p className="gray-c">{t("APMCoverImage")}</p>
+          <p className="gray-c">{t("AkUqJiz")}</p>
 
           {coverUrl ? (
             <div style={{ position: "relative" }}>
@@ -273,10 +273,10 @@ export default function ArticlePublishModalV2({
               ) : (
                 <>
                   <ImgIcon />
-                  <p style={{ margin: 0 }}>{t("APMSelectImage")}</p>
-                  <p className="gray-c" style={{ margin: 0 }}>{t("APMDragDrop")}</p>
+                  <p style={{ margin: 0 }}>{t("AkYfILd")}</p>
+                  <p className="gray-c" style={{ margin: 0 }}>{t("Am1WtFq")}</p>
                   <Button
-                    label={t("APMSelectFile")}
+                    label={t("ARLPyKf")}
                     size="s"
                     style={{ marginTop: "4px" }}
                     onClick={(e) => {
@@ -291,9 +291,9 @@ export default function ArticlePublishModalV2({
         </div>
 
         <div className="fit-container fx-col box-pad-h-m" style={{ gap: "6px" }}>
-          <p className="gray-c">{t("APMSummary")}</p>
+          <p className="gray-c">{t("ApFiOFA")}</p>
           <textarea
-            placeholder={t("APMSummaryPlaceholder")}
+            placeholder={t("AK1Oxyn")}
             value={summary}
             onChange={(e) => setSummary(e.target.value)}
             style={{
@@ -315,11 +315,11 @@ export default function ArticlePublishModalV2({
         </div>
 
         <div className="fit-container fx-col box-pad-h-m" style={{ gap: "8px" }}>
-          <p className="gray-c">{t("APMTags")}</p>
+          <p className="gray-c">{t("AFK78FS")}</p>
           <input
             type="text"
             className="if ifs-full"
-            placeholder={t("APMTagsPlaceholder")}
+            placeholder={t("AJRQOle")}
             value={tagsInput}
             onChange={(e) => setTagsInput(e.target.value)}
           />
@@ -354,24 +354,15 @@ export default function ArticlePublishModalV2({
             paddingTop: "12px",
           }}
         >
-          {/* <div className="fx-centered fx-gap-h border-all round-corner box-pad-h-s box-pad-v-xs">
-            <Icon name="crown" />
-            <p>{t("APMPremiumContent")}</p>
-            <Toggle
-              small
-              status={isPremium}
-              setStatus={(val) => setIsPremium(val)}
-            />
-          </div> */}
           <div className="fx-centered fx-gap-h">
             <Button
-              label={t("APMSaveDraft")}
+              label={t("AjbW7pt")}
               type="gst"
               onClick={() => publish(30024)}
               disabled={isLoading}
             />
             <Button
-              label={isLoading ? t("APMPublishing") : t("APMPublish")}
+              label={isLoading ? t("AOTJ9PF") : t("As7IjvV")}
               onClick={() => publish(30023)}
               disabled={isLoading}
               loading={isLoading}

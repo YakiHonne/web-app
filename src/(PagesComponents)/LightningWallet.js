@@ -39,6 +39,8 @@ import { customHistory } from "@/Helpers/History";
 import { useRouter } from "next/router";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
+import { SelectTabs } from "@/Components/SelectTabs";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function LightningWallet() {
   const dispatch = useDispatch();
@@ -67,14 +69,8 @@ export default function LightningWallet() {
   const walletPortalRef = useRef(null);
   const [walletDropPos, setWalletDropPos] = useState(null);
   const pageTabs = [
-    {
-      display_name: t("AQtRwt6"),
-      value: 0,
-    },
-    {
-      display_name: t("ALrBEok"),
-      value: 1,
-    },
+    t("AQtRwt6"),
+    t("ALrBEok")
   ];
   const checkIsLinked = (addr) => {
     if (userMetadata) {
@@ -198,7 +194,6 @@ export default function LightningWallet() {
 
   const getBalancWebLN = async () => {
     try {
-      // setIsLoading(true);
       await window.webln.enable();
       let data = await window.webln.getBalance();
       console.log(data)
@@ -211,7 +206,6 @@ export default function LightningWallet() {
   };
   const getAlbyData = async (activeWallet) => {
     try {
-      // setIsLoading(true);
       let checkTokens = await checkAlbyToken(wallets, activeWallet);
       let b = await getBalanceAlbyAPI(
         checkTokens.activeWallet.data.access_token,
@@ -267,7 +261,6 @@ export default function LightningWallet() {
 
   const getNWCData = async (activeWallet) => {
     try {
-      // setIsLoading(true);
       const nwc = new webln.NWC({ nostrWalletConnectUrl: activeWallet.data });
       await nwc.enable();
       const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 90;
@@ -398,11 +391,13 @@ export default function LightningWallet() {
               wallets.length === 0 && (
                 <div className="fx-centered fx-col fx-start-h">
                   <div className="fit-container fx-centered box-pad-v">
-                    <SelectTabsNoIndex
-                      tabs={pageTabs}
-                      selectedTab={0}
-                      setSelectedTab={handleSelectPageTab}
-                    />
+                    <div>
+                      <SelectTabs
+                        tabs={pageTabs}
+                        selectedTab={0}
+                        setSelectedTab={handleSelectPageTab}
+                      />
+                    </div>
                   </div>
 
                   <PagePlaceholder
@@ -416,13 +411,14 @@ export default function LightningWallet() {
               wallets.length > 0 && (
                 <div className="box-pad-v box-pad-h">
                   <div className="fit-container fx-centered">
-                    <SelectTabsNoIndex
-                      tabs={pageTabs}
-                      selectedTab={0}
-                      setSelectedTab={handleSelectPageTab}
-                    />
+                    <div>
+                      <SelectTabs
+                        tabs={pageTabs}
+                        selectedTab={0}
+                        setSelectedTab={handleSelectPageTab}
+                      />
+                    </div>
                   </div>
-                  {/* <h3>{t("AQtRwt6")}</h3> */}
                   <div className="fit-container box-pad-v">
                     <div
                       className="fit-container fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
@@ -531,7 +527,7 @@ export default function LightningWallet() {
                                     top: walletDropPos.top,
                                     left: walletDropPos.left,
                                     minWidth: walletDropPos.width,
-                                    width: "300px",
+                                    width: "350px",
                                     zIndex: 99999,
                                   }}
                                   className={`bg-dropdown di-wrapper${dismissingWallets ? " dismissing" : ""}`}
@@ -540,13 +536,14 @@ export default function LightningWallet() {
                                     <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
                                       {t("AnXYtQy")}
                                     </p>
-                                    <div
-                                      className="round-icon-tooltip fx-centered btn btn-small btn-gray"
-                                      // data-tooltip={t("A8fEwNq")}
-                                      onClick={() => setShowAddWallet(true)}
-                                    >
-                                      <Icon name="plus-sign" />
-                                      <p>{t("A8fEwNq")}</p>
+                                    <div className="box-pad-h-s box-pad-v-s">
+                                      <div
+                                        className="round-icon-tooltip fx-centered btn btn-small btn-gray"
+                                        onClick={() => setShowAddWallet(true)}
+                                      >
+                                        <Icon name="plus-sign" />
+                                        <p>{t("A8fEwNq")}</p>
+                                      </div>
                                     </div>
                                   </div>
                                   {wallets.map((wallet) => {
@@ -686,9 +683,8 @@ export default function LightningWallet() {
                               return (
                                 <div
                                   key={transaction.id}
-                                  className="fit-container fx-scattered fx-col box-pad-v-m box-pad-h-m sc-s-18 bg-sp"
+                                  className="fit-container fx-scattered fx-col box-pad-v-m box-pad-h-m sc-s"
                                   style={{
-                                    // border: "none",
                                     overflow: "visible",
                                   }}
                                 >
@@ -751,7 +747,7 @@ export default function LightningWallet() {
                                             : setDisplayMessage(transaction.id)
                                         }
                                       >
-                                        <Icon name="comment-not" />
+                                        <Icon name={iconsNames.chat_circle} v={2} />
                                       </div>
                                     )}
                                   </div>
@@ -985,7 +981,6 @@ export default function LightningWallet() {
                                   key={`${transaction.invoice}-${index}`}
                                   className="fit-container fx-scattered fx-col sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
                                   style={{
-                                    // border: "none",
                                     overflow: "visible",
                                   }}
                                 >
@@ -1600,38 +1595,6 @@ const ReceivePayment = ({
       );
     }
   };
-  // const generateWithNWC = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const nwc = new webln.NWC({ nostrWalletConnectUrl: selectedWallet.data });
-  //     await nwc.enable();
-  //     const invoice = await nwc.makeInvoice({
-  //       defaultMemo: comment,
-  //       amount,
-  //     });
-  //     setIsLoading(false);
-  //     setInvoiceRequest(invoice.paymentRequest);
-  //     let t = 0;
-  //     while (t !== 1) {
-  //       const lookup = await nwc.lookupInvoice(invoice);
-  //       if (lookup.preimage) {
-  //         t = -1;
-  //       } else t = t + 1;
-  //       await sleepTimer(2000);
-  //     }
-  //     nwc.close();
-  //   } catch (err) {
-  //     console.log(err);
-  //     setIsLoading(false);
-  //     if (err?.includes("User rejected")) return;
-  //     dispatch(
-  //       setToast({
-  //         type: 2,
-  //         desc: t("Acr4Slu"),
-  //       }),
-  //     );
-  //   }
-  // };
   const generateWithAlby = async (code) => {
     try {
       setIsLoading(true);
@@ -1666,7 +1629,6 @@ const ReceivePayment = ({
     }
     if (selectedWallet.kind === 3) {
       setTriggerNWC(Date.now());
-      // generateWithNWC();
     }
   };
 

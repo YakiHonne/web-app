@@ -23,6 +23,7 @@ import AvatarPlaceholder from "@/Components/AvatarPlaceholder";
 import Icon from "@/Components/Icon";
 import useCreatorSubscription from "@/Hooks/useCreatorSubscription";
 import SubscriptionButton from "@/Components/SubscriptionButton";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function UserMetadata({ user }) {
   const { t } = useTranslation();
@@ -30,9 +31,6 @@ export default function UserMetadata({ user }) {
   const userKeys = useSelector((state) => state.userKeys);
   const { isNip05Verified } = useUserProfile(user.pubkey);
   const { muteUnmute, isMuted } = useIsMute(user.pubkey);
-  // const { isSubChekingLoading, providers } = useCreatorSubscription({
-  //   pubkey: user.pubkey,
-  // });
   const [showPeople, setShowPeople] = useState(false);
   const [timestamp, setTimestamp] = useState(new Date().getTime());
   const [userFollowers, setUserFollowers] = useState(0);
@@ -227,7 +225,7 @@ export default function UserMetadata({ user }) {
                         }}
                         onClick={handleInitConvo}
                       >
-                        <Icon name="env-edit" size={24} />
+                        <Icon name={iconsNames.chat_add} v={2} size={20} />
                       </div>
                     </div>
                   )}
@@ -256,7 +254,7 @@ export default function UserMetadata({ user }) {
                 onClick={() => setShowQR(true)}
               >
                 <div>
-                  <Icon name="qrcode" />
+                  <Icon name={iconsNames.qr_code} v={2} size={20} />
                 </div>
               </div>
             </div>

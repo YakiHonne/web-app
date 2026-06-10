@@ -271,6 +271,7 @@ function Nip19Parsing({ addr, minimal = false }) {
                 style={{
                   marginTop: ".5rem",
                   backgroundColor: "var(--c1-side)",
+                  border: "1px solid var(--dim-gray)"
                 }}
               >
                 <KindOne event={event} reactions={false} minimal={true} />

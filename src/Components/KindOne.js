@@ -91,10 +91,8 @@ function KindOne({
     for (let i = 0; i < range.length; i++) {
       let cleanElement = range[i].trim().replace("nostr:", "");
 
-      // Early exit if max components reached
       if (checkForComponents >= MAX_COMPONENTS) break;
 
-      // Check for note prefixes first (faster)
       let hasNotePrefix = false;
       for (let prefix of NOTE_PREFIXES) {
         if (cleanElement.startsWith(prefix)) {
@@ -104,7 +102,6 @@ function KindOne({
         }
       }
 
-      // Only check for media if no note prefix found
       if (!hasNotePrefix) {
         if (isImageUrl(cleanElement)?.type === "image") {
           checkForComponents++;
@@ -159,7 +156,6 @@ function KindOne({
 
       customHistory(`/note/${event.nEvent}`);
 
-      // Reset navigation state after a short delay
       setTimeout(() => setIsNavigating(false), 1000);
     } catch (error) {
       console.error("Error in onClick handler:", error);
@@ -314,7 +310,6 @@ function KindOne({
       <div
         className="box-pad-v-m fit-container note-item"
         id={event.id}
-      // style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
       >
         {event.isComment && isThread && (
           <RelatedEvent
@@ -338,8 +333,8 @@ function KindOne({
               overflow: "visible",
             }}
           >
-            <div className="fit-container fx-centered fx-start-h fx-start-v">
-              <div>
+            <div className="fit-container fx-centered fx-start-h fx-start-v note-card-row">
+              <div className="note-card-avatar">
                 <UserProfilePic
                   size={40}
                   mainAccountUser={false}
@@ -354,23 +349,34 @@ function KindOne({
                 }
                 style={{ gap: "6px" }}
               >
-                <div className="fx-scattered fit-container">
-                  <div className="fx-centered" style={{ gap: "3px" }}>
-                    <div className="fx-centered" style={{ gap: "3px" }}>
-                      <p className="p-bold p-one-line" style={{ margin: 0 }}>
-                        {userProfile.display_name || userProfile.name}
-                      </p>
-                      {isNip05Verified && (
-                        <Icon name="checkmark-c1" isColored />
-                      )}
-                    </div>
-
-                    <p className="gray-c p-medium" style={{ margin: 0 }}>
-                      <Date_
-                        toConvert={new Date(event.created_at * 1000)}
-                        time={true}
+                <div className="fx-scattered fit-container note-card-header">
+                  <div className="fx-centered" style={{ gap: "8px" }}>
+                    <div className="fx-centered note-card-avatar-mobile">
+                      <UserProfilePic
+                        size={36}
+                        mainAccountUser={false}
+                        user_id={userProfile.pubkey}
+                        img={userProfile.picture}
+                        metadata={minimal ? undefined : userProfile}
                       />
-                    </p>
+                    </div>
+                    <div className="fx-centered" style={{ gap: "3px" }}>
+                      <div className="fx-centered" style={{ gap: "3px" }}>
+                        <p className="p-bold p-one-line" style={{ margin: 0 }}>
+                          {userProfile.display_name || userProfile.name}
+                        </p>
+                        {isNip05Verified && (
+                          <Icon name="checkmark-c1" isColored />
+                        )}
+                      </div>
+
+                      <p className="gray-c p-medium" style={{ margin: 0 }}>
+                        <Date_
+                          toConvert={new Date(event.created_at * 1000)}
+                          time={true}
+                        />
+                      </p>
+                    </div>
                   </div>
                   <div className="fx-centered">
                     {event.isPaidNote && (
@@ -457,37 +463,6 @@ function KindOne({
                     userProfile={userProfile}
                     setShowComments={setShowComments}
                   />
-                  {/* <div className="fx-centered">
-                    <div className="fit-container">
-                      {!isNoteTranslating && !showTranslation && (
-                        <div
-                          className="round-icon-tooltip"
-                          data-tooltip={t("AdHV2qJ")}
-                          onClick={translateNote}
-                        >
-                          <Icon
-                            name="translate"
-                            size={24}
-                            className="opacity-4"
-                          />
-                        </div>
-                      )}
-                      {!isNoteTranslating && showTranslation && (
-                        <div
-                          className="round-icon-tooltip"
-                          data-tooltip={t("AE08Wte")}
-                          onClick={() => setShowTranslation(false)}
-                        >
-                          <Icon
-                            name="translate"
-                            size={24}
-                            className="opacity-4"
-                          />
-                        </div>
-                      )}
-                      {isNoteTranslating && <LoadingDots />}
-                    </div>
-                  </div> */}
                   <EventStats postActions={postActions} />
                 </div>
               </>
@@ -764,21 +739,6 @@ const FastAccessCS = ({
           gap: 0,
         }}
       >
-        {/* <div
-          className="fit-container fx-centered sticky"
-          style={{ borderBottom: "1px solid var(--very-dim-gray)" }}
-        >
-          <div className="fx-scattered fit-container box-pad-h">
-            <h4 className="p-caps">{t("Aog1ulK")}</h4>
-            <div
-              className="close"
-              style={{ position: "static" }}
-              onClick={exit}
-            >
-              <div></div>
-            </div>
-          </div>
-        </div> */}
         <div
           className="close"
           onClick={exit}

@@ -9,9 +9,8 @@ export default function DraftCard({ event, refreshAfterDeletion }) {
   const { t } = useTranslation();
   return (
     <div
-      className="fit-container fx-scattered sc-s-18 box-pad-h-m box-pad-v-m pointer"
+      className="fit-container fx-scattered sc-s box-pad-h-m box-pad-v-m pointer"
       style={{
-        backgroundColor: "transparent",
         gap: "32px",
         overflow: "visible",
         borderColor: event.local ? "var(--c1)" : "",

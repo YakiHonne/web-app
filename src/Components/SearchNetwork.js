@@ -183,40 +183,6 @@ export default function SearchNetwork({ exit }) {
     setIsLoading(false);
   };
 
-  // const searchForUser = () => {
-  //   const filteredUsers = searchKeyword
-  //     ? sortByKeyword(
-  //         nostrAuthors.filter((user) => {
-  //           if (
-  //             !bannedList.includes(user.pubkey) &&
-  //             ((typeof user.display_name === "string" &&
-  //               user.display_name
-  //                 ?.toLowerCase()
-  //                 .includes(searchKeyword?.toLowerCase())) ||
-  //               (typeof user.name === "string" &&
-  //                 user.name
-  //                   ?.toLowerCase()
-  //                   .includes(searchKeyword?.toLowerCase())) ||
-  //               (typeof user.nip05 === "string" &&
-  //                 user.nip05
-  //                   ?.toLowerCase()
-  //                   .includes(searchKeyword?.toLowerCase()))) &&
-  //             isHex(user.pubkey)
-  //           )
-  //             return user;
-  //         }),
-  //         searchKeyword
-  //       ).slice(0, 25)
-  //     : Array.from(
-  //         nostrAuthors
-  //           .filter((_) => !bannedList.includes(_.pubkey))
-  //           .slice(0, 30)
-  //       );
-
-  //   setResults(filteredUsers);
-  //   getUsersFromCache();
-  // };
-
   const searchForContent = async () => {
     let tag = searchKeyword.replaceAll("#", "");
     let tags = [
@@ -290,7 +256,7 @@ export default function SearchNetwork({ exit }) {
               top: 0,
             }}
           >
-            <Icon name="search" size={24} />
+            <Icon name="search_magnifying_glass" v={2} size={24} />
             <input
               type="text"
               placeholder={t("APAkDF0")}
@@ -323,7 +289,7 @@ export default function SearchNetwork({ exit }) {
                 }}
               >
                 <div className="fit-container slide-down box-pad-h-s box-pad-v-s sc-s-18 bg-sp fx-centered fx-start-h pointer">
-                  <Icon name="search" />{" "}
+                  <Icon name="search_magnifying_glass" v={2} />{" "}
                   <p className="p-one-line">
                     {t("AvpIWa1")}{" "}
                     <span className="p-bold ">
@@ -364,7 +330,6 @@ export default function SearchNetwork({ exit }) {
           {userInterestList.length > 0 && (
             <div className="fit-container fx-centered fx-col fx-start-h fx-start-v box-pad-h-m box-pad-v-s">
               <p className="gray-c">{t("AvcFYqP")}</p>
-              {/* <div className="fx-centered fx-wrap"> */}
               <div className="fit-container">
                 <Slider
                   slideBy={200}
@@ -387,7 +352,6 @@ export default function SearchNetwork({ exit }) {
                   })}
                 />
               </div>
-              {/* </div> */}
             </div>
           )}
           {results.map((item, index) => {
@@ -413,7 +377,7 @@ export default function SearchNetwork({ exit }) {
               className="fit-container fx-col fx-centered"
               style={{ height: "300px" }}
             >
-              <Icon name="search" size={24} />
+              <Icon name="search_magnifying_glass" v={2} size={24} />
               <h4>{t("AjlW15t")}</h4>
               <p className="gray-c">{t("A0RqaoC")}</p>
             </div>
@@ -437,11 +401,14 @@ export default function SearchNetwork({ exit }) {
             }}
             className="fit-container fx-centered box-pad-v-s slide-up"
           >
-            <SelectTabs
-              selectedTab={selectedTab}
-              setSelectedTab={(data) => handleSelectedTab(data)}
-              tabs={[t("ABn8zyu"), t("AepwLlB")]}
-            />
+            <div>
+
+              <SelectTabs
+                selectedTab={selectedTab}
+                setSelectedTab={(data) => handleSelectedTab(data)}
+                tabs={[t("ABn8zyu"), t("AepwLlB")]}
+              />
+            </div>
           </div>
         )}
       </div>

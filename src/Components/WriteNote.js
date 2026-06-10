@@ -20,6 +20,7 @@ import ActionTools from "@/Components/ActionTools";
 import BrowseSmartWidgetsV2 from "@/Components/BrowseSmartWidgetsV2";
 import ProfilesPicker from "@/Components/ProfilesPicker";
 import { useRouter } from "next/navigation";
+import { useRouter as router } from "next/router";
 import Toggle from "./Toggle";
 import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
@@ -47,10 +48,13 @@ export default function WriteNote({
   protectedRelay = false,
 }) {
   const navigateTo = useRouter();
+  const { query: { r } } = router();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
   const userRelays = useSelector((state) => state.userRelays);
+  const relayFromURL = r ? r : false;
+  const singleRelayToPublish = protectedRelay || relayFromURL || false;
   const {
     selectedWallet,
     setSelectedWallet,
@@ -67,7 +71,7 @@ export default function WriteNote({
   const [showSmartWidgets, setShowSmartWidgets] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
-  const [isProtected, setIsProtected] = useState(protectedRelay);
+  const [isProtected, setIsProtected] = useState(singleRelayToPublish || relayFromURL || false);
   const [invoice, setInvoice] = useState(false);
   const [showWarningBox, setShowWarningBox] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -161,7 +165,7 @@ export default function WriteNote({
         );
       }
 
-      if (isProtected && protectedRelay) {
+      if (isProtected && singleRelayToPublish) {
         tags.push(["-"]);
       }
 
@@ -171,13 +175,13 @@ export default function WriteNote({
         publishAsPaid(
           processedContent.content,
           [...tags, ...processedTags, ...imetasTags],
-          isProtected && protectedRelay ? protectedRelay : false,
+          isProtected && singleRelayToPublish ? singleRelayToPublish : false,
         );
       } else {
         publishAsFree(
           processedContent.content,
           [...tags, ...processedTags, ...imetasTags],
-          isProtected && protectedRelay ? protectedRelay : false,
+          isProtected && singleRelayToPublish ? singleRelayToPublish : false,
         );
       }
     } catch (err) {
@@ -576,16 +580,6 @@ export default function WriteNote({
         />
       )}
       <div
-        // className="fit-container fx-centered fx-col fx-start-v fx-stretch  bg-sp"
-        // style={{
-        //   overflow: "visible",
-        //   // height: linkedEvent ? "65vh" : "55vh",
-        //   backgroundColor: !border ? "transparent" : "",
-        //   // border: border ? "1px solid var(--very-dim-gray)" : "none",
-        //   // borderBottom: borderBottom
-        //   //   ? "1px solid var(--very-dim-gray)"
-        //   //   : "none",
-        // }}
         ref={ref}
         onClick={() => {
           textareaRef?.current?.focus();
@@ -629,7 +623,7 @@ export default function WriteNote({
                       setSelectedTab={setSelectedTab}
                     />
                   </div>
-                  {protectedRelay && (
+                  {singleRelayToPublish && (
                     <div className="fx fx-centered fx-start-h">
                       <div
                         className="fx-centered  box-pad-h-m"
@@ -646,12 +640,11 @@ export default function WriteNote({
                             {t("A0qEczF")}
                           </p>
                           <div className="fx-centered" style={{ gap: "3px" }}>
-                            <RelayImage url={protectedRelay} size={16} />
+                            <RelayImage url={singleRelayToPublish} size={16} />
                             <span className="p-one-line">
-                              {protectedRelay.substring(0, 25)}
-                              {protectedRelay.length > 25 ? "..." : ""}
+                              {singleRelayToPublish.substring(0, 25)}
+                              {singleRelayToPublish.length > 25 ? "..." : ""}
                             </span>
-                            {/* <span className="p-one-line">{protectedRelay.replace("wss://", "").replace("ws://", "")}</span> */}
                           </div>
                         </div>
                         <Toggle

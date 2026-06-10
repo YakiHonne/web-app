@@ -56,14 +56,6 @@ const getDraft = (pub) => {
     return {};
   }
 };
-const saveDraft = (pub, t, c) => {
-  try {
-    localStorage.setItem(
-      draftKey(pub),
-      JSON.stringify({ title: t, content: c, savedAt: Date.now() }),
-    );
-  } catch { }
-};
 const clearDraft = (pub) => {
   try {
     localStorage.removeItem(draftKey(pub));
@@ -224,10 +216,10 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
         <button
           className={`tiptap-insert-btn${showHeadings ? " is-open" : ""}`}
           onMouseDown={(e) => { e.preventDefault(); setShowHeadings((v) => !v); }}
-          title={t("TbBlockType")}
+          title={t("AXbrvY0")}
           style={{ minWidth: "100px" }}
         >
-          {s.hlevel === 0 ? t("TbParagraph") : `${t("TbHeading")} ${s.hlevel}`}
+          {s.hlevel === 0 ? t("AqfLRVU") : `${t("A16LR9D")} ${s.hlevel}`}
           <span style={{ marginLeft: "auto", display: "flex" }}>{I.chevron}</span>
         </button>
         {showHeadings && (
@@ -247,7 +239,7 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
                   backgroundColor: s.hlevel === l ? "var(--dim-bg)" : "",
                 }}
               >
-                {l === 0 ? t("TbParagraph") : `${t("TbHeading")} ${l}`}
+                {l === 0 ? t("AqfLRVU") : `${t("A16LR9D")} ${l}`}
               </button>
             ))}
           </div>
@@ -255,26 +247,26 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
       </div>
       <Sep />
 
-      <Tb icon={I.ul} onClick={() => editor.chain().focus().toggleBulletList().run()} active={s.bulletList} title={t("TbBulletList")} />
-      <Tb icon={I.ol} onClick={() => editor.chain().focus().toggleOrderedList().run()} active={s.orderedList} title={t("TbOrderedList")} />
+      <Tb icon={I.ul} onClick={() => editor.chain().focus().toggleBulletList().run()} active={s.bulletList} title={t("AjvsiLx")} />
+      <Tb icon={I.ol} onClick={() => editor.chain().focus().toggleOrderedList().run()} active={s.orderedList} title={t("AeKcAdp")} />
       <Sep />
 
       <Tb icon={I.bold} onClick={() => editor.chain().focus().toggleBold().run()} active={s.bold} title="Bold (⌘B)" />
       <Tb icon={I.italic} onClick={() => editor.chain().focus().toggleItalic().run()} active={s.italic} title="Italic (⌘I)" />
-      <Tb icon={I.strike} onClick={() => editor.chain().focus().toggleStrike().run()} active={s.strike} title={t("TbStrike")} />
-      <Tb icon={I.code} onClick={() => editor.chain().focus().toggleCode().run()} active={s.code} title={t("TbCode")} />
+      <Tb icon={I.strike} onClick={() => editor.chain().focus().toggleStrike().run()} active={s.strike} title={t("AOJEI2o")} />
+      <Tb icon={I.code} onClick={() => editor.chain().focus().toggleCode().run()} active={s.code} title={t("ACNzuOK")} />
       <Tb icon={I.under} onClick={() => editor.chain().focus().toggleUnderline().run()} active={s.underline} title="Underline (⌘U)" />
-      <Tb icon={I.hi} onClick={() => editor.chain().focus().toggleHighlight().run()} active={s.highlight} title={t("TbHighlight")} />
+      <Tb icon={I.hi} onClick={() => editor.chain().focus().toggleHighlight().run()} active={s.highlight} title={t("AWdFMmw")} />
       <Sep />
 
-      <Tb icon={I.sup} onClick={() => editor.chain().focus().toggleSuperscript().run()} active={s.superscript} title={t("TbSuperscript")} />
-      <Tb icon={I.sub} onClick={() => editor.chain().focus().toggleSubscript().run()} active={s.subscript} title={t("TbSubscript")} />
+      <Tb icon={I.sup} onClick={() => editor.chain().focus().toggleSuperscript().run()} active={s.superscript} title={t("AYihYup")} />
+      <Tb icon={I.sub} onClick={() => editor.chain().focus().toggleSubscript().run()} active={s.subscript} title={t("AqSa7z3")} />
       <Sep />
 
       <Tb
         icon={s.link ? I.unlink : I.link}
         active={s.link}
-        title={s.link ? t("TbRemoveLink") : t("TbAddLink")}
+        title={s.link ? t("AkxGsQs") : t("AV6IvZ3")}
         onClick={() => {
           if (s.link) { editor.chain().focus().unsetLink().run(); setShowLink(false); }
           else { setLinkVal(s.linkHref); setShowLink((v) => !v); }
@@ -282,19 +274,19 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
       />
       <Sep />
 
-      <Tb icon={I.alL} onClick={() => editor.chain().focus().setTextAlign("left").run()} active={s.alL} title={t("TbAlignLeft")} />
-      <Tb icon={I.alC} onClick={() => editor.chain().focus().setTextAlign("center").run()} active={s.alC} title={t("TbAlignCenter")} />
-      <Tb icon={I.alR} onClick={() => editor.chain().focus().setTextAlign("right").run()} active={s.alR} title={t("TbAlignRight")} />
-      <Tb icon={I.alJ} onClick={() => editor.chain().focus().setTextAlign("justify").run()} active={s.alJ} title={t("TbJustify")} />
+      <Tb icon={I.alL} onClick={() => editor.chain().focus().setTextAlign("left").run()} active={s.alL} title={t("A16X4k8")} />
+      <Tb icon={I.alC} onClick={() => editor.chain().focus().setTextAlign("center").run()} active={s.alC} title={t("AX8w3v5")} />
+      <Tb icon={I.alR} onClick={() => editor.chain().focus().setTextAlign("right").run()} active={s.alR} title={t("ADxfbbU")} />
+      <Tb icon={I.alJ} onClick={() => editor.chain().focus().setTextAlign("justify").run()} active={s.alJ} title={t("AyYSgnc")} />
 
       <div className="tiptap-insert-wrap" ref={insertRef}>
         <button
           className={`tiptap-insert-btn${showInsert ? " is-open" : ""}`}
           onMouseDown={(e) => { e.preventDefault(); setShowInsert((v) => !v); }}
-          title={t("TbInsert")}
+          title={t("AWsufZn")}
         >
           {I.plus}
-          {t("TbAdd")}
+          {t("ARWeWgJ")}
           {I.chevron}
         </button>
         {showInsert && (
@@ -308,14 +300,14 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
               }}
             >
               {I.img}
-              {t("TbImage")}
-              {isUploading && <span style={{ marginLeft: "auto", fontSize: "0.72rem", opacity: 0.5 }}>{t("TbUploading")}</span>}
+              {t("A37QlLV")}
+              {isUploading && <span style={{ marginLeft: "auto", fontSize: "0.72rem", opacity: 0.5 }}>{t("A40iXzu")}</span>}
             </button>
             <button className="tiptap-insert-item" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleBlockquote().run(); setShowInsert(false); }}>
-              {I.quote} {t("TbBlockquote")}
+              {I.quote} {t("AxAw4rf")}
             </button>
             <button className="tiptap-insert-item" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().toggleCodeBlock().run(); setShowInsert(false); }}>
-              {I.cb} {t("TbCodeBlock")}
+              {I.cb} {t("A6ckd8N")}
             </button>
             <button
               className="tiptap-insert-item"
@@ -325,10 +317,10 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
                 setShowInsert(false);
               }}
             >
-              {I.math} {t("TbMathBlock")}
+              {I.math} {t("AjCjjJC")}
             </button>
             <button className="tiptap-insert-item" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setHorizontalRule().run(); setShowInsert(false); }}>
-              {I.hr} {t("TbDivider")}
+              {I.hr} {t("A0KB6RD")}
             </button>
           </div>
         )}
@@ -349,8 +341,8 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
               if (e.key === "Escape") { setShowLink(false); setLinkVal(""); }
             }}
           />
-          <button className="btn btn-normal btn-small" onMouseDown={(e) => { e.preventDefault(); applyLink(); }}>{t("TbApply")}</button>
-          <button className="btn btn-gst btn-small" onMouseDown={(e) => { e.preventDefault(); setShowLink(false); setLinkVal(""); }}>{t("TbCancel")}</button>
+          <button className="btn btn-normal btn-small" onMouseDown={(e) => { e.preventDefault(); applyLink(); }}>{t("AAqu8CO")}</button>
+          <button className="btn btn-gst btn-small" onMouseDown={(e) => { e.preventDefault(); setShowLink(false); setLinkVal(""); }}>{t("AB4BSCe")}</button>
         </div>
       )}
 
@@ -369,8 +361,8 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
               if (e.key === "Escape") { setShowNostr(false); setNostrVal(""); }
             }}
           />
-          <button className="btn btn-normal btn-small" onMouseDown={(e) => { e.preventDefault(); applyNostrEntity(); }}>{t("TbEmbed")}</button>
-          <button className="btn btn-gst btn-small" onMouseDown={(e) => { e.preventDefault(); setShowNostr(false); setNostrVal(""); }}>{t("TbCancel")}</button>
+          <button className="btn btn-normal btn-small" onMouseDown={(e) => { e.preventDefault(); applyNostrEntity(); }}>{t("AISC8KU")}</button>
+          <button className="btn btn-gst btn-small" onMouseDown={(e) => { e.preventDefault(); setShowNostr(false); setNostrVal(""); }}>{t("AB4BSCe")}</button>
         </div>
       )}
     </div>
@@ -379,8 +371,9 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
 
 const lowlight = createLowlight(all);
 
-function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown, onSaveStatusChange, onHasContentChange, onClearRequest, onImetasChange, onExportRequest, onImportRequest }) {
+function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown, onSaveStatusChange, onHasContentChange, onClearRequest, onImetasChange, onExportRequest, onImportRequest, draftTitle = "" }) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
   const subscription = useSelector((state) => state.subscription);
@@ -416,22 +409,8 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
   const savedTimer = useRef(null);
   const srSuppressInvalidationRef = useRef(false);
   const syncedExternalRef = useRef(null);
+  const editorRef = useRef(null);
 
-  const scheduleSave = useCallback(
-    (titleVal, c) => {
-      setSaveStatus("saving");
-      onSaveStatusChange?.("saving");
-      clearTimeout(saveTimer.current);
-      clearTimeout(savedTimer.current);
-      saveTimer.current = setTimeout(() => {
-        saveDraft(pub, titleVal, c);
-        setSaveStatus("saved");
-        onSaveStatusChange?.("saved");
-        savedTimer.current = setTimeout(() => { setSaveStatus("idle"); onSaveStatusChange?.("idle"); }, 3000);
-      }, 1000);
-    },
-    [pub, onSaveStatusChange],
-  );
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -448,7 +427,7 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
       }),
       Image.configure({ inline: false, allowBase64: false }),
       Link.configure({ openOnClick: false, HTMLAttributes: { target: "_blank", rel: "noopener noreferrer" } }),
-      Placeholder.configure({ placeholder: t("EditorPlaceholder") }),
+      Placeholder.configure({ placeholder: t("A0z7xpp") }),
       Underline,
       Highlight.configure({ multicolor: false }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
@@ -460,7 +439,8 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
         onDiffEnd: (finalMarkdown) => {
           setDiffHunks(null);
           srSuppressInvalidationRef.current = true;
-          setTimeout(() => editor?.commands.setContent(finalMarkdown), 0);
+          syncedExternalRef.current = finalMarkdown;
+          setTimeout(() => editorRef.current?.commands.setContent(finalMarkdown), 0);
         },
       }),
     ],
@@ -493,16 +473,34 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
     return () => clearTimeout(t_);
   }, [showRestored]);
 
+  const onMarkdownChangeRef = useRef(onMarkdownChange);
+  useEffect(() => { onMarkdownChangeRef.current = onMarkdownChange; }, [onMarkdownChange]);
+  useEffect(() => { editorRef.current = editor; }, [editor]);
+
+  const draftTitleRef = useRef(draftTitle);
+  useEffect(() => { draftTitleRef.current = draftTitle; }, [draftTitle]);
+
   useEffect(() => {
     if (!editor) return;
     const fn = () => {
       const md = editor.storage.markdown.getMarkdown();
-      if (!editEvent) scheduleSave("", md);
-      onMarkdownChange?.(md);
+      if (!editEvent) {
+        updateArticleDraft({ title: draftTitleRef.current, content: md });
+        setSaveStatus("saving");
+        onSaveStatusChange?.("saving");
+        clearTimeout(saveTimer.current);
+        clearTimeout(savedTimer.current);
+        saveTimer.current = setTimeout(() => {
+          setSaveStatus("saved");
+          onSaveStatusChange?.("saved");
+          savedTimer.current = setTimeout(() => { setSaveStatus("idle"); onSaveStatusChange?.("idle"); }, 3000);
+        }, 1000);
+      }
+      onMarkdownChangeRef.current?.(md);
     };
     editor.on("update", fn);
     return () => editor.off("update", fn);
-  }, [editor, scheduleSave, editEvent, onMarkdownChange]);
+  }, [editor, editEvent, onSaveStatusChange]);
 
   useEffect(
     () => () => { clearTimeout(saveTimer.current); clearTimeout(savedTimer.current); },
@@ -612,12 +610,16 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
 
   useEffect(() => {
     onImportRequest?.((md) => {
-      if (editor) {
+      if (!editor) return;
+      try {
         editor.commands.setContent(md);
-        onMarkdownChange?.(md);
+        if (!editEvent) updateArticleDraft({ title: draftTitleRef.current, content: md });
+      } catch (err) {
+        console.error("Markdown import error:", err);
+        dispatch(setToast({ type: 2, desc: "Failed to import the file. It may contain unsupported syntax." }));
       }
     });
-  }, [onImportRequest, editor, onMarkdownChange]);
+  }, [onImportRequest, editor, editEvent, dispatch]);
 
   const handleAITabClick = (value) => {
     if (!isPremiumPlan) {
@@ -645,7 +647,7 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
 
             <SelectTabs
               selectedTab={showSecondReader ? 0 : showAIPanel ? 1 : -1}
-              tabs={[`✦ ${t("AiSecondReader")}`, `✦ ${t("AiAskAI")}`]}
+              tabs={[`✦ ${t("ASLmW7h")}`, `✦ ${t("APshghB")}`]}
               setSelectedTab={handleAITabClick}
             />
           </div>
@@ -718,7 +720,7 @@ function EditorSwitcherDropdown({ useV2Editor, onToggle }) {
         style={{ gap: "8px", padding: "0 14px", height: "44px", borderRadius: "22px", fontSize: "0.82rem", fontWeight: 600 }}
         onClick={() => setOpen((v) => !v)}
       >
-        <span>{useV2Editor ? t("EditorSwitchV2") : t("EditorClassicLabel")}</span>
+        <span>{useV2Editor ? t("AMT1D0j") : t("ADBVicw")}</span>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "transform 0.15s", transform: open ? "rotate(180deg)" : "rotate(0deg)" }}>
           <polyline points="6 9 12 15 18 9" />
         </svg>
@@ -733,18 +735,17 @@ function EditorSwitcherDropdown({ useV2Editor, onToggle }) {
           }}
         >
           {[
-            { label: t("EditorSwitchV2"), isV2: true },
-            { label: t("EditorClassicLabel"), isV2: false },
+            { label: t("AMT1D0j"), isV2: true },
+            { label: t("ADBVicw"), isV2: false },
           ].map(({ label, isV2 }) => (
             <button
               key={label}
               onClick={() => { if (useV2Editor !== isV2) onToggle(); setOpen(false); }}
+              className="wa-dropdown-item"
               style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                width: "100%", padding: "9px 12px", border: "none", background: "transparent",
-                borderRadius: "9px", cursor: "pointer", fontSize: "0.82rem", fontWeight: useV2Editor === isV2 ? 700 : 400,
-                color: useV2Editor === isV2 ? "var(--c1)" : "",
                 fontFamily: "inherit",
+                fontWeight: useV2Editor === isV2 ? 700 : 400,
+                color: useV2Editor === isV2 ? "var(--c1)" : "",
               }}
             >
               {label}
@@ -801,12 +802,10 @@ function EditorOptionsMenu({ onImport, onExport }) {
             <button
               key={label}
               onClick={() => { if (!disabled) { action(); setOpen(false); } }}
+              className="wa-dropdown-item"
               style={{
-                display: "flex", alignItems: "center", gap: "10px",
-                width: "100%", padding: "9px 12px", border: "none",
-                background: "transparent", borderRadius: "9px",
+                opacity: disabled ? 0.4 : 1,
                 cursor: disabled ? "not-allowed" : "pointer",
-                fontSize: "0.82rem", fontWeight: 400,
                 fontFamily: "inherit",
               }}
             >
@@ -997,13 +996,22 @@ export default function WritingArticle() {
   const handleMdImport = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = "";
+    const allowed = [".md", ".markdown", ".txt"];
+    const isAllowed = allowed.some((ext) => file.name.toLowerCase().endsWith(ext));
+    if (!isAllowed) {
+      dispatch(setToast({ type: 2, desc: "Only .md, .markdown, or .txt files can be imported." }));
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (ev) => {
       const md = ev.target?.result;
       if (typeof md === "string") v2ImportRef.current?.(md);
     };
+    reader.onerror = () => {
+      dispatch(setToast({ type: 2, desc: "Failed to read file." }));
+    };
     reader.readAsText(file);
-    e.target.value = "";
   };
 
   return (
@@ -1104,7 +1112,7 @@ export default function WritingArticle() {
                                   style={{ gap: "6px", fontSize: "0.82rem", height: "44px", padding: "0 20px", borderRadius: "22px", fontWeight: 600 }}
                                   onClick={handlePublish}
                                 >
-                                  {t("EditorPublish")}
+                                  {t("As7IjvV")}
                                 </button>
                                 <div className="bg-dropdown fx-centered" style={{ borderRadius: "50%", width: "44px", height: "44px", flexShrink: 0, overflow: "visible" }}>
                                   <ProfilesPicker setSelectedProfile={setSelectedProfile} />
@@ -1116,6 +1124,7 @@ export default function WritingArticle() {
                               <ArticleEditorV2
                                 editEvent={post_id ? { content: post_content, tags: [["title", post_title || ""], ["summary", post_desc || ""], ["image", post_thumbnail || ""], ["d", post_d || ""]], created_at: post_published_at } : null}
                                 externalMarkdown={sharedMarkdown}
+                                draftTitle={title}
                                 onMarkdownChange={(md) => setSharedMarkdown(md)}
                                 onImetasChange={setV2Imetas}
                                 onSaveStatusChange={setV2SaveStatus}

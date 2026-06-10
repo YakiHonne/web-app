@@ -108,12 +108,20 @@ export default function NotificationCenterMain() {
       >
         {newNotifications.length > 0 && (
           <div
-            className="fit-container fx-centered box-pad-v slide-down"
-            style={{ position: "absolute", left: 0, top: "85px", zIndex: 200 }}
+            className="fx-centered slide-down"
+            style={{
+              position: "fixed",
+              left: 0,
+              right: 0,
+              top: !barHidden ? "155px" : "56px",
+              zIndex: 201,
+              pointerEvents: "none",
+              transition: "top 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            }}
           >
             <div
               className="sc-s box-pad-h-s box-pad-v-s fx-scattered pointer"
-              style={{ backgroundColor: "var(--c1)", border: "none", gap: "10px" }}
+              style={{ backgroundColor: "var(--c1)", border: "none", gap: "10px", pointerEvents: "auto" }}
               onClick={addNewEvents}
             >
               <UsersGroupProfilePicture
@@ -124,7 +132,6 @@ export default function NotificationCenterMain() {
                 <p className="white-c box-pad-h-s">&#8593;</p>
               </div>
             </div>
-            <div style={{ width: "42px" }}></div>
           </div>
         )}
 
@@ -364,18 +371,12 @@ const Notification = React.memo(
       if (!event.isRead) handleRead();
       if (notificationsDetails.url) customHistory(notificationsDetails.url);
     };
-    // if (!type || event.pubkey === userKeys.pub) return;
-    // if ((filterByType && filterByType.includes(type)) || !filterByType)
     if (!notificationsDetails) return;
     return (
       <div
         className="sc-s fit-container fx-centered fx-start-v fx-start-h box-pad-v-m box-pad-h  pointer "
         onClick={handleOnClick}
         style={{ border: "none" }}
-      // style={{
-      //   borderTop: "1px solid  var(--c1-side)",
-      //   borderBottom: "1px solid  var(--c1-side)",
-      // }}
       >
         <div
           style={{ position: "relative", gap: "16px" }}
@@ -482,7 +483,6 @@ const Notification = React.memo(
                   pubkey={user.pubkey}
                 />
               </div>
-              {/* <p className="gray-c p-four-lines">{type?.label_2}</p> */}
             </div>
           </div>
         </div>

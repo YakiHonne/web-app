@@ -16,15 +16,15 @@ function renderText(md) {
 function ActionRow({ hunk, onAccept, onReject }) {
   const { t } = useTranslation();
   if (hunk.status === "accepted") {
-    return <p className="ai-diff-status-label">✓ {t("AiDiffAccepted")}</p>;
+    return <p className="ai-diff-status-label">✓ {t("AmaWh6T")}</p>;
   }
   if (hunk.status === "rejected") {
-    return <p className="ai-diff-status-label">✕ {t("AiDiffRejected")}</p>;
+    return <p className="ai-diff-status-label">✕ {t("AYjF49l")}</p>;
   }
   const acceptLabel =
     hunk.type === "removed"
-      ? `✓ ${t("AiDiffAcceptRemoval")}`
-      : `✓ ${t("AiDiffAccept")}`;
+      ? `✓ ${t("AxDR5DO")}`
+      : `✓ ${t("AL7ZfZM")}`;
   return (
     <div className="ai-diff-actions">
       <button
@@ -37,7 +37,7 @@ function ActionRow({ hunk, onAccept, onReject }) {
         className="ai-diff-btn ai-diff-btn-reject"
         onClick={() => onReject(hunk.id)}
       >
-        ✕ {t("AiDiffReject")}
+        ✕ {t("AICNjVc")}
       </button>
     </div>
   );
@@ -113,8 +113,8 @@ export default function AIDiffViewer({ hunks, onAccept, onReject }) {
           <span className="ai-spark">✦</span>
           <span>
             {pending > 0
-              ? t("AiDiffPending", { count: pending })
-              : t("AiDiffAllResolved")}
+              ? t("Avf9U8Q", { count: pending })
+              : t("ADkjDLh")}
           </span>
         </div>
         {pending > 0 && (
@@ -124,14 +124,14 @@ export default function AIDiffViewer({ hunks, onAccept, onReject }) {
               style={{ padding: "2px 10px", fontSize: "0.72rem" }}
               onClick={() => actionableIds.forEach((id) => onAccept(id))}
             >
-              ✓ {t("AiDiffAcceptAll")}
+              ✓ {t("AHYwr5a")}
             </button>
             <button
               className="ai-diff-btn ai-diff-btn-reject"
               style={{ padding: "2px 10px", fontSize: "0.72rem" }}
               onClick={() => actionableIds.forEach((id) => onReject(id))}
             >
-              ✕ {t("AiDiffRejectAll")}
+              ✕ {t("ADSYUyT")}
             </button>
           </div>
         )}

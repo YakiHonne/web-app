@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 export default function Overlay({
@@ -11,19 +11,21 @@ export default function Overlay({
 }) {
   const [mounted, setMounted] = useState(false);
   const [active, setActive] = useState(false);
+  const isMobileView = typeof window !== "undefined" && window.innerWidth <= 800;
 
   useEffect(() => {
     setMounted(true);
-    // Tiny delay to ensure element is in DOM before starting transitions
-    const timeout = setTimeout(() => {
-      setActive(true);
-    }, 20);
+    const timeout = setTimeout(() => setActive(true), 20);
+    document.body.style.overflow = "hidden";
 
-    let body = document.querySelector("body");
-    body.style.overflow = "hidden";
+    const isMobile = window.innerWidth <= 800;
+    if (isMobile) {
+      document.body.classList.remove("ios-sheet-closing");
+      document.body.classList.add("ios-sheet-open");
+    }
 
     return () => {
-      body.style.overflow = "auto";
+      document.body.style.overflow = "auto";
       clearTimeout(timeout);
     };
   }, []);
@@ -33,10 +35,15 @@ export default function Overlay({
     e.preventDefault();
     setActive(false);
 
+    if (isMobileView && document.body.classList.contains("ios-sheet-open")) {
+      document.body.classList.replace("ios-sheet-open", "ios-sheet-closing");
+      setTimeout(() => document.body.classList.remove("ios-sheet-closing"), 450);
+    }
+
     const timeout = setTimeout(() => {
       exit(e);
       clearTimeout(timeout);
-    }, 200);
+    }, isMobileView ? 420 : 200);
   };
 
   const content = (
@@ -49,9 +56,9 @@ export default function Overlay({
         style={{
           width: `min(100%, ${width}px)`,
           position: "relative",
-          maxHeight: `${maxHeight}vh`,
-          overflow: allowOverFlow ? "visible" : "scroll",
-          borderRadius: '24px'
+          maxHeight: isMobileView ? "88dvh" : `${maxHeight}vh`,
+          overflow: isMobileView ? "auto" : (allowOverFlow ? "visible" : "scroll"),
+          borderRadius: isMobileView ? undefined : "24px",
         }}
         onClick={(e) => e.stopPropagation()}
         className={`no-scrollbar bg-dropdown overlay-sheet ${active ? "active" : ""}`}
@@ -62,9 +69,6 @@ export default function Overlay({
   );
 
   return mounted
-    ? createPortal(
-      content,
-      document.getElementById("portal-root") || document.body,
-    )
+    ? createPortal(content, document.getElementById("portal-root") || document.body)
     : null;
 }
