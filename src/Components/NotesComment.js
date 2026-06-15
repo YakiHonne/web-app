@@ -335,7 +335,7 @@ export default function NotesComment({
                         userProfile={userProfile}
                         setShowComments={fromKindOne ? setShowComments : () => setToggleComment(true)}
                       />
-                      <div className="fx-centered">
+                      {/* <div className="fx-centered">
                         {!isNoteTranslating && (
                           <Icon
                             v={2}
@@ -346,7 +346,7 @@ export default function NotesComment({
                           />
                         )}
                         {isNoteTranslating && <LoadingDots />}
-                      </div>
+                      </div> */}
                       <EventStats postActions={postActions} />
                     </div>
                   </>
