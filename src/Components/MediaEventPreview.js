@@ -5,9 +5,12 @@ import UserProfilePic from "./UserProfilePic";
 import { getLinkFromAddr } from "@/Helpers/Helpers";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import { useTranslation } from "react-i18next";
 
 export default function MediaEventPreview({ event }) {
-  const { userProfile, isNip05Verified } = useUserProfile(event.pubkey);
+  const { t } = useTranslation();
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(event.pubkey);
   let url = getLinkFromAddr(event.naddr || event.nEvent, event.kind);
   return (
     <Link href={url} onClick={(e) => e.stopPropagation()}>
@@ -42,6 +45,7 @@ export default function MediaEventPreview({ event }) {
                       {userProfile.display_name || userProfile.name}
                     </p>
                     {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+                    {proUser.isProUser && <Badge data={proUser} size={16} />}
                   </div>
                   <p className="gray-c p-medium" style={{ margin: 0 }}>
                     &#8226;
@@ -61,7 +65,7 @@ export default function MediaEventPreview({ event }) {
           </div>
           {event.kind !== 20 && (
             <svg
-              aria-label="Reel"
+              aria-label={t("AfWUod5")}
               fill="white"
               height="24"
               role="img"

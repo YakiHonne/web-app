@@ -1,5 +1,6 @@
 import { nip19 } from "nostr-tools";
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import InitiConvo from "@/Components/InitConvo";
 import { checkForLUDS, getuserMetadata } from "@/Helpers/Encryptions";
 import ZapTip from "@/Components/ZapTip";
@@ -16,7 +17,9 @@ import Follow from "@/Components/Follow";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import AvatarPlaceholder from "./AvatarPlaceholder";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import { iconsNames } from "@/Content/IconV2URL";
+import useHasHover from "@/Hooks/useHasHover";
 
 const CARD_WIDTH = 300;
 const CARD_HEIGHT = 420;
@@ -208,6 +211,7 @@ function ProfileIslandCard({
   img,
   metadata,
   isNip05Verified,
+  proUser,
   followers,
   mutualFollows,
   isLoading,
@@ -256,7 +260,9 @@ function ProfileIslandCard({
   const firstMutuals = mutualFollows.slice(0, 3);
   const extraMutuals = mutualFollows.length > 3 ? mutualFollows.length - 3 : 0;
 
-  return (
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <>
       <style>{ISLAND_STYLES}</style>
       <div
@@ -289,6 +295,7 @@ function ProfileIslandCard({
             <div className="isl-name-row">
               <span className="isl-name">{name}</span>
               {isNip05Verified && <Icon name="checkmark-c1" size={20} isColored />}
+              {proUser.isProUser && <Badge data={proUser} size={20} />}
             </div>
             {bio && <p className="isl-bio">{bio}</p>}
           </div>
@@ -342,12 +349,12 @@ function ProfileIslandCard({
                 {metadata?.lud16 || metadata?.lud06 ? (
                   <>
                     <Icon v={2} name={iconsNames.check} />
-                    <span className="isl-stat-lbl">Lightning</span>
+                    <span className="isl-stat-lbl">{t("AnX8qpd")}</span>
                   </>
                 ) : (
                   <>
                     <Icon v={2} name={iconsNames.close_md} />
-                    <span className="isl-stat-lbl">Lightning</span>
+                    <span className="isl-stat-lbl">{t("AnX8qpd")}</span>
                   </>
                 )}
               </div>
@@ -378,7 +385,8 @@ function ProfileIslandCard({
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
 
@@ -396,6 +404,7 @@ export default function UserProfilePic({
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
+  const hasHover = useHasHover();
   const [displayedPicture, setDisplayedPicture] = useState(userMetadata?.picture || null);
   const switchTimerRef = useRef(null);
   const [showMetadata, setShowMetada] = useState(false);
@@ -405,7 +414,7 @@ export default function UserProfilePic({
   const [isLoading, setIsLoading] = useState(true);
   const [initConv, setInitConv] = useState(false);
   const [followers, setFollowers] = useState(0);
-  const { isNip05Verified } = useUserProfile(user_id, metadata ? true : false);
+  const { isNip05Verified, proUser } = useUserProfile(user_id, metadata ? true : false);
   const anchorRef = useRef(null);
   const leaveTimerRef = useRef(null);
 
@@ -447,7 +456,7 @@ export default function UserProfilePic({
 
   const onMouseEnter = useCallback(async () => {
     clearTimeout(leaveTimerRef.current);
-    if (!getCustomSettings().userHoverPreview) return;
+    if (!hasHover || !getCustomSettings().userHoverPreview) return;
     setShowMetada(true);
     if (!userKeys || subStart || !metadata) return;
     setSubStart(true);
@@ -487,6 +496,7 @@ export default function UserProfilePic({
     img: img || fetchedImg,
     metadata,
     isNip05Verified,
+    proUser,
     followers,
     mutualFollows,
     isLoading,

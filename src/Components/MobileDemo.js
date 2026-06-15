@@ -1,0 +1,114 @@
+import { useTranslation } from "react-i18next";
+import Overlay from "./Overlay";
+import Icon from "./Icon";
+import Link from "next/link";
+let ymaQR = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/yma-qr.png";
+
+
+export default function MobileDemo({ exit }) {
+    const { t } = useTranslation();
+    return (
+        <Overlay exit={exit} width={800}>
+            <div
+                style={{ gap: "16px" }}
+                className="box-pad-h-s box-pad-v-s fx-centered fx-col"
+            >
+                <div className="close" onClick={exit}>
+                    <div></div>
+                </div>
+                <video
+                    autoPlay="autoplay"
+                    loop="loop"
+                    playsInline
+                    preload="auto"
+                    id="myVideo"
+                    controls={true}
+                    style={{
+                        position: "relative",
+                        border: "none",
+                        zIndex: "0",
+
+                    }}
+                    className="fit-container sc-s-18"
+                >
+                    <source
+                        src="https://yakihonne.s3.ap-east-1.amazonaws.com/videos/yakihonne-mobile-app-promo-2.mp4"
+                        type="video/mp4"
+                    />{" "}
+                    {t("A71Yr9t")}
+                </video>
+            </div>
+            <div
+                style={{ position: "relative", gap: "16px", }}
+                className="sc-s-18 box-pad-h box-pad-v bg-sp fx-centered fx-col fx-start-v slide-up"
+                onClick={(e) => {
+                    e.stopPropagation();
+                }}
+            >
+                <div className="fx-wrap fx-centered" style={{ gap: "20px" }}>
+                    <div style={{ width: "200px" }}>
+                        <img
+                            className="sc-s-18 fit-container"
+                            src={ymaQR}
+                            style={{ aspectRatio: "1/1" }}
+                        />
+                    </div>
+                    <div className="fx-centered fx-col" style={{ gap: "10px" }}>
+                        <div className="fx-centered fx-col">
+                            <h4>{t("AQgPFMM")}</h4>
+                            <p className="gray-c p-centered" style={{ maxWidth: "350px" }}>{t("A2GbLaw")}</p>
+                        </div>
+                        <div className="fx-centered fx-co fx-start-v">
+                            <a
+                                href="https://apps.apple.com/mo/app/yakihonne/id6472556189?l=en-GB"
+                                target="_blank"
+                            >
+                                <button className="btn btn-gray fx-centered">
+                                    <Icon name="apple" /> {t("AGpzpu6")}
+                                </button>
+                            </a>
+                            <a
+                                href="https://play.google.com/store/apps/details?id=com.yakihonne.yakihonne&hl=en&gl=US&pli=1"
+                                target="_blank"
+                            >
+                                <button className="btn btn-gray fx-centered">
+                                    <Icon name="google" /> {t("ArHaw72")}
+                                </button>
+                            </a>
+                            <a
+                                href="https://zapstore.dev/apps/naddr1qvzqqqr7pvpzqgycd7urua6ajmgc3jjunhcseekkz0swkljhdzs0pvftxlx6cgdnqqtkxmmd9eukz6mfdphkumn99eukz6mfdphkumn97q8ugj"
+                                target="_blank"
+                            >
+                                <button className="btn btn-gray fx-centered">
+                                    <Icon name="zapstore" /> {t("Aggp9CS")}
+                                </button>
+                            </a>
+                        </div>
+                        <div className="fit-container fx-centered">
+                            <Link
+                                href={"/yakihonne-mobile-app"}
+                                className="fit-container"
+                                target="_blank"
+                            >
+                                <button className="btn btn-normal btn-full">
+                                    {t("AArGqN7")}
+                                </button>
+                            </Link>{" "}
+                            <a
+                                href="https://github.com/orgs/YakiHonne/repositories"
+                                target="_blank"
+                            >
+                                <button
+                                    className="btn btn-gray fx-centered"
+                                    style={{ aspectRatio: "1/1", padding: "0" }}
+                                >
+                                    <Icon name="github-logo" />
+                                </button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Overlay>
+    );
+};

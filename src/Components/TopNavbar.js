@@ -39,6 +39,7 @@ import { iconsNames } from "@/Content/IconV2URL";
 import { updatesList } from "@/Components/YakiIntro";
 import Overlay from "@/Components/Overlay";
 import useIsMobile from "@/Hooks/useIsMobile";
+import MobileDemo from "./MobileDemo";
 
 export default function TopNavbar() {
   const { t } = useTranslation();
@@ -84,6 +85,7 @@ export default function TopNavbar() {
   const [fiatValue, setFiatValue] = useState(null);
   const [showChangelog, setShowChangelog] = useState(false);
   const [navHidden, setNavHidden] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
 
   const avatarRef = useRef(null);
   const profileDropRef = useRef(null);
@@ -321,31 +323,32 @@ export default function TopNavbar() {
       { icon: iconsNames.chart_line, iconBold: "dashboard-bold", label: t("ALBhi3j"), path: "/dashboard" },
       { icon: iconsNames.star, iconBold: "dashboard-bold", label: t("ABsx3n9"), path: "/yaki-points" },
     ] : []),
+
   ];
 
   const createItems = [
     {
       icon: iconsNames.note,
-      label: "Note",
-      description: "Quick post",
+      label: t("Az5ftet"),
+      description: t("AAIrmHd"),
       action: () => { setCreateOpen(false); setShowPostNote(true); },
     },
     {
       icon: iconsNames.file_document,
-      label: "Article",
-      description: "Long-form",
+      label: t("AyYkCrS"),
+      description: t("AHjbrk0"),
       action: () => { setCreateOpen(false); customHistory("/write-article"); },
     },
     {
       icon: iconsNames.image_01,
-      label: "Media",
-      description: "Photo or clip",
+      label: t("A0i2SOt"),
+      description: t("A89yth1"),
       action: () => { setCreateOpen(false); setShowPostMedia(true); },
     },
     {
       icon: iconsNames.more_grid_big,
-      label: "Widget",
-      description: "Smart embed",
+      label: t("AFaMatL"),
+      description: t("AzXpori"),
       action: () => { setCreateOpen(false); customHistory("/smart-widget-builder"); },
     },
   ];
@@ -384,6 +387,7 @@ export default function TopNavbar() {
       {showConfirmationBox && (
         <ConfirmationBox exit={() => setShowConfirmationBox(false)} handleOnClick={handleLogout} />
       )}
+      {showDemo && <MobileDemo exit={() => setShowDemo(false)} />}
       <MiniNavbar
         visible={navHidden}
         pathname={pathname}
@@ -416,7 +420,7 @@ export default function TopNavbar() {
           </div>
           <div className="uplift-search-pill" onClick={() => setShowSearch(true)}>
             <Icon name={iconsNames.search_magnifying_glass} size={15} v={2} />
-            <span className="uplift-search-pill-label">Search</span>
+            <span className="uplift-search-pill-label">{t("A0omdiR")}</span>
 
           </div>
         </div>
@@ -426,7 +430,7 @@ export default function TopNavbar() {
           <div className="uplift-nav-pill">
             <div
               className={`uplift-nav-icon-btn${isPage("/") ? " uplift-active" : ""}`}
-              aria-label="Home"
+              aria-label={t("AJDdA3h")}
               onClick={() => customHistory("/", true)}
             >
               <span className="uplift-nav-icon-wrap">
@@ -437,7 +441,7 @@ export default function TopNavbar() {
 
             <div
               className={`uplift-nav-icon-btn${isPage("/articles") ? " uplift-active" : ""}`}
-              aria-label="Articles"
+              aria-label={t("AesMg52")}
               onClick={() => customHistory("/articles", true)}
             >
               <span className="uplift-nav-icon-wrap">
@@ -449,7 +453,7 @@ export default function TopNavbar() {
             <button
               ref={plusBtnRef}
               className={`uplift-plus-btn${createOpen ? " uplift-plus-open" : ""}`}
-              aria-label="Create"
+              aria-label={t("AajDfNN")}
               onClick={toggleCreate}
             >
               <span className="uplift-plus-icon-wrap">
@@ -459,7 +463,7 @@ export default function TopNavbar() {
 
             <div
               className={`uplift-nav-icon-btn${isPage("/messages") ? " uplift-active" : ""}`}
-              aria-label="Messages"
+              aria-label={t("As2zi6P")}
               onClick={() => customHistory("/messages")}
             >
               <span className="uplift-nav-icon-wrap">
@@ -472,7 +476,7 @@ export default function TopNavbar() {
             <div
               ref={moreBtnRef}
               className={`uplift-nav-icon-btn${showMore ? " uplift-active" : ""}`}
-              aria-label="More"
+              aria-label={t("Ayc6Y5B")}
               onClick={openMore}
             >
               <span className="uplift-nav-icon-wrap">
@@ -510,7 +514,7 @@ export default function TopNavbar() {
 
           <div
             className="uplift-icon-btn"
-            aria-label="Notifications"
+            aria-label={t("ASSFfFZ")}
             onClick={() => customHistory("/notifications")}
           >
             <Icon name={iconsNames.bell} size={18} v={2} />
@@ -606,17 +610,7 @@ export default function TopNavbar() {
                 <span>{t("ABtsLBp")}</span>
               </div>
 
-              <a
-                href="https://pro.yakihonne.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="uplift-dropdown-item"
-                style={{ textDecoration: "none" }}
-                onClick={closeProfileMenu}
-              >
-                <Icon name={iconsNames.wavy_check} v={2} size={18} />
-                <span>YakiPro</span>
-              </a>
+
 
               <div className="uplift-dropdown-item" onClick={() => { singleLogout(); }}>
                 <Icon name="logout" size={18} />
@@ -718,6 +712,32 @@ export default function TopNavbar() {
                     <span className={isPage(page.path) ? "" : "gray-c"}>{page.label}</span>
                   </div>
                 ))}
+                <a
+                  href="https://pro.yakihonne.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="uplift-more-drawer-item"
+                  style={{ textDecoration: "none" }}
+                  onClick={closeProfileMenu}
+                >
+                  <div className="uplift-more-drawer-item-icon">
+                    <Icon name={iconsNames.wavy_check} v={2} size={20} opacity=".5" />
+                  </div>
+                  <span className="gray-c">YakiPro</span>
+                </a>
+                <div
+                  className="uplift-more-drawer-item"
+                  style={{ textDecoration: "none" }}
+                  onClick={() => {
+                    closeProfileMenu()
+                    setShowDemo(true);
+                  }}
+                >
+                  <div className="uplift-more-drawer-item-icon">
+                    <Icon name={iconsNames.mobile} v={2} size={20} opacity=".5" />
+                  </div>
+                  <span className="gray-c">{t("Ai28b6B")}</span>
+                </div>
               </div>
 
               <div className="uplift-more-drawer-section-label">{t("Apv9nXe")}</div>
@@ -786,7 +806,7 @@ const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, a
       <div className="uplift-mini-right">
         <div
           className="uplift-mini-icon-btn"
-          aria-label="Messages"
+          aria-label={t("As2zi6P")}
           onClick={() => customHistory("/messages")}
         >
           <Icon name={iconsNames.chat_conversation} size={17} v={2} opacity={1} />
@@ -795,7 +815,7 @@ const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, a
 
         <div
           className="uplift-mini-icon-btn"
-          aria-label="Notifications"
+          aria-label={t("ASSFfFZ")}
           onClick={() => customHistory("/notifications")}
         >
           <Icon name={iconsNames.bell} size={17} v={2} opacity={1} />
@@ -813,6 +833,7 @@ const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, a
 };
 
 const MobileBottomNav = ({ isPage, navHidden, userKeys, isNewMsg, createOpen, plusBtnRef, toggleCreate, openMore }) => {
+  const { t } = useTranslation();
   useEffect(() => {
     if (!navHidden) {
       document.body.classList.add("bottom-nav-visible");
@@ -826,7 +847,7 @@ const MobileBottomNav = ({ isPage, navHidden, userKeys, isNewMsg, createOpen, pl
     <nav className={`uplift-bottom-nav${navHidden ? " uplift-bottom-nav-hidden" : ""}`}>
       <div
         className={`uplift-bottom-nav-btn${isPage("/") ? " uplift-active" : ""}`}
-        aria-label="Home"
+        aria-label={t("AJDdA3h")}
         onClick={() => customHistory("/", true)}
       >
         <span className="uplift-nav-icon-wrap">
@@ -837,7 +858,7 @@ const MobileBottomNav = ({ isPage, navHidden, userKeys, isNewMsg, createOpen, pl
 
       <div
         className={`uplift-bottom-nav-btn${isPage("/articles") ? " uplift-active" : ""}`}
-        aria-label="Articles"
+        aria-label={t("AesMg52")}
         onClick={() => customHistory("/articles", true)}
       >
         <span className="uplift-nav-icon-wrap">
@@ -849,7 +870,7 @@ const MobileBottomNav = ({ isPage, navHidden, userKeys, isNewMsg, createOpen, pl
       <button
         ref={plusBtnRef}
         className={`uplift-bottom-nav-plus${createOpen ? " uplift-plus-open" : ""}`}
-        aria-label="Create"
+        aria-label={t("AajDfNN")}
         onClick={toggleCreate}
       >
         <span className="uplift-plus-icon-wrap">
@@ -859,7 +880,7 @@ const MobileBottomNav = ({ isPage, navHidden, userKeys, isNewMsg, createOpen, pl
 
       <div
         className={`uplift-bottom-nav-btn${isPage("/messages") ? " uplift-active" : ""}`}
-        aria-label="Messages"
+        aria-label={t("As2zi6P")}
         onClick={() => customHistory("/messages")}
       >
         <span className="uplift-nav-icon-wrap">
@@ -871,7 +892,7 @@ const MobileBottomNav = ({ isPage, navHidden, userKeys, isNewMsg, createOpen, pl
 
       <div
         className="uplift-bottom-nav-btn"
-        aria-label="More"
+        aria-label={t("Ayc6Y5B")}
         onClick={openMore}
       >
         <span className="uplift-nav-icon-wrap">

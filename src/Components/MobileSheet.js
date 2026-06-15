@@ -7,15 +7,17 @@ export default function MobileSheet({ open, onClose, children, title, titleRight
   const sheetRef = useRef(null);
   const [visible, setVisible] = useState(open);
   const [animOpen, setAnimOpen] = useState(open);
+  const wasOpened = useRef(open);
 
   useEffect(() => {
     if (open) {
+      wasOpened.current = true;
       setVisible(true);
       document.body.classList.remove("ios-sheet-closing");
       document.body.classList.add("ios-sheet-open");
       requestAnimationFrame(() => requestAnimationFrame(() => setAnimOpen(true)));
     } else {
-      if (document.body.classList.contains("ios-sheet-open")) {
+      if (wasOpened.current && document.body.classList.contains("ios-sheet-open")) {
         document.body.classList.replace("ios-sheet-open", "ios-sheet-closing");
         setTimeout(() => document.body.classList.remove("ios-sheet-closing"), 450);
       }

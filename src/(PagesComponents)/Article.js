@@ -38,6 +38,7 @@ import { customHistory } from "@/Helpers/History";
 import PostReaction from "@/Components/PostReaction";
 import Spinner from "@/Components/Spinner";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import EventStats from "@/Components/EventStats";
 
 export default function Article({ event, userProfile, naddrData }) {
@@ -127,6 +128,15 @@ export default function Article({ event, userProfile, naddrData }) {
   }, [post]);
 
   const translateArticle = async () => {
+    if (!userKeys) {
+      dispatch(
+        setToast({
+          type: 3,
+          desc: t("ALtr4nL"),
+        }),
+      );
+      return;
+    }
     setIsContentTranslating(true);
     if (translatedContent) {
       setShowTranslation(true);
@@ -631,7 +641,7 @@ const ReaderIndicator = () => {
 
 const AuthPreview = ({ pubkey }) => {
   const { t } = useTranslation();
-  const { userProfile, isNip05Verified } = useUserProfile(pubkey);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(pubkey);
 
   return (
     <div className="fx-centered">
@@ -650,6 +660,7 @@ const AuthPreview = ({ pubkey }) => {
               {userProfile.display_name || userProfile.name}
             </p>
             {isNip05Verified && <Icon name="checkmark-c1" size={20} isColored />}
+            {proUser.isProUser && <Badge data={proUser} size={20} />}
           </div>
         </div>
       </div>

@@ -37,6 +37,7 @@ import Link from "next/link";
 import { iconsNames } from "@/Content/IconV2URL";
 
 const PAID_NOTE_AMOUNT = process.env.NEXT_PUBLIC_PAID_NOTE_AMOUNT;
+const PAID_NOTE_AMOUNT_BASIC_PLAN = process.env.NEXT_PUBLIC_PAID_NOTE_AMOUNT_BASIC_PLAN;
 
 export default function WriteNote({
   exit,
@@ -53,6 +54,10 @@ export default function WriteNote({
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
   const userRelays = useSelector((state) => state.userRelays);
+  const subscription = useSelector((state) => state.subscription);
+  const isPremiumPlan = subscription?.status?.plan === "premium" && subscription?.status?.active;
+  const isBasicPlan = subscription?.status?.plan === "basic" && subscription?.status?.active;
+  const paidNoteAmount = isPremiumPlan ? 0 : isBasicPlan ? PAID_NOTE_AMOUNT_BASIC_PLAN : PAID_NOTE_AMOUNT;
   const relayFromURL = r ? r : false;
   const singleRelayToPublish = protectedRelay || relayFromURL || false;
   const {
@@ -260,7 +265,32 @@ export default function WriteNote({
         setIsLoading(false);
         return;
       }
-      let sats = PAID_NOTE_AMOUNT * 1000;
+
+      if (!paidNoteAmount) {
+        if (selectedScheduleDate)
+          publishScheduledEvent({
+            event: eventInitEx,
+            relays: relay ? [relay] : userRelays,
+          });
+        else
+          dispatch(
+            setToPublish({
+              eventInitEx,
+              allRelays: relay ? [relay] : [],
+              isFavRelay: relay ? relay : false,
+            }),
+          );
+        updateNoteDraft("root", "");
+        navigateTo.push(
+          "/profile/" +
+          nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+        );
+        exit();
+        setIsLoading(false);
+        return;
+      }
+
+      let sats = paidNoteAmount * 1000;
 
       let zapTags = [
         ["relays", ...userRelays],
@@ -465,7 +495,7 @@ export default function WriteNote({
 
           >
             <div className="fx-centered fx-col">
-              <h4>{linkedEvent ? "Heads up!" : "Save draft?"}</h4>
+              <h4>{linkedEvent ? t("AirKalq") : t("AGNjoi1")}</h4>
               <p className="gray-c p-centered box-pad-v-m">
                 {t(linkedEvent ? "AwNtfnu" : "ATjCUcj")}
               </p>
@@ -556,7 +586,7 @@ export default function WriteNote({
                     {isSendingLoading ? (
                       <LoadingDots />
                     ) : (
-                      t("AloNXcI", { amount: PAID_NOTE_AMOUNT })
+                      t("AloNXcI", { amount: paidNoteAmount })
                     )}
                   </button>
                 </div>
@@ -757,7 +787,7 @@ export default function WriteNote({
                     setShowMentionSuggestions(false);
                   }}
                 >
-                  GIFs
+                  {t("A9IJuyo")}
                 </div>
                 {showGIFs && (
                   <Gifs
@@ -791,7 +821,7 @@ export default function WriteNote({
                 {isLoading ? (
                   <LoadingDots />
                 ) : isPaid ? (
-                  t("A559jVY")
+                  paidNoteAmount ? t("A559jVY", { amount: paidNoteAmount }) : t("A559jVZ")
                 ) : (
                   t("AT4tygn")
                 )}

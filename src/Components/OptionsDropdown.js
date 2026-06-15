@@ -28,7 +28,7 @@ export default function OptionsDropdown({
   };
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isMobile) return;
 
     const handleClick = (e) => {
       if (
@@ -41,13 +41,14 @@ export default function OptionsDropdown({
 
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
+  }, [open, isMobile]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isMobile) return;
 
     const handleScroll = (e) => {
       if (dropdownRef.current?.contains(e.target)) return;
+      if (e.target?.closest?.("[data-dropdown-submenu]")) return;
       close();
     };
     const handleResize = () => close();
@@ -150,10 +151,6 @@ export default function OptionsDropdown({
               zIndex: 999999,
             }}
             className={`bg-dropdown di-wrapper${dismissing ? " dismissing" : ""}${displayAbove ? " origin-bottom" : ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              close();
-            }}
           >
             <div className="box-pad-h-s box-pad-v-s fx-centered fx-col fx-start-v pointer">
               {options.map((option, i) => (

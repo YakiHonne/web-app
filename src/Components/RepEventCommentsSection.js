@@ -28,7 +28,7 @@ export default function RepEventCommentsSection({
         position: "absolute",
         left: 0,
         top: 0,
-        zIndex: 20,
+        zIndex: 1001,
         height: "100dvh",
         overflow: "scroll",
 
@@ -36,13 +36,26 @@ export default function RepEventCommentsSection({
     >
       <div className="main-middle">
         <div
-          className="fx-centered fit-container fx-start-h box-pad-v-m sticky"
+          className="fx-centered fit-container fx-start-h box-pad-v-m sticky rep-event-comments-back-row"
           onClick={exit}
-          style={{ padding: "1rem", backgroundColor: "transparent" }}
+          style={{
+            padding: "1rem",
+            backgroundColor: "transparent",
+            backdropFilter: "none",
+            WebkitBackdropFilter: "none",
+          }}
         >
           <button
-            className="btn btn-normal btn-gray fx-centered bg-dropdown"
-            style={{ padding: "0 1rem", borderRadius: "50%", aspectRatio: "1/1", width: "44px", height: "44px" }}
+            className="btn btn-normal btn-gray fx-centered"
+            style={{
+              padding: "0 1rem",
+              borderRadius: "50%",
+              aspectRatio: "1/1",
+              width: "44px",
+              height: "44px",
+              backgroundColor: "rgba(20, 20, 20, 0.7)",
+              boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+            }}
           >
             <Icon name="arrow" transform="rotate(90deg)" />
           </button>

@@ -18,17 +18,12 @@ import Overlay from "@/Components/Overlay";
 
 let chart_ = [
   { action: "flashnews_post", all_time_points: 0, last_updated: null },
-  { action: "un_write", all_time_points: 0, last_updated: null },
-  { action: "un_rate", all_time_points: 0, last_updated: null },
-  { action: "curation_post", all_time_points: 0, last_updated: null },
   { action: "article_post", all_time_points: 0, last_updated: null },
   { action: "article_draft", all_time_points: 0, last_updated: null },
-  { action: "video_post", all_time_points: 0, last_updated: null },
   { action: "bookmark", all_time_points: 0, last_updated: null },
   { action: "zap", all_time_points: 0, last_updated: null },
   { action: "reaction", all_time_points: 0, last_updated: null },
   { action: "dms", all_time_points: 0, last_updated: null },
-  { action: "user_impact", all_time_points: 0, last_updated: null },
   { action: "comment_post", all_time_points: 0, last_updated: null },
 ];
 
@@ -78,17 +73,12 @@ export default function UserLevels() {
     topics_setup: t("AQQFa7F"),
     follow_yaki: t("AyIwX8s"),
     flashnews_post: t("AIbcFuI"),
-    un_write: t("AZYR1td"),
-    un_rate: t("AiUEDe3"),
-    curation_post: t("AP6dp7w"),
     article_post: t("ATFKth1"),
     article_draft: t("Aweyw6L"),
-    video_post: t("A5qKCQ4"),
     bookmark: t("AuOVsg9"),
     zap: t("AetoahH"),
     reaction: t("Alz0E9Y"),
     dms: t("AwpwbAl"),
-    user_impact: t("Ag6EZcj"),
     comment_post: t("AsCfe1h"),
   };
   useEffect(() => {
@@ -146,12 +136,13 @@ export default function UserLevels() {
         }).display_name;
         setTiers(tiers);
         setCurrentTier(currentTierDisplayName);
+        let visibleStats = tempStats.filter((item) => levels[item.action]);
         setOneTimeRewardStats(
-          tempStats.filter((item) => item.cooldown === 0 && item.count > 0)
+          visibleStats.filter((item) => item.cooldown === 0 && item.count > 0)
         );
 
         setRepeatedRewardsStats(
-          tempStats.filter(
+          visibleStats.filter(
             (item) =>
               item.cooldown > 0 || (item.cooldown === 0 && item.count === 0)
           )
@@ -218,9 +209,6 @@ export default function UserLevels() {
               <>
                 {isLoaded && (
                   <>
-                    <div className="box-pad-v fit-container">
-                      <h4>{t("Ae2D51K")}</h4>
-                    </div>
                     <div
                       className="fit-container fx-centered fx-col"
                       style={{ rowGap: "16px" }}
@@ -504,7 +492,7 @@ export default function UserLevels() {
                                   {(item.user_stat?.all_time_points || 0) ===
                                     item.points[0] *
                                     (item.user_stat?.count || 1) && (
-                                      <Icon name="checkmark" />
+                                      <Icon name="checkmark" isColored={true} />
                                     )}
                                 </div>
                               </div>

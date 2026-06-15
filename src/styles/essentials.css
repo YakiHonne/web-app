@@ -457,10 +457,6 @@ hr:last-child {
     transition: box-shadow .2s ease-in, transform .15s ease-in, opacity .2s ease-in;
 }
 
-.btn:hover {
-    transform: scale(1.02);
-}
-
 .btn:active {
     transform: scale(0.97);
     transition: transform .07s ease-out;
@@ -501,13 +497,6 @@ hr:last-child {
         inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
-.btn-normal:hover {
-    opacity: .85;
-    box-shadow:
-        0 0 0 1px rgba(255, 200, 100, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
-
 .btn-gst {
     background-color: transparent;
     border: 1px solid var(--c1);
@@ -527,44 +516,16 @@ hr:last-child {
         inset 0 1px 0 rgba(255, 255, 255, 0.55);
 }
 
-.btn-gst:hover {
-    background-color: var(--c1);
-    color: white;
-    box-shadow:
-        0 0 0 1px rgba(255, 200, 100, 0.22),
-        inset 0 1px 0 rgba(255, 255, 255, 0.16);
-}
-
 .btn-orange {
     background-color: var(--orange-main);
     border: none;
     color: white;
 }
 
-.btn-orange:hover {
-    opacity: .8;
-}
-
-.btn-gray:hover {
-    opacity: .85;
-    box-shadow:
-        0 0 0 1px rgba(100, 100, 100, 0.55),
-        inset 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-
 .btn-orange-gst {
     background-color: transparent;
     border: 1px solid var(--orange-main);
     color: var(--orange-main);
-}
-
-.btn-orange-gst:hover {
-    background-color: var(--orange-main);
-    color: white;
-}
-
-.btn-gst:hover div {
-    filter: invert();
 }
 
 .btn-text {
@@ -586,10 +547,6 @@ hr:last-child {
     color: var(--c1);
 }
 
-.btn-text-pale:hover {
-    opacity: .5;
-}
-
 .btn-text-gray {
     font-family: 'DM sans', sans-serif;
     background-color: transparent;
@@ -598,10 +555,6 @@ hr:last-child {
     text-decoration: underline;
     padding: 0;
     transition: .2s ease-in;
-}
-
-.btn-text-gray:hover {
-    color: var(--primary);
 }
 
 .btn-red {
@@ -620,15 +573,6 @@ hr:last-child {
     color: white;
 }
 
-.btn-red:hover {
-    background-color: #560101;
-    border: none;
-    color: var(--red-main);
-    box-shadow:
-        0 0 0 1px rgba(255, 100, 100, 0.20),
-        inset 0 1px 0 rgba(255, 255, 255, 0.10);
-}
-
 .btn-gst-red {
     background-color: transparent;
     border: 1px solid var(--red-main);
@@ -644,18 +588,6 @@ hr:last-child {
     border: 1px solid var(--dim-gray);
     color: var(--dim-gray);
     cursor: not-allowed;
-}
-
-.btn-gst-red:hover {
-    background-color: var(--red-main);
-    color: white;
-    box-shadow:
-        0 0 0 1px rgba(255, 180, 180, 0.20),
-        inset 0 1px 0 rgba(255, 255, 255, 0.14);
-}
-
-.btn-gst-red:hover div {
-    filter: brightness(0) invert();
 }
 
 .btn-disabled {
@@ -678,12 +610,6 @@ hr:last-child {
     color: var(--white);
 }
 
-.btn-normal-pale:hover {
-    background-color: var(--white);
-    border: none;
-    color: var(--c1);
-}
-
 .btn-gst-nc {
     border: 1px solid var(--dim-gray);
     background-color: transparent;
@@ -691,20 +617,11 @@ hr:last-child {
     color: var(--black);
 }
 
-.btn-gst-nc:hover {
-    background-color: var(--very-dim-gray);
-    border: 1px solid var(--gray);
-}
-
 .btn-normal-gray {
     border: none;
     background-color: var(--dim-gray);
     color: var(--black);
     transition: .2s ease-in-out;
-}
-
-.btn-normal-gray:hover {
-    border: 1px solid var(--gray);
 }
 
 .btn-plus,
@@ -736,11 +653,6 @@ hr:last-child {
     transform: translateX(-50%) translateY(-50%);
 }
 
-.btn-plus:hover,
-.btn-minus:hover {
-    filter: invert();
-}
-
 .btn-full {
     width: 100%;
 }
@@ -770,19 +682,10 @@ hr:last-child {
     animation-fill-mode: forwards;
 }
 
-.btn-tooltip:hover.btn-tooltip::after {
-    display: block;
-}
-
 .btn-normal-special {
     background-color: #fde4ff8a;
     border: 1px solid #86318c54;
     color: var(--c1);
-}
-
-.btn-normal-special:hover {
-    background-color: var(--c1);
-    color: var(--white);
 }
 
 input::-webkit-outer-spin-button,
@@ -943,10 +846,6 @@ label {
 
 }
 
-.round-icon:hover {
-    background-color: var(--dim-gray);
-}
-
 .round-icon-small {
     min-width: 2rem;
     aspect-ratio: 1/1;
@@ -957,10 +856,6 @@ label {
     align-items: center;
     cursor: pointer;
     transition: .2s ease-in-out;
-}
-
-.round-icon-small:hover {
-    background-color: var(--dim-gray);
 }
 
 .bg-img {
@@ -1718,4 +1613,112 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .grid-item-blossom-2 {
     display: flex;
     width: 100%;
+}
+
+/* Hover effects: only on devices with a real pointer (mouse), never on touch */
+@media (hover: hover) and (pointer: fine) {
+    .btn:hover {
+        transform: scale(1.02);
+    }
+
+    .btn-normal:hover {
+        opacity: .85;
+        box-shadow:
+            0 0 0 1px rgba(255, 200, 100, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-gst:hover {
+        background-color: var(--c1);
+        color: white;
+        box-shadow:
+            0 0 0 1px rgba(255, 200, 100, 0.22),
+            inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    }
+
+    .btn-gst:hover div {
+        filter: invert();
+    }
+
+    .btn-orange:hover {
+        opacity: .8;
+    }
+
+    .btn-gray:hover {
+        opacity: .85;
+        box-shadow:
+            0 0 0 1px rgba(100, 100, 100, 0.55),
+            inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    }
+
+    .btn-orange-gst:hover {
+        background-color: var(--orange-main);
+        color: white;
+    }
+
+    .btn-text-pale:hover {
+        opacity: .5;
+    }
+
+    .btn-text-gray:hover {
+        color: var(--primary);
+    }
+
+    .btn-red:hover {
+        background-color: #560101;
+        border: none;
+        color: var(--red-main);
+        box-shadow:
+            0 0 0 1px rgba(255, 100, 100, 0.20),
+            inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    }
+
+    .btn-gst-red:hover {
+        background-color: var(--red-main);
+        color: white;
+        box-shadow:
+            0 0 0 1px rgba(255, 180, 180, 0.20),
+            inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+
+    .btn-gst-red:hover div {
+        filter: brightness(0) invert();
+    }
+
+    .btn-normal-pale:hover {
+        background-color: var(--white);
+        border: none;
+        color: var(--c1);
+    }
+
+    .btn-gst-nc:hover {
+        background-color: var(--very-dim-gray);
+        border: 1px solid var(--gray);
+    }
+
+    .btn-normal-gray:hover {
+        border: 1px solid var(--gray);
+    }
+
+    .btn-plus:hover,
+    .btn-minus:hover {
+        filter: invert();
+    }
+
+    .btn-tooltip:hover.btn-tooltip::after {
+        display: block;
+    }
+
+    .btn-normal-special:hover {
+        background-color: var(--c1);
+        color: var(--white);
+    }
+
+    .round-icon:hover {
+        background-color: var(--dim-gray);
+    }
+
+    .round-icon-small:hover {
+        background-color: var(--dim-gray);
+    }
 }

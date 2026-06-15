@@ -24,12 +24,13 @@ import Icon from "@/Components/Icon";
 import useCreatorSubscription from "@/Hooks/useCreatorSubscription";
 import SubscriptionButton from "@/Components/SubscriptionButton";
 import { iconsNames } from "@/Content/IconV2URL";
+import Badge from "@/Helpers/Badge";
 
 export default function UserMetadata({ user }) {
   const { t } = useTranslation();
   const id = user.pubkey;
   const userKeys = useSelector((state) => state.userKeys);
-  const { isNip05Verified } = useUserProfile(user.pubkey);
+  const { isNip05Verified, proUser } = useUserProfile(user.pubkey);
   const { muteUnmute, isMuted } = useIsMute(user.pubkey);
   const [showPeople, setShowPeople] = useState(false);
   const [timestamp, setTimestamp] = useState(new Date().getTime());
@@ -38,7 +39,7 @@ export default function UserMetadata({ user }) {
   const [showQR, setShowQR] = useState(false);
   const [showMetadataCarousel, setShowMetadataCarousel] = useState(false);
   const [selectedItemInCarousel, setSelectedItemInCarousel] = useState(0);
-
+  console.log(proUser)
   useEffect(() => {
     getUserFollowers();
   }, [timestamp]);
@@ -249,6 +250,7 @@ export default function UserMetadata({ user }) {
               {isNip05Verified && (
                 <Icon name="checkmark-c1" size={24} isColored />
               )}
+              {proUser.isProUser && <Badge data={proUser} size={24} />}
               <div
                 className="fx-centered pointer"
                 onClick={() => setShowQR(true)}

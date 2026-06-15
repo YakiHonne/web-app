@@ -13,6 +13,7 @@ import EventOptions from "@/Components/ElementOptions/EventOptions";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import PostReaction from "./PostReaction";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import Overlay from "@/Components/Overlay";
 import EventStats from "./EventStats";
 
@@ -43,7 +44,7 @@ export default function RepEventPreviewCard({
   const userFollowings = useSelector((state) => state.userFollowings);
   const { t } = useTranslation();
   const [showContent, setShowContent] = useState(!item.contentSensitive);
-  const { isNip05Verified, userProfile } = useUserProfile(item.pubkey);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(item.pubkey);
   const isFollowing = useMemo(() => {
     return checkFollowing(userFollowings, item.pubkey);
   }, [userFollowings]);
@@ -93,6 +94,7 @@ export default function RepEventPreviewCard({
                     author={userProfile}
                     item={item}
                     isNip05Verified={isNip05Verified}
+                    proUser={proUser}
                   />
                 </div>
               </div>
@@ -141,6 +143,7 @@ export default function RepEventPreviewCard({
                   author={userProfile}
                   item={item}
                   isNip05Verified={isNip05Verified}
+                  proUser={proUser}
                 />
                 {isFollowing && (
                   <div
@@ -213,7 +216,7 @@ export default function RepEventPreviewCard({
   );
 }
 
-const AuthorPreview = ({ author, item, isNip05Verified }) => {
+const AuthorPreview = ({ author, item, isNip05Verified, proUser }) => {
   return (
     <div className="fx-centered fx-start-h ">
       <UserProfilePic
@@ -227,13 +230,14 @@ const AuthorPreview = ({ author, item, isNip05Verified }) => {
         <div className="fx-centered fx-start-h" style={{ gap: "3px" }}>
           <p className="p-bold">{author.display_name || author.name}</p>
           {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+          {proUser.isProUser && <Badge data={proUser} size={16} />}
         </div>
         <DynamicIndicator item={item} />
       </div>
     </div>
   );
 };
-const AuthorPreviewMinimal = ({ author, isNip05Verified }) => {
+const AuthorPreviewMinimal = ({ author, isNip05Verified, proUser }) => {
   return (
     <div className="fx-centered fx-start-h ">
       <UserProfilePic
@@ -248,6 +252,7 @@ const AuthorPreviewMinimal = ({ author, isNip05Verified }) => {
           {author.display_name || author.name}
         </p>
         {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+        {proUser.isProUser && <Badge data={proUser} size={16} />}
       </div>
     </div>
   );

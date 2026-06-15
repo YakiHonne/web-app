@@ -35,11 +35,11 @@ const Main = () => {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const dispatch = useDispatch();
-  const [mbHide, setMbHide] = useState(true);
   const [url, setUrl] = useState("");
   const [urlToCheck, setUrlToCheck] = useState("");
   const [receivedLogs, setReceivedLogs] = useState([]);
   const [refresh, setSetRefresh] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
 
   const handleSetUrlToCheck = () => {
     const urlRegex =
@@ -53,7 +53,7 @@ const Main = () => {
     dispatch(
       setToast({
         type: 2,
-        desc: "Invalid URL",
+        desc: t("AesiKY4"),
       }),
     );
   };
@@ -62,52 +62,62 @@ const Main = () => {
     <>
       {!userKeys && <PagePlaceholder page={"nostr-not-connected"} />}
       {userKeys && (
-        <div className="fit-container fx-centered fx-col">
-          <div className="desk-hide fit-container fx-centered box-pad-v">
-            <div
-              className="fx-centered sc-s-18 "
-              style={{
-                backgroundColor: "var(--very-dim-gray)",
-                padding: "4px",
-                borderRadius: "100px",
-                border: "1px solid var(--pale-gray)",
-              }}
-            >
-              <button
-                className={`btn btn-small ${
-                  mbHide ? "btn-normal" : "btn-text-gray"
-                }`}
-                style={{
-                  borderRadius: "100px",
-                  minWidth: "120px",
-                  transition: ".3s",
-                }}
-                onClick={() => setMbHide(true)}
-              >
-                App
-              </button>
-              <button
-                className={`btn btn-small ${
-                  !mbHide ? "btn-normal" : "btn-text-gray"
-                }`}
-                style={{
-                  borderRadius: "100px",
-                  minWidth: "120px",
-                  transition: ".3s",
-                }}
-                onClick={() => setMbHide(false)}
-              >
-                Logs
-              </button>
+        <div className="fit-container fx-centered">
+          <div
+            style={{ width: "min(100%,400px)" }}
+            className="fx-centered fx-col"
+          >
+            <div className="fit-container fx-centered fx-col fx-start-h fx-start-v">
+              <p className="gray-c fit-container">{t("AagFn6G")}</p>
+              <div className="fit-container fx-centered fx-start-v">
+                <input
+                  className={`if ifs-full ${
+                    urlToCheck ? "if-disabled" : ""
+                  }`}
+                  type="text"
+                  placeholder={t("AnmM3FH")}
+                  value={url}
+                  onChange={(e) => {
+                    setUrl(e.target.value);
+                  }}
+                  disabled={urlToCheck}
+                />
+                {!urlToCheck && (
+                  <button
+                    className="btn btn-normal"
+                    style={{ minWidth: "max-content" }}
+                    onClick={handleSetUrlToCheck}
+                  >
+                    {t("AVhZ4Oa")}
+                  </button>
+                )}
+                {urlToCheck && (
+                  <div className="fx-centered">
+                    <button
+                      className="btn btn-red slide-up"
+                      style={{ minWidth: "max-content" }}
+                      onClick={() => {
+                        setUrlToCheck("");
+                        setReceivedLogs([]);
+                      }}
+                    >
+                      {t("AdrLdL1")}
+                    </button>
+                    <div
+                      className="round-icon-small round-icon-tooltip slide-right"
+                      data-tooltip={t("AckKGvv")}
+                      onClick={() => {
+                        setSetRefresh(Date.now());
+                        setReceivedLogs([]);
+                      }}
+                    >
+                      <Icon name="switch-arrows-v2" />
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="fit-container fx-centered fx-start-h fx-start-v">
-            <div
-              style={{ width: "min(100%,800px)", flex: 1.5 }}
-              className={`${
-                !mbHide ? "mb-hide-800" : ""
-              } fx-centered box-marg-full`}
-            >
+            <div className="fx-centered box-marg-s">
               {!urlToCheck && (
                 <section
                   className="fx-centered fx-col sc-s-18"
@@ -128,195 +138,142 @@ const Main = () => {
                 />
               )}
             </div>
-            <div
-              style={{
-                height: "100vh",
-                backgroundColor: "var(--pale-gray)",
-                width: "1px",
-                position: "sticky",
-                top: 0,
-                margin: "0 .5rem",
-              }}
-              className="mb-hide-800"
-            ></div>
-            <div
-              style={{
-                width: "min(100%,400px)",
-                height: "100vh",
-                overflow: "scroll",
-                padding: "1rem .5rem",
-                flex: 1,
-              }}
-              className={`box-pad-h-m box-pad-v sticky ${
-                mbHide ? "mb-hide-800" : ""
-              }`}
-            >
-              <div className="fit-container fx-scattered">
-                <h4 className=" box-marg-s fit-container">
-                  Your Mini App's domain
-                </h4>
-              </div>
-              <input
-                className={`if ifs-full ${
-                  urlToCheck ? "if-disabled" : ""
-                } box-marg-s`}
-                type="text"
-                placeholder="https://example.com or http://localhost:3000"
-                value={url}
-                onChange={(e) => {
-                  setUrl(e.target.value);
-                }}
-                disabled={urlToCheck}
-              />
-              {!urlToCheck && (
-                <button
-                  className="btn btn-normal btn-full"
-                  onClick={handleSetUrlToCheck}
-                >
-                  Test app
-                </button>
-              )}
-              {urlToCheck && (
-                <div className="fx-centered">
-                  <button
-                    className="btn btn-red btn-full slide-up"
-                    onClick={() => {
-                      setUrlToCheck("");
-                      setReceivedLogs([]);
-                    }}
-                  >
-                    Test another app
-                  </button>
-                  <div
-                    className="round-icon-small round-icon-tooltip slide-right"
-                    data-tooltip={"Refresh"}
-                    onClick={() => {
-                      setSetRefresh(Date.now());
-                      setReceivedLogs([]);
-                    }}
-                  >
-                    <Icon name="switch-arrows-v2" />
-                  </div>
-                </div>
-              )}
-              <div
-                className="fit-container fx-centered fx-col fx-start-h fx-start-v box-pad-v"
-                style={{ rowGap: "5px" }}
+            {receivedLogs.length > 0 && (
+              <button
+                className="btn btn-gray btn-full"
+                onClick={() => setShowLogs(true)}
               >
-                {receivedLogs.length > 0 && <h4>App logs</h4>}
-                <div className="box-pad-v-s"></div>
-                {receivedLogs.map((log, index) => {
-                  return (
-                    <div
-                      className="fit-container fx-centered fx-col fx-start-h fx-start-v"
-                      key={index}
-                    >
-                      <div className="fx-centered fx-start-h">
-                        <p>
-                          Kind: <span className="gray-c">{log.kind}</span>
-                        </p>
-                        {!log.client && (
-                          <div
-                            className="fx-centered box-pad-h-s sc-s-18"
-                            style={{
-                              borderColor: "var(--green-main)",
-                              backgroundColor: "transparent",
-                              height: "25px",
-                            }}
-                          >
-                            {" "}
-                            <p className="p-italic green-c p-medium">
-                              Sent data
-                            </p>
-                          </div>
-                        )}
-                        {log.client && (
-                          <div
-                            className="fx-centered box-pad-h-s sc-s-18"
-                            style={{
-                              borderColor: "var(--c1)",
-                              backgroundColor: "transparent",
-                              height: "25px",
-                            }}
-                          >
-                            <p className="p-italic c1-c p-medium">
-                              Received data
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                      {log.data && (
-                        <ReactMarkdown
-                          children={
-                            typeof log.data === "string"
-                              ? log.data
-                              : "```json\n" +
-                                JSON.stringify(log.data, null, 2) +
-                                "\n```"
-                          }
-                          remarkPlugins={[remarkGfm]}
-                          rehypePlugins={[rehypeHighlight]}
-                          components={{
-                            code({
-                              node,
-                              inline,
-                              className,
-                              children,
-                              ...props
-                            }) {
-                              const match = /language-(\w+)/.exec(
-                                className || "",
-                              );
-                              const codeRef = nanoid();
-                              return !inline ? (
-                                <pre
-                                  style={{ padding: "0", width: "350px" }}
-                                  className="fit-container"
-                                >
-                                  <div
-                                    className="sc-s-18 box-pad-v-s box-pad-h-m fit-container fx-scattered"
-                                    style={{
-                                      borderBottomRightRadius: 0,
-                                      borderBottomLeftRadius: 0,
-                                      top: "0px",
-                                      position: "sticky",
-                                      border: "none",
-                                    }}
-                                  >
-                                    <p className="gray-c p-italic">
-                                      {match?.length > 0 ? match[1] : ""}
-                                    </p>
-                                  </div>
-                                  <code
-                                    className={`hljs ${className} fit-container`}
-                                    {...props}
-                                    id={codeRef}
-                                  >
-                                    {children}
-                                  </code>
-                                </pre>
-                              ) : (
-                                <code
-                                  className="inline-code fit-container"
-                                  {...props}
-                                  style={{ margin: "1rem 0" }}
-                                >
-                                  {children}
-                                </code>
-                              );
-                            },
-                          }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                {t("Al8MnWb", { count: receivedLogs.length })}
+              </button>
+            )}
           </div>
+          {showLogs && (
+            <LogsOverlay
+              logs={receivedLogs}
+              exit={() => setShowLogs(false)}
+            />
+          )}
         </div>
       )}
     </>
+  );
+};
+
+const LogsOverlay = ({ logs, exit }) => {
+  const { t } = useTranslation();
+  return (
+    <Overlay exit={exit} width={500}>
+      <div className="box-pad-h box-pad-v fx-centered fx-col fx-start-h fx-start-v slide-up">
+        <h4>{t("A8iuHtc")}</h4>
+        <div className="box-pad-v-s"></div>
+        <div
+          className="fit-container fx-centered fx-col fx-start-h fx-start-v"
+          style={{ rowGap: "5px" }}
+        >
+          {logs.map((log, index) => {
+            return (
+              <div
+                className="fit-container fx-centered fx-col fx-start-h fx-start-v"
+                style={{ minWidth: 0 }}
+                key={index}
+              >
+                <div className="fx-centered fx-start-h">
+                  <p>
+                    Kind: <span className="gray-c">{log.kind}</span>
+                  </p>
+                  {!log.client && (
+                    <div
+                      className="fx-centered box-pad-h-s sc-s-18"
+                      style={{
+                        borderColor: "var(--green-main)",
+                        backgroundColor: "transparent",
+                        height: "25px",
+                      }}
+                    >
+                      {" "}
+                      <p className="p-italic green-c p-medium">{t("Ah3XYp9")}</p>
+                    </div>
+                  )}
+                  {log.client && (
+                    <div
+                      className="fx-centered box-pad-h-s sc-s-18"
+                      style={{
+                        borderColor: "var(--c1)",
+                        backgroundColor: "transparent",
+                        height: "25px",
+                      }}
+                    >
+                      <p className="p-italic c1-c p-medium">{t("A32AiGB")}</p>
+                    </div>
+                  )}
+                </div>
+                {log.data && (
+                  <ReactMarkdown
+                    children={
+                      typeof log.data === "string"
+                        ? log.data
+                        : "```json\n" +
+                          JSON.stringify(log.data, null, 2) +
+                          "\n```"
+                    }
+                    remarkPlugins={[remarkGfm]}
+                    rehypePlugins={[rehypeHighlight]}
+                    components={{
+                      code({ node, inline, className, children, ...props }) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        const codeRef = nanoid();
+                        return !inline ? (
+                          <pre
+                            style={{
+                              padding: "0",
+                              width: "400px",
+                              maxWidth: "100%",
+                              minWidth: 0,
+                              overflow: "auto",
+                            }}
+                            className="fit-container"
+                          >
+                            <div
+                              className="sc-s-18 box-pad-v-s box-pad-h-m fit-container fx-scattered"
+                              style={{
+                                borderBottomRightRadius: 0,
+                                borderBottomLeftRadius: 0,
+                                top: "0px",
+                                position: "sticky",
+                                border: "none",
+                              }}
+                            >
+                              <p className="gray-c p-italic">
+                                {match?.length > 0 ? match[1] : ""}
+                              </p>
+                            </div>
+                            <code
+                              className={`hljs ${className} fit-container`}
+                              {...props}
+                              id={codeRef}
+                            >
+                              {children}
+                            </code>
+                          </pre>
+                        ) : (
+                          <code
+                            className="inline-code fit-container"
+                            {...props}
+                            style={{ margin: "1rem 0" }}
+                          >
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </Overlay>
   );
 };
 
@@ -356,14 +313,14 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
           }
           if (!userMetadata) {
             SWHandler.host.sendError(
-              "The user is not connected",
+              t("AC6jYA6"),
               url,
               iframeRef.current,
             );
             setReceivedLogs((prev) => [
               ...prev,
               {
-                data: "The user is not connected",
+                data: t("AC6jYA6"),
                 kind: "err-msg",
                 client: false,
               },
@@ -394,14 +351,14 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
               ]);
             } else {
               SWHandler.host.sendError(
-                "Signing event failed",
+                t("AxPNC2r"),
                 url,
                 iframeRef.current,
               );
               setReceivedLogs((prev) => [
                 ...prev,
                 {
-                  data: "Signing event failed",
+                  data: t("AxPNC2r"),
                   kind: "err-msg",
                   client: false,
                 },
@@ -425,14 +382,14 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
             );
             if (!signedEvent) {
               SWHandler.host.sendError(
-                "Signing event failed",
+                t("AxPNC2r"),
                 url,
                 iframeRef.current,
               );
               setReceivedLogs((prev) => [
                 ...prev,
                 {
-                  data: "Signing event failed",
+                  data: t("AxPNC2r"),
                   kind: "err-msg",
                   client: false,
                 },
@@ -556,6 +513,7 @@ const MiniApp = ({ url, setReceivedLogs, refresh }) => {
 };
 
 const ManifestFile = ({ url }) => {
+  const { t } = useTranslation();
   const [metadata, setMetadata] = useState(false);
   const [isMetadataLoding, setIsMetadataLoading] = useState(false);
   const [showGenerateFile, setShowGenerateFile] = useState(false);
@@ -612,7 +570,7 @@ const ManifestFile = ({ url }) => {
           className="btn btn-normal btn-full"
           onClick={() => setShowGenerateFile(true)}
         >
-          Generate a manifest file
+          {t("ALWT79i")}
         </button>
       </>
     );
@@ -631,7 +589,7 @@ const ManifestFile = ({ url }) => {
           <GenerateManifestFile exit={() => setShowGenerateFile()} />
         )}
         <div className="fx-centered fx-col fit-container">
-          <p className="c1-c p-italic">Could not find a manifest file!</p>
+          <p className="c1-c p-italic">{t("Azghmnf")}</p>
           <button
             className="btn btn-normal btn-full"
             onClick={() => setShowGenerateFile(true)}
@@ -646,6 +604,7 @@ const ManifestFile = ({ url }) => {
 };
 
 const GenerateManifestFile = ({ exit }) => {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const userMetadata = useSelector((state) => state.userMetadata);
   const [developer, setDeveloper] = useState(userMetadata);
@@ -697,7 +656,7 @@ const GenerateManifestFile = ({ exit }) => {
       dispatch(
         setToast({
           type: 2,
-          desc: "Please fill all the required fields",
+          desc: t("ALV8Khl"),
         }),
       );
       return;
@@ -726,16 +685,16 @@ const GenerateManifestFile = ({ exit }) => {
           <div className="fx-centered box-pad-v fx-col">
             <Icon name="checkmark-tt" size={60} isColored />
             <h4 className="p-centered" style={{ lineHeight: "150%" }}>
-              The file was generated successfully!
+              {t("AXPjOEg")}
             </h4>
             <button className="btn btn-normal" onClick={exit}>
-              Back to Playground
+              {t("AjhvX3x")}
             </button>
             <button
               className="btn btn-text-gray"
               onClick={() => setProcessDone(false)}
             >
-              Edit my file
+              {t("AziGH3B")}
             </button>
           </div>
         </div>
@@ -757,7 +716,7 @@ const GenerateManifestFile = ({ exit }) => {
                     size={50}
                   />
                   <div>
-                    <p>Developer</p>
+                    <p>{t("ARKDj6i")}</p>
                     <h4>{developer.display_name || developer.name}</h4>
                   </div>
                 </div>
@@ -765,7 +724,7 @@ const GenerateManifestFile = ({ exit }) => {
                   className="btn btn-gray btn-small"
                   onClick={() => setShowUsersList(true)}
                 >
-                  Change
+                  {t("AFX6uFu")}
                 </button>
               </>
             )}
@@ -782,28 +741,28 @@ const GenerateManifestFile = ({ exit }) => {
                   className="btn btn-gst-red"
                   onClick={() => setShowUsersList(false)}
                 >
-                  Cancel
+                  {t("AB4BSCe")}
                 </button>
               </>
             )}
           </div>
           <div className="box-pad-h-m box-pad-v-m fx-centered fx-start-h fx-start-v fx-col fit-container">
-            <h4>Widget metadata</h4>
+            <h4>{t("AvNU9bm")}</h4>
             <input
-              placeholder="Widget title (required)"
+              placeholder={t("AMx6chG")}
               className="if ifs-full"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
             <input
-              placeholder="App URL (required)"
+              placeholder={t("AvDC7MR")}
               className="if ifs-full"
               value={appUrl}
               onChange={(e) => setAppUrl(e.target.value)}
             />
             <div className="fit-container fx-scattered">
               <input
-                placeholder="App icon URL (required)"
+                placeholder={t("Aez4AQO")}
                 className="if ifs-full"
                 value={appIcon}
                 onChange={(e) => setAppIcon(e.target.value)}
@@ -812,7 +771,7 @@ const GenerateManifestFile = ({ exit }) => {
             </div>
             <div className="fit-container fx-scattered">
               <input
-                placeholder="App thumbnail URL (required)"
+                placeholder={t("A9gpP5w")}
                 className="if ifs-full"
                 value={appThumbnail}
                 onChange={(e) => setAppThumbnail(e.target.value)}
@@ -820,7 +779,7 @@ const GenerateManifestFile = ({ exit }) => {
               <UploadFile round={true} setImageURL={setAppThumbnail} />
             </div>
             <input
-              placeholder="App button title (required)"
+              placeholder={t("ATPT0g6")}
               className="if ifs-full"
               value={appButtonTitle}
               onChange={(e) => setButtonTitle(e.target.value)}
@@ -830,7 +789,7 @@ const GenerateManifestFile = ({ exit }) => {
               onSubmit={handleAddTags}
             >
               <input
-                placeholder="Add tags"
+                placeholder={t("AZwaoRX")}
                 className="if ifs-full"
                 value={tempTag}
                 onChange={(e) => setTempTag(e.target.value)}
@@ -864,29 +823,29 @@ const GenerateManifestFile = ({ exit }) => {
               className="fit-container fx-centered fx-start-h fx-start-v fx-col sc-s-18 box-pad-h-s box-pad-v-s"
               style={{ gap: "3px" }}
             >
-              <p className="c1-c p-bold">Important</p>
+              <p className="c1-c p-bold">{t("AysGcoC")}</p>
               <p>
-                Please place the generated file in a{" "}
+                {t("Am3EtRm")}{" "}
                 <span
                   className="sticker sticker-orange-side p-bold"
                   style={{ display: "inline-block" }}
                 >
                   /.well-known
                 </span>{" "}
-                folder in a publicly accessible domain
+                {t("AC8oBlE")}
               </p>
             </div>
           </div>
           <div className="fit-container fx-centered box-pad-h-m box-pad-v-m">
             <button className="btn btn-gst-red fx" onClick={exit}>
-              Cancel
+              {t("AB4BSCe")}
             </button>
             <button
               className={`btn fx ${!status ? "btn-disabled" : "btn-normal"}`}
               disabled={!status}
               onClick={generateFile}
             >
-              Generate
+              {t("ACrKIyB")}
             </button>
           </div>
         </div>

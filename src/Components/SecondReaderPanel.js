@@ -480,6 +480,11 @@ export default function SecondReaderPanel({
         setView("active");
       } catch (err) {
         console.error("[SecondReader] full analysis failed", err);
+        if (err.status === 403) {
+          dispatch(setToast({ type: 2, desc: err.message || t("AMr1BBt") }));
+        } else if (err.status === 429) {
+          dispatch(setToast({ type: 2, desc: err.message || t("Alec9a8") }));
+        }
       } finally {
         setIsAnalyzing(false);
       }
@@ -524,7 +529,13 @@ export default function SecondReaderPanel({
         });
       })
       .catch((err) => {
-        if (!cancelled) console.error("[SecondReader] paragraph analysis failed", err);
+        if (cancelled) return;
+        console.error("[SecondReader] paragraph analysis failed", err);
+        if (err.status === 403) {
+          dispatch(setToast({ type: 2, desc: err.message || t("AMr1BBt") }));
+        } else if (err.status === 429) {
+          dispatch(setToast({ type: 2, desc: err.message || t("Alec9a8") }));
+        }
       })
       .finally(() => {
         if (!cancelled) setIsAnalyzingParagraph(false);

@@ -1,5 +1,17 @@
 import axiosInstance from "@/Helpers/HTTP_Client";
 
+const throwPlanAwareError = (err, fallback) => {
+  const status = err?.response?.status;
+  if (status === 403 || status === 429) {
+    const planError = new Error(
+      err?.response?.data?.message || err?.response?.data?.error || fallback,
+    );
+    planError.status = status;
+    throw planError;
+  }
+  throw new Error(err?.response?.data?.error || err.message || fallback);
+};
+
 export const analyzeFullArticle = async (article, personaId) => {
   try {
     const { data } = await axiosInstance.post(
@@ -9,9 +21,7 @@ export const analyzeFullArticle = async (article, personaId) => {
     if (!data.success) throw new Error(data.error || "Analysis failed");
     return data.data;
   } catch (err) {
-    throw new Error(
-      err?.response?.data?.error || err.message || "Analysis failed",
-    );
+    throwPlanAwareError(err, "Analysis failed");
   }
 };
 
@@ -30,10 +40,6 @@ export const analyzeParagraph = async (
       throw new Error(data.error || "Paragraph analysis failed");
     return data.data;
   } catch (err) {
-    throw new Error(
-      err?.response?.data?.error ||
-        err.message ||
-        "Paragraph analysis failed",
-    );
+    throwPlanAwareError(err, "Paragraph analysis failed");
   }
 };

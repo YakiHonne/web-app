@@ -8,6 +8,8 @@ import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import OptionsDropdown from "@/Components/OptionsDropdown";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 import { nip19 } from "nostr-tools";
 import RawEventDisplay from "@/Components/ElementOptions/RawEventDisplay";
 import useIsMute from "@/Hooks/useIsMute";
@@ -819,6 +821,7 @@ const BroadcastEvent = ({ event }) => {
   const [subPos, setSubPos] = useState(null);
   const hideTimeout = useRef(null);
   const rowRef = useRef(null);
+  const isMobile = useIsMobile();
 
   const allRelays = useMemo(() => {
     return [...new Set([...userRelays, ...(userFavRelays?.relays || [])])];
@@ -846,16 +849,58 @@ const BroadcastEvent = ({ event }) => {
   };
 
   const handleMouseEnter = () => {
+    if (isMobile) return;
     clearTimeout(hideTimeout.current);
     updateSubPos();
     setShowRelays(true);
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return;
     hideTimeout.current = setTimeout(() => setShowRelays(false), 150);
   };
 
   if (allRelays.length === 0) return null;
+
+  const relaysContent = isProtected ? (
+    <div className="fx-centered fx-col box-pad-h-s box-pad-v-m">
+      <Icon name="protected-2" size={24} />
+      <p className="gray-c p-centered">{t("AqqpEOw")}</p>
+    </div>
+  ) : (
+    <>
+      <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
+      {userFavRelays?.relays.map((_) => (
+        <div
+          key={_}
+          className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+          onClick={() => handleRepublish(_)}
+        >
+          <div style={{ position: "relative" }}>
+            <RelayImage url={_} size={30} />
+            <div style={{ position: "absolute", right: "-10px", bottom: "-10px", zIndex: 10, scale: ".65" }}>
+              <div className="round-icon-small round-icon-tooltip" data-tooltip={t("Ay0vA4Z")} style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "none" }}>
+                <Icon name="star" size={24} />
+              </div>
+            </div>
+          </div>
+          <p className="p-one-line">{_}</p>
+        </div>
+      ))}
+      {userRelays.map((_) =>
+        !userFavRelays?.relays.includes(_) ? (
+          <div
+            key={_}
+            className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
+            onClick={() => handleRepublish(_)}
+          >
+            <RelayImage url={_} size={30} />
+            <p className="p-one-line">{_}</p>
+          </div>
+        ) : null
+      )}
+    </>
+  );
 
   return (
     <div
@@ -877,67 +922,38 @@ const BroadcastEvent = ({ event }) => {
       </div>
       <Icon name="arrow" />
 
-      {showRelays && subPos && typeof document !== "undefined" && createPortal(
-        <div
-          style={{
-            position: "fixed",
-            top: subPos.top,
-            right: subPos.right,
-            transform: "translateY(-50%)",
-            minWidth: "220px",
-            maxHeight: "400px",
-            overflowY: "auto",
-            zIndex: 9999999,
-            borderRadius: "16px",
-          }}
-          className="fx-centered fx-col fx-start-h fx-start-v bg-dropdown box-pad-h-s box-pad-v-s dynamic-island-dropdown"
-          onMouseEnter={() => clearTimeout(hideTimeout.current)}
-          onMouseLeave={handleMouseLeave}
-          onMouseDown={(e) => e.stopPropagation()}
-          onClick={(e) => e.stopPropagation()}
-          onWheel={(e) => e.stopPropagation()}
-        >
-          {isProtected ? (
-            <div className="fx-centered fx-col box-pad-h-s box-pad-v-m">
-              <Icon name="protected-2" size={24} />
-              <p className="gray-c p-centered">{t("AqqpEOw")}</p>
-            </div>
-          ) : (
-            <>
-              <p className="gray-c box-pad-h-s box-pad-v-s">{t("AZjgE2A")}</p>
-              {userFavRelays?.relays.map((_) => (
-                <div
-                  key={_}
-                  className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
-                  onClick={() => handleRepublish(_)}
-                >
-                  <div style={{ position: "relative" }}>
-                    <RelayImage url={_} size={30} />
-                    <div style={{ position: "absolute", right: "-10px", bottom: "-10px", zIndex: 10, scale: ".65" }}>
-                      <div className="round-icon-small round-icon-tooltip" data-tooltip={t("Ay0vA4Z")} style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "none" }}>
-                        <Icon name="star" size={24} />
-                      </div>
-                    </div>
-                  </div>
-                  <p className="p-one-line">{_}</p>
-                </div>
-              ))}
-              {userRelays.map((_) =>
-                !userFavRelays?.relays.includes(_) ? (
-                  <div
-                    key={_}
-                    className="fx-shrink fx-centered fx-start-h box-pad-v-s box-pad-h-s option-no-scale fit-container"
-                    onClick={() => handleRepublish(_)}
-                  >
-                    <RelayImage url={_} size={30} />
-                    <p className="p-one-line">{_}</p>
-                  </div>
-                ) : null
-              )}
-            </>
-          )}
-        </div>,
-        document.body
+      {isMobile ? (
+        <MobileSheet open={showRelays} onClose={() => setShowRelays(false)} title={t("AHhMsNx")}>
+          <div className="fx-centered fx-col fx-start-h fx-start-v" style={{ padding: "0 8px" }}>
+            {relaysContent}
+          </div>
+        </MobileSheet>
+      ) : (
+        showRelays && subPos && typeof document !== "undefined" && createPortal(
+          <div
+            data-dropdown-submenu
+            style={{
+              position: "fixed",
+              top: subPos.top,
+              right: subPos.right,
+              transform: "translateY(-50%)",
+              minWidth: "220px",
+              maxHeight: "400px",
+              overflowY: "auto",
+              zIndex: 9999999,
+              borderRadius: "16px",
+            }}
+            className="fx-centered fx-col fx-start-h fx-start-v bg-dropdown box-pad-h-s box-pad-v-s dynamic-island-dropdown"
+            onMouseEnter={() => clearTimeout(hideTimeout.current)}
+            onMouseLeave={handleMouseLeave}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            onWheel={(e) => e.stopPropagation()}
+          >
+            {relaysContent}
+          </div>,
+          document.body
+        )
       )}
     </div>
   );

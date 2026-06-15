@@ -64,8 +64,10 @@
     align-items: center;
 }
 
-.uplift-mini-logo:hover {
-    opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+    .uplift-mini-logo:hover {
+        opacity: 1;
+    }
 }
 
 .uplift-mini-title {
@@ -96,8 +98,10 @@
     transition: background-color 0.15s ease;
 }
 
-.uplift-mini-icon-btn:hover {
-    background-color: rgba(255, 255, 255, 0.07);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-mini-icon-btn:hover {
+        background-color: rgba(255, 255, 255, 0.07);
+    }
 }
 
 .uplift-navbar-left {
@@ -116,8 +120,10 @@
     transition: opacity 0.15s ease;
 }
 
-.uplift-logo-btn:hover {
-    opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+    .uplift-logo-btn:hover {
+        opacity: 1;
+    }
 }
 
 .uplift-search-pill {
@@ -135,9 +141,11 @@
     flex-shrink: 0;
 }
 
-.uplift-search-pill:hover {
-    border-color: rgba(255, 255, 255, 0.16);
-    background-color: rgba(255, 255, 255, 0.07);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-search-pill:hover {
+        border-color: rgba(255, 255, 255, 0.16);
+        background-color: rgba(255, 255, 255, 0.07);
+    }
 }
 
 .uplift-search-pill-label {
@@ -190,9 +198,15 @@
     color: rgba(255, 255, 255, 0.45);
 }
 
-.uplift-nav-icon-btn:hover {
-    background-color: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.9);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-nav-icon-btn:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .uplift-nav-icon-btn:hover .uplift-nav-icon-wrap {
+        opacity: 1;
+    }
 }
 
 .uplift-nav-icon-btn.uplift-active {
@@ -208,7 +222,6 @@
     transition: opacity 0.18s ease;
 }
 
-.uplift-nav-icon-btn:hover .uplift-nav-icon-wrap,
 .uplift-nav-icon-btn.uplift-active .uplift-nav-icon-wrap {
     opacity: 1;
 }
@@ -252,8 +265,10 @@
 
 }
 
-.uplift-plus-btn:hover {
-    transform: scale(1.06);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-plus-btn:hover {
+        transform: scale(1.06);
+    }
 }
 
 .uplift-plus-btn:active {
@@ -296,8 +311,10 @@
     color: #ffffff;
 }
 
-.uplift-balance-chip:hover {
-    border-color: rgba(255, 255, 255, 0.18);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-balance-chip:hover {
+        border-color: rgba(255, 255, 255, 0.18);
+    }
 }
 
 .uplift-balance-btc-dot {
@@ -367,8 +384,10 @@
     border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.uplift-icon-btn:hover {
-    background-color: rgba(255, 255, 255, 0.09);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-icon-btn:hover {
+        background-color: rgba(255, 255, 255, 0.09);
+    }
 }
 
 .uplift-bell-dot {
@@ -394,8 +413,10 @@
     transition: outline-color 0.18s ease;
 }
 
-.uplift-avatar-btn:hover {
-    outline-color: var(--c1);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-avatar-btn:hover {
+        outline-color: var(--c1);
+    }
 }
 
 .uplift-avatar-switching {
@@ -448,8 +469,10 @@
     white-space: nowrap;
 }
 
-.uplift-login-btn:hover {
-    opacity: 0.88;
+@media (hover: hover) and (pointer: fine) {
+    .uplift-login-btn:hover {
+        opacity: 0.88;
+    }
 }
 
 .uplift-create-scrim {
@@ -556,12 +579,14 @@
         background-color 0.15s ease 0s;
 }
 
-.uplift-create-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-}
+@media (hover: hover) and (pointer: fine) {
+    .uplift-create-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
 
-.uplift-create-item:hover .uplift-create-item-icon {
-    transform: translateY(-1px) scale(1.05);
+    .uplift-create-item:hover .uplift-create-item-icon {
+        transform: translateY(-1px) scale(1.05);
+    }
 }
 
 .uplift-create-item-icon {
@@ -622,8 +647,10 @@
     border-radius: var(--border-r-18);
 }
 
-.uplift-dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+    }
 }
 
 .uplift-dropdown-profile-name {
@@ -669,8 +696,10 @@
     border-radius: var(--border-r-18);
 }
 
-.uplift-dropdown-account-item:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-dropdown-account-item:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+    }
 }
 
 .uplift-dropdown-account-item.uplift-account-active {
@@ -738,8 +767,10 @@
     color: rgba(255, 255, 255, 0.75);
 }
 
-.uplift-dropdown-signout-btn:hover {
-    background-color: rgba(255, 255, 255, 0.09);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-dropdown-signout-btn:hover {
+        background-color: rgba(255, 255, 255, 0.09);
+    }
 }
 
 .uplift-drawer-open-mask {
@@ -814,8 +845,10 @@
     color: rgba(255, 255, 255, 0.8);
 }
 
-.uplift-more-drawer-item:hover {
-    background-color: rgba(255, 255, 255, 0.06);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-more-drawer-item:hover {
+        background-color: rgba(255, 255, 255, 0.06);
+    }
 }
 
 .uplift-more-drawer-item.uplift-more-active {
@@ -915,9 +948,11 @@
     transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.uplift-more-drawer-changelog-btn:hover {
-    background-color: rgba(255, 255, 255, 0.11);
-    color: rgba(255, 255, 255, 0.7);
+@media (hover: hover) and (pointer: fine) {
+    .uplift-more-drawer-changelog-btn:hover {
+        background-color: rgba(255, 255, 255, 0.11);
+        color: rgba(255, 255, 255, 0.7);
+    }
 }
 
 .uplift-more-drawer-publishing {
@@ -1098,14 +1133,37 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: nowrap;
         padding: 8px 16px 4px;
         flex-shrink: 0;
+        gap: 8px;
     }
 
     .mobile-sheet-title {
         font-size: 1rem;
         font-weight: 600;
         opacity: 0.65;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        flex-shrink: 1;
+    }
+
+    .mobile-sheet-title-row > div {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
+    .mobile-sheet-title-row > div,
+    .mobile-sheet-title-row > div * {
+        white-space: nowrap !important;
+    }
+
+    .mobile-sheet-title-row > div .btn,
+    .mobile-sheet-title-row > div .btn-small {
+        flex-shrink: 0;
+        min-width: max-content;
     }
 
     .mobile-sheet-body {
@@ -1172,7 +1230,6 @@
         transition:
             transform 0.42s cubic-bezier(0.32, 0.72, 0, 1),
             border-radius 0.42s cubic-bezier(0.32, 0.72, 0, 1);
-        overflow: hidden;
     }
 
     body.ios-sheet-open #__next {
@@ -1549,10 +1606,12 @@
     color: rgba(0, 0, 0, 0.45);
 }
 
-[data-theme='white'] .uplift-nav-icon-btn:hover,
-[data-theme='light'] .uplift-nav-icon-btn:hover {
-    background-color: rgba(0, 0, 0, 0.06);
-    color: rgba(0, 0, 0, 0.85);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-nav-icon-btn:hover,
+    [data-theme='light'] .uplift-nav-icon-btn:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+        color: rgba(0, 0, 0, 0.85);
+    }
 }
 
 [data-theme='white'] .uplift-nav-icon-btn.uplift-active,
@@ -1572,10 +1631,12 @@
     border-color: rgba(0, 0, 0, 0.10);
 }
 
-[data-theme='white'] .uplift-search-pill:hover,
-[data-theme='light'] .uplift-search-pill:hover {
-    border-color: rgba(0, 0, 0, 0.18);
-    background-color: rgba(0, 0, 0, 0.06);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-search-pill:hover,
+    [data-theme='light'] .uplift-search-pill:hover {
+        border-color: rgba(0, 0, 0, 0.18);
+        background-color: rgba(0, 0, 0, 0.06);
+    }
 }
 
 [data-theme='white'] .uplift-search-pill-label,
@@ -1597,9 +1658,11 @@
     color: rgba(0, 0, 0, 0.85);
 }
 
-[data-theme='white'] .uplift-balance-chip:hover,
-[data-theme='light'] .uplift-balance-chip:hover {
-    border-color: rgba(0, 0, 0, 0.20);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-balance-chip:hover,
+    [data-theme='light'] .uplift-balance-chip:hover {
+        border-color: rgba(0, 0, 0, 0.20);
+    }
 }
 
 [data-theme='white'] .uplift-balance-unit,
@@ -1623,9 +1686,11 @@
     border-color: rgba(0, 0, 0, 0.10);
 }
 
-[data-theme='white'] .uplift-icon-btn:hover,
-[data-theme='light'] .uplift-icon-btn:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-icon-btn:hover,
+    [data-theme='light'] .uplift-icon-btn:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+    }
 }
 
 [data-theme='white'] .uplift-mini-navbar,
@@ -1658,9 +1723,11 @@
     opacity: 1;
 }
 
-[data-theme='white'] .uplift-mini-icon-btn:hover,
-[data-theme='light'] .uplift-mini-icon-btn:hover {
-    background-color: rgba(0, 0, 0, 0.06);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-mini-icon-btn:hover,
+    [data-theme='light'] .uplift-mini-icon-btn:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+    }
 }
 
 [data-theme='white'] .uplift-filter-bar,
@@ -1679,9 +1746,11 @@
     color: rgba(0, 0, 0, 0.75);
 }
 
-[data-theme='white'] .uplift-more-drawer-item:hover,
-[data-theme='light'] .uplift-more-drawer-item:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-more-drawer-item:hover,
+    [data-theme='light'] .uplift-more-drawer-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
 }
 
 [data-theme='white'] .uplift-more-drawer-section-label,
@@ -1706,10 +1775,12 @@
     color: rgba(0, 0, 0, 0.45);
 }
 
-[data-theme='white'] .uplift-more-drawer-changelog-btn:hover,
-[data-theme='light'] .uplift-more-drawer-changelog-btn:hover {
-    background-color: rgba(0, 0, 0, 0.09);
-    color: rgba(0, 0, 0, 0.65);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-more-drawer-changelog-btn:hover,
+    [data-theme='light'] .uplift-more-drawer-changelog-btn:hover {
+        background-color: rgba(0, 0, 0, 0.09);
+        color: rgba(0, 0, 0, 0.65);
+    }
 }
 
 [data-theme='white'] .uplift-dropdown-item,
@@ -1717,9 +1788,11 @@
     color: rgba(0, 0, 0, 0.80);
 }
 
-[data-theme='white'] .uplift-dropdown-item:hover,
-[data-theme='light'] .uplift-dropdown-item:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-dropdown-item:hover,
+    [data-theme='light'] .uplift-dropdown-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
 }
 
 [data-theme='white'] .uplift-dropdown-divider,
@@ -1732,9 +1805,11 @@
     color: rgba(0, 0, 0, 0.35);
 }
 
-[data-theme='white'] .uplift-dropdown-account-item:hover,
-[data-theme='light'] .uplift-dropdown-account-item:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-dropdown-account-item:hover,
+    [data-theme='light'] .uplift-dropdown-account-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
 }
 
 [data-theme='white'] .uplift-dropdown-account-item.uplift-account-active,
@@ -1758,9 +1833,11 @@
     color: rgba(0, 0, 0, 0.65);
 }
 
-[data-theme='white'] .uplift-dropdown-signout-btn:hover,
-[data-theme='light'] .uplift-dropdown-signout-btn:hover {
-    background-color: rgba(0, 0, 0, 0.08);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-dropdown-signout-btn:hover,
+    [data-theme='light'] .uplift-dropdown-signout-btn:hover {
+        background-color: rgba(0, 0, 0, 0.08);
+    }
 }
 
 [data-theme='white'] .uplift-bell-dot,
@@ -1808,9 +1885,11 @@
     color: rgba(0, 0, 0, 0.40);
 }
 
-[data-theme='white'] .uplift-create-item:hover,
-[data-theme='light'] .uplift-create-item:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='white'] .uplift-create-item:hover,
+    [data-theme='light'] .uplift-create-item:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
 }
 
 [data-theme='creamy'] .uplift-nav-pill {
@@ -1821,9 +1900,11 @@
     color: rgba(30, 20, 10, 0.45);
 }
 
-[data-theme='creamy'] .uplift-nav-icon-btn:hover {
-    background-color: rgba(0, 0, 0, 0.06);
-    color: rgba(30, 20, 10, 0.85);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-nav-icon-btn:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+        color: rgba(30, 20, 10, 0.85);
+    }
 }
 
 [data-theme='creamy'] .uplift-nav-icon-btn.uplift-active {
@@ -1840,9 +1921,11 @@
     border-color: rgba(160, 110, 50, 0.18);
 }
 
-[data-theme='creamy'] .uplift-search-pill:hover {
-    border-color: rgba(160, 110, 50, 0.30);
-    background-color: rgba(180, 120, 40, 0.09);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-search-pill:hover {
+        border-color: rgba(160, 110, 50, 0.30);
+        background-color: rgba(180, 120, 40, 0.09);
+    }
 }
 
 [data-theme='creamy'] .uplift-search-pill-label {
@@ -1861,8 +1944,10 @@
     color: rgba(30, 20, 10, 0.85);
 }
 
-[data-theme='creamy'] .uplift-balance-chip:hover {
-    border-color: rgba(160, 110, 50, 0.30);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-balance-chip:hover {
+        border-color: rgba(160, 110, 50, 0.30);
+    }
 }
 
 [data-theme='creamy'] .uplift-balance-unit {
@@ -1882,8 +1967,10 @@
     border-color: rgba(160, 110, 50, 0.18);
 }
 
-[data-theme='creamy'] .uplift-icon-btn:hover {
-    background-color: rgba(180, 120, 40, 0.10);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-icon-btn:hover {
+        background-color: rgba(180, 120, 40, 0.10);
+    }
 }
 
 [data-theme='creamy'] .uplift-mini-navbar {
@@ -1902,8 +1989,10 @@
     color: rgba(30, 20, 10, 0.90);
 }
 
-[data-theme='creamy'] .uplift-mini-icon-btn:hover {
-    background-color: rgba(0, 0, 0, 0.06);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-mini-icon-btn:hover {
+        background-color: rgba(0, 0, 0, 0.06);
+    }
 }
 
 [data-theme='creamy'] .uplift-filter-bar {
@@ -1919,8 +2008,10 @@
     color: rgba(30, 20, 10, 0.75);
 }
 
-[data-theme='creamy'] .uplift-more-drawer-item:hover {
-    background-color: rgba(180, 120, 40, 0.07);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-more-drawer-item:hover {
+        background-color: rgba(180, 120, 40, 0.07);
+    }
 }
 
 [data-theme='creamy'] .uplift-more-drawer-section-label {
@@ -1941,17 +2032,21 @@
     color: rgba(30, 20, 10, 0.45);
 }
 
-[data-theme='creamy'] .uplift-more-drawer-changelog-btn:hover {
-    background-color: rgba(0, 0, 0, 0.09);
-    color: rgba(30, 20, 10, 0.65);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-more-drawer-changelog-btn:hover {
+        background-color: rgba(0, 0, 0, 0.09);
+        color: rgba(30, 20, 10, 0.65);
+    }
 }
 
 [data-theme='creamy'] .uplift-dropdown-item {
     color: rgba(30, 20, 10, 0.80);
 }
 
-[data-theme='creamy'] .uplift-dropdown-item:hover {
-    background-color: rgba(180, 120, 40, 0.07);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-dropdown-item:hover {
+        background-color: rgba(180, 120, 40, 0.07);
+    }
 }
 
 [data-theme='creamy'] .uplift-dropdown-divider {
@@ -1962,8 +2057,10 @@
     color: rgba(30, 20, 10, 0.38);
 }
 
-[data-theme='creamy'] .uplift-dropdown-account-item:hover {
-    background-color: rgba(180, 120, 40, 0.07);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-dropdown-account-item:hover {
+        background-color: rgba(180, 120, 40, 0.07);
+    }
 }
 
 [data-theme='creamy'] .uplift-dropdown-account-item.uplift-account-active {
@@ -1983,8 +2080,10 @@
     color: rgba(30, 20, 10, 0.65);
 }
 
-[data-theme='creamy'] .uplift-dropdown-signout-btn:hover {
-    background-color: rgba(180, 120, 40, 0.10);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-dropdown-signout-btn:hover {
+        background-color: rgba(180, 120, 40, 0.10);
+    }
 }
 
 [data-theme='creamy'] .uplift-bell-dot {
@@ -2024,8 +2123,10 @@
     color: rgba(30, 20, 10, 0.40);
 }
 
-[data-theme='creamy'] .uplift-create-item:hover {
-    background-color: rgba(180, 120, 40, 0.07);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='creamy'] .uplift-create-item:hover {
+        background-color: rgba(180, 120, 40, 0.07);
+    }
 }
 
 [data-theme='gray'] .uplift-navbar,
@@ -2053,9 +2154,11 @@
     border-color: rgba(255, 255, 255, 0.12);
 }
 
-[data-theme='gray'] .uplift-search-pill:hover {
-    border-color: rgba(255, 255, 255, 0.22);
-    background-color: rgba(255, 255, 255, 0.10);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='gray'] .uplift-search-pill:hover {
+        border-color: rgba(255, 255, 255, 0.22);
+        background-color: rgba(255, 255, 255, 0.10);
+    }
 }
 
 [data-theme='gray'] .uplift-balance-chip {
@@ -2063,8 +2166,10 @@
     border-color: rgba(255, 255, 255, 0.12);
 }
 
-[data-theme='gray'] .uplift-balance-chip:hover {
-    border-color: rgba(255, 255, 255, 0.22);
+@media (hover: hover) and (pointer: fine) {
+    [data-theme='gray'] .uplift-balance-chip:hover {
+        border-color: rgba(255, 255, 255, 0.22);
+    }
 }
 
 [data-theme='gray'] .uplift-icon-btn {

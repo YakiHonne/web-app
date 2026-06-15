@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import UserProfilePic from "@/Components/UserProfilePic";
 import ShowUsersList from "@/Components/ShowUsersList";
 import Date_ from "@/Components/Date_";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { translate } from "@/Helpers/Controlers";
 import useNoteStats from "@/Hooks/useNoteStats";
@@ -18,6 +18,7 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import useIsMute from "@/Hooks/useIsMute";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import { iconsNames } from "@/Content/IconV2URL";
 import EventStats from "./EventStats";
 import CommentsSection from "@/Components/CommentsSection";
@@ -36,7 +37,8 @@ export default function NotesComment({
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
+  const userKeys = useSelector((state) => state.userKeys);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(event.pubkey);
   const { isMuted } = useIsMute(event.pubkey);
   const [toggleComment, setToggleComment] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -70,6 +72,15 @@ export default function NotesComment({
   };
 
   const translateNote = async () => {
+    if (!userKeys) {
+      dispatch(
+        setToast({
+          type: 3,
+          desc: t("ALtr4nL"),
+        }),
+      );
+      return;
+    }
     setIsNoteTranslating(true);
     if (translatedNote) {
       setShowTranslation(true);
@@ -118,7 +129,7 @@ export default function NotesComment({
       dispatch(
         setToast({
           type: 2,
-          desc: t("AZ5VQXL"),
+          desc: err?.response?.status === 401 ? t("ALtr4nL") : t("AZ5VQXL"),
         }),
       );
     }
@@ -200,6 +211,7 @@ export default function NotesComment({
                         {userProfile.display_name || userProfile.name}
                       </p>
                       {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+                      {proUser.isProUser && <Badge data={proUser} size={16} />}
                       <p className="gray-c p-medium">
                         <Date_
                           toConvert={new Date(event.created_at * 1000)}
@@ -323,29 +335,18 @@ export default function NotesComment({
                         userProfile={userProfile}
                         setShowComments={fromKindOne ? setShowComments : () => setToggleComment(true)}
                       />
-                      {/* <div className="fx-centered">
-                        <div className="fit-container box-pad-h-m">
-                          {!isNoteTranslating && !showTranslation && (
-                            <div
-                              className="round-icon-tooltip"
-                              data-tooltip={t("AdHV2qJ")}
-                              onClick={translateNote}
-                            >
-                              <Icon name="translate" size={24} className="opacity-4" />
-                            </div>
-                          )}
-                          {!isNoteTranslating && showTranslation && (
-                            <div
-                              className="round-icon-tooltip"
-                              data-tooltip={t("AE08Wte")}
-                              onClick={() => setShowTranslation(false)}
-                            >
-                              <Icon name="translate" size={24} className="opacity-4" />
-                            </div>
-                          )}
-                          {isNoteTranslating && <LoadingDots />}
-                        </div>
-                      </div> */}
+                      <div className="fx-centered">
+                        {!isNoteTranslating && (
+                          <Icon
+                            v={2}
+                            name={iconsNames.globe}
+                            onClick={translateNote}
+                            opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"}
+                            size={20}
+                          />
+                        )}
+                        {isNoteTranslating && <LoadingDots />}
+                      </div>
                       <EventStats postActions={postActions} />
                     </div>
                   </>

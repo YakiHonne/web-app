@@ -9,7 +9,7 @@ const ClientComponent = dynamic(() => import("@/(PagesComponents)/Subscription")
 export default function SubscriptionPageRoute() {
   const data = {
     path: "subscription",
-    title: "Subscription — Yakihonne",
+    title: "Subscription & Usage — Yakihonne",
     description: "Manage your Yaki subscription plan and billing.",
     image: "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/thumbnail.png",
   };

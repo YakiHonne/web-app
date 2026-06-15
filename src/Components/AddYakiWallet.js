@@ -1,4 +1,5 @@
-import axios from "axios";
+import axiosInstance from "@/Helpers/HTTP_Client";
+import Link from "next/link";
 import React, { useState } from "react";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +18,7 @@ export default function AddYakiWallet({ refresh }) {
   const [showErrorMessage, setShowMessageError] = useState(false);
   const [showEmptyUNMessage, setShowMessageEmtpyUN] = useState(false);
   const [showInvalidMessage, setShowInvalidMessage] = useState(false);
+  const [showLimitMessage, setShowLimitMessage] = useState(false);
   const [userName, setUserName] = useState(
     userMetadata?.display_name || userMetadata?.name || "",
   );
@@ -30,7 +32,7 @@ export default function AddYakiWallet({ refresh }) {
         return;
       }
       setIsLoading(true);
-      let url = await axios.post("https://wallet.yakihonne.com/api/wallets", {
+      let url = await axiosInstance.post("/api/v1/wallet", {
         username: userName?.toLowerCase(),
       });
       let toSave = [
@@ -81,7 +83,9 @@ export default function AddYakiWallet({ refresh }) {
     } catch (err) {
       console.log(err);
       setIsLoading(false);
-      if (err.response?.status) {
+      if (err.response?.status === 429) {
+        setShowLimitMessage(true);
+      } else if (err.response?.status) {
         setShowMessageError(true);
       } else {
         dispatch(
@@ -99,6 +103,7 @@ export default function AddYakiWallet({ refresh }) {
     let isValid = /^[a-zA-Z0-9]+$/.test(value);
     if (showErrorMessage) setShowMessageError(false);
     if (showEmptyUNMessage) setShowMessageEmtpyUN(false);
+    if (showLimitMessage) setShowLimitMessage(false);
     if (!value || (isValid && showInvalidMessage)) setShowInvalidMessage(false);
     if (value && !isValid && !showInvalidMessage) setShowInvalidMessage(true);
     setUserName(value);
@@ -143,13 +148,13 @@ export default function AddYakiWallet({ refresh }) {
               onChange={handleInputField}
               style={{
                 borderColor:
-                  showErrorMessage || showEmptyUNMessage || showInvalidMessage
+                  showErrorMessage || showEmptyUNMessage || showInvalidMessage || showLimitMessage
                     ? "var(--red-main)"
                     : "",
               }}
             />
             <p className="gray-c p-big" style={{ minWidth: "max-content" }}>
-              @wallet.yakihonne.com
+              {t("An427hr")}
             </p>
           </div>
           {showErrorMessage && (
@@ -165,6 +170,16 @@ export default function AddYakiWallet({ refresh }) {
           {showInvalidMessage && (
             <div className="fit-container box-pad-h-m">
               <p className="red-c p-medium">{t("AqSxggD")}</p>
+            </div>
+          )}
+          {showLimitMessage && (
+            <div className="fit-container box-pad-h-m">
+              <p className="red-c p-medium">
+                {t("ANYr7l9")}{" "}
+                <Link href="/subscription" style={{ color: "var(--c1)", fontWeight: 600 }}>
+                  {t("AqAJ3zy")}
+                </Link>
+              </p>
             </div>
           )}
           <button

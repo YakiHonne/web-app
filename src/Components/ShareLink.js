@@ -13,6 +13,7 @@ import { customHistory } from "@/Helpers/History";
 import QRCodeStyling from "qr-code-styling";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import Overlay from "@/Components/Overlay";
 
 function shuffleArray(arr) {
@@ -361,7 +362,7 @@ export const SharingWindow = ({ path, title, description, exit }) => {
 };
 
 const UserShowCard = ({ metadata, onClick }) => {
-  const { isNip05Verified } = useUserProfile(metadata.pubkey);
+  const { isNip05Verified, proUser } = useUserProfile(metadata.pubkey);
   return (
     <div
       className="fx-centered fx-col box-pad-h-s box-pad-v-s option pointer"
@@ -380,6 +381,7 @@ const UserShowCard = ({ metadata, onClick }) => {
           {metadata.display_name || metadata.name}
         </p>
         {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+        {proUser.isProUser && <Badge data={proUser} size={16} />}
       </div>
     </div>
   );
@@ -505,7 +507,7 @@ const ShareOnOptions = ({ path, title, description }) => {
             <div className="round-icon">
               <Icon name="env" size={24} />
             </div>
-            <p className="gray-c p-medium">Email</p>
+            <p className="gray-c p-medium">{t("AJSyHW1")}</p>
           </div>
         </a>
 
@@ -529,7 +531,7 @@ const ShareOnOptions = ({ path, title, description }) => {
           <div className="round-icon">
             <Icon name="qrcode" size={24} />
           </div>
-          <p className="gray-c p-medium">QR</p>
+          <p className="gray-c p-medium">{t("AwGy6lT")}</p>
         </div>
       </div>
     </>

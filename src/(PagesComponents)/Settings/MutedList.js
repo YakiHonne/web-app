@@ -10,6 +10,7 @@ import LoadingDots from "@/Components/LoadingDots";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import Date_ from "@/Components/Date_";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 
 export function MutedList({ exit }) {
   const { t } = useTranslation();
@@ -124,7 +125,7 @@ export function MutedList({ exit }) {
 }
 
 const MutedUser = ({ pubkey }) => {
-  const { userProfile, isNip05Verified } = useUserProfile(pubkey);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(pubkey);
   const { muteUnmute } = useIsMute(pubkey);
   const { t } = useTranslation();
 
@@ -139,6 +140,7 @@ const MutedUser = ({ pubkey }) => {
           {userProfile.display_name || userProfile.name}
         </p>
         {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+        {proUser.isProUser && <Badge data={proUser} size={16} />}
       </div>
       <p className="gray-c p-medium p-centered p-one-line">
         {userProfile.name || userProfile.display_name}
@@ -155,7 +157,7 @@ const MutedUser = ({ pubkey }) => {
 };
 
 const MutedNote = ({ event }) => {
-  const { userProfile, isNip05Verified } = useUserProfile(event?.pubkey);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(event?.pubkey);
   const { muteUnmute } = useIsMute(event?.id, "e");
   const { t } = useTranslation();
 
@@ -175,6 +177,7 @@ const MutedNote = ({ event }) => {
                 {userProfile.display_name || userProfile.name}
               </p>
               {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+              {proUser.isProUser && <Badge data={proUser} size={16} />}
             </div>
             <p className="gray-c p-medium" style={{ margin: 0 }}>
               &#8226;

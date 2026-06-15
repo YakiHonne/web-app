@@ -10,6 +10,7 @@ import ZapAd from "./ZapAd";
 import LoadingDots from "./LoadingDots";
 import useVideoVolume from "@/Hooks/useVideoVolume";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import Spinner from "./Spinner";
 import EventStats from "./EventStats";
 
@@ -20,7 +21,7 @@ const getParsedContent = (item) => {
   return content;
 };
 export default function MediaOverlay({ item, postActions, full = false }) {
-  const { userProfile, isNip05Verified } = useUserProfile(item.pubkey);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(item.pubkey);
   const content = getParsedContent(item);
   const [openComment, setOpenComment] = useState(false);
   return (
@@ -66,6 +67,7 @@ export default function MediaOverlay({ item, postActions, full = false }) {
                   {userProfile.display_name || userProfile.name}
                 </p>
                 {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+                {proUser.isProUser && <Badge data={proUser} size={16} />}
               </div>
               <p className="gray-c p-medium" style={{ margin: 0 }}>
                 <Date_

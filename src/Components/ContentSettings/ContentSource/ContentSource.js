@@ -389,7 +389,11 @@ export default function ContentSource({
               >
                 <p className="gray-c p-medium">{type === 1 ? t("AuUadPD") : t("A84qogb")}</p>
                 {userKeys && (userKeys?.sec || userKeys?.ext || userKeys?.bunker) && (
-                  <div onClick={() => setShowFeedMarketPlace(!showFeedMarketplace)}>
+                  <div
+                    onClick={() => {
+                      setShowFeedMarketPlace(!showFeedMarketplace);
+                    }}
+                  >
                     <Icon v={2} name={iconsNames.settings} size={16} opacity=".5" />
                   </div>
                 )}
@@ -411,6 +415,72 @@ export default function ContentSource({
                     </div>
                   </div>
                 ))}
+                {(favRelays.length > 0 || relaysSet.length > 0) && (
+                  <h5 className="c1-c box-pad-h-s">{t("AhSpIKN")}</h5>
+                )}
+                {relaysSet.length > 0 && (
+                  <div className="fit-container fx-centered fx-col fx-start-h fx-start-v" style={{ gap: 0, marginBottom: ".5rem" }}>
+                    <p className="gray-c p-medium box-pad-h-s">{t("AgRMPL3")}</p>
+                    {relaysSet.map((metadata, _index) => {
+                      const isThereRelays = metadata.relays.length > 0;
+                      return (
+                        <div
+                          key={_index}
+                          className="pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale"
+                          style={{ borderRadius: "var(--border-r-18)", opacity: isThereRelays ? 1 : 0.7, cursor: isThereRelays ? "pointer" : "not-allowed" }}
+                          onClick={(e) => isThereRelays ? handleSelectCategory(e, { ...metadata, value: metadata.aTag }, { value: "rsf" }) : null}
+                        >
+                          <ContentFeedCategoryPreview category={{ ...metadata, group: "rsf" }} />
+                          <div className="fx-centered" style={{ gap: "8px" }}>
+                            <div className={`sticker sticker-normal sticker-small ${isThereRelays ? "sticker-green-side" : "sticker-red-side"}`} style={{ minWidth: "max-content" }}>
+                              {metadata.relays.length} {metadata.relays.length === 1 ? "relay" : "relays"}
+                            </div>
+                            {selectedCategory.value === metadata.aTag && <Icon name="check" size={24} />}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {favRelays.length > 0 && (
+                  <div className="fit-container fx-centered fx-col fx-start-h fx-start-v" style={{ gap: 0, marginBottom: ".5rem" }}>
+                    <p className="gray-c p-medium box-pad-h-s">{t("A1NJKQa")}</p>
+                    {favRelays.map((_, _index) => (
+                      <div key={_index} className="pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale" style={{ borderRadius: "var(--border-r-18)" }} onClick={(e) => handleSelectCategory(e, _, { value: "af" })}>
+                        <ContentFeedCategoryPreview category={{ group: "af", ..._ }} />
+                        <div className="fx-centered" style={{ gap: "8px" }}>
+                          {selectedCategory.value === _.value && <Icon name="check" size={24} />}
+                          <Icon name="share-icon" onClick={(e) => { e.stopPropagation(); setshowRelaySharing(_.value); }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {((userStarterPacksSimplified.length > 0 && type !== 3) || (userMediaPacksSimplified.length > 0 && type === 3)) && (
+                  <div className="fit-container fx-centered fx-col fx-start-v">
+                    <h5 className="c1-c box-pad-h-s">{type === 3 ? t("AusIycI") : t("AVzZUeP")}</h5>
+                    <div className="fit-container fx-centered fx-col fx-start-h fx-start-v" style={{ gap: 0, marginBottom: ".5rem" }}>
+                      {[...(type === 3 ? userMediaPacksSimplified : userStarterPacksSimplified)].map((metadata, _index) => (
+                        <div key={_index} className="pointer fit-container box-pad-h-s box-pad-v-s fx-scattered option-no-scale" style={{ borderRadius: "var(--border-r-18)" }} onClick={(e) => handleSelectCategory(e, { ...metadata, value: metadata.aTag }, { value: "pf" })}>
+                          <ContentFeedCategoryPreview category={{ ...metadata, group: "pf" }} />
+                          <div className="fx-centered" style={{ gap: "8px" }}>
+                            {selectedCategory.value === metadata.aTag && <Icon name="check" size={24} />}
+                            <Icon name="share-icon" onClick={(e) => { e.stopPropagation(); setShowPackSharing(metadata.d); }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {favRelays.length === 0 && relaysSet.length === 0 && (
+                  <div className="fit-container fx-centered fx-col" style={{ padding: "16px 12px" }}>
+                    <p className="p-centered gray-c">{t("AJbVpAT")}</p>
+                    <p className="p-centered gray-c p-medium" style={{ marginTop: "4px" }}>{t("AyV6Rei")}</p>
+                    <button className="btn btn-normal btn-small" style={{ marginTop: "12px" }} onClick={() => { setShowFeedMarketPlace(!showFeedMarketplace); }}>
+                      {t("A0zZsLz")}
+                    </button>
+                  </div>
+                )}
               </div>
             </SourceFilterPortalPanel>,
             document.body

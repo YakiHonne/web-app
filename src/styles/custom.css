@@ -164,14 +164,14 @@
     cursor: pointer;
 }
 
-.edit-options:hover {
+@media (hover: hover) and (pointer: fine) {
+    .edit-options:hover {
+        background-color: var(--c1);
+    }
 
-    background-color: var(--c1);
-}
-
-.edit-options:hover div {
-    filter: invert();
-
+    .edit-options:hover div {
+        filter: invert();
+    }
 }
 
 .add-section-button {
@@ -218,11 +218,13 @@
     border: 1px solid transparent;
 }
 
-#sidebar .inactive-link:hover {
-    border-color: var(--dim-gray);
-    background-color: var(--very-dim-gray);
-    opacity: 1;
-    cursor: pointer;
+@media (hover: hover) and (pointer: fine) {
+    #sidebar .inactive-link:hover {
+        border-color: var(--dim-gray);
+        background-color: var(--very-dim-gray);
+        opacity: 1;
+        cursor: pointer;
+    }
 }
 
 main {
@@ -315,20 +317,22 @@ main {
     transition: .2s ease-in-out;
 }
 
-.inactive-link-a:hover {
-    opacity: 1;
-}
+@media (hover: hover) and (pointer: fine) {
+    .inactive-link-a:hover {
+        opacity: 1;
+    }
 
-.inactive-link-a:hover::after {
-    position: absolute;
-    content: '';
-    height: 5px;
-    width: 20px;
-    left: 50%;
-    bottom: -21px;
-    transform: translateX(-50%);
-    border-radius: var(--border-r-32);
-    background-color: var(--c1);
+    .inactive-link-a:hover::after {
+        position: absolute;
+        content: '';
+        height: 5px;
+        width: 20px;
+        left: 50%;
+        bottom: -21px;
+        transform: translateX(-50%);
+        border-radius: var(--border-r-32);
+        background-color: var(--c1);
+    }
 }
 
 .active-link-a::after {
@@ -429,9 +433,11 @@ main {
     position: relative;
 }
 
-.icon-tooltip:hover:after,
-.round-icon-tooltip:hover::after {
-    display: block;
+@media (hover: hover) and (pointer: fine) {
+    .icon-tooltip:hover:after,
+    .round-icon-tooltip:hover::after {
+        display: block;
+    }
 }
 
 .round-icon-tooltip::after {
@@ -465,12 +471,14 @@ main {
     transition: .2s ease-in-out;
 }
 
-.icon-hover:hover {
-    background-color: var(--c1);
-}
+@media (hover: hover) and (pointer: fine) {
+    .icon-hover:hover {
+        background-color: var(--c1);
+    }
 
-.icon-hover:hover div {
-    filter: invert();
+    .icon-hover:hover div {
+        filter: invert();
+    }
 }
 
 .posts-cards {
@@ -617,9 +625,11 @@ main {
     transition: .1s ease-in-out;
 }
 
-.curation-link:hover {
-    color: var(--c1);
-    text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+    .curation-link:hover {
+        color: var(--c1);
+        text-decoration: underline;
+    }
 }
 
 .posts-in-topic-card {
@@ -986,18 +996,18 @@ main {
     border: 1px solid transparent;
 }
 
-.nostr-sidebar .inactive-link:hover {
+@media (hover: hover) and (pointer: fine) {
+    .nostr-sidebar .inactive-link:hover {
+        background-color: var(--orange-side);
+        opacity: 1;
+        cursor: pointer;
+    }
 
-    background-color: var(--orange-side);
-    opacity: 1;
-    cursor: pointer;
-}
-
-.nostr-sidebar .active-link:hover {
-
-    background-color: var(--orange-side);
-    opacity: 1;
-    cursor: pointer;
+    .nostr-sidebar .active-link:hover {
+        background-color: var(--orange-side);
+        opacity: 1;
+        cursor: pointer;
+    }
 }
 
 .sign-in-screen section {
@@ -1022,8 +1032,10 @@ main {
     display: none;
 }
 
-.to-copy:hover .copy-icon {
-    display: flex;
+@media (hover: hover) and (pointer: fine) {
+    .to-copy:hover .copy-icon {
+        display: flex;
+    }
 }
 
 .nostr-article article {
@@ -1070,8 +1082,10 @@ main {
     color: var(--c1);
 }
 
-.nostr-navbar-link:hover {
-    background-color: var(--dim-gray);
+@media (hover: hover) and (pointer: fine) {
+    .nostr-navbar-link:hover {
+        background-color: var(--dim-gray);
+    }
 }
 
 .w-md-editor {
@@ -1189,12 +1203,14 @@ main {
     transition: .2s ease-in-out;
 }
 
-.nostr-sidebar .inactive-link:hover .tooltip-sidebar-hover,
-.nostr-sidebar .active-link:hover .tooltip-sidebar-hover {
-    opacity: 1;
-    display: flex;
-    width: max-content;
-    padding: 0 2rem 0 5rem;
+@media (hover: hover) and (pointer: fine) {
+    .nostr-sidebar .inactive-link:hover .tooltip-sidebar-hover,
+    .nostr-sidebar .active-link:hover .tooltip-sidebar-hover {
+        opacity: 1;
+        display: flex;
+        width: max-content;
+        padding: 0 2rem 0 5rem;
+    }
 }
 
 .lp-cards,
@@ -1491,9 +1507,10 @@ main {
     transition: .3s ease-in-out;
 }
 
-.icon-tooltip:hover::after {
-    display: flex;
-
+@media (hover: hover) and (pointer: fine) {
+    .icon-tooltip:hover::after {
+        display: flex;
+    }
 }
 
 .rvl-btn {
@@ -1755,7 +1772,7 @@ main {
     border-radius: 18px !important;
 }
 
-@media (hover: hover) {
+@media (hover: hover) and (pointer: fine) {
 
     .list-item:hover {
         background-color: var(--c1-side);
@@ -1908,10 +1925,12 @@ main {
     cursor: pointer;
 }
 
-.balance-container:hover {
-    padding-top: .5rem;
-    padding-bottom: .5rem;
-    background-color: #ff9c0811
+@media (hover: hover) and (pointer: fine) {
+    .balance-container:hover {
+        padding-top: .5rem;
+        padding-bottom: .5rem;
+        background-color: #ff9c0811
+    }
 }
 
 .poll-content-box>span {
@@ -2185,8 +2204,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     display: none;
 }
 
-.relay-item:hover .round-icon-small {
-    display: flex;
+@media (hover: hover) and (pointer: fine) {
+    .relay-item:hover .round-icon-small {
+        display: flex;
+    }
 }
 
 [dir="rtl"] .reply-tail {
@@ -3729,8 +3750,10 @@ input[type="range"]::-moz-range-thumb {
     transition: color 0.18s ease;
 }
 
-.login-footer-link:hover {
-    color: var(--black);
+@media (hover: hover) and (pointer: fine) {
+    .login-footer-link:hover {
+        color: var(--black);
+    }
 }
 
 .login-footer-link .round-icon-small {

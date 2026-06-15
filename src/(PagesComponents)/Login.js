@@ -18,14 +18,15 @@ import {
   nip44,
 } from "nostr-tools";
 import * as secp from "@noble/secp256k1";
-import { copyText, FileUpload, sleepTimer } from "@/Helpers/Helpers";
+import { copyText, FileUpload, LoginToAPI, sleepTimer } from "@/Helpers/Helpers";
+import { setIsConnectedToYaki } from "@/Store/Slides/YakiChest";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { setToast } from "@/Store/Slides/Publishers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import InterestSuggestions from "@/Content/InterestSuggestions";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { saveUsers } from "@/Helpers/DB";
-import axios from "axios";
+import axiosInstance from "@/Helpers/HTTP_Client";
 import {
   NDKEvent,
   NDKNip46Signer,
@@ -567,6 +568,7 @@ const LoginScreen = () => {
 
 const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
   const dispatch = useDispatch();
+  const previousUserKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [about, setAbout] = useState("");
@@ -650,7 +652,18 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
         return;
       }
       setIsCreatingWalletLoading(true);
-      let url = await axios.post("https://wallet.yakihonne.com/api/wallets", {
+
+      if (previousUserKeys) {
+        try {
+          await axiosInstance.post("/api/v1/logout");
+        } catch (err) {
+          console.log(err);
+        }
+        dispatch(setIsConnectedToYaki(false));
+      }
+      await LoginToAPI(userKeys.pub, userKeys);
+
+      let url = await axiosInstance.post("/api/v1/wallet", {
         username: userName?.toLowerCase(),
       });
 

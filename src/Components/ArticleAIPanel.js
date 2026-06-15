@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { askArticleAI } from "@/Endpoints/ArticleAI";
 import Button from "@/Components/UI/Button";
 import aiChatDb from "@/lib/aiChatDb";
@@ -56,7 +57,17 @@ function AIBubble({ msg }) {
     <div className="ai-msg-ai">
       <div className="ai-msg-ai-header">
         <span className="ai-spark">✦</span>
-        <span className="ai-msg-ai-text">{msg.text}</span>
+        <span className="ai-msg-ai-text">
+          {msg.text}
+          {msg.cta && (
+            <>
+              {" "}
+              <Link href="/subscription" style={{ color: "var(--c1)", fontWeight: 600 }}>
+                {msg.cta}
+              </Link>
+            </>
+          )}
+        </span>
       </div>
     </div>
   );
@@ -151,11 +162,27 @@ export default function ArticleAIPanel({
         }, 700);
       }
     } catch (err) {
-      const aiMsg = {
-        id: nextId(),
-        role: "ai",
-        text: err.message || t("AEH0z9N"),
-      };
+      let aiMsg;
+      if (err.status === 403) {
+        aiMsg = {
+          id: nextId(),
+          role: "ai",
+          text: err.message || t("AMr1BBt"),
+          cta: t("Aecr6Vl"),
+        };
+      } else if (err.status === 429) {
+        aiMsg = {
+          id: nextId(),
+          role: "ai",
+          text: err.message || t("Alec9a8"),
+        };
+      } else {
+        aiMsg = {
+          id: nextId(),
+          role: "ai",
+          text: err.message || t("AEH0z9N"),
+        };
+      }
       setMessages((prev) => [...prev, aiMsg]);
     } finally {
       setIsAILoading(false);
@@ -252,6 +279,7 @@ export default function ArticleAIPanel({
               type="gray"
               size="m"
               leftIcon="trash"
+              className="ai-clear-btn"
               disabled={messages.length === 0 || isAILoading}
               onClick={handleClear}
             />

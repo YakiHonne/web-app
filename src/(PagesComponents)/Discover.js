@@ -503,6 +503,7 @@ const ExploreFeed = ({
           skipAnimationFrameInResizeObserver={true}
           overscan={1000}
           useWindowScroll={true}
+          computeItemKey={(index) => content[index]?.id}
           totalCount={content.length}
           increaseViewportBy={1000}
           endReached={(index) => {

@@ -12,9 +12,10 @@ import { FilePicker } from "@/Components/FilePicker";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
-import axios from "axios";
+import axiosInstance from "@/Helpers/HTTP_Client";
 import { NDKEvent, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
-import { FileUpload } from "@/Helpers/Helpers";
+import { FileUpload, LoginToAPI } from "@/Helpers/Helpers";
+import { setIsConnectedToYaki } from "@/Store/Slides/YakiChest";
 import { updateWallets } from "@/Helpers/ClientHelpers";
 import { setUserKeys } from "@/Store/Slides/UserData";
 import { ndkInstance } from "@/Helpers/NDKInstance";
@@ -228,7 +229,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
         <input
           type="text"
           className="if ifs-full box-marg-s"
-          placeholder="npub, nsec, hex"
+          placeholder={t("ArcAsZe")}
           value={key}
           onChange={(e) => setKey(e.target.value)}
         />
@@ -273,6 +274,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
 
 const SignupScreen = ({ switchScreen, userKeys, exit }) => {
   const dispatch = useDispatch();
+  const previousUserKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [about, setAbout] = useState("");
@@ -297,7 +299,18 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
         return false;
       }
       setIsCreatingWalletLoading(true);
-      let url = await axios.post("https://wallet.yakihonne.com/api/wallets", {
+
+      if (previousUserKeys) {
+        try {
+          await axiosInstance.post("/api/v1/logout");
+        } catch (err) {
+          console.log(err);
+        }
+        dispatch(setIsConnectedToYaki(false));
+      }
+      await LoginToAPI(userKeys.pub, userKeys);
+
+      let url = await axiosInstance.post("/api/v1/wallet", {
         username: userName?.toLowerCase(),
       });
       setNWCAddr(url.data.lightningAddress);
@@ -646,7 +659,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
                   disabled={isCreatingWalletLoading || isLoading}
                 />
                 <p className="gray-c p-big" style={{ minWidth: "max-content" }}>
-                  @wallet.yakihonne.com
+                  {t("An427hr")}
                 </p>
               </div>
               {showErrorMessage && (

@@ -9,9 +9,10 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import Date_ from "./Date_";
 import MediaEventPreview from "./MediaEventPreview";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 
 export default function LinkRepEventPreview({ event, allowClick = true }) {
-  const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(event.pubkey);
   let url = getLinkFromAddr(event.naddr || event.nEvent, event.kind);
   const { t } = useTranslation();
   const onClick = (e) => {
@@ -61,6 +62,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
                     {userProfile.display_name || userProfile.name}
                   </p>
                   {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+                  {proUser.isProUser && <Badge data={proUser} size={16} />}
                 </div>
                 <p className="gray-c p-medium">&#8226;</p>
                 <p className="gray-c p-medium">
@@ -138,6 +140,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
               {userProfile.display_name || userProfile.name}
             </p>
             {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+            {proUser.isProUser && <Badge data={proUser} size={16} />}
           </div>
         </div>
       </div>

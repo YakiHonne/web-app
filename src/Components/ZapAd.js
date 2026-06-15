@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
 import Icon from "@/Components/Icon";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 const getZaps = (zappers, pubkey) => {
   let sats = zappers.reduce(
@@ -83,6 +84,7 @@ const HighestZapper = ({ data, onClick }) => {
   const [author, setAuthor] = useState(getEmptyuserMetadata(data.pubkey));
   const [initConv, setInitConv] = useState(false);
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     let auth = getUser(data.pubkey);
@@ -146,59 +148,100 @@ const HighestZapper = ({ data, onClick }) => {
             <div onClick={(e) => e.stopPropagation()}>
               <OptionsDropdown
                 vertical={false}
-                options={[
-                  <div
-                    key="zap-options"
-                    style={{ position: "relative" }}
-                    className="fx-centered"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div
-                      style={{
-                        borderRight: "1px solid var(--gray)",
-                        paddingRight: ".75rem",
-                      }}
-                      onClick={() =>
-                        customHistory(
-                          "/profile/" +
-                          nip19.nprofileEncode({ pubkey: author.pubkey }),
-                        )
-                      }
-                    >
-                      <Icon name="user" size={24} />
-                      <p className="p-medium">{t("AyBBPWE")}</p>
-                    </div>
-                    <div
-                      // className="round-icon-small round-icon-tooltip"
-                      // data-tooltip={"Message"}
-                      // style={{ borderColor: "var(--gray)", border: "none" }}
-                      style={{
-                        borderRight: "1px solid var(--gray)",
-                        paddingRight: ".75rem",
-                      }}
-                      onClick={() => setInitConv(true)}
-                    >
-                      <Icon name="env" size={24} />
-                      <p className="p-medium">{t("AN0NVU3")}</p>
-                    </div>
-                    <div
-                      // className="round-icon-small"
-                      // style={{ borderColor: "var(--gray)", border: "none" }}
-                      style={{ paddingLeft: ".75rem" }}
-                    >
-                      <ZapTip
-                        recipientLNURL={checkForLUDS(
-                          author.lud16,
-                          author.lud06,
-                        )}
-                        recipientPubkey={author.pubkey}
-                        senderPubkey={userKeys.pub}
-                        recipientInfo={author}
-                        zapLabel={true}
-                      />
-                    </div>
-                  </div>,
-                ]}
+                options={
+                  isMobile
+                    ? [
+                      <div
+                        key="zap-options-mobile"
+                        className="fx-centered fit-container option-no-scale"
+                        style={{ gap: 0 }}
+                      >
+                        <div
+                          className="pointer fx-centered fx-col fit-container box-pad-h-s box-pad-v-m"
+                          style={{ flex: 1 }}
+                          onClick={() =>
+                            customHistory(
+                              "/profile/" +
+                              nip19.nprofileEncode({ pubkey: author.pubkey }),
+                            )
+                          }
+                        >
+                          <Icon name="user" size={24} />
+                          <p className="p-medium">{t("AyBBPWE")}</p>
+                        </div>
+                        <div
+                          className="pointer fx-centered fx-col fit-container box-pad-h-s box-pad-v-m"
+                          style={{ flex: 1 }}
+                          onClick={() => setInitConv(true)}
+                        >
+                          <Icon name="env" size={24} />
+                          <p className="p-medium">{t("AN0NVU3")}</p>
+                        </div>
+                        <div
+                          className="fx-centered fx-col fit-container box-pad-h-s box-pad-v-m"
+                          style={{ flex: 1 }}
+                        >
+                          <ZapTip
+                            recipientLNURL={checkForLUDS(
+                              author.lud16,
+                              author.lud06,
+                            )}
+                            recipientPubkey={author.pubkey}
+                            senderPubkey={userKeys.pub}
+                            recipientInfo={author}
+                            zapLabel={true}
+                            stackedLabel={true}
+                          />
+                        </div>
+                      </div>,
+                    ]
+                    : [
+                      <div
+                        key="zap-options"
+                        style={{ position: "relative" }}
+                        className="fx-centered"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div
+                          style={{
+                            borderRight: "1px solid var(--gray)",
+                            paddingRight: ".75rem",
+                          }}
+                          onClick={() =>
+                            customHistory(
+                              "/profile/" +
+                              nip19.nprofileEncode({ pubkey: author.pubkey }),
+                            )
+                          }
+                        >
+                          <Icon name="user" size={24} />
+                          <p className="p-medium">{t("AyBBPWE")}</p>
+                        </div>
+                        <div
+                          style={{
+                            borderRight: "1px solid var(--gray)",
+                            paddingRight: ".75rem",
+                          }}
+                          onClick={() => setInitConv(true)}
+                        >
+                          <Icon name="env" size={24} />
+                          <p className="p-medium">{t("AN0NVU3")}</p>
+                        </div>
+                        <div style={{ paddingLeft: ".75rem" }}>
+                          <ZapTip
+                            recipientLNURL={checkForLUDS(
+                              author.lud16,
+                              author.lud06,
+                            )}
+                            recipientPubkey={author.pubkey}
+                            senderPubkey={userKeys.pub}
+                            recipientInfo={author}
+                            zapLabel={true}
+                          />
+                        </div>
+                      </div>,
+                    ]
+                }
               />
             </div>
           </div>

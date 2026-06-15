@@ -7,89 +7,103 @@ import LoadingDots from "@/Components/LoadingDots";
 import Spinner from "@/Components/Spinner";
 import LoginWithAPI from "@/Components/LoginWithAPI";
 import useSubscription from "@/Hooks/useSubscription";
+import useUsage from "@/Hooks/useUsage";
 import useLightningPayment from "@/Hooks/useLightningPayment";
 import { getSubscriptionLink } from "@/Endpoints/Subscription";
 import QRCode from "react-qr-code";
 import { copyText } from "@/Helpers/Helpers";
 import { iconsNames } from "@/Content/IconV2URL";
+import ProgressBar from "@/Components/ProgressBar";
+import { SelectTabs } from "@/Components/SelectTabs";
+import { useTranslation } from "react-i18next";
 
 const PLANS = [
   {
     id: "basic",
     price_id: "price_1TXxor8f5pgfcSH1UwpipjP6",
-    name: "Creator",
+    name: "Basic",
     price: "9",
     sats: "18,000",
     period: "/ month",
-    desc: "For writers who want to publish, monetize, and understand their audience.",
-    cta: "Get Creator",
+    descKey: "Asc3VDr",
+    ctaKey: "Ac2yDI1",
     highlighted: false,
     features: [
-      { text: "Unlimited articles & notes publishing", dim: false },
-      { text: "Nostr-native identity (npub / nsec)", dim: false },
-      { text: "Premium content gating (NIP-63)", dim: false },
-      { text: "Subscriber management", dim: false },
-      { text: "Lightning paywall — no commission", dim: false },
-      { text: "Creator Analytics — up to 3 months", dim: false },
-      { text: "50 GB Blossom media storage", dim: false },
-      { text: "YakiPro for creators", dim: false },
-      { text: "AI Writing Assistant", dim: true },
-      { text: "Second Reader AI (5 personas)", dim: true },
-      { text: "Energy Mapper", dim: true },
+      { textKey: "AU1WBSd", dim: false },
+      { textKey: "ANhrPjf", dim: false },
+      { textKey: "AVQsKA5", dim: false },
+      { textKey: "A50fFes", dim: false },
+      { textKey: "A8ksMlO", dim: false },
+      { textKey: "Ao2SIvH", dim: false },
+      { textKey: "ADO4Yfl", dim: false },
+      { textKey: "AEpny9c", dim: false },
+      { textKey: "Ada9y3u", dim: true },
+      { textKey: "A8Nj6tx", dim: true },
+      { textKey: "A5A5LVD", dim: true },
     ],
   },
   {
     id: "premium",
     price_id: "price_1TXyHO8f5pgfcSH1W1jqzsuk",
-    name: "Pro",
+    name: "Premium",
     price: "19",
     sats: "38,000",
     period: "/ month",
-    desc: "For serious creators who want AI in their corner and the full analytics picture.",
-    cta: "Get Pro",
+    descKey: "AIIFml1",
+    ctaKey: "ACPuCzH",
     highlighted: true,
-    badge: "Most popular",
     features: [
-      { text: "Everything in Creator", dim: false },
-      { text: "AI Writing Assistant — unlimited", dim: false },
-      { text: "Second Reader AI (all 5 personas)", dim: false },
-      { text: "Energy Mapper — per-sentence emotion graph", dim: false },
-      { text: "Inline diff viewer — accept / reject changes", dim: false },
-      { text: "Analytics — up to 3 years of history", dim: false },
-      { text: "Click-through bar drill-down per note/article", dim: false },
-      { text: "100 GB Blossom media storage", dim: false },
-      { text: "Early access to new features", dim: false },
+      { textKey: "ASLOpzl", dim: false },
+      { textKey: "AhCQAkq", dim: false },
+      { textKey: "AeFrGDi", dim: false },
+      { textKey: "A74eLZx", dim: false },
+      { textKey: "Ai1B3HF", dim: false },
+      { textKey: "AyquzYg", dim: false },
+      { textKey: "Az5xfx5", dim: false },
+      { textKey: "AXvNUU1", dim: false },
+      { textKey: "AMUKeIv", dim: false },
     ],
   },
 ];
 
 const COMPARE_ROWS = [
-  { label: "Articles & Notes publishing", creator: true, pro: true },
-  { label: "Nostr-native identity", creator: true, pro: true },
-  { label: "Premium content gating", creator: true, pro: true },
-  { label: "Subscriber management", creator: true, pro: true },
-  { label: "Lightning paywall", creator: true, pro: true },
-  { label: "Blossom media storage", creator: "50 GB", pro: "100 GB" },
-  { label: "Creator Analytics history", creator: "3 months", pro: "3 years" },
-  { label: "Drill-down bar click", creator: false, pro: true },
-  { label: "AI Writing Assistant", creator: false, pro: "Unlimited" },
-  { label: "Second Reader AI", creator: false, pro: "5 personas" },
-  { label: "Energy Mapper", creator: false, pro: true },
-  { label: "Inline diff — accept / reject", creator: false, pro: true },
+  { labelKey: "ALx6onZ", creator: true, pro: true },
+  { labelKey: "ASL87jw", creator: true, pro: true },
+  { labelKey: "AAHCjSA", creator: true, pro: true },
+  { labelKey: "A50fFes", creator: true, pro: true },
+  { labelKey: "A2o7YV8", creator: true, pro: true },
+  { labelKey: "A8SkkKn", creator: "50 GB", pro: "100 GB" },
+  { labelKey: "AxpgMtE", creator: "3 months", pro: "3 years" },
+  { labelKey: "Av9K4Uc", creator: false, pro: true },
+  { labelKey: "Ada9y3u", creator: false, pro: "60/week" },
+  { labelKey: "AiJc9Ml", creator: false, pro: "30/week" },
+  { labelKey: "A5A5LVD", creator: false, pro: "20/week" },
+  { labelKey: "AC03DMc", creator: false, pro: true },
 ];
 
 const FAQ_ITEMS = [
-  { q: "Do I need a Nostr account?", a: "Yes — your keypair (npub / nsec) is your identity on YakiPro. You can generate one in-app or import an existing one. Your private key is never stored on our servers." },
-  { q: "How do Lightning payments work?", a: "Premium content is gated via NIP-63. Your subscribers pay you directly via Lightning invoice — we never touch the funds. You keep 100% of every sat." },
-  { q: "What is Blossom storage?", a: "Blossom is a Nostr-native media hosting protocol. YakiPro gives you a dedicated Blossom server for images and files used in your articles — 50 GB on Creator, 100 GB on Pro." },
-  { q: "Can I switch plans?", a: "Yes, upgrade or downgrade at any time. Your published content, subscriber list, and analytics history are always yours regardless of plan." },
-  { q: "Is my content portable?", a: "Completely. Every article is a signed Nostr event on relays you control. You can read and republish your content with any Nostr-compatible client." },
-  { q: "Can I pay in Bitcoin?", a: "Yes. Pay via Lightning and get a 10% discount on any plan. Invoices are generated instantly — no custodial wallets required." },
+  { qKey: "AIBil2L", aKey: "AT7x2DG" },
+  { qKey: "AEUWsw2", aKey: "Aeb4LuD" },
+  { qKey: "AfJMzCG", aKey: "AcuJc5A" },
+  { qKey: "AZcdCkV", aKey: "AbJvLWu" },
+  { qKey: "AKvEPn9", aKey: "AIZxnGr" },
 ];
 
-const fmtDate = (ts) => {
-  if (!ts) return "N/A";
+const fmtDate = (ts, naLabel) => {
+  if (!ts) return naLabel;
   return new Date(ts * 1000).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+};
+
+const fmtResetIn = (ts, t) => {
+  if (!ts) return null;
+  const diffMs = ts * 1000 - Date.now();
+  if (diffMs <= 0) return t("ACQpwGH");
+  const minutes = Math.round(diffMs / 60000);
+  if (minutes < 60) return t("APwGSMO", { count: minutes });
+  const hours = Math.round(diffMs / 3600000);
+  if (hours < 24) return t("AeDw1O8", { count: hours });
+  const days = Math.round(diffMs / 86400000);
+  return t("AUrDmZm", { count: days });
 };
 
 const planOrder = (id) => PLANS.findIndex((p) => p.id === id);
@@ -105,10 +119,17 @@ function useReveal(dep) {
   }, [dep]);
 }
 
-function CellValue({ value }) {
-  if (value === true) return <span style={{ color: "#2FBF71", fontWeight: 900, fontSize: "1rem" }}>✓</span>;
+function CellValue({ value, t }) {
+  if (value === true) return <Icon name="check" size={20} v={2} isBoldThemeColor />;
   if (value === false) return <span style={{ color: "rgba(139,148,158,0.3)", fontSize: "0.9rem" }}>–</span>;
-  return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#8b9cf4" }}>{value}</span>;
+  if (value === "50 GB") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("ASR1V0c")}</span>;
+  if (value === "100 GB") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AJXhgWC")}</span>;
+  if (value === "3 months") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AVnJlbF")}</span>;
+  if (value === "3 years") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AN9MDu8")}</span>;
+  if (value === "60/week") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AJeNfeN")}</span>;
+  if (value === "30/week") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AObhDYm")}</span>;
+  if (value === "20/week") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AsTcBNN")}</span>;
+  return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{value}</span>;
 }
 
 function WaitingDots() {
@@ -122,6 +143,7 @@ function WaitingDots() {
 }
 
 function LightningInvoiceModal({ invoice, planName, sats, onClose, userPub }) {
+  const { t } = useTranslation();
   const { status, data } = useLightningPayment(userPub);
 
   useEffect(() => {
@@ -140,12 +162,12 @@ function LightningInvoiceModal({ invoice, planName, sats, onClose, userPub }) {
         <div className="fx-centered fx-col box-pad-h box-pad-v" style={{ rowGap: "20px", textAlign: "center" }}>
           <div style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(47,191,113,0.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "2rem", color: "#2FBF71" }}>✓</div>
           <div className="fx-centered fx-col" style={{ rowGap: "6px" }}>
-            <h3 style={{ color: "#2FBF71", margin: 0 }}>Payment confirmed!</h3>
+            <h3 style={{ color: "#2FBF71", margin: 0 }}>{t("AzGrCIb")}</h3>
             <p className="gray-c" style={{ margin: 0, fontSize: "0.85rem" }}>
-              {planName} plan activated{expiryDate && <> · renews <strong style={{ color: "inherit" }}>{expiryDate}</strong></>}
+              {t("AnDRJ44", { plan: planName })}{expiryDate && <> · {t("AMHtfN5")} <strong style={{ color: "inherit" }}>{expiryDate}</strong></>}
             </p>
           </div>
-          <p className="gray-c" style={{ fontSize: "0.78rem", margin: 0 }}>Reloading your session…</p>
+          <p className="gray-c" style={{ fontSize: "0.78rem", margin: 0 }}>{t("AUkcJAr")}</p>
         </div>
       </Overlay>
     );
@@ -156,9 +178,9 @@ function LightningInvoiceModal({ invoice, planName, sats, onClose, userPub }) {
       <div className="fx-centered fx-col box-pad-h box-pad-v" style={{ rowGap: "24px" }}>
         <div className="fx-centered fx-col fit-container" style={{ rowGap: "6px", textAlign: "center" }}>
           <div style={{ width: 44, height: 44, borderRadius: "50%", background: "rgba(247,88,22,0.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.4rem" }}>⚡</div>
-          <h3 style={{ marginTop: "8px" }}>Pay with Lightning</h3>
+          <h3 style={{ marginTop: "8px" }}>{t("ASLKQFy")}</h3>
           <p className="gray-c" style={{ fontSize: "0.85rem", margin: 0 }}>
-            {planName} plan &nbsp;·&nbsp;<span style={{ color: "var(--c1)", fontWeight: 700 }}>{sats} sats</span>
+            {t("Aen7xbl", { plan: planName })} &nbsp;·&nbsp;<span style={{ color: "var(--c1)", fontWeight: 700 }}>{t("ARpXkUv", { sats })}</span>
           </p>
         </div>
         <div style={{ background: "#ffffff", padding: "16px", borderRadius: "16px", display: "flex", boxShadow: "0 4px 24px rgba(247,88,22,0.12)" }}>
@@ -167,27 +189,28 @@ function LightningInvoiceModal({ invoice, planName, sats, onClose, userPub }) {
         <div
           className="fit-container fx-scattered round-corner border-all box-pad-h-m box-pad-v-s"
           style={{ cursor: "pointer", columnGap: "12px" }}
-          onClick={() => copyText(invoice, "Invoice copied!")}
+          onClick={() => copyText(invoice, t("A3FRcsM"))}
         >
           <p className="gray-c" style={{ fontSize: "0.72rem", fontFamily: "monospace", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, margin: 0 }}>
             {invoice.slice(0, 48)}…
           </p>
-          <span style={{ color: "var(--c1)", fontSize: "0.8rem", fontWeight: 600, flexShrink: 0 }}>Copy</span>
+          <span style={{ color: "var(--c1)", fontSize: "0.8rem", fontWeight: 600, flexShrink: 0 }}>{t("Anwd2wT")}</span>
         </div>
         <div className="fx-centered fit-container" style={{ columnGap: "10px" }}>
           <Spinner size={16} />
-          <p style={{ color: "var(--c1)", fontSize: "0.82rem", fontWeight: 600, margin: 0 }}>Waiting for payment...</p>
+          <p style={{ color: "var(--c1)", fontSize: "0.82rem", fontWeight: 600, margin: 0 }}>{t("AyWYflA")}</p>
         </div>
         {status === "error" && (
-          <p className="gray-c" style={{ fontSize: "0.78rem", margin: 0, textAlign: "center" }}>Connection lost. Please refresh if payment was sent.</p>
+          <p className="gray-c" style={{ fontSize: "0.78rem", margin: 0, textAlign: "center" }}>{t("Ak5bPb9")}</p>
         )}
-        <button className="btn btn-gst btn-full" onClick={onClose}>Cancel</button>
+        <button className="btn btn-gst btn-full" onClick={onClose}>{t("AB4BSCe")}</button>
       </div>
     </Overlay>
   );
 }
 
 function PricingCards({ isLn, setIsLn, userPub, onClose }) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [lightningInvoice, setLightningInvoice] = useState(null);
   const [activePlan, setActivePlan] = useState(null);
@@ -230,41 +253,34 @@ function PricingCards({ isLn, setIsLn, userPub, onClose }) {
 
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "32px" }}>
         <div className="sub-pricing-toggle">
-          <button className={`sub-pricing-toggle-btn${!isLn ? " active" : ""}`} onClick={() => setIsLn(false)}>$ USD</button>
-          <button className={`sub-pricing-toggle-btn${isLn ? " active" : ""}`} onClick={() => setIsLn(true)}>⚡ Sats</button>
+          <button className={`sub-pricing-toggle-btn${!isLn ? " active" : ""}`} onClick={() => setIsLn(false)}>{t("Az5mbB1")}</button>
+          <button className={`sub-pricing-toggle-btn${isLn ? " active" : ""}`} onClick={() => setIsLn(true)}>{t("AQv2Hnr")}</button>
         </div>
       </div>
 
       <div className="lp-pricing-cards ip-reveal" style={{ maxWidth: 780, margin: "0 auto" }}>
         {PLANS.map((plan) => (
           <div key={plan.id} className={`lp-plan-card bg-dropdown${plan.highlighted ? " lp-plan-card-pro" : ""}`}>
-            {plan.badge && (
-              <div style={{ position: "absolute", top: plan.highlighted ? 18 : 16, right: 20 }}>
-                <span className="lp-plan-badge">{plan.badge}</span>
-              </div>
-            )}
             <div>
               <div className="lp-plan-name">{plan.name}</div>
               <div className="lp-plan-price-row">
                 {isLn ? (
-                  <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>{plan.sats}</span><span className="lp-plan-period"> sats{plan.period}</span></>
+                  <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>{plan.sats}</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()}{plan.period}</span></>
                 ) : (
                   <><span className="lp-plan-amount">${plan.price}</span><span className="lp-plan-period">{plan.period}</span></>
                 )}
               </div>
               <div className="lp-plan-sats">
-                <span>⚡</span>
-                {isLn ? <span>~${plan.price} / month</span> : <span>~{plan.sats} sats / month</span>}
-                {!isLn && <span style={{ color: "rgba(139,148,158,0.4)", fontSize: "0.68rem", fontWeight: 400 }}>· 10% off with Lightning</span>}
+                {isLn ? <span>~${plan.price} / month</span> : <span>~{plan.sats} {t("AUQUggV")}</span>}
               </div>
-              <p className="lp-plan-desc">{plan.desc}</p>
+              <p className="lp-plan-desc">{t(plan.descKey)}</p>
             </div>
             <div className="lp-plan-divider" />
             <ul className="lp-plan-features">
               {plan.features.map((f) => (
-                <li key={f.text} className={`lp-plan-feature${f.dim ? " lp-plan-feature-dim" : ""}`}>
-                  <span className="lp-plan-feature-icon">{f.dim ? "–" : "✓"}</span>
-                  {f.text}
+                <li key={f.textKey} className={`lp-plan-feature${f.dim ? " lp-plan-feature-dim" : ""}`}>
+                  <span className="lp-plan-feature-icon">{f.dim ? "–" : <Icon name="check" size={20} v={2} isBoldThemeColor />}</span>
+                  {t(f.textKey)}
                 </li>
               ))}
             </ul>
@@ -274,40 +290,34 @@ function PricingCards({ isLn, setIsLn, userPub, onClose }) {
               disabled={isLoading}
               onClick={() => handleCheckout(plan)}
             >
-              {isLoading ? <LoadingDots /> : plan.cta}
+              {isLoading ? <LoadingDots /> : t(plan.ctaKey)}
             </button>
           </div>
         ))}
-      </div>
-
-      <div className="ip-reveal ip-reveal-d1" style={{ maxWidth: 780, margin: "24px auto 0", padding: "16px 22px", borderRadius: 10, background: "rgba(247,88,22,0.06)", border: "1px solid rgba(247,88,22,0.15)", display: "flex", alignItems: "center", gap: 14 }}>
-        <span style={{ fontSize: "1.4rem", flexShrink: 0 }}>⚡</span>
-        <p style={{ margin: 0, fontSize: "0.875rem", color: "rgba(139,148,158,0.85)", lineHeight: 1.55 }}>
-          {isLn ? "⚡ Sats prices already include a 10% Lightning discount." : <><strong style={{ color: "#E6EDF3" }}>Pay with Bitcoin Lightning</strong> and get a 10% discount on any plan. Invoices are generated instantly — no custodial wallets, no KYC.</>}
-        </p>
       </div>
     </>
   );
 }
 
 function CompareTable() {
+  const { t } = useTranslation();
   return (
     <div style={{ marginTop: "48px" }}>
       <div className="ip-reveal" style={{ textAlign: "center", marginBottom: 32 }}>
-        <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c1)", marginBottom: 8 }}>Compare plans</p>
-        <h2 style={{ margin: 0 }}>Everything side by side</h2>
+        <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c1)", marginBottom: 8 }}>{t("AoFbKNF")}</p>
+        <h2 style={{ margin: 0 }}>{t("AJQdVdV")}</h2>
       </div>
       <div className="lp-compare-table ip-reveal ip-reveal-d1" style={{ maxWidth: 780, margin: "0 auto" }}>
         <div className="lp-compare-row header">
-          <div className="lp-compare-cell header-cell">Feature</div>
-          <div className="lp-compare-cell center header-cell">Creator</div>
-          <div className="lp-compare-cell center header-cell" style={{ color: "#F75816" }}>Pro</div>
+          <div className="lp-compare-cell header-cell">{t("ALvzv9F")}</div>
+          <div className="lp-compare-cell center header-cell">{PLANS[0].name}</div>
+          <div className="lp-compare-cell center header-cell" style={{ color: "#F75816" }}>{PLANS[1].name}</div>
         </div>
         {COMPARE_ROWS.map((row) => (
-          <div key={row.label} className="lp-compare-row">
-            <div className="lp-compare-cell">{row.label}</div>
-            <div className="lp-compare-cell center"><CellValue value={row.creator} /></div>
-            <div className="lp-compare-cell center"><CellValue value={row.pro} /></div>
+          <div key={row.labelKey} className="lp-compare-row">
+            <div className="lp-compare-cell">{t(row.labelKey)}</div>
+            <div className="lp-compare-cell center"><CellValue value={row.creator} t={t} /></div>
+            <div className="lp-compare-cell center"><CellValue value={row.pro} t={t} /></div>
           </div>
         ))}
       </div>
@@ -316,21 +326,22 @@ function CompareTable() {
 }
 
 function FaqSection() {
+  const { t } = useTranslation();
   const [openFaq, setOpenFaq] = useState(null);
   return (
     <div style={{ marginTop: "48px" }}>
       <div className="ip-reveal" style={{ textAlign: "center", marginBottom: 32 }}>
-        <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c1)", marginBottom: 8 }}>FAQ</p>
-        <h2 style={{ margin: 0 }}>Common questions</h2>
+        <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c1)", marginBottom: 8 }}>{t("A8daj48")}</p>
+        <h2 style={{ margin: 0 }}>{t("A1wcO5C")}</h2>
       </div>
       <div className="lp-faq ip-reveal ip-reveal-d1" style={{ maxWidth: 780, margin: "0 auto" }}>
         {FAQ_ITEMS.map((item, i) => (
           <div key={i} className="lp-faq-item" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
             <div className="lp-faq-trigger">
-              <p className="lp-faq-q">{item.q}</p>
+              <p className="lp-faq-q">{t(item.qKey)}</p>
               <span className={`lp-faq-icon${openFaq === i ? " open" : ""}`}>+</span>
             </div>
-            {openFaq === i && <p className="lp-faq-a">{item.a}</p>}
+            {openFaq === i && <p className="lp-faq-a">{t(item.aKey)}</p>}
           </div>
         ))}
       </div>
@@ -339,6 +350,7 @@ function FaqSection() {
 }
 
 function UpgradeOverlay({ onClose, userPub }) {
+  const { t } = useTranslation();
   const [isLn, setIsLn] = useState(false);
   useReveal(true);
 
@@ -365,9 +377,9 @@ function UpgradeOverlay({ onClose, userPub }) {
       <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 24px 80px" }}>
         <div className="ip-reveal" style={{ textAlign: "center", marginBottom: "48px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
           <Icon name="checkmark-c1" size={72} isColored />
-          <h2 style={{ margin: 0 }}>Upgrade your plan</h2>
+          <h2 style={{ margin: 0 }}>{t("AqAJ3zy")}</h2>
           <p className="gray-c" style={{ fontSize: "1rem", lineHeight: 1.6, maxWidth: 480, margin: 0 }}>
-            Unlock more features with YakiPro and take full control of your creative future.
+            {t("ACSRZQI")}
           </p>
         </div>
 
@@ -397,8 +409,9 @@ function PlanBadge({ plan }) {
 }
 
 function PaymentMethodIcon({ method }) {
-  if (method === "lightning") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="bolt" size={18} /><span>Lightning</span></span>;
-  if (method === "stripe") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="wallet" size={18} /><span>Card</span></span>;
+  const { t } = useTranslation();
+  if (method === "lightning") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="bolt" size={18} /><span>{t("AnX8qpd")}</span></span>;
+  if (method === "stripe") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="wallet" size={18} /><span>{t("AKSZkTI")}</span></span>;
   return <span className="gray-c">—</span>;
 }
 
@@ -412,18 +425,105 @@ function SkeletonCard() {
   );
 }
 
+const USAGE_ORDER = ["chat-articles", "second-reader", "energy-mapper", "translate-lt", "wallet-creation"];
+
+function UsageRow({ item, onUpgrade }) {
+  const { t } = useTranslation();
+  const { label, period_type, limit, percentage, reset_at } = item;
+  const isUnlimited = limit === -1;
+  const isLocked = limit === 0;
+  const resetText = !isUnlimited && (period_type === "weekly" || period_type === "daily") ? fmtResetIn(reset_at, t) : null;
+
+  return (
+    <div className="fit-container fx-centered fx-col fx-start-v" style={{ rowGap: "10px" }}>
+      <div className="fit-container fx-scattered">
+        <p style={{ fontWeight: 600 }}>{label}</p>
+        {isUnlimited ? (
+          <span className="gray-c p-medium">{t("AUlM6c3")}</span>
+        ) : isLocked ? null : (
+          <span className="gray-c p-medium">{t("AnJK4iL", { percentage })}</span>
+        )}
+      </div>
+
+      {isLocked ? (
+        <div className="fit-container fx-scattered round-corner box-pad-h-m box-pad-v-s">
+          <div className="fx-centered" style={{ columnGap: "8px" }}>
+            <Icon name={iconsNames.lock} size={16} />
+            <p className="gray-c p-medium">{t("AHPptdT")}</p>
+          </div>
+          <button className="btn btn-gst" onClick={onUpgrade}>{t("AGo17y4")}</button>
+        </div>
+      ) : isUnlimited ? null : (
+        <ProgressBar percentage={percentage} full />
+      )}
+
+      {resetText && (
+        <div className="fx-centered" style={{ columnGap: "6px" }}>
+          <Icon name={iconsNames.clock} size={14} />
+          <span className="gray-c p-medium">{resetText}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function UsageView({ onUpgrade }) {
+  const { t } = useTranslation();
+  const { usage, loading, error, fetch } = useUsage();
+
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+
+  if (loading) {
+    return <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>;
+  }
+
+  if (error) {
+    return (
+      <div className="sub-card fx-centered fx-col" style={{ rowGap: "12px" }}>
+        <Icon name="warning" size={32} />
+        <p className="gray-c p-centered">{t("AOE8oDg")}</p>
+        <button className="btn btn-gst" onClick={fetch}>{t("AcdxgMi")}</button>
+      </div>
+    );
+  }
+
+  if (!usage) return null;
+
+  const entries = USAGE_ORDER
+    .map((key) => usage.usage?.[key] && { key, ...usage.usage[key] })
+    .filter(Boolean);
+
+  return (
+    <div className="sub-card fx-centered fx-col fx-start-v" style={{ rowGap: "24px" }}>
+      <div className="fit-container fx-scattered">
+        <h4>{t("AOrYFC7")}</h4>
+        <PlanBadge plan={usage.plan || "free"} />
+      </div>
+      {entries.map((item, i) => (
+        <React.Fragment key={item.key}>
+          {i > 0 && <div className="fit-container" style={{ borderTop: "1px solid var(--dim-gray)" }} />}
+          <UsageRow item={item} onUpgrade={onUpgrade} />
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
 function CancelConfirmModal({ endDate, onConfirm, onClose, loading }) {
+  const { t } = useTranslation();
   return (
     <Overlay exit={onClose} width={440}>
       <div className="fx-centered fx-col box-pad-h box-pad-v" style={{ rowGap: "16px" }}>
         <div style={{ width: 48, height: 48, borderRadius: "50%", backgroundColor: "rgba(239,68,68,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Icon name="warning" size={22} />
         </div>
-        <h4 className="p-centered">Cancel subscription?</h4>
-        <p className="gray-c p-centered">Your subscription will end on <strong>{endDate}</strong>. You'll keep full access until then.</p>
+        <h4 className="p-centered">{t("AZ7QZK4")}</h4>
+        <p className="gray-c p-centered">{t("AG0J3LL", { date: endDate })}</p>
         <div className="fit-container fx-centered" style={{ columnGap: "12px" }}>
-          <button className="btn btn-gst fit-container" onClick={onClose}>Keep subscription</button>
-          <button className="btn btn-red fit-container" onClick={onConfirm} disabled={loading}>{loading ? <LoadingDots /> : "Yes, cancel"}</button>
+          <button className="btn btn-gst fit-container" onClick={onClose}>{t("AlYjdXR")}</button>
+          <button className="btn btn-red fit-container" onClick={onConfirm} disabled={loading}>{loading ? <LoadingDots /> : t("AsZQ11Q")}</button>
         </div>
       </div>
     </Overlay>
@@ -431,6 +531,7 @@ function CancelConfirmModal({ endDate, onConfirm, onClose, loading }) {
 }
 
 function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onUpgrade }) {
+  const { t } = useTranslation();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const isStripeActive = status.last_payment_method === "stripe" && status.active;
   const isFree = !status.plan || status.plan === "free";
@@ -439,7 +540,7 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
     <>
       {showCancelModal && (
         <CancelConfirmModal
-          endDate={fmtDate(status.next_subscription)}
+          endDate={fmtDate(status.next_subscription, t("AvGdwjI"))}
           loading={cancelling}
           onClose={() => setShowCancelModal(false)}
           onConfirm={async () => { await onCancel(); setShowCancelModal(false); }}
@@ -447,7 +548,7 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
       )}
       <div className="sub-card fx-centered fx-col" style={{ rowGap: "14px" }}>
         <div className="fit-container fx-scattered">
-          <h4>Current plan</h4>
+          <h4>{t("AwtJ5HS")}</h4>
           <PlanBadge plan={status.plan || "free"} />
         </div>
 
@@ -457,44 +558,44 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
             style={{ gap: "12px" }}
           >
             <div style={{ display: "flex", flexDirection: "column", rowGap: "2px" }}>
-              <p style={{ fontWeight: 600 }}>Trial active</p>
-              <p className="gray-c p-medium">Ends {fmtDate(status.trial_ends_at)}</p>
+              <p style={{ fontWeight: 600 }}>{t("Aoiqy17")}</p>
+              <p className="gray-c p-medium">{t("Am6X1Yl", { date: fmtDate(status.trial_ends_at, t("AvGdwjI")) })}</p>
             </div>
             <button className="btn btn-normal" style={{ flexShrink: 0 }} onClick={onUpgrade}>
-              Upgrade
+              {t("AGo17y4")}
             </button>
           </div>
         )}
 
         {status.cancel_at_period_end && (
           <div className="fit-container round-corner fx-centered box-pad-h-m box-pad-v-s" style={{ backgroundColor: "rgba(247,88,22,0.08)", border: "1px solid var(--c1)" }}>
-            <p style={{ color: "var(--c1)" }}>Subscription ending on {fmtDate(status.next_subscription)} — will revert to Free</p>
+            <p style={{ color: "var(--c1)" }}>{t("AOvUPSY", { date: fmtDate(status.next_subscription, t("AvGdwjI")) })}</p>
           </div>
         )}
 
         {!status.cancel_at_period_end && status.active && status.next_subscription > 0 && (
           <div className="fit-container fx-scattered">
-            <p className="gray-c">Next renewal</p>
-            <p>{fmtDate(status.next_subscription)}</p>
+            <p className="gray-c">{t("AfLR6HA")}</p>
+            <p>{fmtDate(status.next_subscription, t("AvGdwjI"))}</p>
           </div>
         )}
 
         {status.last_payment_method && (
           <div className="fit-container fx-scattered">
-            <p className="gray-c">Payment method</p>
+            <p className="gray-c">{t("A0SiY0R")}</p>
             <PaymentMethodIcon method={status.last_payment_method} />
           </div>
         )}
 
         {status.last_subscription > 0 && status.history?.length > 0 && (
           <div className="fit-container fx-scattered">
-            <p className="gray-c">Last payment</p>
-            <p>{fmtDate(status.last_subscription)}</p>
+            <p className="gray-c">{t("A6YH5Fa")}</p>
+            <p>{fmtDate(status.last_subscription, t("AvGdwjI"))}</p>
           </div>
         )}
 
         {isFree && (
-          <button className="btn btn-normal btn-full" onClick={onUpgrade}>Upgrade plan</button>
+          <button className="btn btn-normal btn-full" onClick={onUpgrade}>{t("Aqc63x1")}</button>
         )}
 
         {isStripeActive && (
@@ -502,13 +603,13 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
             <div className="fit-container" style={{ borderTop: "1px solid var(--dim-gray)" }} />
             {status.cancel_at_period_end ? (
               <div className="fit-container fx-centered fx-col" style={{ rowGap: "8px" }}>
-                <p className="gray-c p-centered p-medium">Your subscription ends on {fmtDate(status.next_subscription)}. Resume to keep access after that date.</p>
-                <button className="btn btn-normal btn-full" onClick={onResume} disabled={resuming}>{resuming ? <LoadingDots /> : "Resume subscription"}</button>
+                <p className="gray-c p-centered p-medium">{t("A0TlKu7", { date: fmtDate(status.next_subscription, t("AvGdwjI")) })}</p>
+                <button className="btn btn-normal btn-full" onClick={onResume} disabled={resuming}>{resuming ? <LoadingDots /> : t("APugHtt")}</button>
               </div>
             ) : (
               <div className="fit-container fx-centered fx-col" style={{ rowGap: "8px" }}>
-                <button className="btn btn-red btn-full" onClick={() => setShowCancelModal(true)} disabled={cancelling}>{cancelling ? <LoadingDots /> : "Cancel subscription"}</button>
-                <p className="gray-c p-centered p-medium">Cancelling will keep your access until the end of the current billing period.</p>
+                <button className="btn btn-red btn-full" onClick={() => setShowCancelModal(true)} disabled={cancelling}>{cancelling ? <LoadingDots /> : t("AL0OUiB")}</button>
+                <p className="gray-c p-centered p-medium">{t("AMPyR2N")}</p>
               </div>
             )}
           </>
@@ -519,29 +620,31 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
 }
 
 function PendingChangeCard({ status, onCancelChange, cancellingChange }) {
+  const { t } = useTranslation();
   if (!status.pending_plan) return null;
   return (
     <div className="sub-card fx-centered fx-col" style={{ rowGap: "12px", border: "1px solid var(--c1)" }}>
       <div className="fit-container fx-scattered">
-        <h4>Pending plan change</h4>
+        <h4>{t("Amuehyf")}</h4>
         <PlanBadge plan={status.pending_plan} />
       </div>
       <div className="fit-container fx-centered fx-col" style={{ rowGap: "6px" }}>
         <div className="fit-container fx-scattered">
-          <p className="gray-c">Change</p>
+          <p className="gray-c">{t("AFX6uFu")}</p>
           <div className="fx-centered" style={{ columnGap: "6px" }}>
             <PlanBadge plan={status.plan} /><span className="gray-c">→</span><PlanBadge plan={status.pending_plan} />
           </div>
         </div>
-        <div className="fit-container fx-scattered"><p className="gray-c">Takes effect on</p><p>{fmtDate(status.next_subscription)}</p></div>
-        <div className="fit-container fx-scattered"><p className="gray-c">Scheduled on</p><p>{fmtDate(status.pending_plan_since)}</p></div>
+        <div className="fit-container fx-scattered"><p className="gray-c">{t("AEj8km4")}</p><p>{fmtDate(status.next_subscription, t("AvGdwjI"))}</p></div>
+        <div className="fit-container fx-scattered"><p className="gray-c">{t("AQNxYoD")}</p><p>{fmtDate(status.pending_plan_since, t("AvGdwjI"))}</p></div>
       </div>
-      <button className="btn btn-gst btn-full" onClick={onCancelChange} disabled={cancellingChange}>{cancellingChange ? <LoadingDots /> : "Cancel this change"}</button>
+      <button className="btn btn-gst btn-full" onClick={onCancelChange} disabled={cancellingChange}>{cancellingChange ? <LoadingDots /> : t("AJxtluP")}</button>
     </div>
   );
 }
 
 function ActionsCard({ status, onChangePlan, changingPlan }) {
+  const { t } = useTranslation();
   if (status.last_payment_method !== "stripe" || !status.active) return null;
 
   const hasPending = !!status.pending_plan;
@@ -549,7 +652,7 @@ function ActionsCard({ status, onChangePlan, changingPlan }) {
 
   return (
     <div className="sub-card fx-centered fx-col fx-start-v" style={{ rowGap: "16px" }}>
-      <h4>Manage plans</h4>
+      <h4>{t("AuxUqLK")}</h4>
       <div className="fit-container fx-centered fx-stretch" style={{ gap: "12px", alignItems: "stretch" }}>
         {PLANS.map((plan) => {
           const isCurrent = plan.id === status.plan;
@@ -559,7 +662,7 @@ function ActionsCard({ status, onChangePlan, changingPlan }) {
             <div key={plan.id} className="sub-plan-card bg-dropdown" style={isCurrent ? { outline: "1px solid var(--c1)", outlineOffset: "-1px" } : {}}>
               {isCurrent && (
                 <div style={{ position: "absolute", top: 14, right: 16 }}>
-                  <span style={{ fontWeight: 700, fontSize: "0.72rem", color: "var(--c1)", background: "rgba(247,88,22,0.12)", borderRadius: "999px", padding: "2px 10px" }}>Current plan</span>
+                  <span style={{ fontWeight: 700, fontSize: "0.72rem", color: "var(--c1)", background: "rgba(247,88,22,0.12)", borderRadius: "999px", padding: "2px 10px" }}>{t("A8wDj0f")}</span>
                 </div>
               )}
               <div>
@@ -568,15 +671,16 @@ function ActionsCard({ status, onChangePlan, changingPlan }) {
                   <span className="sub-plan-amount">${plan.price}</span>
                   <span className="gray-c" style={{ fontSize: "0.875rem" }}>{plan.period}</span>
                 </div>
-                <p style={{ fontSize: "0.78rem", color: "var(--c1)", fontWeight: 600 }}>~{plan.sats} sats / month</p>
-                <p className="sub-plan-desc">{plan.desc}</p>
+                <p style={{ fontSize: "0.78rem", color: "var(--c1)", fontWeight: 600 }}>~{plan.sats} {t("AUQUggV")}</p>
+                <p className="sub-plan-desc">{t(plan.descKey)}</p>
               </div>
               <div className="sub-plan-divider" />
               <ul className="sub-plan-features">
                 {plan.features.map((f) => (
-                  <li key={f.text} className={`sub-plan-feature${f.dim ? " sub-plan-feature-dim" : ""}`}>
-                    <span className="sub-plan-feature-icon">{f.dim ? "–" : "✓"}</span>
-                    {f.text}
+                  <li key={f.textKey} className={`sub-plan-feature${f.dim ? " sub-plan-feature-dim" : ""}`}>
+                    {f.dim && <span className="sub-plan-feature-icon">–</span>}
+                    {!f.dim && <Icon v={2} name={iconsNames.check} isBoldThemeColor={true} />}
+                    {t(f.textKey)}
                   </li>
                 ))}
               </ul>
@@ -586,7 +690,7 @@ function ActionsCard({ status, onChangePlan, changingPlan }) {
                 disabled={isCurrent || hasPending || isLoading}
                 onClick={() => !isCurrent && !hasPending && onChangePlan({ new_plan: plan.id, new_price_id: plan.price_id })}
               >
-                {isLoading ? <LoadingDots /> : isCurrent ? "Current plan" : isUpgrade ? "Upgrade" : "Downgrade"}
+                {isLoading ? <LoadingDots /> : isCurrent ? t("A8wDj0f") : isUpgrade ? t("AGo17y4") : t("AVFOoVV")}
               </button>
             </div>
           );
@@ -597,10 +701,11 @@ function ActionsCard({ status, onChangePlan, changingPlan }) {
 }
 
 function PaymentHistoryCard({ history }) {
+  const { t } = useTranslation();
   if (!history || history.length === 0) return null;
   return (
     <div className="sub-card fx-centered fx-col fx-start-v" style={{ rowGap: "12px" }}>
-      <h4>Payment history</h4>
+      <h4>{t("AOerrwt")}</h4>
       <div className="fit-container fx-centered fx-col" style={{ rowGap: "8px" }}>
         {[...history].reverse().map((entry, i) => (
           <div key={i} className="fit-container fx-scattered sc-s box-pad-h-m box-pad-v-s">
@@ -608,7 +713,7 @@ function PaymentHistoryCard({ history }) {
               <PlanBadge plan={entry.plan} />
               <PaymentMethodIcon method={entry.last_payment_method} />
             </div>
-            <p className="gray-c">{fmtDate(entry.last_subscription)}</p>
+            <p className="gray-c">{fmtDate(entry.last_subscription, t("AvGdwjI"))}</p>
           </div>
         ))}
       </div>
@@ -617,10 +722,12 @@ function PaymentHistoryCard({ history }) {
 }
 
 export default function SubscriptionPage() {
+  const { t } = useTranslation();
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
   const userKeys = useSelector((state) => state.userKeys);
   const [showLoginWithAPI, setShowLoginWithAPI] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [selectedTab, setSelectedTab] = useState(0);
 
   const { status, loading, error, fetch, cancel, cancelling, resume, resuming, changePlan, changingPlan, cancelChange, cancellingChange } = useSubscription();
 
@@ -634,24 +741,32 @@ export default function SubscriptionPage() {
       {showUpgrade && <UpgradeOverlay onClose={() => setShowUpgrade(false)} userPub={userKeys?.pub} />}
 
       <div className="fx-centered fx-col fx-start-v" style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px 48px", rowGap: "16px" }}>
+        {isConnectedToYaki && (
+          <div style={{ width: "fit-content", margin: "0 auto" }}>
+            <SelectTabs tabs={[t("ArUKrGp"), t("APtVGe1")]} selectedTab={selectedTab} setSelectedTab={setSelectedTab} small={true} />
+          </div>
+        )}
+
         {!isConnectedToYaki ? (
           <div className="sub-card fx-centered fx-col" style={{ rowGap: "20px", textAlign: "center" }}>
             <div style={{ width: 56, height: 56, borderRadius: "50%", backgroundColor: "rgba(247,88,22,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <Icon name="cup" size={28} />
             </div>
             <div style={{ display: "flex", flexDirection: "column", rowGap: "8px" }}>
-              <h4>Not connected to Yaki Platform</h4>
-              <p className="gray-c p-centered">Connect to the Yaki platform to view and manage your subscription.</p>
+              <h4>{t("AxxV7ZQ")}</h4>
+              <p className="gray-c p-centered">{t("AvvW4bY")}</p>
             </div>
-            <button className="btn btn-normal" onClick={() => setShowLoginWithAPI(true)}>Connect to Yaki</button>
+            <button className="btn btn-normal" onClick={() => setShowLoginWithAPI(true)}>{t("AdimVMk")}</button>
           </div>
+        ) : selectedTab === 1 ? (
+          <UsageView onUpgrade={() => setShowUpgrade(true)} />
         ) : loading ? (
           <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>
         ) : error ? (
           <div className="sub-card fx-centered fx-col" style={{ rowGap: "12px" }}>
             <Icon name="warning" size={32} />
-            <p className="gray-c p-centered">Failed to load subscription data. Please try again.</p>
-            <button className="btn btn-gst" onClick={fetch}>Retry</button>
+            <p className="gray-c p-centered">{t("AKxHz6k")}</p>
+            <button className="btn btn-gst" onClick={fetch}>{t("AcdxgMi")}</button>
           </div>
         ) : status ? (
           <>
@@ -666,8 +781,8 @@ export default function SubscriptionPage() {
                   </svg>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", rowGap: "6px" }}>
-                  <p style={{ fontWeight: 600 }}>Note</p>
-                  <p className="gray-c p-medium">{status.last_payment_method === "lightning" ? "You can upgrade your plan or switch payment methods once your current billing cycle ends." : "Changing your payment method requires a cancellation of your current subscription, then simply resubscribe once your current billing cycle ends."}</p>
+                  <p style={{ fontWeight: 600 }}>{t("AVvsxau")}</p>
+                  <p className="gray-c p-medium">{status.last_payment_method === "lightning" ? t("AUAXp9Y") : t("AoRq7VZ")}</p>
                 </div>
               </div>
             )}

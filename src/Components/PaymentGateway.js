@@ -25,6 +25,7 @@ import successJSON from "@/JSONs/success.json";
 import useCashu from "@/Hooks/useCachu";
 import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import Overlay from "@/Components/Overlay";
 import Spinner from "./Spinner";
 
@@ -693,7 +694,7 @@ const Cashier = ({
                         onChange={(e) => setAmount(parseInt(e.target.value))}
                         autoFocus
                       />
-                      <p className="gray-c p-big">Sats</p>
+                      <p className="gray-c p-big">{t("AQv2Hnr")}</p>
                     </div>
                     <input
                       type="text"
@@ -718,7 +719,7 @@ const Cashier = ({
                       <p className="gray-c p-big">{t("A82pzWN")}</p>
 
                       <h1 style={{ fontSize: "80px" }}>{amount}</h1>
-                      <p className="gray-c p-big">Sats</p>
+                      <p className="gray-c p-big">{t("AQv2Hnr")}</p>
                     </div>
                   </div>
                 )}
@@ -867,7 +868,7 @@ const Cashier = ({
 const ReceiverInfo = ({ pubkey, isLNBC, recipientAddr }) => {
   const { t } = useTranslation();
   const ref = useRef(null);
-  const { isNip05Verified, userProfile } = useUserProfile(pubkey);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(pubkey);
   const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
@@ -913,6 +914,7 @@ const ReceiverInfo = ({ pubkey, isLNBC, recipientAddr }) => {
           <div className="fx-centered fx-start-h">
             <p className="p-maj">{userProfile?.display_name}</p>
             {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+            {proUser.isProUser && <Badge data={proUser} size={16} />}
           </div>
           {!isLNBC && (
             <p className="p-one-line gray-c">

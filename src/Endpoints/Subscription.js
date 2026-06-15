@@ -5,6 +5,11 @@ export const getSubscriptionStatus = async () => {
   return data;
 };
 
+export const getUsage = async () => {
+  const { data } = await axiosInstance.get("/api/v1/usage");
+  return data;
+};
+
 export const cancelSubscription = async () => {
   const { data } = await axiosInstance.post("/api/v1/subscription-cancel");
   return data;

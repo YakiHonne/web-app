@@ -3,7 +3,7 @@ import ArrowUp from "@/Components/ArrowUp";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
 import LoadingDots from "@/Components/LoadingDots";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { getSubData, translate } from "@/Helpers/Controlers";
 import useNoteStats from "@/Hooks/useNoteStats";
@@ -30,12 +30,14 @@ import { nip19 } from "nostr-tools";
 import Spinner from "@/Components/Spinner";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import { iconsNames } from "@/Content/IconV2URL";
 import EventStats from "@/Components/EventStats";
 
 export default function Note({ event, nevent }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const userKeys = useSelector((state) => state.userKeys);
   const [showHistory, setShowHistory] = useState(false);
   const [isLoading, setIsLoading] = useState(event ? false : true);
   const [usersList, setUsersList] = useState(false);
@@ -49,7 +51,7 @@ export default function Note({ event, nevent }) {
   );
   const customService = getContentTranslationConfig();
 
-  const { userProfile, isNip05Verified } = useUserProfile(note?.pubkey);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(note?.pubkey);
   const { postActions } = useNoteStats(note?.id, note?.pubkey);
   const unsupportedKind = useMemo(() => {
     return note?.kind !== 1;
@@ -82,6 +84,15 @@ export default function Note({ event, nevent }) {
   }, [event]);
 
   const translateNote = async () => {
+    if (!userKeys) {
+      dispatch(
+        setToast({
+          type: 3,
+          desc: t("ALtr4nL"),
+        }),
+      );
+      return;
+    }
     setIsNoteTranslating(true);
     if (translatedNote) {
       setShowTranslation(true);
@@ -229,6 +240,7 @@ export default function Note({ event, nevent }) {
                         {isNip05Verified && (
                           <Icon name="checkmark-c1" size={24} isColored />
                         )}
+                        {proUser.isProUser && <Badge data={proUser} size={24} />}
                       </div>
                       <p className="gray-c">
                         <Date_
@@ -290,35 +302,6 @@ export default function Note({ event, nevent }) {
                     userProfile={userProfile}
                   />
                   <div className="fx-centered">
-                    <div className="fit-container">
-                      {/* {!isNoteTranslating && !showTranslation && (
-                        <div
-                          className="round-icon-tooltip"
-                          data-tooltip={t("AdHV2qJ")}
-                          onClick={translateNote}
-                        >
-                          <Icon
-                            name="translate"
-                            size={24}
-                            className="opacity-4"
-                          />
-                        </div>
-                      )} */}
-                      {/* {!isNoteTranslating && showTranslation && (
-                        <div
-                          className="round-icon-tooltip"
-                          data-tooltip={t("AE08Wte")}
-                          onClick={() => setShowTranslation(false)}
-                        >
-                          <Icon
-                            name="translate"
-                            size={24}
-                            className="opacity-4"
-                          />
-                        </div>
-                      )}
-                      {isNoteTranslating && <LoadingDots />} */}
-                    </div>
                     {/* <EventOptions
                       event={note}
                       component={"notes"}

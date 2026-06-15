@@ -33,6 +33,7 @@ import UnsupportedKindPreview from "./UnsupportedKindPreview";
 import Link from "next/link";
 import LinkRepEventPreview from "./LinkRepEventPreview";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import {
   getEventFromCache,
   setEventFromCache,
@@ -50,7 +51,8 @@ function KindOne({
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const { isNip05Verified, userProfile } = useUserProfile(event?.pubkey);
+  const userKeys = useSelector((state) => state.userKeys);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(event?.pubkey);
   const [toggleComment, setToggleComment] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
@@ -164,6 +166,15 @@ function KindOne({
   };
 
   const translateNote = async () => {
+    if (!userKeys) {
+      dispatch(
+        setToast({
+          type: 3,
+          desc: t("ALtr4nL"),
+        }),
+      );
+      return;
+    }
     setIsNoteTranslating(true);
     if (translatedNote) {
       setShowTranslation(true);
@@ -214,7 +225,7 @@ function KindOne({
       dispatch(
         setToast({
           type: 2,
-          desc: t("AZ5VQXL"),
+          desc: err?.response?.status === 401 ? t("ALtr4nL") : t("AZ5VQXL"),
         }),
       );
     }
@@ -368,6 +379,7 @@ function KindOne({
                         {isNip05Verified && (
                           <Icon name="checkmark-c1" isColored />
                         )}
+                        {proUser.isProUser && <Badge data={proUser} size={16} />}
                       </div>
 
                       <p className="gray-c p-medium" style={{ margin: 0 }}>

@@ -41,6 +41,8 @@ import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
 import { SelectTabs } from "@/Components/SelectTabs";
 import { iconsNames } from "@/Content/IconV2URL";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 export default function LightningWallet() {
   const dispatch = useDispatch();
@@ -68,6 +70,7 @@ export default function LightningWallet() {
   const walletTriggerRef = useRef(null);
   const walletPortalRef = useRef(null);
   const [walletDropPos, setWalletDropPos] = useState(null);
+  const isMobile = useIsMobile();
   const pageTabs = [
     t("AQtRwt6"),
     t("ALrBEok")
@@ -296,7 +299,7 @@ export default function LightningWallet() {
   };
 
   useEffect(() => {
-    if (!showWalletsList) return;
+    if (!showWalletsList || isMobile) return;
     const handleClick = (e) => {
       if (
         walletPortalRef.current && !walletPortalRef.current.contains(e.target) &&
@@ -312,7 +315,7 @@ export default function LightningWallet() {
       document.removeEventListener("mousedown", handleClick);
       window.removeEventListener("scroll", handleScroll, true);
     };
-  }, [showWalletsList]);
+  }, [showWalletsList, isMobile]);
 
   const handleSelectWallet = (walletID) => {
     let index = wallets.findIndex((wallet) => wallet.id == walletID);
@@ -353,6 +356,54 @@ export default function LightningWallet() {
     setOps("");
     setWalletBalance(walletBalance + amount);
   };
+
+  const walletsListContent = wallets.map((wallet) => {
+    let isLinked = checkIsLinked(wallet.entitle);
+    return (
+      <div
+        key={wallet.id}
+        className="option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleSelectWallet(wallet.id);
+        }}
+        style={{
+          border: "none",
+          overflow: "visible",
+        }}
+      >
+        <div className="fx-centered">
+          {wallet.active && (
+            <div
+              style={{
+                minWidth: "8px",
+                aspectRatio: "1/1",
+                backgroundColor: "var(--green-main)",
+                borderRadius: "var(--border-r-50)",
+              }}
+            ></div>
+          )}
+          <p className={`p-one-line ${wallet.active ? "green-c" : ""}`}>
+            {wallet.entitle}
+          </p>
+          {isLinked && (
+            <div className="round-icon-tooltip" data-tooltip={t("ANExIY1")}>
+              <div className="sticker sticker-small sticker-green-pale">
+                {t("AqlBPla")}
+              </div>
+            </div>
+          )}
+        </div>
+        {wallet.kind !== 1 && (
+          <EventOptions
+            event={wallet}
+            component={"wallet"}
+            refreshAfterDeletion={refreshAfterDeletion}
+          />
+        )}
+      </div>
+    );
+  });
 
   return (
     <>
@@ -441,7 +492,7 @@ export default function LightningWallet() {
                                     <p className="gray-c">{t("A1yJkHJ")}</p>
                                     <h2>{walletBalance}</h2>
                                   </div>
-                                  <span className="gray-c p-big">sats</span>
+                                  <span className="gray-c p-big">{t("A8ck81V")}</span>
                                 </div>
                                 <p className="box-pad-h-m">|</p>
                                 <div className="fx-centered fx-col fx-start-h fx-start-v">
@@ -519,93 +570,58 @@ export default function LightningWallet() {
                                   <Icon name="arrow" size={12} />
                                 </div>
                               )}
-                              {showWalletsList && walletDropPos && typeof document !== "undefined" && createPortal(
-                                <div
-                                  ref={walletPortalRef}
-                                  style={{
-                                    position: "fixed",
-                                    top: walletDropPos.top,
-                                    left: walletDropPos.left,
-                                    minWidth: walletDropPos.width,
-                                    width: "350px",
-                                    zIndex: 99999,
-                                  }}
-                                  className={`bg-dropdown di-wrapper${dismissingWallets ? " dismissing" : ""}`}
+                              {isMobile ? (
+                                <MobileSheet
+                                  open={showWalletsList}
+                                  onClose={closeWalletsList}
+                                  title={t("AnXYtQy")}
+                                  titleRight={
+                                    <div
+                                      className="round-icon-tooltip fx-centered btn btn-small btn-gray"
+                                      onClick={() => setShowAddWallet(true)}
+                                      style={{ flexShrink: 0, whiteSpace: "nowrap" }}
+                                    >
+                                      <Icon name="plus-sign" />
+                                      <p style={{ whiteSpace: "nowrap" }}>{t("A8fEwNq")}</p>
+                                    </div>
+                                  }
                                 >
-                                  <div className="fit-container fx-scattered">
-                                    <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
-                                      {t("AnXYtQy")}
-                                    </p>
-                                    <div className="box-pad-h-s box-pad-v-s">
-                                      <div
-                                        className="round-icon-tooltip fx-centered btn btn-small btn-gray"
-                                        onClick={() => setShowAddWallet(true)}
-                                      >
-                                        <Icon name="plus-sign" />
-                                        <p>{t("A8fEwNq")}</p>
+                                  <div className="fx-centered fx-col fx-start-h fx-start-v" style={{ padding: "0 8px" }}>
+                                    {walletsListContent}
+                                  </div>
+                                </MobileSheet>
+                              ) : (
+                                showWalletsList && walletDropPos && typeof document !== "undefined" && createPortal(
+                                  <div
+                                    ref={walletPortalRef}
+                                    style={{
+                                      position: "fixed",
+                                      top: walletDropPos.top,
+                                      left: walletDropPos.left,
+                                      width: "max(400px, " + walletDropPos.width + "px)",
+                                      zIndex: 99999,
+                                    }}
+                                    className={`bg-dropdown di-wrapper${dismissingWallets ? " dismissing" : ""}`}
+                                  >
+                                    <div className="fit-container fx-scattered" style={{ flexWrap: "nowrap" }}>
+                                      <p className="p-medium gray-c box-pad-h-m box-pad-v-s" style={{ whiteSpace: "nowrap" }}>
+                                        {t("AnXYtQy")}
+                                      </p>
+                                      <div className="box-pad-h-s box-pad-v-s">
+                                        <div
+                                          className="round-icon-tooltip fx-centered btn btn-small btn-gray"
+                                          onClick={() => setShowAddWallet(true)}
+                                          style={{ whiteSpace: "nowrap" }}
+                                        >
+                                          <Icon name="plus-sign" />
+                                          <p style={{ minWidth: "max-content" }}>{t("A8fEwNq")}</p>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                  {wallets.map((wallet) => {
-                                    let isLinked = checkIsLinked(
-                                      wallet.entitle,
-                                    );
-                                    return (
-                                      <div
-                                        key={wallet.id}
-                                        className="option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleSelectWallet(wallet.id);
-                                        }}
-                                        style={{
-                                          border: "none",
-                                          overflow: "visible",
-                                        }}
-                                      >
-                                        <div className="fx-centered">
-                                          {wallet.active && (
-                                            <div
-                                              style={{
-                                                minWidth: "8px",
-                                                aspectRatio: "1/1",
-                                                backgroundColor:
-                                                  "var(--green-main)",
-                                                borderRadius:
-                                                  "var(--border-r-50)",
-                                              }}
-                                            ></div>
-                                          )}
-                                          <p
-                                            className={`p-one-line ${wallet.active ? "green-c" : ""}`}
-                                          >
-                                            {wallet.entitle}
-                                          </p>
-                                          {isLinked && (
-                                            <div
-                                              className="round-icon-tooltip"
-                                              data-tooltip={t("ANExIY1")}
-                                            >
-                                              <div className="sticker sticker-small sticker-green-pale">
-                                                {t("AqlBPla")}
-                                              </div>
-                                            </div>
-                                          )}
-                                        </div>
-                                        {wallet.kind !== 1 && (
-                                          <EventOptions
-                                            event={wallet}
-                                            component={"wallet"}
-                                            refreshAfterDeletion={
-                                              refreshAfterDeletion
-                                            }
-                                          />
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>,
-                                document.body
+                                    {walletsListContent}
+                                  </div>,
+                                  document.body
+                                )
                               )}
                             </div>
                           </div>
@@ -732,7 +748,7 @@ export default function LightningWallet() {
                                           <span className="orange-c">
                                             {" "}
                                             {transaction.amount}{" "}
-                                            <span className="gray-c">Sats</span>
+                                            <span className="gray-c">{t("AQv2Hnr")}</span>
                                           </span>
                                         </p>
                                       </div>
@@ -906,7 +922,7 @@ export default function LightningWallet() {
                                           <span className="orange-c">
                                             {" "}
                                             {transaction.amount}{" "}
-                                            <span className="gray-c">Sats</span>
+                                            <span className="gray-c">{t("AQv2Hnr")}</span>
                                           </span>
                                         </p>
                                       </div>
@@ -1085,7 +1101,7 @@ export default function LightningWallet() {
                                           <span className="orange-c">
                                             {" "}
                                             {transaction.amount}{" "}
-                                            <span className="gray-c">Sats</span>
+                                            <span className="gray-c">{t("AQv2Hnr")}</span>
                                           </span>
                                         </p>
                                       </div>
@@ -1460,7 +1476,7 @@ const SendPayment = ({
                 onChange={(e) => setAmount(parseInt(e.target.value))}
                 autoFocus
               />
-              <p className="gray-c p-big">Sats</p>
+              <p className="gray-c p-big">{t("AQv2Hnr")}</p>
             </div>
             <input
               type="text"
@@ -1701,7 +1717,7 @@ const ReceivePayment = ({
               onChange={(e) => setAmount(parseInt(e.target.value))}
               autoFocus
             />
-            <p className="gray-c p-big">Sats</p>
+            <p className="gray-c p-big">{t("AQv2Hnr")}</p>
           </div>
           <input
             type="text"

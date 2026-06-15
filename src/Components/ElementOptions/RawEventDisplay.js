@@ -13,10 +13,11 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import { convertDate } from "@/Helpers/Encryptions";
 import { eventKinds } from "@/Content/Extra";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import Overlay from "@/Components/Overlay";
 
 export default function RawEventDisplay({ event, exit }) {
-  const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(event.pubkey);
   const { t } = useTranslation();
   let eventString = `\`\`\`json 
   ${JSON.stringify(event, null, 2)}
@@ -25,7 +26,7 @@ export default function RawEventDisplay({ event, exit }) {
     const codeRef = document.getElementById(id);
     if (!codeRef) return;
     const codeText = codeRef.innerText;
-    copyText(codeText, "Code is copied");
+    copyText(codeText, t("AwszVHZ"));
   };
   return (
     <Overlay exit={exit} width={500}>
@@ -48,6 +49,7 @@ export default function RawEventDisplay({ event, exit }) {
             />
             <p>{userProfile.display_name || userProfile?.name}</p>
             {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+            {proUser.isProUser && <Badge data={proUser} size={16} />}
           </div>
           <div className="fx-centered fx-start-h">
             <p className="gray-c">{t("AZxuurd")}</p>
