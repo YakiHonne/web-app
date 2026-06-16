@@ -487,6 +487,7 @@ function KindOne({
               replyId={event.id}
               replyPubkey={event.pubkey}
               actions={postActions}
+              label={event.isComment ? "" : t("AABwCJX")}
             />
           )}
         </div>

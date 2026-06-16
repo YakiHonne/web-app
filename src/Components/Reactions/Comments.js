@@ -27,6 +27,7 @@ export default function Comments({
   actions,
   tagKind = "e",
   rootKind = null,
+  label = ""
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -461,7 +462,7 @@ export default function Comments({
                       borderRadius: 0,
                     }}
                     className="txt-area ifs-full if if-no-border"
-                    placeholder={t("AOmRQKF")}
+                    placeholder={label || t("AKtM0ji")}
                     value={comment}
                     onChange={handleOnChange}
                     onKeyDown={handleKeyDown}

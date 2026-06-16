@@ -269,7 +269,7 @@ export default function CommentsSection({
                 <UserProfilePic size={40} mainAccountUser={true} />
                 <div className="sc-s-18 box-pad-h-m box-pad-v-s fit-container">
                   <p className="gray-c">
-                    {t("AOmRQKF")}
+                    {t("AABwCJX")}
                   </p>
                 </div>
               </div>
@@ -284,6 +284,7 @@ export default function CommentsSection({
                   actions={postActions}
                   tagKind={tagKind}
                   rootKind={rootKind}
+                  label={t("AABwCJX")}
                 />
               </div>
             )}
