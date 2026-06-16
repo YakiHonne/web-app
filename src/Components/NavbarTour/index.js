@@ -12,6 +12,7 @@ function getRect(selector) {
     const el = document.querySelector(selector);
     if (!el) return null;
     const r = el.getBoundingClientRect();
+    const borderRadius = window.getComputedStyle(el).borderRadius || "8px";
     return {
       top: r.top - PADDING,
       left: r.left - PADDING,
@@ -21,6 +22,7 @@ function getRect(selector) {
       elLeft: r.left,
       elRight: r.right,
       elBottom: r.bottom,
+      borderRadius,
     };
   } catch {
     return null;
@@ -48,18 +50,43 @@ function computeTooltipPosition(rect) {
   For non-click steps we use a single full-screen overlay.
 */
 function Veil({ rect, onVoidClick }) {
-  // Always use 4-strip approach so the spotlight area is never covered
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1440;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 900;
+
   if (!rect) {
     return <div className={styles.veilFull} onClick={onVoidClick} />;
   }
-  const { top, left, width, height } = rect;
+
+  const { top, left, width, height, borderRadius } = rect;
+  // Parse border-radius to a number for SVG rx/ry (take the first value)
+  const r = Math.min(parseFloat(borderRadius) || 8, width / 2, height / 2);
+
+  const cutout = `M ${left + r} ${top}
+    H ${left + width - r} Q ${left + width} ${top} ${left + width} ${top + r}
+    V ${top + height - r} Q ${left + width} ${top + height} ${left + width - r} ${top + height}
+    H ${left + r} Q ${left} ${top + height} ${left} ${top + height - r}
+    V ${top + r} Q ${left} ${top} ${left + r} ${top} Z`;
+
   return (
-    <>
-      <div className={styles.veilStrip} style={{ top: 0, left: 0, right: 0, height: `${top}px` }} onClick={onVoidClick} />
-      <div className={styles.veilStrip} style={{ top: `${top + height}px`, left: 0, right: 0, bottom: 0 }} onClick={onVoidClick} />
-      <div className={styles.veilStrip} style={{ top: `${top}px`, left: 0, width: `${left}px`, height: `${height}px` }} onClick={onVoidClick} />
-      <div className={styles.veilStrip} style={{ top: `${top}px`, left: `${left + width}px`, right: 0, height: `${height}px` }} onClick={onVoidClick} />
-    </>
+    <svg
+      className={styles.veilSvg}
+      viewBox={`0 0 ${vw} ${vh}`}
+      preserveAspectRatio="none"
+      onClick={onVoidClick}
+    >
+      <defs>
+        <mask id="tour-cutout">
+          <rect width={vw} height={vh} fill="white" />
+          <path d={cutout} fill="black" />
+        </mask>
+      </defs>
+      <rect
+        width={vw}
+        height={vh}
+        fill="rgba(0,0,0,0.68)"
+        mask="url(#tour-cutout)"
+      />
+    </svg>
   );
 }
 
@@ -192,7 +219,7 @@ export default function NavbarTour({ steps, onComplete }) {
   }, [currentStep]);
 
   const spotlightStyle = rect
-    ? { top: `${rect.top}px`, left: `${rect.left}px`, width: `${rect.width}px`, height: `${rect.height}px` }
+    ? { top: `${rect.top}px`, left: `${rect.left}px`, width: `${rect.width}px`, height: `${rect.height}px`, borderRadius: rect.borderRadius }
     : { top: "-200px", left: "-200px", width: "0px", height: "0px" };
 
   return (
