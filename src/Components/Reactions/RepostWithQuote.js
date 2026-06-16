@@ -11,6 +11,7 @@ import WriteNote from "@/Components/WriteNote";
 import NumberShrink from "@/Components/NumberShrink";
 import Icon from "@/Components/Icon";
 import { iconsNames } from "@/Content/IconV2URL";
+import Spinner from "../Spinner";
 
 export default function RepostWithQuote({ isReposted, isQuoted, event, actions, totalCount }) {
   const dispatch = useDispatch();
@@ -69,7 +70,7 @@ export default function RepostWithQuote({ isReposted, isQuoted, event, actions, 
 
   const handleRepost = async (e) => {
     e.stopPropagation();
-    closeDropdown();
+
     if (isLoading) return;
     if (!userKeys) { setIsLogin(true); return; }
 
@@ -79,6 +80,7 @@ export default function RepostWithQuote({ isReposted, isQuoted, event, actions, 
         let eventInitEx = await InitEvent(5, "This repost will be deleted!", [["e", isReposted.id]]);
         if (!eventInitEx) { setIsLoading(false); return; }
         dispatch(setToPublish({ eventInitEx, allRelays: [], toRemoveFromCache: { kind: "reposts", eventId: event.id } }));
+        closeDropdown();
         setIsLoading(false);
         return;
       }
@@ -88,6 +90,7 @@ export default function RepostWithQuote({ isReposted, isQuoted, event, actions, 
       if (!eventInitEx) { setIsLoading(false); return; }
       dispatch(setToPublish({ eventInitEx, allRelays: [] }));
       setRepostEventID(eventInitEx.id);
+      closeDropdown();
       setIsLoading(false);
     } catch (err) {
       console.log(err);
@@ -120,7 +123,7 @@ export default function RepostWithQuote({ isReposted, isQuoted, event, actions, 
 
       <div style={{ position: "relative" }} ref={dropdownRef}>
         <div
-          className="fx-centered pointer repost-quote-btn"
+          className="fx-centered pointer repost-quote-btn pointer"
           style={{ columnGap: "4px", borderRadius: "20px", padding: "4px 8px", transition: "background-color 0.15s ease" }}
           onClick={handleToggleDropdown}
         >
@@ -148,16 +151,16 @@ export default function RepostWithQuote({ isReposted, isQuoted, event, actions, 
               style={{ columnGap: "10px" }}
               onClick={handleRepost}
             >
-              <Icon
+              {isLoading ? <Spinner size={18} /> : <Icon
                 name={iconsNames.arrow_reload_02}
                 size={18}
                 v={2}
                 opacity={!isReposted ? 0.6 : "initial"}
                 isColored={isReposted}
                 isBoldThemeColor={isReposted}
-              />
-              <p className={isReposted ? "orange-c" : ""}>
-                {isReposted ? t("AUvmzyU") + " ✓" : t("AUvmzyU")}
+              />}
+              <p className={isReposted ? "c1-c" : ""}>
+                {t("AUvmzyU")}
               </p>
             </div>
             <div
@@ -173,7 +176,7 @@ export default function RepostWithQuote({ isReposted, isQuoted, event, actions, 
                 isColored={isQuoted}
                 isBoldThemeColor={isQuoted}
               />
-              <p className={isQuoted ? "orange-c" : ""}>{t("A5XLJln")}</p>
+              <p className={isQuoted ? "c1-c" : ""}>{t("A5XLJln")}</p>
             </div>
           </div>
         )}
