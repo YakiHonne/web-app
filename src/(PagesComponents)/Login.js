@@ -50,11 +50,13 @@ import PackPreviewOnboarding from "@/Components/PackPreviewOnboarding";
 import Icon from "@/Components/Icon";
 import DotGrid from "@/Components/DotGrid/DotGrid";
 import { SelectTabs } from "@/Components/SelectTabs";
+import { useTheme } from "next-themes";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 let isNewAccount = getWallets().length > 0 ? true : false;
 
 export default function Login() {
+  const { theme } = useTheme()
   const { t } = useTranslation();
   let sk_ = generateSecretKey();
   let sk = bytesTohex(sk_);
@@ -79,7 +81,7 @@ export default function Login() {
         <DotGrid
           dotSize={7}
           gap={19}
-          baseColor="#2b2b2b"
+          baseColor={["dark", "gray"].includes(theme) ? "#2b2b2b" : "#e8e8e8"}
           activeColor="#ff5c27"
           proximity={270}
           shockRadius={250}
@@ -946,7 +948,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
                     ></div>
                     <div className="signup-avatar-overlay fx-centered fx-col pointer toggle">
                       <Icon name="image" size={24} />
-                      <p className="gray-c">{t("AnD39Ci")}</p>
+                      <p className="gray-c p-medium" >{t("AnD39Ci")}</p>
                     </div>
                   </div>
                 </div>
@@ -1094,188 +1096,6 @@ const InitiProfile = () => {
       style={{ height: "500px" }}
     >
       <Spinner size={32} />
-    </div>
-  );
-};
-
-const ProfilePreview = ({ pubkeys }) => {
-  let nostrAuthors = useSelector((state) => state.nostrAuthors);
-  let [images, setImages] = useState(pubkeys);
-
-  useEffect(() => {
-    try {
-      let authors = [];
-      for (let author of pubkeys) {
-        let pubkey = getHex(author);
-        let auth = getUser(pubkey);
-        if (auth) authors.push(auth.picture);
-        else authors.push("");
-      }
-      setImages(authors);
-    } catch (err) {
-      console.log(err);
-    }
-  }, [nostrAuthors]);
-
-  return (
-    <div style={{ position: "relative", minWidth: "32px", minHeight: "32px" }}>
-      <div style={{ position: "absolute", left: 0, bottom: "0" }}>
-        <UserProfilePic
-          user_id={pubkeys[0]}
-          mainAccountUser={false}
-          img={images[0] || ""}
-          size={10}
-        />
-      </div>
-      <div style={{ position: "absolute", left: "16px", top: "10px" }}>
-        <UserProfilePic
-          user_id={pubkeys[1]}
-          mainAccountUser={false}
-          img={images[1] || ""}
-          size={8}
-        />
-      </div>
-      <div style={{ position: "absolute", left: "16px", bottom: "-4px" }}>
-        <UserProfilePic
-          user_id={pubkeys[2]}
-          mainAccountUser={false}
-          img={images[2] || ""}
-          size={12}
-        />
-      </div>
-    </div>
-  );
-};
-
-const Suggestions = ({ index, selectedInterests, handleSelectInterests }) => {
-  const { t } = useTranslation();
-  const isInterested = useMemo(() => {
-    let tag = InterestSuggestions[index].main_tag;
-    let interest = selectedInterests.find((interest) => interest.tag === tag);
-    return interest;
-  }, [selectedInterests]);
-
-  const followUnfollow = (pubkey, index_, isFollowed) => {
-    if (isInterested) {
-      if (!isFollowed)
-        handleSelectInterests({
-          ...isInterested,
-          pubkeys: [...isInterested.pubkeys, pubkey],
-        });
-      if (isFollowed) {
-        let pubkeys = Array.from(isInterested.pubkeys);
-        pubkeys = pubkeys.splice(index_, 0);
-        handleSelectInterests({
-          ...isInterested,
-          pubkeys,
-        });
-      }
-    }
-    if (!isInterested) {
-      handleSelectInterests({
-        tag: InterestSuggestions[index].main_tag,
-        pubkeys: [pubkey],
-      });
-    }
-  };
-  const followUnfollowAll = (toFollowAll) => {
-    if (!toFollowAll) {
-      handleSelectInterests({
-        tag: InterestSuggestions[index].main_tag,
-        pubkeys: [],
-      });
-    }
-    if (toFollowAll) {
-      handleSelectInterests({
-        tag: InterestSuggestions[index].main_tag,
-        pubkeys: InterestSuggestions[index].pubkeys.map((pubkey) => {
-          return getHex(pubkey);
-        }),
-      });
-    }
-  };
-  const isFollowed = (pubkey) => {
-    if (isInterested) {
-      return isInterested.pubkeys.find((_) => _ === pubkey) ? true : false;
-    }
-    return false;
-  };
-
-  return (
-    <div
-      className="sc-s-18 box-pad-h-m box-pad-v-m fit-container box-marg-s slide-down"
-      style={{
-        maxHeight: "40vh",
-        overflow: "scroll",
-        border: "none",
-        borderRadius: "0",
-      }}
-    >
-      <div className="fit-container fx-scattered box-marg-s">
-        <p className="gray-c">{t("AoO5zem")}</p>
-        {isInterested?.pubkeys?.length !==
-          InterestSuggestions[index].pubkeys.length && (
-            <button
-              className="btn btn-gst btn-small"
-              onClick={() => followUnfollowAll(true)}
-            >
-              {t("AzkUxnd")}
-            </button>
-          )}
-        {isInterested?.pubkeys?.length ===
-          InterestSuggestions[index].pubkeys.length && (
-            <button
-              className="btn btn-normal btn-small"
-              onClick={() => followUnfollowAll(false)}
-            >
-              {t("AyohNeT")}
-            </button>
-          )}
-      </div>
-      <div
-        className="fx-centered fx-col fx-start-h fx-start-v"
-        style={{ gap: "16px" }}
-      >
-        {InterestSuggestions[index].pubkeys.map((_, index_) => {
-          let pubkey = getHex(_);
-          let author = getUser(pubkey) || getEmptyuserMetadata(pubkey);
-          let checkIsFollowed = isFollowed(pubkey);
-          return (
-            <div className="fit-container fx-scattered" key={index_}>
-              <div className="fx-centered">
-                <UserProfilePic
-                  user_id={pubkey}
-                  mainAccountUser={false}
-                  img={author.picture}
-                  size={48}
-                />
-                <div>
-                  <p>{author.display_name || author.name}</p>
-                  <p className="gray-c p-medium">
-                    @{author.name || author.display_name}
-                  </p>
-                </div>
-              </div>
-              {!checkIsFollowed && (
-                <button
-                  className="btn btn-gst btn-small"
-                  onClick={() => followUnfollow(pubkey, index_, false)}
-                >
-                  {t("A9o2pLM")}
-                </button>
-              )}
-              {checkIsFollowed && (
-                <button
-                  className="btn btn-normal btn-small"
-                  onClick={() => followUnfollow(pubkey, index_, true)}
-                >
-                  {t("ASi0a0d")}
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 };

@@ -90,7 +90,9 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               onClick={() => setTheme("dark")}
             >
               <div className="box-pad-h box-pad-v-m fx-centered fx-col">
-                <Icon name="yaki-logomark" size={40} />
+                <div style={{ filter: "invert()" }}>
+                  <Icon name="yaki-logomark" size={40} isColored />
+                </div>
                 <p className="p-medium" style={{ color: "white" }}>
                   Noir
                 </p>
@@ -105,7 +107,9 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               onClick={() => setTheme("gray")}
             >
               <div className="box-pad-h box-pad-v-m fx-centered fx-col">
-                <Icon name="yaki-logomark" size={40} />
+                <div style={{ filter: "invert()" }}>
+                  <Icon name="yaki-logomark" size={40} isColored />
+                </div>
                 <p className="p-medium" style={{ color: "white" }}>
                   Graphite
                 </p>
@@ -122,7 +126,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               onClick={() => setTheme("light")}
             >
               <div className="box-pad-h box-pad-v-m fx-centered fx-col">
-                <Icon name="yaki-logomark" size={40} />
+                <Icon name="yaki-logomark" size={40} isColored />
                 <p className="p-medium" style={{ color: "black" }}>
                   Neige
                 </p>
@@ -137,7 +141,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               onClick={() => setTheme("creamy")}
             >
               <div className="box-pad-h box-pad-v-m fx-centered fx-col">
-                <Icon name="yaki-logomark" size={40} />
+                <Icon name="yaki-logomark" size={40} isColored />
                 <p
                   className="p-medium"
                   style={{ color: "black", width: "max-content" }}

@@ -86,7 +86,7 @@ function PackOverlay({ pack, isAllFollowing, handleMultiSelection, handleSingleS
   return (
     <div className="pack-overlay-backdrop" onClick={onClose}>
       <div
-        className="pack-overlay-sheet bg-dropdown-t"
+        className="pack-overlay-sheet"
         onClick={(e) => e.stopPropagation()}
       >
         <button className="pack-overlay-close" onClick={onClose}>

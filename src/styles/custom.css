@@ -4299,6 +4299,37 @@ input[type="range"]::-moz-range-thumb {
     overflow-y: auto;
     overflow-x: hidden;
     animation: pack-sheet-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    background-color: rgba(20, 20, 20, 0.75);
+}
+
+[data-theme='white'] .pack-overlay-sheet,
+[data-theme='light'] .pack-overlay-sheet {
+    background-color: rgba(255, 255, 255, 0.75);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    color: rgba(0, 0, 0, 0.85);
+}
+
+[data-theme='white'] .pack-overlay-sheet p,
+[data-theme='white'] .pack-overlay-sheet span,
+[data-theme='white'] .pack-overlay-sheet h3,
+[data-theme='light'] .pack-overlay-sheet p,
+[data-theme='light'] .pack-overlay-sheet span,
+[data-theme='light'] .pack-overlay-sheet h3 {
+    color: rgba(0, 0, 0, 0.85);
+}
+
+[data-theme='creamy'] .pack-overlay-sheet {
+    background-color: rgba(250, 247, 243, 0.75);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    color: rgba(60, 40, 10, 0.85);
+}
+
+[data-theme='creamy'] .pack-overlay-sheet p,
+[data-theme='creamy'] .pack-overlay-sheet span,
+[data-theme='creamy'] .pack-overlay-sheet h3 {
+    color: rgba(60, 40, 10, 0.85);
 }
 
 @keyframes pack-sheet-in {
