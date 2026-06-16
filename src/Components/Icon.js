@@ -31,7 +31,7 @@ export default function Icon({
         opacity: opacity || "initial",
         minWidth: width || size,
         minHeight: height || size,
-        cursor: onClick ? "pointer" : "initial",
+        // cursor: onClick ? "pointer" : "initial",
         filter: !isColored
           ? ["dark", "gray"].includes(resolvedTheme)
             ? "brightness(0) invert()"
