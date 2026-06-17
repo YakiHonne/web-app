@@ -12,6 +12,7 @@ import { getCustomSettings } from "@/Helpers/ClientHelpers";
 import Icon from "@/Components/Icon";
 import { iconsNames } from "@/Content/IconV2URL";
 import NumberShrink from "../NumberShrink";
+import Spinner from "../Spinner";
 
 export default function Like({ isLiked, event, actions, tagKind = "e", total }) {
   const dispatch = useDispatch();
@@ -179,9 +180,15 @@ export default function Like({ isLiked, event, actions, tagKind = "e", total }) 
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
         >
-          {!isLiked && <Icon name={iconsNames.heart_01} size={20} opacity={0.4} v={2} />}
-          {/* {!isLiked && <Icon name="heart" size={24} opacity={0.4} />} */}
-          {isLiked && <EmojiImg content={isLiked?.content} />}
+          {isLoading &&
+            <Spinner />
+          }
+          {!isLoading &&
+            <>
+              {!isLiked && <Icon name={iconsNames.heart_01} size={20} opacity={0.4} v={2} />}
+              {isLiked && <EmojiImg content={isLiked?.content} />}
+            </>
+          }
           <span className={`p-medium ${isLiked ? "orange-c" : "opacity-4"}`}>
             <NumberShrink value={total} />
           </span>
