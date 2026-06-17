@@ -20,6 +20,7 @@ import { redirectToLogin } from "@/Helpers/Helpers";
 import { useSelector } from "react-redux";
 import {
   exportAllWallets,
+  getAccountKindTag,
   handleSwitchAccount,
   logoutAllAccounts,
   userLogout,
@@ -330,7 +331,7 @@ export default function SidebarComp() {
                   isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
                   isPage(
                     "/profile/" +
-                      nip19.nprofileEncode({ pubkey: userKeys.pub }),
+                    nip19.nprofileEncode({ pubkey: userKeys.pub }),
                   ) ||
                   isPage("/profile/" + userMetadata.nip05)
                 }
@@ -339,11 +340,11 @@ export default function SidebarComp() {
                 <Icon
                   name={
                     isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
-                    isPage(
-                      "/profile/" +
+                      isPage(
+                        "/profile/" +
                         nip19.nprofileEncode({ pubkey: userKeys.pub }),
-                    ) ||
-                    isPage("/profile/" + userMetadata.nip05)
+                      ) ||
+                      isPage("/profile/" + userMetadata.nip05)
                       ? "user-bold"
                       : "user"
                   }
@@ -597,30 +598,7 @@ export default function SidebarComp() {
                                 </div>
                               </div>
                               <div className="fx-centered">
-                                {account.userKeys.ext && (
-                                  <div
-                                    className="sticker sticker-small sticker-orange-side"
-                                    style={{ minWidth: "max-content" }}
-                                  >
-                                    Extension
-                                  </div>
-                                )}
-                                {account.userKeys.sec && (
-                                  <div
-                                    className="sticker sticker-small sticker-red-side"
-                                    style={{ minWidth: "max-content" }}
-                                  >
-                                    Private Key
-                                  </div>
-                                )}
-                                {account.userKeys.bunker && (
-                                  <div
-                                    className="sticker sticker-small sticker-green-side"
-                                    style={{ minWidth: "max-content" }}
-                                  >
-                                    Remote
-                                  </div>
-                                )}
+                                {getAccountKindTag({ account })}
                                 {userKeys.pub !== account.pubkey && (
                                   <div
                                     className="fx-centered"

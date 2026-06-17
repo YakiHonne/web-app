@@ -25,6 +25,7 @@ import { getConnectedAccounts, getWallets, getAllWallets } from "@/Helpers/Clien
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import {
   exportAllWallets,
+  getAccountKindTag,
   handleSwitchAccount,
   logoutAllAccounts,
   userLogout,
@@ -647,9 +648,7 @@ export default function TopNavbar() {
                         <p className="p-one-line">
                           {account.display_name || account.name || minimizeKey(account.pubkey)}
                         </p>
-                        <p className="gray-c p-small p-one-line">
-                          @{account.name || account.display_name || minimizeKey(account.pubkey)}
-                        </p>
+                        {getAccountKindTag({ account })}
                       </div>
                     </div>
                     {userKeys.pub === account.pubkey ? (

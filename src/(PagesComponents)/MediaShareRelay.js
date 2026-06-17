@@ -219,9 +219,8 @@ const HomeFeed = ({ relay }) => {
     <div className="fx-centered  fx-wrap fit-container" style={{ gap: 0 }}>
       {["recent", "recent_with_replies"].includes("global") &&
         notes?.length > 0 && (
-          <div className="fit-container box-pad-h">
-            <hr />
-            <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-pad-v-m">
+          <div className="fit-container box-pad-h box-pad-v-m sc-s">
+            <div className="fit-container fx-centered fx-start-h fx-start-v ">
               <div>
                 <Icon name="eye-opened" size={24} />
               </div>
@@ -230,8 +229,6 @@ const HomeFeed = ({ relay }) => {
                 <p className="gray-c">{t("AstvJYT")}</p>
               </div>
             </div>
-            <hr />
-            <hr />
           </div>
         )}
       {notes?.length === 0 && !isLoading && isConnected && (

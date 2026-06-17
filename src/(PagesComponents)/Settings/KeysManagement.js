@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { getBech32, downloadAsFile, shortenKey } from "../../Helpers/Encryptions";
 import { copyText } from "../../Helpers/Helpers";
 import Icon from "@/Components/Icon";
+import RecoverPrivateKeyGoogleMethod from "./RecoverPrivateKeyGoogleMethod";
 
 export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
   const { t } = useTranslation();
@@ -57,33 +58,65 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
 
       {selectedTab === "keys" && (
         <div className="fit-container fx-col fx-centered fx-start-v box-pad-h-m box-pad-v-m ">
+          {userKeys.email &&
+            <>
+              <div className="fit-container fx-centered fx-start-v fx-col">
+                <p className="c1-c p-left fit-container">{t("AcpRrIH")}</p>
+                <div className="sc-s-d fit-container box-pad-h-m box-pad-v-s">
+                  <p >{userKeys.email}</p>
+                </div>
+              </div>
+            </>
+          }
+          {userKeys.bunker && <>
+            <div>
+              <p className=" p-left fit-container">{t("AoLGP7H")}</p>
+              <p className="p-medium gray-c">{t("AB7RH4M")}</p>
+            </div>
+            <div
+              className="fx-scattered if pointer dashed-onH fit-container"
+              style={{ borderStyle: "dashed" }}
+              onClick={() =>
+                copyText(userKeys.bunker, t("ADOA9ab"))
+              }
+            >
+              <p>{shortenKey(userKeys.bunker)}</p>
+              <Icon name="copy" size={24} />
+            </div>
+          </>}
+          {userKeys.central &&
+            <RecoverPrivateKeyGoogleMethod />
+          }
+          {!(userKeys.central || userKeys.bunker) && <>
+            <div>
+              <p className="p-left fit-container">{t("Az0mazr")}</p>
+              <p className="p-medium gray-c">{t("AnQpdZ9")}</p>
+            </div>
+            <div
+              className={`fx-scattered if pointer fit-container ${userKeys.sec ? "dashed-onH" : "if-disabled"
+                }`}
+              style={{ borderStyle: "dashed" }}
+              onClick={() =>
+                userKeys.sec
+                  ? copyText(getBech32("nsec", userKeys.sec), t("AStACDI"))
+                  : null
+              }
+            >
+              <p>
+                {userKeys.sec ? (
+                  shortenKey(getBech32("nsec", userKeys.sec))
+                ) : (
+                  <span className="italic-txt gray-c">
+                    {userKeys.ext ? t("ApmycvH") : t("Au372KY")}
+                  </span>
+                )}
+              </p>
+              {userKeys.sec && <Icon name="copy" size={24} />}
+            </div>
+          </>}
+
           <div>
-            <p className="c1-c p-left fit-container">{t("Az0mazr")}</p>
-            <p className="p-medium gray-c">{t("AnQpdZ9")}</p>
-          </div>
-          <div
-            className={`fx-scattered if pointer fit-container ${userKeys.sec ? "dashed-onH" : "if-disabled"
-              }`}
-            style={{ borderStyle: "dashed" }}
-            onClick={() =>
-              userKeys.sec
-                ? copyText(getBech32("nsec", userKeys.sec), t("AStACDI"))
-                : null
-            }
-          >
-            <p>
-              {userKeys.sec ? (
-                shortenKey(getBech32("nsec", userKeys.sec))
-              ) : (
-                <span className="italic-txt gray-c">
-                  {userKeys.ext ? t("ApmycvH") : t("Au372KY")}
-                </span>
-              )}
-            </p>
-            {userKeys.sec && <Icon name="copy" size={24} />}
-          </div>
-          <div>
-            <p className="c1-c p-left fit-container">{t("AZRwERj")}</p>
+            <p className=" p-left fit-container">{t("AZRwERj")}</p>
             <p className="p-medium gray-c">{t("A9pRbqh")}</p>
           </div>
           <div
@@ -102,6 +135,7 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
               <Icon name="export" />
             </div>
           </div>
+
         </div>
       )}
     </div>

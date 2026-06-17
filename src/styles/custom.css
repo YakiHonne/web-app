@@ -3592,9 +3592,7 @@ input[type="range"]::-moz-range-thumb {
     align-items: center;
     gap: 16px;
     width: 100%;
-    border: 1px solid var(--pale-gray);
     border-radius: 16px;
-    padding: 14px 16px;
     cursor: pointer;
     text-align: left;
     transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
@@ -3656,7 +3654,6 @@ input[type="range"]::-moz-range-thumb {
     height: 28px;
     border-radius: 50%;
     flex: none;
-    opacity: 0.5;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
@@ -4120,6 +4117,66 @@ input[type="range"]::-moz-range-thumb {
     background: var(--white);
     padding: 18px;
     display: inline-flex;
+}
+
+.login-google-overlay {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.login-google-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+}
+
+.login-google-busy {
+    gap: 10px;
+    padding: 8px 0;
+}
+
+.login-google-info-card {
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.login-google-info-card--alert {
+    background: color-mix(in srgb, var(--red-main) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--red-main) 30%, transparent);
+}
+
+.login-google-key-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.login-google-key-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+
+.login-google-setup-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.login-google-setup-actions .btn:first-child {
+    flex: 0 0 auto;
+    padding: 0 20px;
+}
+
+.login-google-setup-actions .btn:last-child {
+    flex: 1;
 }
 
 @media (max-width: 640px) {

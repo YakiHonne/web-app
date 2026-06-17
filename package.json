@@ -14,6 +14,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@ffmpeg/ffmpeg": "^0.12.15",
+    "@fiatjaf/promenade-trusted-dealer": "npm:@jsr/fiatjaf__promenade-trusted-dealer@^0.4.3",
     "@getalby/sdk": "^5.1.2",
     "@giphy/js-fetch-api": "^5.7.0",
     "@giphy/react-components": "^10.1.0",

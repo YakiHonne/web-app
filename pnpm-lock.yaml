@@ -23,6 +23,9 @@ importers:
       '@ffmpeg/ffmpeg':
         specifier: ^0.12.15
         version: 0.12.15
+      '@fiatjaf/promenade-trusted-dealer':
+        specifier: npm:@jsr/fiatjaf__promenade-trusted-dealer@^0.4.3
+        version: '@jsr/fiatjaf__promenade-trusted-dealer@0.4.3'
       '@getalby/sdk':
         specifier: ^5.1.2
         version: 5.1.2(typescript@5.9.3)
@@ -1368,6 +1371,15 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@jsr/fiatjaf__promenade-trusted-dealer@0.4.3':
+    resolution: {integrity: sha512-Eyo7TXFtdHM41KI7p30K7osxWE0tNVibNUNIUl5CS2FJD7bxIcWvGXukJ16BBUdxtGy5+mI/CGhrKusJU14PzA==, tarball: https://npm.jsr.io/~/11/@jsr/fiatjaf__promenade-trusted-dealer/0.4.3.tgz}
+
+  '@jsr/henrygd__semaphore@0.0.2':
+    resolution: {integrity: sha512-nrwZ8HaqU1Agb2ij8omIxaOCAsKkDHWcwS9hTRumPhZuptwh6/0BJExBd8+eClTYM7jBnZxK+cP4WJRTcHBvCA==, tarball: https://npm.jsr.io/~/11/@jsr/henrygd__semaphore/0.0.2.tgz}
+
+  '@jsr/nostr__tools@2.16.2':
+    resolution: {integrity: sha512-QK1XwHvAnqEwbimD+ywbLQ3T2iI+/qE/zrRgOhmtjoEGlCWgtbPTNJ6Y/MEunXr6H/MnuHV+s400i/Yk4suvGQ==, tarball: https://npm.jsr.io/~/11/@jsr/nostr__tools/2.16.2.tgz}
 
   '@next/env@15.4.5':
     resolution: {integrity: sha512-ruM+q2SCOVCepUiERoxOmZY9ZVoecR3gcXNwCYZRvQQWRjhOiPJGmQ2fAiLR6YKWXcSAh7G79KEFxN3rwhs4LQ==}
@@ -6822,6 +6834,24 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@jsr/fiatjaf__promenade-trusted-dealer@0.4.3':
+    dependencies:
+      '@jsr/henrygd__semaphore': 0.0.2
+      '@jsr/nostr__tools': 2.16.2
+      '@noble/curves': 1.9.7
+
+  '@jsr/henrygd__semaphore@0.0.2': {}
+
+  '@jsr/nostr__tools@2.16.2':
+    dependencies:
+      '@noble/ciphers': 0.5.3
+      '@noble/curves': 1.2.0
+      '@noble/hashes': 1.3.1
+      '@scure/base': 1.1.1
+      '@scure/bip32': 1.3.1
+      '@scure/bip39': 1.2.1
+      nostr-wasm: 0.1.0
 
   '@next/env@15.4.5': {}
 

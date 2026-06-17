@@ -389,9 +389,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         userFollowings?.length < 5 &&
         isUserFollowingsLoaded &&
         notes?.length > 0 && (
-          <div className="fit-container box-pad-h">
-            <hr />
-            <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-pad-v-m">
+          <div className="fit-container box-pad-h box-pad-v-m sc-s">
+            <div className="fit-container fx-centered fx-start-h fx-start-v ">
               <div>
                 <Icon name="eye-opened" size={24} />
               </div>
@@ -400,8 +399,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
                 <p className="gray-c">{t("AstvJYT")}</p>
               </div>
             </div>
-            <hr />
-            <hr />
           </div>
         )}
       {!selectedFilter.default &&

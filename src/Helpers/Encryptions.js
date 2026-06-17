@@ -284,14 +284,14 @@ const getParsedSW = (event) => {
     buttons,
     components: input
       ? [
-          { value: image, type: "image" },
-          { value: input, type: "input" },
-          { value: buttons, type: "button" },
-        ]
+        { value: image, type: "image" },
+        { value: input, type: "input" },
+        { value: buttons, type: "button" },
+      ]
       : [
-          { value: image, type: "image" },
-          { value: buttons, type: "button" },
-        ],
+        { value: image, type: "image" },
+        { value: buttons, type: "button" },
+      ],
   };
 };
 
@@ -308,10 +308,10 @@ const getParsedRelayReview = (event) => {
     naddr: event?.encode
       ? event?.encode()
       : nip19.naddrEncode({
-          identifier: d,
-          pubkey: event.pubkey,
-          kind: event.kind,
-        }),
+        identifier: d,
+        pubkey: event.pubkey,
+        kind: event.kind,
+      }),
   };
   return event_;
 };
@@ -397,11 +397,11 @@ const getParsedRepEvent = (event) => {
     if (imeta_url) content.vUrl = imeta_url.split(" ")[1];
     content.naddr = content.d
       ? (event.encode && event.encode()) ||
-        nip19.naddrEncode({
-          pubkey: event.pubkey,
-          identifier: content.d,
-          kind: event.kind,
-        })
+      nip19.naddrEncode({
+        pubkey: event.pubkey,
+        identifier: content.d,
+        kind: event.kind,
+      })
       : "";
     content.naddrData = {
       pubkey: event.pubkey,
@@ -414,10 +414,10 @@ const getParsedRepEvent = (event) => {
       content.nEvent = event.encode
         ? event.encode()
         : nip19.neventEncode({
-            pubkey: event.pubkey,
-            id: event.id,
-            kind: event.kind,
-          });
+          pubkey: event.pubkey,
+          id: event.id,
+          kind: event.kind,
+        });
 
     return content;
   } catch (err) {
@@ -470,11 +470,11 @@ const getParsedPacksEvent = (event) => {
     }
     content.naddr = content.d
       ? (event.encode && event.encode()) ||
-        nip19.naddrEncode({
-          pubkey: event.pubkey,
-          identifier: content.d,
-          kind: event.kind,
-        })
+      nip19.naddrEncode({
+        pubkey: event.pubkey,
+        identifier: content.d,
+        kind: event.kind,
+      })
       : "";
     content.naddrData = {
       pubkey: event.pubkey,
@@ -582,18 +582,18 @@ const getParsedMedia = (event) => {
       content.image = imeta_img.replace("image", "").replaceAll(" ", "");
     content.naddr = content.d
       ? (event.encode && event.encode()) ||
-        nip19.naddrEncode({
-          pubkey: event.pubkey,
-          identifier: content.d,
-          kind: event.kind,
-        })
+      nip19.naddrEncode({
+        pubkey: event.pubkey,
+        identifier: content.d,
+        kind: event.kind,
+      })
       : "";
     content.naddrData = content.d
       ? {
-          pubkey: event.pubkey,
-          identifier: content.d,
-          kind: event.kind,
-        }
+        pubkey: event.pubkey,
+        identifier: content.d,
+        kind: event.kind,
+      }
       : undefined;
     content.aTag = content.d
       ? `${event.kind}:${event.pubkey}:${content.d}`
@@ -919,7 +919,7 @@ const decrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
     const bunker = BunkerSigner.fromBunker(
-      userKeys.localKeys.sec,
+      hexToUint8Array(userKeys.localKeys.sec),
       bunkerPointer,
       {
         onauth: (url) => {
@@ -944,7 +944,7 @@ const encrypt04UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
     const bunker = BunkerSigner.fromBunker(
-      userKeys.localKeys.sec,
+      hexToUint8Array(userKeys.localKeys.sec),
       bunkerPointer,
       {
         onauth: (url) => {
@@ -970,7 +970,7 @@ const encrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
     const bunker = BunkerSigner.fromBunker(
-      userKeys.localKeys.sec,
+      hexToUint8Array(userKeys.localKeys.sec),
       bunkerPointer,
       {
         onauth: (url) => {
@@ -996,7 +996,7 @@ const decrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
     const bunker = BunkerSigner.fromBunker(
-      userKeys.localKeys.sec,
+      hexToUint8Array(userKeys.localKeys.sec),
       bunkerPointer,
       {
         onauth: (url) => {
@@ -1365,17 +1365,17 @@ const filterContent = (selectedFilter, list) => {
     let thumbnail = selectedFilter?.thumbnail ? _.image : true;
     let excluded_words = selectedFilter?.excluded_words?.length
       ? !(
-          matchWords(_.title, selectedFilter.excluded_words) ||
-          matchWords(_.description, selectedFilter.excluded_words) ||
-          matchWords(_.content, selectedFilter.excluded_words) ||
-          matchWords(_.items, selectedFilter.excluded_words)
-        )
+        matchWords(_.title, selectedFilter.excluded_words) ||
+        matchWords(_.description, selectedFilter.excluded_words) ||
+        matchWords(_.content, selectedFilter.excluded_words) ||
+        matchWords(_.items, selectedFilter.excluded_words)
+      )
       : true;
     let included_words = selectedFilter?.included_words?.length
       ? matchWords(_.title, selectedFilter.included_words) ||
-        matchWords(_.description, selectedFilter.included_words) ||
-        matchWords(_.content, selectedFilter.included_words) ||
-        matchWords(_.items, selectedFilter.included_words)
+      matchWords(_.description, selectedFilter.included_words) ||
+      matchWords(_.content, selectedFilter.included_words) ||
+      matchWords(_.items, selectedFilter.included_words)
       : true;
     let hide_sensitive = selectedFilter?.hide_sensitive
       ? !_.contentSensitive
@@ -1436,13 +1436,13 @@ const filterContent = (selectedFilter, list) => {
       let tags = _.tags.filter((tag) => tag[0] === "t").map((tag) => tag[1]);
       let excluded_words = selectedFilter?.excluded_words?.length
         ? !(
-            matchWords(_.content, selectedFilter.excluded_words) ||
-            matchWords(tags, selectedFilter.excluded_words)
-          )
+          matchWords(_.content, selectedFilter.excluded_words) ||
+          matchWords(tags, selectedFilter.excluded_words)
+        )
         : true;
       let included_words = selectedFilter?.included_words?.length
         ? matchWords(_.content, selectedFilter.included_words) ||
-          matchWords(tags, selectedFilter.included_words)
+        matchWords(tags, selectedFilter.included_words)
         : true;
 
       let posted_by = selectedFilter?.posted_by?.length

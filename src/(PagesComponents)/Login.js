@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LoadingDots from "@/Components/LoadingDots";
 import { getUser, getUserFromNOSTR } from "@/Helpers/Controlers";
@@ -11,6 +11,7 @@ import {
   hexToUint8Array,
 } from "@/Helpers/Encryptions";
 import {
+  finalizeEvent,
   generateSecretKey,
   getPublicKey,
   nip04,
@@ -51,9 +52,14 @@ import Icon from "@/Components/Icon";
 import DotGrid from "@/Components/DotGrid/DotGrid";
 import { SelectTabs } from "@/Components/SelectTabs";
 import { useTheme } from "next-themes";
+import { trustedKeyDeal, hexShard, hexPubShard } from "@fiatjaf/promenade-trusted-dealer";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
+import { CENTRAL_URL, OPERATOR_URLS } from "@/Content/pomegrenate";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 let isNewAccount = getWallets().length > 0 ? true : false;
+
 
 export default function Login() {
   const { theme } = useTheme()
@@ -345,6 +351,124 @@ const Bunker = ({ autoLaunch = false }) => {
   );
 };
 
+const massageURL = (input) => {
+  let url = input.trim();
+  if (!url.startsWith("http")) {
+    url = "https://" + url;
+  }
+  return new URL(url).origin;
+};
+
+const openPopup = (url, name) => {
+  const width = 600;
+  const height = 700;
+  const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
+  const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
+  const popup = window.open(
+    url,
+    name,
+    `popup=yes,width=${width},height=${height},left=${left},top=${top}`,
+  );
+  return popup;
+};
+
+const awaitPopupMessage = (popup, expectedOrigin, extract) => {
+  return new Promise((resolve, reject) => {
+    const POPUP_TIMEOUT_MS = 5 * 60 * 1000;
+
+    const cleanup = () => {
+      window.removeEventListener("message", onMessage);
+      clearInterval(closeMonitor);
+      clearTimeout(timer);
+    };
+
+    const onMessage = (event) => {
+      if (event.origin !== expectedOrigin || event.source !== popup) return;
+      const value = extract(event.data);
+      if (value === undefined) return;
+      cleanup();
+      popup.close();
+      resolve(value);
+    };
+
+    const closeMonitor = setInterval(() => {
+      if (popup.closed) {
+        cleanup();
+        reject(new Error("POPUP_CLOSED"));
+      }
+    }, 300);
+
+    const timer = setTimeout(() => {
+      cleanup();
+      popup.close();
+      reject(new Error("Timed out waiting for Google sign-in"));
+    }, POPUP_TIMEOUT_MS);
+
+    window.addEventListener("message", onMessage);
+  });
+};
+
+const authenticateWithGoogle = async (central) => {
+  const popup = openPopup(`${central}/login/google`, "PomegranateLogin");
+  if (!popup) throw new Error("POPUP_BLOCKED");
+
+  const raw = await awaitPopupMessage(popup, central, (data) => {
+    if (data && typeof data === "object" && typeof data.token === "string") {
+      return data.token;
+    }
+    return undefined;
+  });
+
+  let createdAt = null;
+  let email = "";
+  const parsed = JSON.parse(atob(raw));
+  if (typeof parsed.created_at === "number") createdAt = parsed.created_at * 1000;
+  if (Array.isArray(parsed.tags)) {
+    const emailTag = parsed.tags.find((t) => Array.isArray(t) && t[0] === "email");
+    email = emailTag?.[1] ?? "";
+  }
+  if (!createdAt || Date.now() - createdAt > 24 * 60 * 60 * 1000) {
+    throw new Error("Google sign-in token expired");
+  }
+  return { raw, email, createdAt };
+};
+
+const getAccount = async (central, token) => {
+  const res = await fetch(`${central}/account`, {
+    headers: { Authorization: `Token ${token.raw}` },
+  });
+  if (res.status === 401) throw new Error("Google session expired, please sign in again");
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data?.pubkey ? data : null;
+};
+
+const listProfiles = async (central, token) => {
+  const res = await fetch(`${central}/profiles`, {
+    headers: { Authorization: `Token ${token.raw}` },
+  });
+  if (!res.ok) throw new Error("Failed to load signing profiles");
+  return await res.json();
+};
+
+const createProfile = async (central, token, name) => {
+  const res = await fetch(`${central}/profiles`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token.raw}`,
+    },
+    body: JSON.stringify({ name }),
+  });
+  if (!res.ok) throw new Error("Signing profile creation failed");
+  return await res.json();
+};
+
+const getBunkerUrl = (central, profile) => {
+  const relay = central.replace(/^http/, "ws");
+  return `bunker://${profile.handler_pubkey}?relay=${encodeURIComponent(relay)}`;
+};
+
 const LoginScreen = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -353,6 +477,7 @@ const LoginScreen = () => {
   const [checkExt, setCheckExt] = useState(window.nostr ? true : false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeMethod, setActiveMethod] = useState("");
+  const [showGoogleLogin, setShowGoogleLogin] = useState(false);
 
   const methods = [
     {
@@ -375,15 +500,18 @@ const LoginScreen = () => {
       title: t("A9eQr6B"),
       desc: t("AJdT1m0"),
     },
+    {
+      id: "google",
+      icon: "google",
+      title: "Login with Google",
+      desc: "Sign in using your Google account",
+    },
   ];
-  const activeMethodData = methods.find((m) => m.id === activeMethod);
 
   const handleMethodClick = (method) => {
     if (method.disabled) return;
-    if (method.id === "ext") {
-      onLoginWithExt();
-      return;
-    }
+    if (method.id === "ext") { onLoginWithExt(); return; }
+    if (method.id === "google") { setShowGoogleLogin(true); return; }
     setActiveMethod(method.id);
   };
 
@@ -511,13 +639,13 @@ const LoginScreen = () => {
             {methods.map((method, index) => (
               <div
                 key={method.id}
-                className={`login-convo-option bg-dropdown-t ${method.disabled ? "disabled" : ""}`}
+                className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${method.disabled ? "disabled" : ""}`}
                 style={{ "--stagger-i": index }}
                 onClick={() => handleMethodClick(method)}
                 disabled={method.disabled}
               >
                 <span className="login-convo-option-icon">
-                  <Icon name={method.icon} v={method.iconV || 1} size={26} />
+                  <Icon name={method.icon} v={method.iconV || 1} size={32} />
                 </span>
                 <span className="login-convo-option-copy">
                   <b>{method.title}</b>
@@ -541,7 +669,6 @@ const LoginScreen = () => {
               {t("AyGDBDa")}
             </div>
 
-
             <div className="login-convo-field">
               <input
                 type="text"
@@ -564,7 +691,323 @@ const LoginScreen = () => {
           </div>
         )}
       </div>
+      {showGoogleLogin && (
+        <GoogleLoginOverlay onClose={() => setShowGoogleLogin(false)} />
+      )}
     </>
+  );
+};
+
+const createPomegranateAccount = async (central, token, operators, threshold, secretKey) => {
+  const session = crypto.randomUUID();
+  const masterSk = BigInt("0x" + bytesToHex(secretKey));
+  const { shards } = trustedKeyDeal(masterSk, threshold, operators.length);
+
+  const regEvent = finalizeEvent(
+    {
+      kind: 20445,
+      created_at: Math.floor(Date.now() / 1000),
+      tags: [
+        ["threshold", String(threshold)],
+        ...operators.map((op, i) => ["operator", op, hexPubShard(shards[i].pubShard)]),
+      ],
+      content: "",
+    },
+    secretKey,
+  );
+
+  const regRes = await fetch(`${central}/register`, {
+    method: "POST",
+    body: JSON.stringify(regEvent),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Token ${token.raw}`,
+      "X-Pomegranate-Session": session,
+    },
+  });
+  if (!regRes.ok) throw new Error("Central server registration failed");
+
+  const utf8 = new TextEncoder();
+  const results = await Promise.all(
+    operators.map(async (operator, i) => {
+      const event = finalizeEvent(
+        {
+          kind: 20444,
+          created_at: Math.floor(Date.now() / 1000),
+          tags: [
+            ["central", central],
+            ["email", token.email],
+          ],
+          content: hexShard(shards[i]),
+        },
+        secretKey,
+      );
+      const opToken = bytesToHex(sha256(utf8.encode(`${session}:${operator}`)));
+      try {
+        const res = await fetch(`${operator}/po/register`, {
+          method: "POST",
+          body: JSON.stringify(event),
+          headers: {
+            "Content-Type": "application/json",
+            "X-Pomegranate-Operator-Token": opToken,
+          },
+        });
+        return res.ok ? null : operator;
+      } catch {
+        return operator;
+      }
+    }),
+  );
+
+  const failed = results.filter(Boolean);
+  if (operators.length - failed.length < threshold) {
+    throw new Error(
+      `Could not register with enough operators (${operators.length - failed.length}/${threshold}). Please try again.`,
+    );
+  }
+};
+
+const GoogleLoginOverlay = ({ onClose }) => {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  const [phase, setPhase] = useState("intro");
+  const [status, setStatus] = useState("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [token, setToken] = useState(null);
+  const [secretKey, setSecretKey] = useState(() => generateSecretKey());
+  const [copied, setCopied] = useState(false);
+  const localKeys = NDKPrivateKeySigner.generate();
+  const central = massageURL(CENTRAL_URL);
+  const operators = OPERATOR_URLS.map(massageURL);
+  const threshold = Math.ceil((operators.length * 7) / 12);
+
+  const nsec = nip19.nsecEncode(secretKey);
+  const busy = !["idle", "error"].includes(status);
+
+  const statusLabel = {
+    authenticating: t("Apom004"),
+    checking: t("Apom005"),
+    creating: t("Apom006"),
+  }[status] || "";
+
+  const downloadKey = (nsecValue) => {
+    const content = [
+      "Important: Store this information securely.",
+      "---",
+      `Private key: ${nsecValue}`,
+    ].join("\n");
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "nostr-private-key.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleStart = async () => {
+    setErrorMsg("");
+    setStatus("authenticating");
+    try {
+      const googleToken = await authenticateWithGoogle(central);
+      setToken(googleToken);
+      setStatus("checking");
+      const account = await getAccount(central, googleToken);
+      if (account) {
+        let profiles = await listProfiles(central, googleToken);
+        if (!profiles.find((p) => p.name === "default")) {
+          await createProfile(central, googleToken, "default");
+          profiles = await listProfiles(central, googleToken);
+        }
+        const profile = profiles.find((p) => p.name === "default") || profiles[0];
+        const bunkerUrl = getBunkerUrl(central, profile);
+        console.log("[Login with Google] Existing account found:", {
+          central,
+          email: googleToken.email,
+          account,
+          profiles,
+          bunkerUrl,
+        });
+        handleSaveAccount({ pubkey: account.pubkey, bunkerUrl, central, email: googleToken.email })
+        setStatus("idle");
+        onClose();
+      } else {
+        const newKey = generateSecretKey();
+        setSecretKey(newKey);
+        downloadKey(nip19.nsecEncode(newKey));
+        dispatch(setToast({ type: 1, desc: t("Apom010") }));
+        setStatus("idle");
+        setPhase("setup");
+      }
+    } catch (err) {
+      if (err.message === "POPUP_CLOSED") { setStatus("idle"); return; }
+      if (err.message === "POPUP_BLOCKED") {
+        setStatus("error");
+        setErrorMsg("Popup was blocked. Please allow popups for this site.");
+        return;
+      }
+      setStatus("error");
+      setErrorMsg(err.message || "Something went wrong");
+    }
+  };
+
+  const handleCreate = async () => {
+    if (!token) return;
+    setErrorMsg("");
+    setStatus("creating");
+    try {
+      await createPomegranateAccount(central, token, operators, threshold, secretKey);
+
+      let account = null;
+      for (let i = 0; i < 10; i++) {
+        await new Promise((r) => setTimeout(r, 1500));
+        account = await getAccount(central, token);
+        if (account) break;
+      }
+      if (!account) throw new Error("Account confirmation timed out. Please try again.");
+
+      let profiles = await listProfiles(central, token);
+      if (!profiles.find((p) => p.name === "default")) {
+        await createProfile(central, token, "default");
+        profiles = await listProfiles(central, token);
+      }
+      const profile = profiles.find((p) => p.name === "default") || profiles[0];
+      const bunkerUrl = getBunkerUrl(central, profile);
+
+      console.log("[Login with Google] New account created:", {
+        central,
+        email: token.email,
+        account,
+        profiles,
+        bunkerUrl,
+        nsec,
+      });
+      handleSaveAccount({ pubkey: account.pubkey, bunkerUrl, central, email: googleToken.email })
+
+      setStatus("idle");
+      onClose();
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err.message || "Something went wrong");
+    }
+  };
+
+  const handleCopy = () => {
+    copyText(nsec, t("AStACDI"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSaveAccount = ({ pubkey, bunkerUrl, central, email }) => {
+    let toSave = {
+      localKeys: {
+        sec: localKeys.privateKey,
+        pub: getPublicKey(hexToUint8Array(localKeys.privateKey)),
+      },
+      pub: pubkey,
+      bunker: bunkerUrl,
+      central,
+      email
+    };
+    dispatch(setUserKeys(toSave));
+    Router.back();
+  }
+
+  return (
+    <Overlay exit={onClose} width={420}>
+      <div className="login-google-overlay box-pad-h box-pad-v bg-dropdown-t">
+        <div className="close" onClick={onClose}><div></div></div>
+
+        {phase === "intro" && (
+          <>
+            <div className="login-google-head">
+              <Icon name="google" size={32} />
+              <h4 className="login-card-title" style={{ fontSize: "1.2rem" }}>
+                {t("Apom001")}
+              </h4>
+              <p className="gray-c p-medium">{t("Apom002")}</p>
+            </div>
+
+            {errorMsg && (
+              <p className="red-c p-medium" style={{ textAlign: "center" }}>{errorMsg}</p>
+            )}
+
+            {busy ? (
+              <div className="login-google-busy fx-centered fx-col">
+                <Spinner size={24} />
+                <p className="gray-c p-medium">{statusLabel}</p>
+              </div>
+            ) : (
+              <button className="btn btn-normal btn-full" onClick={handleStart}>
+                {errorMsg ? t("AhOnn0t") : t("Apom003")}
+              </button>
+            )}
+          </>
+        )}
+
+        {phase === "setup" && (
+          <>
+            <div className="login-google-head">
+              <h4 className="login-card-title" style={{ fontSize: "1.2rem" }}>
+                {t("Apom007")}
+              </h4>
+            </div>
+
+            <div className="login-google-key-field">
+              <p className="p-medium p-bold">{t("Apom008")}</p>
+              <div className="login-google-key-row">
+                <input
+                  type="text"
+                  className="if ifs-full"
+                  value={nsec}
+                  readOnly
+                  onClick={(e) => e.target.select()}
+                  style={{ fontFamily: "monospace", fontSize: "0.75rem" }}
+                />
+                <button
+                  className="btn btn-normal btn-gray fx-centered bg-dropdown"
+                  style={{ padding: "0 1rem", borderRadius: "50%", aspectRatio: "1/1", width: "44px", height: "44px" }}
+                  onClick={handleCopy}
+                  disabled={busy}
+                >
+                  <Icon name={copied ? "check_big" : "copy"} size={16} v={copied ? 2 : 1} />
+                </button>
+              </div>
+            </div>
+
+            {errorMsg && (
+              <p className="red-c p-medium" style={{ textAlign: "center" }}>{errorMsg}</p>
+            )}
+
+            {busy ? (
+              <div className="login-google-busy fx-centered fx-col">
+                <Spinner size={24} />
+                <p className="gray-c p-medium">{statusLabel}</p>
+              </div>
+            ) : (
+              <div className="login-google-setup-actions">
+                <button
+                  className="btn btn-normal btn-gray fx-centered bg-dropdown"
+                  style={{ padding: "0 1rem", borderRadius: "50%", aspectRatio: "1/1", width: "44px", height: "44px" }}
+                  onClick={() => { setPhase("intro"); setToken(null); setStatus("idle"); setErrorMsg(""); }}
+                  disabled={busy}
+                >
+                  <Icon name="arrow" transform="rotate(90deg)" size={16} />
+                </button>
+                <button
+                  className="btn btn-normal"
+                  onClick={handleCreate}
+                  disabled={busy}
+                >
+                  {errorMsg ? t("AhOnn0t") : t("Apom009")}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </Overlay>
   );
 };
 
@@ -577,7 +1020,6 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
   const [pictureFile, setPictureFile] = useState("");
   const [picture, setPicture] = useState("");
   const [bannerFile, setBannerFile] = useState("");
-  const [banner, setBanner] = useState("");
   const [NWCURL, setNWCURL] = useState("");
   const [NWAddr, setNWCAddr] = useState("");
   const [isCreatingWalletLoading, setIsCreatingWalletLoading] = useState(false);
@@ -588,7 +1030,6 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
   const [showEmptyUNMessage, setShowMessageEmtpyUN] = useState(false);
   const [showInvalidMessage, setShowInvalidMessage] = useState(false);
   const [userName, setUserName] = useState("");
-  const [enableWalletLinking, setEnablingWalletLinking] = useState(true);
   const [selectedPacks, setSelectedPacks] = useState([]);
 
   const railSteps = [

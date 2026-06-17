@@ -245,10 +245,9 @@ const downloadAllKeys = () => {
     .map((account) => {
       return [
         `Account username: ${account.display_name || account.name}`,
-        `Private key: ${
-          account?.userKeys?.sec
-            ? getBech32("nsec", account?.userKeys?.sec)
-            : ""
+        `Private key: ${account?.userKeys?.sec
+          ? getBech32("nsec", account?.userKeys?.sec)
+          : ""
         }`,
         `Public key: ${getBech32("npub", account?.userKeys?.pub)}`,
       ];
@@ -336,10 +335,9 @@ const userLogout = async (pubkey) => {
       let toSave = [
         "Important: Store this information securely. If you lose it, recovery may not be possible. Keep it private and protected at all times",
         "---",
-        `Private key: ${
-          accounts[accountIndex]?.userKeys?.sec
-            ? getBech32("nsec", accounts[accountIndex]?.userKeys?.sec)
-            : ""
+        `Private key: ${accounts[accountIndex]?.userKeys?.sec
+          ? getBech32("nsec", accounts[accountIndex]?.userKeys?.sec)
+          : ""
         }`,
         `Public key: ${getBech32(
           "npub",
@@ -644,9 +642,10 @@ const InitEvent = async (
         return false;
       }
     } else if (userKeys.bunker) {
+
       const bunkerPointer = await parseBunkerInput(userKeys.bunker);
       const bunker = BunkerSigner.fromBunker(
-        userKeys.localKeys.sec,
+        hexToUint8Array(userKeys.localKeys.sec),
         bunkerPointer,
         {
           onauth: (url) => {
@@ -692,7 +691,7 @@ const getEventStatAfterEOSE = (
     let content = !reaction.content.includes(":")
       ? reaction.content
       : reaction.tags.find((tag) => `:${tag[1]}:` === reaction.content)[2] ||
-        "+";
+      "+";
     stats[kind][kind] = removeObjDuplicants(stats[kind][kind], [
       { id: reaction.id, pubkey: reaction.pubkey, content },
     ]);
@@ -913,6 +912,44 @@ const fetchRelayMetadata = async (relay) => {
   }
 };
 
+
+const getAccountKindTag = ({ account }) => {
+  if (account.userKeys.ext) {
+    return <div
+      className="sticker sticker-small sticker-orange-side"
+      style={{ minWidth: "max-content" }}
+    >
+      Extension
+    </div>
+  }
+  if (
+    account.userKeys.sec)
+    return <div
+      className="sticker sticker-small sticker-red-side"
+      style={{ minWidth: "max-content" }}
+    >
+      Private Key
+    </div>
+
+  if (
+    account.userKeys.bunker && !account.userKeys.central)
+    return <div
+      className="sticker sticker-small sticker-green-side"
+      style={{ minWidth: "max-content" }}
+    >
+      Remote
+    </div>
+
+  if (account.userKeys.central)
+    return <div
+      className="sticker sticker-small sticker-blue-side"
+      style={{ minWidth: "max-content" }}
+    >
+      Google
+    </div>
+
+}
+
 export {
   ConnectNDK,
   aggregateUsers,
@@ -945,4 +982,5 @@ export {
   saveInboxRelaysListsForUsers,
   walletWarning,
   saveRelayMetadata,
+  getAccountKindTag
 };
