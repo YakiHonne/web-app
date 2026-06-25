@@ -10,7 +10,7 @@ import Comments from "@/Components/Reactions/Comments";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import ZapAd from "@/Components/ZapAd";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import PostReaction from "./PostReaction";
@@ -232,7 +232,7 @@ export default function NotesComment({
                 <div className="fx-centered">
 
                   {!isNoteTranslating && <Icon v={2} name={iconsNames.globe} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
-                  {isNoteTranslating && <LoadingDots />}
+                  {isNoteTranslating && <Spinner />}
                   {!noReactions && (
                     <EventOptions
                       event={event}
@@ -345,7 +345,7 @@ export default function NotesComment({
                             size={20}
                           />
                         )}
-                        {isNoteTranslating && <LoadingDots />}
+                        {isNoteTranslating && <Spinner />}
                       </div> */}
                       <EventStats postActions={postActions} />
                     </div>

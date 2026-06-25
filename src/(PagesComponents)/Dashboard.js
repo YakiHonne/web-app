@@ -3,7 +3,7 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import { useDispatch, useSelector } from "react-redux";
 import Date_ from "@/Components/Date_";
 import { getPopularNotes, getUserStats } from "@/Helpers/WSInstance";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import NumberShrink from "@/Components/NumberShrink";
 import axios from "axios";
 import { getSubData } from "@/Helpers/Controlers";
@@ -40,7 +40,6 @@ import InterestSuggestions from "@/Content/InterestSuggestions";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { customHistory } from "@/Helpers/History";
-import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import ShowPeople from "@/Components/ShowPeople";
 import UserFollowers from "@/Components/UserFollowers";
@@ -2642,7 +2641,7 @@ const ManageInterest = ({ exit }) => {
           className={`btn ${isChanged ? "btn-normal" : "btn-disabled"}`}
           onClick={saveInterestList}
         >
-          {isLoading ? <LoadingDots /> : t("A29aBCD")}
+          {isLoading ? <Spinner /> : t("A29aBCD")}
         </button>
       </div>
       <div className="fit-container fx-centered fx-col box-pad-h">

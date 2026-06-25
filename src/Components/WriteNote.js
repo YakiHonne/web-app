@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import UploadFile from "@/Components/UploadFile";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import MentionSuggestions from "@/Components/MentionSuggestions";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
@@ -35,9 +35,10 @@ import Overlay from "./Overlay";
 import { nip19 } from "nostr-tools";
 import Link from "next/link";
 import { iconsNames } from "@/Content/IconV2URL";
-
-const PAID_NOTE_AMOUNT = process.env.NEXT_PUBLIC_PAID_NOTE_AMOUNT;
-const PAID_NOTE_AMOUNT_BASIC_PLAN = process.env.NEXT_PUBLIC_PAID_NOTE_AMOUNT_BASIC_PLAN;
+import usePaidNoteCost from "@/Hooks/usePaidNoteCost";
+import usePoints from "@/Hooks/usePoints";
+import { publishPaidNoteWithPoints } from "@/Endpoints/Points";
+import NumberShrink from "@/Components/NumberShrink";
 
 export default function WriteNote({
   exit,
@@ -54,10 +55,11 @@ export default function WriteNote({
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
   const userRelays = useSelector((state) => state.userRelays);
-  const subscription = useSelector((state) => state.subscription);
-  const isPremiumPlan = subscription?.status?.plan === "premium" && subscription?.status?.active;
-  const isBasicPlan = subscription?.status?.plan === "basic" && subscription?.status?.active;
-  const paidNoteAmount = isPremiumPlan ? 0 : isBasicPlan ? PAID_NOTE_AMOUNT_BASIC_PLAN : PAID_NOTE_AMOUNT;
+  const { paidNoteAmount, isPremiumPlan, isBasicPlan } = usePaidNoteCost();
+  const { config: pointsConfig, fetchConfig: fetchPointsConfig, refreshBalance: refreshPointsBalance } = usePoints();
+  const consumablePoints = useSelector((state) => state.yakiChestStats?.consumablePoints);
+  const pointsCost = pointsConfig?.paid_note?.[isBasicPlan ? "basic" : "free"];
+  const isPointsEligible = typeof pointsCost === "number" && typeof consumablePoints === "number" && consumablePoints >= pointsCost;
   const relayFromURL = r ? r : false;
   const singleRelayToPublish = protectedRelay || relayFromURL || false;
   const {
@@ -86,6 +88,11 @@ export default function WriteNote({
   const [imetas, setImetas] = useState([]);
   const [selectedScheduleDate, setSelectedScheduleDate] = useState(undefined);
   const ref = useRef();
+
+  useEffect(() => {
+    fetchPointsConfig();
+    refreshPointsBalance();
+  }, [fetchPointsConfig, refreshPointsBalance]);
 
   useEffect(() => {
     adjustHeight();
@@ -133,7 +140,7 @@ export default function WriteNote({
     if (textareaRef.current) textareaRef.current.focus();
   };
 
-  const publishNote = async () => {
+  const publishNote = async (payMethod) => {
     try {
       if (isLoading) return;
       if (!userKeys) return;
@@ -181,6 +188,7 @@ export default function WriteNote({
           processedContent.content,
           [...tags, ...processedTags, ...imetasTags],
           isProtected && singleRelayToPublish ? singleRelayToPublish : false,
+          payMethod,
         );
       } else {
         publishAsFree(
@@ -243,7 +251,108 @@ export default function WriteNote({
     }, 1000);
   };
 
-  const publishAsPaid = async (content, tags_, relay) => {
+  const proceedToPublish = (eventInitEx, relay) => {
+    if (selectedScheduleDate)
+      publishScheduledEvent({
+        event: eventInitEx,
+        relays: relay ? [relay] : userRelays,
+      });
+    else
+      dispatch(
+        setToPublish({
+          eventInitEx,
+          allRelays: relay ? [relay] : [],
+          isFavRelay: relay ? relay : false,
+        }),
+      );
+    updateNoteDraft("root", "");
+    navigateTo.push(
+      "/profile/" +
+      nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+    );
+    exit();
+    setIsLoading(false);
+  };
+
+  const payWithLightning = async (eventInitEx, relay) => {
+    let sats = paidNoteAmount * 1000;
+
+    let zapTags = [
+      ["relays", ...userRelays],
+      ["amount", sats.toString()],
+      ["lnurl", process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR],
+      ["p", process.env.NEXT_PUBLIC_YAKI_PUBKEY],
+      ["e", eventInitEx.id],
+    ];
+
+    var zapEvent = await getZapEventRequest(
+      selectedProfile || userKeys,
+      `${userMetadata.name} paid for a paid note.`,
+      zapTags,
+    );
+    if (!zapEvent) {
+      setIsLoading(false);
+      return;
+    }
+
+    const res = await axios(
+      `${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR_CALLBACK}?amount=${sats}&nostr=${zapEvent}&lnurl=${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR}`,
+    );
+
+    if (res.data.status === "ERROR") {
+      setIsLoading(false);
+      dispatch(
+        setToast({
+          type: 2,
+          desc: t("AZ43zpG"),
+        }),
+      );
+      return;
+    }
+
+    setInvoice(res.data.pr);
+
+    let sub = ndkInstance.subscribe(
+      [
+        {
+          kinds: [9735],
+          "#p": [process.env.NEXT_PUBLIC_YAKI_PUBKEY],
+          "#e": [eventInitEx.id],
+        },
+      ],
+      { groupable: false, cacheUsage: "ONLY_RELAY" },
+    );
+
+    sub.on("event", () => {
+      setInvoice("");
+      dispatch(
+        setToast({
+          type: 1,
+          desc: t("ACDUO1d"),
+        }),
+      );
+      sub.stop();
+      proceedToPublish(eventInitEx, relay);
+    });
+  };
+
+  const payWithPoints = async (eventInitEx, relay) => {
+    try {
+      await publishPaidNoteWithPoints();
+      await refreshPointsBalance();
+      proceedToPublish(eventInitEx, relay);
+    } catch (err) {
+      setIsLoading(false);
+      dispatch(
+        setToast({
+          type: 2,
+          desc: err?.response?.data?.message || t("AXNt63U"),
+        }),
+      );
+    }
+  };
+
+  const publishAsPaid = async (content, tags_, relay, payMethod) => {
     try {
       setIsLoading(true);
 
@@ -267,106 +376,15 @@ export default function WriteNote({
       }
 
       if (!paidNoteAmount) {
-        if (selectedScheduleDate)
-          publishScheduledEvent({
-            event: eventInitEx,
-            relays: relay ? [relay] : userRelays,
-          });
-        else
-          dispatch(
-            setToPublish({
-              eventInitEx,
-              allRelays: relay ? [relay] : [],
-              isFavRelay: relay ? relay : false,
-            }),
-          );
-        updateNoteDraft("root", "");
-        navigateTo.push(
-          "/profile/" +
-          nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
-        );
-        exit();
-        setIsLoading(false);
+        proceedToPublish(eventInitEx, relay);
         return;
       }
 
-      let sats = paidNoteAmount * 1000;
-
-      let zapTags = [
-        ["relays", ...userRelays],
-        ["amount", sats.toString()],
-        ["lnurl", process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR],
-        ["p", process.env.NEXT_PUBLIC_YAKI_PUBKEY],
-        ["e", eventInitEx.id],
-      ];
-
-      var zapEvent = await getZapEventRequest(
-        selectedProfile || userKeys,
-        `${userMetadata.name} paid for a paid note.`,
-        zapTags,
-      );
-      if (!zapEvent) {
-        setIsLoading(false);
-        return;
+      if (payMethod === "points") {
+        await payWithPoints(eventInitEx, relay);
+      } else {
+        await payWithLightning(eventInitEx, relay);
       }
-
-      const res = await axios(
-        `${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR_CALLBACK}?amount=${sats}&nostr=${zapEvent}&lnurl=${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR}`,
-      );
-
-      if (res.data.status === "ERROR") {
-        setIsLoading(false);
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AZ43zpG"),
-          }),
-        );
-        return;
-      }
-
-      setInvoice(res.data.pr);
-
-      let sub = ndkInstance.subscribe(
-        [
-          {
-            kinds: [9735],
-            "#p": [process.env.NEXT_PUBLIC_YAKI_PUBKEY],
-            "#e": [eventInitEx.id],
-          },
-        ],
-        { groupable: false, cacheUsage: "ONLY_RELAY" },
-      );
-
-      sub.on("event", () => {
-        setInvoice("");
-        dispatch(
-          setToast({
-            type: 1,
-            desc: t("ACDUO1d"),
-          }),
-        );
-        if (selectedScheduleDate)
-          publishScheduledEvent({
-            event: eventInitEx,
-            relays: relay ? [relay] : userRelays,
-          });
-        else
-          dispatch(
-            setToPublish({
-              eventInitEx,
-              allRelays: relay ? [relay] : [],
-            }),
-          );
-        sub.stop();
-        updateNoteDraft("root", "");
-        navigateTo.push(
-          "/profile/" +
-          nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
-        );
-        exit();
-        setIsLoading(false);
-      });
     } catch (err) {
       setIsLoading(false);
       console.log(err);
@@ -584,7 +602,7 @@ export default function WriteNote({
                     disabled={isSendingLoading}
                   >
                     {isSendingLoading ? (
-                      <LoadingDots />
+                      <Spinner />
                     ) : (
                       t("AloNXcI", { amount: paidNoteAmount })
                     )}
@@ -594,7 +612,7 @@ export default function WriteNote({
             )}
             <div className="fit-container fx-centered ">
               <p className="gray-c p-medium">{t("AoXe2Kx")}</p>
-              <LoadingDots />
+              <Spinner />
             </div>
           </div>
         </Overlay>
@@ -812,20 +830,29 @@ export default function WriteNote({
                 <Toggle status={isPaid} setStatus={setIsPaid} small={true} />
               </div>
             </div>
-            <div>
+            <div className="fx-centered fx-wrap" style={{ gap: "8px" }}>
               <button
                 className="btn btn-normal btn-small"
-                onClick={publishNote}
+                onClick={() => publishNote()}
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : isPaid ? (
                   paidNoteAmount ? t("A559jVY", { amount: paidNoteAmount }) : t("A559jVZ")
                 ) : (
                   t("AT4tygn")
                 )}
               </button>
+              {isPaid && !!paidNoteAmount && !isPremiumPlan && isPointsEligible && (
+                <button
+                  className="btn btn-normal btn-small"
+                  onClick={() => publishNote("points")}
+                  disabled={isLoading}
+                >
+                  {isLoading ? <Spinner /> : t("Apts013", { amount: pointsCost })}
+                </button>
+              )}
             </div>
           </div>
         </div>

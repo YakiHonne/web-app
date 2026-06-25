@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useSelector } from "react-redux";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -254,7 +254,7 @@ const ChatWindow = ({ message, setMessage, setStatus }) => {
             className="sc-s box-pad-h-m box-pad-v-m"
             style={{ width: "60px", border: "none" }}
           >
-            <LoadingDots />
+            <Spinner />
           </div>
         )}
       </div>

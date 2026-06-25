@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import RelayPreview from "./RelayPreview/RelayPreview";
 import { useTranslation } from "react-i18next";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { trimRelay } from "@/Helpers/Helpers";
 import Icon from "@/Components/Icon";
 import { iconsNames } from "@/Content/IconV2URL";
@@ -110,7 +110,7 @@ export default function Global({
           className="fit-container fit-height fx-centered"
           style={{ height: "60vh" }}
         >
-          <LoadingDots />
+          <Spinner />
         </div>
       )}
     </div>

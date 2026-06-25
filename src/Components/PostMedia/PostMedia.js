@@ -1,7 +1,7 @@
 import { extractNip19, FileUpload } from "@/Helpers/Helpers";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import LoadingDots from "../LoadingDots";
+import Spinner from "../Spinner";
 import { IMAGE_FILTERS } from "@/Content/ImageFilterConfig";
 import MediaUploadArea from "./MediaUploadArea";
 import ImageComp from "./ImageComp";
@@ -348,16 +348,15 @@ export default function PostMedia({ exit }) {
                   onClick={clearWorkspace}
                   disabled={isLoading}
                 >
-                  {isLoading ? <LoadingDots /> : <Icon name="arrow" />}
+                  {isLoading ? <Spinner /> : <Icon name="arrow" />}
                 </button>
                 <button
-                  className={`btn btn-normal btn-full ${
-                    !isPublishingEnabled ? "btn-disabled" : ""
-                  }`}
+                  className={`btn btn-normal btn-full ${!isPublishingEnabled ? "btn-disabled" : ""
+                    }`}
                   onClick={publishPost}
                   disabled={isLoading || !isPublishingEnabled}
                 >
-                  {isLoading ? <LoadingDots /> : "Publish"}
+                  {isLoading ? <Spinner /> : "Publish"}
                 </button>
               </div>
             </div>

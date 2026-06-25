@@ -7,11 +7,10 @@ import Date_ from "./Date_";
 import UserProfilePic from "./UserProfilePic";
 import PostReaction from "./PostReaction";
 import ZapAd from "./ZapAd";
-import LoadingDots from "./LoadingDots";
+import Spinner from "./Spinner";
 import useVideoVolume from "@/Hooks/useVideoVolume";
 import Icon from "@/Components/Icon";
 import Badge from "@/Helpers/Badge";
-import Spinner from "./Spinner";
 import EventStats from "./EventStats";
 
 const getParsedContent = (item) => {

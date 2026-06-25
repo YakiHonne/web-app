@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { setToast } from "../../Store/Slides/Publishers";
-import LoadingDots from "../../Components/LoadingDots";
+import Spinner from "../../Components/Spinner";
 import { MutedList } from "./MutedList";
 import { MediaUploader } from "./MediaUploader";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
@@ -230,14 +230,14 @@ export function ContentModerationManagement({
                   onClick={addNewServer}
                   disabled={isLoading}
                 >
-                  {isLoading ? <LoadingDots /> : t("ALyj7Li")}
+                  {isLoading ? <Spinner /> : t("ALyj7Li")}
                 </button>
                 <button
                   className="btn btn-red"
                   onClick={() => setCustomServer(false)}
                   disabled={isLoading}
                 >
-                  {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                  {isLoading ? <Spinner /> : t("AB4BSCe")}
                 </button>
               </div>
             )}

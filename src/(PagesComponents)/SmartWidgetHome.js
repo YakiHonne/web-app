@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { getParsedSW } from "@/Helpers/Encryptions";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useSelector } from "react-redux";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { t } from "i18next";
@@ -313,7 +313,7 @@ const SWSet = ({ external }) => {
               style={{ height: "150px" }}
               className="fit-container fx-centered"
             >
-              <LoadingDots />
+              <Spinner />
             </div>
           )}
         </div>

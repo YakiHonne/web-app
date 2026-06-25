@@ -1,19 +1,18 @@
-import LoadingDots from "@/Components/LoadingDots";
-import LoginWithAPI from "@/Components/LoginWithAPI";
-import React, { useState } from "react";
+import Spinner from "@/Components/Spinner";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import Icon from "@/Components/Icon";
+import useYakiChestConnect from "@/Hooks/useYakiChestConnect";
 
 export default function YakiChestManagement() {
   const { t } = useTranslation();
   const isYakiChestLoaded = useSelector((state) => state.isYakiChestLoaded);
   const yakiChestStats = useSelector((state) => state.yakiChestStats);
-  const [showYakiChest, setShowYakiChest] = useState(false);
+  const { connect, isConnecting } = useYakiChestConnect();
 
   return (
     <>
-      {showYakiChest && <LoginWithAPI exit={() => setShowYakiChest(false)} />}
       <div
         className="sc-s fit-container fx-scattered box-pad-h-m box-pad-v-m pointer"
       // style={{
@@ -46,15 +45,16 @@ export default function YakiChestManagement() {
           <div className="fx-centered">
             <button
               className="btn btn-small btn-normal"
-              onClick={() => setShowYakiChest(true)}
+              onClick={connect}
+              disabled={isConnecting}
             >
-              {t("Azb0lto")}
+              {isConnecting ? <Spinner /> : t("Azb0lto")}
             </button>
           </div>
         )}
         {!isYakiChestLoaded && (
           <div className="fx-centered">
-            <LoadingDots />
+            <Spinner />
           </div>
         )}
       </div>

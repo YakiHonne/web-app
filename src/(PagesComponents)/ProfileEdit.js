@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PagePlaceholder from "@/Components/PagePlaceholder";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Date_ from "@/Components/Date_";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
@@ -62,7 +62,7 @@ export default function ProfileEdit() {
             setRelaysStatus(tempRelays_);
           }
         });
-      } catch (err) {}
+      } catch (err) { }
     };
 
     if (tempUserRelays) CheckRelays();
@@ -466,16 +466,15 @@ export default function ProfileEdit() {
                           </div>
                           <div className="fx-centered fit-container box-marg">
                             <button
-                              className={`btn btn-normal fx ${
-                                checkMetadata() && !isImageUploading
+                              className={`btn btn-normal fx ${checkMetadata() && !isImageUploading
                                   ? "btn-disabled"
                                   : ""
-                              }`}
+                                }`}
                               onClick={updateInfos}
                               disabled={checkMetadata()}
                             >
                               {isLoading ? (
-                                <LoadingDots />
+                                <Spinner />
                               ) : (
                                 <>
                                   {isImageUploading
@@ -490,7 +489,7 @@ export default function ProfileEdit() {
                                 onClick={triggerEdit}
                               >
                                 {isLoading ? (
-                                  <LoadingDots />
+                                  <Spinner />
                                 ) : (
                                   <>
                                     {isImageUploading

@@ -2,7 +2,7 @@ import Icon from "@/Components/Icon";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import FileSelectorWrapper from "./FileSelectorWrapper";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 let id = "file-selector-" + Math.random().toString(36).substring(2, 9);
 
 export default function FileDragAndDropWrapper({
@@ -72,7 +72,7 @@ export default function FileDragAndDropWrapper({
         <div className="fx-centered fx-col fx-start-h fx-start-v fx-gap-v-m">
           <p className="gray-c">{label || t("AsXohpb")}</p>
           <button className="btn btn-gray" onClick={() => onChange(null)}>
-            {isLoading ? <LoadingDots /> : t("AkzjyNm")}
+            {isLoading ? <Spinner /> : t("AkzjyNm")}
           </button>
         </div>
       </div>
@@ -127,7 +127,7 @@ export default function FileDragAndDropWrapper({
         </p>
         <FileSelectorWrapper onChange={onChange}>
           <button className="btn btn-normal">
-            {isLoading ? <LoadingDots /> : t("AiINSld")}
+            {isLoading ? <Spinner /> : t("AiINSld")}
           </button>
         </FileSelectorWrapper>
       </div>

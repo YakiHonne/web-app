@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import { saveFetchedUsers, saveUsers } from "@/Helpers/DB";
 import { nip19 } from "nostr-tools";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { SelectTabs } from "@/Components/SelectTabs";
 import { getSubData } from "@/Helpers/Controlers";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
@@ -387,7 +387,7 @@ export default function SearchNetwork({ exit }) {
               className="fit-container fx-centered"
               style={{ height: "300px" }}
             >
-              <p className="gray-c p-medium">{t("APAkDF0")}</p> <LoadingDots />
+              <p className="gray-c p-medium">{t("APAkDF0")}</p> <Spinner />
             </div>
           )}
         </div>

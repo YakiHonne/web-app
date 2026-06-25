@@ -29,7 +29,7 @@ import PremiumFeatureGate from "@/Components/PremiumFeatureGate";
 import MDEditorWrapper from "@/Components/MDEditorWrapper";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import LoadingScreen from "@/Components/LoadingScreen";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import ProfilesPicker from "@/Components/ProfilesPicker";
 import Router, { useRouter } from "next/router";
 import { useTheme } from "next-themes";
@@ -45,7 +45,6 @@ import {
   getPostToEdit,
   updateArticleDraft,
 } from "@/Helpers/ClientHelpers";
-import Spinner from "@/Components/Spinner";
 import { iconsNames } from "@/Content/IconV2URL";
 
 const draftKey = (pub) => `yh-article-draft-v2-${pub || "anon"}`;

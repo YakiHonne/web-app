@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { convertDate, encryptEventData } from "@/Helpers/Encryptions";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Counter from "@/Components/Counter";
 import { redirectToLogin } from "@/Helpers/Helpers";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
@@ -311,9 +311,8 @@ export default function UN({
             )}
           </div>
           <div
-            className={`fx-centered fx-start-h fx-wrap ${
-              scaled ? "p-medium" : ""
-            }`}
+            className={`fx-centered fx-start-h fx-wrap ${scaled ? "p-medium" : ""
+              }`}
             style={{ rowGap: 0, columnGap: "4px" }}
           >
             {content}
@@ -402,14 +401,14 @@ export default function UN({
                               disabled={isLoading}
                               onClick={() => setTriggerUndo(false)}
                             >
-                              {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                              {isLoading ? <Spinner /> : t("AB4BSCe")}
                             </button>
                             <button
                               className="btn btn-small btn-normal"
                               disabled={isLoading}
                               onClick={handleUndo}
                             >
-                              {isLoading ? <LoadingDots /> : t("Ay2FSU5")}
+                              {isLoading ? <Spinner /> : t("Ay2FSU5")}
                             </button>
                           </div>
                         )}
@@ -448,7 +447,7 @@ export default function UN({
                     onClick={handlePublishing}
                     disabled={isLoading}
                   >
-                    {isLoading ? <LoadingDots /> : t("A0hPAcy")}
+                    {isLoading ? <Spinner /> : t("A0hPAcy")}
                   </button>
                 </div>
               </>

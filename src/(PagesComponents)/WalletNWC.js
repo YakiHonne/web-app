@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { webln } from "@getalby/sdk";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
@@ -131,7 +131,7 @@ export default function WalletNWC() {
               onClick={addNWC}
               disabled={isLoading}
             >
-              {isLoading ? <LoadingDots /> : t("Azb0lto")}
+              {isLoading ? <Spinner /> : t("Azb0lto")}
             </button>
           </div>
         </div>

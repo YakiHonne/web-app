@@ -184,7 +184,7 @@ export default function UploadFile({
               }
             />
           ) : (
-            // {/* <LoadingDots /> */}
+            // {/* <Spinner /> */}
             // </div>
             <ProgressCirc
               percentage={progress}
@@ -200,7 +200,7 @@ export default function UploadFile({
                 )
               }
             />
-            // <LoadingDots />
+            // <Spinner />
           )
         ) : (
           <Icon v={2} name={iconsNames.image_01} opacity=".5" size={small ? 16 : 24} />

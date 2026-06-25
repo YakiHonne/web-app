@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Overlay from "@/Components/Overlay";
 import { nanoid } from "nanoid";
 import { useDispatch, useSelector } from "react-redux";
@@ -139,7 +139,7 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
             onClick={handleShowRelaysPicker}
           >
             {isLoading ? (
-              <LoadingDots />
+              <Spinner />
             ) : bookmark ? (
               <>{t("A9nS8Wz")}</>
             ) : (

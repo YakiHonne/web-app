@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import { nip19 } from "nostr-tools";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Link from "next/link";
 import { isHex } from "@/Helpers/Helpers";
 import SearchUserCard from "@/Components/SearchUserCard";
@@ -116,7 +116,7 @@ export default function MentionSuggestions({
           <>
             <div className="fx-centered fit-container box-pad-v-s">
               <p className="p-small gray-c">{t("AKvHyxG")}</p>
-              <LoadingDots />
+              <Spinner />
             </div>
             <hr />
           </>

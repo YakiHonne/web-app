@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Virtuoso } from "react-virtuoso";
 import MintItem from "./MintItem";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { bytesTohex } from "@/Helpers/Encryptions";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
 import { encrypt44 } from "@/Helpers/Encryptions";
@@ -182,7 +182,7 @@ export default function WalletManagement({
                 placeholder="https://.."
               />
               <button className="btn btn-normal" onClick={addCustomMint}>
-                {isCheckingCustomMint ? <LoadingDots /> : t("ARWeWgJ")}
+                {isCheckingCustomMint ? <Spinner /> : t("ARWeWgJ")}
               </button>
             </div>
             <div className="fit-container" style={{ height: "40vh" }}>
@@ -242,7 +242,7 @@ export default function WalletManagement({
                 className="fit-container fx-centered"
                 style={{ height: "50vh" }}
               >
-                <LoadingDots />
+                <Spinner />
               </div>
             )}
           </>
@@ -284,20 +284,19 @@ export default function WalletManagement({
                 className="fit-container fx-centered"
                 style={{ height: "50vh" }}
               >
-                <LoadingDots />
+                <Spinner />
               </div>
             )}
           </>
         )}
         <div className="fit-container fx-centered">
           <button
-            className={`btn btn-full ${
-              mints.length > 0 ? "btn-normal" : "btn-disabled"
-            }`}
+            className={`btn btn-full ${mints.length > 0 ? "btn-normal" : "btn-disabled"
+              }`}
             onClick={createWallet}
           >
             {isLoading ? (
-              <LoadingDots />
+              <Spinner />
             ) : previousPrivKey ? (
               t("ACs4qJF")
             ) : (

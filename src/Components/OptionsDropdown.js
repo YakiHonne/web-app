@@ -150,7 +150,7 @@ export default function OptionsDropdown({
               width: "max-content",
               zIndex: 999999,
             }}
-            className={`bg-dropdown di-wrapper${dismissing ? " dismissing" : ""}${displayAbove ? " origin-bottom" : ""}`}
+            className={`bg-dropdown-t di-wrapper${dismissing ? " dismissing" : ""}${displayAbove ? " origin-bottom" : ""}`}
           >
             <div className="box-pad-h-s box-pad-v-s fx-centered fx-col fx-start-v pointer">
               {options.map((option, i) => (

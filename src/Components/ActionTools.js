@@ -4,7 +4,7 @@ import { getSubData } from "@/Helpers/Controlers";
 import { getParsedSW } from "@/Helpers/Encryptions";
 import SWActionPreview from "./SWActionPreview";
 import { saveUsers } from "@/Helpers/DB";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import MiniTool from "./MiniTool";
 import UserProfilePic from "./UserProfilePic";
 import { useSelector } from "react-redux";
@@ -180,7 +180,7 @@ const Actions = ({ exit, setReturnedData }) => {
                   style={{ height: "200px" }}
                   className="fit-container fx-centered"
                 >
-                  <LoadingDots />
+                  <Spinner />
                 </div>
               )}
             </div>

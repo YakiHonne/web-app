@@ -19,7 +19,7 @@ import { relaysOnPlatform } from "@/Content/Relays";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
 import QRCode from "react-qr-code";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getZapEventRequest } from "@/Helpers/NostrPublisher";
 import AddWallet from "@/Components/AddWallet";
 import UserSearchBar from "@/Components/UserSearchBar";
@@ -528,7 +528,7 @@ export default function LightningWallet() {
                               className="fx-centered fx-col box-pad-v box-pad-h"
                               style={{ height: "150px" }}
                             >
-                              <LoadingDots />
+                              <Spinner />
                             </div>
                           )}
                         </div>
@@ -681,7 +681,7 @@ export default function LightningWallet() {
                       className="fit-container fx-centered"
                       style={{ height: "40vh" }}
                     >
-                      <p className="gray-c">{t("AZhgADD")}</p> <LoadingDots />
+                      <p className="gray-c">{t("AZhgADD")}</p> <Spinner />
                     </div>
                   )}
                   {!isLoading && (
@@ -1498,7 +1498,7 @@ const SendPayment = ({
           onClick={handleSendPayment}
           disabled={isLoading}
         >
-          {isLoading ? <LoadingDots /> : t("A14LwWS")}
+          {isLoading ? <Spinner /> : t("A14LwWS")}
         </button>
       </div>
     </Overlay>
@@ -1684,7 +1684,7 @@ const ReceivePayment = ({
           </div>
           {triggerNWC && (
             <div className="fx-centered box-pad-h-m box-pad-v-s">
-              <LoadingDots /> <p className="gray-c">{t("AJ99n5o")}</p>{" "}
+              <Spinner /> <p className="gray-c">{t("AJ99n5o")}</p>{" "}
             </div>
           )}
         </Overlay>
@@ -1737,7 +1737,7 @@ const ReceivePayment = ({
             onClick={generateInvoice}
             disabled={isLoading}
           >
-            {isLoading ? <LoadingDots /> : t("AuOH50L")}
+            {isLoading ? <Spinner /> : t("AuOH50L")}
           </button>
         </div>
       </Overlay>

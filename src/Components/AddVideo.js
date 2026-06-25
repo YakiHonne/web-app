@@ -6,7 +6,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import ToPublishVideo from "@/Components/ToPublishVideo";
 import UploadFile from "@/Components/UploadFile";
 import { getVideoFromURL } from "@/Helpers/Helpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
@@ -199,7 +199,7 @@ export default function AddVideo({ exit, event }) {
                     onClick={() => (videoURL ? validate() : null)}
                     disabled={isLoading}
                   >
-                    {isLoading ? <LoadingDots /> : t("AfMMwZC")}
+                    {isLoading ? <Spinner /> : t("AfMMwZC")}
                   </button>
                   <button
                     className="btn btn-gst-red"
@@ -209,7 +209,7 @@ export default function AddVideo({ exit, event }) {
                     }}
                     disabled={isLoading}
                   >
-                    {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                    {isLoading ? <Spinner /> : t("AB4BSCe")}
                   </button>
                 </div>
               </div>

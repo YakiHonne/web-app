@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import NProfilePreviewer from "@/Components/NProfilePreviewer";
 import UserSearchBar from "@/Components/UserSearchBar";
 import { useSelector } from "react-redux";
@@ -81,7 +81,7 @@ export default function InitiConvo({ exit, receiver = false }) {
               onClick={handleSendMessage}
               disabled={isLoading}
             >
-              {isLoading ? <LoadingDots /> : t("AsEtDNy")}
+              {isLoading ? <Spinner /> : t("AsEtDNy")}
             </button>
             {(userKeys.sec || window?.nostr?.nip44) && (
               <div
@@ -91,9 +91,8 @@ export default function InitiConvo({ exit, receiver = false }) {
                 <p className="p-medium slide-left">{t("ATta6yb")}</p>
 
                 <div
-                  className={`toggle ${legacy ? "toggle-dim-gray" : ""} ${
-                    !legacy ? "toggle-green" : "toggle-dim-gray"
-                  }`}
+                  className={`toggle ${legacy ? "toggle-dim-gray" : ""} ${!legacy ? "toggle-green" : "toggle-dim-gray"
+                    }`}
                   onClick={handleLegacyDMs}
                 ></div>
               </div>

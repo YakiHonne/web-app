@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import UserSearchBar from "@/Components/UserSearchBar";
 import NProfilePreviewer from "@/Components/NProfilePreviewer";
 import UploadFile from "@/Components/UploadFile";
@@ -242,15 +242,15 @@ export default function ToPublishVideo({
                 e.preventDefault();
                 tempTag.replace(/\s/g, "").length
                   ? setSelectedCategories([
-                      ...selectedCategories,
-                      tempTag.trim(),
-                    ])
+                    ...selectedCategories,
+                    tempTag.trim(),
+                  ])
                   : dispatch(
-                      setToast({
-                        type: 3,
-                        desc: t("Axk4fkj"),
-                      }),
-                    );
+                    setToast({
+                      type: 3,
+                      desc: t("Axk4fkj"),
+                    }),
+                  );
                 setTempTag("");
               }}
               style={{ position: "relative" }}
@@ -383,14 +383,14 @@ export default function ToPublishVideo({
           disabled={isLoading}
           onClick={exit}
         >
-          {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+          {isLoading ? <Spinner /> : t("AB4BSCe")}
         </button>
         <button
           className="btn fx  btn-normal"
           onClick={() => !isLoading && Submit(30023)}
           disabled={isLoading}
         >
-          {isLoading ? <LoadingDots /> : t("As7IjvV")}
+          {isLoading ? <Spinner /> : t("As7IjvV")}
         </button>
       </div>
     </div>

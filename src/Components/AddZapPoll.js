@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { nip19 } from "nostr-tools";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
@@ -222,9 +222,8 @@ export default function AddZapPoll({ exit, setNevent }) {
               onChange={(e) => setTempOption(e.target.value)}
             />
             <div
-              className={`round-icon round-icon-tooltip ${
-                tempOption ? "pointer" : "if-disabled"
-              }`}
+              className={`round-icon round-icon-tooltip ${tempOption ? "pointer" : "if-disabled"
+                }`}
               data-tooltip={t("AI4ia0I")}
               onClick={handleAddOption}
             >
@@ -232,7 +231,7 @@ export default function AddZapPoll({ exit, setNevent }) {
             </div>
           </div>
           <button className="btn btn-normal btn-full" onClick={postPoll}>
-            {isLoading ? <LoadingDots /> : t("As7IjvV")}
+            {isLoading ? <Spinner /> : t("As7IjvV")}
           </button>
         </div>
       </div>

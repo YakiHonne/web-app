@@ -19,7 +19,7 @@ import {
   compactContent,
 } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import ZapAd from "@/Components/ZapAd";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import NotesComment from "@/Components/NotesComment";
@@ -41,6 +41,7 @@ import {
 import { iconsNames } from "@/Content/IconV2URL";
 import Overlay from "@/Components/Overlay";
 import EventStats from "./EventStats";
+import PaidNoteInfoOverlay from "@/Components/PaidNoteInfoOverlay";
 
 function KindOne({
   event,
@@ -57,6 +58,7 @@ function KindOne({
   const [showComments, setShowComments] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [usersList, setUsersList] = useState(false);
+  const [showPaidNoteInfo, setShowPaidNoteInfo] = useState(false);
   const { postActions } = useNoteStats(event?.id, event?.pubkey);
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
   const [translatedNote, setTranslatedNote] = useState("");
@@ -392,10 +394,21 @@ function KindOne({
                   </div>
                   <div className="fx-centered">
                     {event.isPaidNote && (
-                      <div className="sticker sticker-c1">{t("AAg9D6c")}</div>
+                      <div
+                        className="sticker sticker-paid sticker-click pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPaidNoteInfo(true);
+                        }}
+                      >
+                        {t("AAg9D6c")}
+                      </div>
+                    )}
+                    {showPaidNoteInfo && (
+                      <PaidNoteInfoOverlay onClose={() => setShowPaidNoteInfo(false)} />
                     )}
                     {!isNoteTranslating && <Icon v={2} name={iconsNames.globe} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
-                    {isNoteTranslating && <LoadingDots />}
+                    {isNoteTranslating && <Spinner />}
                     {reactions && (
                       <EventOptions
                         event={event}
@@ -662,7 +675,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
         style={{ gap: 0 }}
       >
         <div className="sc-s bg-sp box-pad-h-s box-pad-v-s ">
-          <LoadingDots />
+          <Spinner />
         </div>
         <div
           style={{
@@ -700,7 +713,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
         ) : (
           <div className="fx-centered">
             <p className="gray-c">{t("AoUrRsg")}</p>
-            <LoadingDots />
+            <Spinner />
           </div>
         )}
       </div>

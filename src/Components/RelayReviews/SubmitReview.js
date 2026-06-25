@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import RatingPreview from "./RatingPreview";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
-import LoadingDots from "../LoadingDots";
+import Spinner from "../Spinner";
 import { useDispatch } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import Overlay from "@/Components/Overlay";
@@ -65,7 +65,7 @@ export default function SubmitReview({ exit, relay, handleSubmittedReview }) {
           onClick={handleSubmitReview}
           disabled={isLoading}
         >
-          {isLoading ? <LoadingDots /> : t("AKzczuT")}
+          {isLoading ? <Spinner /> : t("AKzczuT")}
         </button>
       </div>
     </Overlay>

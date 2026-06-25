@@ -376,6 +376,8 @@ const updateYakiChestStats = (user_stats) => {
       totalPointInLevel,
       inBetweenLevelPoints,
       remainingPointsToNextLevel,
+      consumablePoints: user_stats.current_points?.points,
+      consumablePointsLU: user_stats.current_points?.last_updated,
     }),
   );
 };

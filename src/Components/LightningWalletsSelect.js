@@ -177,7 +177,7 @@ export default function LightningWalletsSelect({
               rowGap: 0,
               overflow: "auto",
               maxHeight: "300px",
-              zIndex: 999999,
+              zIndex: 1000002,
               borderRadius: "16px",
               transformOrigin: "top center",
             }}

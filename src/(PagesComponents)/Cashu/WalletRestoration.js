@@ -10,7 +10,7 @@ import { encrypt44 } from "@/Helpers/Encryptions";
 import { InitEvent } from "@/Helpers/Controlers";
 import successJSON from "@/JSONs/success.json";
 import Lottie from "lottie-react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Overlay from "@/Components/Overlay";
 import { useSelector } from "react-redux";
 
@@ -186,13 +186,12 @@ export default function WalletRestoration({ activeMint, exit }) {
             )}
             <div className="fit-container fx-centered box-pad-v-s box-pad-h-m">
               <button
-                className={`btn btn-normal btn-full ${
-                  isAllFilled.isAllFilled ? "" : "btn-disabled"
-                }`}
+                className={`btn btn-normal btn-full ${isAllFilled.isAllFilled ? "" : "btn-disabled"
+                  }`}
                 disabled={!isAllFilled.isAllFilled || isLoading}
                 onClick={restoreWallet}
               >
-                {isLoading ? <LoadingDots /> : t("ADmoKen")}
+                {isLoading ? <Spinner /> : t("ADmoKen")}
               </button>
             </div>
           </>

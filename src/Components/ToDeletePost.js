@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Overlay from "@/Components/Overlay";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
@@ -110,7 +110,7 @@ export default function ToDeletePost({
             disabled={isLoading}
           >
             {isLoading ? (
-              <LoadingDots />
+              <Spinner />
             ) : curation ? (
               "delete curation"
             ) : (
@@ -122,7 +122,7 @@ export default function ToDeletePost({
             onClick={exit}
             disabled={isLoading}
           >
-            {isLoading ? <LoadingDots /> : "cancel"}
+            {isLoading ? <Spinner /> : "cancel"}
           </button>
         </div>
       </section>

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import LoadingScreen from "@/Components/LoadingScreen";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 
@@ -289,14 +289,14 @@ export default function ToUpdateRelay({ exit }) {
                 onClick={exit}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                {isLoading ? <Spinner /> : t("AB4BSCe")}
               </button>
               <button
                 className="btn btn-normal fx"
                 onClick={saveRelays}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingDots /> : t("AZWpmir")}
+                {isLoading ? <Spinner /> : t("AZWpmir")}
               </button>
             </div>
           </div>

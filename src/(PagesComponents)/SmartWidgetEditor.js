@@ -10,7 +10,7 @@ import {
   getParsedSW,
   timeAgo,
 } from "@/Helpers/Encryptions";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Select from "@/Components/Select";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import UserSearchBar from "@/Components/UserSearchBar";
@@ -762,7 +762,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                 disabled={swMetadataIsLoading}
                 onClick={() => getApp()}
               >
-                {swMetadataIsLoading ? <LoadingDots /> : t("ACfptgy")}
+                {swMetadataIsLoading ? <Spinner /> : t("ACfptgy")}
               </button>
             )}
             {swMetadata && (
@@ -790,7 +790,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
             disabled={isSaving}
           >
             {isSaving ? (
-              <LoadingDots />
+              <Spinner />
             ) : preview ? (
               t("AsXohpb")
             ) : (
@@ -1110,8 +1110,8 @@ const SWEditorToolbar = ({
                     <div className="fx-centered fx-start-h">
                       <div
                         className={`sw-layer-icon ${comp.type === "input"
-                            ? "container-one-24"
-                            : `${comp.type}-24`
+                          ? "container-one-24"
+                          : `${comp.type}-24`
                           }`}
                       ></div>
                       <p className="p-one-line sw-layer-label">{comp.type}</p>
@@ -1674,7 +1674,7 @@ const SWTemplates = ({ templates, setTemplate, setBuildOption }) => {
     <>
       {isLoading && (
         <Overlay exit={() => { }}>
-          <LoadingDots />
+          <Spinner />
         </Overlay>
       )}
       <div className="fit-container fx-centered fx-start-h fx-start-v fx-col">

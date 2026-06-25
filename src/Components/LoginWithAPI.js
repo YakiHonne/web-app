@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { LoginToAPI } from "@/Helpers/Helpers";
 import { useDispatch, useSelector } from "react-redux";
 import { initiFirstLoginStats } from "@/Helpers/Controlers";
@@ -65,7 +65,7 @@ export default function LoginWithAPI({ exit }) {
           onClick={connect}
           disabled={isLoading}
         >
-          {isLoading ? <LoadingDots /> : t("Amdv4GO")}
+          {isLoading ? <Spinner /> : t("Amdv4GO")}
         </button>
         {!isLoading && (
           <button className="btn btn-text btn-normal" onClick={exit}>

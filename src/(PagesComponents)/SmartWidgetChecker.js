@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PagePlaceholder from "@/Components/PagePlaceholder";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { nip19 } from "nostr-tools";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
@@ -117,7 +117,7 @@ export default function SmartWidgetChecker() {
                       data-tooltip={t("AboMK2E")}
                     >
                       {isLoading ? (
-                        <LoadingDots />
+                        <Spinner />
                       ) : (
                         <Icon name="trash" isColored />
                       )}

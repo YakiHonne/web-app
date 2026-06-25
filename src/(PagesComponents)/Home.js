@@ -28,6 +28,9 @@ import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
 import PostNotePortal from "@/Components/PostNotePortal";
 import { Virtuoso } from "react-virtuoso";
 import Icon from "@/Components/Icon";
+import usePaidNotes from "@/Hooks/usePaidNotes";
+import usePaidNoteCost from "@/Hooks/usePaidNoteCost";
+import PaidNoteAd from "@/Components/PaidNoteAd";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -152,6 +155,14 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     [notes],
   );
   const virtuosoRef = useRef(null);
+  const { paidNotes, fetchIfStale: fetchPaidNotesIfStale } = usePaidNotes();
+  const { isPremiumPlan, isBasicPlan } = usePaidNoteCost();
+  const paidNoteAdGap = isBasicPlan ? 15 : 7;
+  const showPaidNoteAds =
+    !isPremiumPlan && notesContentFrom !== "paid" && paidNotes.length > 0;
+  useEffect(() => {
+    fetchPaidNotesIfStale();
+  }, [fetchPaidNotesIfStale]);
   useEffect(() => {
     let contentFromValue = getContentFromValue(selectedCategory);
     if (selectedCategoryValue !== selectedCategory.value) {
@@ -469,6 +480,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
                   <Fragment key={note.id}>
                     <KindSix event={note} />
                     <SuggestionsCards index={index} />
+                    {showPaidNoteAds && (
+                      <PaidNoteAd index={index} gap={paidNoteAdGap} />
+                    )}
                   </Fragment>
                 );
               if (note.kind !== 6)
@@ -476,6 +490,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
                   <Fragment key={note.id}>
                     <KindOne event={note} border={true} />
                     <SuggestionsCards index={index} />
+                    {showPaidNoteAds && (
+                      <PaidNoteAd index={index} gap={paidNoteAdGap} />
+                    )}
                   </Fragment>
                 );
             }

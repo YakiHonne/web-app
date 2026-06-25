@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import ArrowUp from "@/Components/ArrowUp";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { getSubData, translate } from "@/Helpers/Controlers";
@@ -27,7 +27,6 @@ import { getContentTranslationConfig, straightUp } from "@/Helpers/Helpers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
-import Spinner from "@/Components/Spinner";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
 import Badge from "@/Helpers/Badge";
@@ -262,7 +261,7 @@ export default function Note({ event, nevent }) {
                       </div>
                     )}
                     {!isNoteTranslating && <Icon v={2} name={iconsNames.globe} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
-                    {isNoteTranslating && <LoadingDots />}
+                    {isNoteTranslating && <Spinner />}
                     <EventOptions
                       event={note}
                       component={"notes"}

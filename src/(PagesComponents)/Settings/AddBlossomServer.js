@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "../../Store/Slides/Publishers";
 import { InitEvent } from "../../Helpers/Controlers";
-import LoadingDots from "../../Components/LoadingDots";
+import Spinner from "../../Components/Spinner";
 
 export function AddBlossomServer({ exit }) {
   const { t } = useTranslation();
@@ -70,7 +70,7 @@ export function AddBlossomServer({ exit }) {
           onClick={addNewServer}
           disabled={isLoading}
         >
-          {isLoading ? <LoadingDots /> : t("ALyj7Li")}
+          {isLoading ? <Spinner /> : t("ALyj7Li")}
         </button>
       </div>
     </div>

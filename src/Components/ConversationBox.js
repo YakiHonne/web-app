@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import UploadFile from "@/Components/UploadFile";
 import { useSelector } from "react-redux";
 import Emojis from "@/Components/Emojis";
@@ -366,7 +366,7 @@ export function ConversationBox({ convo, back, noHeader = false, showBack = fals
                           >
                             {convo.content}
                           </div>
-                        ) || <LoadingDots />}
+                        ) || <Spinner />}
                         {/* <div
                         style={{ minWidth: "max-content" }}
                         className="fx-centered fx-start-h round-icon-tooltip pointer fit-container"

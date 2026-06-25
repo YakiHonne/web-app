@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { nip19 } from "nostr-tools";
 import OptionsDropdown from "@/Components/OptionsDropdown";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Link from "next/link";
 import ShareLink from "@/Components/ShareLink";
 import AuthorPreview from "@/Components/AuthorPreview";
@@ -119,9 +119,8 @@ export default function WidgetCardV2({
         />
       )}
       <div
-        className={`fx-centered fit-container fx-start-h fx-start-v ${
-          header ? "box-pad-h-s box-pad-v-s sc-s-18 bg-sp" : ""
-        }`}
+        className={`fx-centered fit-container fx-start-h fx-start-v ${header ? "box-pad-h-s box-pad-v-s sc-s-18 bg-sp" : ""
+          }`}
         style={{
           overflow: "visible",
           flexWrap: authPreviewPosition === "bottom" ? "wrap" : "wrap-reverse",
@@ -165,12 +164,12 @@ export default function WidgetCardV2({
                         onClick={() =>
                           swMetadata.id === widget.id
                             ? setPostNoteWithWidget(
-                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
-                              )
+                              `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
+                            )
                             : setInitPublish({
-                                publish: true,
-                                publishInNote: true,
-                              })
+                              publish: true,
+                              publishInNote: true,
+                            })
                         }
                       >
                         <Icon name="add-note" />
@@ -253,11 +252,10 @@ export default function WidgetCardV2({
                       <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
                         <ShareLink
                           label={t("AGB5vpj")}
-                          path={`/smart-widget/${
-                            isNIP05Verified
+                          path={`/smart-widget/${isNIP05Verified
                               ? `${authorData.nip05}/${widget.metadata.d}`
                               : widget.metadata.naddr
-                          }`}
+                            }`}
                           title={swMetadata.title || swMetadata.description}
                           description={
                             swMetadata.description || swMetadata.title
@@ -416,12 +414,12 @@ export default function WidgetCardV2({
                         onClick={() =>
                           swMetadata.id === widget.id
                             ? setPostNoteWithWidget(
-                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
-                              )
+                              `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
+                            )
                             : setInitPublish({
-                                publish: true,
-                                publishInNote: true,
-                              })
+                              publish: true,
+                              publishInNote: true,
+                            })
                         }
                       >
                         <Icon name="add-note" />
@@ -504,11 +502,10 @@ export default function WidgetCardV2({
                       <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
                         <ShareLink
                           label={t("AGB5vpj")}
-                          path={`/smart-widget/${
-                            isNIP05Verified
+                          path={`/smart-widget/${isNIP05Verified
                               ? `${authorData.nip05}/${widget.metadata.d}`
                               : widget.metadata.naddr
-                          }`}
+                            }`}
                           title={swMetadata.title || swMetadata.description}
                           description={
                             swMetadata.description || swMetadata.title
@@ -650,8 +647,8 @@ const PublishWidget = ({
   };
   if (isLoading) {
     return (
-      <Overlay exit={() => {}}>
-        <LoadingDots />
+      <Overlay exit={() => { }}>
+        <Spinner />
       </Overlay>
     );
   }
@@ -687,7 +684,7 @@ const PublishWidget = ({
             onClick={() => setPostNoteWithWidget(pWidget.url)}
             disabled={isImageLoading}
           >
-            {isImageLoading ? <LoadingDots /> : t("AB8DnjO")}
+            {isImageLoading ? <Spinner /> : t("AB8DnjO")}
           </button>
         </div>
       </div>

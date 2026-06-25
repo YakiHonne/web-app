@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { getUser } from "@/Helpers/Controlers";
 import Slider from "./Slider";
 import { sendMessage } from "@/Helpers/DMHelpers";
-import LoadingDots from "./LoadingDots";
+import Spinner from "./Spinner";
 import useSearchUsers from "@/Hooks/useSearchUsers";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import { customHistory } from "@/Helpers/History";
@@ -440,7 +440,7 @@ const ShareWith = ({
         disabled={isLoading}
       >
         {isLoading ? (
-          <LoadingDots />
+          <Spinner />
         ) : successfulSendingTo.length < selectedUsers.length &&
           successfulSendingTo.length > 0 ? (
           t("AhOnn0t")

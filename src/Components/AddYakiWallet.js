@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch, useSelector } from "react-redux";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import { downloadAsFile } from "@/Helpers/Encryptions";
 import Icon from "@/Components/Icon";
@@ -111,9 +111,8 @@ export default function AddYakiWallet({ refresh }) {
 
   return (
     <div
-      className={`fit-container fx-scattered sc-s-18 fx-col box-pad-h-s box-pad-v-s pointer ${
-        showMore ? "" : "option"
-      }`}
+      className={`fit-container fx-scattered sc-s-18 fx-col box-pad-h-s box-pad-v-s pointer ${showMore ? "" : "option"
+        }`}
       style={{ backgroundColor: "transparent" }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -187,7 +186,7 @@ export default function AddYakiWallet({ refresh }) {
             onClick={handleCreateWallet}
           >
             {/* {!isLoading && <>{userName ? t("AvjCl1G") : t("AhQtS0K")}</>} */}
-            {isLoading ? <LoadingDots /> : t("AvjCl1G")}
+            {isLoading ? <Spinner /> : t("AvjCl1G")}
           </button>
         </div>
       )}

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import useMints from "@/Hooks/useMints";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { swapTokensMinToOtherMint } from "@/Helpers/CashuHelpers";
 import Mintslist from "./MintsList";
 import SyncTokens from "./SyncTokens";
@@ -87,7 +87,7 @@ export default function SwapTokens({ cashuWallet, cashuTokens, exit }) {
   if (mints.length === 0 || mintFrom === "" || mintTo === "")
     return (
       <Overlay exit={exit}>
-        <LoadingDots />
+        <Spinner />
       </Overlay>
     );
   return (
@@ -166,13 +166,12 @@ export default function SwapTokens({ cashuWallet, cashuTokens, exit }) {
         </div>
         <div className="fx-centered fit-container">
           <button
-            className={`btn ${
-              isEnabled ? "btn-normal" : "btn-disabled"
-            } btn-full`}
+            className={`btn ${isEnabled ? "btn-normal" : "btn-disabled"
+              } btn-full`}
             disabled={!isEnabled}
             onClick={swapTokens}
           >
-            {isLoading ? <LoadingDots /> : t("AZE0w8d")}
+            {isLoading ? <Spinner /> : t("AZE0w8d")}
           </button>
         </div>
       </div>

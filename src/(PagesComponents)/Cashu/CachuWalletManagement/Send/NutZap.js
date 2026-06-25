@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import Mintslist from "../../MintsList";
 import useCashu from "@/Hooks/useCachu";
 import { getSubData } from "@/Helpers/Controlers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { sendP2PKLockedToken } from "@/Helpers/CashuHelpers";
 import Icon from "@/Components/Icon";
 
@@ -144,11 +144,10 @@ export default function NutZap({ exit }) {
                 className="if p-bold if-no-border ifs-full p-centered"
                 placeholder={t("AcDgXKI")}
                 style={{
-                  fontSize: `max(${
-                    amount.toString().length > 5
+                  fontSize: `max(${amount.toString().length > 5
                       ? `${80 - (amount.toString().length - 6) * 10}px`
                       : "80px"
-                  },50px)`,
+                    },50px)`,
                   height: "80px",
                 }}
                 value={amount}
@@ -186,18 +185,17 @@ export default function NutZap({ exit }) {
             className="fit-container fx-centered fx-col box-pad-h "
             style={{ height: "20vh" }}
           >
-            <LoadingDots />
+            <Spinner />
           </div>
         )}
         {receiverWallet && (
           <button
-            className={`btn btn-full ${
-              isSendingEnabled ? "btn-normal" : "btn-disabled"
-            }`}
+            className={`btn btn-full ${isSendingEnabled ? "btn-normal" : "btn-disabled"
+              }`}
             disabled={!isSendingEnabled || isLoading}
             onClick={handleSend}
           >
-            {isLoading ? <LoadingDots /> : t("A14LwWS")}
+            {isLoading ? <Spinner /> : t("A14LwWS")}
           </button>
         )}
       </div>

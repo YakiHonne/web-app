@@ -6,7 +6,7 @@ import { getEventStatAfterEOSE, InitEvent } from "@/Helpers/Controlers";
 import { saveEventStats } from "@/Helpers/DB";
 import { extractNip19, filterImetas } from "@/Helpers/Helpers";
 import { setToPublish } from "@/Store/Slides/Publishers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import UploadFile from "@/Components/UploadFile";
 import MentionSuggestions from "@/Components/MentionSuggestions";
 import Gifs from "@/Components/Gifs";
@@ -529,14 +529,14 @@ export default function Comments({
                 onClick={() => (comment ? setShowWarningBox(true) : exit())}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                {isLoading ? <Spinner /> : t("AB4BSCe")}
               </button>
               <button
                 className="btn btn-normal btn-small"
                 onClick={commentNote}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingDots /> : t("AT4tygn")}
+                {isLoading ? <Spinner /> : t("AT4tygn")}
               </button>
             </div>
           </div>

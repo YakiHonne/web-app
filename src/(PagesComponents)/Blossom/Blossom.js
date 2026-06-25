@@ -1,6 +1,6 @@
 import Dot from "@/Components/Dot";
 import Icon from "@/Components/Icon";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Slider from "@/Components/Slider";
 import useBlossomManagement from "@/Hooks/useBlossomManagement";
 import React, { useState } from "react";
@@ -51,7 +51,7 @@ export default function Blossom() {
         <div className="box-pad-v-m fit-container">
           {isBlobsLoading && (
             <div className="fx-centered box-pad-v">
-              <LoadingDots />
+              <Spinner />
             </div>
           )}
           {!isBlobsLoading && userBlossomServers.length > 0 && (
@@ -105,41 +105,41 @@ export default function Blossom() {
         {((selectedTab === false && allBlobs.length > 0) ||
           (selectedTab !== false &&
             blobs[userBlossomServers[selectedTab]].length > 0)) && (
-          <VirtuosoGrid
-            key={`${display}-${selectedTab}`}
-            style={{ width: "100%", height: "100vh" }}
-            overscan={200}
-            useWindowScroll={true}
-            skipAnimationFrameInResizeObserver={true}
-            increaseViewportBy={300}
-            totalCount={
-              selectedTab === false
-                ? allBlobs.length
-                : blobs[userBlossomServers[selectedTab]].length
-            }
-            listClassName={`fx-centered fx-start-h fx-wrap ${display === 1 ? "fx-gap-v" : ""}`}
-            itemClassName={
-              display === 1 ? "grid-item-blossom-1" : "grid-item-blossom-2"
-            }
-            itemContent={(index) => {
-              let _ =
+            <VirtuosoGrid
+              key={`${display}-${selectedTab}`}
+              style={{ width: "100%", height: "100vh" }}
+              overscan={200}
+              useWindowScroll={true}
+              skipAnimationFrameInResizeObserver={true}
+              increaseViewportBy={300}
+              totalCount={
                 selectedTab === false
-                  ? allBlobs[index]
-                  : blobs[userBlossomServers[selectedTab]][index];
-              return (
-                <BlobCard
-                  key={_.sha256}
-                  blob={_}
-                  userBlossomServers={userBlossomServers}
-                  blossomColors={blossomColors}
-                  display={display}
-                  refreshLists={refreshLists}
-                  selectedServer={userBlossomServers[selectedTab]}
-                />
-              );
-            }}
-          />
-        )}
+                  ? allBlobs.length
+                  : blobs[userBlossomServers[selectedTab]].length
+              }
+              listClassName={`fx-centered fx-start-h fx-wrap ${display === 1 ? "fx-gap-v" : ""}`}
+              itemClassName={
+                display === 1 ? "grid-item-blossom-1" : "grid-item-blossom-2"
+              }
+              itemContent={(index) => {
+                let _ =
+                  selectedTab === false
+                    ? allBlobs[index]
+                    : blobs[userBlossomServers[selectedTab]][index];
+                return (
+                  <BlobCard
+                    key={_.sha256}
+                    blob={_}
+                    userBlossomServers={userBlossomServers}
+                    blossomColors={blossomColors}
+                    display={display}
+                    refreshLists={refreshLists}
+                    selectedServer={userBlossomServers[selectedTab]}
+                  />
+                );
+              }}
+            />
+          )}
         {/* <div className="fit-container fx-centered fx-wrap">
           {selectedTab === false &&
             allBlobs.map((_, index) => {

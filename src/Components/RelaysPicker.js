@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import RelayImage from "./RelayImage";
-import LoadingDots from "./LoadingDots";
+import Spinner from "./Spinner";
 import { saveRelayMetadata } from "@/Helpers/Controlers";
 import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 import RelayMetadataPreview from "./RelayMetadataPreview";
@@ -161,7 +161,7 @@ const SelectedRelayPreview = ({ url }) => {
   if (!metadata && !isLoading) {
     return (
       <div className="fit-container box-pad-v fx-centered">
-        <LoadingDots />
+        <Spinner />
       </div>
     );
   }

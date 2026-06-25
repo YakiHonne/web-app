@@ -20,7 +20,7 @@ import { updateWallets } from "@/Helpers/ClientHelpers";
 import { setUserKeys } from "@/Store/Slides/UserData";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { relaysOnPlatform } from "@/Content/Relays";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getUser, getUserFromNOSTR } from "@/Helpers/Controlers";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
@@ -239,7 +239,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
             className="btn btn-normal btn-full"
             onClick={() => onLogin(key)}
           >
-            {isLoading ? <LoadingDots /> : <>{t("AmOtzoL")}</>}
+            {isLoading ? <Spinner /> : <>{t("AmOtzoL")}</>}
           </button>
           {checkExt && (
             <>
@@ -249,7 +249,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
                 disabled={!checkExt}
                 onClick={onLoginWithExt}
               >
-                {isLoading ? <LoadingDots /> : <>{t("AgG7T1H")}</>}
+                {isLoading ? <Spinner /> : <>{t("AgG7T1H")}</>}
               </button>
             </>
           )}
@@ -637,9 +637,8 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
 
           {!NWCAddr && enableWalletLinking && (
             <div
-              className={`fit-container fit-container fx-centered fx-col ${
-                isCreatingWalletLoading ? "flash" : ""
-              }`}
+              className={`fit-container fit-container fx-centered fx-col ${isCreatingWalletLoading ? "flash" : ""
+                }`}
             >
               <div className="fit-container fx-centered">
                 <input
@@ -651,8 +650,8 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
                   style={{
                     borderColor:
                       showErrorMessage ||
-                      showEmptyUNMessage ||
-                      showInvalidMessage
+                        showEmptyUNMessage ||
+                        showInvalidMessage
                         ? "var(--red-main)"
                         : "",
                   }}
@@ -710,7 +709,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
           disabled={isCreatingWalletLoading || isLoading}
         >
           {isCreatingWalletLoading || isLoading ? (
-            <LoadingDots />
+            <Spinner />
           ) : (
             t("AHXrr4Y")
           )}

@@ -6,7 +6,7 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import useIsMute from "@/Hooks/useIsMute";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { getSubData } from "@/Helpers/Controlers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import Date_ from "@/Components/Date_";
 import Icon from "@/Components/Icon";
@@ -93,7 +93,7 @@ export function MutedList({ exit }) {
                   className="fx-centered fx-col fit-container"
                   style={{ height: "20vh" }}
                 >
-                  <LoadingDots />
+                  <Spinner />
                 </div>
               )}
               {(mutedList.length === 0 ||

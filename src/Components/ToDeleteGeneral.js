@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
@@ -98,10 +98,10 @@ export default function ToDeleteGeneral({
             onClick={deleteEvent}
             disabled={isLoading}
           >
-            {isLoading ? <LoadingDots /> : t("Almq94P")}
+            {isLoading ? <Spinner /> : t("Almq94P")}
           </button>
           <button className="fx btn btn-red" onClick={cancel}>
-            {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+            {isLoading ? <Spinner /> : t("AB4BSCe")}
           </button>
         </div>
       </section>

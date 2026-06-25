@@ -3,7 +3,7 @@ import Mintslist from "../../MintsList";
 import useCashu from "@/Hooks/useCachu";
 import { useTranslation } from "react-i18next";
 import useLightningWallets from "@/Hooks/useLightningWallets";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { Wallet } from "@cashu/cashu-ts";
 import { publishProofs } from "@/Helpers/CashuHelpers";
 import Invoice from "../Invoice";
@@ -99,11 +99,10 @@ export default function Lightning({ exit }) {
                   className="if p-bold if-no-border ifs-full p-centered"
                   placeholder={t("AcDgXKI")}
                   style={{
-                    fontSize: `max(${
-                      amount.toString().length > 5
+                    fontSize: `max(${amount.toString().length > 5
                         ? `${80 - (amount.toString().length - 6) * 10}px`
                         : "80px"
-                    },50px)`,
+                      },50px)`,
                     height: "80px",
                   }}
                   value={amount}
@@ -137,7 +136,7 @@ export default function Lightning({ exit }) {
                 onClick={isLoading ? null : exit}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <p className="red-c p-big" style={{ height: "20px" }}>
@@ -159,7 +158,7 @@ export default function Lightning({ exit }) {
                 }}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <Icon name="qrcode" size={24} />
@@ -177,7 +176,7 @@ export default function Lightning({ exit }) {
                 onClick={() => (isLoading ? null : initiateReceving())}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <p className="p-big" style={{ height: "20px" }}>

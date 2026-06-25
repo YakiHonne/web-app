@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { nanoid } from "nanoid";
 import TopicsTags from "@/Content/TopicsTags";
@@ -46,8 +46,8 @@ export default function ToPublish({
     tags.length > 0
       ? tags
       : extractNip19(postContent)
-          .tags.filter((_) => _[0] === "t" && _[1])
-          .map((_) => _[1]),
+        .tags.filter((_) => _[0] === "t" && _[1])
+        .map((_) => _[1]),
   );
   const [thumbnail, setThumbnail] = useState("");
   const [thumbnailPrev, setThumbnailPrev] = useState(postThumbnail || "");
@@ -361,15 +361,15 @@ export default function ToPublish({
                         onClick={(e) => {
                           item.replace(/\s/g, "").length
                             ? setSelectedCategories([
-                                ...selectedCategories,
-                                item.trim(),
-                              ])
+                              ...selectedCategories,
+                              item.trim(),
+                            ])
                             : dispatch(
-                                setToast({
-                                  type: 3,
-                                  desc: t("Axk4fkj"),
-                                }),
-                              );
+                              setToast({
+                                type: 3,
+                                desc: t("Axk4fkj"),
+                              }),
+                            );
 
                           setTempTag("");
                           e.stopPropagation();
@@ -387,15 +387,15 @@ export default function ToPublish({
                   e.preventDefault();
                   tempTag.replace(/\s/g, "").length
                     ? setSelectedCategories([
-                        ...selectedCategories,
-                        tempTag.trim(),
-                      ])
+                      ...selectedCategories,
+                      tempTag.trim(),
+                    ])
                     : dispatch(
-                        setToast({
-                          type: 3,
-                          desc: t("Axk4fkj"),
-                        }),
-                      );
+                      setToast({
+                        type: 3,
+                        desc: t("Axk4fkj"),
+                      }),
+                    );
                   setTempTag("");
                 }}
                 style={{ position: "relative" }}
@@ -559,14 +559,14 @@ export default function ToPublish({
               className="btn btn-full  btn-gst-red"
               onClick={() => !isLoading && Submit(30024)}
             >
-              {isLoading ? <LoadingDots /> : t("ABg9vzA")}
+              {isLoading ? <Spinner /> : t("ABg9vzA")}
             </button>
           )}
           <button
             className="btn btn-full  btn-normal"
             onClick={() => !isLoading && Submit(30023)}
           >
-            {isLoading ? <LoadingDots /> : t("As7IjvV")}
+            {isLoading ? <Spinner /> : t("As7IjvV")}
           </button>
         </div>
       </div>

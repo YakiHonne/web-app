@@ -3,11 +3,11 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import React, { useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Icon from "@/Components/Icon";
 
 export default function AddToFavList({ url }) {
-    let relay = url.endsWith("/") ? url : url + "/";
+  let relay = url.endsWith("/") ? url : url + "/";
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
@@ -24,9 +24,9 @@ export default function AddToFavList({ url }) {
     return [];
   }, [userFavRelays]);
   const isAdded = useMemo(() => {
-      return relaysList.includes(relay);
-    }, [relaysList]);
-    
+    return relaysList.includes(relay);
+  }, [relaysList]);
+
   const updateRelaysFeed = async (e) => {
     e?.stopPropagation();
     if (isLoading) return;
@@ -68,7 +68,7 @@ export default function AddToFavList({ url }) {
           onClick={updateRelaysFeed}
         >
           {isLoading ? (
-            <LoadingDots />
+            <Spinner />
           ) : (
             <>
               <Icon name="plus-sign" />
@@ -84,7 +84,7 @@ export default function AddToFavList({ url }) {
           onClick={updateRelaysFeed}
         >
           {isLoading ? (
-            <LoadingDots />
+            <Spinner />
           ) : (
             <>
               <p className="p-bold">-</p>

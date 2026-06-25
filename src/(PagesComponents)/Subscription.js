@@ -3,18 +3,22 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
-import LoadingDots from "@/Components/LoadingDots";
 import Spinner from "@/Components/Spinner";
-import LoginWithAPI from "@/Components/LoginWithAPI";
 import useSubscription from "@/Hooks/useSubscription";
+import useYakiChestConnect from "@/Hooks/useYakiChestConnect";
 import useUsage from "@/Hooks/useUsage";
 import useLightningPayment from "@/Hooks/useLightningPayment";
+import useLightningWallets from "@/Hooks/useLightningWallets";
+import LightningWalletsSelect from "@/Components/LightningWalletsSelect";
+import usePoints from "@/Hooks/usePoints";
+import useRedeemCodes from "@/Hooks/useRedeemCodes";
 import { getSubscriptionLink } from "@/Endpoints/Subscription";
 import QRCode from "react-qr-code";
-import { copyText } from "@/Helpers/Helpers";
+import { copyText, createLightningInvoice } from "@/Helpers/Helpers";
 import { iconsNames } from "@/Content/IconV2URL";
 import ProgressBar from "@/Components/ProgressBar";
 import { SelectTabs } from "@/Components/SelectTabs";
+import NumberShrink from "@/Components/NumberShrink";
 import { useTranslation } from "react-i18next";
 
 const PLANS = [
@@ -209,11 +213,13 @@ function LightningInvoiceModal({ invoice, planName, sats, onClose, userPub }) {
   );
 }
 
-function PricingCards({ isLn, setIsLn, userPub, onClose }) {
+function PricingCards({ mode, setMode, userPub, onClose, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription, hasAnyPointsEligiblePlan }) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [lightningInvoice, setLightningInvoice] = useState(null);
   const [activePlan, setActivePlan] = useState(null);
+  const isLn = mode === "sats";
+  const isPoints = mode === "points";
 
   const generateLightningInvoice = async (plan) => {
     const lnAddr = process.env.NEXT_PUBLIC_YAKIPRO_LIGHTNING_ADDR;
@@ -227,6 +233,11 @@ function PricingCards({ isLn, setIsLn, userPub, onClose }) {
   };
 
   const handleCheckout = async (plan) => {
+    if (isPoints) {
+      await onRedeemSubscription(plan.id);
+      onClose();
+      return;
+    }
     setIsLoading(true);
     try {
       if (isLn) {
@@ -253,47 +264,72 @@ function PricingCards({ isLn, setIsLn, userPub, onClose }) {
 
       <div style={{ display: "flex", justifyContent: "center", marginBottom: "32px" }}>
         <div className="sub-pricing-toggle">
-          <button className={`sub-pricing-toggle-btn${!isLn ? " active" : ""}`} onClick={() => setIsLn(false)}>{t("Az5mbB1")}</button>
-          <button className={`sub-pricing-toggle-btn${isLn ? " active" : ""}`} onClick={() => setIsLn(true)}>{t("AQv2Hnr")}</button>
+          <button className={`sub-pricing-toggle-btn${mode === "fiat" ? " active" : ""}`} onClick={() => setMode("fiat")}>{t("Az5mbB1")}</button>
+          <button className={`sub-pricing-toggle-btn${mode === "sats" ? " active" : ""}`} onClick={() => setMode("sats")}>{t("AQv2Hnr")}</button>
+          {hasAnyPointsEligiblePlan && (
+            <button className={`sub-pricing-toggle-btn${mode === "points" ? " active" : ""}`} onClick={() => setMode("points")}>{t("Apts012")}</button>
+          )}
         </div>
       </div>
 
       <div className="lp-pricing-cards ip-reveal" style={{ maxWidth: 780, margin: "0 auto" }}>
-        {PLANS.map((plan) => (
-          <div key={plan.id} className={`lp-plan-card bg-dropdown${plan.highlighted ? " lp-plan-card-pro" : ""}`}>
-            <div>
-              <div className="lp-plan-name">{plan.name}</div>
-              <div className="lp-plan-price-row">
-                {isLn ? (
-                  <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>{plan.sats}</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()}{plan.period}</span></>
-                ) : (
-                  <><span className="lp-plan-amount">${plan.price}</span><span className="lp-plan-period">{plan.period}</span></>
-                )}
-              </div>
-              <div className="lp-plan-sats">
-                {isLn ? <span>~${plan.price} / month</span> : <span>~{plan.sats} {t("AUQUggV")}</span>}
-              </div>
-              <p className="lp-plan-desc">{t(plan.descKey)}</p>
-            </div>
-            <div className="lp-plan-divider" />
-            <ul className="lp-plan-features">
-              {plan.features.map((f) => (
-                <li key={f.textKey} className={`lp-plan-feature${f.dim ? " lp-plan-feature-dim" : ""}`}>
-                  <span className="lp-plan-feature-icon">{f.dim ? "–" : <Icon name="check" size={20} v={2} isBoldThemeColor />}</span>
-                  {t(f.textKey)}
-                </li>
-              ))}
-            </ul>
-            <button
-              className={`lp-btn lp-btn-lg${plan.highlighted ? " lp-btn-primary" : " lp-btn-outline"}`}
-              style={{ width: "100%", borderRadius: 8 }}
-              disabled={isLoading}
-              onClick={() => handleCheckout(plan)}
+        {PLANS.map((plan) => {
+          const pointsEligible = !!eligibility?.[plan.id]?.eligible;
+          const pointsCost = pointsConfig?.subscription?.[plan.id];
+          const isRedeeming = redeemingPlan === plan.id;
+          const cardDisabled = isPoints && !pointsEligible;
+
+          return (
+            <div
+              key={plan.id}
+              className={`lp-plan-card bg-dropdown${plan.highlighted ? " lp-plan-card-pro" : ""}`}
+              style={cardDisabled ? { opacity: 0.5 } : undefined}
             >
-              {isLoading ? <LoadingDots /> : t(plan.ctaKey)}
-            </button>
-          </div>
-        ))}
+              <div>
+                <div className="lp-plan-name">{plan.name}</div>
+                <div className="lp-plan-price-row">
+                  {isPoints ? (
+                    <span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>
+                      {typeof pointsCost === "number" ? <NumberShrink value={pointsCost} /> : pointsCost}
+                    </span>
+                  ) : isLn ? (
+                    <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>{plan.sats}</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()}{plan.period}</span></>
+                  ) : (
+                    <><span className="lp-plan-amount">${plan.price}</span><span className="lp-plan-period">{plan.period}</span></>
+                  )}
+                  {isPoints && <span className="lp-plan-period"> {t("A4IGG0z")}{plan.period}</span>}
+                </div>
+                <div className="lp-plan-sats">
+                  {isPoints ? (
+                    !pointsEligible && <span>{t("Apts015")}</span>
+                  ) : isLn ? (
+                    <span>~${plan.price} / month</span>
+                  ) : (
+                    <span>~{plan.sats} {t("AUQUggV")}</span>
+                  )}
+                </div>
+                <p className="lp-plan-desc">{t(plan.descKey)}</p>
+              </div>
+              <div className="lp-plan-divider" />
+              <ul className="lp-plan-features">
+                {plan.features.map((f) => (
+                  <li key={f.textKey} className={`lp-plan-feature${f.dim ? " lp-plan-feature-dim" : ""}`}>
+                    <span className="lp-plan-feature-icon">{f.dim ? "–" : <Icon name="check" size={20} v={2} isBoldThemeColor />}</span>
+                    {t(f.textKey)}
+                  </li>
+                ))}
+              </ul>
+              <button
+                className={`lp-btn lp-btn-lg${cardDisabled ? " btn-disabled" : plan.highlighted ? " lp-btn-primary" : " lp-btn-outline"}`}
+                style={{ width: "100%", borderRadius: 8 }}
+                disabled={isLoading || isRedeeming || cardDisabled}
+                onClick={() => !cardDisabled && handleCheckout(plan)}
+              >
+                {isLoading || isRedeeming ? <Spinner /> : t(plan.ctaKey)}
+              </button>
+            </div>
+          );
+        })}
       </div>
     </>
   );
@@ -349,9 +385,10 @@ function FaqSection() {
   );
 }
 
-function UpgradeOverlay({ onClose, userPub }) {
+function UpgradeOverlay({ onClose, userPub, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription }) {
   const { t } = useTranslation();
-  const [isLn, setIsLn] = useState(false);
+  const [mode, setMode] = useState("fiat");
+  const hasAnyPointsEligiblePlan = PLANS.some((plan) => !!eligibility?.[plan.id]?.eligible);
   useReveal(true);
 
   return (
@@ -383,7 +420,17 @@ function UpgradeOverlay({ onClose, userPub }) {
           </p>
         </div>
 
-        <PricingCards isLn={isLn} setIsLn={setIsLn} userPub={userPub} onClose={onClose} />
+        <PricingCards
+          mode={mode}
+          setMode={setMode}
+          userPub={userPub}
+          onClose={onClose}
+          eligibility={eligibility}
+          pointsConfig={pointsConfig}
+          redeemingPlan={redeemingPlan}
+          onRedeemSubscription={onRedeemSubscription}
+          hasAnyPointsEligiblePlan={hasAnyPointsEligiblePlan}
+        />
         <div style={{ height: "1px", background: "var(--dim-gray)", margin: "48px 0" }} />
         <CompareTable />
         <div style={{ height: "1px", background: "var(--dim-gray)", margin: "48px 0" }} />
@@ -412,6 +459,7 @@ function PaymentMethodIcon({ method }) {
   const { t } = useTranslation();
   if (method === "lightning") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="bolt" size={18} /><span>{t("AnX8qpd")}</span></span>;
   if (method === "stripe") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="wallet" size={18} /><span>{t("AKSZkTI")}</span></span>;
+  if (method === "points") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="cup" size={18} /><span>{t("A4IGG0z")}</span></span>;
   return <span className="gray-c">—</span>;
 }
 
@@ -425,7 +473,7 @@ function SkeletonCard() {
   );
 }
 
-const USAGE_ORDER = ["chat-articles", "second-reader", "energy-mapper", "translate-lt", "wallet-creation"];
+const USAGE_ORDER = ["chat-articles", "second-reader", "energy-mapper", "translate-lt", "wallet-creation", "redeem-codes"];
 
 function UsageRow({ item, onUpgrade }) {
   const { t } = useTranslation();
@@ -467,6 +515,169 @@ function UsageRow({ item, onUpgrade }) {
   );
 }
 
+function RedeemAddressOverlay({ onClose, onSubmit, loading }) {
+  const { t } = useTranslation();
+  const [lightningAddr, setLightningAddr] = useState("");
+  const [validating, setValidating] = useState(false);
+  const { wallets, setWallets, selectedWallet, setSelectedWallet } = useLightningWallets();
+  const savedWallets = wallets.filter((wallet) => wallet.kind !== 1);
+
+  const handleSelectWallet = (wallet) => {
+    setSelectedWallet(wallet);
+    setLightningAddr(wallet.entitle);
+  };
+
+  const handleSubmit = async () => {
+    setValidating(true);
+    try {
+      const invoice = await createLightningInvoice({ amount: 1, message: "", recipientAddr: lightningAddr });
+      if (!invoice) {
+        setValidating(false);
+        return;
+      }
+      setValidating(false);
+      onSubmit(lightningAddr);
+    } catch (err) {
+      console.log(err);
+      setValidating(false);
+    }
+  };
+
+  return (
+    <Overlay exit={onClose} width={420}>
+      <div className="fx-centered fx-col box-pad-h box-pad-v" style={{ rowGap: "16px" }}>
+        <h4>{t("Apts005")}</h4>
+        {savedWallets.length > 0 && (
+          <LightningWalletsSelect
+            label={t("ARXDO1q")}
+            selectedWallet={selectedWallet}
+            setSelectedWallet={handleSelectWallet}
+            wallets={savedWallets}
+            setWallets={setWallets}
+          />
+        )}
+        {savedWallets.length > 0 && <p className="gray-c p-medium p-centered">{t("Ax46s4g")}</p>}
+        <input
+          type="text"
+          className="if ifs-full"
+          placeholder={t("A40BuYB")}
+          value={lightningAddr}
+          onChange={(e) => setLightningAddr(e.target.value?.toLowerCase())}
+        />
+        <button
+          className="btn btn-normal btn-full"
+          disabled={!lightningAddr || loading || validating}
+          onClick={handleSubmit}
+        >
+          {loading || validating ? <Spinner /> : t("Apts014")}
+        </button>
+      </div>
+    </Overlay>
+  );
+}
+
+function CodeRow({ item, onUseNow }) {
+  const { t } = useTranslation();
+  const isRedeemed = item.status && item.preImage;
+  const isPending = item.status && !item.preImage;
+  const isUnused = !item.status;
+
+  return (
+    <div className="fit-container fx-scattered sc-s box-pad-h-m box-pad-v-s">
+      <div className="fx-centered fx-col fx-start-v" style={{ rowGap: "4px" }}>
+        <p className="p-big">{item.code}</p>
+        <span className="gray-c p-medium">
+          {t("Apts018")} <NumberShrink value={item.amount} /> {t("A8ck81V")}
+          {" · "}
+          {isRedeemed ? t("Apts003") : isPending ? t("Apts004") : t("Apts002")}
+        </span>
+      </div>
+      <div className="fx-centered" style={{ columnGap: "8px" }}>
+        {isUnused && (
+          <button className="btn btn-normal btn-small" onClick={() => onUseNow(item.code)}>{t("Apts005")}</button>
+        )}
+        <button className="btn btn-gst btn-small" onClick={() => copyText(item.code, t("AwszVHZ"))}>{t("Anwd2wT")}</button>
+      </div>
+    </div>
+  );
+}
+
+function MyCodesSection({ redeemCooldownActive, redeemResetText, refreshUsage }) {
+  const { t } = useTranslation();
+  const { codes, loading, fetch, requesting, requestCode, redeeming, redeem } = useRedeemCodes();
+  const { config, fetchConfig, refreshBalance } = usePoints();
+  const consumablePoints = useSelector((state) => state.yakiChestStats?.consumablePoints);
+  const [activeCode, setActiveCode] = useState(null);
+
+  useEffect(() => {
+    fetch();
+    fetchConfig();
+    refreshBalance();
+  }, [fetch, fetchConfig, refreshBalance]);
+
+  const redeemCodeCost = config?.redeem_code?.cost;
+  const noLimit = config?.redeem_code?.limit === 0;
+  const insufficientPoints = typeof redeemCodeCost === "number" && typeof consumablePoints === "number" && consumablePoints < redeemCodeCost;
+  const requestDisabled = noLimit || insufficientPoints || redeemCooldownActive || requesting;
+
+  const tooltip = noLimit
+    ? t("Apts009")
+    : insufficientPoints
+      ? t("Apts008")
+      : redeemCooldownActive
+        ? t("Apts007")
+        : undefined;
+
+  const refreshAfterRequest = async () => {
+    await refreshBalance();
+    if (refreshUsage) await refreshUsage();
+  };
+
+  const handleRedeem = async (lightning_address) => {
+    const ok = await redeem({ code: activeCode, lightning_address }, refreshAfterRequest);
+    if (ok) setActiveCode(null);
+  };
+
+  return (
+    <div className="fit-container fx-centered fx-col fx-start-v" style={{ rowGap: "16px" }}>
+      {activeCode && (
+        <RedeemAddressOverlay
+          onClose={() => setActiveCode(null)}
+          onSubmit={handleRedeem}
+          loading={redeeming}
+        />
+      )}
+      <div className="fit-container fx-centered fx-col fx-start-v" style={{ rowGap: "8px" }}>
+        <div className="fit-container fx-scattered">
+          <h4>{t("Apts001")}</h4>
+          <button
+            className={`btn ${requestDisabled ? "btn-disabled" : "btn-gst"}`}
+            disabled={requestDisabled}
+            data-tooltip={tooltip}
+            onClick={() => requestCode(refreshAfterRequest)}
+          >
+            {requesting ? (
+              <Spinner />
+            ) : (
+              <>{t("Apts006")} {typeof redeemCodeCost === "number" && <NumberShrink value={redeemCodeCost} />} {t("A4IGG0z")}</>
+            )}
+          </button>
+        </div>
+        {redeemCooldownActive && redeemResetText && (
+          <p className="gray-c p-medium">{redeemResetText}</p>
+        )}
+      </div>
+      {loading ? (
+        <Spinner />
+      ) : (
+        codes.map((item, i) => (
+          <CodeRow key={item.code || i} item={item} onUseNow={setActiveCode} />
+        ))
+      )}
+    </div>
+  );
+}
+
 function UsageView({ onUpgrade }) {
   const { t } = useTranslation();
   const { usage, loading, error, fetch } = useUsage();
@@ -495,6 +706,15 @@ function UsageView({ onUpgrade }) {
     .map((key) => usage.usage?.[key] && { key, ...usage.usage[key] })
     .filter(Boolean);
 
+  const redeemCodesUsage = usage.usage?.["redeem-codes"];
+  const redeemCooldownActive = !!redeemCodesUsage && redeemCodesUsage.limit > 0 && redeemCodesUsage.used >= redeemCodesUsage.limit;
+  const redeemMonthlyCapActive = !!redeemCodesUsage && redeemCodesUsage.monthly_limit > 0 && redeemCodesUsage.monthly_used >= redeemCodesUsage.monthly_limit;
+  const redeemResetText = redeemMonthlyCapActive
+    ? fmtResetIn(redeemCodesUsage.monthly_reset_at, t)
+    : redeemCooldownActive
+      ? fmtResetIn(redeemCodesUsage.reset_at, t)
+      : null;
+
   return (
     <div className="sub-card fx-centered fx-col fx-start-v" style={{ rowGap: "24px" }}>
       <div className="fit-container fx-scattered">
@@ -507,6 +727,12 @@ function UsageView({ onUpgrade }) {
           <UsageRow item={item} onUpgrade={onUpgrade} />
         </React.Fragment>
       ))}
+      <div className="fit-container" style={{ borderTop: "1px solid var(--dim-gray)" }} />
+      <MyCodesSection
+        redeemCooldownActive={redeemCooldownActive || redeemMonthlyCapActive}
+        redeemResetText={redeemResetText}
+        refreshUsage={fetch}
+      />
     </div>
   );
 }
@@ -523,10 +749,34 @@ function CancelConfirmModal({ endDate, onConfirm, onClose, loading }) {
         <p className="gray-c p-centered">{t("AG0J3LL", { date: endDate })}</p>
         <div className="fit-container fx-centered" style={{ columnGap: "12px" }}>
           <button className="btn btn-gst fit-container" onClick={onClose}>{t("AlYjdXR")}</button>
-          <button className="btn btn-red fit-container" onClick={onConfirm} disabled={loading}>{loading ? <LoadingDots /> : t("AsZQ11Q")}</button>
+          <button className="btn btn-red fit-container" onClick={onConfirm} disabled={loading}>{loading ? <Spinner /> : t("AsZQ11Q")}</button>
         </div>
       </div>
     </Overlay>
+  );
+}
+
+function RedeemSubscriptionButton({ plan, eligibility, config, redeemingPlan, onRedeem }) {
+  const { t } = useTranslation();
+  const isEligible = !!eligibility?.[plan.id]?.eligible;
+  const isLoading = redeemingPlan === plan.id;
+  const cost = config?.subscription?.[plan.id];
+
+  if (!isEligible) return null;
+
+  return (
+    <button
+      className="btn btn-gst btn-full"
+      style={{ height: "auto", minHeight: "var(--40)", whiteSpace: "normal", textAlign: "center", padding: "8px 16px" }}
+      disabled={isLoading}
+      onClick={() => onRedeem(plan.id)}
+    >
+      {isLoading ? (
+        <Spinner />
+      ) : (
+        <>{t("Apts010")} {typeof cost === "number" && <NumberShrink value={cost} />} {t("A4IGG0z")}</>
+      )}
+    </button>
   );
 }
 
@@ -580,10 +830,10 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
           </div>
         )}
 
-        {status.last_payment_method && (
+        {status.last_payment_method_display && (
           <div className="fit-container fx-scattered">
             <p className="gray-c">{t("A0SiY0R")}</p>
-            <PaymentMethodIcon method={status.last_payment_method} />
+            <PaymentMethodIcon method={status.last_payment_method_display} />
           </div>
         )}
 
@@ -604,11 +854,11 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
             {status.cancel_at_period_end ? (
               <div className="fit-container fx-centered fx-col" style={{ rowGap: "8px" }}>
                 <p className="gray-c p-centered p-medium">{t("A0TlKu7", { date: fmtDate(status.next_subscription, t("AvGdwjI")) })}</p>
-                <button className="btn btn-normal btn-full" onClick={onResume} disabled={resuming}>{resuming ? <LoadingDots /> : t("APugHtt")}</button>
+                <button className="btn btn-normal btn-full" onClick={onResume} disabled={resuming}>{resuming ? <Spinner /> : t("APugHtt")}</button>
               </div>
             ) : (
               <div className="fit-container fx-centered fx-col" style={{ rowGap: "8px" }}>
-                <button className="btn btn-red btn-full" onClick={() => setShowCancelModal(true)} disabled={cancelling}>{cancelling ? <LoadingDots /> : t("AL0OUiB")}</button>
+                <button className="btn btn-red btn-full" onClick={() => setShowCancelModal(true)} disabled={cancelling}>{cancelling ? <Spinner /> : t("AL0OUiB")}</button>
                 <p className="gray-c p-centered p-medium">{t("AMPyR2N")}</p>
               </div>
             )}
@@ -638,12 +888,12 @@ function PendingChangeCard({ status, onCancelChange, cancellingChange }) {
         <div className="fit-container fx-scattered"><p className="gray-c">{t("AEj8km4")}</p><p>{fmtDate(status.next_subscription, t("AvGdwjI"))}</p></div>
         <div className="fit-container fx-scattered"><p className="gray-c">{t("AQNxYoD")}</p><p>{fmtDate(status.pending_plan_since, t("AvGdwjI"))}</p></div>
       </div>
-      <button className="btn btn-gst btn-full" onClick={onCancelChange} disabled={cancellingChange}>{cancellingChange ? <LoadingDots /> : t("AJxtluP")}</button>
+      <button className="btn btn-gst btn-full" onClick={onCancelChange} disabled={cancellingChange}>{cancellingChange ? <Spinner /> : t("AJxtluP")}</button>
     </div>
   );
 }
 
-function ActionsCard({ status, onChangePlan, changingPlan }) {
+function ActionsCard({ status, onChangePlan, changingPlan, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription }) {
   const { t } = useTranslation();
   if (status.last_payment_method !== "stripe" || !status.active) return null;
 
@@ -690,8 +940,17 @@ function ActionsCard({ status, onChangePlan, changingPlan }) {
                 disabled={isCurrent || hasPending || isLoading}
                 onClick={() => !isCurrent && !hasPending && onChangePlan({ new_plan: plan.id, new_price_id: plan.price_id })}
               >
-                {isLoading ? <LoadingDots /> : isCurrent ? t("A8wDj0f") : isUpgrade ? t("AGo17y4") : t("AVFOoVV")}
+                {isLoading ? <Spinner /> : isCurrent ? t("A8wDj0f") : isUpgrade ? t("AGo17y4") : t("AVFOoVV")}
               </button>
+              {!isCurrent && !hasPending && (
+                <RedeemSubscriptionButton
+                  plan={plan}
+                  eligibility={eligibility}
+                  config={pointsConfig}
+                  redeemingPlan={redeemingPlan}
+                  onRedeem={onRedeemSubscription}
+                />
+              )}
             </div>
           );
         })}
@@ -725,20 +984,36 @@ export default function SubscriptionPage() {
   const { t } = useTranslation();
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
   const userKeys = useSelector((state) => state.userKeys);
-  const [showLoginWithAPI, setShowLoginWithAPI] = useState(false);
+  const { connect: connectToYaki, isConnecting } = useYakiChestConnect();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
 
   const { status, loading, error, fetch, cancel, cancelling, resume, resuming, changePlan, changingPlan, cancelChange, cancellingChange } = useSubscription();
+  const { config: pointsConfig, fetchConfig, eligibility, fetchEligibility, redeemingPlan, redeemSubscription } = usePoints();
 
   useEffect(() => {
     if (isConnectedToYaki) fetch();
   }, [isConnectedToYaki]);
 
+  useEffect(() => {
+    if (isConnectedToYaki) {
+      fetchEligibility();
+      fetchConfig();
+    }
+  }, [isConnectedToYaki, fetchEligibility, fetchConfig]);
+
   return (
     <>
-      {showLoginWithAPI && <LoginWithAPI exit={() => setShowLoginWithAPI(false)} />}
-      {showUpgrade && <UpgradeOverlay onClose={() => setShowUpgrade(false)} userPub={userKeys?.pub} />}
+      {showUpgrade && (
+        <UpgradeOverlay
+          onClose={() => setShowUpgrade(false)}
+          userPub={userKeys?.pub}
+          eligibility={eligibility}
+          pointsConfig={pointsConfig}
+          redeemingPlan={redeemingPlan}
+          onRedeemSubscription={(plan) => redeemSubscription(plan, fetch)}
+        />
+      )}
 
       <div className="fx-centered fx-col fx-start-v" style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px 48px", rowGap: "16px" }}>
         {isConnectedToYaki && (
@@ -756,7 +1031,7 @@ export default function SubscriptionPage() {
               <h4>{t("AxxV7ZQ")}</h4>
               <p className="gray-c p-centered">{t("AvvW4bY")}</p>
             </div>
-            <button className="btn btn-normal" onClick={() => setShowLoginWithAPI(true)}>{t("AdimVMk")}</button>
+            <button className="btn btn-normal" onClick={connectToYaki} disabled={isConnecting}>{isConnecting ? <Spinner /> : t("AdimVMk")}</button>
           </div>
         ) : selectedTab === 1 ? (
           <UsageView onUpgrade={() => setShowUpgrade(true)} />
@@ -770,9 +1045,24 @@ export default function SubscriptionPage() {
           </div>
         ) : status ? (
           <>
-            <CurrentPlanCard status={status} onCancel={cancel} onResume={resume} cancelling={cancelling} resuming={resuming} onUpgrade={() => setShowUpgrade(true)} />
+            <CurrentPlanCard
+              status={status}
+              onCancel={cancel}
+              onResume={resume}
+              cancelling={cancelling}
+              resuming={resuming}
+              onUpgrade={() => setShowUpgrade(true)}
+            />
             <PendingChangeCard status={status} onCancelChange={cancelChange} cancellingChange={cancellingChange} />
-            <ActionsCard status={status} onChangePlan={changePlan} changingPlan={changingPlan} />
+            <ActionsCard
+              status={status}
+              onChangePlan={changePlan}
+              changingPlan={changingPlan}
+              eligibility={eligibility}
+              pointsConfig={pointsConfig}
+              redeemingPlan={redeemingPlan}
+              onRedeemSubscription={(plan) => redeemSubscription(plan, fetch)}
+            />
             {status.active && status.last_payment_method && (
               <div className="fit-container round-corner-m box-pad-h-m box-pad-v-m" style={{ background: "rgba(247,88,22,0.06)", border: "1px solid rgba(247,88,22,0.18)", display: "flex", columnGap: "14px", alignItems: "flex-start" }}>
                 <div style={{ flexShrink: 0, width: "52px", height: "52px", borderRadius: "10px", background: "rgba(247,88,22,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>

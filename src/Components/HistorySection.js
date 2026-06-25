@@ -3,7 +3,7 @@ import NotesComment from "@/Components/NotesComment";
 import { getSubData } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { saveUsers } from "@/Helpers/DB";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import { useTranslation } from "react-i18next";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
@@ -88,15 +88,15 @@ export default function HistorySection({
       setIsLoading(true);
 
       const commentKinds = tagKind === "a" ? [1, 1111] : [1];
-      
+
       let filter = isRoot
         ? []
         : [
-            {
-              kinds: commentKinds,
-              [`#${tagKind}`]: [id],
-            },
-          ];
+          {
+            kinds: commentKinds,
+            [`#${tagKind}`]: [id],
+          },
+        ];
       let checkEventKind = id.split(":");
       if (checkEventKind.length > 2) {
         filter.push({
@@ -122,7 +122,7 @@ export default function HistorySection({
     if (isLoading) return;
 
     const commentKinds = tagKind === "a" ? [1, 1111] : [1];
-    
+
     const sub = ndkInstance.subscribe(
       [
         {
@@ -160,7 +160,7 @@ export default function HistorySection({
         style={{ height: "5vh" }}
         className="fit-container box-pad-h-m fx-centered"
       >
-        <LoadingDots />
+        <Spinner />
       </div>
     );
   if (netComments.length === 0)

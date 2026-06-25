@@ -1,6 +1,6 @@
 import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getUser, getUserFromNOSTR } from "@/Helpers/Controlers";
 import { setUserKeys } from "@/Store/Slides/UserData";
 import {
@@ -34,7 +34,6 @@ import {
   NDKPrivateKeySigner,
 } from "@nostr-dev-kit/ndk";
 import { FilePicker } from "@/Components/FilePicker";
-import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import {
   BUNKER_REGEX,
@@ -331,7 +330,7 @@ const Bunker = ({ autoLaunch = false }) => {
                 onClick={handleBunker}
                 disabled={isLoading || !bunkerURL}
               >
-                {isLoading ? <LoadingDots /> : t("AmOtzoL")}
+                {isLoading ? <Spinner /> : t("AmOtzoL")}
               </button>
               {isLoading && (
                 <button className="btn btn-gst btn-full">
@@ -684,7 +683,7 @@ const LoginScreen = () => {
                   onClick={() => onLogin(key)}
                   disabled={isLoading || !key}
                 >
-                  {isLoading ? <LoadingDots /> : <>{t("AmOtzoL")}</>}
+                  {isLoading ? <Spinner /> : <>{t("AmOtzoL")}</>}
                 </button>
               </div>
             </div>
@@ -1512,7 +1511,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
                 onClick={handleCreateWallet}
                 disabled={isCreatingWalletLoading}
               >
-                {isCreatingWalletLoading ? <LoadingDots /> : t("AWallet2")}
+                {isCreatingWalletLoading ? <Spinner /> : t("AWallet2")}
               </button>
             ) : (
               <button

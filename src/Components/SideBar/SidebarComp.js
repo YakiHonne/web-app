@@ -6,7 +6,7 @@ import NotificationCenter from "@/Components/SideBar/NotificationCenter";
 import { useEffect } from "react";
 import { useRef } from "react";
 import ProgressCirc from "@/Components/ProgressCirc";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import LoginWithAPI from "@/Components/LoginWithAPI";
 import WriteNew from "@/Components/WriteNew";
 import UserBalance from "@/Components/UserBalance";
@@ -503,7 +503,7 @@ export default function SidebarComp() {
                     </div>
                   )}
 
-                  {!isYakiChestLoaded && <LoadingDots />}
+                  {!isYakiChestLoaded && <Spinner />}
                 </div>
                 {showSettings && (
                   <div

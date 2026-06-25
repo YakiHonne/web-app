@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Overlay from "@/Components/Overlay";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { nanoid } from "nanoid";
 import { useDispatch } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
@@ -93,7 +93,7 @@ export default function ToPublishDrafts({
             onClick={() => Submit(30024)}
             disabled={isLoading}
           >
-            {isLoading ? <LoadingDots /> : t("AjbW7pt")}
+            {isLoading ? <Spinner /> : t("AjbW7pt")}
           </button>
           <button className="btn btn-gst-red btn-full" onClick={exit}>
             {t("AB4BSCe")}

@@ -8,7 +8,7 @@ import NumberShrink from "@/Components/NumberShrink";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { getSubscriptionLink } from "@/Helpers/Endpoints/creators";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
 import HorizontalScrollWrapper from "@/Components/HorizontalScrollWrapper";
@@ -235,7 +235,7 @@ function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
           onClick={handleSubscription}
           disabled={plan.method === "lightning" && !recipientAddr}
         >
-          {isLoading ? <LoadingDots /> : "Subscribe Now"}
+          {isLoading ? <Spinner /> : "Subscribe Now"}
         </button>
       </div>
     </>

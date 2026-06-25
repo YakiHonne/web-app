@@ -15,11 +15,10 @@ import { saveUsers } from "@/Helpers/DB";
 import axios from "axios";
 import { downloadAsFile, getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import UploadFile from "@/Components/UploadFile";
 import UserSearchBar from "@/Components/UserSearchBar";
 import PaymentGateway from "@/Components/PaymentGateway";
-import Spinner from "@/Components/Spinner";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
 
@@ -71,9 +70,8 @@ const Main = () => {
               <p className="gray-c fit-container">{t("AagFn6G")}</p>
               <div className="fit-container fx-centered fx-start-v">
                 <input
-                  className={`if ifs-full ${
-                    urlToCheck ? "if-disabled" : ""
-                  }`}
+                  className={`if ifs-full ${urlToCheck ? "if-disabled" : ""
+                    }`}
                   type="text"
                   placeholder={t("AnmM3FH")}
                   value={url}
@@ -213,8 +211,8 @@ const LogsOverlay = ({ logs, exit }) => {
                       typeof log.data === "string"
                         ? log.data
                         : "```json\n" +
-                          JSON.stringify(log.data, null, 2) +
-                          "\n```"
+                        JSON.stringify(log.data, null, 2) +
+                        "\n```"
                     }
                     remarkPlugins={[remarkGfm]}
                     rehypePlugins={[rehypeHighlight]}
@@ -578,7 +576,7 @@ const ManifestFile = ({ url }) => {
   if (isMetadataLoding && !metadata) {
     return (
       <div className="fx-centered box-pad-h">
-        <LoadingDots />
+        <Spinner />
       </div>
     );
   }

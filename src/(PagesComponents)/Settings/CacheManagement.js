@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { setToast } from "../../Store/Slides/Publishers";
 import { getStorageEstimate, makeReadableNumber } from "../../Helpers/Helpers";
 import { clearDBCache } from "../../Helpers/DB";
-import LoadingDots from "../../Components/LoadingDots";
+import Spinner from "../../Components/Spinner";
 import Toggle from "@/Components/Toggle";
 import Icon from "@/Components/Icon";
 
@@ -108,7 +108,7 @@ export function CacheManagement({ selectedTab, setSelectedTab }) {
               onClick={clearAppCache}
               disabled={isCacheClearing}
             >
-              {isCacheClearing ? <LoadingDots /> : t("AWj8yOR")}
+              {isCacheClearing ? <Spinner /> : t("AWj8yOR")}
             </button>
           </div>
         </div>

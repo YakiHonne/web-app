@@ -23,7 +23,6 @@ import RepEventCommentsSection from "@/Components/RepEventCommentsSection";
 import Backbar from "@/Components/Backbar";
 import { useTranslation } from "react-i18next";
 import { translate } from "@/Helpers/Controlers";
-import LoadingDots from "@/Components/LoadingDots";
 import { setToast } from "@/Store/Slides/Publishers";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import bannedList from "@/Content/BannedList";
@@ -566,7 +565,7 @@ export default function Article({ event, userProfile, naddrData }) {
                       minWidth: "max-content",
                     }}
                   >
-                    <LoadingDots />
+                    <Spinner />
                   </button>
                 )}
               </div>
@@ -818,7 +817,7 @@ const PostStats = ({
 // import Backbar from "@/Components/Backbar";
 // import { useTranslation } from "react-i18next";
 // import { translate } from "@/Helpers/Controlers";
-// import LoadingDots from "@/Components/LoadingDots";
+// import Spinner from "@/Components/Spinner";
 // import { setToast } from "@/Store/Slides/Publishers";
 // import PagePlaceholder from "@/Components/PagePlaceholder";
 // import bannedList from "@/Content/BannedList";
@@ -1391,7 +1390,7 @@ const PostStats = ({
 //                       minWidth: "max-content",
 //                     }}
 //                   >
-//                     <LoadingDots />
+//                     <Spinner />
 //                   </button>
 //                 )}
 //               </div>

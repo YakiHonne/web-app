@@ -1029,6 +1029,68 @@
     to { --snake-angle: 360deg; }
 }
 
+@keyframes paid-note-rotate {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.paid-note-ad-border {
+    position: relative;
+    padding: 1px;
+    margin: 8px 0;
+    border-radius: 16px;
+    background: var(--dim-gray);
+}
+
+.paid-note-ad-border-spinner {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.paid-note-ad-border-spinner::before {
+    content: "";
+    position: absolute;
+    inset: -100%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        transparent 300deg,
+        #8b5cf6 330deg,
+        #ec4899 345deg,
+        #f59e0b 355deg,
+        transparent 360deg
+    );
+    animation: paid-note-rotate 3s linear infinite;
+    opacity: 0.7;
+}
+
+.paid-note-ad-border-content {
+    position: relative;
+    z-index: 1;
+    border-radius: 15px;
+    overflow: hidden;
+    background: var(--white);
+}
+
+.paid-note-ad-border-content .note-item {
+    margin-bottom: 0;
+}
+
+@keyframes paid-tag-gradient {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.sticker-paid {
+    background: linear-gradient(90deg, #8b5cf6, #ec4899, #f59e0b, #8b5cf6);
+    background-size: 200% 100%;
+    animation: paid-tag-gradient 3s linear infinite;
+    color: white;
+}
+
 .uplift-filter-bar-hidden {
     transform: translateX(-50%) translateY(-24px);
     opacity: 0;

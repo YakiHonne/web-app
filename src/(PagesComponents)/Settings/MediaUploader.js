@@ -11,7 +11,7 @@ import {
   replaceMediaUploader,
   updateMediaUploader,
 } from "@/Helpers/ClientHelpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Select from "@/Components/Select";
 import Toggle from "@/Components/Toggle";
 import AddBlossomServer from "./AddBlossomServer";
@@ -314,7 +314,7 @@ export function MediaUploader({ exit }) {
                       onClick={addNewServer}
                       disabled={isLoading}
                     >
-                      {isLoading ? <LoadingDots /> : t("ALyj7Li")}
+                      {isLoading ? <Spinner /> : t("ALyj7Li")}
                     </button>
                   </div>
                 )}

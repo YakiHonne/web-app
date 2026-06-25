@@ -32,7 +32,6 @@ import useRelaysAccess from "@/Hooks/useRelaysAccess";
 import RelayJoinRequest from "./RelayJoinRequest";
 import RelayRequestCode from "@/Components/RelayRequestCode";
 import DeleteWarning from "@/Components/DeleteWarning";
-import LoadingDots from "@/Components/LoadingDots";
 import Icon from "@/Components/Icon";
 import { SelectTabs } from "@/Components/SelectTabs";
 
@@ -184,7 +183,7 @@ export default function ContentSharedRelay() {
                             diabled={isRelayAccessLoading}
                           >
                             {isRelayAccessLoading ? (
-                              <LoadingDots />
+                              <Spinner />
                             ) : (
                               t("ApEvULT")
                             )}
@@ -196,7 +195,7 @@ export default function ContentSharedRelay() {
                           >
                             <Icon name="logout" />
                             {isRelayAccessLoading ? (
-                              <LoadingDots />
+                              <Spinner />
                             ) : (
                               t("AUmONF7")
                             )}
@@ -212,7 +211,7 @@ export default function ContentSharedRelay() {
                           disabled={isRelayAccessLoading}
                         >
                           {isRelayAccessLoading ? (
-                            <LoadingDots />
+                            <Spinner />
                           ) : (
                             t("AZs7Pyp")
                           )}

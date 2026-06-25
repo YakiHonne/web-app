@@ -8,7 +8,7 @@ import {
 import QRCode from "react-qr-code";
 import { relaysOnPlatform } from "@/Content/Relays";
 import { getZapEventRequest } from "@/Helpers/NostrPublisher";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { webln } from "@getalby/sdk";
 import { decode } from "light-bolt11-decoder";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
@@ -27,7 +27,6 @@ import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
 import Icon from "@/Components/Icon";
 import Badge from "@/Helpers/Badge";
 import Overlay from "@/Components/Overlay";
-import Spinner from "./Spinner";
 
 export default function PaymentGateway({
   recipientAddr,
@@ -735,7 +734,7 @@ const Cashier = ({
                 onClick={isLoading ? null : exit}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <p className="red-c p-big" style={{ height: "20px" }}>
@@ -757,7 +756,7 @@ const Cashier = ({
                 }}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <Icon name="qrcode" size={24} />
@@ -775,7 +774,7 @@ const Cashier = ({
                 onClick={() => (isLoading ? null : onConfirmation())}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <p className="p-big" style={{ height: "20px" }}>
@@ -814,7 +813,7 @@ const Cashier = ({
             {!onlyInvoice && (
               <div className="fit-container fx-centered box-pad-v-s">
                 <p className="gray-c p-medium">{t("A1ufjMM")}</p>
-                <LoadingDots />
+                <Spinner />
               </div>
             )}
             {onlyInvoice && (

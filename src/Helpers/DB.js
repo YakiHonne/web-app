@@ -58,6 +58,10 @@ if (typeof window !== "undefined") {
     starterPacks: "",
     mediaPacks: "",
   });
+
+  db.version(3).stores({
+    paidNotesSeenCounts: "",
+  });
 }
 export { db, ndkdb };
 
@@ -1374,5 +1378,57 @@ export const saveNutZaps = async (nutZaps, pubkey) => {
     } catch (err) {
       console.log(err);
     }
+  }
+};
+
+export const getPaidNotesSeenCounts = async () => {
+  if (!db) return {};
+  try {
+    let seenCounts = await db.table("paidNotesSeenCounts").get("counts");
+    return seenCounts || {};
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+};
+
+export const incrementPaidNoteSeenCount = async (id) => {
+  if (!db) return 0;
+  try {
+    let seenCounts = await getPaidNotesSeenCounts();
+    seenCounts[id] = (seenCounts[id] || 0) + 1;
+    await Dexie.ignoreTransaction(async () => {
+      await db.transaction("rw", db.paidNotesSeenCounts, async () => {
+        await db.paidNotesSeenCounts.put(seenCounts, "counts");
+      });
+    });
+    return seenCounts[id];
+  } catch (err) {
+    console.log(err);
+    return 0;
+  }
+};
+
+export const getPaidNotesLastFetchedAt = async () => {
+  if (!db) return 0;
+  try {
+    let lastFetchedAt = await db.table("paidNotesSeenCounts").get("lastFetchedAt");
+    return lastFetchedAt || 0;
+  } catch (err) {
+    console.log(err);
+    return 0;
+  }
+};
+
+export const setPaidNotesLastFetchedAt = async (timestamp) => {
+  if (!db) return;
+  try {
+    await Dexie.ignoreTransaction(async () => {
+      await db.transaction("rw", db.paidNotesSeenCounts, async () => {
+        await db.paidNotesSeenCounts.put(timestamp, "lastFetchedAt");
+      });
+    });
+  } catch (err) {
+    console.log(err);
   }
 };

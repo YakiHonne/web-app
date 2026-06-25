@@ -11,7 +11,7 @@ import { getParsedNote } from "@/Helpers/ClientHelpers";
 import { nip19 } from "nostr-tools";
 import Link from "next/link";
 import KindOne from "@/Components/KindOne";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import MinimalPreviewWidget from "@/Components/SmartWidget/MinimalPreviewWidget";
 import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
@@ -291,7 +291,7 @@ function Nip19Parsing({ addr, minimal = false }) {
                 className="fit-container box-pad-h box-pad-v sc-s fx-centered"
               >
                 <p className="p-medium gray-c">{t("AgfmpuR")}</p>
-                <LoadingDots />
+                <Spinner />
               </div>
             )}
             {!isLoading && !event && (

@@ -120,7 +120,7 @@ const decrypt44UsingBunker = async (userKeys, otherPartyPubkey, content) => {
   try {
     const bunkerPointer = await parseBunkerInput(userKeys.bunker);
     const bunker = BunkerSigner.fromBunker(
-      userKeys.localKeys.sec,
+      hexToUint8Array(userKeys.localKeys.sec),
       bunkerPointer,
       {
         onauth: (url) => {

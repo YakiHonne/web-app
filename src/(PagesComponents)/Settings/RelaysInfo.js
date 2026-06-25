@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import axios from "axios";
 import { getUser } from "@/Helpers/Controlers";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import RelayImage from "@/Components/RelayImage";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Overlay from "@/Components/Overlay";
@@ -48,7 +48,7 @@ export function RelaysInfo({ url, exit }) {
             className="fx-centered fit-container"
             style={{ height: "300px" }}
           >
-            <LoadingDots />
+            <Spinner />
           </div>
         )}
         {!isLoading && (

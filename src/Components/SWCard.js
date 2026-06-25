@@ -495,7 +495,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //                 }}
 //                 disabled={isLoading}
 //               >
-//                 {isLoading ? <LoadingDots /> : t("AWADEEz")}
+//                 {isLoading ? <Spinner /> : t("AWADEEz")}
 //               </button>
 //               <button
 //                 className="btn btn-normal btn-full fx-centered"
@@ -503,7 +503,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //                 disabled={isLoading}
 //               >
 //                 {isLoading ? (
-//                   <LoadingDots />
+//                   <Spinner />
 //                 ) : (
 //                   <>
 //                     {lnbcAmount ? (
@@ -537,7 +537,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //             {!onlyInvoice && (
 //               <div className="fit-container fx-centered box-pad-v-s">
 //                 <p className="gray-c p-medium">{t("A1ufjMM")}</p>
-//                 <LoadingDots />
+//                 <Spinner />
 //               </div>
 //             )}
 //             {onlyInvoice && (

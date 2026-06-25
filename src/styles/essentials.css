@@ -299,7 +299,8 @@ hr:last-child {
     width: fit-content;
     padding: 0 8px;
     min-height: 20px;
-    border-radius: var(--border-r-6);
+    max-height: 22px;
+    border-radius: 50px;
     font-size: var(--12);
     transition: .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     word-break: break-word;
@@ -317,7 +318,7 @@ hr:last-child {
     width: fit-content;
     padding: 0 5px;
     height: 10px;
-    border-radius: var(--border-r-6);
+    border-radius: 50px;
     font-size: var(--10);
     word-break: break-word;
 }
@@ -1260,7 +1261,7 @@ a:not(.no-hover):hover {
 }
 
 .sc-s-18 {
-     overflow: hidden;
+    overflow: hidden;
     border-radius: var(--border-r-20);
     border: 1px solid var(--pale-gray);
     background-color: var(--c1-side);

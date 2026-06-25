@@ -1,5 +1,5 @@
 import Date_ from "@/Components/Date_";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { redeemToken } from "@/Helpers/CashuHelpers";
 import useUserProfile from "@/Hooks/useUsersProfile";
@@ -136,7 +136,7 @@ const CashuNutZapItem = React.memo(
               disabled={isLoading}
             >
               {isLoading ? (
-                <LoadingDots />
+                <Spinner />
               ) : (
                 t("A0FXaKJ", { amount: item.amount })
               )}

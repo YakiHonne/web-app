@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import useMints from "@/Hooks/useMints";
 import Mintslist from "../../MintsList";
 import useCashu from "@/Hooks/useCachu";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import {
   checkProofsStatus,
   swapTokensMinToOtherMint,
@@ -132,22 +132,22 @@ export default function ECash({ exit }) {
       let status =
         decodedToken.mint === mintTo.url
           ? await swapTokensSameMint({
-              amount: decodedToken.amount,
-              mint: mintTo.url,
-              token: token_,
-              cashuTokens,
-            })
+            amount: decodedToken.amount,
+            mint: mintTo.url,
+            token: token_,
+            cashuTokens,
+          })
           : await swapTokensMinToOtherMint({
-              amount: decodedToken.amount,
-              mintFrom: decodedToken.mint,
-              mintTo: mintTo.url,
-              cashuTokens,
-              externalProofs: decodedToken.unspentProofs,
-              includeFees: true,
-              cb: (fees) => {
-                setFees(fees);
-              },
-            });
+            amount: decodedToken.amount,
+            mintFrom: decodedToken.mint,
+            mintTo: mintTo.url,
+            cashuTokens,
+            externalProofs: decodedToken.unspentProofs,
+            includeFees: true,
+            cb: (fees) => {
+              setFees(fees);
+            },
+          });
       if (status.status) {
         setIsLoading(false);
         dispatch(
@@ -199,7 +199,7 @@ export default function ECash({ exit }) {
             </div>
           </div>
           <button onClick={decodeToken} className="btn btn-normal btn-full">
-            {isLoading ? <LoadingDots /> : t("AMcfy2X")}
+            {isLoading ? <Spinner /> : t("AMcfy2X")}
           </button>
         </div>
       )}
@@ -247,7 +247,7 @@ export default function ECash({ exit }) {
                   disabled={isLoading}
                   onClick={addMint}
                 >
-                  {isLoading ? <LoadingDots /> : t("ApnhCB8")}
+                  {isLoading ? <Spinner /> : t("ApnhCB8")}
                 </button>
               )}
             </div>
@@ -281,7 +281,7 @@ export default function ECash({ exit }) {
               onClick={redeemToken}
               disabled={isLoading}
             >
-              {isLoading ? <LoadingDots /> : t("AU6S4ek")}
+              {isLoading ? <Spinner /> : t("AU6S4ek")}
             </button>
           )}
           {decodedToken?.isSpent && (

@@ -10,7 +10,7 @@ import { ConversationBox } from "./ConversationBox";
 import { handleUpdateConversation } from "@/Helpers/DMHelpers";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import InitiConvo from "./InitConvo";
-import LoadingDots from "./LoadingDots";
+import Spinner from "./Spinner";
 import { Virtuoso } from "react-virtuoso";
 import Icon from "@/Components/Icon";
 import { iconsNames } from "@/Content/IconV2URL";
@@ -453,7 +453,7 @@ export default function FloatingDMs() {
                   className="fit-container fx-centered"
                   style={{ height: "300px" }}
                 >
-                  <LoadingDots />
+                  <Spinner />
                 </div>
               )} */}
             </div>

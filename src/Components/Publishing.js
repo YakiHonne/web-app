@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { useDispatch, useSelector } from "react-redux";
 import { updateYakiChestStats } from "@/Helpers/Controlers";
@@ -632,7 +632,7 @@ export default function Publishing({ displayOff = false }) {
                                     <p className="red-c">{relay.url}</p>
                                   )}
                                   {relay.status === 1 && <p>{relay.url}</p>}
-                                  {relay.status === 0 && <LoadingDots />}
+                                  {relay.status === 0 && <Spinner />}
                                   {relay.status === 2 && (
                                     <Icon
                                       name="crossmark-tt"
@@ -698,7 +698,7 @@ export default function Publishing({ displayOff = false }) {
         <div className="fit-container box-pad-v-m box-pad-h-m box-marg-s sc-s-18 slide-up-down fx-scattered link-label">
           <div className="fx-centered ">
             <p>{t("Aas6Xk5")}</p>
-            <LoadingDots />
+            <Spinner />
           </div>
           <ProgressCirc percentage={lastEventStats.percentage} size={32} />
         </div>

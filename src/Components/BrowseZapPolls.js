@@ -3,7 +3,7 @@ import { nip19 } from "nostr-tools";
 import { getBech32 } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import MinimalZapPollPreview from "@/Components/MinimalZapPollPreview";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useSelector } from "react-redux";
 import { saveUsers } from "@/Helpers/DB";
 import { getUser } from "@/Helpers/Controlers";
@@ -141,17 +141,15 @@ export default function BrowseZapPolls({ setNevent, exit }) {
           style={{ padding: "1rem" }}
         >
           <div
-            className={`list-item fx-centered fx ${
-              selectedOption === "com" ? "selected-list-item" : ""
-            }`}
+            className={`list-item fx-centered fx ${selectedOption === "com" ? "selected-list-item" : ""
+              }`}
             onClick={() => handleContentSource("com")}
           >
             <p>{t("ADAU7C1")}</p>
           </div>
           <div
-            className={`list-item fx-centered fx ${
-              selectedOption === "self" ? "selected-list-item" : ""
-            }`}
+            className={`list-item fx-centered fx ${selectedOption === "self" ? "selected-list-item" : ""
+              }`}
             onClick={() => handleContentSource("self")}
           >
             <p>{t("AQyoumZ")}</p>
@@ -218,7 +216,7 @@ export default function BrowseZapPolls({ setNevent, exit }) {
               style={{ height: "30vh" }}
             >
               <p className="gray-c">{t("AKvHyxG")}</p>
-              <LoadingDots />
+              <Spinner />
             </div>
           )}
         </div>
