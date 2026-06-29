@@ -458,7 +458,7 @@ function PlanBadge({ plan }) {
 function PaymentMethodIcon({ method }) {
   const { t } = useTranslation();
   if (method === "lightning") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="bolt" size={18} /><span>{t("AnX8qpd")}</span></span>;
-  if (method === "stripe") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="wallet" size={18} /><span>{t("AKSZkTI")}</span></span>;
+  if (method === "stripe" || method === "airwallex") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="wallet" size={18} /><span>{t("AKSZkTI")}</span></span>;
   if (method === "points") return <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Icon name="cup" size={18} /><span>{t("A4IGG0z")}</span></span>;
   return <span className="gray-c">—</span>;
 }
@@ -783,7 +783,7 @@ function RedeemSubscriptionButton({ plan, eligibility, config, redeemingPlan, on
 function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onUpgrade }) {
   const { t } = useTranslation();
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const isStripeActive = status.last_payment_method === "stripe" && status.active;
+  const isStripeActive = ["stripe", "airwallex"].includes(status.last_payment_method) && status.active;
   const isFree = !status.plan || status.plan === "free";
 
   return (
@@ -895,7 +895,7 @@ function PendingChangeCard({ status, onCancelChange, cancellingChange }) {
 
 function ActionsCard({ status, onChangePlan, changingPlan, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription }) {
   const { t } = useTranslation();
-  if (status.last_payment_method !== "stripe" || !status.active) return null;
+  if (!["stripe", "airwallex"].includes(status.last_payment_method) || !status.active) return null;
 
   const hasPending = !!status.pending_plan;
   const currentPlanIdx = planOrder(status.plan);
