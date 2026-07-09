@@ -11,7 +11,6 @@ import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
 import { BunkerSigner, parseBunkerInput } from "nostr-tools/nip46";
 import { localStorage_ } from "./utils/clientLocalStorage";
-import jwt from "jsonwebtoken";
 
 const LNURL_REGEX =
   /^(?:http.*[&?]lightning=|lightning:)?(lnurl[0-9]{1,}[02-9ac-hj-np-z]+)/;
