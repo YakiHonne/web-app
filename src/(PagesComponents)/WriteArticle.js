@@ -46,6 +46,7 @@ import {
   updateArticleDraft,
 } from "@/Helpers/ClientHelpers";
 import { iconsNames } from "@/Content/IconV2URL";
+import { pdfFileToMarkdown } from "@/Helpers/PdfToMarkdown";
 
 const draftKey = (pub) => `yh-article-draft-v2-${pub || "anon"}`;
 const getDraft = (pub) => {
@@ -370,7 +371,7 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
 
 const lowlight = createLowlight(all);
 
-function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown, onSaveStatusChange, onHasContentChange, onClearRequest, onImetasChange, onExportRequest, onImportRequest, draftTitle = "" }) {
+function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown, onSaveStatusChange, onHasContentChange, onClearRequest, onImetasChange, onExportRequest, onImportRequest, onPdfImportRequest, draftTitle = "" }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
@@ -620,6 +621,24 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
     });
   }, [onImportRequest, editor, editEvent, dispatch]);
 
+  useEffect(() => {
+    onPdfImportRequest?.(async (file) => {
+      if (!editor) return;
+      try {
+        const { markdown, images } = await pdfFileToMarkdown(file);
+        editor.commands.setContent(markdown);
+        for (const blob of images) {
+          const imgFile = new File([blob], "pdf-image.png", { type: "image/png" });
+          editor.chain().focus("end").run();
+          await uploadImage(imgFile);
+        }
+      } catch (err) {
+        console.error("[ArticleEditorV2] PDF import failed:", err);
+        dispatch(setToast({ type: 2, desc: t("Apts021") }));
+      }
+    });
+  }, [onPdfImportRequest, editor, uploadImage, dispatch]);
+
   const handleAITabClick = (value) => {
     if (!isPremiumPlan) {
       setShowAIGate(true);
@@ -761,7 +780,7 @@ function EditorSwitcherDropdown({ useV2Editor, onToggle }) {
   );
 }
 
-function EditorOptionsMenu({ onImport, onExport }) {
+function EditorOptionsMenu({ onImport, onImportPdf, onExport, isPdfParsing }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -774,6 +793,7 @@ function EditorOptionsMenu({ onImport, onExport }) {
 
   const items = [
     { label: t("AiINSld"), icon: iconsNames.file_upload, action: onImport, disabled: false },
+    { label: isPdfParsing ? t("Apts017") : t("Apts016"), icon: iconsNames.file_upload, action: () => !isPdfParsing && onImportPdf(), disabled: isPdfParsing },
     { label: t("A4A5psW"), icon: iconsNames.file_download, action: onExport, disabled: false },
   ];
 
@@ -801,7 +821,7 @@ function EditorOptionsMenu({ onImport, onExport }) {
             <button
               key={label}
               onClick={() => { if (!disabled) { action(); setOpen(false); } }}
-              className="wa-dropdown-item"
+              className="wa-dropdown-item fx-centered fx-start-h"
               style={{
                 opacity: disabled ? 0.4 : 1,
                 cursor: disabled ? "not-allowed" : "pointer",
@@ -809,7 +829,9 @@ function EditorOptionsMenu({ onImport, onExport }) {
               }}
             >
               <Icon v={2} name={icon} size={16} />
-              {label}
+              <p>
+                {label}
+              </p>
             </button>
           ))}
         </div>
@@ -829,6 +851,8 @@ export default function WritingArticle() {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
+  const subscription = useSelector((state) => state.subscription);
+  const isPaidPlan = ["basic", "premium"].includes(subscription?.status?.plan) && !!subscription?.status?.active;
   const [showEditorGate, setShowEditorGate] = useState(false);
   const { resolvedTheme } = useTheme();
   const isDarkMode = ["dark", "gray", "system"].includes(resolvedTheme);
@@ -847,6 +871,9 @@ export default function WritingArticle() {
   const mdImportRef = useRef(null);
   const v2ExportRef = useRef(null);
   const v2ImportRef = useRef(null);
+  const v2PdfImportRef = useRef(null);
+  const pdfInputRef = useRef(null);
+  const [isPdfParsing, setIsPdfParsing] = useState(false);
   const [uploadsHistory, setUploadsHistory] = useState(getUploadsHistory());
   const [showUploadsHistory, setShowUploadsHistory] = useState(false);
   const [showClearEditPopup, setShowClearEditPopup] = useState(false);
@@ -856,20 +883,20 @@ export default function WritingArticle() {
   const [isEdit, setIsEdit] = useState(true);
   const [triggerHTMLWarning, setTriggerHTMLWarning] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(false);
-  const [useV2Editor, setUseV2Editor] = useState(() => {
-    try {
-      return localStorage.getItem("yh-editor-v2") === "true";
-    } catch {
-      return false;
-    }
-  });
+  const [useV2Editor, setUseV2Editor] = useState(false);
 
   useEffect(() => {
-    if (!isConnectedToYaki && useV2Editor) {
+    if (!isConnectedToYaki || !isPaidPlan) {
       setUseV2Editor(false);
       try { localStorage.setItem("yh-editor-v2", "false"); } catch { }
+      return;
     }
-  }, [isConnectedToYaki]);
+    try {
+      setUseV2Editor(localStorage.getItem("yh-editor-v2") === "true");
+    } catch {
+      setUseV2Editor(false);
+    }
+  }, [isConnectedToYaki, isPaidPlan]);
 
   useEffect(() => {
     if (userKeys) setSelectedProfile(userKeys);
@@ -970,12 +997,24 @@ export default function WritingArticle() {
 
   const toggleEditor = () => {
     const next = !useV2Editor;
-    if (next && !isConnectedToYaki) {
+    if (next && (!isConnectedToYaki || !isPaidPlan)) {
       setShowEditorGate(true);
       return;
     }
     setUseV2Editor(next);
     try { localStorage.setItem("yh-editor-v2", String(next)); } catch { }
+  };
+
+  const handlePdfImport = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    setIsPdfParsing(true);
+    try {
+      await v2PdfImportRef.current?.(file);
+    } finally {
+      setIsPdfParsing(false);
+    }
   };
 
   const handlePublish = () => setShowPublishModal(true);
@@ -1079,12 +1118,21 @@ export default function WritingArticle() {
                                 style={{ display: "none" }}
                                 onChange={handleMdImport}
                               />
+                              <input
+                                ref={pdfInputRef}
+                                type="file"
+                                accept=".pdf,application/pdf"
+                                style={{ display: "none" }}
+                                onChange={handlePdfImport}
+                              />
                               <div className="fx-centered" style={{ gap: "8px" }}>
                                 {useV2Editor && (
                                   <>
                                     <EditorOptionsMenu
                                       onImport={() => mdImportRef.current?.click()}
+                                      onImportPdf={() => pdfInputRef.current?.click()}
                                       onExport={handleMdExport}
+                                      isPdfParsing={isPdfParsing}
                                     />
                                     <button
                                       className="btn btn-normal btn-gray fx-centered bg-dropdown"
@@ -1131,6 +1179,7 @@ export default function WritingArticle() {
                                 onClearRequest={(fn) => { v2ClearRef.current = fn; }}
                                 onExportRequest={(fn) => { v2ExportRef.current = fn; }}
                                 onImportRequest={(fn) => { v2ImportRef.current = fn; }}
+                                onPdfImportRequest={(fn) => { v2PdfImportRef.current = fn; }}
                               />
                             ) : (
                               <div className="article fit-container" style={{ position: "relative" }}>

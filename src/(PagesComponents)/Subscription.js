@@ -12,7 +12,7 @@ import useLightningWallets from "@/Hooks/useLightningWallets";
 import LightningWalletsSelect from "@/Components/LightningWalletsSelect";
 import usePoints from "@/Hooks/usePoints";
 import useRedeemCodes from "@/Hooks/useRedeemCodes";
-import { getSubscriptionLink } from "@/Endpoints/Subscription";
+import { getSubscriptionLink, getPlans } from "@/Endpoints/Subscription";
 import QRCode from "react-qr-code";
 import { copyText, createLightningInvoice } from "@/Helpers/Helpers";
 import { iconsNames } from "@/Content/IconV2URL";
@@ -20,55 +20,6 @@ import ProgressBar from "@/Components/ProgressBar";
 import { SelectTabs } from "@/Components/SelectTabs";
 import NumberShrink from "@/Components/NumberShrink";
 import { useTranslation } from "react-i18next";
-
-const PLANS = [
-  {
-    id: "basic",
-    price_id: "price_1TXxor8f5pgfcSH1UwpipjP6",
-    name: "Basic",
-    price: "9",
-    sats: "18,000",
-    period: "/ month",
-    descKey: "Asc3VDr",
-    ctaKey: "Ac2yDI1",
-    highlighted: false,
-    features: [
-      { textKey: "AU1WBSd", dim: false },
-      { textKey: "ANhrPjf", dim: false },
-      { textKey: "AVQsKA5", dim: false },
-      { textKey: "A50fFes", dim: false },
-      { textKey: "A8ksMlO", dim: false },
-      { textKey: "Ao2SIvH", dim: false },
-      { textKey: "ADO4Yfl", dim: false },
-      { textKey: "AEpny9c", dim: false },
-      { textKey: "Ada9y3u", dim: true },
-      { textKey: "A8Nj6tx", dim: true },
-      { textKey: "A5A5LVD", dim: true },
-    ],
-  },
-  {
-    id: "premium",
-    price_id: "price_1TXyHO8f5pgfcSH1W1jqzsuk",
-    name: "Premium",
-    price: "19",
-    sats: "38,000",
-    period: "/ month",
-    descKey: "AIIFml1",
-    ctaKey: "ACPuCzH",
-    highlighted: true,
-    features: [
-      { textKey: "ASLOpzl", dim: false },
-      { textKey: "AhCQAkq", dim: false },
-      { textKey: "AeFrGDi", dim: false },
-      { textKey: "A74eLZx", dim: false },
-      { textKey: "Ai1B3HF", dim: false },
-      { textKey: "AyquzYg", dim: false },
-      { textKey: "Az5xfx5", dim: false },
-      { textKey: "AXvNUU1", dim: false },
-      { textKey: "AMUKeIv", dim: false },
-    ],
-  },
-];
 
 const COMPARE_ROWS = [
   { labelKey: "ALx6onZ", creator: true, pro: true },
@@ -110,7 +61,7 @@ const fmtResetIn = (ts, t) => {
   return t("AUrDmZm", { count: days });
 };
 
-const planOrder = (id) => PLANS.findIndex((p) => p.id === id);
+const planOrder = (plans, id) => plans.findIndex((p) => p.id === id);
 
 function useReveal(dep) {
   useEffect(() => {
@@ -213,7 +164,7 @@ function LightningInvoiceModal({ invoice, planName, sats, onClose, userPub }) {
   );
 }
 
-function PricingCards({ mode, setMode, userPub, onClose, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription, hasAnyPointsEligiblePlan }) {
+function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription, hasAnyPointsEligiblePlan }) {
   const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [lightningInvoice, setLightningInvoice] = useState(null);
@@ -244,7 +195,7 @@ function PricingCards({ mode, setMode, userPub, onClose, eligibility, pointsConf
         const invoice = await generateLightningInvoice(plan);
         if (invoice) { setActivePlan(plan); setLightningInvoice(invoice); }
       } else {
-        await getSubscriptionLink({ price_id: plan.price_id, plan: plan.id });
+        await getSubscriptionLink({ plan_id: plan.id });
       }
     } catch (err) { console.error(err); }
     setIsLoading(false);
@@ -256,7 +207,7 @@ function PricingCards({ mode, setMode, userPub, onClose, eligibility, pointsConf
         <LightningInvoiceModal
           invoice={lightningInvoice}
           planName={activePlan.name}
-          sats={activePlan.sats}
+          sats={activePlan.sats_price?.toLocaleString()}
           userPub={userPub}
           onClose={() => { setLightningInvoice(null); setActivePlan(null); }}
         />
@@ -273,7 +224,8 @@ function PricingCards({ mode, setMode, userPub, onClose, eligibility, pointsConf
       </div>
 
       <div className="lp-pricing-cards ip-reveal" style={{ maxWidth: 780, margin: "0 auto" }}>
-        {PLANS.map((plan) => {
+        {plans.map((plan, planIdx) => {
+          const isHighlighted = planIdx === plans.length - 1;
           const pointsEligible = !!eligibility?.[plan.id]?.eligible;
           const pointsCost = pointsConfig?.subscription?.[plan.id];
           const isRedeeming = redeemingPlan === plan.id;
@@ -282,7 +234,7 @@ function PricingCards({ mode, setMode, userPub, onClose, eligibility, pointsConf
           return (
             <div
               key={plan.id}
-              className={`lp-plan-card bg-dropdown${plan.highlighted ? " lp-plan-card-pro" : ""}`}
+              className={`lp-plan-card bg-dropdown${isHighlighted ? " lp-plan-card-pro" : ""}`}
               style={cardDisabled ? { opacity: 0.5 } : undefined}
             >
               <div>
@@ -293,39 +245,38 @@ function PricingCards({ mode, setMode, userPub, onClose, eligibility, pointsConf
                       {typeof pointsCost === "number" ? <NumberShrink value={pointsCost} /> : pointsCost}
                     </span>
                   ) : isLn ? (
-                    <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>{plan.sats}</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()}{plan.period}</span></>
+                    <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>{plan.sats_price?.toLocaleString()}</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()} / month</span></>
                   ) : (
-                    <><span className="lp-plan-amount">${plan.price}</span><span className="lp-plan-period">{plan.period}</span></>
+                    <><span className="lp-plan-amount">${plan.usd_price}</span><span className="lp-plan-period"> / month</span></>
                   )}
-                  {isPoints && <span className="lp-plan-period"> {t("A4IGG0z")}{plan.period}</span>}
+                  {isPoints && <span className="lp-plan-period"> {t("A4IGG0z")} / month</span>}
                 </div>
                 <div className="lp-plan-sats">
                   {isPoints ? (
                     !pointsEligible && <span>{t("Apts015")}</span>
                   ) : isLn ? (
-                    <span>~${plan.price} / month</span>
+                    <span>~${plan.usd_price} / month</span>
                   ) : (
-                    <span>~{plan.sats} {t("AUQUggV")}</span>
+                    <span>~{plan.sats_price?.toLocaleString()} {t("AUQUggV")}</span>
                   )}
                 </div>
-                <p className="lp-plan-desc">{t(plan.descKey)}</p>
               </div>
               <div className="lp-plan-divider" />
               <ul className="lp-plan-features">
-                {plan.features.map((f) => (
-                  <li key={f.textKey} className={`lp-plan-feature${f.dim ? " lp-plan-feature-dim" : ""}`}>
-                    <span className="lp-plan-feature-icon">{f.dim ? "–" : <Icon name="check" size={20} v={2} isBoldThemeColor />}</span>
-                    {t(f.textKey)}
+                {(plan.perks ?? []).map((perk, i) => (
+                  <li key={i} className="lp-plan-feature">
+                    <span className="lp-plan-feature-icon"><Icon name="check" size={20} v={2} isBoldThemeColor /></span>
+                    {perk}
                   </li>
                 ))}
               </ul>
               <button
-                className={`lp-btn lp-btn-lg${cardDisabled ? " btn-disabled" : plan.highlighted ? " lp-btn-primary" : " lp-btn-outline"}`}
+                className={`lp-btn lp-btn-lg${cardDisabled ? " btn-disabled" : isHighlighted ? " lp-btn-primary" : " lp-btn-outline"}`}
                 style={{ width: "100%", borderRadius: 8 }}
                 disabled={isLoading || isRedeeming || cardDisabled}
                 onClick={() => !cardDisabled && handleCheckout(plan)}
               >
-                {isLoading || isRedeeming ? <Spinner /> : t(plan.ctaKey)}
+                {isLoading || isRedeeming ? <Spinner /> : isHighlighted ? t("ACPuCzH") : t("Ac2yDI1")}
               </button>
             </div>
           );
@@ -335,7 +286,7 @@ function PricingCards({ mode, setMode, userPub, onClose, eligibility, pointsConf
   );
 }
 
-function CompareTable() {
+function CompareTable({ plans }) {
   const { t } = useTranslation();
   return (
     <div style={{ marginTop: "48px" }}>
@@ -346,8 +297,8 @@ function CompareTable() {
       <div className="lp-compare-table ip-reveal ip-reveal-d1" style={{ maxWidth: 780, margin: "0 auto" }}>
         <div className="lp-compare-row header">
           <div className="lp-compare-cell header-cell">{t("ALvzv9F")}</div>
-          <div className="lp-compare-cell center header-cell">{PLANS[0].name}</div>
-          <div className="lp-compare-cell center header-cell" style={{ color: "#F75816" }}>{PLANS[1].name}</div>
+          <div className="lp-compare-cell center header-cell">{plans[0]?.name ?? ""}</div>
+          <div className="lp-compare-cell center header-cell" style={{ color: "#F75816" }}>{plans[1]?.name ?? ""}</div>
         </div>
         {COMPARE_ROWS.map((row) => (
           <div key={row.labelKey} className="lp-compare-row">
@@ -385,10 +336,10 @@ function FaqSection() {
   );
 }
 
-function UpgradeOverlay({ onClose, userPub, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription }) {
+function UpgradeOverlay({ plans, onClose, userPub, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription }) {
   const { t } = useTranslation();
   const [mode, setMode] = useState("fiat");
-  const hasAnyPointsEligiblePlan = PLANS.some((plan) => !!eligibility?.[plan.id]?.eligible);
+  const hasAnyPointsEligiblePlan = plans.some((plan) => !!eligibility?.[plan.id]?.eligible);
   useReveal(true);
 
   return (
@@ -421,6 +372,7 @@ function UpgradeOverlay({ onClose, userPub, eligibility, pointsConfig, redeeming
         </div>
 
         <PricingCards
+          plans={plans}
           mode={mode}
           setMode={setMode}
           userPub={userPub}
@@ -432,7 +384,7 @@ function UpgradeOverlay({ onClose, userPub, eligibility, pointsConfig, redeeming
           hasAnyPointsEligiblePlan={hasAnyPointsEligiblePlan}
         />
         <div style={{ height: "1px", background: "var(--dim-gray)", margin: "48px 0" }} />
-        <CompareTable />
+        <CompareTable plans={plans} />
         <div style={{ height: "1px", background: "var(--dim-gray)", margin: "48px 0" }} />
         <FaqSection />
         <div style={{ height: "48px" }} />
@@ -893,20 +845,21 @@ function PendingChangeCard({ status, onCancelChange, cancellingChange }) {
   );
 }
 
-function ActionsCard({ status, onChangePlan, changingPlan, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription }) {
+function ActionsCard({ plans, status, onChangePlan, changingPlan, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription }) {
   const { t } = useTranslation();
   if (!["stripe", "airwallex"].includes(status.last_payment_method) || !status.active) return null;
 
   const hasPending = !!status.pending_plan;
-  const currentPlanIdx = planOrder(status.plan);
+  const currentPlanIdx = planOrder(plans, status.plan);
 
   return (
     <div className="sub-card fx-centered fx-col fx-start-v" style={{ rowGap: "16px" }}>
       <h4>{t("AuxUqLK")}</h4>
       <div className="fit-container fx-centered fx-stretch" style={{ gap: "12px", alignItems: "stretch" }}>
-        {PLANS.map((plan) => {
+        {plans.map((plan, planIdx) => {
+          const isHighlighted = planIdx === plans.length - 1;
           const isCurrent = plan.id === status.plan;
-          const isUpgrade = planOrder(plan.id) > currentPlanIdx;
+          const isUpgrade = planOrder(plans, plan.id) > currentPlanIdx;
           const isLoading = changingPlan === plan.id;
           return (
             <div key={plan.id} className="sub-plan-card bg-dropdown" style={isCurrent ? { outline: "1px solid var(--c1)", outlineOffset: "-1px" } : {}}>
@@ -918,24 +871,22 @@ function ActionsCard({ status, onChangePlan, changingPlan, eligibility, pointsCo
               <div>
                 <div className="sub-plan-name">{plan.name}</div>
                 <div className="sub-plan-price-row">
-                  <span className="sub-plan-amount">${plan.price}</span>
-                  <span className="gray-c" style={{ fontSize: "0.875rem" }}>{plan.period}</span>
+                  <span className="sub-plan-amount">${plan.usd_price}</span>
+                  <span className="gray-c" style={{ fontSize: "0.875rem" }}> / month</span>
                 </div>
-                <p style={{ fontSize: "0.78rem", color: "var(--c1)", fontWeight: 600 }}>~{plan.sats} {t("AUQUggV")}</p>
-                <p className="sub-plan-desc">{t(plan.descKey)}</p>
+                <p style={{ fontSize: "0.78rem", color: "var(--c1)", fontWeight: 600 }}>~{plan.sats_price?.toLocaleString()} {t("AUQUggV")}</p>
               </div>
               <div className="sub-plan-divider" />
               <ul className="sub-plan-features">
-                {plan.features.map((f) => (
-                  <li key={f.textKey} className={`sub-plan-feature${f.dim ? " sub-plan-feature-dim" : ""}`}>
-                    {f.dim && <span className="sub-plan-feature-icon">–</span>}
-                    {!f.dim && <Icon v={2} name={iconsNames.check} isBoldThemeColor={true} />}
-                    {t(f.textKey)}
+                {(plan.perks ?? []).map((perk, i) => (
+                  <li key={i} className="sub-plan-feature">
+                    <Icon v={2} name={iconsNames.check} isBoldThemeColor={true} />
+                    {perk}
                   </li>
                 ))}
               </ul>
               <button
-                className={`btn ${plan.highlighted ? "btn-normal" : "btn-gst"} btn-full`}
+                className={`btn ${isHighlighted ? "btn-normal" : "btn-gst"} btn-full`}
                 style={{ opacity: isCurrent || (hasPending && !isCurrent) ? 0.5 : 1 }}
                 disabled={isCurrent || hasPending || isLoading}
                 onClick={() => !isCurrent && !hasPending && onChangePlan({ new_plan: plan.id, new_price_id: plan.price_id })}
@@ -987,9 +938,15 @@ export default function SubscriptionPage() {
   const { connect: connectToYaki, isConnecting } = useYakiChestConnect();
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
+  const [plans, setPlans] = useState([]);
+  const [plansLoading, setPlansLoading] = useState(true);
 
   const { status, loading, error, fetch, cancel, cancelling, resume, resuming, changePlan, changingPlan, cancelChange, cancellingChange } = useSubscription();
   const { config: pointsConfig, fetchConfig, eligibility, fetchEligibility, redeemingPlan, redeemSubscription } = usePoints();
+
+  useEffect(() => {
+    getPlans().then((p) => { setPlans(p); setPlansLoading(false); });
+  }, []);
 
   useEffect(() => {
     if (isConnectedToYaki) fetch();
@@ -1006,6 +963,7 @@ export default function SubscriptionPage() {
     <>
       {showUpgrade && (
         <UpgradeOverlay
+          plans={plans}
           onClose={() => setShowUpgrade(false)}
           userPub={userKeys?.pub}
           eligibility={eligibility}
@@ -1035,7 +993,7 @@ export default function SubscriptionPage() {
           </div>
         ) : selectedTab === 1 ? (
           <UsageView onUpgrade={() => setShowUpgrade(true)} />
-        ) : loading ? (
+        ) : loading || plansLoading ? (
           <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>
         ) : error ? (
           <div className="sub-card fx-centered fx-col" style={{ rowGap: "12px" }}>
@@ -1055,6 +1013,7 @@ export default function SubscriptionPage() {
             />
             <PendingChangeCard status={status} onCancelChange={cancelChange} cancellingChange={cancellingChange} />
             <ActionsCard
+              plans={plans}
               status={status}
               onChangePlan={changePlan}
               changingPlan={changingPlan}

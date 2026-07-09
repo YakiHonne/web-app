@@ -148,7 +148,7 @@ export default function OptionsDropdown({
               left: displayLeft ? position.left - minWidth : position.left,
               minWidth,
               width: "max-content",
-              zIndex: 999999,
+              zIndex: 1000002,
             }}
             className={`bg-dropdown-t di-wrapper${dismissing ? " dismissing" : ""}${displayAbove ? " origin-bottom" : ""}`}
           >

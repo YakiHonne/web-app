@@ -882,6 +882,7 @@ export function isVid(url) {
     if (match[0].includes("youtu")) platform = "YouTube";
 
     if (platform === "YouTube") {
+      if (/^(channel\/|c\/|@|playlist\b|user\/)/.test(videoId)) return false;
       return {
         isYT: true,
         videoId: videoId.replace("shorts/", ""),

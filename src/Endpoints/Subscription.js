@@ -33,8 +33,19 @@ export const cancelPendingChange = async () => {
   return data;
 };
 
-export const getSubscriptionLink = async ({ plan, price_id }) => {
-  const { data } = await axiosInstance.post("/api/v1/subscription-link", { plan, price_id, main: true });
+export const getSubscriptionLink = async ({ plan_id, main = true }) => {
+  const { data } = await axiosInstance.post("/api/v1/subscription-link", { plan_id, main });
   if (data?.url) window.open(data.url);
   return data;
 };
+
+let _plansCache = null;
+
+export const getPlans = async () => {
+  if (_plansCache) return _plansCache;
+  const { data } = await axiosInstance.get("/api/v1/plans");
+  _plansCache = data.plans ?? [];
+  return _plansCache;
+};
+
+export const clearPlansCache = () => { _plansCache = null; };
