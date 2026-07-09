@@ -13,7 +13,6 @@ const ndkInstance = new NDK({
   // mutedIds: new Map([bannedList.map((p) => [p, "p"])]),
 });
 
-await ndkInstance.connect(1000);
 if (typeof window !== "undefined") {
   ndkInstance.cacheAdapter = new NDKCacheAdapterDexie({
     dbName: "ndk-store",
@@ -21,6 +20,7 @@ if (typeof window !== "undefined") {
     profileCacheSize: 200,
   });
 }
+ndkInstance.connect(1000).catch(() => {});
 
 export { ndkInstance };
 
