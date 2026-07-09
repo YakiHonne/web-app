@@ -27,7 +27,6 @@ import ToastMessages from "@/Components/ToastMessages";
 import dynamic from "next/dynamic";
 import KeepAlive from "@/Components/KeepAlive";
 import IinitiateNotifications from "@/Components/IinitiateNotifications";
-import InitiateCashu from "@/Components/InitiateCashu";
 import NewDesignAnnouncement from "@/Components/NewDesignAnnouncement";
 import NavbarTour from "@/Components/NavbarTour";
 
@@ -44,6 +43,9 @@ const WarningBarClient = dynamic(() => import("@/Components/WarningBar"), {
   ssr: false,
 });
 const PublishingClient = dynamic(() => import("@/Components/Publishing"), {
+  ssr: false,
+});
+const InitiateCashu = dynamic(() => import("@/Components/InitiateCashu"), {
   ssr: false,
 });
 

@@ -9,9 +9,11 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import Spinner from "@/Components/Spinner";
 import UploadFile from "@/Components/UploadFile";
 import MentionSuggestions from "@/Components/MentionSuggestions";
-import Gifs from "@/Components/Gifs";
-import Emojis from "@/Components/Emojis";
+import dynamic from "next/dynamic";
 import NotePreview from "@/Components/NotePreview";
+
+const Gifs = dynamic(() => import("@/Components/Gifs"), { ssr: false });
+const Emojis = dynamic(() => import("@/Components/Emojis"), { ssr: false });
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import ProfilesPicker from "@/Components/ProfilesPicker";

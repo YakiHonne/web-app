@@ -10,7 +10,6 @@ import Spinner from "./Spinner";
 import useSearchUsers from "@/Hooks/useSearchUsers";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import { customHistory } from "@/Helpers/History";
-import QRCodeStyling from "qr-code-styling";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
 import Badge from "@/Helpers/Badge";
@@ -544,45 +543,51 @@ export const ShareQRCode = ({ path, exit }) => {
   const [selectedFgColor, setSelectedFgColor] = useState("#000000");
   const containerRef = useRef(null);
   const qrRef = useRef(null);
-  const qrCodeRef = useRef(
-    new QRCodeStyling({
-      type: "canvas",
-      shape: "square",
-      width: 300,
-      height: 300,
-      data: fullURL,
-      margin: 0,
-      qrOptions: { typeNumber: "0", mode: "Byte", errorCorrectionLevel: "Q" },
-      imageOptions: {
-        saveAsBlob: true,
-        hideBackgroundDots: true,
-        imageSize: 0.4,
-        margin: 0,
-      },
-      dotsOptions: {
-        type: "rounded",
-        color: "#000000",
-        roundSize: true,
-      },
-      backgroundOptions: { round: 0, color: "#ffffff" },
-      image: YakiLogo("#000000"),
-      cornersSquareOptions: {
-        type: "extra-rounded",
-        color: "#000000",
-      },
-      cornersDotOptions: { type: "dot", color: "#000000" },
-    })
-  );
+  const qrCodeRef = useRef(null);
 
   useEffect(() => {
-    qrCodeRef.current.append(qrRef.current);
+    let active = true;
+    import("qr-code-styling").then(({ default: QRCodeStyling }) => {
+      if (!active || !qrRef.current) return;
+      qrCodeRef.current = new QRCodeStyling({
+        type: "canvas",
+        shape: "square",
+        width: 300,
+        height: 300,
+        data: fullURL,
+        margin: 0,
+        qrOptions: { typeNumber: "0", mode: "Byte", errorCorrectionLevel: "Q" },
+        imageOptions: {
+          saveAsBlob: true,
+          hideBackgroundDots: true,
+          imageSize: 0.4,
+          margin: 0,
+        },
+        dotsOptions: {
+          type: "rounded",
+          color: "#000000",
+          roundSize: true,
+        },
+        backgroundOptions: { round: 0, color: "#ffffff" },
+        image: YakiLogo("#000000"),
+        cornersSquareOptions: {
+          type: "extra-rounded",
+          color: "#000000",
+        },
+        cornersDotOptions: { type: "dot", color: "#000000" },
+      });
+      qrCodeRef.current.append(qrRef.current);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const changeQRColor = (color) => {
     setSelectedFgColor(color);
     let image = YakiLogo(color);
 
-    qrCodeRef.current.update({
+    qrCodeRef.current?.update({
       image,
       dotsOptions: {
         color,
@@ -597,7 +602,7 @@ export const ShareQRCode = ({ path, exit }) => {
   };
 
   const onDownloadClick = () => {
-    qrCodeRef.current.download({
+    qrCodeRef.current?.download({
       extension: "png",
     });
   };

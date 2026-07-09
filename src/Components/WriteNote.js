@@ -11,10 +11,13 @@ import { getZapEventRequest } from "@/Helpers/NostrPublisher";
 import { encryptEventData, shortenKey } from "@/Helpers/Encryptions";
 import axios from "axios";
 import { ndkInstance } from "@/Helpers/NDKInstance";
-import QRCode from "react-qr-code";
-import Gifs from "@/Components/Gifs";
-import Emojis from "@/Components/Emojis";
+import dynamic from "next/dynamic";
 import NotePreview from "@/Components/NotePreview";
+
+const QRCode = dynamic(() => import("react-qr-code"), { ssr: false });
+
+const Gifs = dynamic(() => import("@/Components/Gifs"), { ssr: false });
+const Emojis = dynamic(() => import("@/Components/Emojis"), { ssr: false });
 import { useTranslation } from "react-i18next";
 import ActionTools from "@/Components/ActionTools";
 import BrowseSmartWidgetsV2 from "@/Components/BrowseSmartWidgetsV2";

@@ -9,7 +9,6 @@ import VideoComp from "./VideoComp";
 import MediaPostData from "./MediaPostData";
 import ImageFilter from "./ImageFilter";
 import VideoEditor from "./VideoEditor";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { InitEvent } from "@/Helpers/Controlers";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -45,6 +44,7 @@ const applyImageFilter = (file, filter = "grayscale(1)") => {
 };
 
 const trimVideoFile = async (file, range) => {
+  const { FFmpeg } = await import("@ffmpeg/ffmpeg");
   const ffmpeg = new FFmpeg({ log: true });
 
   await ffmpeg.load();

@@ -17,8 +17,13 @@ import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
-import ZapPollsComp from "@/Components/SmartWidget/ZapPollsComp";
+import dynamic from "next/dynamic";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
+
+const ZapPollsComp = dynamic(
+  () => import("@/Components/SmartWidget/ZapPollsComp"),
+  { ssr: false },
+);
 import UserProfilePic from "./UserProfilePic";
 import { getLinkFromAddr } from "@/Helpers/Helpers";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";

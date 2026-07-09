@@ -11,8 +11,12 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { setUpdatedActionFromYakiChest } from "@/Store/Slides/YakiChest";
 import LoginSignup from "@/Components/LoginSignup";
-import PaymentGateway from "@/Components/PaymentGateway";
+import dynamic from "next/dynamic";
 import { nip19 } from "nostr-tools";
+
+const PaymentGateway = dynamic(() => import("@/Components/PaymentGateway"), {
+  ssr: false,
+});
 import Icon from "@/Components/Icon";
 import NumberShrink from "../NumberShrink";
 
