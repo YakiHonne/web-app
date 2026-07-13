@@ -7,8 +7,12 @@ import { useTranslation } from "react-i18next";
 import { InitEvent, publishEvent } from "@/Helpers/Controlers";
 import OptionsDropdown from "./OptionsDropdown";
 import PostAsNote from "./PostAsNote";
-import PaymentGateway from "./PaymentGateway";
+import dynamic from "next/dynamic";
 import axios from "axios";
+
+const PaymentGateway = dynamic(() => import("./PaymentGateway"), {
+  ssr: false,
+});
 import { saveUsers } from "@/Helpers/DB";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import UserProfilePic from "./UserProfilePic";

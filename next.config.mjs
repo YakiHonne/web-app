@@ -7,8 +7,12 @@ const withPWA = withPWAInit({
   skipWaiting: true,
   clientsClaim: true,
   cleanupOutdatedCaches: true,
+  buildExcludes: [
+    /\.map$/,
+    /app-build-manifest\.json$/,
+    /dynamic-css-manifest\.json$/,
+  ],
   // runtimeCaching,
-  // buildExcludes: [/middleware-manifest\.json$/],
 });
 
 /** @type {import('next').NextConfig} */

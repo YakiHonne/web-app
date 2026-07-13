@@ -11,7 +11,12 @@ import OptionsDropdown from "@/Components/OptionsDropdown";
 import MobileSheet from "@/Components/MobileSheet";
 import useIsMobile from "@/Hooks/useIsMobile";
 import { nip19 } from "nostr-tools";
-import RawEventDisplay from "@/Components/ElementOptions/RawEventDisplay";
+import dynamic from "next/dynamic";
+
+const RawEventDisplay = dynamic(
+  () => import("@/Components/ElementOptions/RawEventDisplay"),
+  { ssr: false },
+);
 import useIsMute from "@/Hooks/useIsMute";
 import AddArticleToCuration from "@/Components/AddArticleToCuration";
 import PostAsNote from "@/Components/PostAsNote";

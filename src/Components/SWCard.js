@@ -1,10 +1,17 @@
 import React, { useState } from "react";
-import { Widget } from "smart-widget-previewer";
 import { customHistory } from "@/Helpers/History";
 import { useSelector } from "react-redux";
 import MiniApp from "@/Components/MiniApp";
-import PaymentGateway from "@/Components/PaymentGateway";
+import dynamic from "next/dynamic";
 import Icon from "@/Components/Icon";
+
+const PaymentGateway = dynamic(() => import("@/Components/PaymentGateway"), {
+  ssr: false,
+});
+const Widget = dynamic(
+  () => import("smart-widget-previewer").then((mod) => mod.Widget),
+  { ssr: false },
+);
 
 export default function SWCard({ widget, onNextWidget }) {
   const userKeys = useSelector((state) => state.userKeys);

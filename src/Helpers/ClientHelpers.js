@@ -1,5 +1,9 @@
-import AudioLoader from "@/Components/AudioLoader";
+import dynamic from "next/dynamic";
 import Gallery from "@/Components/Gallery";
+
+const AudioLoader = dynamic(() => import("@/Components/AudioLoader"), {
+  ssr: false,
+});
 import IMGElement from "@/Components/IMGElement";
 import LinkPreview from "@/Components/LinkPreview";
 import LNBCInvoice from "@/Components/LNBCInvoice";
@@ -20,7 +24,10 @@ import { nanoid } from "nanoid";
 import { hkdf } from "@noble/hashes/hkdf.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { checkJWT, decodeJWT } from "./Encryptions";
-import RedPacketBox from "@/Components/RedPacket/RedPacketBox";
+const RedPacketBox = dynamic(
+  () => import("@/Components/RedPacket/RedPacketBox"),
+  { ssr: false },
+);
 import Icon from "@/Components/Icon";
 import { useVideoThumbnail } from "@/Hooks/useVideoThumbnail";
 import Carousel from "@/Components/Carousel";

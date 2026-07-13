@@ -4,9 +4,11 @@ import Date_ from "@/Components/Date_";
 import Spinner from "@/Components/Spinner";
 import UploadFile from "@/Components/UploadFile";
 import { useSelector } from "react-redux";
-import Emojis from "@/Components/Emojis";
-import Gifs from "@/Components/Gifs";
+import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";
+
+const Emojis = dynamic(() => import("@/Components/Emojis"), { ssr: false });
+const Gifs = dynamic(() => import("@/Components/Gifs"), { ssr: false });
 import { deleteMessage, sendMessage } from "@/Helpers/DMHelpers";
 import OptionsDropdown from "./OptionsDropdown";
 import { copyText } from "@/Helpers/Helpers";

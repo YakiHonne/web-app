@@ -5,8 +5,12 @@ import { getEventStatAfterEOSE, InitEvent } from "@/Helpers/Controlers";
 import { saveEventStats } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import LoginSignup from "@/Components/LoginSignup";
-import EmojiPicker from "emoji-picker-react";
+import dynamic from "next/dynamic";
 import EmojiImg from "@/Components/EmojiImg";
+
+const EmojiPicker = dynamic(() => import("emoji-picker-react"), {
+  ssr: false,
+});
 import { useTheme } from "next-themes";
 import { getCustomSettings } from "@/Helpers/ClientHelpers";
 import Icon from "@/Components/Icon";

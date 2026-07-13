@@ -1,7 +1,11 @@
 import React, { useMemo, useState } from "react";
 import LoginSignup from "@/Components/LoginSignup";
-import PaymentGateway from "@/Components/PaymentGateway";
+import dynamic from "next/dynamic";
 import { nip19 } from "nostr-tools";
+
+const PaymentGateway = dynamic(() => import("@/Components/PaymentGateway"), {
+  ssr: false,
+});
 import Icon from "@/Components/Icon";
 import { useTranslation } from "react-i18next";
 

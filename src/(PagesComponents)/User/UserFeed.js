@@ -313,7 +313,7 @@ export default function UserFeed({ user }) {
           gap: "8px",
           padding: "12px 0",
           position: "sticky",
-          top: hidden ? "-300px" : "86px",
+          top: hidden ? "-300px" : "56px",
           transition: "top 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
           zIndex: 200,
         }}
