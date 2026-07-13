@@ -75,7 +75,7 @@ export default function PostReaction({
     event.kind === 1 && (order.repost > -1 || order.quote > -1);
   const repostQuoteOrder =
     order.repost > -1 ? order.repost : order.quote > -1 ? order.quote : -1;
-
+  console.log(postActions)
   return (
     <>
       {usersList && (

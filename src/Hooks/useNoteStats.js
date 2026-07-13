@@ -123,13 +123,13 @@ const useNoteStats = (noteID, notePubkey) => {
               kind9735_ = kind9735_ + sats;
             }
           }
-          if (event.kind === 7) {
+          if (event.kind === 7 && event.content !== "-") {
             if (!kind7Since || kind7Since < event.created_at)
               kind7Since = event.created_at;
             let content = !event.content.includes(":")
               ? event.content
               : (event.tags.find((tag) => `:${tag[1]}:` === event.content) ||
-                  [])[2] || "+";
+                [])[2] || "+";
             let checkValid7 = event.tags.find(
               (tag) => tag[0] === "e" && tag[1] === noteID,
             );
