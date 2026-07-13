@@ -33,8 +33,8 @@ export const cancelPendingChange = async () => {
   return data;
 };
 
-export const getSubscriptionLink = async ({ plan_id, main = true }) => {
-  const { data } = await axiosInstance.post("/api/v1/subscription-link", { plan_id, main });
+export const getSubscriptionLink = async ({ plan, main = true }) => {
+  const { data } = await axiosInstance.post("/api/v1/subscription-link", { plan, main });
   if (data?.url) window.open(data.url);
   return data;
 };

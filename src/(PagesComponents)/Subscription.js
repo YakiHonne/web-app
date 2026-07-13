@@ -30,9 +30,9 @@ const COMPARE_ROWS = [
   { labelKey: "A8SkkKn", creator: "50 GB", pro: "100 GB" },
   { labelKey: "AxpgMtE", creator: "3 months", pro: "3 years" },
   { labelKey: "Av9K4Uc", creator: false, pro: true },
-  { labelKey: "Ada9y3u", creator: false, pro: "60/week" },
-  { labelKey: "AiJc9Ml", creator: false, pro: "30/week" },
-  { labelKey: "A5A5LVD", creator: false, pro: "20/week" },
+  { labelKey: "Ada9y3u", creator: false, pro: "weekly limit" },
+  { labelKey: "AiJc9Ml", creator: false, pro: "weekly limit" },
+  { labelKey: "A5A5LVD", creator: false, pro: "weekly limit" },
   { labelKey: "AC03DMc", creator: false, pro: true },
 ];
 
@@ -81,10 +81,7 @@ function CellValue({ value, t }) {
   if (value === "100 GB") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AJXhgWC")}</span>;
   if (value === "3 months") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AVnJlbF")}</span>;
   if (value === "3 years") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AN9MDu8")}</span>;
-  if (value === "60/week") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AJeNfeN")}</span>;
-  if (value === "30/week") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AObhDYm")}</span>;
-  if (value === "20/week") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AsTcBNN")}</span>;
-  return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{value}</span>;
+  if (value === "weekly limit") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AJeNfeN")}</span>;
 }
 
 function WaitingDots() {
@@ -195,7 +192,7 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
         const invoice = await generateLightningInvoice(plan);
         if (invoice) { setActivePlan(plan); setLightningInvoice(invoice); }
       } else {
-        await getSubscriptionLink({ plan_id: plan.id });
+        await getSubscriptionLink({ plan: plan.plan });
       }
     } catch (err) { console.error(err); }
     setIsLoading(false);
