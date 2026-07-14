@@ -1404,8 +1404,12 @@ main {
 
 .wmde-markdown {
     font-size: 1rem !important;
-
     font-family: 'DM sans', sans-serif !important;
+}
+
+.wmde-markdown p,
+.tiptap-content p {
+    margin-bottom: 0 !important;
 }
 
 .wmde-markdown pre {

@@ -11,7 +11,7 @@ export default function ContentFeedCategoryPreview({
       <div className="fx-centered">
         {category.value === "top" && (
           <div>
-            <Icon name="medal" size={24} />
+            <Icon name="podium" size={24} />
           </div>
         )}
         {category.value === "widgets" && (
@@ -36,7 +36,7 @@ export default function ContentFeedCategoryPreview({
         )}
         {category.value === "network" && (
           <div>
-            <Icon name="posts" size={24} />
+            <Icon name="workflow" size={24} />
           </div>
         )}
         {category.value === "global" && (

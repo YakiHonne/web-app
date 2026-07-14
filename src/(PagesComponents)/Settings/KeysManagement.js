@@ -81,7 +81,7 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
               }
             >
               <p>{shortenKey(userKeys.bunker)}</p>
-              <Icon name="copy" size={24} />
+              <Icon name="copy" size={20} />
             </div>
           </>}
           {userKeys.central &&
@@ -111,7 +111,7 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
                   </span>
                 )}
               </p>
-              {userKeys.sec && <Icon name="copy" size={24} />}
+              {userKeys.sec && <Icon name="copy" size={20} />}
             </div>
           </>}
 
@@ -127,7 +127,7 @@ export function KeysManagement({ selectedTab, setSelectedTab, userKeys }) {
             }
           >
             <p>{shortenKey(getBech32("npub", userKeys.pub))}</p>
-            <Icon name="copy" size={24} />
+            <Icon name="copy" size={20} />
           </div>
           <div className="fit-container fx-end-h" onClick={exportKeys}>
             <div className="fx-centered">

@@ -15,6 +15,8 @@ import { all, createLowlight } from "lowlight";
 import Mathematics from "tiptap-math";
 import "katex/dist/katex.min.css";
 import NostrEntityExtension from "@/Extensions/NostrEntityExtension";
+import MentionExtension, { mentionPluginKey } from "@/Extensions/MentionExtension";
+import MentionSuggestions from "@/Components/MentionSuggestions";
 import { useSelector } from "react-redux";
 import { FileUpload } from "@/Helpers/Helpers";
 import ArticlePublishModalV2 from "@/Components/ArticlePublishModalV2";
@@ -104,6 +106,7 @@ const I = {
   sub: ic(<><path d="M4 5l8 8M12 5L4 13" /><path d="M20 21h-4c0-1.5.442-2 1.5-2.5S20 17.33 20 16c0-.47-.17-.93-.484-1.29a2.1 2.1 0 0 0-2.617-.436c-.42.24-.738.614-.899 1.06" /></>),
   math: ic(<path d="M18 7H6l6 5-6 5h12" />),
   nostr: ic(<><circle cx="12" cy="12" r="3" /><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></>),
+  at: ic(<><circle cx="12" cy="12" r="4" /><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.6 7.2" /></>),
   chevron: ic(<polyline points="6 9 12 15 18 9" />),
 };
 
@@ -322,6 +325,21 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
             <button className="tiptap-insert-item" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().setHorizontalRule().run(); setShowInsert(false); }}>
               {I.hr} {t("A0KB6RD")}
             </button>
+            <button
+              className="tiptap-insert-item"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                const { $from } = editor.state.selection;
+                const charBefore = $from.nodeBefore?.isText
+                  ? $from.nodeBefore.text.slice(-1)
+                  : "";
+                const needsSpace = charBefore && !/\s/.test(charBefore);
+                editor.chain().focus().insertContent(needsSpace ? " @" : "@").run();
+                setShowInsert(false);
+              }}
+            >
+              {I.at} Mention
+            </button>
           </div>
         )}
       </div>
@@ -410,6 +428,8 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
   const srSuppressInvalidationRef = useRef(false);
   const syncedExternalRef = useRef(null);
   const editorRef = useRef(null);
+  const [mentionState, setMentionState] = useState(null);
+  const mentionSuggestionsRef = useRef(null);
 
 
   const editor = useEditor({
@@ -419,6 +439,7 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
       CodeBlockLowlight.configure({ lowlight }),
       Mathematics.configure({ evaluation: true }),
       NostrEntityExtension,
+      MentionExtension,
       Markdown.configure({
         html: false,
         linkify: true,
@@ -446,7 +467,54 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
     ],
     editorProps: { attributes: { class: "tiptap-content" } },
     content: "",
+    onSelectionUpdate: ({ editor: ed }) => syncMentionState(ed),
+    onUpdate: ({ editor: ed }) => syncMentionState(ed),
   });
+
+  const syncMentionState = useCallback((ed) => {
+    const state = mentionPluginKey.getState(ed.state);
+    if (!state?.active) {
+      setMentionState(null);
+      return;
+    }
+    const coords = ed.view.coordsAtPos(state.to);
+    setMentionState({ query: state.query, from: state.from, to: state.to, left: coords.left, top: coords.bottom });
+  }, []);
+
+  useEffect(() => {
+    if (!editor) return;
+    editor.storage.mention.handlers = {
+      onArrowDown: () => {
+        mentionSuggestionsRef.current?.moveDown();
+        return true;
+      },
+      onArrowUp: () => {
+        mentionSuggestionsRef.current?.moveUp();
+        return true;
+      },
+      onEnter: () => {
+        const confirmed = mentionSuggestionsRef.current?.confirm();
+        return !!confirmed;
+      },
+      onEscape: () => {
+        setMentionState(null);
+        return true;
+      },
+    };
+  }, [editor, mentionState]);
+
+  const handleSelectMention = useCallback((nprofile) => {
+    if (!editor || !mentionState) return;
+    editor
+      .chain()
+      .focus()
+      .insertContentAt({ from: mentionState.from, to: mentionState.to }, [
+        { type: "mention", attrs: { addr: nprofile } },
+        { type: "text", text: " " },
+      ])
+      .run();
+    setMentionState(null);
+  }, [editor, mentionState]);
 
   useEffect(() => {
     if (!editor) return;
@@ -682,6 +750,25 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
             />
           ) : (
             <EditorContent editor={editor} />
+          )}
+          {mentionState && (
+            <div
+              style={{
+                position: "fixed",
+                left: mentionState.left,
+                top: mentionState.top,
+                width: "280px",
+                height: 0,
+                zIndex: 300,
+              }}
+            >
+              <MentionSuggestions
+                ref={mentionSuggestionsRef}
+                mention={mentionState.query}
+                setSelectedMention={handleSelectMention}
+                disableKeyboard
+              />
+            </div>
           )}
         </div>
       </div>

@@ -72,7 +72,7 @@ export default function KindSix({ event }) {
           }
           onClick={() => (reposts.length > 1 ? setShowReposts(true) : null)}
         >
-          <Icon name="switch-arrows" />
+          <Icon name="arrow_reload_02" v={2} />
           <UserProfilePic
             size={18}
             mainAccountUser={false}

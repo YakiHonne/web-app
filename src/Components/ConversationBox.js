@@ -15,7 +15,6 @@ import { copyText } from "@/Helpers/Helpers";
 import DeleteWarning from "./DeleteWarning";
 import RedPacket from "./RedPacket/RedPacketInit/RedPacket";
 import Icon from "@/Components/Icon";
-import { iconsNames } from "@/Content/IconV2URL";
 
 export function ConversationBox({ convo, back, noHeader = false, showBack = false }) {
   let conversationLength = convo.convo.length;
@@ -625,7 +624,7 @@ export function ConversationBox({ convo, back, noHeader = false, showBack = fals
                 className="btn btn-normal fx-centered"
                 onClick={() => handleSendMessage({ isRedPacket: false })}
               >
-                <Icon v={2} name={iconsNames.navigation} transform="rotate(90deg)" size={24} />
+                <Icon name="send" size={24} />
               </div>
             </form>
           </div>

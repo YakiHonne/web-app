@@ -30,7 +30,6 @@ import { nip19 } from "nostr-tools";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
 import Badge from "@/Helpers/Badge";
-import { iconsNames } from "@/Content/IconV2URL";
 import EventStats from "@/Components/EventStats";
 
 export default function Note({ event, nevent }) {
@@ -260,7 +259,7 @@ export default function Note({ event, nevent }) {
                         {t("AAg9D6c")}
                       </div>
                     )}
-                    {!isNoteTranslating && <Icon v={2} name={iconsNames.globe} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                    {!isNoteTranslating && <Icon name="translate" onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
                     {isNoteTranslating && <Spinner />}
                     <EventOptions
                       event={note}
