@@ -35,11 +35,12 @@ const getItemsForTab = (postActions, tabIndex) => {
     }
 }
 
-const PeopleList = ({ items, tab }) => {
-    const [people, setPeople] = React.useState([])
-    const [page, setPage] = React.useState(0)
+const PeopleList = ({ items, tab, cache, setCache }) => {
+    const cached = cache[tab]
+    const [people, setPeople] = React.useState(cached?.people || [])
+    const [page, setPage] = React.useState(cached?.page || 0)
     const [isLoading, setIsLoading] = React.useState(false)
-    const [hasMore, setHasMore] = React.useState(true)
+    const [hasMore, setHasMore] = React.useState(cached ? cached.hasMore : true)
     const sentinelRef = React.useRef(null)
     const [bulkList, setBulkList] = React.useState([])
 
@@ -49,6 +50,7 @@ const PeopleList = ({ items, tab }) => {
         const batch = pubkeys.slice(pageIndex * BATCH_SIZE, (pageIndex + 1) * BATCH_SIZE)
         if (batch.length === 0) {
             setHasMore(false)
+            setCache(prev => ({ ...prev, [tab]: { ...(prev[tab] || {}), people: prev[tab]?.people || [], page: pageIndex, hasMore: false } }))
             return
         }
         setIsLoading(true)
@@ -59,7 +61,10 @@ const PeopleList = ({ items, tab }) => {
                 .filter((item, index, arr) => arr.findIndex(x => x.pubkey === item.pubkey) === index)
             setPeople(prev => {
                 const combined = [...prev, ...parsed]
-                return combined.filter((item, index, arr) => arr.findIndex(x => x.pubkey === item.pubkey) === index)
+                const deduped = combined.filter((item, index, arr) => arr.findIndex(x => x.pubkey === item.pubkey) === index)
+                const stillHasMore = batch.length >= BATCH_SIZE
+                setCache(prevCache => ({ ...prevCache, [tab]: { people: deduped, page: pageIndex, hasMore: stillHasMore } }))
+                return deduped
             })
             if (batch.length < BATCH_SIZE) setHasMore(false)
         } catch (err) {
@@ -67,16 +72,15 @@ const PeopleList = ({ items, tab }) => {
         } finally {
             setIsLoading(false)
         }
-    }, [pubkeys])
+    }, [pubkeys, tab, setCache])
+
+    const skipInitialFetch = React.useRef(!!cached)
 
     React.useEffect(() => {
-        setPeople([])
-        setPage(0)
-        setHasMore(true)
-        setBulkList([])
-    }, [items])
-
-    React.useEffect(() => {
+        if (skipInitialFetch.current) {
+            skipInitialFetch.current = false
+            return
+        }
         fetchBatch(page)
     }, [page, fetchBatch])
 
@@ -155,6 +159,7 @@ const PeopleList = ({ items, tab }) => {
 const StatsOverlay = ({ postActions, exit }) => {
     const { t } = useTranslation()
     const [selectedTab, setSelectedTab] = React.useState(0)
+    const [peopleCache, setPeopleCache] = React.useState({})
 
     const counts = [
         postActions.likes?.likes?.length || 0,
@@ -176,7 +181,7 @@ const StatsOverlay = ({ postActions, exit }) => {
         <Overlay exit={exit} width={600}>
             <div className="fx-centered fx-col fx-start-h fit-container box-pad-v-m box-pad-h-m">
                 <SelectTabs selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabs={tabs} />
-                <PeopleList key={selectedTab} items={items} tab={selectedTab} />
+                <PeopleList key={selectedTab} items={items} tab={selectedTab} cache={peopleCache} setCache={setPeopleCache} />
             </div>
         </Overlay>
     )

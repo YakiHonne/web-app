@@ -62,6 +62,12 @@ if (typeof window !== "undefined") {
   db.version(3).stores({
     paidNotesSeenCounts: "",
   });
+
+  db.version(4).stores({
+    notificationsSet: "",
+    publishedEvents: "",
+    wotFilterList: "",
+  });
 }
 export { db, ndkdb };
 
@@ -1426,6 +1432,91 @@ export const setPaidNotesLastFetchedAt = async (timestamp) => {
     await Dexie.ignoreTransaction(async () => {
       await db.transaction("rw", db.paidNotesSeenCounts, async () => {
         await db.paidNotesSeenCounts.put(timestamp, "lastFetchedAt");
+      });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const getNotificationsSet = async (pubkey) => {
+  if (!db) return null;
+  try {
+    let list = await db.table("notificationsSet").get(pubkey);
+    return list || null;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+};
+
+export const saveNotificationsSet = async (pubkey, list) => {
+  if (!db) return;
+  try {
+    await Dexie.ignoreTransaction(async () => {
+      await db.transaction("rw", db.notificationsSet, async () => {
+        await db.notificationsSet.put(list, pubkey);
+      });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const removeNotificationsSet = async (pubkey) => {
+  if (!db) return;
+  try {
+    await Dexie.ignoreTransaction(async () => {
+      await db.transaction("rw", db.notificationsSet, async () => {
+        await db.notificationsSet.delete(pubkey);
+      });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const getPublishedEvents = async () => {
+  if (!db) return [];
+  try {
+    let events = await db.table("publishedEvents").get("events");
+    return events || [];
+  } catch (err) {
+    console.log(err);
+    return [];
+  }
+};
+
+export const savePublishedEvents = async (events) => {
+  if (!db) return;
+  try {
+    await Dexie.ignoreTransaction(async () => {
+      await db.transaction("rw", db.publishedEvents, async () => {
+        await db.publishedEvents.put(events, "events");
+      });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const getWotFilterList = async (key) => {
+  if (!db) return null;
+  try {
+    let list = await db.table("wotFilterList").get(key);
+    return list || null;
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
+};
+
+export const saveWotFilterList = async (key, value) => {
+  if (!db) return;
+  try {
+    await Dexie.ignoreTransaction(async () => {
+      await db.transaction("rw", db.wotFilterList, async () => {
+        await db.wotFilterList.put(value, key);
       });
     });
   } catch (err) {

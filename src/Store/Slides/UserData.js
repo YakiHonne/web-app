@@ -219,6 +219,19 @@ const userBlossomServersSlice = createSlice({
   },
 });
 
+const userWotFilterListSlice = createSlice({
+  name: "userWotFilterList",
+  initialState: { network: [], backup: [] },
+  reducers: {
+    setUserWotNetworkList(state, action) {
+      state.network = action.payload;
+    },
+    setUserWotBackupList(state, action) {
+      state.backup = action.payload;
+    },
+  },
+});
+
 const userPinnedNotesSlice = createSlice({
   name: "userPinnedNotes",
   initialState: [],
@@ -313,6 +326,8 @@ export const { setUserInboxRelays } = userInboxRelaysSlice.actions;
 export const { setUserFavRelays } = userFavRelaysSlice.actions;
 export const { setUserWotList } = userWotListSlice.actions;
 export const { setUserBlossomServers } = userBlossomServersSlice.actions;
+export const { setUserWotNetworkList, setUserWotBackupList } =
+  userWotFilterListSlice.actions;
 export const { setUserSearchRelays } = userSearchRelaysSlice.actions;
 export const { setUserPinnedNotes } = userPinnedNotesSlice.actions;
 export const { setUserCashuWallet } = userCashuWalletSlice.actions;
@@ -345,6 +360,7 @@ export const UserInboxRelaysReducer = userInboxRelaysSlice.reducer;
 export const UserFavRelaysReducer = userFavRelaysSlice.reducer;
 export const UserWotListReducer = userWotListSlice.reducer;
 export const UserBlossomServersReducer = userBlossomServersSlice.reducer;
+export const UserWotFilterListReducer = userWotFilterListSlice.reducer;
 export const UserSearchRelaysReducer = userSearchRelaysSlice.reducer;
 export const UserPinnedNotesReducer = userPinnedNotesSlice.reducer;
 export const UserCashuWalletReducer = userCashuWalletSlice.reducer;

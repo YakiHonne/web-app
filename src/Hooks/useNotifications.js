@@ -1,4 +1,5 @@
 import { getCustomSettings } from "@/Helpers/ClientHelpers";
+import { removeNotificationsSet, saveNotificationsSet } from "@/Helpers/DB";
 import {
   clearNotifications,
   setRefreshNotifications,
@@ -44,7 +45,7 @@ export default function useNotifications() {
 
   const refreshNotifications = () => {
     if (isNotificationsLoading) return;
-    localStorage.removeItem(`notificationsSet_${userKeys.pub}`);
+    removeNotificationsSet(userKeys.pub);
     dispatch(clearNotifications());
     dispatch(setRefreshNotifications(Date.now()));
   };
@@ -98,16 +99,7 @@ export default function useNotifications() {
   };
 
   const saveInLocalStorage = (notifications) => {
-    try {
-      localStorage.setItem(
-        `notificationsSet_${userKeys.pub}`,
-        JSON.stringify(notifications),
-      );
-    } catch (err) {
-      if (notifications.length > 300) {
-        saveInLocalStorage(notifications.slice(0, notifications.length - 20));
-      }
-    }
+    saveNotificationsSet(userKeys.pub, notifications);
   };
 
   return {
