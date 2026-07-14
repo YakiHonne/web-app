@@ -230,8 +230,7 @@ export default function NotesComment({
                   )}
                 </div>
                 <div className="fx-centered">
-
-                  {!isNoteTranslating && <Icon v={2} name={iconsNames.globe} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                  {!isNoteTranslating && <Icon name={"translate"} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
                   {isNoteTranslating && <Spinner />}
                   {!noReactions && (
                     <EventOptions

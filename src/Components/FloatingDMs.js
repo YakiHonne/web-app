@@ -113,7 +113,7 @@ export default function FloatingDMs() {
             onClick={() => setOpen(true)}
             style={{ borderRadius: "50px" }}
           >
-            <Icon name={iconsNames.navigation} v={2} transform="rotate(90deg)" size={20} />
+            <Icon name="send" size={20} />
             <p className="box-pad-h-s gray-c">{t("As2zi6P")}</p>
             {isNewMsg && (
               <div

@@ -2,6 +2,7 @@ import useRecentNotes from "@/Hooks/useRecentNotes";
 import React, { useMemo } from "react";
 import useRecentPosts from "@/Hooks/useRecentPosts";
 import UsersGroupProfilePicture from "./UsersGroupProfilePicture";
+import Icon from "@/Components/Icon";
 
 export default function RecentPosts({
   filter,
@@ -65,7 +66,13 @@ const RecentPostsContent = ({ pubkeys, notesLength, onClick, position = "top" })
                     {notesLength > 99 ? "+99" : notesLength} new{" "}
                     {notesLength === 1 ? "post" : "posts"}
                   </p>
-                  <p className="gray-c box-pad-h-s">&#8593;</p>
+                  <Icon
+                    name="chevron_up"
+                    v={2}
+                    size={18}
+                    className="gray-c box-pad-h-s"
+                    isColored
+                  />
                 </div>
               </div>
             </div>

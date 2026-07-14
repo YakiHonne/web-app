@@ -96,7 +96,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="add-note" size={24} />
+      <Icon name="add-note" size={20} />
       <p>{t("AB8DnjO")}</p>
     </div>
   );
@@ -108,7 +108,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="calendar" size={24} />
+      <Icon name="calendar" size={20} />
       <p>{t("A9x72MB")}</p>
     </div>
   );
@@ -120,7 +120,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="hashtag" size={24} />
+      <Icon name="hashtag" size={20} />
       <p>{t("AYFAFKs")}</p>
     </div>
   );
@@ -132,7 +132,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="hashtag" size={24} />
+      <Icon name="hashtag" size={20} />
       <p>{t("ApPw14o", { item: "naddr" })}</p>
     </div>
   );
@@ -144,7 +144,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="key-icon" size={24} />
+      <Icon name="key-icon" size={20} />
       <p>{t("AHrJpSX")}</p>
     </div>
   );
@@ -156,7 +156,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="copy" size={24} />
+      <Icon name="copy" size={20} />
       <p>{t("AUkCrth")}</p>
     </div>
   );
@@ -168,7 +168,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="pub-hex" size={24} />
+      <Icon name="pub-hex" size={20} />
       <p>{t("AHrJpSX")}</p>
     </div>
   );
@@ -181,7 +181,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="raw-event" size={24} />
+      <Icon name="raw-event" size={20} />
       <p>{t("AUrrk1e")}</p>
     </div>
   );
@@ -194,7 +194,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="curation-plus" size={24} />
+      <Icon name="curation-plus" size={20} />
       <p>{t("A89Qqmt")}</p>
     </div>
   );
@@ -207,7 +207,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="copy" size={24} />
+      <Icon name="copy" size={20} />
       <p>{t("Aoq0uKa")}</p>
     </div>
   );
@@ -220,7 +220,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="copy" size={24} />
+      <Icon name="copy" size={20} />
       <p>{t("ArCMp34")}</p>
     </div>
   );
@@ -234,7 +234,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="share-v2" size={24} />
+      <Icon name="share-v2" size={20} />
       <p>{t("A4A5psW")}</p>
     </div>
   );
@@ -247,7 +247,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="link" size={24} />
+      <Icon name="link" size={20} />
       <span>{t("AmQVpu4")}</span>
     </div>
   );
@@ -260,7 +260,7 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="trash" isColored size={24} />
+      <Icon name="trash" isColored size={20} />
       <span className="red-c">{t("AawdN9R")}</span>
     </div>
   );
@@ -270,7 +270,7 @@ export default function EventOptions({
       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       href={`/smart-widget-checker?naddr=${event.naddr}`}
     >
-      <Icon name="smart-widget-checker" size={24} />
+      <Icon name="smart-widget-checker" size={20} />
       <p>{t("AavUrQj")}</p>
     </Link>
   );
@@ -283,7 +283,7 @@ export default function EventOptions({
         localStorage.setItem(event.naddr, JSON.stringify(event));
       }}
     >
-      <Icon name="clone" size={24} />
+      <Icon name="clone" size={20} />
       <p>{t("AyWVBDx")}</p>
     </Link>
   );
@@ -296,7 +296,7 @@ export default function EventOptions({
         localStorage.setItem(event.naddr, JSON.stringify(event));
       }}
     >
-      <Icon name="edit" size={24} />
+      <Icon name="edit" size={20} />
       <p>{t("AsXohpb")}</p>
     </Link>
   );
@@ -324,7 +324,7 @@ export default function EventOptions({
         navigate.push("/write-article?edit=" + event.naddr);
       }}
     >
-      <Icon name="edit" size={24} />
+      <Icon name="edit" size={20} />
       <p>{t("AsXohpb")}</p>
     </div>
   );
@@ -337,7 +337,7 @@ export default function EventOptions({
         handleRescheduleEvent();
       }}
     >
-      <Icon name="succeeded-events" size={24} />
+      <Icon name="succeeded-events" size={20} />
       <p>{t("AxIOpkH")}</p>
     </div>
   );
@@ -349,7 +349,7 @@ export default function EventOptions({
         setShowEditVideo(true);
       }}
     >
-      <Icon name="edit" size={24} />
+      <Icon name="edit" size={20} />
       <p>{t("AsXohpb")}</p>
     </div>
   );
@@ -361,7 +361,7 @@ export default function EventOptions({
         setShowEditCuration(true);
       }}
     >
-      <Icon name="edit" size={24} />
+      <Icon name="edit" size={20} />
       <p>{t("AsXohpb")}</p>
     </div>
   );
@@ -388,7 +388,7 @@ export default function EventOptions({
       className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
       onClick={(e) => { e.stopPropagation(); setShowSharing(true); }}
     >
-      <Icon name="share-v2" size={24} />
+      <Icon name="share-v2" size={20} />
       <p>{t("A6enIP3")}</p>
     </div>
   );
@@ -401,12 +401,12 @@ export default function EventOptions({
       >
         {isMutedPubkey ? (
           <>
-            <Icon name="unmute" size={24} />
+            <Icon name="unmute" size={20} />
             <p className="red-c">{t("AKELUbQ")}</p>
           </>
         ) : (
           <>
-            <Icon name="mute" size={24} isColored />
+            <Icon name="mute" size={20} isColored />
             <p className="red-c">{t("AGMxuQ0")}</p>
           </>
         )}
@@ -422,12 +422,12 @@ export default function EventOptions({
       >
         {!isPinned ? (
           <>
-            <Icon name="pin" size={24} />
+            <Icon name="pin" size={20} />
             <p>{t("AZKwkIB")}</p>
           </>
         ) : (
           <>
-            <Icon name="unpin" size={24} />
+            <Icon name="unpin" size={20} />
             <p>{t("AXGyCxz")}</p>
           </>
         )}
@@ -442,12 +442,12 @@ export default function EventOptions({
     >
       {isMutedId ? (
         <>
-          <Icon name="unmute" size={24} />
+          <Icon name="unmute" size={20} />
           <p className="red-c">{t("AnddeNp")}</p>
         </>
       ) : (
         <>
-          <Icon name="mute" size={24} isColored />
+          <Icon name="mute" size={20} isColored />
           <p className="red-c">{t("AydqZTl")}</p>
         </>
       )}
@@ -465,7 +465,7 @@ export default function EventOptions({
           setDeleteEvent(event);
         }}
       >
-        <Icon name="trash" isColored size={24} />
+        <Icon name="trash" isColored size={20} />
         <p className="red-c">{t("Almq94P")}</p>
       </div>
     ) : (
@@ -869,7 +869,7 @@ const BroadcastEvent = ({ event }) => {
 
   const relaysContent = isProtected ? (
     <div className="fx-centered fx-col box-pad-h-s box-pad-v-m">
-      <Icon name="protected-2" size={24} />
+      <Icon name="protected-2" size={20} />
       <p className="gray-c p-centered">{t("AqqpEOw")}</p>
     </div>
   ) : (
@@ -885,7 +885,7 @@ const BroadcastEvent = ({ event }) => {
             <RelayImage url={_} size={30} />
             <div style={{ position: "absolute", right: "-10px", bottom: "-10px", zIndex: 10, scale: ".65" }}>
               <div className="round-icon-small round-icon-tooltip" data-tooltip={t("Ay0vA4Z")} style={{ backgroundColor: "rgba(255,255,255,0.15)", border: "none" }}>
-                <Icon name="star" size={24} />
+                <Icon name="star" size={20} />
               </div>
             </div>
           </div>
@@ -922,7 +922,7 @@ const BroadcastEvent = ({ event }) => {
       onMouseLeave={handleMouseLeave}
     >
       <div className="fx-centered">
-        <Icon name="republish" size={24} />
+        <Icon name="republish" size={20} />
         <p className={isProtected ? "gray-c" : ""}>{t("AHhMsNx")}</p>
       </div>
       <Icon name="arrow" />

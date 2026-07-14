@@ -241,7 +241,7 @@ export default function SidebarComp() {
               }}
               isActive={isPage("/")}
             >
-              <Icon name={isPage("/") ? "home-bold" : "home"} size={24} />
+              <Icon name={isPage("/") ? "home-bold" : "home"} size={24} strokeWidth={2} />
               <div className="link-label">{t("AJDdA3h")}</div>
             </SidebarNavItem>
             <SidebarNavItem
@@ -252,7 +252,7 @@ export default function SidebarComp() {
             >
               <Icon
                 name={isPage("/media") ? "media-bold" : "media"}
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("A0i2SOt")}</div>
             </SidebarNavItem>
@@ -264,7 +264,7 @@ export default function SidebarComp() {
             >
               <Icon
                 name={isPage("/relay-orbits") ? "orbit-bold" : "orbit"}
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("AjGFut6")}</div>
             </SidebarNavItem>
@@ -276,7 +276,7 @@ export default function SidebarComp() {
             >
               <Icon
                 name={isPage("/explore") ? "discover-bold" : "discover"}
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("ABxLOSx")}</div>
             </SidebarNavItem>
@@ -288,7 +288,7 @@ export default function SidebarComp() {
             >
               <Icon
                 name={isPage("/articles") ? "posts-bold" : "posts"}
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("AesMg52")}</div>
             </SidebarNavItem>
@@ -305,7 +305,7 @@ export default function SidebarComp() {
                     ? "smart-widget-bold"
                     : "smart-widget"
                 }
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("A2mdxcf")}</div>
             </SidebarNavItem>
@@ -317,7 +317,7 @@ export default function SidebarComp() {
               <div className="fx-centered">
                 <Icon
                   name={isPage("/messages") ? "env-bold" : "env"}
-                  size={24}
+                  size={24} strokeWidth={2}
                 />
                 <div className="link-label">{t("As2zi6P")}</div>
               </div>
@@ -348,7 +348,7 @@ export default function SidebarComp() {
                       ? "user-bold"
                       : "user"
                   }
-                  size={24}
+                  size={24} strokeWidth={2}
                 />
                 <div className="link-label">{t("AyBBPWE")}</div>
               </SidebarNavItem>
@@ -362,7 +362,7 @@ export default function SidebarComp() {
               >
                 <Icon
                   name={isPage("/dashboard") ? "dashboard-bold" : "dashboard"}
-                  size={24}
+                  size={24} strokeWidth={2}
                 />
                 <div className="link-label">{t("ALBhi3j")}</div>
               </SidebarNavItem>
@@ -390,7 +390,7 @@ export default function SidebarComp() {
                   }}
                 >
                   <div className="mb-show round-icon">
-                    <Icon name="setting" size={24} />
+                    <Icon name="setting" size={24} strokeWidth={2} />
                   </div>
                   <div
                     className="fx-centered fx-start-h pointer"
@@ -675,7 +675,7 @@ export default function SidebarComp() {
                 onClick={() => redirectToLogin()}
               >
                 <div className="link-label">{t("AmOtzoL")}</div>
-                <Icon name="connect" size={24} />
+                <Icon name="connect" size={24} strokeWidth={2} />
               </button>
             )}
           </div>

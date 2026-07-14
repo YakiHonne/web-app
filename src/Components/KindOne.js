@@ -38,7 +38,6 @@ import {
   getEventFromCache,
   setEventFromCache,
 } from "@/Helpers/utils/eventsCache";
-import { iconsNames } from "@/Content/IconV2URL";
 import Overlay from "@/Components/Overlay";
 import EventStats from "./EventStats";
 import PaidNoteInfoOverlay from "@/Components/PaidNoteInfoOverlay";
@@ -407,7 +406,7 @@ function KindOne({
                     {showPaidNoteInfo && (
                       <PaidNoteInfoOverlay onClose={() => setShowPaidNoteInfo(false)} />
                     )}
-                    {!isNoteTranslating && <Icon v={2} name={iconsNames.globe} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                    {!isNoteTranslating && <Icon name="translate" onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
                     {isNoteTranslating && <Spinner />}
                     {reactions && (
                       <EventOptions
