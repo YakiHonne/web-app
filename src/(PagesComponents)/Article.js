@@ -146,19 +146,14 @@ export default function Article({ event, userProfile, naddrData }) {
       let res = await translate(
         [post.title, post.description || " ", post.content].join(" ABCAF "),
       );
-      if (res.status === 500) {
+      if (res.status !== 200) {
         dispatch(
           setToast({
             type: 2,
-            desc: t("AZ5VQXL"),
-          }),
-        );
-      }
-      if (res.status === 400) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AJeHuH1"),
+            desc:
+              typeof res.res === "string" && res.res
+                ? res.res
+                : t("AZ5VQXL"),
           }),
         );
       }

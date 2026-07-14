@@ -145,7 +145,7 @@ export default function EventOptions({
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
       <Icon name="key-icon" size={20} />
-      <p>{t("AHrJpSX")}</p>
+      <p>{t("AHrJpSX")} (npub)</p>
     </div>
   );
   const copyContent = (
@@ -168,8 +168,8 @@ export default function EventOptions({
       }}
       className="pointer fx-centered fx-start-h fit-container box-pad-h-s box-pad-v-s option-no-scale"
     >
-      <Icon name="pub-hex" size={20} />
-      <p>{t("AHrJpSX")}</p>
+      <Icon name="key-icon" size={20} />
+      <p>{t("AHrJpSX")} (hex)</p>
     </div>
   );
 

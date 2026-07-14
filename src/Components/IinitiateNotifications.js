@@ -120,7 +120,7 @@ export default function IinitiateNotifications() {
                 ...description,
                 created_at: event.created_at,
                 amount: getZapper(event).amount,
-                isNew: true,
+                isNew: false,
                 isRead: false,
               };
             } else if (event.kind === 6) {
@@ -131,7 +131,7 @@ export default function IinitiateNotifications() {
                     .filter((tag) => tag[0] === "p")
                     .map((tag) => tag[1]);
                   tempAuth.push([...pubkeys, event.pubkey]);
-                  return { ...event, isNew: true, isRead: false };
+                  return { ...event, isNew: false, isRead: false };
                 }
               } catch (err) {
                 console.log("event kind:6 ditched");
@@ -148,7 +148,7 @@ export default function IinitiateNotifications() {
                   .filter((tag) => tag[0] === "p")
                   .map((tag) => tag[1]);
                 tempAuth.push([...pubkeys, event.pubkey]);
-                return { ...event, isNew: true, isRead: false };
+                return { ...event, isNew: false, isRead: false };
               }
             }
           } else return false;
@@ -308,7 +308,9 @@ export default function IinitiateNotifications() {
             (_) => _.tags.filter((_) => _[0] === "p").length <= 10,
           );
         }
-        return list;
+        // isNew only makes sense for events streamed in while the page is
+        // open; persisted notifications from previous sessions are not new
+        return list.map((_) => (_.isNew ? { ..._, isNew: false } : _));
       }
       return [];
     } catch (err) {

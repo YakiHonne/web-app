@@ -718,12 +718,24 @@ const translate = async (text) => {
     };
   }
   let lang = getAppLang();
-  let res = await axiosInstance.post("/api/v1/translate", {
-    service,
-    lang,
-    text,
-  });
-  return res.data;
+  try {
+    let res = await axiosInstance.post("/api/v1/translate", {
+      service,
+      lang,
+      text,
+    });
+    return res.data;
+  } catch (err) {
+    // axios throws on non-2xx HTTP statuses (e.g. 429 rate limit);
+    // normalize them into the { status, res } shape callers expect
+    if (err.response) {
+      return {
+        status: err.response.status,
+        res: err.response.data?.message || err.response.data?.res,
+      };
+    }
+    throw err;
+  }
 };
 
 const publishEvent = async (event, relays = relaysOnPlatform) => {
