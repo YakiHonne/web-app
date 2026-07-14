@@ -25,6 +25,8 @@ import {
   setUserSearchRelays,
   setUserStarterPacks,
   setUserWotList,
+  setUserWotNetworkList,
+  setUserWotBackupList,
 } from "@/Store/Slides/UserData";
 import {
   getBookmarks,
@@ -66,6 +68,8 @@ import {
   getMediaPacks,
   saveStarterPacks,
   saveMediaPacks,
+  getWotFilterList,
+  saveWotFilterList,
 } from "@/Helpers/DB";
 import {
   addConnectedAccounts,
@@ -1104,10 +1108,22 @@ export default function AppInit() {
   }, [userKeys, isConnectedToYaki]);
 
   useEffect(() => {
+    if (!userKeys) return;
+    (async () => {
+      let [networkData, backupData] = await Promise.all([
+        getWotFilterList(`network_${userKeys.pub}`),
+        getWotFilterList(`backup_wot`),
+      ]);
+      dispatch(setUserWotNetworkList(networkData?.wotPubkeys || []));
+      dispatch(setUserWotBackupList(backupData?.wotPubkeys || []));
+    })();
+  }, [userKeys]);
+
+  useEffect(() => {
     const buildWOTList = async () => {
-      let prevData = localStorage.getItem(`network_${userKeys.pub}`);
+      let prevData = await getWotFilterList(`network_${userKeys.pub}`);
       prevData = prevData
-        ? JSON.parse(prevData)
+        ? prevData
         : {
             last_updated: undefined,
           };
@@ -1176,18 +1192,17 @@ export default function AppInit() {
         .filter((_) => _.status)
         .map((_) => _.pubkey)
         .slice(0, 200);
-      localStorage.setItem(
-        `network_${userKeys.pub}`,
-        JSON.stringify({
-          last_updated: Math.floor(Date.now() / 1000),
-          wotPubkeys,
-        }),
-      );
+      let dataToStore = {
+        last_updated: Math.floor(Date.now() / 1000),
+        wotPubkeys,
+      };
+      await saveWotFilterList(`network_${userKeys.pub}`, dataToStore);
+      dispatch(setUserWotNetworkList(wotPubkeys));
     };
     const buildBackupWOTList = async () => {
-      let prevData = localStorage.getItem(`backup_wot`);
+      let prevData = await getWotFilterList(`backup_wot`);
       prevData = prevData
-        ? JSON.parse(prevData)
+        ? prevData
         : {
             last_updated: undefined,
           };
@@ -1262,13 +1277,12 @@ export default function AppInit() {
         .filter((_) => _.status)
         .map((_) => _.pubkey)
         .slice(0, 200);
-      localStorage.setItem(
-        `backup_wot`,
-        JSON.stringify({
-          last_updated: backupFollowings.data[0].created_at + 1,
-          wotPubkeys,
-        }),
-      );
+      let dataToStore = {
+        last_updated: backupFollowings.data[0].created_at + 1,
+        wotPubkeys,
+      };
+      await saveWotFilterList(`backup_wot`, dataToStore);
+      dispatch(setUserWotBackupList(wotPubkeys));
     };
     if (followings && followings?.followings?.length > 0) {
       saveRelaysListsForUsers(followings?.followings);

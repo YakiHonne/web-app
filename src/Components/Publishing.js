@@ -9,8 +9,10 @@ import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import {
   getOutboxRelays,
+  getPublishedEvents as getPublishedEventsDB,
   removeEventStats,
   removeRecordFromNDKStore,
+  savePublishedEvents,
 } from "@/Helpers/DB";
 import { relaysOnPlatform } from "@/Content/Relays";
 import {
@@ -20,7 +22,6 @@ import {
 import Date_ from "./Date_";
 import ProgressCirc from "./ProgressCirc";
 import { useTranslation } from "react-i18next";
-import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import { eventKinds } from "@/Content/Extra";
 import Icon from "@/Components/Icon";
 import Overlay from "./Overlay";
@@ -64,17 +65,6 @@ const getOutboxPubkey = (kind, tags) => {
   return pTag[1];
 };
 
-const getPublishedEvents = () => {
-  try {
-    let publishedEvents = localStorage_.getItem("publishedEvents");
-    if (publishedEvents) return JSON.parse(publishedEvents);
-    return [];
-  } catch (err) {
-    console.log(err);
-    return [];
-  }
-};
-
 export default function Publishing({ displayOff = false }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -85,8 +75,23 @@ export default function Publishing({ displayOff = false }) {
 
   const [showDetails, setShowDetails] = useState(false);
   const [showEventStats, setShowEventStats] = useState(false);
-  const [publishedEvents, setPublishedEvents] = useState(getPublishedEvents());
+  const [publishedEvents, setPublishedEvents] = useState([]);
   const [showToast, setShowToast] = useState(false);
+  const [isPublishedEventsLoaded, setIsPublishedEventsLoaded] =
+    useState(false);
+
+  useEffect(() => {
+    let isCancelled = false;
+    getPublishedEventsDB().then((events) => {
+      if (!isCancelled) {
+        setPublishedEvents(events);
+        setIsPublishedEventsLoaded(true);
+      }
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const succeededEvents = useMemo(() => {
     return publishedEvents.filter((event) =>
@@ -124,6 +129,7 @@ export default function Publishing({ displayOff = false }) {
   }, [publishedEvents]);
 
   useEffect(() => {
+    if (!isPublishedEventsLoaded) return;
     let tempArray = Array.from(publishedEvents);
 
     tempArray = tempArray.map((event) => {
@@ -142,14 +148,13 @@ export default function Publishing({ displayOff = false }) {
       setPublishedEvents(tempArray);
     }
     saveLocal(tempArray);
-  }, [publishedEvents]);
+  }, [publishedEvents, isPublishedEventsLoaded]);
 
   const saveLocal = (events) => {
     try {
-      localStorage_.setItem("publishedEvents", JSON.stringify(events));
+      savePublishedEvents(events);
     } catch (error) {
       console.log(error);
-      saveLocal(events.slice(0, events.length - 5));
     }
   };
 

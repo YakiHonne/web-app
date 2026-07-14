@@ -10,7 +10,9 @@ import {
   getFollowings,
   getMutedlist,
   getNotificationLastEventTS,
+  getNotificationsSet,
   saveNotificationLastEventTS,
+  saveNotificationsSet,
   saveUsers,
 } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
@@ -152,7 +154,7 @@ export default function IinitiateNotifications() {
           } else return false;
         })
         .filter((_) => _);
-      let list = saveNotificationsHistory(userKeys.pub, data);
+      let list = await saveNotificationsHistory(userKeys.pub, data);
       dispatch(setNotifications({ data: list, pubkey: userKeys.pub }));
       if (data.length) {
         saveNotificationLastEventTS(userKeys.pub, data[0]?.created_at);
@@ -221,10 +223,13 @@ export default function IinitiateNotifications() {
       });
     };
     if (userKeys) {
-      let tempNot = getNotificationsHistory(userKeys.pub);
-      if (tempNot && tempNot.length > 0) dispatch(updateNotifications(tempNot));
-      else dispatch(clearNotifications());
-      fetchData(tempNot);
+      (async () => {
+        let tempNot = await getNotificationsHistory(userKeys.pub);
+        if (tempNot && tempNot.length > 0)
+          dispatch(updateNotifications(tempNot));
+        else dispatch(clearNotifications());
+        fetchData(tempNot);
+      })();
     }
     if (!userKeys) {
       dispatch(clearNotifications());
@@ -293,15 +298,11 @@ export default function IinitiateNotifications() {
     return filter;
   };
 
-  const getNotificationsHistory = (pubkey) => {
+  const getNotificationsHistory = async (pubkey) => {
     try {
-      let list = localStorage.getItem(`notificationsSet_${pubkey}`);
+      let list = await getNotificationsSet(pubkey);
 
       if (list) {
-        list = JSON.parse(list);
-        // list = list.map((_) => {
-        //   return { ..._, isNew: false };
-        // });
         if (notificationSettings.hideMentions) {
           list = list.filter(
             (_) => _.tags.filter((_) => _[0] === "p").length <= 10,
@@ -315,19 +316,17 @@ export default function IinitiateNotifications() {
     }
   };
 
-  const saveNotificationsHistory = (pubkey, list) => {
+  const saveNotificationsHistory = async (pubkey, list) => {
     try {
-      let history = getNotificationsHistory(pubkey);
+      let history = await getNotificationsHistory(pubkey);
       let newList = removeEventsDuplicants(sortEvents([...list, ...history]));
       if (notificationSettings.hideMentions) {
         newList = newList.filter(
           (_) => _.tags.filter((_) => _[0] === "p").length <= 10,
         );
       }
-      localStorage.setItem(
-        `notificationsSet_${pubkey}`,
-        JSON.stringify(newList.slice(0, 800)),
-      );
+      let toStore = newList.slice(0, 800);
+      await saveNotificationsSet(pubkey, toStore);
       return newList;
     } catch (err) {
       return [];

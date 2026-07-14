@@ -1257,15 +1257,12 @@ const getWOTScoreForPubkey = (network, pubkey, minScore = 3, counts) => {
 
 const getWOTList = () => {
   try {
-    let userKeys = localStorage_.getItem("_nostruserkeys");
-    let userPubkey = userKeys ? JSON.parse(userKeys)?.pub : false;
-    let prevData = localStorage_.getItem(`network_${userPubkey}`);
-    prevData = prevData ? JSON.parse(prevData) : { network: [] };
-
-    if (!(prevData && userPubkey)) {
+    let userKeys = store.getState().userKeys;
+    let userPubkey = userKeys ? userKeys.pub : false;
+    if (!userPubkey) {
       return [];
     }
-    let network = prevData.wotPubkeys;
+    let network = store.getState().userWotFilterList.network;
     if (!network || network?.length === 0) {
       return [];
     }
@@ -1278,10 +1275,7 @@ const getWOTList = () => {
 };
 const getBackupWOTList = () => {
   try {
-    let prevData = localStorage_.getItem(`backup_wot`);
-    prevData = prevData ? JSON.parse(prevData) : { network: [] };
-
-    let network = prevData.wotPubkeys;
+    let network = store.getState().userWotFilterList.backup;
     if (!network || network?.length === 0) {
       return [];
     }
