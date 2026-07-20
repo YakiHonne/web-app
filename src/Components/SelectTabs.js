@@ -15,7 +15,7 @@ export function SelectTabs({ selectedTab, tabs, setSelectedTab, small = false })
     }));
   }, [tabs]);
 
-  const updateSlider = useCallback(() => {
+  const updateSlider = useCallback((scrollIntoView = true) => {
     const selectedButton = buttonRefs[selectedTab]?.ref?.current;
     const slider = sliderRef.current;
     const container = containerRef.current;
@@ -28,13 +28,21 @@ export function SelectTabs({ selectedTab, tabs, setSelectedTab, small = false })
       slider.style.width = `${width / remSize}rem`;
       slider.style.transform = `translateX(${(left - containerLeft + container.scrollLeft) / remSize}rem)`;
 
-      selectedButton.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      if (scrollIntoView) {
+        selectedButton.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      }
     }
   }, [selectedTab, buttonRefs]);
 
   useEffect(() => {
-    updateSlider();
+    updateSlider(false);
   }, [updateSlider]);
+
+  useEffect(() => {
+    const selectedButton = buttonRefs[selectedTab]?.ref?.current;
+    selectedButton?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTab]);
 
   useEffect(() => {
     const container = containerRef.current;

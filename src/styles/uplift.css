@@ -626,6 +626,12 @@
     transform-origin: top right;
 }
 
+@media only screen and (min-width: 801px) {
+    [dir='rtl'] .uplift-profile-dropdown-wrapper {
+        transform-origin: top left;
+    }
+}
+
 .uplift-profile-dropdown-wrapper.dismissing {
     animation: di-out 0.18s cubic-bezier(0.4, 0, 0.6, 1) forwards;
 }
@@ -958,6 +964,33 @@
 .uplift-more-drawer-publishing {
     padding: 0 0.5rem;
     flex-shrink: 0;
+}
+
+.uplift-more-drawer-legal-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    column-gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+.uplift-more-drawer-legal-links p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.uplift-more-drawer-legal-links p:not(.uplift-more-drawer-legal-dot):hover {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.uplift-more-drawer-legal-dot {
+    font-size: 0.4rem;
+    cursor: default;
 }
 
 .uplift-filter-bar {
@@ -1835,6 +1868,16 @@
     background-color: rgba(0, 0, 0, 0.05);
     border-color: rgba(0, 0, 0, 0.10);
     color: rgba(0, 0, 0, 0.45);
+}
+
+[data-theme='white'] .uplift-more-drawer-legal-links p,
+[data-theme='light'] .uplift-more-drawer-legal-links p {
+    color: rgba(0, 0, 0, 0.35);
+}
+
+[data-theme='white'] .uplift-more-drawer-legal-links p:not(.uplift-more-drawer-legal-dot):hover,
+[data-theme='light'] .uplift-more-drawer-legal-links p:not(.uplift-more-drawer-legal-dot):hover {
+    color: rgba(0, 0, 0, 0.7);
 }
 
 @media (hover: hover) and (pointer: fine) {

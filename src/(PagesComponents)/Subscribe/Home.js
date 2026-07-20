@@ -14,13 +14,17 @@ import { setToast } from "@/Store/Slides/Publishers";
 import HorizontalScrollWrapper from "@/Components/HorizontalScrollWrapper";
 import PaymentGateway from "@/Components/PaymentGateway";
 import { checkForLUDS } from "@/Helpers/Encryptions";
+import { iconsNames } from "@/Content/IconV2URL";
+import useUserProfile from "@/Hooks/useUsersProfile";
+import Badge from "@/Helpers/Badge";
+import Icon from "@/Components/Icon";
 
 export default function Home() {
   const { t } = useTranslation();
   const { query } = useRouter();
   const pubkey = query.p;
   const [isLoading, setIsLoading] = useState(true);
-  const [metadata, setMetadata] = useState(null);
+  const { userProfile: metadata, isNip05Verified, isLoading: userIsLoading, proUser } = useUserProfile(pubkey, true)
   const [rawPlans, setRawPlans] = useState(null);
   const [selectedMethodIndex, setSelectedMethodIndex] = useState(0);
   const gatewayPubkey = useMemo(() => {
@@ -43,16 +47,9 @@ export default function Home() {
         "#d": [identifier],
         limit: 1,
       },
-      {
-        kinds: [0],
-        authors: [pubkey],
-        limit: 1,
-      },
     ]);
 
-    let m = data.data.find((_) => _.kind === 0);
     let p = data.data.find((_) => _.kind === 30164);
-    if (m) setMetadata(JSON.parse(m.content));
     if (p) setRawPlans(p.rawEvent());
     setIsLoading(false);
   };
@@ -102,7 +99,7 @@ export default function Home() {
     [methods],
   );
 
-  if (isLoading) {
+  if (isLoading || userIsLoading) {
     return (
       <div className="subscribe-container fx-centered">
         <div className="loader"></div>
@@ -113,21 +110,65 @@ export default function Home() {
   const currentMethod = methods[selectedMethodIndex];
 
   return (
-    <div className="subscribe-container">
-      {/* Section 1: User Metadata */}
-      <section className="user-metadata-section">
-        <UserProfilePic user_id={pubkey} size={80} img={metadata?.picture} />
+    <div className="fx-centered fx-col">
+      <section className="fit-container">
+        <div
+          className="fit-container fx-centered fx-start-h fx-end-v fx-start-v box-pad-h-s box-pad-v-s bg-img cover-bg"
+          style={{
+            position: "relative",
+            height: metadata?.banner ? "250px" : "150px",
+          }}
+        >
+          <div
+            className="fit-container sc-s bg-img cover-bg"
+            style={{
+              height: "calc(100% - 90px)",
+              position: "absolute",
+              left: 0,
+              top: 0,
+              backgroundImage: metadata?.banner ? `url(${metadata?.banner})` : "",
+              backgroundColor: "var(--very-dim-gray)",
+              overflow: "visible",
+              zIndex: 0,
+
+              cursor: metadata?.banner ? "zoom-in" : "default",
+            }}
+          ></div>
+          <div
+            className="fx-centered fx-col fx-start-v fit-container"
+            style={{ position: "relative", zIndex: 200 }}
+          >
+            <div
+              className="fx-centered fx-end-v fit-container"
+              style={{ columnGap: "16px" }}
+            >
+              <div style={{
+                outline: "6px solid var(--white)",
+                borderRadius: "var(--border-r-50)",
+              }}>
+
+                <UserProfilePic user_id={pubkey} size={150} img={metadata?.picture} />
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="fx-centered fx-col gap-s">
-          <h3>{metadata?.display_name || metadata?.name || "Nostr Creator"}</h3>
-          {metadata?.name && metadata?.display_name && (
-            <p className="gray-c p-centered p-big">@{metadata.name}</p>
+          <div className="fx-centered" style={{ gap: "6px" }}>
+
+            <h3>{metadata?.display_name || metadata?.name || t("AbFJKUc")}</h3>
+            {isNip05Verified && (
+              <Icon name="checkmark-c1" size={24} isColored />
+            )}
+            {proUser.isProUser && <Badge data={proUser} size={24} />}
+          </div>
+          {metadata?.about && (
+            <p className="p-centered p-big">{metadata.about}</p>
           )}
         </div>
       </section>
 
-      {/* Section 2: Plans */}
       {methods.length > 0 && (
-        <section className="fx-centered fx-col fit-container">
+        <section className="fx-centered fx-col fit-container box-pad-v-m">
           <div>
             <SelectTabs
               selectedTab={selectedMethodIndex}
@@ -135,7 +176,7 @@ export default function Home() {
               setSelectedTab={setSelectedMethodIndex}
             />
           </div>
-          <p className="gray-c box-pad-v-m box-pad-h p-centered">
+          <p className="gray-c box-pad-v-s box-pad-h p-centered">
             {t("AUIVQgL", { name: metadata.display_name || metadata.name })}
           </p>
           <div className="fit-container">
@@ -156,7 +197,7 @@ export default function Home() {
 
       {methods.length === 0 && !isLoading && (
         <p className="gray-c">
-          No subscription plans available for this creator.
+          {t("AHtIZDO")}
         </p>
       )}
     </div>
@@ -164,6 +205,7 @@ export default function Home() {
 }
 
 function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
+  const { t } = useTranslation();
   const isPremium = false;
   const userKeys = useSelector((state) => state.userKeys);
   const [isLoading, setIsLoading] = useState(false);
@@ -191,7 +233,7 @@ function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
     if (res) window.open(res);
     else
       store.dispatch(
-        setToast({ type: 2, desc: "Could not initiate subscription" }),
+        setToast({ type: 2, desc: t("ALqvxJv") }),
       );
     setIsLoading(false);
   };
@@ -216,8 +258,8 @@ function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
           specificRelays={["wss://nostr-01.yakihonne.com"]}
         />
       )}
-      <div className={`plan-card fx-shrink ${isPremium ? "premium" : ""}`}>
-        {isPremium && <div className="plan-badge">Most Popular</div>}
+      <div className={`bg-dropdown plan-card fx-shrink ${isPremium ? "premium" : ""}`}>
+        {isPremium && <div className="plan-badge">{t("ASFj1cj")}</div>}
         <div className="plan-name">{plan.name}</div>
         <div className="plan-price-container">
           <span className="plan-currency">{plan.currency}</span>
@@ -227,15 +269,15 @@ function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
           <span className="plan-interval">/ {plan.interval}</span>
         </div>
         {plan.discount > 0 && (
-          <div className="plan-discount">{plan.discount}% Off</div>
+          <div className="plan-discount">{t("AGMpTe0", { discount: plan.discount })}</div>
         )}
 
         <button
-          className={`btn btn-full plan-cta ${plan.method === "lightning" && !recipientAddr ? "btn-disabled" : "btn-gst"}`}
+          className={`btn btn-full  ${plan.method === "lightning" && !recipientAddr ? "btn-disabled" : "btn-normal"}`}
           onClick={handleSubscription}
           disabled={plan.method === "lightning" && !recipientAddr}
         >
-          {isLoading ? <Spinner /> : "Subscribe Now"}
+          {isLoading ? <Spinner /> : t("AfGdsaA")}
         </button>
       </div>
     </>

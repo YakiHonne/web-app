@@ -40,7 +40,6 @@ const NoteTreeWithMedia = ({ children, mediaItems, pubkey, noBlur, sliderPortalI
 
   useEffect(() => {
     if (!sliderPortalId) return;
-    // The portal target div is rendered by KindOne after the Link — wait one tick for it to mount
     const el = document.getElementById(sliderPortalId);
     if (el) setPortalTarget(el);
   }, [sliderPortalId]);
@@ -92,7 +91,6 @@ const MediaChip = ({ type, url, mediaIndex }) => {
   );
 };
 
-// 2.3 items visible: the partial third item hints there's more to scroll
 const SLIDE_WIDTH = "calc((100% - 8px) / 2.3)";
 
 const slideStyle = {
@@ -268,7 +266,6 @@ export function getNoteTree(
     .flatMap((segment) => (segment === "\n" ? "\n" : segment.split(/\s+/)))
     .filter(Boolean);
 
-  // First pass: count total media items to decide whether to use chip mode
   let totalMedia = 0;
   for (let i = 0; i < (isCollapsedNote ? wordsCount : tree.length); i++) {
     const el_ = tree[i]?.replaceAll("nostr:", "") || "";
@@ -288,7 +285,6 @@ export function getNoteTree(
 
   let finalTree = [];
   let mediaItems = [];
-  // track indices in finalTree where chips were inserted, keyed by mediaIndex
   let chipPositions = [];
   let maxChar = isCollapsedNote ? wordsCount : tree.length;
   for (let i = 0; i < maxChar; i++) {
@@ -472,7 +468,6 @@ export function getNoteTree(
       finalTree.push(<LNURLParsing lnurl={el} key={key} />);
     } else if (el?.startsWith("#")) {
       const match = el.match(/(#+)([^\s#]+)/);
-      // const match = el.match(/(#+)([\w-+]+)/);
       if (match) {
         const hashes = match[1];
         const text = match[2];
@@ -546,10 +541,8 @@ export function getNoteTree(
     }
   }
 
-  // Find which chips are "trailing" — all media after the last non-media non-br token
   let trailingMediaIndices = new Set();
   if (useChipMode && chipPositions.length > 0) {
-    // Walk finalTree backwards; collect trailing br/MediaChip entries
     let lastNonMediaIdx = -1;
     for (let i = finalTree.length - 1; i >= 0; i--) {
       const el = finalTree[i];
@@ -567,7 +560,6 @@ export function getNoteTree(
     }
   }
 
-  // Rebuild finalTree replacing trailing chips with hidden placeholders
   const prunedTree = finalTree.map((el) => {
     if (el?.type === MediaChip && trailingMediaIndices.has(el.props.mediaIndex)) {
       return null;
@@ -719,7 +711,19 @@ export function getParsedNote(
 ) {
   try {
     if (!event) return;
-    let expiration = event.tags.find((tag) => tag[0] === "expiration");
+
+    let expiration, isQuote, isPremium, checkForLabel, isComment, isNotRoot, isReply, isProtected;
+    for (let tag of event.tags) {
+      if (!expiration && tag[0] === "expiration") expiration = tag;
+      if (!isQuote && tag[0] === "q") isQuote = tag;
+      if (!isPremium && tag[0] === "nip63") isPremium = tag;
+      if (!checkForLabel && tag[0] === "l") checkForLabel = tag;
+      if (!isComment && tag.length > 0 && tag[3] === "root") isComment = tag;
+      if (!isNotRoot && tag.length > 3 && tag[3] === "root") isNotRoot = tag;
+      if (!isReply && tag.length > 3 && tag[3] === "reply") isReply = tag;
+      if (!isProtected && tag[0] === "-") isProtected = tag;
+    }
+
     let isExpired = expiration && parseInt(expiration[1]) < Date.now() / 1000;
     if (isExpired) return;
     let isNoteLong = event.content.split(" ").length > 150;
@@ -728,20 +732,6 @@ export function getParsedNote(
       isCollapsedNoteEnabled === undefined ? true : isCollapsedNoteEnabled;
     let isCollapsedNote_ =
       isCollapsedNoteEnabled && isCollapsedNote && isNoteLong;
-    let isQuote = event.tags.find((tag) => tag[0] === "q");
-    let checkForLabel = event.tags.find((tag) => tag[0] === "l");
-    let isComment = event.tags.find(
-      (tag) => tag.length > 0 && tag[3] === "root",
-    );
-
-    let isNotRoot =
-      event.tags.length === 0
-        ? false
-        : event.tags.find((tag) => tag.length > 3 && tag[3] === "root");
-    let isReply =
-      event.tags.length === 0
-        ? false
-        : event.tags.find((tag) => tag.length > 3 && tag[3] === "reply");
     let isPaidNote = false;
     if (checkForLabel && ["UNCENSORED NOTE"].includes(checkForLabel[1]))
       return false;
@@ -752,7 +742,6 @@ export function getParsedNote(
     let nEvent = event?.encode ? event.encode() : nEventEncode(event.id);
 
     let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
-    let isProtected = event.tags.find((tag) => tag[0] === "-");
     if (event.kind === 1 || event.kind === 1111) {
       let note_tree = parseContent
         ? getNoteTree(
@@ -778,6 +767,7 @@ export function getParsedNote(
         isCollapsedNote: isCollapsedNote_,
         nEvent,
         isProtected,
+        isPremium
       };
     }
 
@@ -1438,7 +1428,6 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
   const result = [];
   let currentTextElement = null;
   let currentImages = [];
-  // Helpers
   const isImage = (el) =>
     el && typeof el.type !== "string" && el.type === IMGElement;
 
@@ -1456,7 +1445,6 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
   const isMediaOrComponent = (el) =>
     isImage(el) || isVideo(el) || isComponent(el);
 
-  // Step 1: collapse/clean br
   const cleanedArray = [];
   for (let i = 0; i < arr.length; i++) {
     const el = arr[i];
@@ -1465,44 +1453,37 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
       const prev = arr[i - 1];
       const next = arr[i + 1];
 
-      // 1. remove br between media/components
       if (isMediaOrComponent(prev) || isMediaOrComponent(next)) {
         continue;
       }
 
-      // 2. remove br if next is br and prev is media/component
       if (next?.type === "br" && isMediaOrComponent(prev)) {
         continue;
       }
-      // 2. remove br if next is br and prev is media/component
       if (["p", "span"].includes(next?.type) && isMediaOrComponent(prev)) {
         continue;
       }
 
-      // Count trailing <br> in cleanedArray
       let trailingBrCount = 0;
       for (let j = cleanedArray.length - 1; j >= 0; j--) {
         if (cleanedArray[j].type === "br") trailingBrCount++;
         else break;
       }
 
-      // 3. If already 2 br → only allow more if next is text
       if (trailingBrCount >= 2) {
         if (["p", "span"].includes(next?.type)) {
-          continue; // cap at 2 before text
+          continue;
         } else {
-          continue; // remove any more before media/component
+          continue;
         }
       }
 
-      // Otherwise keep this br
       cleanedArray.push(el);
     } else {
       cleanedArray.push(el);
     }
   }
 
-  // Step 2: merge p/span & group images
   for (const element of cleanedArray) {
     if (["p", "span"].includes(element.type)) {
       if (!currentTextElement) {
@@ -1558,7 +1539,6 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
     }
   }
 
-  // Flush leftovers
   if (currentTextElement) result.push(currentTextElement);
   if (currentImages.length > 0)
     result.push(createImageGrid(currentImages, pubkey, noBlur));
@@ -1572,7 +1552,7 @@ function isRelayUrl(value) {
 
     if (!/^wss?:$/i.test(u.protocol)) return false;
 
-    const host = u.hostname; //
+    const host = u.hostname;
 
     if (host === "localhost") return true;
 

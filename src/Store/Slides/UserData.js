@@ -99,6 +99,15 @@ const isUserFollowingsLoadedSlice = createSlice({
     },
   },
 });
+const isUserDataLoadedSlice = createSlice({
+  name: "isUserDataLoaded",
+  initialState: false,
+  reducers: {
+    setIsUserDataLoaded(state, action) {
+      return action.payload;
+    },
+  },
+});
 const userMutedListSlice = createSlice({
   name: "userMutedList",
   initialState: { userMutedList: [], allTags: [] },
@@ -313,6 +322,7 @@ export const { setUserChatContacts } = userChatContactsSlice.actions;
 export const { setUserFollowings } = userFollowingsSlice.actions;
 export const { setIsUserFollowingsLoaded } =
   isUserFollowingsLoadedSlice.actions;
+export const { setIsUserDataLoaded } = isUserDataLoadedSlice.actions;
 export const { setUserMutedList } = userMutedListSlice.actions;
 export const { setUserBalance } = userBalanceSlice.actions;
 export const { setUserFollowingsRelays } = userFollowingsRelaysSlice.actions;
@@ -371,3 +381,4 @@ export const UserStarterPacksReducer = userStarterPacksSlice.reducer;
 export const UserMediaPacksReducer = userMediaPacksSlice.reducer;
 export const IsUserFollowingsLoadedReducer =
   isUserFollowingsLoadedSlice.reducer;
+export const IsUserDataLoadedReducer = isUserDataLoadedSlice.reducer;

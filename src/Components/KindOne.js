@@ -41,6 +41,8 @@ import {
 import Overlay from "@/Components/Overlay";
 import EventStats from "./EventStats";
 import PaidNoteInfoOverlay from "@/Components/PaidNoteInfoOverlay";
+import Follow from "./Follow";
+import { iconsNames } from "@/Content/IconV2URL";
 
 function KindOne({
   event,
@@ -48,6 +50,7 @@ function KindOne({
   border = false,
   minimal = false,
   getReposts = () => null,
+  followButton = false,
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -317,6 +320,7 @@ function KindOne({
       <div
         className="box-pad-v-m fit-container note-item"
         id={event.id}
+        style={{ border: event.isPremium ? "1px solid #ffed4b5c" : "unset" }}
       >
         {event.isComment && isThread && (
           <RelatedEvent
@@ -341,7 +345,7 @@ function KindOne({
             }}
           >
             <div className="fit-container fx-centered fx-start-h fx-start-v note-card-row">
-              <div className="note-card-avatar">
+              <div className="note-card-avatar fx-centered fx-col">
                 <UserProfilePic
                   size={40}
                   mainAccountUser={false}
@@ -349,6 +353,7 @@ function KindOne({
                   img={userProfile.picture}
                   metadata={minimal ? undefined : userProfile}
                 />
+
               </div>
               <div
                 className={
@@ -377,13 +382,22 @@ function KindOne({
                         )}
                         {proUser.isProUser && <Badge data={proUser} size={16} />}
                       </div>
-
+                      {event.isPremium &&
+                        <div className="fx-centered" style={{ fontSize: "12px", lineHeight: 0, backgroundColor: "#ffed4b5c", borderRadius: "10px", height: "20px", padding: "0 8px", minWidth: "max-content" }}>
+                          {t("AW299l2")}
+                        </div>
+                      }
                       <p className="gray-c p-medium" style={{ margin: 0 }}>
                         <Date_
                           toConvert={new Date(event.created_at * 1000)}
                           time={true}
                         />
                       </p>
+                      {event.isPaidNote && followButton &&
+                        <div className="box-pad-h-s">
+                          <Follow icon={false} toFollowKey={event.pubkey} toFollowName={userProfile.display_name || userProfile.name} size="tiny" />
+                        </div>
+                      }
                     </div>
                   </div>
                   <div className="fx-centered">

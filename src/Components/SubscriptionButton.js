@@ -33,9 +33,9 @@ export default function SubscriptionButton({ pubkey }) {
 const Providers = ({ providers, exit }) => {
   const { t } = useTranslation();
   return (
-    <Overlay exit={exit}>
+    <Overlay exit={exit} width={500}>
       <div className="fx-centered fx-col box-pad-h-m box-pad-v">
-        <h3>{t("AYFLfRf")}</h3>
+        <h4>{t("AYFLfRf")}</h4>
         <p className="gray-c p-centered">{t("Am6p1hr")}</p>
         <HorizontalScrollWrapper centerIfSmall={true}>
           {providers.map((provider) => (
@@ -51,16 +51,16 @@ const ProviderCard = ({ provider }) => {
   const { t } = useTranslation();
   const { userProfile } = useUserProfile(provider.pubkey);
   return (
-    <div className="sc-s-18 bg-sp box-pad-h box-pad-v fx-centered fx-col">
-      <UserProfilePic img={userProfile?.picture} size={48} />
-      <p>{userProfile.display_name}</p>
+    <div className="bg-dropdown box-pad-h box-pad-v fx-centered fx-col">
+      <UserProfilePic img={userProfile?.picture} size={80} />
+      <p className="p-big">{userProfile.display_name}</p>
       {userProfile.about && (
         <p className="gray-c p-centered">{userProfile.about}</p>
       )}
       <Link href={provider.url} target="_blank">
-        <button className="btn btn-normal btn-small fx-centered">
+        <button className="btn btn-normal fx-centered">
           {t("AaNDAmV")}
-          <Icon name={"share-icon"} />
+          <Icon name={"share-icon"} strokeWidth={2} />
         </button>
       </Link>
     </div>

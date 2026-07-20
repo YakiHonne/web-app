@@ -11,6 +11,7 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
     ...getEmptyuserMetadata(pubkey),
     empty: true,
   });
+  const [isLoading, setIsLoading] = useState(true)
   const [isNip05Verified, setIsNip05Verified] = useState(false);
   const [proUser, setProUser] = useState(
     getProUserState(pubkey) || { plan: "free", isProUser: false, badge: "" }
@@ -18,6 +19,7 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true)
         let auth = getUser(pubkey);
         if (auth) {
           setUserProfile(auth);
@@ -31,14 +33,17 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
             if (userBadge) setProUser(userBadge)
           }
         }
+        setIsLoading(false)
       } catch (err) {
         console.log(err);
       }
     };
     if (nostrAuthors.length > 0 && !isNip05Verified && userProfile.empty)
       fetchData();
-    if (!pubkey)
+    if (!pubkey) {
       setUserProfile({ ...getEmptyuserMetadata(pubkey), empty: true });
+      setIsLoading(false)
+    }
   }, [nostrAuthors, pubkey, verifyNip05]);
 
   const getUserBadge = async () => {
@@ -65,7 +70,7 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
     setProUserState(pubkey, result)
     return result
   }
-  return { isNip05Verified, userProfile, proUser };
+  return { isNip05Verified, userProfile, proUser, isLoading };
 };
 
 

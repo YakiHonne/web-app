@@ -8,9 +8,10 @@ export default function KeepAlive({ routeKey, children }) {
   const ALWAYS_KEEP = ["/", "/discover", "/notifications"];
   const ALWAYS_REMOVE = [
     "/login",
-    // "/lightning-wallet",
-    // "/cashu-wallet",
     "/write-article",
+    "/privacy",
+    "/terms",
+    "/refund-policy",
   ];
 
   useEffect(() => {

@@ -297,6 +297,7 @@ hr:last-child {
     justify-content: center;
     align-items: center;
     width: fit-content;
+    min-width: max-content;
     padding: 0 8px;
     min-height: 20px;
     max-height: 22px;
@@ -469,6 +470,17 @@ hr:last-child {
     font-size: var(--12);
     padding: 0 var(--20);
     height: var(--32);
+    border-radius: 30px;
+    cursor: pointer;
+    transition: .2s ease-in;
+}
+
+.btn-tiny {
+    font-family: 'DM sans', sans-serif;
+    font-weight: 600;
+    font-size: var(--10);
+    padding: 0 var(--10);
+    height: var(--24);
     border-radius: 30px;
     cursor: pointer;
     transition: .2s ease-in;

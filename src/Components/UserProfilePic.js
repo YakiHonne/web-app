@@ -35,13 +35,12 @@ const ISLAND_STYLES = `
     100% { opacity: 1; transform: translateY(0); }
   }
 
-  /* Card shell — transparent so photo fills top, glass panel at bottom */
   .isl-card {
     position: fixed;
     width: ${CARD_WIDTH}px;
     border-radius: 28px;
     overflow: hidden;
-    z-index: 99999;
+    z-index: 1000002;
     background: transparent;
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.10),
@@ -58,7 +57,6 @@ const ISLAND_STYLES = `
     pointer-events: auto;
   }
 
-  /* Photo is position:absolute and fills the entire card */
   .isl-bg {
     position: absolute;
     inset: 0;
@@ -73,7 +71,6 @@ const ISLAND_STYLES = `
     object-position: center top;
     display: block;
   }
-  /* Gradient: clear → very dark, covering the lower 70% of the card */
   .isl-bg-gradient {
     position: absolute;
     inset: 0;
@@ -87,7 +84,6 @@ const ISLAND_STYLES = `
     );
   }
 
-  /* Content sits on top of the absolute photo */
   .isl-inner {
     position: relative;
     display: flex;
@@ -96,7 +92,6 @@ const ISLAND_STYLES = `
   }
   .isl-spacer { flex: 1; min-height: 120px; }
 
-  /* Name + bio overlay on gradient */
   .isl-info {
     padding: 0 16px 10px;
     animation: island-body-in 0.3s 0.08s ease both;
@@ -125,14 +120,12 @@ const ISLAND_STYLES = `
     overflow: hidden;
   }
 
-  /* Frosted glass panel — stats + actions */
   .isl-glass {
     position: relative;
     isolation: isolate;
     background: linear-gradient(to bottom, rgba(12, 12, 16, 0.0) 0%, rgba(12, 12, 16, 0.88) 100%);
     animation: island-body-in 0.3s 0.12s ease both;
   }
-  /* Pseudo-element carries the blur, masked so it fades from transparent at top to solid at bottom */
   .isl-glass::before {
     content: "";
     position: absolute;
@@ -145,7 +138,6 @@ const ISLAND_STYLES = `
     pointer-events: none;
   }
 
-  /* Stats: 3 columns, thin white dividers, no background */
   .isl-stats {
     display: grid;
     grid-template-columns: 1fr 1px 1fr 1px 1fr;
@@ -178,7 +170,6 @@ const ISLAND_STYLES = `
     flex-shrink: 0;
   }
 
-  /* Action buttons */
   .isl-actions {
     display: flex;
     align-items: center;
@@ -188,7 +179,6 @@ const ISLAND_STYLES = `
   .isl-follow-wrap { flex: 1; display: flex; }
   .isl-follow-wrap > * { flex: 1; }
 
-  /* Small icon-only circle button */
   .isl-icon-btn {
     display: flex;
     align-items: center;

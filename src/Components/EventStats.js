@@ -36,6 +36,7 @@ const getItemsForTab = (postActions, tabIndex) => {
 }
 
 const PeopleList = ({ items, tab, cache, setCache }) => {
+    const { t } = useTranslation()
     const cached = cache[tab]
     const [people, setPeople] = React.useState(cached?.people || [])
     const [page, setPage] = React.useState(cached?.page || 0)
@@ -75,31 +76,40 @@ const PeopleList = ({ items, tab, cache, setCache }) => {
     }, [pubkeys, tab, setCache])
 
     const skipInitialFetch = React.useRef(!!cached)
+    const fetchBatchRef = React.useRef(fetchBatch)
+    fetchBatchRef.current = fetchBatch
 
     React.useEffect(() => {
         if (skipInitialFetch.current) {
             skipInitialFetch.current = false
             return
         }
-        fetchBatch(page)
-    }, [page, fetchBatch])
+        fetchBatchRef.current(page)
+    }, [page])
+
+    const hasMoreRef = React.useRef(hasMore)
+    hasMoreRef.current = hasMore
+    const isLoadingRef = React.useRef(isLoading)
+    isLoadingRef.current = isLoading
 
     React.useEffect(() => {
-        if (!sentinelRef.current || !hasMore || isLoading) return
+        if (!sentinelRef.current) return
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting) setPage(prev => prev + 1)
+                if (entries[0].isIntersecting && hasMoreRef.current && !isLoadingRef.current) {
+                    setPage(prev => prev + 1)
+                }
             },
             { rootMargin: '200px' }
         )
         observer.observe(sentinelRef.current)
         return () => observer.disconnect()
-    }, [hasMore, isLoading, people])
+    }, [])
 
     if (pubkeys.length === 0) {
         return (
             <div className="fx-centered fit-container box-pad-v" style={{ opacity: 0.4 }}>
-                <p>No one yet</p>
+                <p>{t("AdrUBOU")}</p>
             </div>
         )
     }
@@ -125,7 +135,6 @@ const PeopleList = ({ items, tab, cache, setCache }) => {
                         <div className="fx-centered" style={{ columnGap: '12px', flexShrink: 0 }}>
                             {tab === 0 && actionData?.content && (
                                 <EmojiImg content={actionData.content} />
-                                // <span style={{ fontSize: '1.2rem' }}>{actionData.content}</span>
                             )}
                             {tab === 3 && actionData?.amount != null && (
                                 <div className="fx-centered" style={{ columnGap: '4px' }}>
@@ -151,7 +160,7 @@ const PeopleList = ({ items, tab, cache, setCache }) => {
                     <Spinner />
                 </div>
             )}
-            {hasMore && !isLoading && <div ref={sentinelRef} style={{ height: '1px' }} />}
+            {hasMore && <div ref={sentinelRef} style={{ height: '1px' }} />}
         </div>
     )
 }
@@ -168,12 +177,12 @@ const StatsOverlay = ({ postActions, exit }) => {
         postActions.zaps?.zaps?.length || 0,
     ]
 
-    const tabs = [
+    const tabs = React.useMemo(() => [
         `${t("Alz0E9Y")} (${counts[0]})`,
         `${t("Aai65RJ")} (${counts[1]})`,
         `${t("AWmDftG")} (${counts[2]})`,
         `${t("AVDZ5cJ")} (${counts[3]})`,
-    ]
+    ], [t, counts[0], counts[1], counts[2], counts[3]])
 
     const items = React.useMemo(() => getItemsForTab(postActions, selectedTab), [postActions, selectedTab])
 

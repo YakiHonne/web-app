@@ -12,7 +12,7 @@ export default function PaidNoteAd({ index, gap }) {
     <div className="paid-note-ad-border">
       <div className="paid-note-ad-border-spinner" />
       <div className="paid-note-ad-border-content">
-        <KindOne event={note} border={false} />
+        <KindOne event={note} border={false} followButton={true} />
       </div>
     </div>
   );

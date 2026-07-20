@@ -15,8 +15,10 @@ import "@/styles/PlayPauseButton.css";
 import "@/styles/uplift.css";
 import "@/styles/articlePreview.css";
 import "@/styles/tiptap.css";
+import "@/styles/legalDoc.css";
 
 import { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import "@/lib/i18n";
 import ReduxProvider from "@/Store/ReduxProvider";
 import { ThemeProvider } from "next-themes";
@@ -29,6 +31,8 @@ import KeepAlive from "@/Components/KeepAlive";
 import IinitiateNotifications from "@/Components/IinitiateNotifications";
 import NewDesignAnnouncement from "@/Components/NewDesignAnnouncement";
 import NavbarTour from "@/Components/NavbarTour";
+import ProfileRelayCheck from "@/Components/ProfileRelayCheck";
+import { nip19 } from "nostr-tools";
 
 const TopNavbarClient = dynamic(() => import("@/Components/TopNavbar"), {
   ssr: false,
@@ -50,13 +54,13 @@ const InitiateCashu = dynamic(() => import("@/Components/InitiateCashu"), {
 });
 
 const tourSteps = [
-  { selector: ".uplift-search-pill",    title: "Search",        description: "Find notes, profiles, and topics instantly." },
-  { selector: ".uplift-nav-icon-btn[aria-label='Home']",     title: "Home",     description: "Your main feed — notes and updates from people you follow." },
+  { selector: ".uplift-search-pill", title: "Search", description: "Find notes, profiles, and topics instantly." },
+  { selector: ".uplift-nav-icon-btn[aria-label='Home']", title: "Home", description: "Your main feed — notes and updates from people you follow." },
   { selector: ".uplift-nav-icon-btn[aria-label='Articles']", title: "Articles", description: "Browse and read long-form content from creators." },
-  { selector: ".uplift-plus-btn",       title: "Create",        description: "Post a note, write an article, share media, or build a widget.", requiresClick: true },
+  { selector: ".uplift-plus-btn", title: "Create", description: "Post a note, write an article, share media, or build a widget.", requiresClick: true },
   { selector: ".uplift-nav-icon-btn[aria-label='Messages']", title: "Messages", description: "Chat directly with anyone on Nostr." },
-  { selector: ".uplift-nav-icon-btn[aria-label='More']",     title: "More",     description: "Access Media, Relay Orbits, Explore, Smart Widgets, and your Dashboard.", requiresClick: true },
-  { selector: ".uplift-balance-chip",   title: "Wallet",        description: "Hover to see the fiat equivalent of your Lightning balance in real time.", requiresHover: true },
+  { selector: ".uplift-nav-icon-btn[aria-label='More']", title: "More", description: "Access Media, Relay Orbits, Explore, Smart Widgets, and your Dashboard.", requiresClick: true },
+  { selector: ".uplift-balance-chip", title: "Wallet", description: "Hover to see the fiat equivalent of your Lightning balance in real time.", requiresHover: true },
   { selector: ".uplift-icon-btn[aria-label='Notifications']", title: "Notifications", description: "Stay up to date with replies, zaps, and mentions." },
   { selector: ".uplift-navbar .uplift-avatar-btn", title: "Profile", description: "Your identity, settings, and connected accounts.", requiresClick: true },
 ];
@@ -67,12 +71,80 @@ const NO_SIDEBAR_PAGES = new Set([
   "/yakihonne-smart-widgets",
   "/privacy",
   "/terms",
+  "/refund-policy",
   "/login",
   "/points-system",
-  // "/write-article",
   "/m/maci-poll",
   "/docs/sw/[keyword]",
 ]);
+
+const SETTLE_DELAY_MS = 1200;
+
+function ProfileRelayCheckGate() {
+  const router = useRouter();
+  const isOnRelaysTab =
+    router.pathname === "/settings" && router.query?.tab === "relays";
+  const isOnProfilePage = router.pathname === "/settings/profile";
+  const suppressOnThisPage = isOnRelaysTab || isOnProfilePage;
+
+  const userKeys = useSelector((state) => state.userKeys);
+  const userMetadata = useSelector((state) => state.userMetadata);
+  const userAllRelays = useSelector((state) => state.userAllRelays);
+  const isUserDataLoaded = useSelector((state) => state.isUserDataLoaded);
+  const [dismissed, setDismissed] = useState(true);
+  const [settled, setSettled] = useState(false);
+
+  const isLoggedIn = !!(userKeys && (userKeys.sec || userKeys.ext || userKeys.bunker));
+  const dismissKey = userKeys?.pub
+    ? `yakihonne_profile_relay_check_dismissed_${userKeys.pub}`
+    : null;
+
+  useEffect(() => {
+    setDismissed(dismissKey ? !!localStorage.getItem(dismissKey) : true);
+  }, [dismissKey]);
+
+  const pubkeyStubs = userKeys?.pub
+    ? [userKeys.pub.substring(0, 10), nip19.npubEncode(userKeys.pub).substring(0, 10)]
+    : [];
+  const isStubName = (value) => !value || pubkeyStubs.includes(value);
+  const missingProfile =
+    isLoggedIn &&
+    settled &&
+    userMetadata &&
+    isStubName(userMetadata.name) &&
+    isStubName(userMetadata.display_name) &&
+    !userMetadata.picture;
+  const missingRelays = isLoggedIn && settled && (!userAllRelays || userAllRelays.length === 0);
+
+  useEffect(() => {
+    if (!isLoggedIn || !isUserDataLoaded) {
+      setSettled(false);
+      return;
+    }
+    const timeout = setTimeout(() => setSettled(true), SETTLE_DELAY_MS);
+    return () => clearTimeout(timeout);
+  }, [isLoggedIn, isUserDataLoaded]);
+
+  const shouldShow =
+    !suppressOnThisPage && settled && !dismissed && (missingProfile || missingRelays);
+
+  const handleDismiss = (dontShowAgain) => {
+    if (dontShowAgain && dismissKey) {
+      localStorage.setItem(dismissKey, "true");
+    }
+    setDismissed(true);
+  };
+
+  if (!shouldShow) return null;
+
+  return (
+    <ProfileRelayCheck
+      missingProfile={missingProfile}
+      missingRelays={missingRelays}
+      onDismiss={handleDismiss}
+    />
+  );
+}
 
 function App({ Component, pageProps }) {
   const router = useRouter();
@@ -91,7 +163,7 @@ function App({ Component, pageProps }) {
       if (!isNaN(idx) && sizes[idx]) {
         document.documentElement.style.fontSize = sizes[idx];
       }
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -113,7 +185,6 @@ function App({ Component, pageProps }) {
     setShowTour(false);
   };
 
-  // fake loader (overlay only)
   useEffect(() => {
     const handleStart = () => setLoading(true);
     const handleDone = () => setLoading(false);
@@ -164,6 +235,7 @@ function App({ Component, pageProps }) {
         {showTour && (
           <NavbarTour steps={tourSteps} onComplete={handleTourComplete} />
         )}
+        {!showAnnouncement && !showTour && <ProfileRelayCheckGate />}
         {loading && (
           <div
             className="fit-container sc-s-18"

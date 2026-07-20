@@ -80,7 +80,7 @@ export default function TopNavbar() {
   const [showPostNote, setShowPostNote] = useState(false);
   const [showPostMedia, setShowPostMedia] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
-  const [profilePos, setProfilePos] = useState({ top: 72, right: 16 });
+  const [profilePos, setProfilePos] = useState({ top: 72, right: 16, left: null });
   const [balanceHover, setBalanceHover] = useState(false);
   const [fiatRate, setFiatRate] = useState(null);
   const [fiatValue, setFiatValue] = useState(null);
@@ -228,7 +228,12 @@ export default function TopNavbar() {
       const r = avatarRef.current.getBoundingClientRect();
       const dropdownH = 520;
       const top = Math.min(r.bottom + 8, window.innerHeight - dropdownH - 8);
-      setProfilePos({ top: Math.max(top, 56), right: window.innerWidth - r.right });
+      const isRTL = document.documentElement.dir === "rtl";
+      setProfilePos({
+        top: Math.max(top, 56),
+        right: isRTL ? null : window.innerWidth - r.right,
+        left: isRTL ? r.left : null,
+      });
     }
     if (showProfileMenu) {
       closeProfileMenu();
@@ -588,7 +593,11 @@ export default function TopNavbar() {
           <div
             ref={profileDropRef}
             className={`${isMobile ? "" : "bg-dropdown "}uplift-profile-dropdown-wrapper${dismissingProfile ? " dismissing" : ""}`}
-            style={{ top: profilePos.top, right: profilePos.right }}
+            style={
+              profilePos.left !== null
+                ? { top: profilePos.top, left: profilePos.left }
+                : { top: profilePos.top, right: profilePos.right }
+            }
           >
             <div className="uplift-profile-dropdown">
               <div className="uplift-dropdown-item" onClick={handleProfileLink}>
@@ -757,6 +766,20 @@ export default function TopNavbar() {
                 >
                   {t("Az3tRpL")}
                 </button>
+              </div>
+
+              <div className="uplift-more-drawer-legal-links">
+                <p onClick={() => { setShowMore(false); customHistory("/privacy", true); }}>
+                  {t("AH6LUz3")}
+                </p>
+                <p className="uplift-more-drawer-legal-dot">&#9679;</p>
+                <p onClick={() => { setShowMore(false); customHistory("/terms", true); }}>
+                  {t("A5LsZ43")}
+                </p>
+                <p className="uplift-more-drawer-legal-dot">&#9679;</p>
+                <p onClick={() => { setShowMore(false); customHistory("/refund-policy", true); }}>
+                  {t("ARbkkUU")}
+                </p>
               </div>
             </div>
           </div>

@@ -443,18 +443,18 @@ function UsageRow({ item, onUpgrade }) {
       </div>
 
       {isLocked ? (
-        <div className="fit-container fx-scattered round-corner box-pad-h-m box-pad-v-s">
-          <div className="fx-centered" style={{ columnGap: "8px" }}>
-            <Icon name={iconsNames.lock} size={16} />
-            <p className="gray-c p-medium">{t("AHPptdT")}</p>
+        <div className="fit-container fx-scattered round-corner  box-pad-v-s">
+          <div className="fx-centered fx-start-h" style={{ columnGap: "8px" }}>
+            <Icon name={iconsNames.lock} v={2} opacity=".5" size={20} />
+            <p className="gray-c">{t("AHPptdT")}</p>
           </div>
-          <button className="btn btn-gst" onClick={onUpgrade}>{t("AGo17y4")}</button>
+          <button className="btn btn-normal btn-small" onClick={onUpgrade}>{t("AGo17y4")}</button>
         </div>
       ) : isUnlimited ? null : (
         <ProgressBar percentage={percentage} full />
       )}
 
-      {resetText && (
+      {resetText && !isLocked && (
         <div className="fx-centered" style={{ columnGap: "6px" }}>
           <Icon name={iconsNames.clock} size={14} />
           <span className="gray-c p-medium">{resetText}</span>
@@ -958,18 +958,6 @@ export default function SubscriptionPage() {
 
   return (
     <>
-      {showUpgrade && (
-        <UpgradeOverlay
-          plans={plans}
-          onClose={() => setShowUpgrade(false)}
-          userPub={userKeys?.pub}
-          eligibility={eligibility}
-          pointsConfig={pointsConfig}
-          redeemingPlan={redeemingPlan}
-          onRedeemSubscription={(plan) => redeemSubscription(plan, fetch)}
-        />
-      )}
-
       <div className="fx-centered fx-col fx-start-v" style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px 48px", rowGap: "16px" }}>
         {isConnectedToYaki && (
           <div style={{ width: "fit-content", margin: "0 auto" }}>
@@ -989,7 +977,7 @@ export default function SubscriptionPage() {
             <button className="btn btn-normal" onClick={connectToYaki} disabled={isConnecting}>{isConnecting ? <Spinner /> : t("AdimVMk")}</button>
           </div>
         ) : selectedTab === 1 ? (
-          <UsageView onUpgrade={() => setShowUpgrade(true)} />
+          <UsageView onUpgrade={() => setSelectedTab(0)} />
         ) : loading || plansLoading ? (
           <><SkeletonCard /><SkeletonCard /><SkeletonCard /></>
         ) : error ? (

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   setIsUserFollowingsLoaded,
+  setIsUserDataLoaded,
   setUserAllRelays,
   setUserAppSettings,
   setUserBlossomServers,
@@ -267,7 +268,6 @@ export default function AppInit() {
         relaysURLsToWrite.length > 0 ? relaysURLsToWrite : relaysOnPlatform;
       dispatch(setUserRelays(relaysURLsToWrite));
       dispatch(setUserAllRelays(relays.relays));
-      // addExplicitRelays(relaysURLsToRead);
     }
     if (
       JSON.stringify(previousFavRelays.current) !== JSON.stringify(favRelays)
@@ -504,9 +504,9 @@ export default function AppInit() {
     }
     dispatch(setIsUserFollowingsLoaded(false));
     dispatch(setUserFollowings([]));
+    dispatch(setIsUserDataLoaded(false));
   }, [userKeys]);
 
-  // Auto-connect to Yaki Chest whenever userKeys changes pubkey
   useEffect(() => {
     const pub = userKeys?.pub;
     const canSign = userKeys && (userKeys.ext || userKeys.sec || userKeys.bunker);
@@ -535,7 +535,6 @@ export default function AppInit() {
     };
 
     const autoConnect = async () => {
-      // Disconnect previous session if switching accounts
       if (prevPubkeyRef.current) {
         dispatch(setIsConnectedToYaki(false));
         dispatch(setYakiChestStats(false));
@@ -546,7 +545,6 @@ export default function AppInit() {
       prevPubkeyRef.current = pub;
 
       try {
-        // Check if backend session is already valid for this pubkey
         const online = await axiosInstance.get("/api/v1/online");
         const onlineData = online?.data;
         if (onlineData && (onlineData.pubkey === pub || onlineData.user_stats?.pubkey === pub)) {
@@ -558,7 +556,6 @@ export default function AppInit() {
         }
       } catch {}
 
-      // Session not valid — perform full login
       try {
         const data = await LoginToAPI(pub, userKeys);
         if (data) {
@@ -830,56 +827,54 @@ export default function AppInit() {
           }
         }
       });
-      subscription.on("eose", () => {
-        saveFollowings(
-          tempUserFollowings,
-          userKeys.pub,
-          lastFollowingsTimestamp,
-        );
-        saveInterests(tempUserInterests, userKeys.pub, lastInterestsTimestamp);
-        saveMutedlist(tempMutedList, userKeys.pub, lastMutedTimestamp);
-        saveRelays(tempRelays, userKeys.pub, lastRelaysTimestamp);
-        savePinnedNotes(
-          tempPinnedNotes,
-          userKeys.pub,
-          lastPinnedNotesTimestamp,
-        );
-        saveInboxRelays(
-          tempInboxRelays,
-          userKeys.pub,
-          lastInboxRelaysTimestamp,
-        );
-        saveFavRelays(tempFavRelays, userKeys.pub, lastFavRelaysTimestamp);
-        saveSearchRelays(
-          tempSearchRelays,
-          userKeys.pub,
-          lastSearchRelaysTimestamp,
-        );
-        saveBlossomServers(
-          tempBlossomServers,
-          userKeys.pub,
-          lastBlossomServersTimestamp,
-        );
-        saveAppSettings(
-          tempAppSettings,
-          userKeys.pub,
-          lastAppSettingsTimestamp,
-        );
-        saveAppSettings(
-          tempAppSettings,
-          userKeys.pub,
-          lastAppSettingsTimestamp,
-        );
-        saveBookmarks(tempBookmarks, userKeys.pub);
-        saveRelaysSet(tempRelaysSet, userKeys.pub);
-        saveStarterPacks(tempStarterPacks, userKeys.pub);
-        saveMediaPacks(tempMediaPacks, userKeys.pub);
+      subscription.on("eose", async () => {
+        await Promise.all([
+          saveFollowings(
+            tempUserFollowings,
+            userKeys.pub,
+            lastFollowingsTimestamp,
+          ),
+          saveInterests(tempUserInterests, userKeys.pub, lastInterestsTimestamp),
+          saveMutedlist(tempMutedList, userKeys.pub, lastMutedTimestamp),
+          saveRelays(tempRelays, userKeys.pub, lastRelaysTimestamp),
+          savePinnedNotes(
+            tempPinnedNotes,
+            userKeys.pub,
+            lastPinnedNotesTimestamp,
+          ),
+          saveInboxRelays(
+            tempInboxRelays,
+            userKeys.pub,
+            lastInboxRelaysTimestamp,
+          ),
+          saveFavRelays(tempFavRelays, userKeys.pub, lastFavRelaysTimestamp),
+          saveSearchRelays(
+            tempSearchRelays,
+            userKeys.pub,
+            lastSearchRelaysTimestamp,
+          ),
+          saveBlossomServers(
+            tempBlossomServers,
+            userKeys.pub,
+            lastBlossomServersTimestamp,
+          ),
+          saveAppSettings(
+            tempAppSettings,
+            userKeys.pub,
+            lastAppSettingsTimestamp,
+          ),
+          saveBookmarks(tempBookmarks, userKeys.pub),
+          saveRelaysSet(tempRelaysSet, userKeys.pub),
+          saveStarterPacks(tempStarterPacks, userKeys.pub),
+          saveMediaPacks(tempMediaPacks, userKeys.pub),
+        ]);
         if (!(tempAuthMetadata && lastUserMetadataTimestamp)) {
           let emptyMetadata = getEmptyuserMetadata(userKeys.pub);
           dispatch(setUserMetadata(emptyMetadata));
           addConnectedAccounts(emptyMetadata, userKeys);
         }
         eose = true;
+        dispatch(setIsUserDataLoaded(true));
       });
     };
 

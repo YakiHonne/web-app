@@ -25,9 +25,7 @@ function shuffleArray(arr) {
 }
 
 function pick50(arr) {
-  let shuffled = shuffleArray(arr).slice(0, 50);
-  saveUsers(shuffled);
-  return shuffled;
+  return shuffleArray(arr).slice(0, 50);
 }
 
 const allColors = [
@@ -136,14 +134,22 @@ export const SharingWindow = ({ path, title, description, exit }) => {
   const { users, isSearchLoading } = useSearchUsers(toSearch);
   const [isLoading, setIsLoading] = useState(false);
 
-  const batch = useMemo(() => {
-    return pick50(userFollowings);
-  }, [userFollowings]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const batch = useMemo(() => pick50(userFollowings), []);
+
+  useEffect(() => {
+    if (batch.length > 0) saveUsers(batch);
+  }, [batch]);
+
+  const authorsByPubkey = useMemo(() => {
+    const map = new Map();
+    for (const author of nostrAuthors) map.set(author.pubkey, author);
+    return map;
+  }, [nostrAuthors]);
+
   const contact = useMemo(() => {
-    return batch.map((_) => {
-      return getUser(_);
-    });
-  }, [nostrAuthors, batch]);
+    return batch.map((pubkey) => authorsByPubkey.get(pubkey) || getUser(pubkey));
+  }, [authorsByPubkey, batch]);
 
   const handleSelectedUsers = (metadata) => {
     if (isLoading) return;
@@ -361,7 +367,7 @@ export const SharingWindow = ({ path, title, description, exit }) => {
 };
 
 const UserShowCard = ({ metadata, onClick }) => {
-  const { isNip05Verified, proUser } = useUserProfile(metadata.pubkey);
+  const { isNip05Verified, proUser } = useUserProfile(metadata.pubkey, false);
   return (
     <div
       className="fx-centered fx-col box-pad-h-s box-pad-v-s option pointer"

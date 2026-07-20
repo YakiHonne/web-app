@@ -112,13 +112,12 @@ const FollowText = ({
         "",
         tempTags.map((p) => ["p", p])
       );
-      if (!eventInitEx) return;
+      if (!eventInitEx) { setIsLoading(false); return; }
       dispatch(
         setToPublish({
           eventInitEx,
         })
       );
-      // setTags(tempTags);å
       setIsLoading(false);
     } catch (err) {
       console.log(err);
@@ -170,9 +169,8 @@ const FollowText = ({
     return (
       <button
         className={`btn ${size === "small" ? "btn-small" : ""} ${isFollowing.bulk
-            ? `btn-green`
-            : // ? `${isFollowing.status ? "btn-gray" : "btn-normal"}`
-            `${isFollowing.status ? "btn-gray" : "btn-normal"}`
+          ? `btn-green`
+          : `${isFollowing.status ? "btn-gray" : "btn-normal"}`
           } ${full ? "btn-full" : ""}`}
         style={{
           borderColor: isFollowing.bulk && !isFollowing.status ? "initial" : "",
@@ -199,7 +197,7 @@ const FollowText = ({
 
   return (
     <button
-      className={`btn ${isFollowing.status ? "btn-gray" : "btn-normal"} ${size === "small" ? "btn-small" : ""
+      className={`btn ${isFollowing.status ? "btn-gray" : "btn-normal"} ${size === "small" ? "btn-small" : size === "tiny" ? "btn-tiny" : ""
         } ${full ? "btn-full" : ""}`}
       disabled={isLoading}
       onClick={followUnfollow}
@@ -273,7 +271,6 @@ const FollowIcon = ({
           allRelays: [...filterRelays(relaysOnPlatform, userRelays)],
         })
       );
-      // setTags(tempTags);å
       setIsLoading(false);
     } catch (err) {
       console.log(err);

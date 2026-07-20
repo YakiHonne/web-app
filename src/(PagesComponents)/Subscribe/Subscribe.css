@@ -66,7 +66,6 @@
 .plan-card:hover {
   transform: translateY(-12px);
   border-color: var(--orange-main);
-  box-shadow: 0 25px 50px -12px color-mix(in srgb, var(--black) 10%, transparent);
 }
 
 .plan-card.premium {
