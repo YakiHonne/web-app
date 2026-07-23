@@ -11,8 +11,236 @@ import Follow from './Follow'
 import NumberShrink from './NumberShrink'
 import EmojiImg from './EmojiImg'
 import Spinner from './Spinner'
+import { useTheme } from 'next-themes'
 
 const BATCH_SIZE = 20
+
+const REACTION_SERIES = [
+    { key: 'likes', color: '#FF4A4A', labelKey: 'Alz0E9Y' },
+    { key: 'reposts', color: '#00C04D', labelKey: 'Aai65RJ' },
+    { key: 'quotes', color: '#8b5cf6', labelKey: 'AWmDftG' },
+    { key: 'replies', color: '#1d9bf0', labelKey: 'AENEcn9' },
+    { key: 'zaps', color: '#ee7700', labelKey: 'AVDZ5cJ' },
+]
+
+const BUCKET_COUNT = 8
+
+const getSeriesItems = (postActions, key) => {
+    if (!postActions) return []
+    return postActions[key]?.[key] || []
+}
+
+const buildChartBuckets = (postActions) => {
+    const all = []
+    for (const series of REACTION_SERIES) {
+        for (const item of getSeriesItems(postActions, series.key)) {
+            if (item?.created_at) all.push({ created_at: item.created_at, key: series.key })
+        }
+    }
+    if (all.length === 0) return null
+
+    let min = Infinity
+    let max = -Infinity
+    for (const a of all) {
+        if (a.created_at < min) min = a.created_at
+        if (a.created_at > max) max = a.created_at
+    }
+
+    // Guard against a single point in time (all reactions at once)
+    const span = max - min || 1
+    const step = span / BUCKET_COUNT
+
+    const buckets = Array.from({ length: BUCKET_COUNT }, (_, i) => {
+        const start = min + i * step
+        return {
+            start,
+            end: min + (i + 1) * step,
+            counts: REACTION_SERIES.reduce((acc, s) => ({ ...acc, [s.key]: 0 }), {}),
+        }
+    })
+
+    for (const a of all) {
+        let idx = Math.floor((a.created_at - min) / step)
+        if (idx < 0) idx = 0
+        if (idx >= BUCKET_COUNT) idx = BUCKET_COUNT - 1
+        buckets[idx].counts[a.key] += 1
+    }
+
+    let maxCount = 0
+    for (const b of buckets) {
+        for (const s of REACTION_SERIES) {
+            if (b.counts[s.key] > maxCount) maxCount = b.counts[s.key]
+        }
+    }
+
+    return { buckets, maxCount, min, max }
+}
+
+const formatBucketDate = (seconds) => {
+    try {
+        return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(seconds * 1000))
+    } catch {
+        return ''
+    }
+}
+
+const StatsBarChart = ({ postActions }) => {
+    const { t } = useTranslation()
+    const { resolvedTheme } = useTheme()
+    const isLight = resolvedTheme === 'light' || resolvedTheme === 'white' || resolvedTheme === 'creamy'
+    const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.07)'
+    const [hovered, setHovered] = React.useState(null)
+
+    const chart = React.useMemo(() => buildChartBuckets(postActions), [postActions])
+
+    if (!chart) return null
+
+    const { buckets, maxCount, min, max } = chart
+    // When there are only a few periods, cap each group's width so they stay
+    // clustered in the center instead of stretching across the row.
+    const groupMaxWidth = buckets.length <= 4 ? '64px' : 'none'
+    const hoveredBucket = hovered != null ? buckets[hovered] : null
+
+    return (
+        <div className="fit-container fx-centered fx-col" style={{ rowGap: '12px', paddingBottom: '4px' }}>
+            <div className="fx-centered fx-wrap" style={{ columnGap: '16px', rowGap: '6px', justifyContent: 'center' }}>
+                {REACTION_SERIES.map(s => (
+                    <div className="fx-centered" style={{ columnGap: '6px' }} key={s.key}>
+                        <span style={{ width: '10px', height: '10px', borderRadius: '3px', backgroundColor: s.color, flexShrink: 0 }} />
+                        <p className="gray-c p-medium">{t(s.labelKey)}</p>
+                    </div>
+                ))}
+            </div>
+            <div
+                className="fit-container fx-centered fx-col"
+                style={{ rowGap: '6px', position: 'relative' }}
+            >
+                <div
+                    className="fx-centered fit-container"
+                    style={{
+                        minHeight: '32px',
+                        transition: 'opacity .15s ease',
+                        opacity: hoveredBucket ? 1 : 0,
+                        pointerEvents: 'none',
+                    }}
+                >
+                    {hoveredBucket && (
+                        <div
+                            className="sc-s-18 fx-centered fx-wrap"
+                            style={{
+                                columnGap: '2px',
+                                rowGap: '4px',
+                                padding: '6px 12px',
+                                backgroundColor: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.06)',
+                                border: 'none',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <p className="p-medium" style={{ fontWeight: 600 }}>
+                                {formatBucketDate(hoveredBucket.start)}
+                            </p>
+                            {REACTION_SERIES.map(s => (
+                                <div className="fx-centered" style={{ columnGap: '4px' }} key={s.key}>
+                                    <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: s.color, flexShrink: 0 }} />
+                                    <p className="p-medium">{hoveredBucket.counts[s.key]}</p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div
+                    className="fit-container fx-centered fx-even"
+                    style={{
+                        height: '120px',
+                        columnGap: '10px',
+                        alignItems: 'flex-end',
+                        justifyContent: 'center',
+                        borderBottom: `1px solid ${gridColor}`,
+                        paddingTop: '8px',
+                    }}
+                >
+                    {buckets.map((b, i) => {
+                        const isHovered = hovered === i
+                        return (
+                            <div
+                                key={i}
+                                className="fx-centered fx-end-v pointer"
+                                onMouseEnter={() => setHovered(i)}
+                                onMouseLeave={() => setHovered(prev => (prev === i ? null : prev))}
+                                style={{
+                                    flex: 1,
+                                    maxWidth: groupMaxWidth,
+                                    height: '100%',
+                                    columnGap: '2px',
+                                    alignItems: 'flex-end',
+                                    justifyContent: 'center',
+                                    minWidth: 0,
+                                    opacity: hovered == null || isHovered ? 1 : 0.4,
+                                    transition: 'opacity .15s ease',
+                                }}
+                            >
+                                {REACTION_SERIES.map(s => {
+                                    const c = b.counts[s.key]
+                                    const heightPct = maxCount ? (c / maxCount) * 100 : 0
+                                    return (
+                                        <div
+                                            key={s.key}
+                                            style={{
+                                                flex: 1,
+                                                minWidth: 0,
+                                                maxWidth: '4px',
+                                                height: `${heightPct}%`,
+                                                // Empty periods still show a faint sliver instead of nothing.
+                                                minHeight: '3px',
+                                                backgroundColor: s.color,
+                                                opacity: c > 0 ? 1 : 0.25,
+                                                borderRadius: '3px 3px 0 0',
+                                                transition: 'height .25s ease, opacity .15s ease',
+                                            }}
+                                        />
+                                    )
+                                })}
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+            <div className="fx-scattered fit-container">
+                {(() => {
+                    const seen = new Set()
+                    const labels = []
+                    for (let i = 0; i < 5; i++) {
+                        const label = formatBucketDate(min + ((max - min) * i) / 4)
+                        if (label && !seen.has(label)) {
+                            seen.add(label)
+                            labels.push(label)
+                        }
+                    }
+                    const single = labels.length === 1
+                    return labels.map((label, i) => (
+                        <p
+                            className="gray-c p-medium"
+                            key={label}
+                            style={{
+                                flex: 1,
+                                textAlign: single
+                                    ? 'center'
+                                    : i === 0
+                                        ? 'left'
+                                        : i === labels.length - 1
+                                            ? 'right'
+                                            : 'center',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            {label}
+                        </p>
+                    ))
+                })()}
+            </div>
+        </div>
+    )
+}
 
 export default function EventStats({ postActions }) {
     const [showStats, setShowStats] = React.useState(false)
@@ -188,7 +416,8 @@ const StatsOverlay = ({ postActions, exit }) => {
 
     return (
         <Overlay exit={exit} width={600}>
-            <div className="fx-centered fx-col fx-start-h fit-container box-pad-v-m box-pad-h-m">
+            <div className="fx-centered fx-col fx-start-h fit-container box-pad-v-m box-pad-h-m" style={{ rowGap: '16px' }}>
+                <StatsBarChart postActions={postActions} />
                 <SelectTabs selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabs={tabs} />
                 <PeopleList key={selectedTab} items={items} tab={selectedTab} cache={peopleCache} setCache={setPeopleCache} />
             </div>

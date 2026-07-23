@@ -119,6 +119,7 @@ const useNoteStats = (noteID, notePubkey) => {
                 pubkey: zapper.pubkey,
                 content: zapper.message,
                 amount: sats,
+                created_at: event.created_at,
               });
               kind9735_ = kind9735_ + sats;
             }
@@ -141,12 +142,21 @@ const useNoteStats = (noteID, notePubkey) => {
                 : true;
             let checkRedundant7 = kind7.find((_) => _.pubkey === event.pubkey);
             if (checkValid7 && !checkRedundant7)
-              kind7.push({ id: event.id, pubkey: event.pubkey, content });
+              kind7.push({
+                id: event.id,
+                pubkey: event.pubkey,
+                content,
+                created_at: event.created_at,
+              });
           }
           if (event.kind === 6) {
             if (!kind6Since || kind6Since < event.created_at)
               kind6Since = event.created_at;
-            kind6.push({ id: event.id, pubkey: event.pubkey });
+            kind6.push({
+              id: event.id,
+              pubkey: event.pubkey,
+              created_at: event.created_at,
+            });
           }
           if (event.kind === 1) {
             let check_kind1 = {
@@ -165,12 +175,20 @@ const useNoteStats = (noteID, notePubkey) => {
             ) {
               if (!kind1_Since || kind1_Since < event.created_at)
                 kind1_Since = event.created_at;
-              kind1_.push({ id: event.id, pubkey: event.pubkey });
+              kind1_.push({
+                id: event.id,
+                pubkey: event.pubkey,
+                created_at: event.created_at,
+              });
             }
             if (check_kind1.isComment) {
               if (!kind1Since || kind1Since < event.created_at)
                 kind1Since = event.created_at;
-              kind1.push({ id: event.id, pubkey: event.pubkey });
+              kind1.push({
+                id: event.id,
+                pubkey: event.pubkey,
+                created_at: event.created_at,
+              });
             }
           }
         }
