@@ -115,7 +115,7 @@ export default function PremiumFeatureGate({ feature, onClose }) {
             {t("Aecr6Vl")}
           </button>
           <button
-            className="btn btn-normal"
+            className="btn btn-text"
             style={{ width: "100%" }}
             onClick={onClose}
           >

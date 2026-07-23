@@ -345,19 +345,17 @@ export default function UserLevels() {
                           />
                           <div className="fit-container fx-scattered">
                             <p className="gray-c p-medium">{t("AetHYzn")}</p>
-                            <p className="gray-c p-medium">
-                              {t("ABcjNuL", {
-                                date:
-                                  headerStats.xp ===
-                                    headerStats.consumablePoints
-                                    ? "N/A"
-                                    : timeAgo(
+                            {headerStats.xp !==
+                              headerStats.consumablePoints && <p className="gray-c p-medium">
+                                {t("ABcjNuL", {
+                                  date:
+                                    timeAgo(
                                       new Date(
                                         headerStats.consumablePointsLU * 1000
                                       )
                                     ),
-                              })}
-                            </p>
+                                })}
+                              </p>}
                           </div>
                         </div>
                       </div>
@@ -687,19 +685,59 @@ const TierDemo = ({ tier, exit }) => {
     </Overlay>
   );
 };
+const POINTS_USES = [
+  {
+    icon: "star-bold",
+    title: "Redeem a subscription plan",
+    desc: "Spend your points to unlock Basic or Premium subscription plans and their perks.",
+  },
+  {
+    icon: "note-bold",
+    title: "Publish paid notes",
+    desc: "Cover the fee for a paid note with your points instead of paying in SATs.",
+  },
+  {
+    icon: "bolt-bold",
+    title: "Redeem points for SATs",
+    desc: "Request a redeem code once you're eligible and cash it out to your lightning address.",
+  },
+];
+
 const PointsDesc = ({ exit }) => {
   const { t } = useTranslation();
   return (
     <Overlay exit={exit} width={450}>
-      <div
-        className="box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up"
-      >
-        <h3 className="p-centered box-pad-h box-marg-s">{t("AIdLWAb")}</h3>
-        <p className="p-centered gray-c">{t("AIjkhSn")}</p>
-        <p className="p-centered gray-c">{"> " + t("A6fM6gw") + " <"}</p>
-        <p className="p-centered gray-c">{"> " + t("AaZQAOK") + " <"}</p>
-        <p className="p-centered gray-c">{"> " + t("Av0e6zQ") + " <"}</p>
-        <p className="green-c p-centered box-pad-h box-marg-s">{t("A3moqWy")}</p>
+      <div className="box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up">
+        <h3 className="p-centered box-marg-s">{t("AIdLWAb")}</h3>
+        <p className="p-centered gray-c box-marg-s">
+          Your points are consumable and can be spent across the platform. Here's
+          what you can do with them:
+        </p>
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ rowGap: "12px" }}
+        >
+          {POINTS_USES.map((item) => (
+            <div
+              className="fit-container fx-centered fx-start-h sc-s-18 box-pad-h-m box-pad-v-m"
+              style={{
+                backgroundColor: "var(--c1-side)",
+                border: "none",
+                columnGap: "14px",
+              }}
+              key={item.title}
+            >
+              <div className="round-icon" style={{ minWidth: "40px" }}>
+                <Icon name={item.icon} />
+              </div>
+              <div className="fx-centered fx-col fx-start-v" style={{ rowGap: "2px" }}>
+                <p className="p-bold">{item.title}</p>
+                <p className="gray-c p-medium">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="green-c p-centered box-marg-s">{t("A3moqWy")}</p>
         <div className="fx-centered fx-col fit-container">
           <button className="btn btn-normal btn-full" onClick={exit}>
             {t("AGLUuNR")}

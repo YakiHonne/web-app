@@ -894,7 +894,7 @@ main {
 }
 
 .main-container {
-    width: min(100%, 800px);
+    width: min(100%, 850px);
     display: flex;
     justify-content: center;
     align-items: flex-start;

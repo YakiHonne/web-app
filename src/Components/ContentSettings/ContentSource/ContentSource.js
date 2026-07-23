@@ -385,7 +385,7 @@ export default function ContentSource({
             >
               <div
                 className="fit-container fx-scattered"
-                style={{ padding: "10px 12px 6px", position: "sticky", top: 0, zIndex: 1, borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+                style={{ padding: "10px 12px 6px", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.06)", backgroundColor: "var(--white-high-transparent)", backdropFilter: "blur(20px)" }}
               >
                 <p className="gray-c p-medium">{type === 1 ? t("AuUadPD") : t("A84qogb")}</p>
                 {userKeys && (userKeys?.sec || userKeys?.ext || userKeys?.bunker) && (
@@ -398,7 +398,7 @@ export default function ContentSource({
                   </div>
                 )}
               </div>
-              <div className="fx-centered fx-col fx-start-v fit-container" style={{ gap: 0, padding: ".25rem .45rem" }}>
+              <div className="fx-centered fx-col fx-start-v fit-container" style={{ gap: 0, padding: "1rem .45rem .25rem" }}>
                 {optionsList.map((option, index) => (
                   <div key={index} className="fx-centered fx-col fx-start-v fit-container">
                     <h5 className="c1-c box-pad-h-s">{option.group_name}</h5>

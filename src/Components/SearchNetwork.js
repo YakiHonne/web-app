@@ -342,8 +342,8 @@ export default function SearchNetwork({ exit }) {
                           );
                           exit();
                         }}
-                        className="sc-s bg-sp box-pad-h-m box-pad-v-s pointer"
-                        style={{ boxShadow: "none" }}
+                        className="sc-s box-pad-h-m box-pad-v-s pointer"
+                        // style={{ boxShadow: "none" }}
                         key={index}
                       >
                         #{interest}

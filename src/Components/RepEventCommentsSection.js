@@ -24,15 +24,6 @@ export default function RepEventCommentsSection({
   return (
     <div
       className="fit-container fx-centered fx-start-h fx-col"
-      style={{
-        position: "absolute",
-        left: 0,
-        top: 0,
-        zIndex: 1001,
-        height: "100dvh",
-        overflow: "scroll",
-
-      }}
     >
       <div className="main-middle">
         <div

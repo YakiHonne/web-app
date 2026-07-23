@@ -456,15 +456,15 @@ export default function Article({ event, userProfile, naddrData }) {
                     </div>
                     {post.image && (
                       <div className="box-marg-s fit-container">
-                        <div
+                        <img
                           className="sc-s bg-img cover-bg fit-container"
                           style={{
-                            backgroundImage: `url(${post.image})`,
                             backgroundColor: "var(--very-dim-gray)",
                             height: "auto",
-                            aspectRatio: "20/9",
                           }}
-                        ></div>
+                          src={post.image}
+                          alt={post.title}
+                        />
                       </div>
                     )}
                     <div

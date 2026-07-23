@@ -201,13 +201,13 @@ export default function ProfilesPicker({ setSelectedProfile }) {
     el.scrollTop = activeIndex * ROW_HEIGHT;
   }, [open]);
 
-  const confirmSelection = (index) => {
+  const confirmSelection = (index, isOnScroll = false) => {
     const account = allAccounts[index];
     if (!account) return;
     setChosenAccount(account.isMain ? false : account);
     if (!account.isMain && account?.userKeys) setSelectedProfile(account.userKeys);
     if (account.isMain) setSelectedProfile(false);
-    setOpen(false);
+    if (!isOnScroll) setOpen(false);
   };
 
   const handleWheelScroll = () => {
@@ -220,7 +220,7 @@ export default function ProfilesPicker({ setSelectedProfile }) {
         Math.min(Math.round(el.scrollTop / ROW_HEIGHT), allAccounts.length - 1)
       );
       setActiveIndex(idx);
-      confirmSelection(idx);
+      confirmSelection(idx, true);
     }, SETTLE_DELAY);
   };
 
@@ -243,7 +243,7 @@ export default function ProfilesPicker({ setSelectedProfile }) {
 
       {allAccounts.length > 1 && (
         <div className={`pp-arrow ${open ? "pp-arrow-open" : ""}`}>
-          <Icon name="arrow" size={20} />
+          <Icon name="arrow" size={20} transform={open ? "" : "rotate(180deg)"} />
         </div>
       )}
 

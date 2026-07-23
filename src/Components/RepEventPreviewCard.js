@@ -277,26 +277,15 @@ const Reactions = ({ post, author }) => {
       )}
       {showCommentsSection && (
         <Overlay exit={() => setShowCommentsSections(false)}>
-          <div
-            className="vox-pad-h fx-centered fx-col fx-start-v fx-start-h"
-            style={{
-              overflow: "scroll",
-              scrollBehavior: "smooth",
-              height: "100vh",
-              borderRadius: 0,
-              gap: 0,
-            }}
-          >
-            <RepEventCommentsSection
-              id={post.aTag}
-              author={author}
-              eventPubkey={post.pubkey}
-              leaveComment={showCommentsSection.comment}
-              exit={() => setShowCommentsSections(false)}
-              kind={post.kind}
-              event={post}
-            />
-          </div>
+          <RepEventCommentsSection
+            id={post.aTag}
+            author={author}
+            eventPubkey={post.pubkey}
+            leaveComment={showCommentsSection.comment}
+            exit={() => setShowCommentsSections(false)}
+            kind={post.kind}
+            event={post}
+          />
         </Overlay>
       )}
       <div

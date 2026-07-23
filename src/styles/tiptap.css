@@ -15,7 +15,7 @@
   padding: 12px 10px;
   border: 1px solid var(--pale-gray);
   position: sticky;
-  top: 0px;
+  top: var(--wa-toolbar-offset, 48px);
   z-index: 100;
   background: var(--c1-side);
   border-radius: 12px;

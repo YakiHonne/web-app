@@ -347,14 +347,14 @@ const getVideoContent = (video) => {
     image,
     naddr: d
       ? nip19.naddrEncode({
-          pubkey: video.pubkey,
-          kind: video.kind,
-          identifier: d,
-        })
+        pubkey: video.pubkey,
+        kind: video.kind,
+        identifier: d,
+      })
       : nip19.neventEncode({
-          id: video.id,
-          pubkey: video.pubkey,
-        }),
+        id: video.id,
+        pubkey: video.pubkey,
+      }),
     aTag: d ? `${video.kind}:${video.pubkey}:${d}` : video.id,
     fallbacks,
   };
@@ -451,11 +451,11 @@ const formatMinutesToMMSS = (seconds) => {
 
 const levelCount = (nextLevel) => {
   if (nextLevel === 1) return 0;
-  else return levelCount(nextLevel - 1) + (nextLevel - 1) * 50;
+  else return levelCount(nextLevel - 1) + (nextLevel - 1) * 4;
 };
 
 const getCurrentLevel = (points) => {
-  return Math.floor((1 + Math.sqrt(1 + (8 * points) / 50)) / 2);
+  return Math.floor((1 + Math.sqrt(1 + (100 * points) / 50)) / 2);
 };
 
 const validateWidgetValues = (value, kind, type) => {
@@ -684,14 +684,13 @@ const toggleColorScheme = (theme) => {
           }
         }
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 };
 
 const getCAEATooltip = (published_at, created_at) => {
-  return `CA ${new Date(published_at * 1000).toISOString().split("T")[0]}, EA ${
-    new Date(created_at * 1000).toISOString().split("T")[0]
-  }`;
+  return `CA ${new Date(published_at * 1000).toISOString().split("T")[0]}, EA ${new Date(created_at * 1000).toISOString().split("T")[0]
+    }`;
 };
 
 const FileUpload = async ({ file, userKeys, cb, includeImeta = false }) => {

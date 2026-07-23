@@ -16,6 +16,7 @@ import "@/styles/uplift.css";
 import "@/styles/articlePreview.css";
 import "@/styles/tiptap.css";
 import "@/styles/legalDoc.css";
+import "@/styles/pointsSystem.css";
 
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";

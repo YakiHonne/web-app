@@ -389,7 +389,7 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
 
 const lowlight = createLowlight(all);
 
-function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown, onSaveStatusChange, onHasContentChange, onClearRequest, onImetasChange, onExportRequest, onImportRequest, onPdfImportRequest, draftTitle = "" }) {
+function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown, onSaveStatusChange, onHasContentChange, onClearRequest, onImetasChange, onExportRequest, onImportRequest, onPdfImportRequest, draftTitle = "", hideBars = false }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
@@ -727,15 +727,32 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
 
   return (
     <>
-      <div className="fit-container fx-centered fx-col" style={{ gap: "1rem" }}>
-        <div className="fit-container fx-centered" style={{ gap: "8px" }}>
-          <div>
-
-            <SelectTabs
-              selectedTab={showSecondReader ? 0 : showAIPanel ? 1 : -1}
-              tabs={[`✦ ${t("ASLmW7h")}`, `✦ ${t("APshghB")}`]}
-              setSelectedTab={handleAITabClick}
-            />
+      <div
+        className="fit-container fx-centered fx-col"
+        style={{
+          gap: "1rem",
+          "--wa-picker-offset": hideBars ? "48px" : "144px",
+          "--wa-toolbar-offset": hideBars ? "101px" : "197px",
+        }}
+      >
+        <div
+          className="fit-container fx-centered"
+          style={{
+            gap: "8px",
+            position: "sticky",
+            top: "var(--wa-picker-offset, 144px)",
+            zIndex: 120,
+            transition: "top 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          <div className="fit-container fx-centered" style={{ width: "100%", minWidth: 0 }}>
+            <div>
+              <SelectTabs
+                selectedTab={showSecondReader ? 0 : showAIPanel ? 1 : -1}
+                tabs={[`✦ ${t("ASLmW7h")}`, `✦ ${t("APshghB")}`]}
+                setSelectedTab={handleAITabClick}
+              />
+            </div>
           </div>
 
         </div>
@@ -972,6 +989,31 @@ export default function WritingArticle() {
   const [selectedProfile, setSelectedProfile] = useState(false);
   const [useV2Editor, setUseV2Editor] = useState(false);
 
+  // Mirror the homepage content-source bar: hide the top bars on scroll-down and
+  // reveal them on scroll-up. Here only the options bar is hidden — the AI-pickers
+  // row and the editor toolbar stay pinned. A small delta deadzone keeps slow,
+  // jittery scrolling from flickering the state back and forth.
+  const [hideEditorBars, setHideEditorBars] = useState(false);
+  const lastScrollY = useRef(0);
+  useEffect(() => {
+    const DELTA = 8;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const diff = y - lastScrollY.current;
+      if (Math.abs(diff) < DELTA) return;
+      if (y <= 80) {
+        setHideEditorBars(false);
+      } else if (diff > 0) {
+        setHideEditorBars(true);
+      } else {
+        setHideEditorBars(false);
+      }
+      lastScrollY.current = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   useEffect(() => {
     if (!isConnectedToYaki || !isPaidPlan) {
       setUseV2Editor(false);
@@ -1182,10 +1224,16 @@ export default function WritingArticle() {
                               style={{
                                 marginBottom: "1rem",
                                 position: "sticky",
-                                top: "50px",
+                                // Sit below the full navbar (84px) for V2 so it never
+                                // slips under it; keep V1 at its original offset.
+                                top: useV2Editor ? "84px" : "50px",
                                 zIndex: 150,
                                 padding: "8px 0",
                                 backgroundColor: "transparent",
+                                transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease",
+                                ...(useV2Editor && hideEditorBars
+                                  ? { transform: "translateY(-24px)", opacity: 0, pointerEvents: "none" }
+                                  : { transform: "translateY(0)", opacity: 1 }),
                               }}
                             >
                               <div className="fx-centered" style={{ gap: "8px" }}>
@@ -1258,6 +1306,7 @@ export default function WritingArticle() {
                               <ArticleEditorV2
                                 editEvent={post_id ? { content: post_content, tags: [["title", post_title || ""], ["summary", post_desc || ""], ["image", post_thumbnail || ""], ["d", post_d || ""]], created_at: post_published_at } : null}
                                 externalMarkdown={sharedMarkdown}
+                                hideBars={hideEditorBars}
                                 draftTitle={title}
                                 onMarkdownChange={(md) => setSharedMarkdown(md)}
                                 onImetasChange={setV2Imetas}

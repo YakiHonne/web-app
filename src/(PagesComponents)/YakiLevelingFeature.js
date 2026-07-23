@@ -1,829 +1,314 @@
-import React, { useState } from "react";
-import ProgressBar from "../Components/ProgressBar";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
-let screenOne =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-1.png";
-let screenTwo =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-2.png";
-let screenThreeOne =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-3-1.png";
-let screenThreeTwo =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-3-2.png";
-let screenFourOne =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-4-1.png";
-let screenFourTwo =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-4-2.png";
-let screenFive =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-5.png";
-let screenSix =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-6.png";
-let screenSeven =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-7.png";
-let screenSevenTwo =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling/screen-7-2.png";
+
+const IMG_BASE =
+  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/NewFeature/Leveling";
+const screenOne = `${IMG_BASE}/screen-1.png`;
+const screenTwo = `${IMG_BASE}/screen-2.png`;
+const screenThreeOne = `${IMG_BASE}/screen-3-1.png`;
+const screenFourOne = `${IMG_BASE}/screen-4-1.png`;
+const screenFive = `${IMG_BASE}/screen-5.png`;
+const screenSeven = `${IMG_BASE}/screen-7.png`;
+
+const FEATURES = [
+  {
+    id: "intro",
+    title: "Introducing Yaki Points",
+    body: "Where every action brings you closer to amazing rewards. Yaki Points turn the way you use the platform into a rewarding journey.",
+    image: screenOne,
+    portrait: false,
+  },
+  {
+    id: "interaction",
+    title: "Every interaction counts",
+    body: "Earn points by engaging in activities and sharing your expertise. Posts, zaps, reactions and more all move you forward.",
+    image: screenTwo,
+    portrait: false,
+    reversed: true,
+  },
+  {
+    id: "meet-pleb",
+    title: "Meet Pleb, the newest member",
+    body: "From the moment Pleb joined, the rewards started rolling in. See how a fresh account starts stacking points from day one.",
+    image: screenThreeOne,
+    portrait: true,
+  },
+  {
+    id: "get-started",
+    title: "Get started now",
+    body: "Unlock the one-time rewards by setting up your account. A complete profile is the fastest way to build early momentum.",
+    image: screenFourOne,
+    portrait: false,
+    reversed: true,
+  },
+];
+
+const TRACK_POINTS = [
+  {
+    title: "Track your activities",
+    body: "Effortlessly track every action reward and watch your progress soar in real time.",
+  },
+  {
+    title: "Level up and multiply",
+    body: "Unlock new tiers and reap multiplied rewards. Transform consistent efforts into exponential gains.",
+  },
+  {
+    title: "Stay on top of your rewards",
+    body: "Keep an eye on repeated rewards and make sure no opportunity is ever missed.",
+  },
+];
+
+const TIERS = [
+  {
+    id: "bronze",
+    name: "Bronze tier",
+    art: "bronze-tier",
+    range: "Level 1 – 50",
+    multiplier: "1× rewards gains",
+    perks: ["Starter Pack", "Unique Bronze Tier Badge", "Random SATs Lucky Draw"],
+    volume: false,
+  },
+  {
+    id: "silver",
+    name: "Silver tier",
+    art: "silver-tier",
+    range: "Level 51 – 100",
+    multiplier: "2× rewards gains",
+    perks: ["Unique Silver Tier Badge", "x2 chance of random SATs Lucky Draw"],
+    volume: 2,
+  },
+  {
+    id: "gold",
+    name: "Gold tier",
+    art: "gold-tier",
+    range: "Level 101 – 500",
+    multiplier: "3× rewards gains",
+    perks: [
+      "Unique Gold Tier Badge",
+      "x3 chance of random SATs Lucky Draw",
+      "Guest on The YakiHonne Podcast",
+      "High rate of content awareness",
+    ],
+    volume: 3,
+  },
+  {
+    id: "platinum",
+    name: "Platinum tier",
+    art: "platinum-tier",
+    range: "Level 501 & above",
+    multiplier: "3× rewards gains",
+    perks: [
+      "Unique Platinum Tier Badge",
+      "x4 chance of random SATs Lucky Draw",
+      "Exclusive events invitations",
+      "Part of the YakiHonne Grants Program",
+    ],
+    volume: 4,
+  },
+];
 
 export default function YakiLevelingFeature() {
-  const [showRewards, setShowRewards] = useState(false);
+  const [openTier, setOpenTier] = useState("bronze");
+  const [mounted, setMounted] = useState(false);
 
-  const LevelingSystem = [
-    <ScreenOne />,
-    <ScreenTwo />,
-    <ScreenThree />,
-    <ScreenFour />,
-    <ScreenSeven />,
-    <ScreenFive />,
-  ];
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined" && window.location.hash) {
+      const id = window.location.hash.replace("#", "");
+      if (TIERS.some((tier) => tier.id === id)) {
+        setOpenTier(id);
+        setTimeout(() => {
+          document
+            .getElementById(id)
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
+      }
+    }
+  }, []);
+
+  const goToApp = () => {
+    localStorage?.setItem("feature_showcase", Date.now());
+    window.location.href = "/yaki-points";
+  };
 
   return (
-    <div
-      className="fx-centered box-pad-h box-pad-v fx-start-v"
-      style={{ backgroundColor: "black", minHeight: "100vh" }}
-    >
-      <div style={{ width: "min(100%, 1000px)", paddingBottom: "3rem" }}>
-        <div
-          className="fx-centered fx-col fx-start-v fx-start-h"
-          style={{ rowGap: "20px" }}
-        >
-          <div
-            className="box-pad-h-s box-pad-v-s sc-s-18 fit-container fx-centered"
-            style={{
-              backgroundColor: "#202020",
-              //   position:  "sticky",
-              border: "none",
-              top: "1rem",
-              zIndex: 100,
-            }}
-          >
-            <Link href={"/"} className="fx-centered">
-              <div
-                className="yakihonne-logo"
-                style={{ filter: "brightness(0) invert()", height: "64px" }}
-              ></div>
-            </Link>
-          </div>
-          <div
-            className="fx-centered fx-centered fx-col"
-            style={{
-              width: "min(100%, 1000px)",
-              rowGap: "24px",
-            }}
-          >
-            {LevelingSystem.map((item, index) => {
-              return (
-                <div className="fit-container fit-height" key={index}>
-                  {item}
-                </div>
-              );
-            })}
-            <div
-              className="fit-container fit-height fx-centered box-pad-h fx-wrap sc-s fx-col"
-              style={{
-                position: "relative",
-                overflow: "hidden",
-                padding: "2rem 1rem",
-                backgroundColor: "#252429",
-                border: "none",
-              }}
-              id="bronze"
+    <div className="points-page">
+      <div className="points-topbar">
+        <div className="points-topbar-inner">
+          <Link href="/" className="fx-centered">
+            <span
+              className="points-brand-mark-wrap"
+              style={{ opacity: mounted ? 1 : 0 }}
             >
-              <div className="fit-container fx-col fx-centered fx-start-v">
-                <div className="fx-centerd fx-col fit-container">
-                  <div
-                    className="fx-centered fit-container pointer"
-                    style={{ columnGap: "16px" }}
-                    onClick={() =>
-                      showRewards === "bronze"
-                        ? setShowRewards(false)
-                        : setShowRewards("bronze")
-                    }
-                  >
-                    <div
-                      className="bronze-tier"
-                      style={{ minWidth: "90px", aspectRatio: "1/1" }}
-                    ></div>
-                    <div className="fx-centered fx-col fx-start-v fit-container">
-                      <h4 style={{ color: "white" }}>Bronze tier</h4>
-                      <div className="fx-centered fx-start-h">
-                        <p className="gray-c ">
-                          Starter Pack{" "}
-                          <span className="p-small gray-c">&#9679;</span>
-                          {"  "}
-                          1x rewards gains{"  "}
-                          <span className="p-small gray-c">&#9679;</span> Unique
-                          Bronze Tier Badge{" "}
-                          <span className="p-small gray-c">&#9679;</span> Random
-                          SATs Lucky Draw{"  "}
-                        </p>
-                      </div>
-                      <div style={{ width: "25%" }} className="fx-centered">
-                        <ProgressBar total={100} current={100} full={true} />
-                        <div style={{ minWidth: "max-content" }}>
-                          <p className="orange-c p-medium">(1 - 50) level</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="round-icon"
-                      style={{
-                        rotate: showRewards === "bronze" ? "-180deg" : "0deg",
-                        borderColor: "#343434",
-                      }}
-                    >
-                      <Icon name="arrow" />
-                    </div>
-                  </div>
-                  <div
-                    className="fit-container"
-                    style={{
-                      maxHeight: showRewards === "bronze" ? "3000px" : "0",
-                      overflow: "hidden",
-                      transition: ".5s ease-in-out",
-                    }}
-                  >
-                    {" "}
-                    <Rewards />
-                  </div>
-                  {/* {showRewards === "bronze" && <Rewards />} */}
-                </div>
-                <hr
-                  style={{ margin: "1rem auto", borderColor: "#343434" }}
-                  id="silver"
-                />
-                <div className="fx-centerd fx-col fit-container">
-                  <div
-                    className="fx-centered fit-container pointer"
-                    style={{ columnGap: "16px" }}
-                    onClick={() =>
-                      showRewards === "silver"
-                        ? setShowRewards(false)
-                        : setShowRewards("silver")
-                    }
-                  >
-                    <div
-                      className="silver-tier"
-                      style={{ minWidth: "90px", aspectRatio: "1/1" }}
-                    ></div>
-                    <div className="fx-centered fx-col fx-start-v fit-container">
-                      <h4 style={{ color: "white" }}>Silver tier</h4>
-                      <div className="fx-centered fx-start-h">
-                        <p className="gray-c ">
-                          2x rewards gains{" "}
-                          <span className="p-small gray-c">&#9679;</span>
-                          {"  "}
-                          Unique Silver Tier Badge{"  "}
-                          <span className="p-small gray-c">&#9679;</span>{" "}
-                          Scheduled SATs Lucky Draw
-                        </p>
-                      </div>
-                      <div style={{ width: "50%" }} className="fx-centered">
-                        <ProgressBar total={100} current={100} full={true} />
-                        <div style={{ minWidth: "max-content" }}>
-                          <p className="orange-c p-medium">(51 - 100) level</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="round-icon"
-                      style={{
-                        rotate: showRewards === "silver" ? "-180deg" : "0deg",
-                        borderColor: "#343434",
-                      }}
-                    >
-                      <Icon name="arrow" />
-                    </div>
-                  </div>
-                  <div
-                    className="fit-container"
-                    style={{
-                      maxHeight: showRewards === "silver" ? "3000px" : "0",
-                      overflow: "hidden",
-                      transition: ".5s ease-in-out",
-                    }}
-                  >
-                    <Rewards volume={2} />
-                  </div>
-                  {/* {showRewards === "silver" && <Rewards volume={2} />} */}
-                </div>
-                <hr
-                  style={{ margin: "1rem auto", borderColor: "#343434" }}
-                  id="gold"
-                />
-                <div className="fx-centerd fx-col fit-container">
-                  <div
-                    className="fx-centered fit-container pointer"
-                    style={{ columnGap: "16px" }}
-                    onClick={() =>
-                      showRewards === "gold"
-                        ? setShowRewards(false)
-                        : setShowRewards("gold")
-                    }
-                  >
-                    <div
-                      className="gold-tier"
-                      style={{ minWidth: "90px", aspectRatio: "1/1" }}
-                    ></div>
-                    <div className="fx-centered fx-col fx-start-v fit-container">
-                      <h4 style={{ color: "white" }}>Gold tier</h4>
-                      <div className="fx-centered fx-start-h">
-                        <p className="gray-c ">
-                          3x rewards gains{" "}
-                          <span className="p-small gray-c">&#9679;</span>
-                          {"  "}
-                          Unique Gold Tier Badge{"  "}
-                          <span className="p-small gray-c">&#9679;</span>{" "}
-                          Scheduled SATs Draw{" "}
-                          <span className="p-small gray-c">&#9679;</span> Become
-                          a Guest on The YakiHonne Podcast{"  "}
-                          <span className="p-small gray-c">&#9679;</span> High
-                          rate of content awareness
-                        </p>
-                      </div>
-                      <div style={{ width: "75%" }} className="fx-centered">
-                        <ProgressBar total={100} current={100} full={true} />
-                        <div style={{ minWidth: "max-content" }}>
-                          <p className="orange-c p-medium">(101 - 500) level</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="round-icon"
-                      style={{
-                        rotate: showRewards === "gold" ? "-180deg" : "0deg",
-                        borderColor: "#343434",
-                      }}
-                    >
-                      <Icon name="arrow" />
-                    </div>
-                  </div>
-                  <div
-                    className="fit-container"
-                    style={{
-                      maxHeight: showRewards === "gold" ? "3000px" : "0",
-                      overflow: "hidden",
-                      transition: ".5s ease-in-out",
-                    }}
-                  >
-                    {" "}
-                    <Rewards volume={3} />
-                  </div>
-                  {/* {showRewards === "gold" && <Rewards volume={3} />} */}
-                </div>
-                <hr
-                  style={{ margin: "1rem auto", borderColor: "#343434" }}
-                  id="platinum"
-                />
-                <div className="fx-centerd fx-col fit-container">
-                  <div
-                    className="fx-centered fit-container pointer"
-                    style={{ columnGap: "16px" }}
-                    onClick={() =>
-                      showRewards === "platinum"
-                        ? setShowRewards(false)
-                        : setShowRewards("platinum")
-                    }
-                  >
-                    <div
-                      className="platinum-tier"
-                      style={{ minWidth: "90px", aspectRatio: "1/1" }}
-                    ></div>
-                    <div className="fx-centered fx-col fx-start-v fit-container">
-                      <h4 style={{ color: "white" }}>Platinum tier</h4>
-                      <div className="fx-centered fx-start-h">
-                        <p className="gray-c ">
-                          3x rewards gains{" "}
-                          <span className="p-small gray-c">&#9679;</span>
-                          {"  "}
-                          Unique Platinum Tier Badge{"  "}
-                          <span className="p-small gray-c">&#9679;</span>{" "}
-                          Scheduled SATs Draw{" "}
-                          <span className="p-small gray-c">&#9679;</span>{" "}
-                          Exlusive Events invitations{"  "}
-                          <span className="p-small gray-c">&#9679;</span> Become
-                          a Part of YakiHonne Grants Program
-                        </p>
-                      </div>
-                      <div style={{ width: "100%" }} className="fx-centered">
-                        <ProgressBar total={100} current={100} full={true} />
-                        <div style={{ minWidth: "max-content" }}>
-                          <p className="orange-c p-medium">
-                            (501 and above) level
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="round-icon"
-                      style={{
-                        rotate: showRewards === "platinum" ? "-180deg" : "0deg",
-                        borderColor: "#343434",
-                      }}
-                    >
-                      <Icon name="arrow" />
-                    </div>
-                  </div>
-                  <div
-                    className="fit-container"
-                    style={{
-                      maxHeight: showRewards === "platinum" ? "3000px" : "0",
-                      overflow: "hidden",
-                      transition: ".5s ease-in-out",
-                    }}
-                  >
-                    <Rewards volume={4} />
-                  </div>
-                  {/* {showRewards === "platinum" && <Rewards volume={4}/>} */}
-                </div>
+              <Icon
+                name="yaki-logomark"
+                className="points-brand-mark"
+                width={40}
+                height={40}
+                isColored
+              />
+            </span>
+          </Link>
+          <button
+            className="btn btn-normal btn-small points-topbar-cta"
+            onClick={goToApp}
+          >
+            Open Yaki Points
+          </button>
+        </div>
+      </div>
+
+      <div className="points-wrap">
+        <header className="points-header">
+          <span className="points-eyebrow">Rewards</span>
+          <h1 className="points-title">The Yaki Points system</h1>
+          <p className="points-lead">
+            Track your progress, level up through the tiers, and turn everyday
+            engagement into real rewards.
+          </p>
+        </header>
+
+        {FEATURES.map((feature) => (
+          <section
+            key={feature.id}
+            className={`points-feature${feature.reversed ? " is-reversed" : ""}`}
+          >
+            <div className="points-feature-media">
+              <div
+                className={`points-frame${feature.portrait ? " is-portrait" : ""}`}
+              >
+                <img src={feature.image} alt={feature.title} loading="lazy" />
               </div>
             </div>
-            <ScreenSix />
+            <div className="points-feature-copy">
+              <h2>{feature.title}</h2>
+              <p>{feature.body}</p>
+            </div>
+          </section>
+        ))}
+
+        <section className="points-feature">
+          <div className="points-feature-media">
+            <div className="points-frame is-portrait">
+              <img src={screenSeven} alt="Track your activities" loading="lazy" />
+            </div>
           </div>
+          <div className="points-feature-copy">
+            <h2>Achieve with Yaki</h2>
+            <p>The ultimate leveling and rewards system.</p>
+            <ul className="points-feature-points">
+              {TRACK_POINTS.map((item) => (
+                <li key={item.title}>
+                  <strong>{item.title}</strong>
+                  <span>{item.body}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="points-feature is-reversed">
+          <div className="points-feature-media">
+            <div className="points-frame is-portrait">
+              <img
+                src={screenFive}
+                alt="Unlock tiers, multiply rewards"
+                loading="lazy"
+              />
+            </div>
+          </div>
+          <div className="points-feature-copy">
+            <h2>Unlock tiers, multiply rewards</h2>
+            <p>
+              Level up through the tiers and unlock multiplied rewards with every
+              milestone you achieve.
+            </p>
+          </div>
+        </section>
+
+        <section className="points-tiers">
+          <div className="points-tiers-head">
+            <h2>Tiers &amp; rewards</h2>
+            <p>Climb the ranks to multiply your gains and unlock exclusive perks.</p>
+          </div>
+
+          {TIERS.map((tier) => {
+            const isOpen = openTier === tier.id;
+            return (
+              <div
+                key={tier.id}
+                id={tier.id}
+                className={`points-tier${isOpen ? " is-open" : ""}`}
+                style={{ scrollMarginTop: "5rem" }}
+              >
+                <button
+                  className="points-tier-btn"
+                  onClick={() => setOpenTier(isOpen ? "" : tier.id)}
+                  aria-expanded={isOpen}
+                >
+                  <div className={`points-tier-art ${tier.art}`}></div>
+                  <div className="points-tier-info">
+                    <div className="points-tier-name-row">
+                      <p className="points-tier-name">{tier.name}</p>
+                      <span className="points-tier-range">{tier.range}</span>
+                    </div>
+                    <p className="points-tier-multiplier">{tier.multiplier}</p>
+                  </div>
+                  <span className="points-tier-chevron">
+                    <Icon name="arrow" />
+                  </span>
+                </button>
+
+                <div className="points-tier-panel">
+                  <div className="points-perks">
+                    {tier.perks.map((perk) => (
+                      <span className="points-perk" key={perk}>
+                        {perk}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="points-tier-panel-inner">
+                    <p className="points-rewards-label">Reward actions</p>
+                    <RewardsGrid volume={tier.volume} />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </section>
+
+        <div className="points-cta">
+          <h2>Start racking up rewards</h2>
+          <p>
+            Jump into Yaki Points and see how your everyday activity turns into
+            levels, tiers, and real rewards.
+          </p>
+          <button className="btn btn-normal" onClick={goToApp}>
+            Take me there
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-const ScreenOne = () => {
+const RewardsGrid = ({ volume = false }) => {
   return (
-    <div
-      className="fit-container fit-height fx-centered box-pad-h fx-wrap box-pad-v sc-s"
-      style={{
-        position: "relative",
-        backgroundColor: "#252429",
-        border: "none",
-      }}
-    >
-      <div
-        className="fx fx-centered fx-col fx-start-v box-pad-h"
-        style={{ flex: "1 1 350px" }}
-      >
-        <h3 style={{ color: "white" }}>Introducing Yaki Points</h3>
-        <p className="gray-c">
-          Where every action brings you closer to amazing rewards !
-        </p>
-      </div>
-      <div
-        className="fx-1-5 fx-centered box-pad-h-m "
-        style={{ flex: "1.5 1 350px" }}
-      >
-        <div
-          className="fit-container sc-s box-pad-v"
-          style={{ background: "#EEBB6B", border: "none" }}
-        >
-          <img src={screenOne} className="fit-container" />
-        </div>
-      </div>
-    </div>
-  );
-};
-const ScreenTwo = () => {
-  return (
-    <div
-      className="fit-container fit-height fx-centered box-pad-h fx-wrap-r sc-s box-pad-v"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        backgroundColor: "#252429",
-        border: "none",
-      }}
-    >
-      <div
-        className="fx-1-5 fx-centered box-pad-h-m "
-        style={{ flex: "1.5 1 350px" }}
-      >
-        <div
-          className="fit-container sc-s box-pad-v"
-          style={{ background: "var(--c1)", border: "none" }}
-        >
-          <img src={screenTwo} className="fit-container" />
-        </div>
-      </div>
-      <div
-        className="fx fx-centered fx-col fx-start-v box-pad-h"
-        style={{ flex: "1 1 350px" }}
-      >
-        <h3 style={{ color: "white" }}>Every Interaction counts</h3>
-        <p className="gray-c">
-          Earn points by engaging in activities, sharing your expertise.
-        </p>
-      </div>
-    </div>
-  );
-};
-const ScreenThree = () => {
-  return (
-    <div
-      className="fit-container fit-height fx-centered box-pad-h fx-wrap-r sc-s"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        height: "45vh",
-        backgroundColor: "#252429",
-        border: "none",
-      }}
-    >
-      <div
-        className="fx fx-centered box-pad-h-m box-pad-v fit-height mb-hide-800"
-        style={{ flex: "1 1 350px" }}
-      >
-        <div
-          className="sc-s box-pad-v box-pad-h fx-centered "
-          style={{ background: "#EEBB6B", height: "90%", border: "none" }}
-        >
-          <img
-            src={screenThreeOne}
-            style={{
-              aspectRatio: "9/16",
-              objectFit: "contain",
-              height: "100%",
-            }}
-          />
-        </div>
-      </div>
-      <div
-        className="fx fx-centered box-pad-h-m  home-fn-mobile"
-        style={{ flex: "1 1 350px" }}
-      >
-        <div
-          className="sc-s box-pad-v box-pad-h fx-centered fit-container"
-          style={{ background: "#EEBB6B" }}
-        >
-          <img
-            src={screenThreeOne}
-            style={{ aspectRatio: "15/9", objectFit: "contain", width: "100%" }}
-          />
-        </div>
-      </div>
-      <div
-        className="fx-1-5 fx-centered fx-col fx-start-v box-pad-h"
-        style={{ position: "relative", flex: "1.5 1 350px" }}
-      >
-        <div className="fx-centered fx-col fx-start-v box-pad-h">
-          <h3 style={{ color: "white" }}>Meet Pleb, the newest member!</h3>
-          <p className="gray-c">
-            From the moment Pleb joined, the rewards started rolling in.
-          </p>
-          <div className="box-marg-full mb-hide-800"></div>
-        </div>
-        <div
-          className="mb-hide-800"
-          style={{
-            position: "absolute",
-            right: "0",
-            top: "60%",
-            transform: "translateX(20%)",
-          }}
-        >
-          <div className="fit-container" style={{ position: "relative" }}>
-            <div
-              className="sc-s"
-              style={{
-                zIndex: "-1",
-                background: "var(--c1)",
-                height: "80%",
-                position: "absolute",
-                width: "85%",
-                left: "50%",
-                transform: "translateX(-50%)",
-                bottom: 0,
-                border: "none",
-              }}
-            ></div>
-            <img src={screenThreeTwo} className="fit-container" />
+    <div className="points-rewards-list">
+      {levels.map((reward, index) => (
+        <div className="points-reward-row" key={index}>
+          <span className="points-reward-icon">
+            <Icon name={reward.icon} width={22} height={22} />
+          </span>
+          <p className="points-reward-name">{reward.display_name}</p>
+          <div className="points-reward-value">
+            <b>{reward.points[0]}</b>
+            <span className="points-reward-xp">xp</span>
+            {volume && <span className="points-reward-mult">×{volume}</span>}
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
-const ScreenFour = () => {
-  return (
-    <div
-      className="fit-container fit-height fx-centered box-pad-h fx-wrap-r sc-s"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        height: "45vh",
-        backgroundColor: "#252429",
-        border: "none",
-      }}
-    >
-      <div
-        className="fx-1-5 fx-centered box-pad-h-m "
-        style={{ flex: "1 1 350px" }}
-      >
-        <div className="fit-container" style={{ position: "relative" }}>
-          <div
-            className="sc-s"
-            style={{
-              zIndex: "-1",
-              background: "var(--c1)",
-              height: "80%",
-              position: "absolute",
-              width: "85%",
-              left: "50%",
-              transform: "translateX(-50%)",
-              bottom: 0,
-            }}
-          ></div>
-          <img src={screenFourOne} className="fit-container" />
-        </div>
-      </div>
-      <div
-        className="fx fx-centered fx-col fx-start-v box-pad-h"
-        style={{ position: "relative", flex: "1 1 350px" }}
-      >
-        <div className="fx-centered fx-col fx-start-v box-pad-h">
-          <h3 style={{ color: "white" }}>Get Started Now</h3>
-          <p className="gray-c">
-            Unlock the one-time rewards by setting up your account.
-          </p>
-          <div className="box-marg-full mb-hide-800"></div>
-        </div>
-        <div
-          className="mb-hide-800"
-          style={{
-            position: "absolute",
-            right: "0",
-            top: "60%",
-            transform: "translateX(-20%)",
-          }}
-        >
-          <div
-            className="sc-s box-pad-v box-pad-h "
-            style={{
-              background: "#EEBB6B",
-              height: "90%",
-              width: "200px",
-              border: "none",
-            }}
-          >
-            <img src={screenFourTwo} className="fit-container" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-const ScreenFive = () => {
-  return (
-    <div
-      className="fit-container fit-height fx-centered box-pad-h fx-wrap sc-s"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        padding: "2rem 1rem",
-        height: "50vh",
-        backgroundColor: "#252429",
-        border: "none",
-      }}
-    >
-      <div
-        className="fx fx-centered fx-col fx-start-v box-pad-h"
-        style={{ flex: "1 1 350px" }}
-      >
-        <h3 style={{ color: "white" }}>Unlock Tiers, Multiply Rewards</h3>
-        <p className="gray-c">
-          Level up through the tiers and unlock multiplied rewards with every
-          milestone you achieve.
-        </p>
-      </div>
-      <div
-        className="fx fx-centered box-pad-h-m fit-height  mb-hide-800"
-        style={{ flex: "1 1 350px" }}
-      >
-        <div
-          className="fit-container fx-centered sc-s box-pad-v"
-          style={{ background: "var(--c1)", height: "100%", border: "none" }}
-        >
-          <img
-            src={screenFive}
-            className="fit-container"
-            style={{
-              height: "100%",
-              aspectRatio: "9/16",
-              objectFit: "contain",
-            }}
-          />
-        </div>
-      </div>
-      <div
-        className="fx fx-centered box-pad-h-m home-fn-mobile"
-        style={{ flex: "1 1 350px" }}
-      >
-        <div
-          className="fit-container fx-centered sc-s box-pad-v "
-          style={{ background: "var(--c1)", border: "none" }}
-        >
-          <img
-            src={screenFive}
-            className="fit-container"
-            style={{ aspectRatio: "15/9", objectFit: "contain", width: "100%" }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ScreenSeven = () => {
-  return (
-    <div
-      className="fit-container fit-height fx-centered box-pad-h fx-wrap sc-s"
-      style={{
-        position: "relative",
-        overflow: "hidden",
-        height: "55vh",
-        backgroundColor: "#252429",
-        border: "none",
-      }}
-    >
-      <div
-        className="fx fx-centered fx-col fx-start-v box-pad-h"
-        style={{ flex: "1 1 300px" }}
-      >
-        <h3 style={{ color: "white" }}>Achieve with Yaki</h3>
-        <p className="gray-c">The Ultimate Leveling and Rewards System!</p>
-      </div>
-      <div
-        className="fx fx-centered  fx-start-v box-pad-h home-fn-mobile"
-        style={{ flex: "1 1 400px", columnGap: 0 }}
-      >
-        <div
-          className="fx-centered fx-col fx-start-v box-pad-h-s"
-          style={{ rowGap: "2px" }}
-        >
-          <p style={{ color: "white" }}>Track Your Activities</p>
-          <p className="gray-c p-medium">
-            Pleb is on a roll, effortlessly tracking every action reward and
-            watching his progress soar!
-          </p>
-        </div>
-        <div
-          className="fx-centered fx-col fx-start-v box-pad-h-s"
-          style={{ rowGap: "2px" }}
-        >
-          <p style={{ color: "white" }}>Level Up and Multiply</p>
-          <p className="gray-c p-medium">
-            Pleb is on a mission, leveling up to unlock new tiers and reap
-            multiplied rewards. Transform consistent efforts into exponential
-            gains.
-          </p>
-        </div>
-        <div
-          className="fx-centered fx-col fx-start-v box-pad-h-s"
-          style={{ rowGap: "2px" }}
-        >
-          <p style={{ color: "white" }}>Stay on Top of Your Rewards</p>
-          <p className="gray-c p-medium">
-            Pleb is constantly on the lookout, tracking repeated rewards and
-            ensuring no opportunity is missed.
-          </p>
-        </div>
-      </div>
-      <div
-        className="fx fx-centered box-pad-h-m box-pad-v fit-height mb-hide-800"
-        style={{ flex: "1 1 300px" }}
-      >
-        <div
-          className="fit-container fx-centered sc-s box-pad-v"
-          style={{ background: "#EEBB6B", height: "100%", border: "none" }}
-        >
-          <img
-            src={screenSeven}
-            className="fit-container"
-            style={{
-              height: "100%",
-              aspectRatio: "9/16",
-              objectFit: "contain",
-            }}
-          />
-        </div>
-      </div>
-      <div
-        className="fx fx-centered box-pad-h-m home-fn-mobile"
-        style={{ flex: "1 1 300px" }}
-      >
-        <div
-          className="fit-container fx-centered sc-s box-pad-v"
-          style={{ background: "#EEBB6B", border: "none" }}
-        >
-          <img
-            src={screenSevenTwo}
-            className="fit-container"
-            style={{ aspectRatio: "23/9", objectFit: "contain", width: "100%" }}
-          />
-        </div>
-      </div>
-      <div
-        className="fx fx-centered fx-col fx-start-v box-pad-h mb-hide-800"
-        style={{ rowGap: "32px", flex: "1 1 300px" }}
-      >
-        <div
-          className="fx-centered fx-col fx-start-v box-pad-h"
-          style={{ rowGap: "2px" }}
-        >
-          <p className="p-big p-bold" style={{ color: "white" }}>
-            Track Your Activities
-          </p>
-          <p className="gray-c p-medium">
-            Pleb is on a roll, effortlessly tracking every action reward and
-            watching his progress soar!
-          </p>
-        </div>
-        <div
-          className="fx-centered fx-col fx-start-v box-pad-h"
-          style={{ rowGap: "2px" }}
-        >
-          <p className="p-big p-bold" style={{ color: "white" }}>
-            Level Up and Multiply
-          </p>
-          <p className="gray-c p-medium">
-            Pleb is on a mission, leveling up to unlock new tiers and reap
-            multiplied rewards. Transform consistent efforts into exponential
-            gains.
-          </p>
-        </div>
-        <div
-          className="fx-centered fx-col fx-start-v box-pad-h"
-          style={{ rowGap: "2px" }}
-        >
-          <p className="p-big p-bold" style={{ color: "white" }}>
-            Stay on Top of Your Rewards
-          </p>
-          <p className="gray-c p-medium">
-            Pleb is constantly on the lookout, tracking repeated rewards and
-            ensuring no opportunity is missed.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ScreenSix = () => {
-  const skipShowcase = () => {
-    localStorage?.setItem("feature_showcase", Date.now());
-    window.location.href = "/yaki-points";
-  };
-  return (
-    <div
-      className="fit-container fit-height fx-centered box-pad-h bg-img cover-bg sc-s"
-      style={{
-        position: "relative",
-        backgroundImage: `url(${screenSix})`,
-        height: "50vh",
-        backgroundColor: "#252429",
-        border: "none",
-      }}
-    >
-      <div className="fx fx-centered fx-col fx-start-v box-pad-h">
-        <h3 style={{ color: "white" }}>Start racking up rewards! </h3>
-        <button className="btn btn-normal" onClick={skipShowcase}>
-          Take me there!
-        </button>
-      </div>
-      <div className="fx fx-centered box-pad-h-m box-pad-v fit-height"></div>
-    </div>
-  );
-};
-
-const Rewards = ({ volume = false }) => {
-  return (
-    <div className="fit-container fx-centered fx-wrap fx-stretch box-pad-v">
-      {levels.map((reward, index) => {
-        return (
-          <div
-            key={index}
-            className="box-pad-h box-pad-v-m sc-s fx-centered fx-col option"
-            style={{
-              width: "24%",
-              backgroundColor: "#252429",
-              borderColor: "#343434",
-            }}
-          >
-            <div
-              className={reward.icon}
-              style={{
-                minWidth: "32px",
-                minHeight: "32px",
-                filter: "invert()",
-              }}
-            ></div>
-            <div className="fx-centered " style={{ filter: "invert()" }}>
-              <h4>{reward.points[0]}</h4>
-              <p className="gray-c">xp</p>
-              {volume && (
-                <p className="p-big orange-c" style={{ filter: "invert()" }}>
-                  x{volume}
-                </p>
-              )}
-            </div>
-            <p className="p-centered gray-c p-medium">{reward.display_name}</p>
-          </div>
-        );
-      })}
+      ))}
     </div>
   );
 };
@@ -834,153 +319,153 @@ const levels = [
     count: 1,
     cooldown: 0,
     display_name: "Account creation",
-    icon: "user-24",
+    icon: "user-bold",
   },
   {
     points: [5],
     count: 5,
     cooldown: 0,
     display_name: "Setting a username",
-    icon: "user-24",
+    icon: "user-bold",
   },
   {
     points: [5],
     count: 5,
     cooldown: 0,
     display_name: "Setting a bio",
-    icon: "user-24",
+    icon: "user-bold",
   },
   {
     points: [5],
     count: 5,
     cooldown: 0,
     display_name: "Setting a profile picture",
-    icon: "image-24",
+    icon: "media-bold",
   },
   {
     points: [5],
     count: 5,
     cooldown: 0,
     display_name: "Setting a profile cover",
-    icon: "image-24",
+    icon: "media-bold",
   },
   {
     points: [5],
     count: 3,
     cooldown: 0,
     display_name: "Using a nip05",
-    icon: "nip05-24",
+    icon: "key-icon",
   },
   {
     points: [15],
     count: 3,
     cooldown: 0,
     display_name: "Using a lightning address",
-    icon: "lightning",
+    icon: "bolt-bold",
   },
   {
     points: [10],
     count: 1,
     cooldown: 0,
     display_name: "Setting favorite relays",
-    icon: "server-24",
+    icon: "orbit-bold",
   },
   {
     points: [10],
     count: 1,
     cooldown: 0,
     display_name: "Choosing favorite topics",
-    icon: "comment-24",
+    icon: "discover-bold",
   },
   {
     points: [30],
     count: 1,
     cooldown: 0,
     display_name: "Following Yakihonne official account",
-    icon: "user-24",
+    icon: "user-followed",
   },
   {
     points: [15],
     count: 0,
     cooldown: 0,
     display_name: "Posting flash news",
-    icon: "news-24",
+    icon: "news-bold",
   },
   {
     points: [2],
     count: 0,
     cooldown: 3600,
     display_name: "Uncensored notes writing",
-    icon: "note-24",
+    icon: "note-bold",
   },
   {
     points: [1],
     count: 0,
     cooldown: 3600,
     display_name: "Uncensored notes rating",
-    icon: "like-24",
+    icon: "like-bold",
   },
   {
     points: [2],
     count: 0,
     cooldown: 7200,
     display_name: "Posting curations",
-    icon: "curation-24",
+    icon: "curation-bold",
   },
   {
     points: [4],
     count: 0,
     cooldown: 3600,
     display_name: "Posting articles",
-    icon: "posts-24",
+    icon: "posts-bold",
   },
   {
     points: [2],
     count: 0,
     cooldown: 3600,
     display_name: "Article drafts",
-    icon: "posts-24",
+    icon: "note-2-bold",
   },
   {
     points: [3],
     count: 0,
     cooldown: 7200,
     display_name: "Posting videos",
-    icon: "play-24",
+    icon: "play-bold",
   },
   {
     points: [2],
     count: 0,
     cooldown: 0,
     display_name: "Bookmarking",
-    icon: "bookmark-24",
+    icon: "bookmark-b",
   },
   {
     points: [1, 5, 10, 20],
     count: 0,
     cooldown: 0,
     display_name: "Zapping",
-    icon: "bolt-24",
+    icon: "bolt-bold",
   },
   {
     points: [2],
     count: 0,
     cooldown: 0,
     display_name: "Reactions",
-    icon: "like-24",
+    icon: "heart-bold",
   },
   {
     points: [5, 10],
     count: 0,
     cooldown: 3600,
     display_name: "Sending messages",
-    icon: "env-24",
+    icon: "env-bold",
   },
   {
     points: [2],
     count: 0,
     cooldown: 900,
     display_name: "Posting comments",
-    icon: "comment-24",
+    icon: "comment-icon",
   },
 ];

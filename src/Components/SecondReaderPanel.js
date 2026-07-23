@@ -379,7 +379,6 @@ export default function SecondReaderPanel({
   const [isAnalyzingParagraph, setIsAnalyzingParagraph] = useState(false);
   const reactionsCache = useRef({});
   const baseMarkdownRef = useRef(null);
-  const invalidateTimerRef = useRef(null);
 
   useEffect(() => {
     if (!activePersona) return;
@@ -399,36 +398,19 @@ export default function SecondReaderPanel({
       const md = getMarkdown();
       if (!md.trim()) return;
 
-      if (baseMarkdownRef.current === null) {
-        baseMarkdownRef.current = md;
-        return;
-      }
-
+      // Track the latest markdown so stored reactions hash against current
+      // content. We intentionally do NOT wipe reactions / reset to the picker
+      // while the user keeps typing — existing thoughts are kept as history and
+      // per-paragraph re-analysis (below) refreshes them incrementally.
       if (suppressInvalidationRef?.current) {
         suppressInvalidationRef.current = false;
-        baseMarkdownRef.current = md;
-        clearTimeout(invalidateTimerRef.current);
-        return;
       }
-
-      if (md !== baseMarkdownRef.current) {
-        clearTimeout(invalidateTimerRef.current);
-        invalidateTimerRef.current = setTimeout(() => {
-          baseMarkdownRef.current = md;
-          reactionsCache.current = {};
-          PERSONAS.forEach((p) => deleteStoredReactions(p.id));
-          setReactions([]);
-          setView("picker");
-        }, 3000);
-      } else {
-        clearTimeout(invalidateTimerRef.current);
-      }
+      baseMarkdownRef.current = md;
     };
 
     editor.on("update", handleUpdate);
     return () => {
       editor.off("update", handleUpdate);
-      clearTimeout(invalidateTimerRef.current);
     };
   }, [editor, getMarkdown, suppressInvalidationRef]);
 

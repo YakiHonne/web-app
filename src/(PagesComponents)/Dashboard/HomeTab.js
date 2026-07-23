@@ -106,7 +106,7 @@ export default function HomeTab({
                 <div
                   style={{
                     border: "6px solid var(--c1-side)",
-                    borderRadius: "22px",
+                    borderRadius: "50%",
                   }}
                 >
                   <UserProfilePic mainAccountUser={true} size={150} />
