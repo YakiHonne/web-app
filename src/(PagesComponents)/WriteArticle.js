@@ -11,6 +11,7 @@ import Superscript from "@tiptap/extension-superscript";
 import Subscript from "@tiptap/extension-subscript";
 import { Markdown } from "tiptap-markdown";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import { TableKit } from "@tiptap/extension-table";
 import { all, createLowlight } from "lowlight";
 import Mathematics from "tiptap-math";
 import "katex/dist/katex.min.css";
@@ -108,6 +109,8 @@ const I = {
   nostr: ic(<><circle cx="12" cy="12" r="3" /><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" /></>),
   at: ic(<><circle cx="12" cy="12" r="4" /><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.6 7.2" /></>),
   chevron: ic(<polyline points="6 9 12 15 18 9" />),
+  table: ic(<><rect x="3" y="3" width="18" height="18" rx="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="3" y1="15" x2="21" y2="15" /><line x1="9" y1="3" x2="9" y2="21" /></>),
+  trash: ic(<><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" /></>),
 };
 
 function Tb({ icon, onClick, active, disabled, title }) {
@@ -151,6 +154,7 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
           orderedList: false, blockquote: false, codeBlock: false,
           superscript: false, subscript: false, alL: false, alC: false,
           alR: false, alJ: false, hlevel: 0, linkHref: "", canUndo: false, canRedo: false,
+          inTable: false,
         };
       return {
         bold: e.isActive("bold"),
@@ -174,6 +178,7 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
         linkHref: e.getAttributes("link").href ?? "",
         canUndo: e.can().undo(),
         canRedo: e.can().redo(),
+        inTable: e.isActive("table"),
       };
     },
   });
@@ -340,6 +345,16 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
             >
               {I.at} Mention
             </button>
+            <button
+              className="tiptap-insert-item"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+                setShowInsert(false);
+              }}
+            >
+              {I.table} Table
+            </button>
           </div>
         )}
       </div>
@@ -381,6 +396,20 @@ function Toolbar({ editor, onImageUpload, isUploading }) {
           />
           <button className="btn btn-normal btn-small" onMouseDown={(e) => { e.preventDefault(); applyNostrEntity(); }}>{t("AISC8KU")}</button>
           <button className="btn btn-gst btn-small" onMouseDown={(e) => { e.preventDefault(); setShowNostr(false); setNostrVal(""); }}>{t("AB4BSCe")}</button>
+        </div>
+      )}
+
+      {s.inTable && (
+        <div className="tiptap-table-toolbar">
+          <button className="tiptap-table-btn" title="Add column before" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().addColumnBefore().run(); }}>+Col ←</button>
+          <button className="tiptap-table-btn" title="Add column after" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().addColumnAfter().run(); }}>+Col →</button>
+          <button className="tiptap-table-btn" title="Delete column" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().deleteColumn().run(); }}>-Col</button>
+          <span className="tiptap-toolbar-sep" />
+          <button className="tiptap-table-btn" title="Add row before" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().addRowBefore().run(); }}>+Row ↑</button>
+          <button className="tiptap-table-btn" title="Add row after" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().addRowAfter().run(); }}>+Row ↓</button>
+          <button className="tiptap-table-btn" title="Delete row" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().deleteRow().run(); }}>-Row</button>
+          <span className="tiptap-toolbar-sep" />
+          <button className="tiptap-table-btn tiptap-table-btn-danger" title="Delete table" onMouseDown={(e) => { e.preventDefault(); editor.chain().focus().deleteTable().run(); }}>{I.trash} Delete table</button>
         </div>
       )}
     </div>
@@ -437,6 +466,7 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
     extensions: [
       StarterKit.configure({ heading: { levels: [1, 2, 3, 4, 5, 6] }, codeBlock: false }),
       CodeBlockLowlight.configure({ lowlight }),
+      TableKit.configure({ table: { resizable: true } }),
       Mathematics.configure({ evaluation: true }),
       NostrEntityExtension,
       MentionExtension,

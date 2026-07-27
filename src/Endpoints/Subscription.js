@@ -39,6 +39,12 @@ export const getSubscriptionLink = async ({ plan, main = true }) => {
   return data;
 };
 
+export const openBillingPortal = async () => {
+  const { data } = await axiosInstance.post("/api/v1/billing-portal", { main: true });
+  if (data?.url) window.open(data.url);
+  return data;
+};
+
 let _plansCache = null;
 
 export const getPlans = async () => {

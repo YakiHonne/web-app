@@ -12,7 +12,9 @@ import useLightningWallets from "@/Hooks/useLightningWallets";
 import LightningWalletsSelect from "@/Components/LightningWalletsSelect";
 import usePoints from "@/Hooks/usePoints";
 import useRedeemCodes from "@/Hooks/useRedeemCodes";
-import { getSubscriptionLink, getPlans } from "@/Endpoints/Subscription";
+import { getSubscriptionLink, getPlans, openBillingPortal } from "@/Endpoints/Subscription";
+import { useDispatch } from "react-redux";
+import { setToast } from "@/Store/Slides/Publishers";
 import QRCode from "react-qr-code";
 import { copyText, createLightningInvoice } from "@/Helpers/Helpers";
 import { iconsNames } from "@/Content/IconV2URL";
@@ -731,9 +733,32 @@ function RedeemSubscriptionButton({ plan, eligibility, config, redeemingPlan, on
 
 function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onUpgrade }) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [openingPortal, setOpeningPortal] = useState(false);
   const isStripeActive = ["stripe", "airwallex"].includes(status.last_payment_method) && status.active;
+  // The billing portal is Stripe-only (airwallex is excluded).
+  const isStripePortal = status.last_payment_method === "stripe" && status.active;
   const isFree = !status.plan || status.plan === "free";
+
+  const handleOpenPortal = async () => {
+    if (openingPortal) return;
+    setOpeningPortal(true);
+    try {
+      await openBillingPortal();
+    } catch (err) {
+      const message = err?.response?.data?.message;
+      const desc =
+        message === "not_a_stripe_subscriber"
+          ? t("AwJcN0R")
+          : message === "no_stripe_customer"
+            ? t("AqHTtA4")
+            : t("AFeQkYJ");
+      dispatch(setToast({ type: 2, desc }));
+    } finally {
+      setOpeningPortal(false);
+    }
+  };
 
   return (
     <>
@@ -782,7 +807,18 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
         {status.last_payment_method_display && (
           <div className="fit-container fx-scattered">
             <p className="gray-c">{t("A0SiY0R")}</p>
-            <PaymentMethodIcon method={status.last_payment_method_display} />
+            <div className="fx-centered" style={{ columnGap: "8px" }}>
+              {isStripePortal && (
+                <button
+                  className="btn btn-gray btn-small"
+                  onClick={handleOpenPortal}
+                  disabled={openingPortal}
+                >
+                  {openingPortal ? <Spinner /> : t("AW1X59p")}
+                </button>
+              )}
+              <PaymentMethodIcon method={status.last_payment_method_display} />
+            </div>
           </div>
         )}
 
@@ -1024,6 +1060,18 @@ export default function SubscriptionPage() {
           </>
         ) : null}
       </div>
+
+      {showUpgrade && (
+        <UpgradeOverlay
+          plans={plans}
+          onClose={() => setShowUpgrade(false)}
+          userPub={userKeys?.pub}
+          eligibility={eligibility}
+          pointsConfig={pointsConfig}
+          redeemingPlan={redeemingPlan}
+          onRedeemSubscription={(plan) => redeemSubscription(plan, fetch)}
+        />
+      )}
     </>
   );
 }

@@ -1271,3 +1271,130 @@
   font-size: 0.82rem;
   line-height: 1.6;
 }
+
+/* ── Table editing toolbar ───────────────────────────────────────────── */
+.tiptap-table-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 100%;
+  padding: 4px 2px 2px;
+}
+
+.tiptap-table-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--pale-gray);
+  background: transparent;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  color: var(--black);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  flex-shrink: 0;
+}
+
+.tiptap-table-btn:hover {
+  background: var(--dim-gray);
+}
+
+.tiptap-table-btn-danger {
+  color: var(--red-main);
+  border-color: var(--red-main);
+}
+
+.tiptap-table-btn-danger:hover {
+  background: var(--red-main);
+  color: #fff;
+}
+
+/* ── Tables ───────────────────────────────────────────────────────────── */
+.tiptap-content .tableWrapper,
+.ProseMirror .tableWrapper {
+  margin: 1rem 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+/* App-wide rule hides all webkit scrollbars by default — opt back in
+   here so wide tables have a visible, mouse-draggable scrollbar. */
+.ProseMirror .tableWrapper::-webkit-scrollbar {
+  display: block;
+  height: 8px;
+}
+
+.ProseMirror .tableWrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ProseMirror .tableWrapper::-webkit-scrollbar-thumb {
+  background: var(--pale-gray);
+  border-radius: 4px;
+}
+
+.ProseMirror .tableWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--dim-gray);
+}
+
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: auto;
+  width: 100%;
+  margin: 0;
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid var(--pale-gray);
+  padding: 8px 12px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  min-width: 120px;
+}
+
+.ProseMirror table td > *,
+.ProseMirror table th > * {
+  max-width: 100%;
+}
+
+.ProseMirror table td code,
+.ProseMirror table th code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ProseMirror table th {
+  background: var(--dim-gray);
+  font-weight: 600;
+  text-align: left;
+}
+
+.ProseMirror table .selectedCell {
+  background: var(--dim-gray);
+}
+
+.ProseMirror table .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--c1);
+  pointer-events: none;
+}
+
+.ProseMirror table .grip-column,
+.ProseMirror table .grip-row {
+  background: var(--dim-gray);
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
