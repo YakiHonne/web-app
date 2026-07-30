@@ -1,6 +1,7 @@
 import useCreatorSubscription from "@/Hooks/useCreatorSubscription";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 import Icon from "./Icon";
 import Overlay from "./Overlay";
 import useUserProfile from "@/Hooks/useUsersProfile";
@@ -10,8 +11,11 @@ import HorizontalScrollWrapper from "./HorizontalScrollWrapper";
 
 export default function SubscriptionButton({ pubkey }) {
   const { t } = useTranslation();
+  const userKeys = useSelector((state) => state.userKeys);
   const { isSubChekingLoading, providers } = useCreatorSubscription({ pubkey });
   const [showProviders, setShowProviders] = useState(false);
+  const [showSelfSubWarning, setShowSelfSubWarning] = useState(false);
+  const isSelf = userKeys?.pub === pubkey;
   if (isSubChekingLoading) return;
   if (providers.length === 0) return;
   return (
@@ -19,9 +23,14 @@ export default function SubscriptionButton({ pubkey }) {
       {showProviders && (
         <Providers providers={providers} exit={() => setShowProviders(false)} />
       )}
+      {showSelfSubWarning && (
+        <SelfSubscriptionWarning exit={() => setShowSelfSubWarning(false)} />
+      )}
       <button
         className="btn btn-normal btn-full fx-centered"
-        onClick={() => setShowProviders(true)}
+        onClick={() =>
+          isSelf ? setShowSelfSubWarning(true) : setShowProviders(true)
+        }
       >
         <Icon name={"crown"} />
         {t("AvD6FbL")}
@@ -29,6 +38,32 @@ export default function SubscriptionButton({ pubkey }) {
     </>
   );
 }
+
+const SelfSubscriptionWarning = ({ exit }) => {
+  const { t } = useTranslation();
+  return (
+    <Overlay exit={exit} width={450}>
+      <section className="fx-centered fx-col box-pad-h box-pad-v">
+        <div
+          className="fx-centered box-marg-s"
+          style={{
+            minWidth: "54px",
+            minHeight: "54px",
+            borderRadius: "var(--border-r-50)",
+            backgroundColor: "var(--c1)",
+          }}
+        >
+          <Icon name={"crown"} />
+        </div>
+        <h4 className="p-centered">{t("AFtyh1A")}</h4>
+        <p className="p-centered gray-c box-pad-v-m">{t("Az7PJTe")}</p>
+        <button className="btn btn-normal btn-full" onClick={exit}>
+          {t("AvtdLIG")}
+        </button>
+      </section>
+    </Overlay>
+  );
+};
 
 const Providers = ({ providers, exit }) => {
   const { t } = useTranslation();
