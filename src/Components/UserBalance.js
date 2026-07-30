@@ -79,12 +79,12 @@ export default function UserBalance() {
 
   const getBalancWebLN = async () => {
     try {
-      await window.webln.enable();
-      let data = await window.webln.getBalance();
-
-      localStorage_.setItem("wallet-userBalance", `${data.balance}`);
-
-      dispatch(setUserBalance(data.balance));
+      await window.webln?.enable();
+      let data = await window.webln?.getBalance();
+      if (data !== undefined) {
+        localStorage_.setItem("wallet-userBalance", `${data.balance}`);
+        dispatch(setUserBalance(data.balance));
+      }
     } catch (err) {
       console.log(err);
     }
