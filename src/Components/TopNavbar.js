@@ -611,7 +611,7 @@ export default function TopNavbar() {
               </div>
 
               <div className="uplift-dropdown-item" onClick={() => { closeProfileMenu(); customHistory("/subscription"); }}>
-                <Icon name="cup" size={18} />
+                <Icon name="credit_card" size={18} />
                 <span>{t("Ar1oBm3")}</span>
               </div>
 

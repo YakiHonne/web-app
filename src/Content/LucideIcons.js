@@ -339,6 +339,7 @@ import {
   Zap,
   ZoomIn,
   ZoomOut,
+  CreditCardIcon
 } from "lucide-react";
 
 // F: rendered filled (used for "-bold"/active variants that fill cleanly)
@@ -373,6 +374,7 @@ const lucideIconsV1 = {
   "add-curation": FolderPlus,
   "add-note": SquarePen,
   admin: UserCog,
+  credit_card: CreditCard,
   arrow: ChevronDown,
   "arrow-up": ArrowUp,
   "arrow-up-bold": [ArrowUp, B],
