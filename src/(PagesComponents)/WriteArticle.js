@@ -37,7 +37,9 @@ import ProfilesPicker from "@/Components/ProfilesPicker";
 import Router, { useRouter } from "next/router";
 import { useTheme } from "next-themes";
 import { getAppLang } from "@/Helpers/Helpers";
-import { detectDirection } from "@/Helpers/Encryptions";
+import { detectDirection, getParsedRepEvent } from "@/Helpers/Encryptions";
+import { getSubData } from "@/Helpers/Controlers";
+import { nip19 } from "nostr-tools";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
 import { useDispatch } from "react-redux";
@@ -45,7 +47,6 @@ import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import {
   getArticleDraft,
-  getPostToEdit,
   updateArticleDraft,
 } from "@/Helpers/ClientHelpers";
 import { iconsNames } from "@/Content/IconV2URL";
@@ -975,12 +976,18 @@ function EditorOptionsMenu({ onImport, onImportPdf, onExport, isPdfParsing }) {
 }
 
 export default function WritingArticle() {
-  const { query } = useRouter();
+  const { query, isReady } = useRouter();
   const { edit } = query || {};
+  const [postToEdit, setPostToEdit] = useState({});
+  const [isFetchingPost, setIsFetchingPost] = useState(
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("edit"),
+  );
+  const [postNotFound, setPostNotFound] = useState(false);
   const {
     post_pubkey, post_id, post_kind, post_title, post_desc, post_thumbnail,
     post_tags, post_d, post_content, post_published_at,
-  } = getPostToEdit(edit);
+  } = postToEdit;
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
@@ -1062,7 +1069,72 @@ export default function WritingArticle() {
   }, [userKeys]);
 
   useEffect(() => {
-    if (userKeys && !post_id) {
+    const fetchPostToEdit = async () => {
+      setIsFetchingPost(true);
+      setPostNotFound(false);
+      let naddrData = false;
+      try {
+        naddrData = nip19.decode(edit).data;
+      } catch (err) {
+        console.log(err);
+      }
+      if (!naddrData?.identifier) {
+        setIsFetchingPost(false);
+        setPostNotFound(true);
+        return;
+      }
+      const res = await getSubData(
+        [
+          {
+            authors: naddrData.pubkey ? [naddrData.pubkey] : undefined,
+            kinds: [naddrData.kind],
+            "#d": [naddrData.identifier],
+          },
+        ],
+        5000,
+        naddrData.relays || undefined,
+        undefined,
+        1,
+      );
+      if (res.data.length === 0) {
+        setIsFetchingPost(false);
+        setPostNotFound(true);
+        return;
+      }
+      if (res.data[0].pubkey !== userKeys.pub) {
+        dispatch(setToast({ type: 2, desc: t("ARqYGc7") }));
+        setIsFetchingPost(false);
+        setPostNotFound(true);
+        return;
+      }
+      let parsedPost = getParsedRepEvent(res.data[0]);
+      let postTitle =
+        res.data[0].tags.find((tag) => tag[0] === "title")?.[1] || "";
+      setPostToEdit({
+        post_pubkey: parsedPost.pubkey,
+        post_id: parsedPost.id,
+        post_kind: parsedPost.kind,
+        post_title: postTitle,
+        post_desc: parsedPost.description,
+        post_thumbnail: parsedPost.image,
+        post_tags: parsedPost.tTags,
+        post_d: naddrData.identifier,
+        post_content: parsedPost.content,
+        post_published_at: parsedPost.published_at,
+      });
+      setTitle(postTitle);
+      setContent(parsedPost.content);
+      setSharedMarkdown(parsedPost.content || "");
+      setSelectedTab(parsedPost.dir === "RTL" ? 1 : 0);
+      setIsFetchingPost(false);
+    };
+    if (!isReady) return;
+    if (edit && userKeys) fetchPostToEdit();
+  }, [isReady, edit, userKeys]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (userKeys && !edit) {
       let draft = getArticleDraft();
       let direction = detectDirection(draft.content);
       if (direction === "RTL") setSelectedTab(1);
@@ -1072,7 +1144,7 @@ export default function WritingArticle() {
       setContent(draft.content);
       setSharedMarkdown(draft.content || "");
     }
-  }, [userKeys]);
+  }, [isReady, userKeys, edit]);
 
   useEffect(() => {
     if (!title && !content) return;
@@ -1222,10 +1294,13 @@ export default function WritingArticle() {
           initialTitle={post_title || ""}
           initialSummary={post_desc || ""}
           initialCoverUrl={post_thumbnail || ""}
+          initialTags={post_tags || []}
           postContent={sharedMarkdown}
           imetas={useV2Editor ? v2Imetas : imetas}
           editId={post_d || ""}
+          editEventId={post_id || ""}
           editPublishedAt={post_published_at}
+          editKind={post_kind}
         />
       )}
       {isLoading && <LoadingScreen />}
@@ -1244,7 +1319,18 @@ export default function WritingArticle() {
             <main className="fit-container" style={{ overflow: "visible" }}>
               <div className="fx-centered fit-container fx-start-h fx-start-v">
                 <div className="box-pad-h-m fit-container">
-                  {userKeys && (
+                  {isFetchingPost && (
+                    <div
+                      className="fit-container fx-centered"
+                      style={{ height: "100vh" }}
+                    >
+                      <Spinner size={32} />
+                    </div>
+                  )}
+                  {!isFetchingPost && postNotFound && (
+                    <PagePlaceholder page="404" />
+                  )}
+                  {!isFetchingPost && !postNotFound && userKeys && (
                     <>
                       {(userKeys.sec || userKeys.ext || userKeys.bunker) && (
                         <>
@@ -1371,7 +1457,9 @@ export default function WritingArticle() {
                       )}
                     </>
                   )}
-                  {!userKeys && <PagePlaceholder page="nostr-not-connected" />}
+                  {!isFetchingPost && !postNotFound && !userKeys && (
+                    <PagePlaceholder page="nostr-not-connected" />
+                  )}
                 </div>
               </div>
             </main>

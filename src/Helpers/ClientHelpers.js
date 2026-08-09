@@ -1397,7 +1397,8 @@ export function redirectToLogin() {
 export function getPostToEdit(naddr) {
   if (!naddr) return {};
   try {
-    let post = localStorage.getItem("ArticleToEdit");
+    let post =
+      localStorage.getItem(naddr) || localStorage.getItem("ArticleToEdit");
     if (post) {
       post = JSON.parse(post);
       return post;

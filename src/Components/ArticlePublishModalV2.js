@@ -50,10 +50,13 @@ export default function ArticlePublishModalV2({
   initialTitle = "",
   initialSummary = "",
   initialCoverUrl = "",
+  initialTags = [],
   postContent,
   imetas = [],
   editId = "",
+  editEventId = "",
   editPublishedAt,
+  editKind,
 }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -63,7 +66,7 @@ export default function ArticlePublishModalV2({
   const [title, setTitle] = useState(initialTitle);
   const [summary, setSummary] = useState(initialSummary);
   const [coverUrl, setCoverUrl] = useState(initialCoverUrl);
-  const [tagsInput, setTagsInput] = useState("");
+  const [tagsInput, setTagsInput] = useState(initialTags.join(", "));
   const [isLoading, setIsLoading] = useState(false);
   const [isCoverUploading, setIsCoverUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -136,7 +139,13 @@ export default function ArticlePublishModalV2({
       ...imetas.map(cloneTag),
     ];
 
-    const eventInitEx = await InitEvent({ kind, content: eventContent, tags });
+    const eventInitEx = await InitEvent(
+      kind,
+      eventContent,
+      tags,
+      created_at,
+      userKeys,
+    );
     if (!eventInitEx) {
       setIsLoading(false);
       return;
@@ -151,6 +160,17 @@ export default function ArticlePublishModalV2({
 
     const relaysToPublish = isPremium ? premiumRelays : [];
     await publishEvent(eventInitEx, relaysToPublish);
+
+    if (kind === 30023 && editKind === 30024 && editEventId) {
+      const deletionEvent = await InitEvent(
+        5,
+        "A draft to delete",
+        [["e", editEventId]],
+        created_at,
+        userKeys,
+      );
+      if (deletionEvent) await publishEvent(deletionEvent, []);
+    }
 
     setIsLoading(false);
     dispatch(
@@ -355,12 +375,14 @@ export default function ArticlePublishModalV2({
           }}
         >
           <div className="fx-centered fx-gap-h">
-            <Button
-              label={t("AjbW7pt")}
-              type="gst"
-              onClick={() => publish(30024)}
-              disabled={isLoading}
-            />
+            {editKind !== 30023 && (
+              <Button
+                label={t("AjbW7pt")}
+                type="gst"
+                onClick={() => publish(30024)}
+                disabled={isLoading}
+              />
+            )}
             <Button
               label={isLoading ? t("AOTJ9PF") : t("As7IjvV")}
               onClick={() => publish(30023)}
