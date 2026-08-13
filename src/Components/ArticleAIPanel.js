@@ -1,8 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { askArticleAI } from "@/Endpoints/ArticleAI";
+import { getErrorReason, getErrorStatus } from "@/Hooks/useQuotaGuard";
+import useFeatureQuota from "@/Hooks/useFeatureQuota";
+import QuotaBanner from "@/Components/QuotaBanner";
 import Button from "@/Components/UI/Button";
-import aiChatDb from "@/lib/aiChatDb";
+import aiChatDb, { scopeKey } from "@/lib/aiChatDb";
+import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 
 let msgIdCounter = 0;
@@ -10,28 +13,29 @@ const nextId = () => ++msgIdCounter;
 
 const SESSION_ID = "article-editor";
 
-async function loadSession() {
+async function loadSession(pubkey) {
   try {
-    const row = await aiChatDb.sessions.get(SESSION_ID);
+    const row = await aiChatDb.sessions.get(scopeKey(pubkey, SESSION_ID));
     return row?.messages ?? [];
   } catch {
     return [];
   }
 }
 
-async function saveSession(messages) {
+async function saveSession(pubkey, messages) {
   try {
     await aiChatDb.sessions.put({
-      sessionId: SESSION_ID,
+      sessionId: scopeKey(pubkey, SESSION_ID),
+      pubkey: pubkey || "",
       messages,
       updatedAt: Date.now(),
     });
   } catch { }
 }
 
-async function clearSession() {
+async function clearSession(pubkey) {
   try {
-    await aiChatDb.sessions.delete(SESSION_ID);
+    await aiChatDb.sessions.delete(scopeKey(pubkey, SESSION_ID));
   } catch { }
 }
 
@@ -57,17 +61,7 @@ function AIBubble({ msg }) {
     <div className="ai-msg-ai">
       <div className="ai-msg-ai-header">
         <span className="ai-spark">✦</span>
-        <span className="ai-msg-ai-text">
-          {msg.text}
-          {msg.cta && (
-            <>
-              {" "}
-              <Link href="/subscription" style={{ color: "var(--c1)", fontWeight: 600 }}>
-                {msg.cta}
-              </Link>
-            </>
-          )}
-        </span>
+        <span className="ai-msg-ai-text">{msg.text}</span>
       </div>
     </div>
   );
@@ -83,6 +77,14 @@ export default function ArticleAIPanel({
   prefillMessage,
 }) {
   const { t } = useTranslation();
+  const pubkey = useSelector((state) => state.userKeys?.pub) || "";
+  const {
+    exceeded: quotaExceeded,
+    locked: quotaLocked,
+    resetAt: quotaResetAt,
+    refresh: refreshQuota,
+    markExceeded,
+  } = useFeatureQuota("chat-articles");
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -93,7 +95,11 @@ export default function ArticleAIPanel({
   const sendRef = useRef(null);
 
   useEffect(() => {
-    loadSession().then((saved) => {
+    let cancelled = false;
+    setSessionLoaded(false);
+    setMessages([]);
+    loadSession(pubkey).then((saved) => {
+      if (cancelled) return;
       if (saved.length > 0) {
         const maxId = saved.reduce((m, msg) => Math.max(m, msg.id ?? 0), 0);
         if (maxId >= msgIdCounter) msgIdCounter = maxId + 1;
@@ -102,6 +108,12 @@ export default function ArticleAIPanel({
       setSessionLoaded(true);
     });
     return () => {
+      cancelled = true;
+    };
+  }, [pubkey]);
+
+  useEffect(() => {
+    return () => {
       clearTimeout(closeTimerRef.current);
       clearTimeout(prefillTimerRef.current);
     };
@@ -109,8 +121,8 @@ export default function ArticleAIPanel({
 
   useEffect(() => {
     if (!sessionLoaded) return;
-    saveSession(messages);
-  }, [messages, sessionLoaded]);
+    saveSession(pubkey, messages);
+  }, [pubkey, messages, sessionLoaded]);
 
   useEffect(() => {
     if (!isOpen || !prefillMessage) return;
@@ -139,9 +151,14 @@ export default function ArticleAIPanel({
     ta.style.height = Math.min(ta.scrollHeight, 104) + "px";
   }, [input]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    refreshQuota();
+  }, [isOpen, refreshQuota]);
+
   const handleSend = useCallback(async () => {
     const text = input.trim();
-    if (!text || isAILoading) return;
+    if (!text || isAILoading || quotaExceeded) return;
 
     const userMsg = { id: nextId(), role: "user", text };
     setMessages((prev) => [...prev, userMsg]);
@@ -155,6 +172,8 @@ export default function ArticleAIPanel({
       const aiMsg = { id: nextId(), role: "ai", text: explanation };
       setMessages((prev) => [...prev, aiMsg]);
 
+      refreshQuota();
+
       if (content) {
         closeTimerRef.current = setTimeout(() => {
           onClose();
@@ -162,42 +181,36 @@ export default function ArticleAIPanel({
         }, 700);
       }
     } catch (err) {
-      let aiMsg;
-      if (err.status === 403) {
-        aiMsg = {
-          id: nextId(),
-          role: "ai",
-          text: err.message || t("AMr1BBt"),
-          cta: t("Aecr6Vl"),
-        };
-      } else if (err.status === 429) {
-        aiMsg = {
-          id: nextId(),
-          role: "ai",
-          text: err.message || t("Alec9a8"),
-        };
+      const status = getErrorStatus(err);
+      const reason = getErrorReason(err);
+
+      if (status === 429 || status === 403) {
+        markExceeded(reason);
+        refreshQuota({ assumeExceeded: true });
       } else {
-        aiMsg = {
-          id: nextId(),
-          role: "ai",
-          text: err.message || t("AEH0z9N"),
-        };
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: nextId(),
+            role: "ai",
+            text: err.message || t("AEH0z9N"),
+          },
+        ]);
       }
-      setMessages((prev) => [...prev, aiMsg]);
     } finally {
       setIsAILoading(false);
     }
-  }, [input, isAILoading, getMarkdown, onClose, onDiffReady, setIsAILoading, t]);
+  }, [input, isAILoading, quotaExceeded, getMarkdown, onClose, onDiffReady, setIsAILoading, refreshQuota, markExceeded, t]);
 
   sendRef.current = handleSend;
 
   const handleClear = useCallback(() => {
     setMessages([]);
-    clearSession();
-  }, []);
+    clearSession(pubkey);
+  }, [pubkey]);
 
   const handleKeyDown = (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent?.isComposing) {
       e.preventDefault();
       handleSend();
     }
@@ -253,6 +266,10 @@ export default function ArticleAIPanel({
             <div ref={bottomRef} />
           </div>
 
+          {quotaExceeded && (
+            <QuotaBanner locked={quotaLocked} resetAt={quotaResetAt} context="ai" />
+          )}
+
           <div className="ai-panel-input-area">
             <textarea
               ref={textareaRef}
@@ -261,13 +278,13 @@ export default function ArticleAIPanel({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={isAILoading}
+              disabled={isAILoading || quotaExceeded}
               rows={1}
             />
             <button
               className="ai-send-btn"
               onClick={handleSend}
-              disabled={isAILoading || !input.trim()}
+              disabled={isAILoading || quotaExceeded || !input.trim()}
               aria-label="Send"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

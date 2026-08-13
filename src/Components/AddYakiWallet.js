@@ -1,5 +1,4 @@
 import axiosInstance from "@/Helpers/HTTP_Client";
-import Link from "next/link";
 import React, { useState } from "react";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,17 +7,18 @@ import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import { downloadAsFile } from "@/Helpers/Encryptions";
 import Icon from "@/Components/Icon";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 export default function AddYakiWallet({ refresh }) {
   const dispatch = useDispatch();
   const userMetadata = useSelector((state) => state.userMetadata);
   const { t } = useTranslation();
+  const { handleAccessError } = useQuotaGuard();
   const [isLoading, setIsLoading] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showErrorMessage, setShowMessageError] = useState(false);
   const [showEmptyUNMessage, setShowMessageEmtpyUN] = useState(false);
   const [showInvalidMessage, setShowInvalidMessage] = useState(false);
-  const [showLimitMessage, setShowLimitMessage] = useState(false);
   const [userName, setUserName] = useState(
     userMetadata?.display_name || userMetadata?.name || "",
   );
@@ -83,8 +83,8 @@ export default function AddYakiWallet({ refresh }) {
     } catch (err) {
       console.log(err);
       setIsLoading(false);
-      if (err.response?.status === 429) {
-        setShowLimitMessage(true);
+      if (handleAccessError(err, "wallet-creation")) {
+        return;
       } else if (err.response?.status) {
         setShowMessageError(true);
       } else {
@@ -103,7 +103,6 @@ export default function AddYakiWallet({ refresh }) {
     let isValid = /^[a-zA-Z0-9]+$/.test(value);
     if (showErrorMessage) setShowMessageError(false);
     if (showEmptyUNMessage) setShowMessageEmtpyUN(false);
-    if (showLimitMessage) setShowLimitMessage(false);
     if (!value || (isValid && showInvalidMessage)) setShowInvalidMessage(false);
     if (value && !isValid && !showInvalidMessage) setShowInvalidMessage(true);
     setUserName(value);
@@ -147,7 +146,7 @@ export default function AddYakiWallet({ refresh }) {
               onChange={handleInputField}
               style={{
                 borderColor:
-                  showErrorMessage || showEmptyUNMessage || showInvalidMessage || showLimitMessage
+                  showErrorMessage || showEmptyUNMessage || showInvalidMessage
                     ? "var(--red-main)"
                     : "",
               }}
@@ -169,16 +168,6 @@ export default function AddYakiWallet({ refresh }) {
           {showInvalidMessage && (
             <div className="fit-container box-pad-h-m">
               <p className="red-c p-medium">{t("AqSxggD")}</p>
-            </div>
-          )}
-          {showLimitMessage && (
-            <div className="fit-container box-pad-h-m">
-              <p className="red-c p-medium">
-                {t("ANYr7l9")}{" "}
-                <Link href="/subscription" style={{ color: "var(--c1)", fontWeight: 600 }}>
-                  {t("AqAJ3zy")}
-                </Link>
-              </p>
             </div>
           )}
           <button

@@ -4798,3 +4798,78 @@ input[type="range"]::-moz-range-thumb {
 .pack-overlay-see-list-btn:hover {
     color: var(--black);
 }
+.profile-edit-row {
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+}
+
+.profile-edit-row > * {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+@media only screen and (max-width: 800px) {
+    .profile-edit-row {
+        flex-wrap: wrap;
+    }
+
+    .profile-edit-row > * {
+        flex: 1 1 100%;
+    }
+}
+
+.yaki-username-border {
+    position: relative;
+    padding: 1px;
+    border-radius: 16px;
+    background: var(--dim-gray);
+    width: 100%;
+}
+
+.yaki-username-border-spinner {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.yaki-username-border-spinner::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    aspect-ratio: 1 / 1;
+    transform-origin: center;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0deg,
+        transparent 300deg,
+        #8b5cf6 330deg,
+        #ec4899 345deg,
+        #f59e0b 355deg,
+        transparent 360deg
+    );
+    animation: yaki-username-rotate 3s linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes yaki-username-rotate {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+.yaki-username-border-content {
+    position: relative;
+    z-index: 1;
+    border-radius: 15px;
+    overflow: hidden;
+    background: var(--white);
+}
+
+.yaki-username-border-content > .sc-s-18 {
+    border: none !important;
+    margin: 0;
+}

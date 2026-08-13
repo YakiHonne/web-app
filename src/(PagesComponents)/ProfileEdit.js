@@ -8,11 +8,21 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { decodeUrlOrAddress, encodeLud06 } from "@/Helpers/Encryptions";
 import axios from "axios";
 import { FilePicker } from "@/Components/FilePicker";
-import { FileUpload } from "@/Helpers/Helpers";
+import { FileUpload, copyText } from "@/Helpers/Helpers";
 import Backbar from "@/Components/Backbar";
 import { useTranslation } from "react-i18next";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Icon from "@/Components/Icon";
+import YakiNameField from "@/Components/YakiNameField";
+import YakiNip05Overlay from "@/Components/YakiNip05Overlay";
+import LinkWalletOverlay from "@/Components/LinkWalletOverlay";
+import useAccess from "@/Hooks/useAccess";
+import useNameClaim from "@/Hooks/useNameClaim";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
+import { claimUsername } from "@/Endpoints/Account";
+import { setSubscriptionStatus } from "@/Store/Slides/Subscription";
+import axiosInstance from "@/Helpers/HTTP_Client";
+import { getWallets } from "@/Helpers/ClientHelpers";
 
 export default function ProfileEdit() {
   const dispatch = useDispatch();
@@ -21,6 +31,33 @@ export default function ProfileEdit() {
   const userKeys = useSelector((state) => state.userKeys);
   const userRelays = useSelector((state) => state.userRelays);
   const userAllRelays = useSelector((state) => state.userAllRelays);
+  const storeWallets = useSelector((state) => state.wallets);
+  const { handleAccessError } = useQuotaGuard();
+  const {
+    isPaid,
+    inTrial,
+    username: yakiUsername,
+    hasUsername,
+    nip05Name,
+    nip05,
+  } = useAccess();
+
+  const canUseYakiNames = isPaid && !inTrial;
+
+  const [claimingUsername, setClaimingUsername] = useState(false);
+  const [showNip05Overlay, setShowNip05Overlay] = useState(false);
+  const [showWalletOverlay, setShowWalletOverlay] = useState(false);
+
+  const usernameClaim = useNameClaim({
+    kind: "username",
+    enabled: canUseYakiNames && !hasUsername,
+  });
+
+  const linkableWallets = (
+    (Array.isArray(storeWallets) && storeWallets.length > 0
+      ? storeWallets
+      : getWallets()) || []
+  ).filter((wallet) => wallet?.kind !== 1 && !!wallet?.entitle);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isImageUploading, setImageUploading] = useState(false);
@@ -68,7 +105,16 @@ export default function ProfileEdit() {
     if (tempUserRelays) CheckRelays();
   }, [tempUserRelays]);
 
+  const hasPendingUsername =
+    canUseYakiNames && !hasUsername && usernameClaim.claimable;
+
   const updateInfos = async () => {
+    if (hasPendingUsername) {
+      const claimed = await claimPendingUsername();
+      if (!claimed) return;
+      if (checkMetadata()) return;
+    }
+
     let content = { ...userMetadata };
     content.picture = userPicture !== false ? userPicture : content.picture;
     content.banner = userBanner !== false ? userBanner : content.banner;
@@ -92,6 +138,63 @@ export default function ProfileEdit() {
         allRelays: userRelays,
       }),
     );
+  };
+
+  const publishField = (patch) => {
+    const content = { ...userMetadata, ...patch };
+    setIsLoading(true);
+    dispatch(
+      setToPublish({
+        userKeys: userKeys,
+        kind: 0,
+        content: JSON.stringify(content),
+        tags: [],
+        allRelays: userRelays,
+      }),
+    );
+  };
+
+  const refreshAccount = async () => {
+    try {
+      const { data } = await axiosInstance.get("/api/v1/subscription-status");
+      dispatch(setSubscriptionStatus(data));
+    } catch { }
+  };
+
+  const claimPendingUsername = async () => {
+    if (claimingUsername) return false;
+    setClaimingUsername(true);
+    try {
+      await claimUsername(usernameClaim.value);
+      await refreshAccount();
+      dispatch(setToast({ type: 1, desc: t("Ayq4yyv") }));
+      setClaimingUsername(false);
+      return true;
+    } catch (err) {
+      if (!handleAccessError(err, "username")) {
+        dispatch(
+          setToast({
+            type: 3,
+            desc:
+              err?.response?.data?.message || t("AQMQDrO"),
+          }),
+        );
+      }
+      setClaimingUsername(false);
+      return false;
+    }
+  };
+
+  const handleUseNip05 = (address) => {
+    setUserNip05(address);
+    publishField({ nip05: address });
+    refreshAccount();
+  };
+
+  const handleUseWallet = (address) => {
+    setUserLud16(address);
+    setUserLud06("");
+    publishField({ lud16: address, lud06: "" });
   };
 
   const handleLUD16 = async (e) => {
@@ -162,8 +265,28 @@ export default function ProfileEdit() {
     return JSON.stringify(userMetadata) === JSON.stringify(tempUserMetadata);
   };
 
+  const nothingToUpdate = () =>
+    checkMetadata() && !hasPendingUsername && !claimingUsername;
+
   return (
     <>
+      {showNip05Overlay && (
+        <YakiNip05Overlay
+          pubkey={userKeys?.pub}
+          nip05Name={nip05Name}
+          isActive={nip05?.is_active !== false}
+          currentNip05={userNip05}
+          onUse={handleUseNip05}
+          exit={() => setShowNip05Overlay(false)}
+        />
+      )}
+      {showWalletOverlay && (
+        <LinkWalletOverlay
+          currentLud16={userLud16}
+          onUse={handleUseWallet}
+          exit={() => setShowWalletOverlay(false)}
+        />
+      )}
       <div>
         <div
           className={`${isLoading || isImageUploading ? "flash" : ""}`}
@@ -202,9 +325,6 @@ export default function ProfileEdit() {
                             top: 0,
                             borderBottom: "1px solid var(--very-dim-gray)",
                             border: "none",
-                            borderTopLeftRadius: "0",
-                            borderTopRightRadius: "0",
-                            // borderRadius: "0",
                           }}
                         ></div>
                         <div
@@ -322,42 +442,86 @@ export default function ProfileEdit() {
                             className="fx-centered fx-col fit-container"
                             style={{ columnGap: "10px" }}
                           >
-                            <div className="fit-container sc-s-18 no-bg ">
-                              <p
-                                className="p-medium gray-c box-pad-h-m"
-                                style={{ paddingTop: ".5rem" }}
-                              >
-                                {t("ALtjgkI")}
-                              </p>
-                              <input
-                                className="if ifs-full if-no-border"
-                                style={{ height: "36px" }}
-                                placeholder={t("ALtjgkI")}
-                                value={userDisplayName}
-                                onChange={(e) =>
-                                  setUserDisplayName(e.target.value)
-                                }
-                              />
-                            </div>
-                            <div className="fit-container sc-s-18 no-bg ">
-                              <p
-                                className="p-medium gray-c box-pad-h-m"
-                                style={{ paddingTop: ".5rem" }}
-                              >
-                                {t("ALCpv2S")}
-                              </p>
-                              <div className="fx-centered fit-container">
-                                <p style={{ paddingLeft: "1rem" }}>@</p>
+                            {canUseYakiNames && (
+                              <>
+                                {hasUsername ? (
+                                  <div className="yaki-username-border">
+                                    <div className="yaki-username-border-spinner" />
+                                    <div className="yaki-username-border-content">
+                                      <YakiNameField
+                                        label={t("Ap3wrvF")}
+                                        prefix="yakihonne.com/"
+                                        value={yakiUsername}
+                                        state="owned"
+                                        reason={t("Azvn2wX")}
+                                        disabled
+                                        badge
+                                        action={
+                                          <div
+                                            className="pointer fx-centered"
+                                            title={t("AoTWbxS")}
+                                            onClick={() =>
+                                              copyText(
+                                                `https://yakihonne.com/${yakiUsername}`,
+                                                t("AoTWbxS"),
+                                              )
+                                            }
+                                          >
+                                            <Icon name="copy" size={16} />
+                                          </div>
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <YakiNameField
+                                    label={t("Ap3wrvF")}
+                                    prefix="yakihonne.com/"
+                                    value={usernameClaim.value}
+                                    state={usernameClaim.state}
+                                    reason={usernameClaim.reason}
+                                    onChange={usernameClaim.onChange}
+                                  />
+                                )}
+                              </>
+                            )}
+                            <div
+                              className="fx-centered fit-container fx-start-v profile-edit-row"
+                              style={{ columnGap: "10px" }}
+                            >
+                              <div className="fit-container sc-s-18 no-bg box-pad-v-s">
+                                <p className="p-medium gray-c box-pad-h-m">
+                                  {t("ALtjgkI")}
+                                </p>
                                 <input
                                   className="if ifs-full if-no-border"
-                                  style={{ height: "36px", paddingLeft: "0" }}
-                                  placeholder={t("ALCpv2S")}
-                                  value={userName}
-                                  onChange={(e) => setUserName(e.target.value)}
+                                  style={{ height: "36px" }}
+                                  placeholder={t("ALtjgkI")}
+                                  value={userDisplayName}
+                                  onChange={(e) =>
+                                    setUserDisplayName(e.target.value)
+                                  }
                                 />
                               </div>
+                              <div className="fit-container sc-s-18 no-bg box-pad-v-s">
+                                <p className="p-medium gray-c box-pad-h-m">
+                                  {t("ALCpv2S")}
+                                </p>
+                                <div className="fx-centered fit-container">
+                                  <p style={{ paddingLeft: "1rem" }}>@</p>
+                                  <input
+                                    className="if ifs-full if-no-border"
+                                    style={{ height: "36px", paddingLeft: "0" }}
+                                    placeholder={t("ALCpv2S")}
+                                    value={userName}
+                                    onChange={(e) =>
+                                      setUserName(e.target.value)
+                                    }
+                                  />
+                                </div>
+                              </div>
                             </div>
-                            <div className="fit-container sc-s-18 no-bg ">
+                            <div className="fit-container sc-s-18 no-bg box-pad-v-s">
                               <p
                                 className="p-medium gray-c box-pad-h-m"
                                 style={{ paddingTop: ".5rem" }}
@@ -372,7 +536,7 @@ export default function ProfileEdit() {
                                 onChange={(e) => setUserAbout(e.target.value)}
                               />
                             </div>
-                            <div className="fit-container sc-s-18 no-bg">
+                            <div className="fit-container sc-s-18 no-bg box-pad-v-s">
                               <p
                                 className="p-medium gray-c box-pad-h-m"
                                 style={{ paddingTop: ".5rem" }}
@@ -387,44 +551,67 @@ export default function ProfileEdit() {
                                 onChange={(e) => setUserWebsite(e.target.value)}
                               />
                             </div>
-                            <div className="fit-container sc-s-18 no-bg">
-                              <p
-                                className="p-medium gray-c box-pad-h-m"
-                                style={{ paddingTop: ".5rem" }}
-                              >
-                                {t("AsS6BPz")}
-                              </p>
-                              <input
-                                className="if ifs-full if-no-border"
-                                style={{ height: "36px" }}
-                                placeholder={t("AsS6BPz")}
-                                value={userNip05}
-                                onChange={(e) => setUserNip05(e.target.value)}
-                              />
+                            <div className="fit-container sc-s-18 no-bg box-pad-v-s">
+                              <div className="fx-scattered fit-container">
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p className="p-medium gray-c box-pad-h-m">
+                                    {t("AsS6BPz")}
+                                  </p>
+                                  <input
+                                    className="if ifs-full if-no-border"
+                                    style={{ height: "36px" }}
+                                    placeholder={t("AsS6BPz")}
+                                    value={userNip05}
+                                    onChange={(e) =>
+                                      setUserNip05(e.target.value)
+                                    }
+                                  />
+                                </div>
+                                {canUseYakiNames && (
+                                  <div className="box-pad-h-m">
+                                    <button
+                                      className="btn btn-small btn-gray"
+                                      style={{ minWidth: "max-content" }}
+                                      onClick={() => setShowNip05Overlay(true)}
+                                    >
+                                      {t("AikNyQn")}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                            <div className="fit-container sc-s-18 no-bg">
-                              <p
-                                className="p-medium gray-c box-pad-h-m"
-                                style={{ paddingTop: ".5rem" }}
-                              >
-                                {t("A40BuYB")}
-                              </p>
-                              <input
-                                className="if ifs-full if-no-border"
-                                style={{ height: "36px" }}
-                                placeholder={t("A40BuYB")}
-                                value={userLud16}
-                                onChange={handleLUD16}
-                              />
+                            <div className="fit-container sc-s-18 no-bg box-pad-v-s">
+                              <div className="fx-scattered fit-container">
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <p className="p-medium gray-c box-pad-h-m">
+                                    {t("A40BuYB")}
+                                  </p>
+                                  <input
+                                    className="if ifs-full if-no-border"
+                                    style={{ height: "36px" }}
+                                    placeholder={t("A40BuYB")}
+                                    value={userLud16}
+                                    onChange={handleLUD16}
+                                  />
+                                </div>
+                                {linkableWallets.length > 0 && (
+                                  <div className="box-pad-h-m">
+                                    <button
+                                      className="btn btn-small btn-gray"
+                                      style={{ minWidth: "max-content" }}
+                                      onClick={() => setShowWalletOverlay(true)}
+                                    >
+                                      {t("AmQVpu4")}
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
 
                             {showMore && (
                               <>
-                                <div className="fit-container sc-s-18 no-bg">
-                                  <p
-                                    className="p-medium gray-c box-pad-h-m"
-                                    style={{ paddingTop: ".5rem" }}
-                                  >
+                                <div className="fit-container sc-s-18 no-bg box-pad-v-s">
+                                  <p className="p-medium gray-c box-pad-h-m">
                                     {t("AvQu51Y")}
                                   </p>
                                   <input
@@ -437,11 +624,8 @@ export default function ProfileEdit() {
                                     }
                                   />
                                 </div>
-                                <div className="fit-container sc-s-18 no-bg">
-                                  <p
-                                    className="p-medium gray-c box-pad-h-m"
-                                    style={{ paddingTop: ".5rem" }}
-                                  >
+                                <div className="fit-container sc-s-18 no-bg box-pad-v-s">
+                                  <p className="p-medium gray-c box-pad-h-m">
                                     {t("ApHMzMe")}
                                   </p>
                                   <input
@@ -466,14 +650,14 @@ export default function ProfileEdit() {
                           </div>
                           <div className="fx-centered fit-container box-marg">
                             <button
-                              className={`btn btn-normal fx ${checkMetadata() && !isImageUploading
+                              className={`btn btn-normal fx ${nothingToUpdate() && !isImageUploading
                                   ? "btn-disabled"
                                   : ""
                                 }`}
                               onClick={updateInfos}
-                              disabled={checkMetadata()}
+                              disabled={nothingToUpdate()}
                             >
-                              {isLoading ? (
+                              {isLoading || claimingUsername ? (
                                 <Spinner />
                               ) : (
                                 <>

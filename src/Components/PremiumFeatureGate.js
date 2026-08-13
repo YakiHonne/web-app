@@ -1,15 +1,10 @@
 import React from "react";
-import { useRouter } from "next/router";
 import Overlay from "./Overlay";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { openUpgradeSheet } from "@/Store/Slides/Upgrade";
 
 const FEATURE_META = {
-  ai: {
-    labelKey: "AnvgwWQ",
-    descKey: "AT6bDWL",
-    perksKeys: ["A1gtD6n", "AuyDNyi", "ANOdwQV", "AdCodB3"],
-  },
   editor: {
     labelKey: "ASmvICL",
     descKey: "AkMDVZr",
@@ -18,9 +13,9 @@ const FEATURE_META = {
 };
 
 export default function PremiumFeatureGate({ feature, onClose }) {
-  const router = useRouter();
+  const dispatch = useDispatch();
   const { t } = useTranslation();
-  const meta = FEATURE_META[feature] || FEATURE_META.ai;
+  const meta = FEATURE_META[feature] || FEATURE_META.editor;
   const subscription = useSelector((state) => state.subscription);
   const plan = subscription?.status?.plan;
   const planLabel = plan === "basic"
@@ -29,7 +24,7 @@ export default function PremiumFeatureGate({ feature, onClose }) {
 
   const handleUpgrade = () => {
     onClose();
-    router.push("/subscription");
+    dispatch(openUpgradeSheet({ context: feature }));
   };
 
   return (

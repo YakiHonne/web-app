@@ -23,6 +23,7 @@ import { iconsNames } from "@/Content/IconV2URL";
 import EventStats from "./EventStats";
 import CommentsSection from "@/Components/CommentsSection";
 import Overlay from "@/Components/Overlay";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 export default function NotesComment({
   event,
@@ -37,6 +38,7 @@ export default function NotesComment({
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { handleTranslateError } = useQuotaGuard();
   const userKeys = useSelector((state) => state.userKeys);
   const { isNip05Verified, userProfile, proUser } = useUserProfile(event.pubkey);
   const { isMuted } = useIsMute(event.pubkey);
@@ -96,15 +98,7 @@ export default function NotesComment({
       }
       let res = await translate(event.content);
       if (res.status !== 200) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc:
-              typeof res.res === "string" && res.res
-                ? res.res
-                : t("AZ5VQXL"),
-          }),
-        );
+        handleTranslateError(res);
       }
       if (res.status === 200) {
         let noteTree = getNoteTree(

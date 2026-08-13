@@ -2,9 +2,11 @@ import { useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { getRedeemCodes, requestRedeemCode, redeemCode } from "@/Endpoints/Points";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 export default function useRedeemCodes() {
   const dispatch = useDispatch();
+  const { handleAccessError } = useQuotaGuard();
   const [codes, setCodes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -32,11 +34,13 @@ export default function useRedeemCodes() {
       await fetch();
       if (onSuccess) await onSuccess();
     } catch (e) {
-      dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to request a code." }));
+      if (!handleAccessError(e, "redeem-points")) {
+        dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to request a code." }));
+      }
     } finally {
       setRequesting(false);
     }
-  }, [dispatch, fetch]);
+  }, [dispatch, fetch, handleAccessError]);
 
   const redeem = useCallback(async ({ code, lightning_address }, onSuccess) => {
     setRedeeming(true);
@@ -47,12 +51,14 @@ export default function useRedeemCodes() {
       if (onSuccess) await onSuccess();
       return true;
     } catch (e) {
-      dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to redeem code." }));
+      if (!handleAccessError(e, "redeem-points")) {
+        dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to redeem code." }));
+      }
       return false;
     } finally {
       setRedeeming(false);
     }
-  }, [dispatch, fetch]);
+  }, [dispatch, fetch, handleAccessError]);
 
   return { codes, loading, error, fetch, requesting, requestCode, redeeming, redeem };
 }

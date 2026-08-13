@@ -731,6 +731,7 @@ const translate = async (text) => {
     if (err.response) {
       return {
         status: err.response.status,
+        reason: err.response.data?.reason || null,
         res: err.response.data?.message || err.response.data?.res,
       };
     }

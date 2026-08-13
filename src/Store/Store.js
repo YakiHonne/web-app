@@ -42,6 +42,7 @@ import {
   UpdatedActionFromYakiChestSliceReducer,
 } from "./Slides/YakiChest";
 import { SubscriptionReducer } from "./Slides/Subscription";
+import { UpgradeReducer, OnboardingReducer } from "./Slides/Upgrade";
 import { NostrAuthorsReducer, NostrClientsReducer } from "./Slides/Profiles";
 import {
   ToastReducer,
@@ -125,5 +126,7 @@ export const store = configureStore({
     userStarterPacks: UserStarterPacksReducer,
     userMediaPacks: UserMediaPacksReducer,
     subscription: SubscriptionReducer,
+    upgrade: UpgradeReducer,
+    onboarding: OnboardingReducer,
   },
 });

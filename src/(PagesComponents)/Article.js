@@ -39,10 +39,12 @@ import Spinner from "@/Components/Spinner";
 import Icon from "@/Components/Icon";
 import Badge from "@/Helpers/Badge";
 import EventStats from "@/Components/EventStats";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 export default function Article({ event, userProfile, naddrData }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const { handleTranslateError } = useQuotaGuard();
   const userKeys = useSelector((state) => state.userKeys);
   const [isLoading, setIsLoading] = useState(event ? false : true);
   const [post, setPost] = useState(event);
@@ -147,15 +149,7 @@ export default function Article({ event, userProfile, naddrData }) {
         [post.title, post.description || " ", post.content].join(" ABCAF "),
       );
       if (res.status !== 200) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc:
-              typeof res.res === "string" && res.res
-                ? res.res
-                : t("AZ5VQXL"),
-          }),
-        );
+        handleTranslateError(res);
       }
       if (res.status === 200) {
         setTranslatedTitle(res.res.split("ABCAF")[0]);

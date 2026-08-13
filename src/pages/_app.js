@@ -53,6 +53,13 @@ const PublishingClient = dynamic(() => import("@/Components/Publishing"), {
 const InitiateCashu = dynamic(() => import("@/Components/InitiateCashu"), {
   ssr: false,
 });
+const UpgradeSheetHost = dynamic(() => import("@/Components/UpgradeSheetHost"), {
+  ssr: false,
+});
+const OnboardingHost = dynamic(
+  () => import("@/Components/Onboarding/OnboardingHost"),
+  { ssr: false },
+);
 
 const tourSteps = [
   { selector: ".uplift-search-pill", title: "Search", description: "Find notes, profiles, and topics instantly." },
@@ -210,6 +217,8 @@ function App({ Component, pageProps }) {
         <AppInit />
         <IinitiateNotifications />
         <InitiateCashu />
+        <UpgradeSheetHost />
+        <OnboardingHost />
         <NavbarClient />
         {!shouldHideSidebar && <TopNavbarClient />}
         <WarningBarClient />

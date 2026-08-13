@@ -749,6 +749,44 @@
   }
 }
 
+.ai-quota-banner {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--pale-gray);
+  background: var(--very-dim-gray);
+  flex-shrink: 0;
+}
+
+.ai-quota-banner-text {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--gray);
+}
+
+.ai-quota-banner-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--c1);
+  white-space: nowrap;
+}
+
+.ai-quota-banner-btn:hover {
+  text-decoration: underline;
+}
+
 .ai-panel-input-area {
   display: flex;
   align-items: flex-end;
@@ -1101,6 +1139,16 @@
 .sr-fix-btn:hover {
   border-color: #6366f1;
   color: #6366f1;
+}
+
+.sr-fix-btn-disabled,
+.sr-fix-btn-disabled:hover {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-color: var(--c1);
+  color: var(--c1);
+  cursor: not-allowed;
 }
 
 .sr-ignore-btn:hover {

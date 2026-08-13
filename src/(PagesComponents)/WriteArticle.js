@@ -424,8 +424,6 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
-  const subscription = useSelector((state) => state.subscription);
-  const isPremiumPlan = subscription?.status?.plan === "premium" && subscription?.status?.active;
   const pub = userKeys?.pub ?? "anon";
 
   const initialDraft = useRef(null);
@@ -446,7 +444,6 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
   const [imetas, setImetas] = useState([]);
   const [showAIPanel, setShowAIPanel] = useState(false);
   const [showSecondReader, setShowSecondReader] = useState(false);
-  const [showAIGate, setShowAIGate] = useState(false);
   const [aiChatPrefill, setAiChatPrefill] = useState("");
   const [diffHunks, setDiffHunks] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -739,10 +736,6 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
   }, [onPdfImportRequest, editor, uploadImage, dispatch]);
 
   const handleAITabClick = (value) => {
-    if (!isPremiumPlan) {
-      setShowAIGate(true);
-      return;
-    }
     if (value === 0 && !showSecondReader) {
       setShowSecondReader(true);
       setShowAIPanel(false);
@@ -843,8 +836,6 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
         lastEditedParagraph={lastEditedParagraph}
         suppressInvalidationRef={srSuppressInvalidationRef}
       />
-
-      {showAIGate && <PremiumFeatureGate feature="ai" onClose={() => setShowAIGate(false)} />}
     </>
   );
 }

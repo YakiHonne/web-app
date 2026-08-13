@@ -1,16 +1,5 @@
 import axiosInstance from "@/Helpers/HTTP_Client";
-
-const throwPlanAwareError = (err, fallback) => {
-  const status = err?.response?.status;
-  if (status === 403 || status === 429) {
-    const planError = new Error(
-      err?.response?.data?.message || err?.response?.data?.error || fallback,
-    );
-    planError.status = status;
-    throw planError;
-  }
-  throw new Error(err?.response?.data?.error || err.message || fallback);
-};
+import { throwPlanAwareError } from "@/Helpers/PlanErrors";
 
 export const analyzeFullArticle = async (article, personaId) => {
   try {

@@ -118,6 +118,8 @@ import {
 } from "@/Store/Slides/YakiChest";
 import {
   setSubscriptionStatus,
+  mergeAccountFields,
+  pickAccountFields,
   clearSubscriptionStatus,
 } from "@/Store/Slides/Subscription";
 import { relaysOnPlatform } from "@/Content/Relays";
@@ -525,7 +527,8 @@ export default function AppInit() {
 
     if (pub === prevPubkeyRef.current) return;
 
-    const fetchAndStoreSubscription = async () => {
+    const fetchAndStoreSubscription = async (account) => {
+      if (account) dispatch(mergeAccountFields(pickAccountFields(account)));
       try {
         const { data } = await axiosInstance.get("/api/v1/subscription-status");
         dispatch(setSubscriptionStatus(data));
@@ -551,7 +554,7 @@ export default function AppInit() {
           localStorage.setItem("connect_yc", `${new Date().getTime()}`);
           if (onlineData.user_stats) updateYakiChestStats(onlineData.user_stats);
           dispatch(setIsConnectedToYaki(true));
-          fetchAndStoreSubscription();
+          fetchAndStoreSubscription(onlineData);
           return;
         }
       } catch {}
@@ -562,7 +565,7 @@ export default function AppInit() {
           localStorage.setItem("connect_yc", `${new Date().getTime()}`);
           if (data.is_new) initiFirstLoginStats(data);
           dispatch(setIsConnectedToYaki(true));
-          fetchAndStoreSubscription();
+          fetchAndStoreSubscription(data);
         }
       } catch {}
     };

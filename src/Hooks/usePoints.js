@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { setToast } from "@/Store/Slides/Publishers";
 import { updateYakiChestStats } from "@/Helpers/Controlers";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 import {
   getPointsConfig,
   getSubscriptionEligibility,
@@ -11,6 +12,7 @@ import {
 
 export default function usePoints() {
   const dispatch = useDispatch();
+  const { handleAccessError } = useQuotaGuard();
   const [config, setConfig] = useState(null);
   const [eligibility, setEligibility] = useState(null);
   const [loadingEligibility, setLoadingEligibility] = useState(false);
@@ -53,11 +55,13 @@ export default function usePoints() {
       await fetchEligibility();
       if (onSuccess) await onSuccess();
     } catch (e) {
-      dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to redeem subscription." }));
+      if (!handleAccessError(e, "redeem-points")) {
+        dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to redeem subscription." }));
+      }
     } finally {
       setRedeemingPlan(null);
     }
-  }, [dispatch, refreshBalance, fetchEligibility]);
+  }, [dispatch, refreshBalance, fetchEligibility, handleAccessError]);
 
   return {
     config,

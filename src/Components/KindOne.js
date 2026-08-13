@@ -43,6 +43,7 @@ import EventStats from "./EventStats";
 import PaidNoteInfoOverlay from "@/Components/PaidNoteInfoOverlay";
 import Follow from "./Follow";
 import { iconsNames } from "@/Content/IconV2URL";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 function KindOne({
   event,
@@ -54,6 +55,7 @@ function KindOne({
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
+  const { handleTranslateError } = useQuotaGuard();
   const userKeys = useSelector((state) => state.userKeys);
   const { isNip05Verified, userProfile, proUser } = useUserProfile(event?.pubkey);
   const [toggleComment, setToggleComment] = useState(false);
@@ -194,15 +196,7 @@ function KindOne({
       }
       let res = await translate(event.content);
       if (res.status !== 200) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc:
-              typeof res.res === "string" && res.res
-                ? res.res
-                : t("AZ5VQXL"),
-          }),
-        );
+        handleTranslateError(res);
       }
       if (res.status === 200) {
         let noteTree = getNoteTree(

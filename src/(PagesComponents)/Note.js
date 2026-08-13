@@ -31,10 +31,12 @@ import Icon from "@/Components/Icon";
 import Badge from "@/Helpers/Badge";
 import EventStats from "@/Components/EventStats";
 import PaidNoteInfoOverlay from "@/Components/PaidNoteInfoOverlay";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 export default function Note({ event, nevent }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const { handleTranslateError } = useQuotaGuard();
   const userKeys = useSelector((state) => state.userKeys);
   const [showHistory, setShowHistory] = useState(false);
   const [isLoading, setIsLoading] = useState(event ? false : true);
@@ -98,15 +100,7 @@ export default function Note({ event, nevent }) {
     try {
       let res = await translate(note.content);
       if (res.status !== 200) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc:
-              typeof res.res === "string" && res.res
-                ? res.res
-                : t("AZ5VQXL"),
-          }),
-        );
+        handleTranslateError(res);
       }
       if (res.status === 200) {
         let noteTree = getNoteTree(

@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { analyzeFullArticle, analyzeParagraph } from "@/Endpoints/SecondReaderAI";
 import { PERSONAS } from "@/Content/SecondReaderPersonas";
-import aiChatDb from "@/lib/aiChatDb";
+import aiChatDb, { scopeKey } from "@/lib/aiChatDb";
 import { setToast } from "@/Store/Slides/Publishers";
+import { getErrorReason, getErrorStatus } from "@/Hooks/useQuotaGuard";
+import useFeatureQuota from "@/Hooks/useFeatureQuota";
+import QuotaBanner from "@/Components/QuotaBanner";
+import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
 import { useTranslation } from "react-i18next";
 
 function hashString(str) {
@@ -14,9 +19,11 @@ function hashString(str) {
   return String(h);
 }
 
-async function loadStoredReactions(personaId) {
+async function loadStoredReactions(pubkey, personaId) {
   try {
-    const row = await aiChatDb.secondReaderReactions.get(personaId);
+    const row = await aiChatDb.secondReaderReactions.get(
+      scopeKey(pubkey, personaId),
+    );
     if (!row) return null;
     return { reactions: row.reactions ?? [], contentHash: row.contentHash };
   } catch {
@@ -24,10 +31,11 @@ async function loadStoredReactions(personaId) {
   }
 }
 
-async function saveStoredReactions(personaId, reactions, contentHash) {
+async function saveStoredReactions(pubkey, personaId, reactions, contentHash) {
   try {
     await aiChatDb.secondReaderReactions.put({
-      personaId,
+      personaId: scopeKey(pubkey, personaId),
+      pubkey: pubkey || "",
       reactions,
       contentHash,
       updatedAt: Date.now(),
@@ -35,13 +43,13 @@ async function saveStoredReactions(personaId, reactions, contentHash) {
   } catch { }
 }
 
-async function deleteStoredReactions(personaId) {
+async function deleteStoredReactions(pubkey, personaId) {
   try {
-    await aiChatDb.secondReaderReactions.delete(personaId);
+    await aiChatDb.secondReaderReactions.delete(scopeKey(pubkey, personaId));
   } catch { }
 }
 
-function PersonaPicker({ onSelect, isAnalyzing, onClose, lastUsedPersonaId }) {
+function PersonaPicker({ onSelect, isAnalyzing, onClose, lastUsedPersonaId, quotaExceeded, quotaLocked, quotaResetAt }) {
   const { t } = useTranslation();
   return (
     <div
@@ -67,6 +75,12 @@ function PersonaPicker({ onSelect, isAnalyzing, onClose, lastUsedPersonaId }) {
         <p className="gray-c p-medium">{t("AYKqIP8")}</p>
       </div>
 
+      {quotaExceeded && (
+        <div style={{ padding: "12px 16px 0" }}>
+          <QuotaBanner locked={quotaLocked} resetAt={quotaResetAt} context="ai" />
+        </div>
+      )}
+
       <div style={{ position: "relative", flex: 1, overflow: "hidden" }}>
         <div
           className="fx-centered fx-col fx-start-h fit-container fx-gap-v-m box-pad-h-m box-pad-v-m"
@@ -78,10 +92,10 @@ function PersonaPicker({ onSelect, isAnalyzing, onClose, lastUsedPersonaId }) {
               <div
                 key={p.id}
                 className="pointer fx-centered fx-start-v fx-gap-h-l fit-container border-all round-corner-m bg-hover box-pad-h-m box-pad-v-m"
-                onClick={() => !isAnalyzing && onSelect(p)}
+                onClick={() => !isAnalyzing && !quotaExceeded && onSelect(p)}
                 style={{
-                  opacity: isAnalyzing ? 0.5 : 1,
-                  cursor: isAnalyzing ? "not-allowed" : "pointer",
+                  opacity: isAnalyzing || quotaExceeded ? 0.5 : 1,
+                  cursor: isAnalyzing || quotaExceeded ? "not-allowed" : "pointer",
                   borderColor: isLastUsed ? "var(--c1)" : undefined,
                   position: "relative",
                 }}
@@ -141,7 +155,7 @@ function SentimentIcon({ sentiment }) {
   return <span>💬</span>;
 }
 
-function ReactionCard({ reaction, onFocus, onFix, onIgnore }) {
+function ReactionCard({ reaction, onFocus, onFix, onIgnore, aiQuotaExceeded }) {
   const { t } = useTranslation();
   const isIgnored = reaction.status === "ignored";
   const isFixed = reaction.status === "fixed";
@@ -168,13 +182,23 @@ function ReactionCard({ reaction, onFocus, onFix, onIgnore }) {
       {!isResolved && (
         <div className="sr-reaction-actions">
           <button
-            className="sr-fix-btn"
+            className={`sr-fix-btn${aiQuotaExceeded ? " sr-fix-btn-disabled" : ""}`}
+            disabled={aiQuotaExceeded}
+            title={aiQuotaExceeded ? "AI quota exceeded" : undefined}
             onClick={(e) => {
               e.stopPropagation();
+              if (aiQuotaExceeded) return;
               onFix(reaction);
             }}
           >
-            {t("AvGTiVQ")} →
+            {aiQuotaExceeded ? (
+              <>
+                <Icon name={iconsNames.circle_warning} size={13} />
+                Limit reached
+              </>
+            ) : (
+              <>{t("AvGTiVQ")} →</>
+            )}
           </button>
           <button
             className="sr-ignore-btn"
@@ -206,6 +230,10 @@ function ActiveReader({
   onClear,
   reduced,
   onToggleReduced,
+  quotaExceeded,
+  quotaLocked,
+  quotaResetAt,
+  aiQuotaExceeded,
 }) {
   const { t } = useTranslation();
   const activeReactions = reactions.filter((r) => !r.status);
@@ -270,6 +298,12 @@ function ActiveReader({
         </div>
       </div>
 
+      {!reduced && quotaExceeded && (
+        <div style={{ padding: "12px 14px 0" }}>
+          <QuotaBanner locked={quotaLocked} resetAt={quotaResetAt} context="ai" />
+        </div>
+      )}
+
       {!reduced && (
         <div className="sr-reactions">
           {activeReactions.length === 0 && resolvedReactions.length === 0 ? (
@@ -285,6 +319,7 @@ function ActiveReader({
                   onFocus={onFocus}
                   onFix={onFix}
                   onIgnore={onIgnore}
+                  aiQuotaExceeded={aiQuotaExceeded}
                 />
               ))}
 
@@ -364,16 +399,19 @@ export default function SecondReaderPanel({
 }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const {
+    exceeded: quotaExceeded,
+    locked: quotaLocked,
+    resetAt: quotaResetAt,
+    refresh: refreshQuota,
+    markExceeded,
+  } = useFeatureQuota("second-reader");
+  const { exceeded: aiQuotaExceeded, refresh: refreshAiQuota } =
+    useFeatureQuota("chat-articles");
+  const pubkey = useSelector((state) => state.userKeys?.pub) || "";
   const [view, setView] = useState("picker");
   const [reduced, setReduced] = useState(false);
-  const [activePersona, setActivePersona] = useState(() => {
-    try {
-      const id = localStorage.getItem("sr-last-persona");
-      return PERSONAS.find((p) => p.id === id) ?? null;
-    } catch {
-      return null;
-    }
-  });
+  const [activePersona, setActivePersona] = useState(null);
   const [reactions, setReactions] = useState([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isAnalyzingParagraph, setIsAnalyzingParagraph] = useState(false);
@@ -381,15 +419,32 @@ export default function SecondReaderPanel({
   const baseMarkdownRef = useRef(null);
 
   useEffect(() => {
+    reactionsCache.current = {};
+    setReactions([]);
+    setView("picker");
+    try {
+      const id = localStorage.getItem(scopeKey(pubkey, "sr-last-persona"));
+      setActivePersona(PERSONAS.find((p) => p.id === id) ?? null);
+    } catch {
+      setActivePersona(null);
+    }
+  }, [pubkey]);
+
+  useEffect(() => {
     if (!activePersona) return;
-    loadStoredReactions(activePersona.id).then((stored) => {
+    let cancelled = false;
+    loadStoredReactions(pubkey, activePersona.id).then((stored) => {
+      if (cancelled) return;
       if (stored && stored.reactions.length > 0) {
         reactionsCache.current[activePersona.id] = stored.reactions;
         setReactions(stored.reactions);
         setView("active");
       }
     });
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [pubkey, activePersona]);
 
   useEffect(() => {
     if (!editor) return;
@@ -418,7 +473,7 @@ export default function SecondReaderPanel({
     async (persona) => {
       const persistPersona = (p) => {
         try {
-          localStorage.setItem("sr-last-persona", p.id);
+          localStorage.setItem(scopeKey(pubkey, "sr-last-persona"), p.id);
         } catch { }
       };
 
@@ -430,7 +485,7 @@ export default function SecondReaderPanel({
         return;
       }
 
-      const stored = await loadStoredReactions(persona.id);
+      const stored = await loadStoredReactions(pubkey, persona.id);
       if (stored && stored.reactions.length > 0) {
         reactionsCache.current[persona.id] = stored.reactions;
         persistPersona(persona);
@@ -439,6 +494,8 @@ export default function SecondReaderPanel({
         setView("active");
         return;
       }
+
+      if (quotaExceeded) return;
 
       const article = getMarkdown();
       const wordCount = article.trim().split(/\s+/).filter(Boolean).length;
@@ -455,24 +512,31 @@ export default function SecondReaderPanel({
           status: null,
         }));
         reactionsCache.current[persona.id] = loaded;
-        await saveStoredReactions(persona.id, loaded, hashString(article));
+        await saveStoredReactions(pubkey, persona.id, loaded, hashString(article));
         persistPersona(persona);
         setActivePersona(persona);
         setReactions(loaded);
         setView("active");
+        refreshQuota();
       } catch (err) {
         console.error("[SecondReader] full analysis failed", err);
-        if (err.status === 403) {
-          dispatch(setToast({ type: 2, desc: err.message || t("AMr1BBt") }));
-        } else if (err.status === 429) {
-          dispatch(setToast({ type: 2, desc: err.message || t("Alec9a8") }));
+        const status = getErrorStatus(err);
+        if (status === 429 || status === 403) {
+          markExceeded(getErrorReason(err));
+          refreshQuota({ assumeExceeded: true });
         }
       } finally {
         setIsAnalyzing(false);
       }
     },
-    [getMarkdown, dispatch, t],
+    [getMarkdown, dispatch, t, pubkey, quotaExceeded, markExceeded, refreshQuota],
   );
+
+  useEffect(() => {
+    if (!isOpen) return;
+    refreshQuota();
+    refreshAiQuota();
+  }, [isOpen, refreshQuota, refreshAiQuota]);
 
   const activePersonaRef = useRef(null);
   activePersonaRef.current = activePersona;
@@ -480,16 +544,19 @@ export default function SecondReaderPanel({
   useEffect(() => {
     const persona = activePersonaRef.current;
     if (!persona) return;
+    if (reactions.length === 0 && !reactionsCache.current[persona.id]) return;
     reactionsCache.current[persona.id] = reactions;
     saveStoredReactions(
+      pubkey,
       persona.id,
       reactions,
       hashString(baseMarkdownRef.current || ""),
     );
-  }, [reactions]);
+  }, [pubkey, reactions]);
 
   useEffect(() => {
     if (!activePersona || !lastEditedParagraph) return;
+    if (quotaExceeded) return;
     const { index, text, before, after } = lastEditedParagraph;
     if (!text.trim()) return;
 
@@ -509,14 +576,15 @@ export default function SecondReaderPanel({
             : without;
           return updated;
         });
+        refreshQuota();
       })
       .catch((err) => {
         if (cancelled) return;
         console.error("[SecondReader] paragraph analysis failed", err);
-        if (err.status === 403) {
-          dispatch(setToast({ type: 2, desc: err.message || t("AMr1BBt") }));
-        } else if (err.status === 429) {
-          dispatch(setToast({ type: 2, desc: err.message || t("Alec9a8") }));
+        const status = getErrorStatus(err);
+        if (status === 429 || status === 403) {
+          markExceeded(getErrorReason(err));
+          refreshQuota({ assumeExceeded: true });
         }
       })
       .finally(() => {
@@ -527,7 +595,7 @@ export default function SecondReaderPanel({
       cancelled = true;
       setIsAnalyzingParagraph(false);
     };
-  }, [lastEditedParagraph, activePersona]);
+  }, [lastEditedParagraph, activePersona, quotaExceeded, markExceeded, refreshQuota]);
 
   const handleFix = useCallback(
     (reaction) => {
@@ -552,9 +620,9 @@ export default function SecondReaderPanel({
   const handleClear = useCallback(() => {
     if (!activePersona) return;
     delete reactionsCache.current[activePersona.id];
-    deleteStoredReactions(activePersona.id);
+    deleteStoredReactions(pubkey, activePersona.id);
     setReactions([]);
-  }, [activePersona]);
+  }, [pubkey, activePersona]);
 
   return (
     <div
@@ -570,6 +638,9 @@ export default function SecondReaderPanel({
           isAnalyzing={isAnalyzing}
           onClose={onClose}
           lastUsedPersonaId={activePersona?.id ?? null}
+          quotaExceeded={quotaExceeded}
+          quotaLocked={quotaLocked}
+          quotaResetAt={quotaResetAt}
         />
       ) : (
         <ActiveReader
@@ -584,6 +655,10 @@ export default function SecondReaderPanel({
           onClear={handleClear}
           reduced={reduced}
           onToggleReduced={() => setReduced((r) => !r)}
+          quotaExceeded={quotaExceeded}
+          quotaLocked={quotaLocked}
+          quotaResetAt={quotaResetAt}
+          aiQuotaExceeded={aiQuotaExceeded}
         />
       )}
     </div>
