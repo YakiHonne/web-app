@@ -421,38 +421,38 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
       <div className="sub-card fx-centered fx-col" style={{ rowGap: "14px" }}>
         <div className="fit-container fx-scattered">
           <h4>{t("AwtJ5HS")}</h4>
-          <PlanBadge plan={status.plan || "free"} />
+          {!status.in_trial && <PlanBadge plan={status.plan || "free"} />}
         </div>
 
         {status.in_trial && (
-          <div
-            className="fit-container round-corner-m box-pad-h-m box-pad-v-m fx-scattered sc-s"
-            style={{ gap: "12px" }}
-          >
-            <div style={{ display: "flex", flexDirection: "column", rowGap: "2px" }}>
-              <p style={{ fontWeight: 600 }}>{t("Aoiqy17")}</p>
-              <p className="gray-c p-medium">{t("Am6X1Yl", { date: fmtDate(status.trial_ends_at, t("AvGdwjI")) })}</p>
+          <>
+            <div className="fit-container sub-trial-pill fx-centered">
+              <p>
+                {t("AHm6CaH", {
+                  date: fmtDate(status.trial_ends_at, t("AvGdwjI")),
+                })}
+              </p>
             </div>
-            <button className="btn btn-normal" style={{ flexShrink: 0 }} onClick={onUpgrade}>
-              {t("AGo17y4")}
+            <button className="btn btn-normal btn-full" onClick={onUpgrade}>
+              {t("AApRZBN")}
             </button>
-          </div>
+          </>
         )}
 
-        {status.cancel_at_period_end && (
+        {!status.in_trial && status.cancel_at_period_end && (
           <div className="fit-container round-corner fx-centered box-pad-h-m box-pad-v-s" style={{ backgroundColor: "rgba(247,88,22,0.08)", border: "1px solid var(--c1)" }}>
             <p style={{ color: "var(--c1)" }}>{t("AOvUPSY", { date: fmtDate(status.next_subscription, t("AvGdwjI")) })}</p>
           </div>
         )}
 
-        {!status.cancel_at_period_end && status.active && status.next_subscription > 0 && (
+        {!status.in_trial && !status.cancel_at_period_end && status.active && status.next_subscription > 0 && (
           <div className="fit-container fx-scattered">
             <p className="gray-c">{t("AfLR6HA")}</p>
             <p>{fmtDate(status.next_subscription, t("AvGdwjI"))}</p>
           </div>
         )}
 
-        {status.last_payment_method_display && (
+        {!status.in_trial && status.last_payment_method_display && (
           <div className="fit-container fx-scattered">
             <p className="gray-c">{t("A0SiY0R")}</p>
             <div className="fx-centered" style={{ columnGap: "8px" }}>
@@ -470,14 +470,14 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
           </div>
         )}
 
-        {status.last_subscription > 0 && status.history?.length > 0 && (
+        {!status.in_trial && status.last_subscription > 0 && status.history?.length > 0 && (
           <div className="fit-container fx-scattered">
             <p className="gray-c">{t("A6YH5Fa")}</p>
             <p>{fmtDate(status.last_subscription, t("AvGdwjI"))}</p>
           </div>
         )}
 
-        {isFree && (
+        {isFree && !status.in_trial && (
           <button className="btn btn-normal btn-full" onClick={onUpgrade}>{t("Aqc63x1")}</button>
         )}
 

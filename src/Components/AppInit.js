@@ -82,6 +82,7 @@ import {
   saveRelaysListsForUsers,
   updateYakiChestStats,
   userLogout,
+  yakiChestDisconnect,
 } from "@/Helpers/Controlers";
 import {
   setInitDMS,
@@ -154,11 +155,13 @@ export default function AppInit() {
       async () => (userKeys ? await getAppSettings(userKeys.pub) : []),
       [userKeys],
     ) || false;
-  const followings =
-    useLiveQuery(
-      async () => (userKeys ? await getFollowings(userKeys.pub) : []),
-      [userKeys],
-    ) || [];
+  // Kept undefined until the query actually resolves, so an account with no
+  // contact list can still be told apart from "not read yet".
+  const followingsQuery = useLiveQuery(
+    async () => (userKeys ? await getFollowings(userKeys.pub) : []),
+    [userKeys],
+  );
+  const followings = followingsQuery || [];
   const interestsList =
     useLiveQuery(
       async () => (userKeys ? await getInterestsList(userKeys.pub) : []),
@@ -310,7 +313,6 @@ export default function AppInit() {
     ) {
       previousFollowings.current = followings;
       dispatch(setUserFollowings(followings?.followings || []));
-      if (followings?.followings) dispatch(setIsUserFollowingsLoaded(true));
     }
 
     if (
@@ -472,8 +474,21 @@ export default function AppInit() {
     let handleUseRKeys = async () => {
       let signer = ndkInstance.signer;
       if (signer) {
-        signer = await ndkInstance.signer.user();
-        signer = signer._pubkey;
+        try {
+          // For a NIP-46 signer this waits on the remote bunker, which may
+          // never answer. Time it out so an unreachable signer cannot stop the
+          // correct one from being installed below.
+          const currentUser = await Promise.race([
+            ndkInstance.signer.user(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("SIGNER_TIMEOUT")), 5000),
+            ),
+          ]);
+          signer = currentUser?._pubkey;
+        } catch (err) {
+          console.log(err);
+          signer = undefined;
+        }
       }
       if (signer !== userKeys.pub) {
         if (userKeys.ext) {
@@ -485,6 +500,17 @@ export default function AppInit() {
           ndkInstance.signer = signer;
         }
         if (userKeys.bunker) {
+          // The NIP-46 RPC only works if NDK is actually connected to the
+          // relay named in the bunker URI, which is not part of the default
+          // relay set (for Pomegranate it is the central itself).
+          try {
+            const bunkerRelays = new URL(userKeys.bunker).searchParams.getAll(
+              "relay",
+            );
+            addExplicitRelays(bunkerRelays);
+          } catch (err) {
+            console.log(err);
+          }
           const localKeys = new NDKPrivateKeySigner(userKeys.localKeys.sec);
           const signer = new NDKNip46Signer(
             ndkInstance,
@@ -508,6 +534,14 @@ export default function AppInit() {
     dispatch(setUserFollowings([]));
     dispatch(setIsUserDataLoaded(false));
   }, [userKeys]);
+
+  // The contact list has been read once the query resolves, even if the account
+  // follows nobody. Without this a freshly created account never flips the flag
+  // and the home feed stays empty until the page is reloaded.
+  useEffect(() => {
+    if (!userKeys || followingsQuery === undefined) return;
+    dispatch(setIsUserFollowingsLoaded(true));
+  }, [userKeys, followingsQuery, dispatch]);
 
   useEffect(() => {
     const pub = userKeys?.pub;
@@ -1087,7 +1121,10 @@ export default function AppInit() {
         dispatch(setIsYakiChestLoaded(false));
         const data = await axiosInstance.get("/api/v1/yaki-chest/stats");
         if (data.data.user_stats.pubkey !== userKeys.pub) {
-          userLogout();
+          // The backend session still belongs to a previously connected
+          // account: drop that session only. Wiping the local keys here would
+          // log the user out of an account they just signed into.
+          await yakiChestDisconnect();
           localStorage.removeItem("connect_yc");
           dispatch(setIsYakiChestLoaded(true));
           return;

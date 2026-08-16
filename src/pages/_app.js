@@ -47,6 +47,9 @@ const FloatingDMsClient = dynamic(() => import("@/Components/FloatingDMs"), {
 const WarningBarClient = dynamic(() => import("@/Components/WarningBar"), {
   ssr: false,
 });
+const TrialBannerClient = dynamic(() => import("@/Components/TrialBanner"), {
+  ssr: false,
+});
 const PublishingClient = dynamic(() => import("@/Components/Publishing"), {
   ssr: false,
 });
@@ -222,6 +225,7 @@ function App({ Component, pageProps }) {
         <NavbarClient />
         {!shouldHideSidebar && <TopNavbarClient />}
         <WarningBarClient />
+        {!shouldHideSidebar && <TrialBannerClient />}
         <div
           className={`page-container fit-container fx-centered fx-start-v${!shouldHideSidebar ? " uplift-page-offset" : ""}`}
           style={{ height: "100dvh" }}

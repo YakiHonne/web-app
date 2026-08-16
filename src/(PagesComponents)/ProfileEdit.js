@@ -23,6 +23,7 @@ import { claimUsername } from "@/Endpoints/Account";
 import { setSubscriptionStatus } from "@/Store/Slides/Subscription";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { getWallets } from "@/Helpers/ClientHelpers";
+import { InitEvent } from "@/Helpers/Controlers";
 
 export default function ProfileEdit() {
   const dispatch = useDispatch();
@@ -32,6 +33,7 @@ export default function ProfileEdit() {
   const userRelays = useSelector((state) => state.userRelays);
   const userAllRelays = useSelector((state) => state.userAllRelays);
   const storeWallets = useSelector((state) => state.wallets);
+  const toPublish = useSelector((state) => state.toPublish);
   const { handleAccessError } = useQuotaGuard();
   const {
     isPaid,
@@ -79,6 +81,13 @@ export default function ProfileEdit() {
     triggerEdit();
   }, [userMetadata]);
 
+  // The publisher clears toPublish once it is done, whether it signed and
+  // published or bailed on an error. Without this the form stays locked behind
+  // pointerEvents:none when publishing fails.
+  useEffect(() => {
+    if (!toPublish) setIsLoading(false);
+  }, [toPublish]);
+
   useEffect(() => {
     setTempUserRelays(userAllRelays);
     setRelaysStatus(
@@ -108,50 +117,40 @@ export default function ProfileEdit() {
   const hasPendingUsername =
     canUseYakiNames && !hasUsername && usernameClaim.claimable;
 
+  // Two unrelated destinations: the Yakihonne API (the one-time username
+  // claim) and Nostr (the kind 0 metadata). Each runs only if its own data
+  // changed, and neither depends on the other's outcome.
   const updateInfos = async () => {
-    if (hasPendingUsername) {
-      const claimed = await claimPendingUsername();
-      if (!claimed) return;
-      if (checkMetadata()) return;
-    }
+    const metadataChanged = !checkMetadata();
+    const tasks = [];
 
-    let content = { ...userMetadata };
-    content.picture = userPicture !== false ? userPicture : content.picture;
-    content.banner = userBanner !== false ? userBanner : content.banner;
-    content.name = userName !== false ? userName : content.name;
-    content.display_name =
-      userDisplayName !== false ? userDisplayName : content.display_name;
-    content.about = userAbout !== false ? userAbout : content.about || "";
-    content.website =
-      userWebsite !== false ? userWebsite : content.website || "";
-    content.nip05 = userNip05 !== false ? userNip05 : content.nip05;
-    content.lud06 = userLud06 !== false ? userLud06 : content.lud06;
-    content.lud16 = userLud16 !== false ? userLud16 : content.lud16;
+    if (hasPendingUsername) tasks.push(claimPendingUsername());
+    if (metadataChanged) tasks.push(publishMetadata(buildMetadata()));
 
+    await Promise.allSettled(tasks);
+  };
+
+  // Sign here rather than letting the publisher call ndkEvent.sign(): InitEvent
+  // is the path that handles extension, bunker (NIP-46) and raw-key accounts,
+  // and it is what every other event in the app uses.
+  const publishMetadata = async (content) => {
     setIsLoading(true);
+    const event = await InitEvent(0, JSON.stringify(content), []);
+    if (!event) {
+      setIsLoading(false);
+      dispatch(setToast({ type: 2, desc: t("ALmNi6E") }));
+      return;
+    }
     dispatch(
       setToPublish({
-        userKeys: userKeys,
-        kind: 0,
-        content: JSON.stringify(content),
-        tags: [],
+        eventInitEx: event,
         allRelays: userRelays,
       }),
     );
   };
 
   const publishField = (patch) => {
-    const content = { ...userMetadata, ...patch };
-    setIsLoading(true);
-    dispatch(
-      setToPublish({
-        userKeys: userKeys,
-        kind: 0,
-        content: JSON.stringify(content),
-        tags: [],
-        allRelays: userRelays,
-      }),
-    );
+    publishMetadata({ ...userMetadata, ...patch });
   };
 
   const refreshAccount = async () => {
@@ -251,19 +250,26 @@ export default function ProfileEdit() {
     setIsLoading(false);
   };
 
-  const checkMetadata = () => {
-    let tempUserMetadata = { ...userMetadata };
-    tempUserMetadata.picture = userPicture;
-    tempUserMetadata.banner = userBanner;
-    tempUserMetadata.name = userName;
-    tempUserMetadata.display_name = userDisplayName;
-    tempUserMetadata.website = userWebsite;
-    tempUserMetadata.about = userAbout;
-    tempUserMetadata.nip05 = userNip05;
-    tempUserMetadata.lud16 = userLud16;
-
-    return JSON.stringify(userMetadata) === JSON.stringify(tempUserMetadata);
+  // Mirrors exactly what updateInfos would publish, so the comparison cannot
+  // disagree with what actually gets sent.
+  const buildMetadata = () => {
+    const content = { ...userMetadata };
+    content.picture = userPicture !== false ? userPicture : content.picture;
+    content.banner = userBanner !== false ? userBanner : content.banner;
+    content.name = userName !== false ? userName : content.name;
+    content.display_name =
+      userDisplayName !== false ? userDisplayName : content.display_name;
+    content.about = userAbout !== false ? userAbout : content.about || "";
+    content.website =
+      userWebsite !== false ? userWebsite : content.website || "";
+    content.nip05 = userNip05 !== false ? userNip05 : content.nip05;
+    content.lud06 = userLud06 !== false ? userLud06 : content.lud06;
+    content.lud16 = userLud16 !== false ? userLud16 : content.lud16;
+    return content;
   };
+
+  const checkMetadata = () =>
+    JSON.stringify(userMetadata) === JSON.stringify(buildMetadata());
 
   const nothingToUpdate = () =>
     checkMetadata() && !hasPendingUsername && !claimingUsername;

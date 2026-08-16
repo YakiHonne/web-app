@@ -9,49 +9,17 @@ import { useSelector } from 'react-redux'
 import { useDispatch } from 'react-redux'
 import { setToast } from '@/Store/Slides/Publishers'
 import { copyText } from '@/Helpers/Helpers'
-import { OPERATOR_URLS } from '@/Content/pomegrenate'
-
-const massageURL = (input) => {
-    let url = input.trim()
-    if (!url.startsWith('http')) url = 'https://' + url
-    return new URL(url).origin
-}
-
-const openPopup = (url, name) => {
-    const width = 600
-    const height = 700
-    const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2)
-    const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2)
-    return window.open(url, name, `popup=yes,width=${width},height=${height},left=${left},top=${top}`)
-}
-
-const awaitPopupMessage = (popup, expectedOrigin, extract) => {
-    return new Promise((resolve, reject) => {
-        const TIMEOUT = 5 * 60 * 1000
-        const cleanup = () => {
-            window.removeEventListener('message', onMessage)
-            clearInterval(monitor)
-            clearTimeout(timer)
-        }
-        const onMessage = (event) => {
-            if (event.origin !== expectedOrigin || event.source !== popup) return
-            const value = extract(event.data)
-            if (value === undefined) return
-            cleanup()
-            popup.close()
-            resolve(value)
-        }
-        const monitor = setInterval(() => {
-            if (popup.closed) { cleanup(); reject(new Error('POPUP_CLOSED')) }
-        }, 300)
-        const timer = setTimeout(() => {
-            cleanup()
-            popup.close()
-            reject(new Error('Timed out'))
-        }, TIMEOUT)
-        window.addEventListener('message', onMessage)
-    })
-}
+import {
+    massageURL,
+    hostOf,
+    openPopup,
+    awaitPopupMessage,
+    authenticateWithGoogle,
+    getAccount,
+    findExistingSetup,
+    deleteAccount,
+} from '@/Helpers/Pomegranate'
+import { userLogout } from '@/Helpers/Controlers'
 
 const bigintTo32Bytes = (n) => {
     const hex = n.toString(16).padStart(64, '0')
@@ -60,41 +28,98 @@ const bigintTo32Bytes = (n) => {
     return bytes
 }
 
-export default function RecoverPrivateKeyGoogleMethod() {
-    const [showOverlay, setShowOverLay] = useState(false)
-    const { t } = useTranslation()
-    return (
-        <>
-            {showOverlay && <RecoverKeys exit={() => setShowOverLay(false)} />}
-            <div className='fit-container fx-col fx-centered fx-start-v box-pad-v-m'>
-                <div className='fx-scattered pointer fit-container'>
-                    <div>
-                        <p>{t('AlLGnJJ')}</p>
-                        <p className='gray-c p-medium'>{t('ABVa6rQ')}</p>
-                    </div>
-                    <button className='btn btn-normal' onClick={() => setShowOverLay(true)}>{t('AlsXwwk')}</button>
-                </div>
-            </div>
-        </>
-    )
+const downloadNsec = (nsec) => {
+    const content = ['Important: Store this information securely.', '---', `Private key: ${nsec}`].join('\n')
+    const blob = new Blob([content], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'nostr-private-key.txt'
+    a.click()
+    URL.revokeObjectURL(url)
 }
 
-const RecoverKeys = ({ exit }) => {
-    const userKeys = useSelector(state => state.userKeys)
-    const dispatch = useDispatch()
+// Shared shard-collection UI: signs in with Google on each operator until the
+// threshold is met, then rebuilds the secret key. The operators and threshold
+// are the ones this account was actually set up with, taken from the published
+// configuration event, since another client may have chosen a different set.
+const useKeyRecovery = () => {
     const { t } = useTranslation()
+    const userKeys = useSelector(state => state.userKeys)
 
-    const operators = OPERATOR_URLS.map(massageURL)
-    const threshold = Math.ceil((operators.length * 7) / 12)
+    const [config, setConfig] = useState(null)
+    const [loadingConfig, setLoadingConfig] = useState(true)
+    const [configError, setConfigError] = useState('')
+    const [needsCentralLookup, setNeedsCentralLookup] = useState(false)
+
+    // Fallback for accounts with no published configuration event: ask the
+    // central directly, which needs a Google token and so a user gesture.
+    const loadConfigFromCentral = async () => {
+        if (!userKeys?.central) return
+        setConfigError('')
+        setLoadingConfig(true)
+        try {
+            const central = massageURL(userKeys.central)
+            const token = await authenticateWithGoogle(central)
+            const account = await getAccount(central, token)
+            if (account?.operators?.length) {
+                setConfig({
+                    operators: account.operators.map(massageURL),
+                    threshold:
+                        account.threshold ||
+                        Math.ceil((account.operators.length * 7) / 12),
+                })
+                setNeedsCentralLookup(false)
+            } else {
+                setConfigError(t('AQsq0aG'))
+            }
+        } catch (err) {
+            if (err.message !== 'POPUP_CLOSED') {
+                setConfigError(err.message || t('AEH0z9N'))
+            }
+        } finally {
+            setLoadingConfig(false)
+        }
+    }
+
+    const loadConfig = React.useCallback(async () => {
+        if (!userKeys?.email) {
+            setLoadingConfig(false)
+            return
+        }
+        setConfigError('')
+        setLoadingConfig(true)
+        try {
+            const setup = await findExistingSetup(userKeys.email)
+            if (setup?.operators?.length) {
+                setConfig({
+                    operators: setup.operators.map(massageURL),
+                    threshold:
+                        setup.threshold ||
+                        Math.ceil((setup.operators.length * 7) / 12),
+                })
+            } else {
+                // Accounts created before the configuration event was published
+                // have no discovery event, so fall back to asking the central.
+                setNeedsCentralLookup(true)
+            }
+        } catch (err) {
+            setConfigError(err.message || t('AEH0z9N'))
+        } finally {
+            setLoadingConfig(false)
+        }
+    }, [userKeys?.email, t])
+
+    // The configuration event is public, so it can be read without any popup.
+    React.useEffect(() => { loadConfig() }, [loadConfig])
+
+    const operators = config?.operators ?? []
+    const threshold = config?.threshold ?? 0
 
     const [shards, setShards] = useState({})
     const [recovering, setRecovering] = useState({})
     const [errors, setErrors] = useState({})
     const [recoveredNsec, setRecoveredNsec] = useState(null)
-    const [copied, setCopied] = useState(false)
-
-    const collectedShards = Object.values(shards)
-    const isComplete = recoveredNsec !== null
 
     const handleRecover = async (operatorUrl) => {
         setRecovering(prev => ({ ...prev, [operatorUrl]: true }))
@@ -113,8 +138,7 @@ const RecoverKeys = ({ exit }) => {
                 const keyShards = collected.map(keyShardFromHex)
                 const secret = aggregateSecretKeyShards(keyShards)
                 const secretKey = bigintTo32Bytes(secret)
-                const nsec = nip19.nsecEncode(secretKey)
-                setRecoveredNsec(nsec)
+                setRecoveredNsec(nip19.nsecEncode(secretKey))
             }
         } catch (err) {
             if (err.message !== 'POPUP_CLOSED') {
@@ -125,21 +149,168 @@ const RecoverKeys = ({ exit }) => {
         }
     }
 
+    return {
+        operators,
+        threshold,
+        shards,
+        recovering,
+        errors,
+        recoveredNsec,
+        handleRecover,
+        collectedCount: Object.keys(shards).length,
+        config,
+        loadConfig,
+        loadConfigFromCentral,
+        needsCentralLookup,
+        loadingConfig,
+        configError,
+    }
+}
+
+const OperatorsList = ({ recovery }) => {
+    const { t } = useTranslation()
+    const {
+        operators, shards, recovering, errors, threshold, collectedCount,
+        handleRecover: onRecover, config, loadConfig, loadConfigFromCentral,
+        needsCentralLookup, loadingConfig, configError,
+    } = recovery
+
+    // The operator set has to come from the account's own configuration before
+    // any shard can be requested.
+    if (loadingConfig) {
+        return (
+            <div className='login-google-busy fx-centered fx-col'>
+                <Spinner size={24} />
+                <p className='gray-c'>{t('AQZNHiW')}</p>
+            </div>
+        )
+    }
+
+    if (!config) {
+        return (
+            <>
+                <p className={needsCentralLookup && !configError ? 'gray-c' : 'red-c'}>
+                    {configError || (needsCentralLookup ? t('AKUiSRk') : t('AQsq0aG'))}
+                </p>
+                <button
+                    className='btn btn-normal btn-full fx-centered'
+                    onClick={needsCentralLookup ? loadConfigFromCentral : loadConfig}
+                >
+                    {needsCentralLookup ? t('AIK8LaE') : t('AhOnn0t')}
+                </button>
+            </>
+        )
+    }
+
+    return (
+        <>
+            <p className='gray-c'>
+                {collectedCount}/{threshold} {t('Apom014').toLowerCase()}
+            </p>
+            <div className='login-convo-options' style={{ marginTop: 0 }}>
+                {operators.map((op, i) => {
+                    const hasShard = !!shards[op]
+                    const isLoading = !!recovering[op]
+                    const error = errors[op]
+                    return (
+                        <div
+                            key={op}
+                            className='login-convo-option '
+                            style={{ '--stagger-i': i, cursor: 'default' }}
+                        >
+                            <span className='login-convo-option-copy'>
+                                <b>{hostOf(op)}</b>
+                                {error && <span className='red-c'>{error}</span>}
+                            </span>
+                            {hasShard ? (
+                                <span className='login-convo-option-go'>
+                                    <Icon name='check_big' v={2} size={18} isBoldThemeColor />
+                                </span>
+                            ) : (
+                                <button
+                                    className='btn btn-normal btn-small btn-gray fx-centered bg-dropdown'
+                                    onClick={() => onRecover(op)}
+                                    disabled={isLoading}
+                                    style={{ minWidth: 90 }}
+                                >
+                                    {isLoading ? <Spinner /> : t('AlsXwwk')}
+                                </button>
+                            )}
+                        </div>
+                    )
+                })}
+            </div>
+        </>
+    )
+}
+
+const KeyReveal = ({ nsec }) => {
+    const { t } = useTranslation()
+    const [copied, setCopied] = useState(false)
     const handleCopy = () => {
-        copyText(recoveredNsec, t('AStACDI'))
+        copyText(nsec, t('AStACDI'))
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
+    return (
+        <div className='login-google-key-field'>
+            <p className='p-bold'>{t('Apom008')}</p>
+            <div className='login-google-key-row'>
+                <input
+                    type='text'
+                    className='if ifs-full'
+                    value={nsec}
+                    readOnly
+                    onClick={(e) => e.target.select()}
+                />
+                <button
+                    className='btn btn-normal btn-gray fx-centered bg-dropdown'
+                    onClick={handleCopy}
+                    style={{ padding: "0 1rem", borderRadius: "50%", aspectRatio: "1/1", width: "44px", height: "44px" }}
+                >
+                    <Icon name={copied ? 'check_big' : 'copy'} size={16} v={copied ? 2 : 1} />
+                </button>
+            </div>
+        </div>
+    )
+}
+
+export default function RecoverPrivateKeyGoogleMethod() {
+    const [showOverlay, setShowOverLay] = useState(false)
+    const [showUnlink, setShowUnlink] = useState(false)
+    const { t } = useTranslation()
+    return (
+        <>
+            {showOverlay && <RecoverKeys exit={() => setShowOverLay(false)} />}
+            {showUnlink && <UnlinkGoogleAccount exit={() => setShowUnlink(false)} />}
+            <div className='fit-container fx-col fx-centered fx-start-v box-pad-v-m'>
+                <div className='fx-scattered pointer fit-container'>
+                    <div>
+                        <p>{t('AlLGnJJ')}</p>
+                        <p className='gray-c p-medium'>{t('ABVa6rQ')}</p>
+                    </div>
+                    <button className='btn btn-normal' onClick={() => setShowOverLay(true)}>{t('AlsXwwk')}</button>
+                </div>
+                <div className='fx-scattered pointer fit-container'>
+                    <div>
+                        <p>{t('AghS7tM')}</p>
+                        <p className='gray-c p-medium'>{t('AITGqC6')}</p>
+                    </div>
+                    <button className='btn btn-red' onClick={() => setShowUnlink(true)}>{t('AehE9EV')}</button>
+                </div>
+            </div>
+        </>
+    )
+}
+
+const RecoverKeys = ({ exit }) => {
+    const { t } = useTranslation()
+    const dispatch = useDispatch()
+    const recovery = useKeyRecovery()
+    const isComplete = recovery.recoveredNsec !== null
 
     const handleDownload = () => {
-        const content = ['Important: Store this information securely.', '---', `Private key: ${recoveredNsec}`].join('\n')
-        const blob = new Blob([content], { type: 'text/plain' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'nostr-private-key.txt'
-        a.click()
-        URL.revokeObjectURL(url)
+        downloadNsec(recovery.recoveredNsec)
         dispatch(setToast({ type: 1, desc: t('Apom010') }))
     }
 
@@ -149,79 +320,145 @@ const RecoverKeys = ({ exit }) => {
                 <div className='close' onClick={exit}><div></div></div>
 
                 <div className='login-google-head'>
-                    <h4 className='login-card-title' style={{ fontSize: '1.2rem' }}>{t('AlLGnJJ')}</h4>
-                    <p className='gray-c p-medium'>{t('Apom012')}</p>
+                    <h4 className='p-big'>{t('AlLGnJJ')}</h4>
+                    <p className='gray-c'>{t('Apom012')}</p>
                 </div>
 
                 {!isComplete && (
-                    <>
-                        <p className='gray-c'>
-                            {collectedShards.length}/{threshold} {t('Apom014').toLowerCase()}
-                        </p>
-                        <div className='login-convo-options' style={{ marginTop: 0 }}>
-                            {operators.map((op, i) => {
-                                const hasShard = !!shards[op]
-                                const isLoading = !!recovering[op]
-                                const error = errors[op]
-                                const host = new URL(op).host
-                                return (
-                                    <div
-                                        key={op}
-                                        className='login-convo-option '
-                                        style={{ '--stagger-i': i, cursor: 'default' }}
-                                    >
-                                        <span className='login-convo-option-copy'>
-                                            <b>{host}</b>
-                                            {error && <span className='red-c'>{error}</span>}
-                                        </span>
-                                        {hasShard ? (
-                                            <span className='login-convo-option-go'>
-                                                <Icon name='check_big' v={2} size={18} isBoldThemeColor />
-                                            </span>
-                                        ) : (
-                                            <button
-                                                className='btn btn-normal btn-small btn-gray fx-centered bg-dropdown'
-                                                onClick={() => handleRecover(op)}
-                                                disabled={isLoading}
-                                                style={{ minWidth: 90 }}
-                                            >
-                                                {isLoading
-                                                    ? <Spinner />
-                                                    : t('AlsXwwk')}
-                                            </button>
-                                        )}
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </>
+                    <OperatorsList recovery={recovery} />
                 )}
 
                 {isComplete && (
                     <>
-                        <div className='login-google-key-field'>
-                            <p className='p-medium p-bold'>{t('Apom008')}</p>
-                            <div className='login-google-key-row'>
-                                <input
-                                    type='text'
-                                    className='if ifs-full'
-                                    value={recoveredNsec}
-                                    readOnly
-                                    onClick={(e) => e.target.select()}
-                                    style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}
-                                />
-                                <button
-                                    className='btn btn-normal btn-gray fx-centered bg-dropdown'
-                                    onClick={handleCopy}
-                                    style={{ padding: "0 1rem", borderRadius: "50%", aspectRatio: "1/1", width: "44px", height: "44px" }}
-
-                                >
-                                    <Icon name={copied ? 'check_big' : 'copy'} size={16} v={copied ? 2 : 1} />
-                                </button>
-                            </div>
-                        </div>
+                        <KeyReveal nsec={recovery.recoveredNsec} />
                         <button className='btn btn-gst btn-full' onClick={handleDownload}>
                             {t('Apom016')}
+                        </button>
+                    </>
+                )}
+            </div>
+        </Overlay>
+    )
+}
+
+// Unlinking is only safe once the user holds their own copy of the key, so the
+// same recovery process runs first and the key is handed over before the
+// Google connection is dropped.
+const UnlinkGoogleAccount = ({ exit }) => {
+    const { t } = useTranslation()
+    const dispatch = useDispatch()
+    const userKeys = useSelector(state => state.userKeys)
+    const recovery = useKeyRecovery()
+
+    const [acknowledged, setAcknowledged] = useState(false)
+    const [confirming, setConfirming] = useState(false)
+    const [unlinking, setUnlinking] = useState(false)
+    const [downloaded, setDownloaded] = useState(false)
+
+    const isComplete = recovery.recoveredNsec !== null
+
+    // Hand the key over as soon as it is reconstructed, the user should not be
+    // able to reach the unlink button without having received it.
+    React.useEffect(() => {
+        if (isComplete && !downloaded) {
+            downloadNsec(recovery.recoveredNsec)
+            dispatch(setToast({ type: 1, desc: t('Apom010') }))
+            setDownloaded(true)
+        }
+    }, [isComplete, downloaded, recovery.recoveredNsec, dispatch, t])
+
+    const handleUnlink = async () => {
+        setUnlinking(true)
+        try {
+            if (userKeys?.central) {
+                try {
+                    const token = await authenticateWithGoogle(userKeys.central)
+                    await deleteAccount(userKeys.central, token)
+                } catch (err) {
+                    // The central may not support removal, the local unlink
+                    // still goes ahead since the user now controls the key.
+                    console.log(err)
+                }
+            }
+            await userLogout(userKeys.pub)
+            dispatch(setToast({ type: 1, desc: t('ANijoRU') }))
+            exit()
+        } catch (err) {
+            console.log(err)
+            setUnlinking(false)
+        }
+    }
+
+    if (confirming) {
+        return (
+            <Overlay exit={() => setConfirming(false)} width={420}>
+                <div className='login-google-overlay box-pad-h box-pad-v bg-dropdown-t'>
+                    <div className='close' onClick={() => setConfirming(false)}><div></div></div>
+                    <div className='login-google-head'>
+                        <div className='pom-warning-badge fx-centered'>
+                            <Icon name='circle_warning' size={26} v={2} />
+                        </div>
+                        <h4 className='p-big'>{t('AWYc8dX')}</h4>
+                        <p className='gray-c'>{t('Alcl7QN')}</p>
+                    </div>
+                    <div className='pom-confirm-actions'>
+                        <button
+                            className='btn btn-gst'
+                            onClick={() => setConfirming(false)}
+                            disabled={unlinking}
+                        >
+                            {t('AB4BSCe')}
+                        </button>
+                        <button
+                            className='btn btn-red fx-centered'
+                            onClick={handleUnlink}
+                            disabled={unlinking}
+                        >
+                            {unlinking ? <Spinner /> : t('AehE9EV')}
+                        </button>
+                    </div>
+                </div>
+            </Overlay>
+        )
+    }
+
+    return (
+        <Overlay exit={exit} width={460}>
+            <div className='login-google-overlay box-pad-h box-pad-v bg-dropdown-t'>
+                <div className='close' onClick={exit}><div></div></div>
+
+                <div className='login-google-head'>
+                    <h4 className='p-big'>{t('AghS7tM')}</h4>
+                    <p className='gray-c'>{t('AGkQ5uY')}</p>
+                </div>
+
+                {!isComplete && (
+                    <OperatorsList recovery={recovery} />
+                )}
+
+                {isComplete && (
+                    <>
+                        <KeyReveal nsec={recovery.recoveredNsec} />
+
+                        <label className='pom-consent-row fit-container'>
+                            <input
+                                className='pom-checkbox-input'
+                                type='checkbox'
+                                checked={acknowledged}
+                                onChange={(e) => setAcknowledged(e.target.checked)}
+                            />
+                            <span className={`pom-checkbox${acknowledged ? ' pom-checkbox-on' : ''}`}>
+                                {acknowledged && <Icon name='check' size={13} v={2} isColored />}
+                            </span>
+                            <span className='pom-consent-label'>{t('AbzNUW8')}</span>
+                        </label>
+
+                        <button
+                            className='btn btn-red btn-full'
+                            onClick={() => setConfirming(true)}
+                            disabled={!acknowledged}
+                        >
+                            {t('AehE9EV')}
                         </button>
                     </>
                 )}

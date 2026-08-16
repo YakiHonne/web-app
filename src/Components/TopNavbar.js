@@ -17,6 +17,7 @@ import LoginSignup from "@/Components/LoginSignup";
 import PostAsNote from "@/Components/PostAsNote";
 import PostMedia from "@/Components/PostMedia/PostMedia";
 import Publishing from "@/Components/Publishing";
+import PremiumSidebarBanner from "@/Components/PremiumSidebarBanner";
 
 import { customHistory } from "@/Helpers/History";
 import { getBech32, minimizeKey, downloadAsFile } from "@/Helpers/Encryptions";
@@ -747,6 +748,8 @@ export default function TopNavbar() {
                   <span className="gray-c">{t("Ai28b6B")}</span>
                 </div>
               </div>
+
+              <PremiumSidebarBanner />
 
               <div className="uplift-more-drawer-section-label">{t("Apv9nXe")}</div>
               <div className="uplift-more-drawer-publishing">

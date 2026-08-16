@@ -238,9 +238,24 @@ export default function Publishing({ displayOff = false }) {
       relaysToPublish = removeDuplicatedRelays(outboxRelays, relaysToPublish);
 
       try {
-        await ndkEvent.sign();
+        // Remote signers (NIP-46) can hang indefinitely when the bunker is
+        // unreachable, and sign() has no timeout of its own.
+        await Promise.race([
+          ndkEvent.sign(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("SIGNING_TIMEOUT")), 30000),
+          ),
+        ]);
       } catch (err) {
-        console.log(err);
+        console.error("[publish] signing failed", {
+          error: err,
+          message: err?.message,
+          kind,
+          signer: ndkInstance.signer?.constructor?.name,
+          bunkerPubkey: ndkInstance.signer?.bunkerPubkey,
+          userPubkey: ndkInstance.signer?.userPubkey,
+          relayUrls: ndkInstance.signer?.relayUrls,
+        });
         dispatch(
           setToast({
             type: 2,

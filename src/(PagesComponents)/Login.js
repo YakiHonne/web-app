@@ -9,9 +9,9 @@ import {
   getEmptyuserMetadata,
   getHex,
   hexToUint8Array,
+  shortenKey,
 } from "@/Helpers/Encryptions";
 import {
-  finalizeEvent,
   generateSecretKey,
   getPublicKey,
   nip04,
@@ -51,17 +51,30 @@ import Icon from "@/Components/Icon";
 import DotGrid from "@/Components/DotGrid/DotGrid";
 import { SelectTabs } from "@/Components/SelectTabs";
 import { useTheme } from "next-themes";
-import { trustedKeyDeal, hexShard, hexPubShard } from "@fiatjaf/promenade-trusted-dealer";
-import { sha256 } from "@noble/hashes/sha2.js";
-import { bytesToHex } from "@noble/hashes/utils.js";
-import { CENTRAL_URL, OPERATOR_URLS } from "@/Content/pomegrenate";
+import {
+  CENTRAL_URL,
+  OPERATOR_URLS,
+  DEFAULT_OPERATOR_URLS,
+  CENTRALS,
+} from "@/Content/pomegrenate";
+import {
+  massageURL,
+  isValidServerURL,
+  hostOf,
+  authenticateWithGoogle,
+  getAccount,
+  resolveDefaultBunker,
+  findExistingSetup,
+  publishConfigEvent,
+  createPomegranateAccount,
+} from "@/Helpers/Pomegranate";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 let isNewAccount = getWallets().length > 0 ? true : false;
 
 
 export default function Login() {
-  const { theme } = useTheme()
+  const { resolvedTheme } = useTheme()
   const { t } = useTranslation();
   let sk_ = generateSecretKey();
   let sk = bytesTohex(sk_);
@@ -86,7 +99,7 @@ export default function Login() {
         <DotGrid
           dotSize={7}
           gap={19}
-          baseColor={["dark", "gray"].includes(theme) ? "#2b2b2b" : "#e8e8e8"}
+          baseColor={["dark", "gray"].includes(resolvedTheme) ? "#2b2b2b" : "#e8e8e8"}
           activeColor="#ff5c27"
           proximity={270}
           shockRadius={250}
@@ -350,124 +363,6 @@ const Bunker = ({ autoLaunch = false }) => {
   );
 };
 
-const massageURL = (input) => {
-  let url = input.trim();
-  if (!url.startsWith("http")) {
-    url = "https://" + url;
-  }
-  return new URL(url).origin;
-};
-
-const openPopup = (url, name) => {
-  const width = 600;
-  const height = 700;
-  const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2);
-  const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2);
-  const popup = window.open(
-    url,
-    name,
-    `popup=yes,width=${width},height=${height},left=${left},top=${top}`,
-  );
-  return popup;
-};
-
-const awaitPopupMessage = (popup, expectedOrigin, extract) => {
-  return new Promise((resolve, reject) => {
-    const POPUP_TIMEOUT_MS = 5 * 60 * 1000;
-
-    const cleanup = () => {
-      window.removeEventListener("message", onMessage);
-      clearInterval(closeMonitor);
-      clearTimeout(timer);
-    };
-
-    const onMessage = (event) => {
-      if (event.origin !== expectedOrigin || event.source !== popup) return;
-      const value = extract(event.data);
-      if (value === undefined) return;
-      cleanup();
-      popup.close();
-      resolve(value);
-    };
-
-    const closeMonitor = setInterval(() => {
-      if (popup.closed) {
-        cleanup();
-        reject(new Error("POPUP_CLOSED"));
-      }
-    }, 300);
-
-    const timer = setTimeout(() => {
-      cleanup();
-      popup.close();
-      reject(new Error("Timed out waiting for Google sign-in"));
-    }, POPUP_TIMEOUT_MS);
-
-    window.addEventListener("message", onMessage);
-  });
-};
-
-const authenticateWithGoogle = async (central) => {
-  const popup = openPopup(`${central}/login/google`, "PomegranateLogin");
-  if (!popup) throw new Error("POPUP_BLOCKED");
-
-  const raw = await awaitPopupMessage(popup, central, (data) => {
-    if (data && typeof data === "object" && typeof data.token === "string") {
-      return data.token;
-    }
-    return undefined;
-  });
-
-  let createdAt = null;
-  let email = "";
-  const parsed = JSON.parse(atob(raw));
-  if (typeof parsed.created_at === "number") createdAt = parsed.created_at * 1000;
-  if (Array.isArray(parsed.tags)) {
-    const emailTag = parsed.tags.find((t) => Array.isArray(t) && t[0] === "email");
-    email = emailTag?.[1] ?? "";
-  }
-  if (!createdAt || Date.now() - createdAt > 24 * 60 * 60 * 1000) {
-    throw new Error("Google sign-in token expired");
-  }
-  return { raw, email, createdAt };
-};
-
-const getAccount = async (central, token) => {
-  const res = await fetch(`${central}/account`, {
-    headers: { Authorization: `Token ${token.raw}` },
-  });
-  if (res.status === 401) throw new Error("Google session expired, please sign in again");
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data?.pubkey ? data : null;
-};
-
-const listProfiles = async (central, token) => {
-  const res = await fetch(`${central}/profiles`, {
-    headers: { Authorization: `Token ${token.raw}` },
-  });
-  if (!res.ok) throw new Error("Failed to load signing profiles");
-  return await res.json();
-};
-
-const createProfile = async (central, token, name) => {
-  const res = await fetch(`${central}/profiles`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Token ${token.raw}`,
-    },
-    body: JSON.stringify({ name }),
-  });
-  if (!res.ok) throw new Error("Signing profile creation failed");
-  return await res.json();
-};
-
-const getBunkerUrl = (central, profile) => {
-  const relay = central.replace(/^http/, "ws");
-  return `bunker://${profile.handler_pubkey}?relay=${encodeURIComponent(relay)}`;
-};
-
 const LoginScreen = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -697,98 +592,79 @@ const LoginScreen = () => {
   );
 };
 
-const createPomegranateAccount = async (central, token, operators, threshold, secretKey) => {
-  const session = crypto.randomUUID();
-  const masterSk = BigInt("0x" + bytesToHex(secretKey));
-  const { shards } = trustedKeyDeal(masterSk, threshold, operators.length);
-
-  const regEvent = finalizeEvent(
-    {
-      kind: 20445,
-      created_at: Math.floor(Date.now() / 1000),
-      tags: [
-        ["threshold", String(threshold)],
-        ...operators.map((op, i) => ["operator", op, hexPubShard(shards[i].pubShard)]),
-      ],
-      content: "",
-    },
-    secretKey,
-  );
-
-  const regRes = await fetch(`${central}/register`, {
-    method: "POST",
-    body: JSON.stringify(regEvent),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Token ${token.raw}`,
-      "X-Pomegranate-Session": session,
-    },
-  });
-  if (!regRes.ok) throw new Error("Central server registration failed");
-
-  const utf8 = new TextEncoder();
-  const results = await Promise.all(
-    operators.map(async (operator, i) => {
-      const event = finalizeEvent(
-        {
-          kind: 20444,
-          created_at: Math.floor(Date.now() / 1000),
-          tags: [
-            ["central", central],
-            ["email", token.email],
-          ],
-          content: hexShard(shards[i]),
-        },
-        secretKey,
-      );
-      const opToken = bytesToHex(sha256(utf8.encode(`${session}:${operator}`)));
-      try {
-        const res = await fetch(`${operator}/po/register`, {
-          method: "POST",
-          body: JSON.stringify(event),
-          headers: {
-            "Content-Type": "application/json",
-            "X-Pomegranate-Operator-Token": opToken,
-          },
-        });
-        return res.ok ? null : operator;
-      } catch {
-        return operator;
-      }
-    }),
-  );
-
-  const failed = results.filter(Boolean);
-  if (operators.length - failed.length < threshold) {
-    throw new Error(
-      `Could not register with enough operators (${operators.length - failed.length}/${threshold}). Please try again.`,
-    );
-  }
-};
-
 const GoogleLoginOverlay = ({ onClose }) => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
-  const [phase, setPhase] = useState("intro");
+  const [phase, setPhase] = useState("central");
   const [status, setStatus] = useState("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [token, setToken] = useState(null);
-  const [secretKey, setSecretKey] = useState(() => generateSecretKey());
   const [copied, setCopied] = useState(false);
-  const localKeys = NDKPrivateKeySigner.generate();
-  const central = massageURL(CENTRAL_URL);
-  const operators = OPERATOR_URLS.map(massageURL);
-  const threshold = Math.ceil((operators.length * 7) / 12);
+  // must stay stable, it is the NIP-46 client key saved with the account
+  const localKeys = useMemo(() => NDKPrivateKeySigner.generate(), []);
+
+  // central selection
+  const centrals = useMemo(() => CENTRALS.map((c) => ({ ...c, url: massageURL(c.url) })), []);
+  const [selectedCentral, setSelectedCentral] = useState(centrals[0].url);
+  const [useCustomCentral, setUseCustomCentral] = useState(false);
+  const [customCentral, setCustomCentral] = useState("");
+
+  // key selection
+  const [keyMode, setKeyMode] = useState("generate");
+  const [secretKey, setSecretKey] = useState(() => generateSecretKey());
+  const [importedKey, setImportedKey] = useState("");
+  const [importError, setImportError] = useState("");
+
+  // operators / threshold
+  const [operators, setOperators] = useState(() =>
+    DEFAULT_OPERATOR_URLS.map(massageURL),
+  );
+  const [newOperator, setNewOperator] = useState("");
+  const [threshold, setThreshold] = useState(
+    () => Math.min(2, DEFAULT_OPERATOR_URLS.length),
+  );
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // an existing setup found on another central
+  const [foundSetup, setFoundSetup] = useState(null);
+  const [foundUser, setFoundUser] = useState(null);
+
+  // Show who the existing account belongs to, so the user can tell whether it
+  // is really theirs before connecting.
+  useEffect(() => {
+    if (!foundSetup?.pubkey) {
+      setFoundUser(null);
+      return;
+    }
+    let cancelled = false;
+    getUserFromNOSTR(foundSetup.pubkey).then((user) => {
+      if (!cancelled) setFoundUser(user);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [foundSetup?.pubkey]);
+
+  const central = useCustomCentral
+    ? isValidServerURL(customCentral)
+      ? massageURL(customCentral)
+      : ""
+    : selectedCentral;
+
+  const suggestedOperators = OPERATOR_URLS.map(massageURL).filter(
+    (op) => !operators.includes(op),
+  );
 
   const nsec = nip19.nsecEncode(secretKey);
   const busy = !["idle", "error"].includes(status);
 
-  const statusLabel = {
-    authenticating: t("Apom004"),
-    checking: t("Apom005"),
-    creating: t("Apom006"),
-  }[status] || "";
+  const statusLabel =
+    {
+      authenticating: t("Apom004"),
+      checking: t("Apom005"),
+      creating: t("Apom006"),
+    }[status] || "";
 
   const downloadKey = (nsecValue) => {
     const content = [
@@ -805,99 +681,6 @@ const GoogleLoginOverlay = ({ onClose }) => {
     URL.revokeObjectURL(url);
   };
 
-  const handleStart = async () => {
-    setErrorMsg("");
-    setStatus("authenticating");
-    try {
-      const googleToken = await authenticateWithGoogle(central);
-      setToken(googleToken);
-      setStatus("checking");
-      const account = await getAccount(central, googleToken);
-      if (account) {
-        let profiles = await listProfiles(central, googleToken);
-        if (!profiles.find((p) => p.name === "default")) {
-          await createProfile(central, googleToken, "default");
-          profiles = await listProfiles(central, googleToken);
-        }
-        const profile = profiles.find((p) => p.name === "default") || profiles[0];
-        const bunkerUrl = getBunkerUrl(central, profile);
-        console.log("[Login with Google] Existing account found:", {
-          central,
-          email: googleToken.email,
-          account,
-          profiles,
-          bunkerUrl,
-        });
-        handleSaveAccount({ pubkey: account.pubkey, bunkerUrl, central, email: googleToken.email })
-        setStatus("idle");
-        onClose();
-      } else {
-        const newKey = generateSecretKey();
-        setSecretKey(newKey);
-        downloadKey(nip19.nsecEncode(newKey));
-        dispatch(setToast({ type: 1, desc: t("Apom010") }));
-        setStatus("idle");
-        setPhase("setup");
-      }
-    } catch (err) {
-      if (err.message === "POPUP_CLOSED") { setStatus("idle"); return; }
-      if (err.message === "POPUP_BLOCKED") {
-        setStatus("error");
-        setErrorMsg("Popup was blocked. Please allow popups for this site.");
-        return;
-      }
-      setStatus("error");
-      setErrorMsg(err.message || "Something went wrong");
-    }
-  };
-
-  const handleCreate = async () => {
-    if (!token) return;
-    setErrorMsg("");
-    setStatus("creating");
-    try {
-      await createPomegranateAccount(central, token, operators, threshold, secretKey);
-
-      let account = null;
-      for (let i = 0; i < 10; i++) {
-        await new Promise((r) => setTimeout(r, 1500));
-        account = await getAccount(central, token);
-        if (account) break;
-      }
-      if (!account) throw new Error("Account confirmation timed out. Please try again.");
-
-      let profiles = await listProfiles(central, token);
-      if (!profiles.find((p) => p.name === "default")) {
-        await createProfile(central, token, "default");
-        profiles = await listProfiles(central, token);
-      }
-      const profile = profiles.find((p) => p.name === "default") || profiles[0];
-      const bunkerUrl = getBunkerUrl(central, profile);
-
-      console.log("[Login with Google] New account created:", {
-        central,
-        email: token.email,
-        account,
-        profiles,
-        bunkerUrl,
-        nsec,
-      });
-      handleSaveAccount({ pubkey: account.pubkey, bunkerUrl, central, email: googleToken.email })
-
-      setStatus("idle");
-      onClose();
-    } catch (err) {
-      setStatus("error");
-      setErrorMsg(err.message || "Something went wrong");
-    }
-  };
-
-  const handleCopy = () => {
-    copyText(nsec, t("AStACDI"));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleSaveAccount = ({ pubkey, bunkerUrl, central, email }) => {
     let toSave = {
       localKeys: {
@@ -907,40 +690,426 @@ const GoogleLoginOverlay = ({ onClose }) => {
       pub: pubkey,
       bunker: bunkerUrl,
       central,
-      email
+      email,
     };
     dispatch(setUserKeys(toSave));
     Router.back();
-  }
+  };
+
+  // Sign in against a central that already holds an account for this email.
+  const connectExisting = async (centralUrl, googleToken) => {
+    const account = await getAccount(centralUrl, googleToken);
+    if (!account) return false;
+    const bunkerUrl = await resolveDefaultBunker(centralUrl, googleToken);
+    handleSaveAccount({
+      pubkey: account.pubkey,
+      bunkerUrl,
+      central: centralUrl,
+      email: googleToken.email,
+    });
+    return true;
+  };
+
+  const handleStart = async (targetCentral = central) => {
+    if (!targetCentral) return;
+    setErrorMsg("");
+    setStatus("authenticating");
+    try {
+      const googleToken = await authenticateWithGoogle(targetCentral);
+      setToken(googleToken);
+      setStatus("checking");
+
+      // The account may already live on this central.
+      if (await connectExisting(targetCentral, googleToken)) {
+        setStatus("idle");
+        onClose();
+        return;
+      }
+
+      // Otherwise look for a setup published from another central before
+      // creating a brand new one.
+      const existing = await findExistingSetup(googleToken.email);
+      if (existing && existing.central && existing.central !== targetCentral) {
+        setFoundSetup(existing);
+        setStatus("idle");
+        setPhase("found");
+        return;
+      }
+
+      setStatus("idle");
+      setPhase("setup");
+    } catch (err) {
+      if (err.message === "POPUP_CLOSED") {
+        setStatus("idle");
+        return;
+      }
+      if (err.message === "POPUP_BLOCKED") {
+        setStatus("error");
+        setErrorMsg(t("AHqyO3m"));
+        return;
+      }
+      setStatus("error");
+      setErrorMsg(err.message || t("AEH0z9N"));
+    }
+  };
+
+  // Image 3: the account was found on a different central, connect there.
+  const handleConnectFound = async () => {
+    if (!foundSetup?.central) return;
+    setErrorMsg("");
+    setStatus("authenticating");
+    try {
+      const googleToken = await authenticateWithGoogle(foundSetup.central);
+      setToken(googleToken);
+      setStatus("checking");
+      if (await connectExisting(foundSetup.central, googleToken)) {
+        setStatus("idle");
+        onClose();
+        return;
+      }
+      // Nothing there after all, fall back to creating an account.
+      setStatus("idle");
+      setFoundSetup(null);
+      setPhase("setup");
+    } catch (err) {
+      if (err.message === "POPUP_CLOSED") {
+        setStatus("idle");
+        return;
+      }
+      setStatus("error");
+      setErrorMsg(err.message || t("AEH0z9N"));
+    }
+  };
+
+  // "Not you": ignore the account that was found and set up a new one on the
+  // central the user originally picked.
+  const handleCreateInstead = () => {
+    setFoundSetup(null);
+    setErrorMsg("");
+    setStatus("idle");
+    setPhase("setup");
+  };
+
+  const applyImportedKey = () => {
+    setImportError("");
+    const value = importedKey.trim();
+    if (!value) return null;
+    try {
+      if (value.startsWith("nsec")) {
+        const { type, data } = nip19.decode(value);
+        if (type !== "nsec") throw new Error();
+        return data;
+      }
+      if (!/^[0-9a-fA-F]{64}$/.test(value)) throw new Error();
+      return hexToUint8Array(value);
+    } catch {
+      setImportError(t("AIdFeYb"));
+      return null;
+    }
+  };
+
+  const addOperator = () => {
+    const value = newOperator.trim();
+    if (!value || !isValidServerURL(value)) return;
+    const url = massageURL(value);
+    if (operators.includes(url)) {
+      setNewOperator("");
+      return;
+    }
+    setOperators([...operators, url]);
+    setNewOperator("");
+  };
+
+  const removeOperator = (url) => {
+    const next = operators.filter((op) => op !== url);
+    setOperators(next);
+    if (threshold > next.length) setThreshold(Math.max(1, next.length));
+  };
+
+  const handleCreate = async () => {
+    if (!token || !central) return;
+    setErrorMsg("");
+
+    let keyToUse = secretKey;
+    if (keyMode === "import") {
+      const imported = applyImportedKey();
+      if (!imported) return;
+      keyToUse = imported;
+      setSecretKey(imported);
+    }
+
+    if (operators.length === 0 || threshold < 1 || threshold > operators.length) {
+      setErrorMsg(t("AxnAEcr"));
+      return;
+    }
+
+    setStatus("creating");
+    try {
+      // A generated key is only shown to the user at this point, so make sure
+      // they get a backup of it before it leaves the browser.
+      if (keyMode === "generate") {
+        downloadKey(nip19.nsecEncode(keyToUse));
+        dispatch(setToast({ type: 1, desc: t("Apom010") }));
+      }
+
+      await createPomegranateAccount(
+        central,
+        token,
+        operators,
+        threshold,
+        keyToUse,
+      );
+
+      let account = null;
+      for (let i = 0; i < 10; i++) {
+        await new Promise((r) => setTimeout(r, 1500));
+        account = await getAccount(central, token);
+        if (account) break;
+      }
+      if (!account) throw new Error(t("Ar66dzx"));
+
+      // Publish the configuration so this setup can be rediscovered from any
+      // other client or central later on.
+      await publishConfigEvent({
+        email: token.email,
+        central,
+        operators,
+        threshold,
+        secretKey: keyToUse,
+      });
+
+      const bunkerUrl = await resolveDefaultBunker(central, token);
+
+      handleSaveAccount({
+        pubkey: account.pubkey,
+        bunkerUrl,
+        central,
+        email: token.email,
+      });
+
+      setStatus("idle");
+      onClose();
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err.message || t("AEH0z9N"));
+    }
+  };
+
+  const handleCopy = () => {
+    copyText(nsec, t("AStACDI"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const backTo = (target) => {
+    setPhase(target);
+    setErrorMsg("");
+    setStatus("idle");
+  };
 
   return (
-    <Overlay exit={onClose} width={420}>
+    <Overlay exit={onClose} width={480}>
       <div className="login-google-overlay box-pad-h box-pad-v bg-dropdown-t">
-        <div className="close" onClick={onClose}><div></div></div>
+        <div className="close" onClick={onClose}>
+          <div></div>
+        </div>
 
-        {phase === "intro" && (
+        {phase === "central" && (
           <>
             <div className="login-google-head">
               <Icon name="google" size={32} />
-              <h4 className="login-card-title" style={{ fontSize: "1.2rem" }}>
+              <h4 className="p-big">
                 {t("Apom001")}
               </h4>
-              <p className="gray-c p-medium">{t("Apom002")}</p>
+              <p className="gray-c">{t("Apom011")}</p>
             </div>
 
+            <div className="fit-container">
+              <p className="p-bold">{t("A8SE9H1")}</p>
+              <p className="gray-c">{t("AdoAL8m")}</p>
+            </div>
+
+            <div className="login-convo-options" style={{ marginTop: 0 }}>
+              {centrals.map((item, index) => {
+                const isSelected = !useCustomCentral && selectedCentral === item.url;
+                return (
+                  <div
+                    key={item.url}
+                    className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${isSelected ? "selected-option" : ""}`}
+                    style={{ "--stagger-i": index }}
+                    onClick={() => {
+                      setUseCustomCentral(false);
+                      setSelectedCentral(item.url);
+                    }}
+                  >
+                    <span className="login-convo-option-icon">
+                      <Icon
+                        name={isSelected ? "circle_check" : "circle"}
+                        size={20}
+                        v={2}
+                        isBoldThemeColor={isSelected}
+                      />
+                    </span>
+                    <span className="login-convo-option-copy">
+                      <b>{hostOf(item.url)}</b>
+                    </span>
+                    <span className="sticker pom-central-tag">
+                      {item.kind === "default" ? t("ANmIqNJ") : t("ATqpiwj")}
+                    </span>
+                  </div>
+                );
+              })}
+
+              <div
+                className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${useCustomCentral ? "selected-option" : ""}`}
+                style={{ "--stagger-i": centrals.length }}
+                onClick={() => setUseCustomCentral(true)}
+              >
+                <span className="login-convo-option-icon">
+                  <Icon
+                    name={useCustomCentral ? "circle_check" : "circle"}
+                    size={20}
+                    v={2}
+                    isBoldThemeColor={useCustomCentral}
+                  />
+                </span>
+                <span className="login-convo-option-copy">
+                  <b>{t("AabmNg4")}</b>
+                </span>
+              </div>
+            </div>
+
+            {useCustomCentral && (
+              <input
+                type="text"
+                className="if ifs-full"
+                placeholder={t("AG91nf9")}
+                value={customCentral}
+                onChange={(e) => setCustomCentral(e.target.value)}
+                autoFocus
+              />
+            )}
+
             {errorMsg && (
-              <p className="red-c p-medium" style={{ textAlign: "center" }}>{errorMsg}</p>
+              <p className="red-c" style={{ textAlign: "center" }}>
+                {errorMsg}
+              </p>
             )}
 
             {busy ? (
               <div className="login-google-busy fx-centered fx-col">
                 <Spinner size={24} />
-                <p className="gray-c p-medium">{statusLabel}</p>
+                <p className="gray-c">{statusLabel}</p>
               </div>
             ) : (
-              <button className="btn btn-normal btn-full" onClick={handleStart}>
+              <button
+                className="btn btn-normal btn-full"
+                onClick={() => handleStart()}
+                disabled={!central}
+              >
                 {errorMsg ? t("AhOnn0t") : t("Apom003")}
               </button>
+            )}
+          </>
+        )}
+
+        {phase === "found" && (
+          <>
+            <div className="login-google-head">
+              <Icon name="server" size={32} isBoldThemeColor />
+              <h4 className="p-big">
+                {t("AR7xWde")}
+              </h4>
+              <p className="gray-c">
+                {t("A5uh9MU", { central: hostOf(foundSetup?.central || "") })}
+              </p>
+            </div>
+
+            {errorMsg && (
+              <p className="red-c" style={{ textAlign: "center" }}>
+                {errorMsg}
+              </p>
+            )}
+
+            {busy ? (
+              <div className="login-google-busy fx-centered fx-col">
+                <Spinner size={24} />
+                <p className="gray-c">{statusLabel}</p>
+              </div>
+            ) : (
+              <>
+                <div className="pom-identity-cards">
+                  <div className="pom-identity-card">
+                    <UserProfilePic
+                      user_id={foundSetup?.pubkey}
+                      img={foundUser?.picture}
+                      size={64}
+                      allowClick={false}
+                    />
+                    <div className="pom-identity-copy">
+                      <p className="p-bold p-one-line">
+                        {foundUser
+                          ? foundUser.display_name.startsWith("npub")
+                            ? shortenKey(foundUser.display_name)
+                            : foundUser.display_name
+                          : ""}
+                      </p>
+                      {foundUser &&
+                        !foundUser.name.startsWith("npub") &&
+                        foundUser.name !== foundUser.display_name && (
+                          <p className="gray-c p-medium p-one-line">
+                            @{foundUser.name}
+                          </p>
+                        )}
+                    </div>
+                    <button
+                      className="btn btn-normal btn-full"
+                      onClick={handleConnectFound}
+                    >
+                      {t("ANqJi0v", {
+                        central: hostOf(foundSetup?.central || ""),
+                      })}
+                    </button>
+                  </div>
+
+                  <div className="pom-identity-card">
+                    <div className="pom-identity-unknown fx-centered">
+                      <span>?</span>
+                    </div>
+                    <div className="pom-identity-copy">
+                      <p className="p-bold p-one-line">{t("AAvmg0n")}</p>
+                      <p className="gray-c p-medium p-one-line">
+                        {t("AMUoqQa")}
+                      </p>
+                    </div>
+                    <button
+                      className="btn btn-gst btn-full"
+                      onClick={handleCreateInstead}
+                    >
+                      {t("ACwufz6")}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="fx-centered fit-container">
+                  <button
+                    className="btn btn-normal btn-gray fx-centered bg-dropdown"
+                    style={{
+                      padding: "0 1rem",
+                      borderRadius: "50%",
+                      aspectRatio: "1/1",
+                      width: "44px",
+                      height: "44px",
+                    }}
+                    onClick={() => {
+                      setFoundSetup(null);
+                      backTo("central");
+                    }}
+                  >
+                    <Icon name="arrow" transform="rotate(90deg)" size={16} />
+                  </button>
+                </div>
+              </>
             )}
           </>
         )}
@@ -948,48 +1117,248 @@ const GoogleLoginOverlay = ({ onClose }) => {
         {phase === "setup" && (
           <>
             <div className="login-google-head">
-              <h4 className="login-card-title" style={{ fontSize: "1.2rem" }}>
-                {t("Apom007")}
+              <h4 className="p-big">
+                {t("AcNNqSN")}
               </h4>
+              <p className="gray-c">{t("AMQOKdV")}</p>
             </div>
 
-            <div className="login-google-key-field">
-              <p className="p-medium p-bold">{t("Apom008")}</p>
-              <div className="login-google-key-row">
-                <input
-                  type="text"
-                  className="if ifs-full"
-                  value={nsec}
-                  readOnly
-                  onClick={(e) => e.target.select()}
-                  style={{ fontFamily: "monospace", fontSize: "0.75rem" }}
-                />
-                <button
-                  className="btn btn-normal btn-gray fx-centered bg-dropdown"
-                  style={{ padding: "0 1rem", borderRadius: "50%", aspectRatio: "1/1", width: "44px", height: "44px" }}
-                  onClick={handleCopy}
-                  disabled={busy}
-                >
-                  <Icon name={copied ? "check_big" : "copy"} size={16} v={copied ? 2 : 1} />
-                </button>
+            <div className="login-convo-options" style={{ marginTop: 0 }}>
+              <div
+                className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${keyMode === "generate" ? "selected-option" : ""}`}
+                style={{ "--stagger-i": 0 }}
+                onClick={() => setKeyMode("generate")}
+              >
+                <span className="login-convo-option-icon">
+                  <Icon name="star" size={24} />
+                </span>
+                <span className="login-convo-option-copy">
+                  <b>{t("AfQb7HD")}</b>
+                  <span>{t("AjhCCrK")}</span>
+                </span>
+                <span className="login-convo-option-go">
+                  <Icon
+                    name={keyMode === "generate" ? "circle_check" : "circle"}
+                    size={20}
+                    v={2}
+                    isBoldThemeColor={keyMode === "generate"}
+                  />
+                </span>
+              </div>
+
+              <div
+                className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${keyMode === "import" ? "selected-option" : ""}`}
+                style={{ "--stagger-i": 1 }}
+                onClick={() => setKeyMode("import")}
+              >
+                <span className="login-convo-option-icon">
+                  <Icon name="key-icon" size={24} />
+                </span>
+                <span className="login-convo-option-copy">
+                  <b>{t("AbXKi4r")}</b>
+                  <span>{t("AmQjQOI")}</span>
+                </span>
+                <span className="login-convo-option-go">
+                  <Icon
+                    name={keyMode === "import" ? "circle_check" : "circle"}
+                    size={20}
+                    v={2}
+                    isBoldThemeColor={keyMode === "import"}
+                  />
+                </span>
               </div>
             </div>
 
+            {keyMode === "generate" && (
+              <div className="login-google-key-field">
+                <p className="p-bold">{t("Apom008")}</p>
+                <div className="login-google-key-row">
+                  <input
+                    type="text"
+                    className="if ifs-full"
+                    value={nsec}
+                    readOnly
+                    onClick={(e) => e.target.select()}
+                  />
+                  <button
+                    className="btn btn-normal btn-gray fx-centered bg-dropdown"
+                    style={{
+                      padding: "0 1rem",
+                      borderRadius: "50%",
+                      aspectRatio: "1/1",
+                      width: "44px",
+                      height: "44px",
+                    }}
+                    onClick={handleCopy}
+                    disabled={busy}
+                  >
+                    <Icon
+                      name={copied ? "check_big" : "copy"}
+                      size={16}
+                      v={copied ? 2 : 1}
+                    />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {keyMode === "import" && (
+              <div className="login-google-key-field">
+                <p className="p-bold">{t("ArPMdgT")}</p>
+                <input
+                  type="password"
+                  className="if ifs-full"
+                  placeholder={t("A7uff0L")}
+                  value={importedKey}
+                  onChange={(e) => {
+                    setImportedKey(e.target.value);
+                    setImportError("");
+                  }}
+                />
+                {importError && <p className="red-c">{importError}</p>}
+              </div>
+            )}
+
+            <div className="fit-container">
+              <div
+                className={`fx-scattered pointer fit-container ${showAdvanced ? "pom-advanced-toggle" : ""}`}
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                <div className="fx-centered">
+                  <Icon name="settings" size={18} v={2} />
+                  <p className="p-bold">{t("AsoXjsL")}</p>
+                </div>
+                <Icon
+                  name="arrow"
+                  size={14}
+                  transform={showAdvanced ? "rotate(180deg)" : "rotate(0deg)"}
+                />
+              </div>
+
+              {showAdvanced && (
+                <div className="sc-s-18 box-pad-h-m box-pad-v-m fit-container fx-col fx-centered fx-start-v bg-dropdown">
+                  <div className="fit-container">
+                    <p className="p-bold gray-c">{t("A51mB0F")}</p>
+                    <p className="gray-c pom-section-label">
+                      {t("Apndhzt")}
+                    </p>
+                  </div>
+
+                  <div className="fit-container fx-col fx-centered">
+                    {operators.map((op) => (
+                      <div key={op} className="pom-operator-row">
+                        <p>{hostOf(op)}</p>
+                        <div
+                          className="pom-operator-remove"
+                          onClick={() => removeOperator(op)}
+                          title={t("AzkTxuy")}
+                        >
+                          <Icon name="trash" size={17} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="fx-centered fit-container">
+                    <input
+                      type="text"
+                      className="if ifs-full"
+                      placeholder={t("AHuJAY1")}
+                      value={newOperator}
+                      onChange={(e) => setNewOperator(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addOperator();
+                        }
+                      }}
+                    />
+                    <button
+                      className="btn btn-normal btn-small"
+                      onClick={addOperator}
+                      disabled={!newOperator.trim()}
+                    >
+                      {t("AflwmPU")}
+                    </button>
+                  </div>
+
+                  {suggestedOperators.length > 0 && (
+                    <div className="fit-container">
+                      <p className="gray-c pom-section-label">
+                        {t("AjJP77C")}
+                      </p>
+                      <div className="pom-chips">
+                        {suggestedOperators.map((op) => (
+                          <div
+                            key={op}
+                            className="pom-chip"
+                            onClick={() => setOperators([...operators, op])}
+                          >
+                            <Icon name="add_plus" size={14} v={2} />
+                            <p>{hostOf(op)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="fit-container">
+                    <p className="p-bold gray-c pom-section-label">
+                      {t("ABnF1Ro")}
+                    </p>
+                    <div className="pom-stepper">
+                      <button
+                        className="pom-stepper-btn"
+                        onClick={() => setThreshold(Math.max(1, threshold - 1))}
+                        disabled={threshold <= 1}
+                      >
+                        <Icon name="remove_minus" size={15} v={2} />
+                      </button>
+                      <p className="pom-stepper-value">{threshold}</p>
+                      <button
+                        className="pom-stepper-btn"
+                        onClick={() =>
+                          setThreshold(Math.min(operators.length, threshold + 1))
+                        }
+                        disabled={threshold >= operators.length}
+                      >
+                        <Icon name="add_plus" size={15} v={2} />
+                      </button>
+                      <p className="gray-c">
+                        {t("Av55soW", { count: operators.length })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {errorMsg && (
-              <p className="red-c p-medium" style={{ textAlign: "center" }}>{errorMsg}</p>
+              <p className="red-c" style={{ textAlign: "center" }}>
+                {errorMsg}
+              </p>
             )}
 
             {busy ? (
               <div className="login-google-busy fx-centered fx-col">
                 <Spinner size={24} />
-                <p className="gray-c p-medium">{statusLabel}</p>
+                <p className="gray-c">{statusLabel}</p>
               </div>
             ) : (
               <div className="login-google-setup-actions">
                 <button
                   className="btn btn-normal btn-gray fx-centered bg-dropdown"
-                  style={{ padding: "0 1rem", borderRadius: "50%", aspectRatio: "1/1", width: "44px", height: "44px" }}
-                  onClick={() => { setPhase("intro"); setToken(null); setStatus("idle"); setErrorMsg(""); }}
+                  style={{
+                    padding: "0 1rem",
+                    borderRadius: "50%",
+                    aspectRatio: "1/1",
+                    width: "44px",
+                    height: "44px",
+                  }}
+                  onClick={() => {
+                    setToken(null);
+                    backTo("central");
+                  }}
                   disabled={busy}
                 >
                   <Icon name="arrow" transform="rotate(90deg)" size={16} />
@@ -997,9 +1366,9 @@ const GoogleLoginOverlay = ({ onClose }) => {
                 <button
                   className="btn btn-normal"
                   onClick={handleCreate}
-                  disabled={busy}
+                  disabled={busy || (keyMode === "import" && !importedKey.trim())}
                 >
-                  {errorMsg ? t("AhOnn0t") : t("Apom009")}
+                  {errorMsg ? t("AhOnn0t") : t("AP9F5rl")}
                 </button>
               </div>
             )}

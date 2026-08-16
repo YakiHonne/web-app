@@ -974,6 +974,7 @@ export {
   logoutAllAccounts,
   handleSwitchAccount,
   userLogout,
+  yakiChestDisconnect,
   exportAllWallets,
   exportWallet,
   updateYakiChestStats,

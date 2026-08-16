@@ -3018,6 +3018,21 @@ input[type="range"]::-moz-range-thumb {
     overflow: visible;
 }
 
+/* Trial state of the current plan card: one pill instead of the plan rows,
+   using the same accent as the premium badge. */
+.sub-trial-pill {
+    box-sizing: border-box;
+    padding: 14px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(105, 123, 216, 0.45);
+    background-color: rgba(105, 123, 216, 0.1);
+    text-align: center;
+}
+
+.sub-trial-pill p {
+    color: #697BD8;
+}
+
 .sub-plan-card {
     flex: 1;
     background: var(--very-dim-gray);
@@ -4318,6 +4333,397 @@ input[type="range"]::-moz-range-thumb {
     align-items: center;
 }
 
+
+/* Sidebar upgrade banner (free plan) */
+/* Padded wrapper: the drawer has no horizontal padding of its own, and keeping
+   the spacing here means the visible card can never push the layout around. */
+.premium-sidebar-slot {
+    padding: 14px 0.75rem 6px;
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.premium-sidebar-banner {
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    line-height: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.premium-sidebar-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.premium-sidebar-banner:hover {
+    transform: translateY(-2px);
+    opacity: 0.92;
+}
+
+/* Sidebar strip shown to trial users instead of the banner */
+.premium-sidebar-trial {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid var(--c1);
+    background: color-mix(in srgb, var(--c1) 8%, transparent);
+    transition: background 0.2s ease;
+}
+
+.premium-sidebar-trial:hover {
+    background: color-mix(in srgb, var(--c1) 14%, transparent);
+}
+
+.premium-trial-text {
+    color: var(--c1);
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+/* rendered as a <span>, so it needs the centering a <button> would do itself */
+.premium-trial-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* Page-level trial banner, sits under the navbar on the far left */
+.trial-banner {
+    position: fixed;
+    top: 92px;
+    left: 16px;
+    z-index: 1000;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    width: min(420px, calc(100vw - 32px));
+    padding: 16px 18px;
+    border-radius: 16px;
+    border: 1px solid var(--very-dim-gray);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    animation: login-convo-rise 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.trial-banner-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.trial-banner-desc {
+    color: var(--gray);
+    font-size: 0.875rem;
+    line-height: 1.45;
+}
+
+.trial-banner-close {
+    position: static;
+    animation: none;
+    transform: none;
+    flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+    .trial-banner {
+        top: 72px;
+    }
+}
+
+/* Default / Suggested tag on the central rows */
+/* sits on top of the row, so it is darker than the row rather than lighter */
+.pom-central-tag {
+    flex-shrink: 0;
+    padding: 5px 12px;
+    max-height: none;
+    background: var(--white);
+    color: var(--dark-gray);
+    font-weight: 500;
+}
+
+/* the row itself is the click target, the tag must not react on its own */
+.pom-central-tag:hover {
+    opacity: 1;
+}
+
+/* Identity choice when an account is found on another central */
+.pom-identity-cards {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.pom-identity-card {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--very-dim-gray);
+    text-align: center;
+}
+
+.pom-identity-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    min-width: 0;
+}
+
+.pom-identity-copy p {
+    width: 100%;
+}
+
+.pom-identity-unknown {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 1px dashed var(--very-dim-gray);
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: var(--gray);
+}
+
+/* the central hostname makes this label long for a half-width card */
+.pom-identity-card .btn {
+    margin-top: auto;
+    height: auto;
+    min-height: var(--40);
+    padding: 8px 14px;
+    font-size: 0.875rem;
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 520px) {
+    .pom-identity-cards {
+        flex-direction: column;
+    }
+
+    .pom-identity-card .btn {
+        margin-top: 0;
+    }
+}
+
+/* Warning badge in the unlink confirmation */
+.pom-warning-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--red-main) 12%, transparent);
+    color: var(--red-main);
+}
+
+/* Advanced options: operators list and threshold stepper */
+.pom-operator-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--very-dim-gray);
+}
+
+.pom-operator-row:last-child {
+    border-bottom: none;
+}
+
+.pom-operator-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.pom-operator-remove:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--red-main) 12%, transparent);
+}
+
+.pom-stepper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.pom-stepper-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    border: 1px solid var(--very-dim-gray);
+    /* bare <button>, so the UA background has to be cleared explicitly or it
+       paints over the icon */
+    background-color: transparent;
+    color: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    line-height: 0;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.2s ease, opacity 0.2s ease;
+}
+
+.pom-stepper-btn:hover:not(:disabled) {
+    border-color: var(--c1);
+}
+
+.pom-stepper-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.pom-stepper-value {
+    min-width: 18px;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Section labels inside the advanced panel */
+.pom-advanced-toggle {
+    margin-bottom: 12px;
+}
+
+.pom-section-label {
+    margin-bottom: 8px;
+}
+
+/* Suggested operator chips */
+.pom-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.pom-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 30px;
+    border: 1px solid var(--very-dim-gray);
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pom-chip:hover {
+    border-color: var(--c1);
+}
+
+.pom-chip p {
+    line-height: 1;
+}
+
+/* Consent checkbox, mirrors the pro onboarding one */
+.pom-consent-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.pom-checkbox-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.pom-checkbox {
+    width: 19px;
+    height: 19px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    border: 1.5px solid rgba(255, 255, 255, 0.28);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.pom-checkbox.pom-checkbox-on {
+    background-color: var(--c1);
+    border-color: var(--c1);
+}
+
+.pom-checkbox-input:focus-visible+.pom-checkbox {
+    box-shadow: 0 0 0 3px rgba(247, 88, 22, 0.3);
+}
+
+.pom-consent-label {
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+[data-theme='light'] .pom-checkbox,
+[data-theme='white'] .pom-checkbox {
+    border-color: rgba(0, 0, 0, 0.25);
+}
+
+[data-theme='creamy'] .pom-checkbox {
+    border-color: rgba(180, 150, 110, 0.45);
+}
+
+[data-theme='light'] .pom-consent-label,
+[data-theme='white'] .pom-consent-label {
+    color: rgba(0, 0, 0, 0.75);
+}
+
+[data-theme='creamy'] .pom-consent-label {
+    color: rgba(0, 0, 0, 0.75);
+}
+
+/* Two equal-width actions that shrink instead of overflowing */
+.pom-confirm-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.pom-confirm-actions .btn {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.login-convo-option.selected-option {
+    border: 1px solid var(--c1);
+    background: color-mix(in srgb, var(--c1) 8%, transparent);
+}
+
+.login-convo-option.selected-option:hover {
+    transform: none;
+}
 
 .login-google-setup-actions {
     display: flex;
