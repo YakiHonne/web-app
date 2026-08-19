@@ -39,10 +39,6 @@ const downloadNsec = (nsec) => {
     URL.revokeObjectURL(url)
 }
 
-// Shared shard-collection UI: signs in with Google on each operator until the
-// threshold is met, then rebuilds the secret key. The operators and threshold
-// are the ones this account was actually set up with, taken from the published
-// configuration event, since another client may have chosen a different set.
 const useKeyRecovery = () => {
     const { t } = useTranslation()
     const userKeys = useSelector(state => state.userKeys)
@@ -52,8 +48,6 @@ const useKeyRecovery = () => {
     const [configError, setConfigError] = useState('')
     const [needsCentralLookup, setNeedsCentralLookup] = useState(false)
 
-    // Fallback for accounts with no published configuration event: ask the
-    // central directly, which needs a Google token and so a user gesture.
     const loadConfigFromCentral = async () => {
         if (!userKeys?.central) return
         setConfigError('')
@@ -99,8 +93,6 @@ const useKeyRecovery = () => {
                         Math.ceil((setup.operators.length * 7) / 12),
                 })
             } else {
-                // Accounts created before the configuration event was published
-                // have no discovery event, so fall back to asking the central.
                 setNeedsCentralLookup(true)
             }
         } catch (err) {
@@ -110,7 +102,6 @@ const useKeyRecovery = () => {
         }
     }, [userKeys?.email, t])
 
-    // The configuration event is public, so it can be read without any popup.
     React.useEffect(() => { loadConfig() }, [loadConfig])
 
     const operators = config?.operators ?? []
@@ -175,8 +166,6 @@ const OperatorsList = ({ recovery }) => {
         needsCentralLookup, loadingConfig, configError,
     } = recovery
 
-    // The operator set has to come from the account's own configuration before
-    // any shard can be requested.
     if (loadingConfig) {
         return (
             <div className='login-google-busy fx-centered fx-col'>
@@ -341,9 +330,6 @@ const RecoverKeys = ({ exit }) => {
     )
 }
 
-// Unlinking is only safe once the user holds their own copy of the key, so the
-// same recovery process runs first and the key is handed over before the
-// Google connection is dropped.
 const UnlinkGoogleAccount = ({ exit }) => {
     const { t } = useTranslation()
     const dispatch = useDispatch()
@@ -357,8 +343,6 @@ const UnlinkGoogleAccount = ({ exit }) => {
 
     const isComplete = recovery.recoveredNsec !== null
 
-    // Hand the key over as soon as it is reconstructed, the user should not be
-    // able to reach the unlink button without having received it.
     React.useEffect(() => {
         if (isComplete && !downloaded) {
             downloadNsec(recovery.recoveredNsec)
@@ -375,8 +359,6 @@ const UnlinkGoogleAccount = ({ exit }) => {
                     const token = await authenticateWithGoogle(userKeys.central)
                     await deleteAccount(userKeys.central, token)
                 } catch (err) {
-                    // The central may not support removal, the local unlink
-                    // still goes ahead since the user now controls the key.
                     console.log(err)
                 }
             }

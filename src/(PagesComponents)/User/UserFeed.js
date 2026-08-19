@@ -22,6 +22,8 @@ import { SelectTabs } from "@/Components/SelectTabs";
 import MediaMasonryList from "@/Components/MediaMasonryList";
 import { useSelector } from "react-redux";
 import Icon from "@/Components/Icon";
+import useCreatorSubscription from "@/Hooks/useCreatorSubscription";
+import usePremiumRelays from "@/Hooks/usePremiumRelays";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -65,6 +67,8 @@ const eventsInitialState = {
   pictures: [],
   "all-media": [],
   "smart-widget": [],
+  "premium-notes": [],
+  "premium-articles": [],
 };
 
 export default function UserFeed({ user }) {
@@ -95,6 +99,10 @@ export default function UserFeed({ user }) {
   const [dismissingSubTab, setDismissingSubTab] = useState(false);
   const subTabBtnRef = useRef(null);
   const [hidden, setHidden] = useState(false);
+  const { isSubChekingLoading, providers } = useCreatorSubscription({ pubkey });
+  const hasPremium = !isSubChekingLoading && providers.length > 0;
+  const { premiumRelays, isPremiumRelaysLoading, getPremiumNDK } =
+    usePremiumRelays(pubkey, hasPremium);
 
   const closeSubTabDropdown = () => {
     setDismissingSubTab(true);
@@ -142,6 +150,8 @@ export default function UserFeed({ user }) {
       "all-media": [34235, 34236, 20, 21, 22],
       pictures: [20],
       "smart-widget": [30033],
+      "premium-notes": [1],
+      "premium-articles": [30023],
     };
     if (contentFrom === "pinned" && pinnedNotesIds.length === 0) return false;
     if (contentFrom === "pinned" && pinnedNotesIds.length > 0)
@@ -165,6 +175,9 @@ export default function UserFeed({ user }) {
   };
   const tabs = [
     { value: "notes", display_name: t("AYIXG83") },
+    ...(hasPremium
+      ? [{ value: "premium", display_name: t("AMT1D0j") }]
+      : []),
     { value: "articles", display_name: t("AesMg52") },
     { value: "media", display_name: t("A0i2SOt") },
     { value: "others", display_name: t("A2qQXRV") },
@@ -178,6 +191,10 @@ export default function UserFeed({ user }) {
       { value: "mentions", display_name: t("A8Da0of") },
     ],
     articles: [{ value: "articles", display_name: t("AesMg52") }],
+    premium: [
+      { value: "premium-notes", display_name: t("AYIXG83") },
+      { value: "premium-articles", display_name: t("AesMg52") },
+    ],
     media: [
       { value: "all-media", display_name: t("AR9ctVs") },
       { value: "pictures", display_name: t("Aa73Zgk") },
@@ -203,8 +220,37 @@ export default function UserFeed({ user }) {
           setIsLoading(false);
           return;
         }
-        const res = await getSubData(filter, 200);
+        const isPremiumFeed = contentFrom.startsWith("premium-");
+        let premiumNDK;
+        if (isPremiumFeed) {
+          if (isPremiumRelaysLoading) return;
+          if (premiumRelays.length === 0) {
+            setIsLoading(false);
+            return;
+          }
+          premiumNDK = await getPremiumNDK();
+          if (!premiumNDK) {
+            setIsLoading(false);
+            return;
+          }
+        }
+        const res = isPremiumFeed
+          ? await getSubData(
+              filter,
+              200,
+              premiumRelays,
+              premiumNDK,
+              undefined,
+              undefined,
+              "ONLY_RELAY",
+            )
+          : await getSubData(filter, 200);
         let data = res.data.slice(0, 100);
+        if (isPremiumFeed) {
+          data = data.filter((event) =>
+            (event.tags || []).some((tag) => tag[0] === "nip63"),
+          );
+        }
         let pubkeys = res.pubkeys;
         let ev = [];
         if (data.length > 0) {
@@ -227,6 +273,8 @@ export default function UserFeed({ user }) {
                   let isMention = checkMentionInContent(event.content, pubkey);
                   if (isMention) return event_;
                 } else if (contentFrom === "pinned") {
+                  return event_;
+                } else if (contentFrom === "premium-notes") {
                   return event_;
                 }
               }
@@ -265,7 +313,13 @@ export default function UserFeed({ user }) {
     };
     if (!pubkey) return;
     fetchData();
-  }, [lastEventTime, contentFrom, pubkey]);
+  }, [
+    lastEventTime,
+    contentFrom,
+    pubkey,
+    isPremiumRelaysLoading,
+    premiumRelays,
+  ]);
 
   useEffect(() => {
     if (userPinnedNotes?.length === 0) {
@@ -434,7 +488,11 @@ export default function UserFeed({ user }) {
             ref={virtuosoRef}
             itemContent={(index) => {
               let item = events[contentFrom][index];
-              if (["curations", "videos", "articles"].includes(contentFrom))
+              if (
+                ["curations", "videos", "articles", "premium-articles"].includes(
+                  contentFrom,
+                )
+              )
                 return <RepEventPreviewCard key={item.id} item={item} />;
               if (contentFrom === "smart-widget")
                 return (

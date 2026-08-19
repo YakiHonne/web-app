@@ -9,8 +9,6 @@ const OPERATOR_URLS = [
     "https://po.yakihonne.com"
 ];
 
-// Operators pre-selected when a new account is created. The rest of
-// OPERATOR_URLS stays available as suggestions in the advanced menu.
 const DEFAULT_OPERATOR_URLS = [
     "https://po.yakihonne.com",
     "https://po.jumble.social",
@@ -22,8 +20,6 @@ const CENTRALS = [
     { url: OPTIONAL_CENTRAL_URL, kind: "suggested" },
 ];
 
-// Kind of the discovery/configuration event published after a successful
-// setup, so other clients can find which central holds this email's account.
 const POMEGRANATE_CONFIG_KIND = 16440;
 
 export {

@@ -47,6 +47,9 @@ const initiateNDKInstance = async (relay, list, isRelayList) => {
     await signer.blockUntilReady();
     ndkInstance.signer = signer;
   }
+  ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
+    ndk: ndkInstance,
+  });
   await ndkInstance.connect(4000);
   if (
     !isRelayList &&
@@ -55,9 +58,6 @@ const initiateNDKInstance = async (relay, list, isRelayList) => {
   ) {
     return false;
   }
-  ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
-    ndk: ndkInstance,
-  });
   setNDKInstance(relay, ndkInstance);
   return ndkInstance;
 };

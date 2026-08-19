@@ -21,8 +21,8 @@ import useNameClaim from "@/Hooks/useNameClaim";
 import useQuotaGuard from "@/Hooks/useQuotaGuard";
 import { claimUsername } from "@/Endpoints/Account";
 import { setSubscriptionStatus } from "@/Store/Slides/Subscription";
+import { openUpgradeSheet } from "@/Store/Slides/Upgrade";
 import axiosInstance from "@/Helpers/HTTP_Client";
-import { getWallets } from "@/Helpers/ClientHelpers";
 import { InitEvent } from "@/Helpers/Controlers";
 
 export default function ProfileEdit() {
@@ -32,7 +32,6 @@ export default function ProfileEdit() {
   const userKeys = useSelector((state) => state.userKeys);
   const userRelays = useSelector((state) => state.userRelays);
   const userAllRelays = useSelector((state) => state.userAllRelays);
-  const storeWallets = useSelector((state) => state.wallets);
   const toPublish = useSelector((state) => state.toPublish);
   const { handleAccessError } = useQuotaGuard();
   const {
@@ -50,16 +49,25 @@ export default function ProfileEdit() {
   const [showNip05Overlay, setShowNip05Overlay] = useState(false);
   const [showWalletOverlay, setShowWalletOverlay] = useState(false);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("linkWallet")) {
+      setShowWalletOverlay(true);
+      params.delete("linkWallet");
+      const query = params.toString();
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${query ? `?${query}` : ""}`,
+      );
+    }
+  }, []);
+
   const usernameClaim = useNameClaim({
     kind: "username",
     enabled: canUseYakiNames && !hasUsername,
   });
-
-  const linkableWallets = (
-    (Array.isArray(storeWallets) && storeWallets.length > 0
-      ? storeWallets
-      : getWallets()) || []
-  ).filter((wallet) => wallet?.kind !== 1 && !!wallet?.entitle);
 
   const [isLoading, setIsLoading] = useState(false);
   const [isImageUploading, setImageUploading] = useState(false);
@@ -81,9 +89,6 @@ export default function ProfileEdit() {
     triggerEdit();
   }, [userMetadata]);
 
-  // The publisher clears toPublish once it is done, whether it signed and
-  // published or bailed on an error. Without this the form stays locked behind
-  // pointerEvents:none when publishing fails.
   useEffect(() => {
     if (!toPublish) setIsLoading(false);
   }, [toPublish]);
@@ -117,9 +122,6 @@ export default function ProfileEdit() {
   const hasPendingUsername =
     canUseYakiNames && !hasUsername && usernameClaim.claimable;
 
-  // Two unrelated destinations: the Yakihonne API (the one-time username
-  // claim) and Nostr (the kind 0 metadata). Each runs only if its own data
-  // changed, and neither depends on the other's outcome.
   const updateInfos = async () => {
     const metadataChanged = !checkMetadata();
     const tasks = [];
@@ -130,9 +132,6 @@ export default function ProfileEdit() {
     await Promise.allSettled(tasks);
   };
 
-  // Sign here rather than letting the publisher call ndkEvent.sign(): InitEvent
-  // is the path that handles extension, bunker (NIP-46) and raw-key accounts,
-  // and it is what every other event in the app uses.
   const publishMetadata = async (content) => {
     setIsLoading(true);
     const event = await InitEvent(0, JSON.stringify(content), []);
@@ -250,8 +249,6 @@ export default function ProfileEdit() {
     setIsLoading(false);
   };
 
-  // Mirrors exactly what updateInfos would publish, so the comparison cannot
-  // disagree with what actually gets sent.
   const buildMetadata = () => {
     const content = { ...userMetadata };
     content.picture = userPicture !== false ? userPicture : content.picture;
@@ -448,7 +445,7 @@ export default function ProfileEdit() {
                             className="fx-centered fx-col fit-container"
                             style={{ columnGap: "10px" }}
                           >
-                            {canUseYakiNames && (
+                            {canUseYakiNames ? (
                               <>
                                 {hasUsername ? (
                                   <div className="yaki-username-border">
@@ -490,6 +487,30 @@ export default function ProfileEdit() {
                                   />
                                 )}
                               </>
+                            ) : (
+                              <div
+                                className="fit-container pointer"
+                                onClick={() =>
+                                  dispatch(
+                                    openUpgradeSheet({
+                                      source: "profile-username",
+                                    }),
+                                  )
+                                }
+                              >
+                                <YakiNameField
+                                  label={t("Ap3wrvF")}
+                                  prefix="yakihonne.com/"
+                                  value={yakiUsername || ""}
+                                  state="owned"
+                                  disabled
+                                  action={
+                                    <div className="pointer fx-centered">
+                                      <Icon name="crown" size={16} />
+                                    </div>
+                                  }
+                                />
+                              </div>
                             )}
                             <div
                               className="fx-centered fit-container fx-start-v profile-edit-row"
@@ -573,17 +594,23 @@ export default function ProfileEdit() {
                                     }
                                   />
                                 </div>
-                                {canUseYakiNames && (
-                                  <div className="box-pad-h-m">
-                                    <button
-                                      className="btn btn-small btn-gray"
-                                      style={{ minWidth: "max-content" }}
-                                      onClick={() => setShowNip05Overlay(true)}
-                                    >
-                                      {t("AikNyQn")}
-                                    </button>
-                                  </div>
-                                )}
+                                <div className="box-pad-h-m">
+                                  <button
+                                    className="btn btn-small btn-gray"
+                                    style={{ minWidth: "max-content" }}
+                                    onClick={() =>
+                                      canUseYakiNames
+                                        ? setShowNip05Overlay(true)
+                                        : dispatch(
+                                            openUpgradeSheet({
+                                              source: "profile-nip05",
+                                            }),
+                                          )
+                                    }
+                                  >
+                                    {t("AikNyQn")}
+                                  </button>
+                                </div>
                               </div>
                             </div>
                             <div className="fit-container sc-s-18 no-bg box-pad-v-s">
@@ -600,17 +627,15 @@ export default function ProfileEdit() {
                                     onChange={handleLUD16}
                                   />
                                 </div>
-                                {linkableWallets.length > 0 && (
-                                  <div className="box-pad-h-m">
-                                    <button
-                                      className="btn btn-small btn-gray"
-                                      style={{ minWidth: "max-content" }}
-                                      onClick={() => setShowWalletOverlay(true)}
-                                    >
-                                      {t("AmQVpu4")}
-                                    </button>
-                                  </div>
-                                )}
+                                <div className="box-pad-h-m">
+                                  <button
+                                    className="btn btn-small btn-gray"
+                                    style={{ minWidth: "max-content" }}
+                                    onClick={() => setShowWalletOverlay(true)}
+                                  >
+                                    {t("AmQVpu4")}
+                                  </button>
+                                </div>
                               </div>
                             </div>
 

@@ -238,8 +238,6 @@ export default function Publishing({ displayOff = false }) {
       relaysToPublish = removeDuplicatedRelays(outboxRelays, relaysToPublish);
 
       try {
-        // Remote signers (NIP-46) can hang indefinitely when the bunker is
-        // unreachable, and sign() has no timeout of its own.
         await Promise.race([
           ndkEvent.sign(),
           new Promise((_, reject) =>

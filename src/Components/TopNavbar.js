@@ -327,6 +327,7 @@ export default function TopNavbar() {
     { icon: iconsNames.puzzle, iconBold: "smart-widget-bold", label: t("A2mdxcf"), path: "/smart-widgets" },
     ...(userKeys ? [
       { icon: iconsNames.user_01, iconBold: "user-bold", label: t("AyBBPWE"), path: null, onClick: handleProfileLink },
+      { icon: iconsNames.cloud, iconBold: "media-bold", label: t("A8SkkKn"), path: "/blossom" },
       { icon: iconsNames.chart_line, iconBold: "dashboard-bold", label: t("ALBhi3j"), path: "/dashboard" },
       { icon: iconsNames.star, iconBold: "dashboard-bold", label: t("ABsx3n9"), path: "/yaki-points" },
     ] : []),
@@ -616,6 +617,11 @@ export default function TopNavbar() {
                 <span>{t("Ar1oBm3")}</span>
               </div>
 
+              <div className="uplift-dropdown-item" onClick={() => { closeProfileMenu(); customHistory("/creators-subscriptions"); }}>
+                <Icon name="crown" size={18} />
+                <span>{t("AC8k2xO")}</span>
+              </div>
+
               <div className="uplift-dropdown-item" onClick={() => { closeProfileMenu(); customHistory("/settings"); }}>
                 <Icon name={iconsNames.settings} v={2} size={18} />
                 <span>{t("ABtsLBp")}</span>
@@ -809,6 +815,7 @@ const PAGE_TITLES = {
   "/lightning-wallet": "Ah1Kxvl",
   "/cashu-wallet": "Ah1Kxvl",
   "/subscription": "Ar1oBm3",
+  "/creators-subscriptions": "AC8k2xO",
 };
 
 const MiniNavbar = ({ visible, pathname, userKeys, newNotifications, isNewMsg, avatarRef, onAvatarClick, onReveal, isAccountSwitching }) => {

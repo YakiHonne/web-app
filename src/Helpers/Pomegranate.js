@@ -84,8 +84,6 @@ export const awaitPopupMessage = (popup, expectedOrigin, extract) => {
   });
 };
 
-// Step 2-4 of the implementation guide: open the central's Google popup and
-// decode the kind:20443 token it posts back.
 export const authenticateWithGoogle = async (central) => {
   const popup = openPopup(`${central}/login/google`, "PomegranateLogin");
   if (!popup) throw new Error("POPUP_BLOCKED");
@@ -151,8 +149,6 @@ export const getBunkerUrl = (central, profile) => {
   return `bunker://${profile.handler_pubkey}?relay=${encodeURIComponent(relay)}`;
 };
 
-// Resolve the "default" profile (creating it if missing) and build its bunker
-// URI. Steps 15-16 of the implementation guide.
 export const resolveDefaultBunker = async (central, token) => {
   let profiles = await listProfiles(central, token);
   if (!profiles.find((p) => p.name === "default")) {
@@ -164,8 +160,6 @@ export const resolveDefaultBunker = async (central, token) => {
   return getBunkerUrl(central, profile);
 };
 
-// Step 5: the email is hashed with argon2id before being used as the "m" tag
-// so the discovery event never exposes the address itself.
 export const hashEmailForDiscovery = (email) =>
   bytesToHex(
     argon2id(email.trim().toLowerCase(), "pomegranate", {
@@ -176,40 +170,55 @@ export const hashEmailForDiscovery = (email) =>
     }),
   );
 
-// Look for an existing setup anywhere on the network. Returns the central that
-// already holds this email's account, or null.
-export const findExistingSetup = async (email) => {
+export const findAllExistingSetups = async (email) => {
   try {
     const m = hashEmailForDiscovery(email);
-    const events = await ndkInstance.fetchEvents({
-      kinds: [POMEGRANATE_CONFIG_KIND],
-      "#m": [m],
-    });
-    const found = [...events].sort((a, b) => b.created_at - a.created_at)[0];
-    if (!found) return null;
-    const central = found.tags.find((tag) => tag[0] === "central")?.[1];
-    if (!central) return null;
-    const operators = found.tags
-      .filter((tag) => tag[0] === "operator" && tag[1])
-      .map((tag) => tag[1]);
-    const threshold = Number(
-      found.tags.find((tag) => tag[0] === "threshold")?.[1],
+    const events = await ndkInstance.fetchEvents(
+      {
+        kinds: [POMEGRANATE_CONFIG_KIND],
+        "#m": [m],
+      },
+      { closeOnEose: true, groupable: false },
     );
-    return {
-      // the configuration event is signed by the account key itself
-      pubkey: found.pubkey,
-      central: massageURL(central),
-      operators,
-      threshold: Number.isFinite(threshold) ? threshold : null,
-    };
+    const sorted = [...events].sort((a, b) => b.created_at - a.created_at);
+    const setups = [];
+    for (const found of sorted) {
+      const central = found.tags.find((tag) => tag[0] === "central")?.[1];
+      if (!central) continue;
+      const massaged = massageURL(central);
+      if (setups.some((setup) => setup.central === massaged)) continue;
+      const operators = found.tags
+        .filter((tag) => tag[0] === "operator" && tag[1])
+        .map((tag) => tag[1]);
+      const threshold = Number(
+        found.tags.find((tag) => tag[0] === "threshold")?.[1],
+      );
+      setups.push({
+        pubkey: found.pubkey,
+        central: massaged,
+        operators,
+        threshold: Number.isFinite(threshold) ? threshold : null,
+        created_at: found.created_at,
+      });
+    }
+    return setups;
   } catch (err) {
     console.log(err);
-    return null;
+    return [];
   }
 };
 
-// Publish the configuration event describing the central, operators and
-// threshold this account was set up with, so any client can rediscover it.
+export const findExistingSetup = async (email) => {
+  const setups = await findAllExistingSetups(email);
+  return setups[0] || null;
+};
+
+export const findSetupOnOtherCentral = async (email, targetCentral) => {
+  const setups = await findAllExistingSetups(email);
+  const target = targetCentral ? massageURL(targetCentral) : "";
+  return setups.find((setup) => setup.central !== target) || null;
+};
+
 export const publishConfigEvent = async ({
   email,
   central,
@@ -241,8 +250,6 @@ export const publishConfigEvent = async ({
   }
 };
 
-// Steps 11-13: shard the key, register the configuration on the central, then
-// hand each operator its own secret shard.
 export const createPomegranateAccount = async (
   central,
   token,
@@ -322,8 +329,6 @@ export const createPomegranateAccount = async (
   }
 };
 
-// Undocumented in the Pomegranate spec: attempted on a best-effort basis when
-// the user unlinks, the local unlink proceeds regardless of the outcome.
 export const deleteAccount = async (central, token) => {
   try {
     const res = await fetch(`${central}/account`, {

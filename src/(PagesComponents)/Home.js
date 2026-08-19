@@ -80,7 +80,7 @@ export default function Home() {
 
   return (
     <>
-      <div style={{ overflow: "auto" }}>
+      <div>
         <ArrowUp />
         <div className="fit-container fx-centered fx-start-h fx-start-v">
           <div

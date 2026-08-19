@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "next/link";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { customHistory } from "@/Helpers/History";
+import { consumeWalletReturnPath } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
 import Overlay from "@/Components/Overlay";
 
@@ -64,19 +65,19 @@ export default function WalletAlby() {
             });
             oldVersion.push(alby);
             updateWallets(oldVersion);
-            customHistory("/lightning-wallet");
+            customHistory(consumeWalletReturnPath() || "/lightning-wallet");
             return;
           } catch (err) {
             updateWallets([alby]);
-            customHistory("/lightning-wallet");
+            customHistory(consumeWalletReturnPath() || "/lightning-wallet");
             return;
           }
         }
         updateWallets([alby]);
-        customHistory("/lightning-wallet");
+        customHistory(consumeWalletReturnPath() || "/lightning-wallet");
       } catch (err) {
         console.log(err);
-        customHistory("/lightning-wallet");
+        customHistory(consumeWalletReturnPath() || "/lightning-wallet");
       }
     };
     getMeData();

@@ -324,6 +324,13 @@ hr:last-child {
     word-break: break-word;
 }
 
+.sticker-big {
+    padding: 0 12px;
+    min-height: 28px;
+    max-height: 28px;
+    font-size: var(--16);
+}
+
 .sticker-round {
     min-width: 32px;
     min-height: 32px;

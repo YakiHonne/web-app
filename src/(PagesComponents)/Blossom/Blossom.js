@@ -1,13 +1,15 @@
 import Dot from "@/Components/Dot";
 import Icon from "@/Components/Icon";
 import Spinner from "@/Components/Spinner";
-import Slider from "@/Components/Slider";
+import Select from "@/Components/Select";
 import useBlossomManagement from "@/Hooks/useBlossomManagement";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import BlobCard from "./BlobCard";
 import UploadBlossom from "./UploadBlossom";
 import { VirtuosoGrid } from "react-virtuoso";
+import YakiBlossomCard from "./YakiBlossomCard";
+import { YAKI_BLOSSOM, formatBytes } from "@/Content/Blossom";
 
 export default function Blossom() {
   const { t } = useTranslation();
@@ -18,10 +20,23 @@ export default function Blossom() {
     isBlobsLoading,
     blossomColors,
     refreshLists,
+    yakiUsage,
+    isYakiUsageLoading,
   } = useBlossomManagement();
   const [selectedTab, setSelectedTab] = useState(false);
   const [display, setDisplay] = useState(2);
   const [showUpload, setShowUpload] = useState(false);
+
+  const selectedServer =
+    selectedTab === false ? false : userBlossomServers[selectedTab];
+
+  const consumedStorage = useMemo(() => {
+    const list =
+      selectedTab === false
+        ? allBlobs
+        : blobs[userBlossomServers[selectedTab]] || [];
+    return list.reduce((sum, blob) => sum + (blob?.size || 0), 0);
+  }, [selectedTab, allBlobs, blobs, userBlossomServers]);
   return (
     <>
       {showUpload && (
@@ -44,64 +59,106 @@ export default function Blossom() {
             className="btn btn-normal fx-centered"
             onClick={() => setShowUpload(true)}
           >
-            {t("AiINSld")}
+            {t("A5AaVbz")}
             <Icon name={"plus-sign"} size={14} />
           </button>
         </div>
         <div className="box-pad-v-m fit-container">
-          {isBlobsLoading && (
-            <div className="fx-centered box-pad-v">
-              <Spinner />
-            </div>
-          )}
-          {!isBlobsLoading && userBlossomServers.length > 0 && (
+          {userBlossomServers.length > 0 && (
             <div
               className="fit-container fx-scattered"
               style={{ maxWidth: "100%" }}
             >
-              <div style={{ width: "calc(100% - 120px)" }}>
-                <Slider
-                  slideBy={150}
-                  items={[
-                    <div
-                      className={`box-pad-h-s box-pad-v-s sc-s-18 ${selectedTab === false ? "" : "bg-sp"} fx-centered pointer`}
-                      onClick={() => setSelectedTab(false)}
-                    >
-                      <Dot color={"var(--black)"} />
-                      <p>{t("A2q2L8K")}</p>
-                    </div>,
-                    ...userBlossomServers.map((_, index) => {
-                      return (
-                        <div
-                          key={index}
-                          className={`box-pad-h-m box-pad-v-s sc-s-18 ${selectedTab === index ? "" : "bg-sp"} fx-centered pointer`}
-                          onClick={() => setSelectedTab(index)}
-                        >
-                          <Dot color={blossomColors[index]} />
-                          <p>{_.replaceAll("https://", "")}</p>
-                        </div>
-                      );
-                    }),
+              <div style={{ width: "calc(100% - 120px)", maxWidth: "320px" }}>
+                <Select
+                  fullWidth
+                  disabled={isBlobsLoading}
+                  value={selectedTab}
+                  setSelectedValue={setSelectedTab}
+                  options={[
+                    {
+                      value: false,
+                      display_name: t("A2q2L8K"),
+                      left_el: isBlobsLoading ? (
+                        <Spinner size={14} />
+                      ) : (
+                        <Dot color={"var(--black)"} />
+                      ),
+                    },
+                    ...userBlossomServers.map((server, index) => ({
+                      value: index,
+                      display_name: server.replaceAll("https://", ""),
+                      left_el: <Dot color={blossomColors[index]} />,
+                      right_el:
+                        server === YAKI_BLOSSOM ? (
+                          <Icon name="crown" size={16} />
+                        ) : null,
+                    })),
                   ]}
                 />
               </div>
-              <div className="fx-centered max-content">
+              <div className="fx-centered max-content" style={{ columnGap: "6px" }}>
                 <div
-                  className={`round-icon pointer fx-centered ${display === 1 ? "bg" : "bg-sp"}`}
+                  className="round-icon pointer fx-centered"
+                  style={
+                    display === 1
+                      ? {
+                          backgroundColor: "var(--very-dim-gray)",
+                          borderColor: "var(--c1)",
+                        }
+                      : undefined
+                  }
                   onClick={() => setDisplay(1)}
                 >
-                  <Icon name={"grid-4"} size={20} />
+                  <Icon
+                    name={"grid-4"}
+                    size={20}
+                    isBoldThemeColor={display === 1}
+                  />
                 </div>
                 <div
-                  className={`round-icon pointer fx-centered ${display === 2 ? "bg" : "bg-sp"}`}
+                  className="round-icon pointer fx-centered"
+                  style={
+                    display === 2
+                      ? {
+                          backgroundColor: "var(--very-dim-gray)",
+                          borderColor: "var(--c1)",
+                        }
+                      : undefined
+                  }
                   onClick={() => setDisplay(2)}
                 >
-                  <Icon name={"grid-2"} size={20} />
+                  <Icon
+                    name={"list_unordered"}
+                    v={2}
+                    size={20}
+                    isBoldThemeColor={display === 2}
+                  />
                 </div>
               </div>
             </div>
           )}
         </div>
+        <div
+          className="fit-container"
+          style={{
+            position: "sticky",
+            top: 0,
+            zIndex: 2,
+            backgroundColor: "var(--white)",
+            paddingBottom: "8px",
+          }}
+        >
+          <YakiBlossomCard used={yakiUsage} isLoading={isYakiUsageLoading} />
+        </div>
+
+        {selectedServer !== YAKI_BLOSSOM && consumedStorage > 0 && (
+          <div className="fit-container fx-scattered box-pad-v-s">
+            <p className="gray-c">{t("AcwrhJU")}</p>
+            <p className="p-bold">{formatBytes(consumedStorage)}</p>
+          </div>
+        )}
+
         {((selectedTab === false && allBlobs.length > 0) ||
           (selectedTab !== false &&
             blobs[userBlossomServers[selectedTab]].length > 0)) && (

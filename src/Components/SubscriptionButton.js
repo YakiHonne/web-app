@@ -32,7 +32,7 @@ export default function SubscriptionButton({ pubkey }) {
           isSelf ? setShowSelfSubWarning(true) : setShowProviders(true)
         }
       >
-        <Icon name={"crown"} />
+        <Icon name={"crown"} size={22} strokeWidth={2.5} />
         {t("AvD6FbL")}
       </button>
     </>

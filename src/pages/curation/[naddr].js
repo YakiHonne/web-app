@@ -61,6 +61,8 @@ export async function getStaticProps({ params }) {
           ? getParsedAuthor(author.data[0])
           : getEmptyuserMetadata(event.pubkey),
     },
+    revalidate:
+      !event?.id || event?.tags?.find((_) => _[0] === "nip63") ? 2 : 604800,
   };
 }
 

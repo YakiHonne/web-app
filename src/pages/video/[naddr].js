@@ -74,6 +74,8 @@ export async function getStaticProps({ params }) {
           ? getParsedAuthor(author.data[0])
           : { ...author },
     },
+    revalidate:
+      !event || event?.tags?.find((_) => _[0] === "nip63") ? 2 : 604800,
   };
 }
 

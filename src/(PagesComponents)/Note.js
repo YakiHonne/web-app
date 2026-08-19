@@ -54,14 +54,14 @@ export default function Note({ event, nevent }) {
   const { userProfile, isNip05Verified, proUser } = useUserProfile(note?.pubkey);
   const { postActions } = useNoteStats(note?.id, note?.pubkey);
   const unsupportedKind = useMemo(() => {
-    return note?.kind !== 1;
+    return ![1, 1111].includes(note?.kind);
   }, [note]);
   useEffect(() => {
     const fetchNote = async () => {
       setIsLoading(true);
       let id = nip19.decode(nevent)?.data.id || nip19.decode(nevent)?.data;
       let relays = nip19.decode(nevent)?.data.relays || [];
-      const res = await getSubData([{ ids: [id] }], 2000, relays, undefined, 1);
+      const res = await getSubData([{ ids: [id] }], 2000, relays, undefined, 1, undefined, "ONLY_RELAY");
       if (res.data.length === 0) {
         setIsLoading(false);
         return;
@@ -154,7 +154,7 @@ export default function Note({ event, nevent }) {
         </Link>
       </div>
     );
-  if (note?.kind !== 1)
+  if (![1, 1111].includes(note?.kind))
     return customHistory(
       "/unsupported/" + nip19.neventEncode({ id: event?.id }),
     );

@@ -45,6 +45,19 @@ export const openBillingPortal = async () => {
   return data;
 };
 
+export const getSubscriberSubscriptions = async () => {
+  const { data } = await axiosInstance.get("/api/v1/subscriber/subscriptions");
+  return data;
+};
+
+export const getSubscriberBillingPortal = async ({ creator_pubkey, return_url }) => {
+  const { data } = await axiosInstance.post("/api/v1/subscriber/billing-portal", {
+    creator_pubkey,
+    return_url,
+  });
+  return data;
+};
+
 let _plansCache = null;
 
 export const getPlans = async () => {

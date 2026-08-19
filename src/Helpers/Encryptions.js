@@ -349,6 +349,9 @@ const getParsedRepEvent = (event) => {
       iMetaFallbacks: [],
     };
     for (let tag of event.tags) {
+      if (tag[0] === "nip63") {
+        content.isPremium = true;
+      }
       if (tag[0] === "title") {
         content.title = tag[1];
       }

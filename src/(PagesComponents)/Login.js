@@ -64,7 +64,7 @@ import {
   authenticateWithGoogle,
   getAccount,
   resolveDefaultBunker,
-  findExistingSetup,
+  findSetupOnOtherCentral,
   publishConfigEvent,
   createPomegranateAccount,
 } from "@/Helpers/Pomegranate";
@@ -601,22 +601,18 @@ const GoogleLoginOverlay = ({ onClose }) => {
   const [errorMsg, setErrorMsg] = useState("");
   const [token, setToken] = useState(null);
   const [copied, setCopied] = useState(false);
-  // must stay stable, it is the NIP-46 client key saved with the account
   const localKeys = useMemo(() => NDKPrivateKeySigner.generate(), []);
 
-  // central selection
   const centrals = useMemo(() => CENTRALS.map((c) => ({ ...c, url: massageURL(c.url) })), []);
   const [selectedCentral, setSelectedCentral] = useState(centrals[0].url);
   const [useCustomCentral, setUseCustomCentral] = useState(false);
   const [customCentral, setCustomCentral] = useState("");
 
-  // key selection
   const [keyMode, setKeyMode] = useState("generate");
   const [secretKey, setSecretKey] = useState(() => generateSecretKey());
   const [importedKey, setImportedKey] = useState("");
   const [importError, setImportError] = useState("");
 
-  // operators / threshold
   const [operators, setOperators] = useState(() =>
     DEFAULT_OPERATOR_URLS.map(massageURL),
   );
@@ -626,12 +622,9 @@ const GoogleLoginOverlay = ({ onClose }) => {
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // an existing setup found on another central
   const [foundSetup, setFoundSetup] = useState(null);
   const [foundUser, setFoundUser] = useState(null);
 
-  // Show who the existing account belongs to, so the user can tell whether it
-  // is really theirs before connecting.
   useEffect(() => {
     if (!foundSetup?.pubkey) {
       setFoundUser(null);
@@ -696,7 +689,6 @@ const GoogleLoginOverlay = ({ onClose }) => {
     Router.back();
   };
 
-  // Sign in against a central that already holds an account for this email.
   const connectExisting = async (centralUrl, googleToken) => {
     const account = await getAccount(centralUrl, googleToken);
     if (!account) return false;
@@ -719,17 +711,17 @@ const GoogleLoginOverlay = ({ onClose }) => {
       setToken(googleToken);
       setStatus("checking");
 
-      // The account may already live on this central.
       if (await connectExisting(targetCentral, googleToken)) {
         setStatus("idle");
         onClose();
         return;
       }
 
-      // Otherwise look for a setup published from another central before
-      // creating a brand new one.
-      const existing = await findExistingSetup(googleToken.email);
-      if (existing && existing.central && existing.central !== targetCentral) {
+      const existing = await findSetupOnOtherCentral(
+        googleToken.email,
+        targetCentral,
+      );
+      if (existing) {
         setFoundSetup(existing);
         setStatus("idle");
         setPhase("found");
@@ -753,7 +745,6 @@ const GoogleLoginOverlay = ({ onClose }) => {
     }
   };
 
-  // Image 3: the account was found on a different central, connect there.
   const handleConnectFound = async () => {
     if (!foundSetup?.central) return;
     setErrorMsg("");
@@ -767,7 +758,6 @@ const GoogleLoginOverlay = ({ onClose }) => {
         onClose();
         return;
       }
-      // Nothing there after all, fall back to creating an account.
       setStatus("idle");
       setFoundSetup(null);
       setPhase("setup");
@@ -781,8 +771,6 @@ const GoogleLoginOverlay = ({ onClose }) => {
     }
   };
 
-  // "Not you": ignore the account that was found and set up a new one on the
-  // central the user originally picked.
   const handleCreateInstead = () => {
     setFoundSetup(null);
     setErrorMsg("");
@@ -845,8 +833,6 @@ const GoogleLoginOverlay = ({ onClose }) => {
 
     setStatus("creating");
     try {
-      // A generated key is only shown to the user at this point, so make sure
-      // they get a backup of it before it leaves the browser.
       if (keyMode === "generate") {
         downloadKey(nip19.nsecEncode(keyToUse));
         dispatch(setToast({ type: 1, desc: t("Apom010") }));
@@ -868,8 +854,6 @@ const GoogleLoginOverlay = ({ onClose }) => {
       }
       if (!account) throw new Error(t("Ar66dzx"));
 
-      // Publish the configuration so this setup can be rediscovered from any
-      // other client or central later on.
       await publishConfigEvent({
         email: token.email,
         central,

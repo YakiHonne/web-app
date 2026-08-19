@@ -51,7 +51,7 @@ function useReveal(dep, rootRef) {
 
 function CellValue({ value, t }) {
   if (value === true) return <Icon name="check" size={20} v={2} isBoldThemeColor />;
-  if (value === false) return <span style={{ color: "rgba(139,148,158,0.3)", fontSize: "0.9rem" }}>–</span>;
+  if (value === false) return <span style={{ color: "var(--gray)", fontSize: "0.9rem" }}>–</span>;
   if (value === "50 GB") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("ASR1V0c")}</span>;
   if (value === "100 GB") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AJXhgWC")}</span>;
   if (value === "3 months") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AVnJlbF")}</span>;
@@ -271,7 +271,7 @@ function CompareTable({ plans }) {
         <div className="lp-compare-row header">
           <div className="lp-compare-cell header-cell">{t("ALvzv9F")}</div>
           <div className="lp-compare-cell center header-cell">{plans[0]?.name ?? ""}</div>
-          <div className="lp-compare-cell center header-cell" style={{ color: "#F75816" }}>{plans[1]?.name ?? ""}</div>
+          <div className="lp-compare-cell center header-cell" style={{ color: "var(--c1)" }}>{plans[1]?.name ?? ""}</div>
         </div>
         {COMPARE_ROWS.map((row) => (
           <div key={row.labelKey} className="lp-compare-row">

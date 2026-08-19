@@ -16,15 +16,23 @@ export default function useNotifications() {
   const isNotificationsLoading = useSelector(
     (state) => state.isNotificationsLoading,
   );
+  const { userMutedList } = useSelector((state) => state.userMutedList);
+  const unmutedNotifications = useMemo(() => {
+    if (!Array.isArray(userMutedList) || userMutedList.length === 0)
+      return globalNotifications;
+    return globalNotifications.filter(
+      (_) => !userMutedList.includes(_.pubkey),
+    );
+  }, [globalNotifications, userMutedList]);
   const notifications = useMemo(() => {
-    return globalNotifications.filter((_) => !_.isNew);
-  }, [globalNotifications]);
+    return unmutedNotifications.filter((_) => !_.isNew);
+  }, [unmutedNotifications]);
   const newNotifications = useMemo(() => {
-    return globalNotifications.filter((_) => _.isNew);
-  }, [globalNotifications]);
+    return unmutedNotifications.filter((_) => _.isNew);
+  }, [unmutedNotifications]);
   const notReadNotifications = useMemo(() => {
-    return globalNotifications.filter((_) => !_.isRead).length;
-  }, [globalNotifications]);
+    return unmutedNotifications.filter((_) => !_.isRead).length;
+  }, [unmutedNotifications]);
   const notificationSettings = (() => {
     let settings =
       getCustomSettings().notification || getCustomSettings("").notification;

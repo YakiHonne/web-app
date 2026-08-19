@@ -6,8 +6,6 @@ import useAccess from "@/Hooks/useAccess";
 import Icon from "@/Components/Icon";
 import { getTrialDaysLeft } from "@/Components/PremiumSidebarBanner";
 
-// Dismissal is permanent and per account, so switching users does not resurrect
-// a banner the other account already dismissed.
 const storageKey = (pubkey) => `trial-banner-dismissed-${pubkey}`;
 
 export default function TrialBanner() {

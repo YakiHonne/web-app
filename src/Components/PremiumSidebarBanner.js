@@ -8,8 +8,6 @@ import { customHistory } from "@/Helpers/History";
 const BANNER_URL =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/premium-banner.png";
 
-// trial_ends_at is a unix timestamp in seconds, matching fmtDate in the
-// subscription page. Days left, floored at 0.
 export const getTrialDaysLeft = (trialEndsAt) => {
   if (!trialEndsAt) return 0;
   const end = Number(trialEndsAt) * 1000;
@@ -24,11 +22,9 @@ export default function PremiumSidebarBanner() {
   const status = useSelector((state) => state.subscription?.status);
   const { isFree, inTrial } = useAccess();
 
-  // Paid, non-trial users have nothing to upgrade to here.
   if (!isFree && !inTrial) return null;
 
   const openUpgrade = () => {
-    // Signed-out users have to authenticate before they can pay.
     if (!userKeys) {
       customHistory("/login");
       return;

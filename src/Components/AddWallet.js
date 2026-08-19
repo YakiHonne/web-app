@@ -4,8 +4,9 @@ import AddYakiWallet from "@/Components/AddYakiWallet";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
+import { setWalletReturnPath } from "@/Helpers/ClientHelpers";
 
-export default function AddWallet({ exit, refresh }) {
+export default function AddWallet({ exit, refresh, returnPath = "" }) {
   const { t } = useTranslation();
   return (
     <Overlay exit={exit} width={500}>
@@ -25,7 +26,10 @@ export default function AddWallet({ exit, refresh }) {
           className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"
           style={{ backgroundColor: "transparent" }}
           href={"/lightning-wallet/nwc"}
-          onClick={exit}
+          onClick={() => {
+            setWalletReturnPath(returnPath);
+            exit();
+          }}
         >
           <div className="fx-centered">
             <Icon name="nwc-logo" size={24} isColored/>
@@ -41,9 +45,10 @@ export default function AddWallet({ exit, refresh }) {
         <div
           className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"
           style={{ backgroundColor: "transparent" }}
-          onClick={() =>
-            (window.location.href = process.env.NEXT_PUBLIC_ALBY_ALBY_CONNECT)
-          }
+          onClick={() => {
+            setWalletReturnPath(returnPath);
+            window.location.href = process.env.NEXT_PUBLIC_ALBY_ALBY_CONNECT;
+          }}
         >
           <div className="fx-centered">
             <Icon name="alby-logo" size={24} isColored/>

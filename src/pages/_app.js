@@ -228,7 +228,7 @@ function App({ Component, pageProps }) {
         {!shouldHideSidebar && <TrialBannerClient />}
         <div
           className={`page-container fit-container fx-centered fx-start-v${!shouldHideSidebar ? " uplift-page-offset" : ""}`}
-          style={{ height: "100dvh" }}
+          style={{ minHeight: "100dvh" }}
         >
           <div className={`main-container${router.pathname === "/write-article" ? " main-container--wide" : ""}`}>
             <main className="fit-container fx-centered fx-end-h fx-start-v">

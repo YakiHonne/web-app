@@ -55,9 +55,7 @@ export default function RepEventPreviewCard({
     return (
       <>
         <div
-          className={
-            "fit-container fx-scattered  fx-col sc-s-18 bg-img cover-bg pointer"
-          }
+          className={`fit-container fx-scattered  fx-col sc-s-18 bg-img cover-bg pointer${item.isPremium ? " premium-glass" : ""}`}
           onClick={(e) => {
             e.stopPropagation();
             customHistory(url);
@@ -110,10 +108,10 @@ export default function RepEventPreviewCard({
   return (
     <>
       <div
-        className={"fit-container fx-scattered box-pad-h-m mediacard sc-s box-marg-s"}
+        className={`fit-container fx-scattered box-pad-h-m mediacard sc-s box-marg-s${item.isPremium ? " premium-glass" : ""}`}
         onClick={(e) => e.stopPropagation()}
         style={{
-          border: "none",
+          border: item.isPremium ? undefined : "none",
           position: "relative",
           overflow: "visible",
           columnGap: "16px",
@@ -217,6 +215,7 @@ export default function RepEventPreviewCard({
 }
 
 const AuthorPreview = ({ author, item, isNip05Verified, proUser }) => {
+  const { t } = useTranslation();
   return (
     <div className="fx-centered fx-start-h ">
       <UserProfilePic
@@ -231,6 +230,12 @@ const AuthorPreview = ({ author, item, isNip05Verified, proUser }) => {
           <p className="p-bold">{author.display_name || author.name}</p>
           {isNip05Verified && <Icon name="checkmark-c1" isColored />}
           {proUser.isProUser && <Badge data={proUser} size={16} />}
+          {item?.isPremium && (
+            <div className="premium-glass-tag">
+              <Icon name="crown" size={12} isColored />
+              {t("AW299l2")}
+            </div>
+          )}
         </div>
         <DynamicIndicator item={item} />
       </div>

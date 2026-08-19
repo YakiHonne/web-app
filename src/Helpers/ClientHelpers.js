@@ -250,6 +250,43 @@ const doesContainNostrSchema = (url) => {
   }
 };
 
+const CUSTOM_EMOJI_REGEX = /:([a-zA-Z0-9_+-]+):/g;
+
+const renderCustomEmojis = (text, emojiMap) => {
+  if (!emojiMap || !text || !text.includes(":")) return text;
+  CUSTOM_EMOJI_REGEX.lastIndex = 0;
+  if (!CUSTOM_EMOJI_REGEX.test(text)) return text;
+  CUSTOM_EMOJI_REGEX.lastIndex = 0;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+  while ((match = CUSTOM_EMOJI_REGEX.exec(text)) !== null) {
+    const url = emojiMap[match[1]];
+    if (!url) continue;
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    parts.push(
+      <img
+        key={`${match[1]}-${match.index}`}
+        src={url}
+        alt={`:${match[1]}:`}
+        title={`:${match[1]}:`}
+        className="custom-emoji"
+        loading="lazy"
+      />,
+    );
+    lastIndex = match.index + match[0].length;
+  }
+  if (parts.length === 0) return text;
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts.map((part, index) =>
+    typeof part === "string" ? (
+      <Fragment key={index}>{part}</Fragment>
+    ) : (
+      part
+    ),
+  );
+};
+
 export function getNoteTree(
   note,
   minimal = false,
@@ -258,6 +295,7 @@ export function getNoteTree(
   pubkey,
   noBlur = false,
   sliderPortalId = null,
+  emojiMap = null,
 ) {
   if (!note) return "";
   let tree = note
@@ -521,7 +559,7 @@ export function getNoteTree(
               }}
               key={key}
             >
-              {el}{" "}
+              {renderCustomEmojis(el, emojiMap)}{" "}
             </span>,
           );
         }
@@ -534,7 +572,7 @@ export function getNoteTree(
             }}
             key={key}
           >
-            {el}{" "}
+            {renderCustomEmojis(el, emojiMap)}{" "}
           </span>,
         );
       }
@@ -712,7 +750,7 @@ export function getParsedNote(
   try {
     if (!event) return;
 
-    let expiration, isQuote, isPremium, checkForLabel, isComment, isNotRoot, isReply, isProtected;
+    let expiration, isQuote, isPremium, checkForLabel, isComment, isNotRoot, isReply, isProtected, nip22Root, nip22Parent, emojiMap;
     for (let tag of event.tags) {
       if (!expiration && tag[0] === "expiration") expiration = tag;
       if (!isQuote && tag[0] === "q") isQuote = tag;
@@ -722,6 +760,19 @@ export function getParsedNote(
       if (!isNotRoot && tag.length > 3 && tag[3] === "root") isNotRoot = tag;
       if (!isReply && tag.length > 3 && tag[3] === "reply") isReply = tag;
       if (!isProtected && tag[0] === "-") isProtected = tag;
+      if (tag[0] === "emoji" && tag[1] && tag[2]) {
+        if (!emojiMap) emojiMap = {};
+        emojiMap[tag[1]] = tag[2];
+      }
+      if (!nip22Root && ["A", "E", "I"].includes(tag[0]) && tag[1]) nip22Root = tag;
+      if (!nip22Parent && ["a", "e", "i"].includes(tag[0]) && tag[1]) nip22Parent = tag;
+    }
+
+    if (event.kind === 1111 && nip22Root) {
+      const rootKind = nip22Root[0] === "A" ? "a" : nip22Root[0] === "E" ? "e" : "i";
+      const parentValue = nip22Parent ? nip22Parent[1] : nip22Root[1];
+      isNotRoot = [rootKind, nip22Root[1]];
+      isReply = parentValue !== nip22Root[1] ? ["e", parentValue] : undefined;
     }
 
     let isExpired = expiration && parseInt(expiration[1]) < Date.now() / 1000;
@@ -752,6 +803,7 @@ export function getParsedNote(
           event.pubkey,
           false,
           `slider-${event.id}`,
+          emojiMap,
         )
         : event.content;
 
@@ -1613,3 +1665,23 @@ const getNIP21FromURL = (url) => {
     return url;
   }
 };
+
+const WALLET_RETURN_KEY = "yaki-wallet-return";
+
+export function setWalletReturnPath(path) {
+  try {
+    if (path) sessionStorage.setItem(WALLET_RETURN_KEY, path);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export function consumeWalletReturnPath() {
+  try {
+    const path = sessionStorage.getItem(WALLET_RETURN_KEY);
+    if (path) sessionStorage.removeItem(WALLET_RETURN_KEY);
+    return path || "";
+  } catch (err) {
+    return "";
+  }
+}

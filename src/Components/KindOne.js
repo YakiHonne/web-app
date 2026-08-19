@@ -207,6 +207,10 @@ function KindOne({
           event.pubkey,
           false,
           `slider-${event.id}`,
+          (event.tags || []).reduce((map, tag) => {
+            if (tag[0] === "emoji" && tag[1] && tag[2]) map[tag[1]] = tag[2];
+            return map;
+          }, {}),
         );
         setTranslatedNote(noteTree);
         setShowTranslation(true);
@@ -312,9 +316,9 @@ function KindOne({
         />
       )}
       <div
-        className="box-pad-v-m fit-container note-item"
+        className={`box-pad-v-m fit-container note-item${event.isPremium ? " premium-glass" : ""}`}
         id={event.id}
-        style={{ border: event.isPremium ? "1px solid #ffed4b5c" : "unset" }}
+        style={{ border: event.isPremium ? undefined : "unset" }}
       >
         {event.isComment && isThread && (
           <RelatedEvent
@@ -377,7 +381,8 @@ function KindOne({
                         {proUser.isProUser && <Badge data={proUser} size={16} />}
                       </div>
                       {event.isPremium &&
-                        <div className="fx-centered" style={{ fontSize: "12px", lineHeight: 0, backgroundColor: "#ffed4b5c", borderRadius: "10px", height: "20px", padding: "0 8px", minWidth: "max-content" }}>
+                        <div className="premium-glass-tag">
+                          <Icon name="crown" size={12} isColored />
                           {t("AW299l2")}
                         </div>
                       }

@@ -40,12 +40,13 @@ export async function getStaticProps({ params }) {
   let event =
     res.data.length > 0
       ? {
-          ...res.data[0],
-        }
+        ...res.data[0],
+      }
       : null;
   const author = event
     ? await getDataForSSG([{ authors: [event.pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata("");
+  const isPremium = event && event?.tags.find(_ => _[0] === 'nip63') ? true : false;
   return {
     props: {
       event,
@@ -54,8 +55,8 @@ export async function getStaticProps({ params }) {
         author.data?.length > 0
           ? getParsedAuthor(author.data[0])
           : { ...author },
-      revalidate: !event ? 604800 : 2,
     },
+    revalidate: !event || isPremium ? 2 : 604800,
   };
 }
 

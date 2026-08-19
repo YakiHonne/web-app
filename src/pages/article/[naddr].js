@@ -59,6 +59,7 @@ export async function getStaticProps({ params }) {
   const author = event
     ? await getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata(pubkey);
+  const isPremium = event && event?.tags.find((_) => _[0] === "nip63") ? true : false;
   return {
     props: {
       event,
@@ -69,6 +70,7 @@ export async function getStaticProps({ params }) {
           ? getParsedAuthor(author.data[0])
           : { ...author },
     },
+    revalidate: !event || isPremium ? 2 : 604800,
   };
 }
 
