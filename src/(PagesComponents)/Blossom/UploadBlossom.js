@@ -164,7 +164,7 @@ export default function UploadBlossom({ exit, servers, refreshLists }) {
           className={`btn btn-full ${selectedServers.length > 0 && file ? "btn-normal" : "btn-disabled"}`}
           onClick={handleUpload}
         >
-          {isLoading ? <Spinner /> : t("AiINSld")}
+          {isLoading ? <Spinner /> : t("A5AaVbz")}
         </button>
       </div>
     </Overlay>

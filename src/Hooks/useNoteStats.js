@@ -8,7 +8,7 @@ import {
 } from "@/Helpers/Encryptions";
 import { getEventStats, saveEventStats } from "@/Helpers/DB";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getWotConfig } from "@/Helpers/ClientHelpers";
+import { getNip22Refs, getWotConfig } from "@/Helpers/ClientHelpers";
 
 const filterStatsByWot = (stats) => {
   const { score, reactions } = getWotConfig();
@@ -95,8 +95,13 @@ const useNoteStats = (noteID, notePubkey) => {
             since: actions.quotes.since,
           },
           {
-            kinds: [1],
+            kinds: [1, 1111],
             "#e": [noteID],
+            since: actions.replies.since,
+          },
+          {
+            kinds: [1111],
+            "#E": [noteID],
             since: actions.replies.since,
           },
           {
@@ -157,6 +162,20 @@ const useNoteStats = (noteID, notePubkey) => {
               pubkey: event.pubkey,
               created_at: event.created_at,
             });
+          }
+          if (event.kind === 1111) {
+            let refs = getNip22Refs(event);
+            let isComment =
+              refs && (refs.rootValue === noteID || refs.parentValue === noteID);
+            if (isComment) {
+              if (!kind1Since || kind1Since < event.created_at)
+                kind1Since = event.created_at;
+              kind1.push({
+                id: event.id,
+                pubkey: event.pubkey,
+                created_at: event.created_at,
+              });
+            }
           }
           if (event.kind === 1) {
             let check_kind1 = {

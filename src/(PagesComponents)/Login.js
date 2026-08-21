@@ -464,11 +464,12 @@ const LoginScreen = () => {
       }
     }
     if (secp.utils.isValidPrivateKey(inputKey)) {
-      let user = await getUserFromNOSTR(getPublicKey(inputKey));
+      let secKey = hexToUint8Array(inputKey);
+      let user = await getUserFromNOSTR(getPublicKey(secKey));
       if (user) {
         let keys = {
           sec: inputKey,
-          pub: getPublicKey(inputKey),
+          pub: getPublicKey(secKey),
         };
 
         dispatch(setUserKeys(keys));

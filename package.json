@@ -80,7 +80,6 @@
     "react-dom": "^19.1.0",
     "react-i18next": "^15.6.1",
     "react-markdown": "^10.1.0",
-    "react-nocomment": "^0.3.0",
     "react-qr-code": "^2.0.18",
     "react-redux": "^9.2.0",
     "react-spring": "^10.0.1",

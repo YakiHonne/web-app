@@ -8,6 +8,7 @@ import {
 } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { getDataForSSG } from "@/Helpers/lib";
+import { safeDecode } from "@/Helpers/ssgParams";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Image"), {
   ssr: false,
@@ -37,7 +38,12 @@ export default function Page({ event, author, nevent }) {
 
 export async function getStaticProps({ params }) {
   const { nevent } = params;
-  let { pubkey, id, relays } = nip19.decode(nevent).data || {};
+  const decoded = safeDecode(nevent);
+  if (!decoded || !["nevent", "note"].includes(decoded.type))
+    return { notFound: true, revalidate: 3600 };
+  let { pubkey, id, relays } =
+    decoded.type === "note" ? { id: decoded.data } : decoded.data || {};
+  if (!id) return { notFound: true, revalidate: 3600 };
   const res = await getDataForSSG(
     [{ ids: [id] }],
     5000,
@@ -63,6 +69,7 @@ export async function getStaticProps({ params }) {
           ? getParsedAuthor(author.data[0])
           : { ...author },
     },
+    revalidate: event ? 604800 : 3600,
   };
 }
 

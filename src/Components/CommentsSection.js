@@ -11,11 +11,11 @@ import Spinner from "@/Components/Spinner";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
-import { getParsedNote, getWotConfig } from "@/Helpers/ClientHelpers";
+import { getNip22Refs, getParsedNote, getWotConfig } from "@/Helpers/ClientHelpers";
 import Icon from "@/Components/Icon";
 
-const filterComments = (all, id, isRoot) => {
-  if (isRoot) return filterRootComments(all, id);
+const filterComments = (all, id, isRoot, rootValue) => {
+  if (isRoot) return filterRootComments(all, id, rootValue);
   return filterRepliesComments(all, id);
 };
 const filterRepliesComments = (all, id) => {
@@ -28,14 +28,9 @@ const filterRepliesComments = (all, id) => {
         ["reply", "root"].includes(item[3]),
     );
 
+    let nip22Refs = comment.kind === 1111 ? getNip22Refs(comment) : null;
     let hasNip22Tag =
-      comment.kind === 1111 &&
-      comment.tags.find(
-        (item) =>
-          (item[0] === "e" || item[0] === "a") &&
-          item[1] === id &&
-          (!item[3] || item[3] === ""),
-      );
+      nip22Refs && !nip22Refs.isTopLevel && nip22Refs.parentValue === id;
 
     if (hasNip10Tag || hasNip22Tag) {
       let note_tree = getParsedNote(comment, true);
@@ -50,16 +45,18 @@ const filterRepliesComments = (all, id) => {
   return temp;
 };
 
-const filterRootComments = (all, id) => {
+const filterRootComments = (all, id, rootValue) => {
   let temp = [];
+  let scope = rootValue || id;
 
   for (let comment of all) {
     let isTopLevel = false;
 
     if (comment.kind === 1111) {
-      let parentKindTag = comment.tags.find((item) => item[0] === "k");
-      let parentKind = parentKindTag ? parentKindTag[1] : null;
-      isTopLevel = parentKind !== "1111";
+      let refs = getNip22Refs(comment);
+      isTopLevel = refs
+        ? refs.isTopLevel && (!scope || refs.rootValue === scope)
+        : false;
     } else {
       let isRoot = comment.tags.find(
         (item) => item[0] === "e" && item[3] === "root",
@@ -96,9 +93,9 @@ const countReplies = (id, all) => {
       (item) => item[3] === "reply" && item[0] === "e" && item[1] === id,
     );
 
-    let hasNip22Reply = comment.kind === 1111 && comment.tags.find(
-      (item) => item[0] === "e" && item[1] === id && (!item[3] || item[3] === "")
-    );
+    let nip22Refs = comment.kind === 1111 ? getNip22Refs(comment) : null;
+    let hasNip22Reply =
+      nip22Refs && !nip22Refs.isTopLevel && nip22Refs.parentValue === id;
 
     if (hasNip10Reply || hasNip22Reply) {
       let nestedReplies = countReplies(comment.id, all);
@@ -152,7 +149,12 @@ export default function CommentsSection({
 
   useEffect(() => {
     let parsedCom = () => {
-      let res = filterComments(comments, id, isRoot);
+      let res = filterComments(
+        comments,
+        id,
+        isRoot,
+        rootData ? rootData[1] : id,
+      );
       setNetComments(res.filter((_) => _.id));
       if (res.length !== 0 || comments.length > 0) setIsLoading(false);
     };
@@ -164,13 +166,18 @@ export default function CommentsSection({
       setIsLoading(true);
       const { score, reactions } = getWotConfig();
 
-      const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+      const commentKinds = [1, 1111];
 
+      const rootValue = rootData ? rootData[1] : id;
       const events = await getSubData(
         [
           {
             kinds: commentKinds,
-            [`#${tagKind}`]: [rootData ? rootData[1] : id],
+            [`#${tagKind}`]: [rootValue],
+          },
+          {
+            kinds: [1111],
+            [`#${tagKind.toUpperCase()}`]: [rootValue],
           },
         ],
         300,
@@ -217,13 +224,19 @@ export default function CommentsSection({
   useEffect(() => {
     if (isLoading) return;
 
-    const commentKinds = tagKind === "a" ? [1, 1111] : [1];
+    const commentKinds = [1, 1111];
 
+    const rootValue = rootData ? rootData[1] : id;
     const sub = ndkInstance.subscribe(
       [
         {
           kinds: commentKinds,
-          [`#${tagKind}`]: [rootData ? rootData[1] : id],
+          [`#${tagKind}`]: [rootValue],
+          since: Math.floor(Date.now() / 1000),
+        },
+        {
+          kinds: [1111],
+          [`#${tagKind.toUpperCase()}`]: [rootValue],
           since: Math.floor(Date.now() / 1000),
         },
       ],

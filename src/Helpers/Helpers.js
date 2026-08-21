@@ -21,7 +21,10 @@ import { t } from "i18next";
 import axiosInstance from "./HTTP_Client";
 import { InitEvent } from "./Controlers";
 import { localStorage_ } from "./utils/clientLocalStorage";
-import { supportedLanguageKeys } from "@/Content/SupportedLanguages";
+import {
+  supportedLanguageKeys,
+  contentLanguageKeys,
+} from "@/Content/SupportedLanguages";
 import {
   getMediaUploader,
   getParsedNote,
@@ -561,6 +564,36 @@ const getAppLang = () => {
   let lang = userLang || browserLanguage;
   if (supportedLanguageKeys.includes(lang)) return lang;
   return "en";
+};
+
+const getContentLang = () => {
+  try {
+    let userLang = localStorage_.getItem("content-lang");
+    if (userLang && contentLanguageKeys.includes(userLang)) return userLang;
+  } catch (err) {
+    return getAppLang();
+  }
+  return getAppLang();
+};
+
+const getContentLangSetting = () => {
+  try {
+    let userLang = localStorage_.getItem("content-lang");
+    if (userLang && contentLanguageKeys.includes(userLang)) return userLang;
+  } catch (err) {
+    return "app";
+  }
+  return "app";
+};
+
+const setContentLang = (value) => {
+  try {
+    if (value === "app") localStorage_.removeItem("content-lang");
+    else if (contentLanguageKeys.includes(value))
+      localStorage_.setItem("content-lang", value);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const getContentTranslationConfig = () => {
@@ -1649,6 +1682,9 @@ export {
   sleepTimer,
   copyText,
   getAppLang,
+  getContentLang,
+  getContentLangSetting,
+  setContentLang,
   handleAppDirection,
   getContentTranslationConfig,
   updateContentTranslationConfig,

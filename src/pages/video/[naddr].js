@@ -6,6 +6,7 @@ import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getVideoContent } from "@/Helpers/Helpers";
 import { getDataForSSG } from "@/Helpers/lib";
+import { safeDecode } from "@/Helpers/ssgParams";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Video"), {
   ssr: false,
@@ -39,7 +40,12 @@ export default function Page({ event, author, naddrData, naddr }) {
 
 export async function getStaticProps({ params }) {
   const { naddr } = params;
-  let { pubkey, identifier, kind, id, relays } = nip19.decode(naddr).data || {};
+  const decoded = safeDecode(naddr);
+  if (!decoded || !["naddr", "nevent", "note"].includes(decoded.type))
+    return { notFound: true, revalidate: 3600 };
+  let { pubkey, identifier, kind, id, relays } =
+    decoded.type === "note" ? { id: decoded.data } : decoded.data || {};
+  if (!identifier && !id) return { notFound: true, revalidate: 3600 };
   const res = await getDataForSSG(
     identifier
       ? [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }]
@@ -74,8 +80,11 @@ export async function getStaticProps({ params }) {
           ? getParsedAuthor(author.data[0])
           : { ...author },
     },
-    revalidate:
-      !event || event?.tags?.find((_) => _[0] === "nip63") ? 2 : 604800,
+    revalidate: event?.tags?.find((_) => _[0] === "nip63")
+      ? 2
+      : event
+        ? 604800
+        : 3600,
   };
 }
 

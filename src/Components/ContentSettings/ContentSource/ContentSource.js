@@ -170,7 +170,7 @@ export default function ContentSource({
       return getSourcesArray(sources, options[0].list, t, type);
     }
     return options;
-  }, [userAppSettings, userKeys]);
+  }, [userAppSettings, userKeys, t]);
 
   const [dismissingSource, setDismissingSource] = useState(false);
   const isMobile = useIsMobile();

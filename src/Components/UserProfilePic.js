@@ -404,7 +404,7 @@ export default function UserProfilePic({
   const [isLoading, setIsLoading] = useState(true);
   const [initConv, setInitConv] = useState(false);
   const [followers, setFollowers] = useState(0);
-  const { isNip05Verified, proUser } = useUserProfile(user_id, metadata ? true : false);
+  const { isNip05Verified, proUser, yakiUsername } = useUserProfile(user_id, metadata ? true : false);
   const anchorRef = useRef(null);
   const leaveTimerRef = useRef(null);
 
@@ -432,6 +432,10 @@ export default function UserProfilePic({
     try {
       if (!allowPropagation) { e.stopPropagation(); e.preventDefault(); }
       if (allowClick) {
+        if (yakiUsername) {
+          customHistory(`/${yakiUsername}`);
+          return;
+        }
         const pubkey = nip19.nprofileEncode({
           pubkey: mainAccountUser ? userMetadata.pubkey : user_id,
         });

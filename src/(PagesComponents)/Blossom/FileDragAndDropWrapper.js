@@ -127,7 +127,7 @@ export default function FileDragAndDropWrapper({
         </p>
         <FileSelectorWrapper onChange={onChange}>
           <button className="btn btn-normal">
-            {isLoading ? <Spinner /> : t("AiINSld")}
+            {isLoading ? <Spinner /> : t("A5AaVbz")}
           </button>
         </FileSelectorWrapper>
       </div>

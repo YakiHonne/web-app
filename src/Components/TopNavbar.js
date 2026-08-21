@@ -13,7 +13,6 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import NumberShrink from "@/Components/NumberShrink";
 import SearchNetwork from "@/Components/SearchNetwork";
 import LoginWithAPI from "@/Components/LoginWithAPI";
-import LoginSignup from "@/Components/LoginSignup";
 import PostAsNote from "@/Components/PostAsNote";
 import PostMedia from "@/Components/PostMedia/PostMedia";
 import Publishing from "@/Components/Publishing";
@@ -80,7 +79,6 @@ export default function TopNavbar() {
   const [createOpen, setCreateOpen] = useState(false);
   const [showPostNote, setShowPostNote] = useState(false);
   const [showPostMedia, setShowPostMedia] = useState(false);
-  const [isLogin, setIsLogin] = useState(false);
   const [profilePos, setProfilePos] = useState({ top: 72, right: 16, left: null });
   const [balanceHover, setBalanceHover] = useState(false);
   const [fiatRate, setFiatRate] = useState(null);
@@ -252,7 +250,7 @@ export default function TopNavbar() {
 
   const toggleCreate = () => {
     if (!(userKeys?.ext || userKeys?.sec || userKeys?.bunker)) {
-      setIsLogin(true);
+      customHistory("/login");
       return;
     }
     setCreateOpen((v) => !v);
@@ -387,7 +385,6 @@ export default function TopNavbar() {
           </div>
         </Overlay>
       )}
-      {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
       {showPostNote && <PostAsNote exit={() => setShowPostNote(false)} />}
       {showPostMedia && <PostMedia exit={() => setShowPostMedia(false)} />}
       {showYakiChest && <LoginWithAPI exit={() => setShowYakiChest(false)} />}

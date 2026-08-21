@@ -1,5 +1,3 @@
-import Icon from "@/Components/Icon";
-
 const supportedLanguageKeys = [
   "en",
   "zh",
@@ -12,73 +10,178 @@ const supportedLanguageKeys = [
   "ar",
   "ru",
   "hi",
+  "hu",
 ];
-const supportedLanguage = [
-  {
-    display_name: "English",
-    value: "en",
-    left_el: <Icon name="flag-en" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "中文",
-    value: "zh",
-    left_el: <Icon name="flag-zh" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "العربية",
-    value: "ar",
-    left_el: <Icon name="flag-ar" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "Español",
-    value: "es",
-    left_el: <Icon name="flag-es" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "Português",
-    value: "pt",
-    left_el: <Icon name="flag-pt" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "Italiano",
-    value: "it",
-    left_el: <Icon name="flag-it" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "Français",
-    value: "fr",
-    left_el: <Icon name="flag-fr" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "ไทย",
-    value: "th",
-    left_el: <Icon name="flag-th" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "日本語",
-    value: "ja",
-    left_el: <Icon name="flag-ja" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "भारतीय",
-    value: "hi",
-    left_el: <Icon name="flag-hi" isColored />,
-    disabled: false,
-  },
-  {
-    display_name: "Русский",
-    value: "ru",
-    left_el: <Icon name="flag-ru" isColored />,
-    disabled: false,
-  },
+
+const LanguageFlag = ({ flag }) => (
+  <span
+    style={{
+      fontSize: "1.1rem",
+      lineHeight: 1,
+      minWidth: "1.35rem",
+      textAlign: "center",
+    }}
+  >
+    {flag}
+  </span>
+);
+
+const appLanguages = [
+  { display_name: "English", value: "en", flag: "🇬🇧" },
+  { display_name: "中文", value: "zh", flag: "🇨🇳" },
+  { display_name: "العربية", value: "ar", flag: "🇸🇦" },
+  { display_name: "Español", value: "es", flag: "🇪🇸" },
+  { display_name: "Português", value: "pt", flag: "🇵🇹" },
+  { display_name: "Italiano", value: "it", flag: "🇮🇹" },
+  { display_name: "Français", value: "fr", flag: "🇫🇷" },
+  { display_name: "ไทย", value: "th", flag: "🇹🇭" },
+  { display_name: "日本語", value: "ja", flag: "🇯🇵" },
+  { display_name: "भारतीय", value: "hi", flag: "🇮🇳" },
+  { display_name: "Русский", value: "ru", flag: "🇷🇺" },
+  { display_name: "Magyar", value: "hu", flag: "🇭🇺" },
 ];
-export { supportedLanguage, supportedLanguageKeys };
+
+const supportedLanguage = appLanguages.map((lang) => ({
+  display_name: lang.display_name,
+  value: lang.value,
+  left_el: <LanguageFlag flag={lang.flag} />,
+  disabled: false,
+}));
+
+const worldLanguages = [
+  { display_name: "Afrikaans", value: "af", flag: "🇿🇦" },
+  { display_name: "Shqip", value: "sq", flag: "🇦🇱" },
+  { display_name: "አማርኛ", value: "am", flag: "🇪🇹" },
+  { display_name: "العربية", value: "ar", flag: "🇸🇦" },
+  { display_name: "Հայերեն", value: "hy", flag: "🇦🇲" },
+  { display_name: "Azərbaycan", value: "az", flag: "🇦🇿" },
+  { display_name: "Euskara", value: "eu", flag: "🇪🇸" },
+  { display_name: "Беларуская", value: "be", flag: "🇧🇾" },
+  { display_name: "বাংলা", value: "bn", flag: "🇧🇩" },
+  { display_name: "Bosanski", value: "bs", flag: "🇧🇦" },
+  { display_name: "Български", value: "bg", flag: "🇧🇬" },
+  { display_name: "Català", value: "ca", flag: "🇦🇩" },
+  { display_name: "Cebuano", value: "ceb", flag: "🇵🇭" },
+  { display_name: "中文", value: "zh", flag: "🇨🇳" },
+  { display_name: "繁體中文", value: "zh-TW", flag: "🇹🇼" },
+  { display_name: "Corsu", value: "co", flag: "🇫🇷" },
+  { display_name: "Hrvatski", value: "hr", flag: "🇭🇷" },
+  { display_name: "Čeština", value: "cs", flag: "🇨🇿" },
+  { display_name: "Dansk", value: "da", flag: "🇩🇰" },
+  { display_name: "Nederlands", value: "nl", flag: "🇳🇱" },
+  { display_name: "English", value: "en", flag: "🇬🇧" },
+  { display_name: "Esperanto", value: "eo", flag: "🌍" },
+  { display_name: "Eesti", value: "et", flag: "🇪🇪" },
+  { display_name: "Suomi", value: "fi", flag: "🇫🇮" },
+  { display_name: "Français", value: "fr", flag: "🇫🇷" },
+  { display_name: "Galego", value: "gl", flag: "🇪🇸" },
+  { display_name: "ქართული", value: "ka", flag: "🇬🇪" },
+  { display_name: "Deutsch", value: "de", flag: "🇩🇪" },
+  { display_name: "Ελληνικά", value: "el", flag: "🇬🇷" },
+  { display_name: "ગુજરાતી", value: "gu", flag: "🇮🇳" },
+  { display_name: "Kreyòl Ayisyen", value: "ht", flag: "🇭🇹" },
+  { display_name: "Hausa", value: "ha", flag: "🇳🇬" },
+  { display_name: "עברית", value: "he", flag: "🇮🇱" },
+  { display_name: "हिन्दी", value: "hi", flag: "🇮🇳" },
+  { display_name: "Magyar", value: "hu", flag: "🇭🇺" },
+  { display_name: "Íslenska", value: "is", flag: "🇮🇸" },
+  { display_name: "Igbo", value: "ig", flag: "🇳🇬" },
+  { display_name: "Bahasa Indonesia", value: "id", flag: "🇮🇩" },
+  { display_name: "Gaeilge", value: "ga", flag: "🇮🇪" },
+  { display_name: "Italiano", value: "it", flag: "🇮🇹" },
+  { display_name: "日本語", value: "ja", flag: "🇯🇵" },
+  { display_name: "Basa Jawa", value: "jv", flag: "🇮🇩" },
+  { display_name: "ಕನ್ನಡ", value: "kn", flag: "🇮🇳" },
+  { display_name: "Қазақ", value: "kk", flag: "🇰🇿" },
+  { display_name: "ខ្មែរ", value: "km", flag: "🇰🇭" },
+  { display_name: "Kinyarwanda", value: "rw", flag: "🇷🇼" },
+  { display_name: "한국어", value: "ko", flag: "🇰🇷" },
+  { display_name: "کوردی", value: "ku", flag: "🇮🇶" },
+  { display_name: "Кыргызча", value: "ky", flag: "🇰🇬" },
+  { display_name: "ລາວ", value: "lo", flag: "🇱🇦" },
+  { display_name: "Latina", value: "la", flag: "🇻🇦" },
+  { display_name: "Latviešu", value: "lv", flag: "🇱🇻" },
+  { display_name: "Lietuvių", value: "lt", flag: "🇱🇹" },
+  { display_name: "Lëtzebuergesch", value: "lb", flag: "🇱🇺" },
+  { display_name: "Македонски", value: "mk", flag: "🇲🇰" },
+  { display_name: "Malagasy", value: "mg", flag: "🇲🇬" },
+  { display_name: "Bahasa Melayu", value: "ms", flag: "🇲🇾" },
+  { display_name: "മലയാളം", value: "ml", flag: "🇮🇳" },
+  { display_name: "Malti", value: "mt", flag: "🇲🇹" },
+  { display_name: "Te Reo Māori", value: "mi", flag: "🇳🇿" },
+  { display_name: "मराठी", value: "mr", flag: "🇮🇳" },
+  { display_name: "Монгол", value: "mn", flag: "🇲🇳" },
+  { display_name: "မြန်မာ", value: "my", flag: "🇲🇲" },
+  { display_name: "नेपाली", value: "ne", flag: "🇳🇵" },
+  { display_name: "Norsk", value: "no", flag: "🇳🇴" },
+  { display_name: "ଓଡ଼ିଆ", value: "or", flag: "🇮🇳" },
+  { display_name: "پښتو", value: "ps", flag: "🇦🇫" },
+  { display_name: "فارسی", value: "fa", flag: "🇮🇷" },
+  { display_name: "Polski", value: "pl", flag: "🇵🇱" },
+  { display_name: "Português", value: "pt", flag: "🇵🇹" },
+  { display_name: "ਪੰਜਾਬੀ", value: "pa", flag: "🇮🇳" },
+  { display_name: "Română", value: "ro", flag: "🇷🇴" },
+  { display_name: "Русский", value: "ru", flag: "🇷🇺" },
+  { display_name: "Gagana Samoa", value: "sm", flag: "🇼🇸" },
+  { display_name: "Gàidhlig", value: "gd", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+  { display_name: "Српски", value: "sr", flag: "🇷🇸" },
+  { display_name: "Sesotho", value: "st", flag: "🇱🇸" },
+  { display_name: "chiShona", value: "sn", flag: "🇿🇼" },
+  { display_name: "سنڌي", value: "sd", flag: "🇵🇰" },
+  { display_name: "සිංහල", value: "si", flag: "🇱🇰" },
+  { display_name: "Slovenčina", value: "sk", flag: "🇸🇰" },
+  { display_name: "Slovenščina", value: "sl", flag: "🇸🇮" },
+  { display_name: "Soomaali", value: "so", flag: "🇸🇴" },
+  { display_name: "Español", value: "es", flag: "🇪🇸" },
+  { display_name: "Basa Sunda", value: "su", flag: "🇮🇩" },
+  { display_name: "Kiswahili", value: "sw", flag: "🇰🇪" },
+  { display_name: "Svenska", value: "sv", flag: "🇸🇪" },
+  { display_name: "Tagalog", value: "tl", flag: "🇵🇭" },
+  { display_name: "Тоҷикӣ", value: "tg", flag: "🇹🇯" },
+  { display_name: "தமிழ்", value: "ta", flag: "🇮🇳" },
+  { display_name: "Татарча", value: "tt", flag: "🇷🇺" },
+  { display_name: "తెలుగు", value: "te", flag: "🇮🇳" },
+  { display_name: "ไทย", value: "th", flag: "🇹🇭" },
+  { display_name: "Türkçe", value: "tr", flag: "🇹🇷" },
+  { display_name: "Türkmen", value: "tk", flag: "🇹🇲" },
+  { display_name: "Українська", value: "uk", flag: "🇺🇦" },
+  { display_name: "اردو", value: "ur", flag: "🇵🇰" },
+  { display_name: "Oʻzbek", value: "uz", flag: "🇺🇿" },
+  { display_name: "Tiếng Việt", value: "vi", flag: "🇻🇳" },
+  { display_name: "Cymraeg", value: "cy", flag: "🏴󠁧󠁢󠁷󠁬󠁳󠁿" },
+  { display_name: "isiXhosa", value: "xh", flag: "🇿🇦" },
+  { display_name: "ייִדיש", value: "yi", flag: "🇮🇱" },
+  { display_name: "Yorùbá", value: "yo", flag: "🇳🇬" },
+  { display_name: "isiZulu", value: "zu", flag: "🇿🇦" },
+];
+
+const contentLanguageKeys = worldLanguages.map((lang) => lang.value);
+
+const getContentLanguages = (appLang, appLangLabel) => {
+  const appLangEntry =
+    worldLanguages.find((lang) => lang.value === appLang) ||
+    worldLanguages.find((lang) => lang.value === "en");
+
+  return [
+    {
+      display_name: appLangLabel,
+      value: "app",
+      left_el: <LanguageFlag flag={appLangEntry.flag} />,
+      disabled: false,
+    },
+    ...worldLanguages.map((lang) => ({
+      display_name: lang.display_name,
+      value: lang.value,
+      left_el: <LanguageFlag flag={lang.flag} />,
+      disabled: false,
+    })),
+  ];
+};
+
+export {
+  supportedLanguage,
+  supportedLanguageKeys,
+  worldLanguages,
+  contentLanguageKeys,
+  getContentLanguages,
+};

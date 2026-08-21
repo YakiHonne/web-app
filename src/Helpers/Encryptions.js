@@ -4,7 +4,7 @@ import { nip04, nip19, nip44 } from "nostr-tools";
 import { decode } from "light-bolt11-decoder";
 import { getImagePlaceholder } from "@/Content/NostrPPPlaceholder";
 import CryptoJS from "crypto-js";
-import { formatMinutesToMMSS, getAppLang } from "./Helpers";
+import { formatMinutesToMMSS, getContentLang } from "./Helpers";
 import { getKeys, isVid, nEventEncode } from "./ClientHelpers";
 import axiosInstance from "./HTTP_Client";
 import { store } from "@/Store/Store";
@@ -679,7 +679,7 @@ const detectDirection = (text) => {
 
 const enableTranslation = async (text) => {
   try {
-    const userLang = getAppLang();
+    const userLang = getContentLang();
     const userKeys = getKeys();
     let lang = await axiosInstance.post("/api/v1/translate/detect", { text });
     lang = lang.data;

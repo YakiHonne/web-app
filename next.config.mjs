@@ -37,6 +37,8 @@ const withPWA = withPWAInit({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  cacheHandler: require.resolve("./cache-handler.cjs"),
+  cacheMaxMemorySize: 0,
   productionBrowserSourceMaps: true,
   reactStrictMode: false,
   eslint: {
@@ -44,6 +46,19 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   transpilePackages: ["@uiw/react-md-editor", "@uiw/react-markdown-preview"],
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "upgrade-insecure-requests",
+          },
+        ],
+      },
+    ];
+  },
   // Turbopack (used by `next dev --turbo`) reads this alias.
   turbopack: {
     resolveAlias: {

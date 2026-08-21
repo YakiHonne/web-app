@@ -2,10 +2,12 @@ import NDK from "@nostr-dev-kit/ndk";
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
 import { relaysOnPlatform } from "@/Content/Relays";
 import bannedList from "@/Content/BannedList";
+import { relayConnectionFilter } from "@/Helpers/utils/relayConnectionFilter";
 
 const ndkInstance = new NDK({
   explicitRelayUrls: relaysOnPlatform,
   enableOutboxModel: true,
+  relayConnectionFilter,
   muteFilter: (event) => {
     if (bannedList.includes(event.pubkey)) return true;
     return false;

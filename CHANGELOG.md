@@ -14,11 +14,13 @@
 - Added event and note statistics so you can see how content is performing.
 - Added Refund Policy and legal document pages.
 - Made the app noticeably faster to load and lighter on data usage.
+- Added Hungarien language support.
+- Added a language preference for translating post content.
 - Fixed the cursor hover behavior across the interface.
 - Fixed the theme color on the login page.
 - Fixed the highlighted icons appearing incorrectly during the tour.
 - Fixed tab positioning issues.
-- General improvements and bug fixes across the app.
+- General improvements and bug fixes across the app, and more feature to discover.
 
 # (v5.9.1) 13/05/2026
 

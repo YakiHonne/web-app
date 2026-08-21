@@ -83,7 +83,7 @@ export async function getStaticProps({ params }) {
   const pubkey = await resolveUsernameToPubkey(username);
 
   if (!pubkey) {
-    return { props: { event: null }, revalidate: 86400 };
+    return { props: { event: null }, revalidate: 60 };
   }
 
   const [resMetaData, resFollowings, resPinned] = await Promise.all([

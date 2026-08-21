@@ -30,7 +30,7 @@ import {
   saveUsers,
 } from "./DB";
 import {
-  getAppLang,
+  getContentLang,
   getContentTranslationConfig,
   getCurrentLevel,
   levelCount,
@@ -47,11 +47,13 @@ import {
   saveLocalRelaysMetadata,
   setRelayMetadata,
 } from "./utils/relayMetadataCache";
+import { relayConnectionFilter } from "@/Helpers/utils/relayConnectionFilter";
 
 const ConnectNDK = async (relays) => {
   try {
     const ndk = new NDK({
       explicitRelayUrls: relays,
+      relayConnectionFilter,
     });
     await ndk.connect();
     return ndk;
@@ -222,7 +224,13 @@ const yakiChestDisconnect = async () => {
 };
 
 const logoutAllAccounts = async () => {
-  let ignore = ["app-lang", "yaki-wallets", "i18nextLng", "chsettings"];
+  let ignore = [
+    "app-lang",
+    "content-lang",
+    "yaki-wallets",
+    "i18nextLng",
+    "chsettings",
+  ];
   downloadAllKeys();
   Object.keys(localStorage).forEach((key) => {
     if (!ignore.includes(key)) {
@@ -717,7 +725,7 @@ const translate = async (text) => {
       ...customServices[service.service],
     };
   }
-  let lang = getAppLang();
+  let lang = getContentLang();
   try {
     let res = await axiosInstance.post("/api/v1/translate", {
       service,

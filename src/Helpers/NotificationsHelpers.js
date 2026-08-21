@@ -50,12 +50,21 @@ const checkEventType = (event, pubkey, relatedEvent, username) => {
       let isReply, isRoot;
       
       if (event.kind === 1111) {
-        isReply = event.tags.find(
-          (tag) => tag[0] === "e" && (!tag[3] || tag[3] === "")
+        let nip22Root = event.tags.find(
+          (tag) => ["A", "E", "I"].includes(tag[0]) && tag[1]
         );
-        isRoot = event.tags.find(
-          (tag) => (tag[0] === "E" || tag[0] === "A")
+        let nip22Parent = event.tags.find(
+          (tag) => ["a", "e", "i"].includes(tag[0]) && tag[1]
         );
+
+        if (nip22Root) {
+          let rootTagType =
+            nip22Root[0] === "A" ? "a" : nip22Root[0] === "E" ? "e" : "i";
+          isRoot = [rootTagType, nip22Root[1]];
+          let parentValue = nip22Parent ? nip22Parent[1] : nip22Root[1];
+          isReply =
+            parentValue !== nip22Root[1] ? ["e", parentValue] : undefined;
+        }
       } else {
         isReply = event.tags.find(
           (tag) => tag.length > 3 && tag[3] === "reply",

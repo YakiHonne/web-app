@@ -4,6 +4,8 @@ import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import { getSubData, getUser } from "@/Helpers/Controlers";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 import { getProUserState, setProUserState } from "@/Helpers/utils/proUserStateCache";
+import { getYakiUsername, setYakiUsername, hasYakiUsername } from "@/Helpers/utils/yakiUsernameCache";
+import { getUsernameByPubkey } from "@/Endpoints/Account";
 
 const useUserProfile = (pubkey, verifyNip05 = true) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
@@ -15,6 +17,9 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
   const [isNip05Verified, setIsNip05Verified] = useState(false);
   const [proUser, setProUser] = useState(
     getProUserState(pubkey) || { plan: "free", isProUser: false, badge: "" }
+  )
+  const [yakiUsername, setYakiUsernameState] = useState(
+    getYakiUsername(pubkey) || ""
   )
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +51,35 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
     }
   }, [nostrAuthors, pubkey, verifyNip05]);
 
+  useEffect(() => {
+    const cachedProUser = getProUserState(pubkey);
+    if (cachedProUser && cachedProUser.isProUser && !proUser.isProUser)
+      setProUser(cachedProUser);
+  }, [pubkey, nostrAuthors, proUser.isProUser]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchYakiUsername = async () => {
+      if (hasYakiUsername(pubkey)) {
+        if (!cancelled) setYakiUsernameState(getYakiUsername(pubkey));
+        return;
+      }
+      try {
+        let username = await getUsernameByPubkey(pubkey);
+        setYakiUsername(pubkey, username);
+        if (!cancelled) setYakiUsernameState(username);
+      } catch (err) {
+        setYakiUsername(pubkey, "");
+        if (!cancelled) setYakiUsernameState("");
+      }
+    };
+    if (pubkey && proUser.isProUser) fetchYakiUsername();
+    else setYakiUsernameState("");
+    return () => {
+      cancelled = true;
+    };
+  }, [pubkey, proUser.isProUser]);
+
   const getUserBadge = async () => {
     let cached = getProUserState(pubkey)
     if (cached) return cached
@@ -70,7 +104,7 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
     setProUserState(pubkey, result)
     return result
   }
-  return { isNip05Verified, userProfile, proUser, isLoading };
+  return { isNip05Verified, userProfile, proUser, isLoading, yakiUsername };
 };
 
 

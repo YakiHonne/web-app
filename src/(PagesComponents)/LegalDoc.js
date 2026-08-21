@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { href: "/refund-policy", label: "Refund Policy" },
 ];
 
-export default function LegalDoc({ eyebrow, title, updated, current, sections, children }) {
+export default function LegalDoc({ eyebrow, title, updated, current, sections, hideNav = false, children }) {
   const [activeId, setActiveId] = useState(sections[0]?.id ?? null);
   const [mounted, setMounted] = useState(false);
   const scrollRef = React.useRef(null);
@@ -65,17 +65,19 @@ export default function LegalDoc({ eyebrow, title, updated, current, sections, c
               />
             </span>
           </Link>
-          <nav className="legal-doc-switcher">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`legal-doc-switcher-item${item.href === current ? " is-active" : ""}`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
+          {!hideNav && (
+            <nav className="legal-doc-switcher">
+              {NAV_ITEMS.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`legal-doc-switcher-item${item.href === current ? " is-active" : ""}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          )}
         </div>
       </div>
 

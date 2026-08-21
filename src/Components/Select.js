@@ -72,8 +72,8 @@ export default function Select({
           ? {
             position: "fixed",
             maxHeight: revert
-              ? Math.min(350, Math.max(120, (anchorRect?.top ?? 350) - 16))
-              : Math.min(350, Math.max(120, window.innerHeight - (anchorRect?.bottom ?? 0) - 16)),
+              ? Math.min(326, Math.max(120, (anchorRect?.top ?? 326) - 16))
+              : Math.min(326, Math.max(120, window.innerHeight - (anchorRect?.bottom ?? 0) - 16)),
             overflow: "scroll",
             ...(revert
               ? { bottom: `calc(100vh - ${anchorRect?.top ?? 0}px + 6px)` }
@@ -90,7 +90,7 @@ export default function Select({
           }
           : {
             position: "absolute",
-            maxHeight: "350px",
+            maxHeight: "326px",
             overflow: "scroll",
             top: revert ? "auto" : "calc(100% + 6px)",
             bottom: revert ? "calc(100% + 6px)" : "auto",

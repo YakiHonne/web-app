@@ -60,6 +60,18 @@ export const resolveUsername = async (username) => {
   return data;
 };
 
+export const getUsernameByPubkey = async (pubkey) => {
+  try {
+    const { data } = await axiosInstance.get(
+      `/api/v1/user/pubkey/${encodeURIComponent(pubkey)}/username`,
+    );
+    return data?.username || "";
+  } catch (err) {
+    if (err?.response?.status === 404) return "";
+    throw err;
+  }
+};
+
 export const claimUsername = async (username) => {
   const { data } = await axiosInstance.post("/api/v1/user/username", {
     username,

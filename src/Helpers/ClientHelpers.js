@@ -742,6 +742,33 @@ export function getComponent(children) {
   return <div className="fit-container">{mergeConsecutivePElements(res)}</div>;
 }
 
+export function getNip22Refs(event) {
+  if (!event || event.kind !== 1111) return null;
+  let root, rootKind, parentKind;
+  let lowerTags = [];
+  for (let tag of event.tags) {
+    if (!root && ["A", "E", "I"].includes(tag[0]) && tag[1]) root = tag;
+    if (["a", "e", "i"].includes(tag[0]) && tag[1]) lowerTags.push(tag);
+    if (!rootKind && tag[0] === "K" && tag[1]) rootKind = tag[1];
+    if (!parentKind && tag[0] === "k" && tag[1]) parentKind = tag[1];
+  }
+  if (!root) return null;
+  let rootType = root[0] === "A" ? "a" : root[0] === "E" ? "e" : "i";
+  let parent = lowerTags.find((tag) => tag[1] !== root[1]) || lowerTags[0];
+  if (parentKind === "1111")
+    parent = lowerTags.find((tag) => tag[0] === "e" && tag[1] !== root[1]) || parent;
+  let parentValue = parent ? parent[1] : root[1];
+  return {
+    rootType,
+    rootValue: root[1],
+    rootKind,
+    parentType: parent ? parent[0] : rootType,
+    parentValue,
+    parentKind: parentKind || rootKind,
+    isTopLevel: parentValue === root[1],
+  };
+}
+
 export function getParsedNote(
   event,
   isCollapsedNote = false,

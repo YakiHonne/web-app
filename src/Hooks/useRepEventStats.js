@@ -55,6 +55,11 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
             since: actions.replies.since,
           },
           {
+            kinds: [1111],
+            "#A": [aTag],
+            since: actions.replies.since,
+          },
+          {
             kinds: [9735],
             "#p": [aTagPubkey],
             "#a": [aTag],

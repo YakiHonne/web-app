@@ -221,7 +221,7 @@ export default function MiniApp({ url, exit, setReturnedData }) {
             <iframe
               ref={iframeRef}
               src={url}
-              allow="microphone; camera; clipboard-write 'src'"
+              allow="clipboard-write 'src'"
               sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
               style={{
                 border: "none",

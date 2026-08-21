@@ -5,6 +5,7 @@ import {
   downloadAsFile,
   getBech32,
   getHex,
+  hexToUint8Array,
 } from "@/Helpers/Encryptions";
 import * as secp from "@noble/secp256k1";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
@@ -29,8 +30,9 @@ let profilePlaceholder =
 
 export default function LoginSignup({ exit }) {
   const { t } = useTranslation();
-  let sk = bytesTohex(generateSecretKey());
-  let pk = getPublicKey(sk);
+  let sk_ = generateSecretKey();
+  let sk = bytesTohex(sk_);
+  let pk = getPublicKey(sk_);
   let userKeys = { pub: pk, sec: sk };
   const [isLogin, setIsLogin] = useState(true);
 
@@ -137,11 +139,12 @@ const LoginScreen = ({ switchScreen, exit }) => {
       try {
         let hex = getHex(inputKey);
         if (secp.utils.isValidPrivateKey(hex)) {
-          let user = await getUserFromNOSTR(getPublicKey(hex));
+          let secKey = hexToUint8Array(hex);
+          let user = await getUserFromNOSTR(getPublicKey(secKey));
           if (user) {
             let keys = {
               sec: hex,
-              pub: getPublicKey(hex),
+              pub: getPublicKey(secKey),
             };
 
             dispatch(setUserKeys(keys));
@@ -162,11 +165,12 @@ const LoginScreen = ({ switchScreen, exit }) => {
       }
     }
     if (secp.utils.isValidPrivateKey(inputKey)) {
-      let user = await getUserFromNOSTR(getPublicKey(inputKey));
+      let secKey = hexToUint8Array(inputKey);
+      let user = await getUserFromNOSTR(getPublicKey(secKey));
       if (user) {
         let keys = {
           sec: inputKey,
-          pub: getPublicKey(inputKey),
+          pub: getPublicKey(secKey),
         };
 
         dispatch(setUserKeys(keys));

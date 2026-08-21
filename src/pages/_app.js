@@ -82,6 +82,8 @@ const NO_SIDEBAR_PAGES = new Set([
   "/yakihonne-smart-widgets",
   "/privacy",
   "/terms",
+  "/terms-app",
+  "/child-safety",
   "/refund-policy",
   "/login",
   "/points-system",
