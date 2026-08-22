@@ -16,18 +16,29 @@ export async function GET(req) {
   };
 
   if (name) {
-    const result = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/.well-known/nostr.json?name=${name}`)
+    try {
+      const result = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/.well-known/nostr.json?name=${encodeURIComponent(name)}`,
+        { timeout: 5000 },
+      );
+      const data = result?.data;
 
-    if (!result) {
+      if (!data?.names || !data.names[name]) {
+        return new Response(JSON.stringify({ error: "Not found" }), {
+          status: 404,
+          headers,
+        });
+      }
+
+      return new Response(JSON.stringify(data), {
+        headers,
+      });
+    } catch (err) {
       return new Response(JSON.stringify({ error: "Not found" }), {
         status: 404,
         headers,
       });
     }
-
-    return new Response(JSON.stringify(result), {
-      headers,
-    });
   }
 
   return new Response(JSON.stringify({ names: {} }), {
