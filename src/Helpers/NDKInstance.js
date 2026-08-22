@@ -2,10 +2,12 @@ import NDK from "@nostr-dev-kit/ndk";
 import NDKCacheAdapterDexie from "@nostr-dev-kit/ndk-cache-dexie";
 import { relaysOnPlatform } from "@/Content/Relays";
 import bannedList from "@/Content/BannedList";
+import { relayConnectionFilter } from "@/Helpers/utils/relayConnectionFilter";
 
 const ndkInstance = new NDK({
   explicitRelayUrls: relaysOnPlatform,
   enableOutboxModel: true,
+  relayConnectionFilter,
   muteFilter: (event) => {
     if (bannedList.includes(event.pubkey)) return true;
     return false;
@@ -13,7 +15,6 @@ const ndkInstance = new NDK({
   // mutedIds: new Map([bannedList.map((p) => [p, "p"])]),
 });
 
-await ndkInstance.connect(1000);
 if (typeof window !== "undefined") {
   ndkInstance.cacheAdapter = new NDKCacheAdapterDexie({
     dbName: "ndk-store",
@@ -21,6 +22,7 @@ if (typeof window !== "undefined") {
     profileCacheSize: 200,
   });
 }
+ndkInstance.connect(1000).catch(() => {});
 
 export { ndkInstance };
 

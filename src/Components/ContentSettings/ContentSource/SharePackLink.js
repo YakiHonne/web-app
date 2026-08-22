@@ -4,6 +4,7 @@ import RelayImage from "@/Components/RelayImage";
 import { copyText } from "@/Helpers/Helpers";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function SharePackLink({ d, exit, type = 1 }) {
   const { t } = useTranslation();
@@ -16,10 +17,9 @@ export default function SharePackLink({ d, exit, type = 1 }) {
     types[type]
   }?d=${d}`;
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={400}>
       <div
-        className="sc-s bg-sp box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up"
-        style={{ width: "min(100%, 400px)", position: "relative" }}
+        className="box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -41,6 +41,6 @@ export default function SharePackLink({ d, exit, type = 1 }) {
           <button className="btn btn-normal btn-full">{t("AER5KJi")}</button>
         </Link>
       </div>
-    </div>
+    </Overlay>
   );
 }

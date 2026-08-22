@@ -99,6 +99,15 @@ const isUserFollowingsLoadedSlice = createSlice({
     },
   },
 });
+const isUserDataLoadedSlice = createSlice({
+  name: "isUserDataLoaded",
+  initialState: false,
+  reducers: {
+    setIsUserDataLoaded(state, action) {
+      return action.payload;
+    },
+  },
+});
 const userMutedListSlice = createSlice({
   name: "userMutedList",
   initialState: { userMutedList: [], allTags: [] },
@@ -219,6 +228,19 @@ const userBlossomServersSlice = createSlice({
   },
 });
 
+const userWotFilterListSlice = createSlice({
+  name: "userWotFilterList",
+  initialState: { network: [], backup: [] },
+  reducers: {
+    setUserWotNetworkList(state, action) {
+      state.network = action.payload;
+    },
+    setUserWotBackupList(state, action) {
+      state.backup = action.payload;
+    },
+  },
+});
+
 const userPinnedNotesSlice = createSlice({
   name: "userPinnedNotes",
   initialState: [],
@@ -300,6 +322,7 @@ export const { setUserChatContacts } = userChatContactsSlice.actions;
 export const { setUserFollowings } = userFollowingsSlice.actions;
 export const { setIsUserFollowingsLoaded } =
   isUserFollowingsLoadedSlice.actions;
+export const { setIsUserDataLoaded } = isUserDataLoadedSlice.actions;
 export const { setUserMutedList } = userMutedListSlice.actions;
 export const { setUserBalance } = userBalanceSlice.actions;
 export const { setUserFollowingsRelays } = userFollowingsRelaysSlice.actions;
@@ -313,6 +336,8 @@ export const { setUserInboxRelays } = userInboxRelaysSlice.actions;
 export const { setUserFavRelays } = userFavRelaysSlice.actions;
 export const { setUserWotList } = userWotListSlice.actions;
 export const { setUserBlossomServers } = userBlossomServersSlice.actions;
+export const { setUserWotNetworkList, setUserWotBackupList } =
+  userWotFilterListSlice.actions;
 export const { setUserSearchRelays } = userSearchRelaysSlice.actions;
 export const { setUserPinnedNotes } = userPinnedNotesSlice.actions;
 export const { setUserCashuWallet } = userCashuWalletSlice.actions;
@@ -345,6 +370,7 @@ export const UserInboxRelaysReducer = userInboxRelaysSlice.reducer;
 export const UserFavRelaysReducer = userFavRelaysSlice.reducer;
 export const UserWotListReducer = userWotListSlice.reducer;
 export const UserBlossomServersReducer = userBlossomServersSlice.reducer;
+export const UserWotFilterListReducer = userWotFilterListSlice.reducer;
 export const UserSearchRelaysReducer = userSearchRelaysSlice.reducer;
 export const UserPinnedNotesReducer = userPinnedNotesSlice.reducer;
 export const UserCashuWalletReducer = userCashuWalletSlice.reducer;
@@ -355,3 +381,4 @@ export const UserStarterPacksReducer = userStarterPacksSlice.reducer;
 export const UserMediaPacksReducer = userMediaPacksSlice.reducer;
 export const IsUserFollowingsLoadedReducer =
   isUserFollowingsLoadedSlice.reducer;
+export const IsUserDataLoadedReducer = isUserDataLoadedSlice.reducer;

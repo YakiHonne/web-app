@@ -5,7 +5,7 @@ import { formatTime } from "@/Helpers/Helpers";
 import { RedPacketIcon } from "./RedPacketIcon";
 import RedPacketEnv from "./RedPacketEnv";
 import useRedPacket from "@/Hooks/useRedPacket";
-import LoadingDots from "../LoadingDots";
+import Spinner from "../Spinner";
 import { useMemo } from "react";
 import Icon from "../Icon";
 
@@ -67,7 +67,7 @@ export default function RedPacketBox({ data }) {
   if (isRedPacketChecking)
     return (
       <div className="fit-container sc-s-18 bg-sp box-pad-v">
-        <LoadingDots />
+        <Spinner />
       </div>
     );
 

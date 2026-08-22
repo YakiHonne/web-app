@@ -4,11 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { nanoid } from "nanoid";
 import UploadFile from "@/Components/UploadFile";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getSubData, InitEvent } from "@/Helpers/Controlers";
 import { getParsedRepEvent } from "@/Helpers/Encryptions";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function AddCuration({ event, exit }) {
   const dispatch = useDispatch();
@@ -148,17 +149,10 @@ export default function AddCuration({ event, exit }) {
           exit={() => setShowPostsList(false)}
         />
       )}
-      <div
-        className="fixed-container box-pad-h-h fx-centered"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={600}>
         <section
-          className=" fx-centered fx-col sc-s-18 bg-sp"
-          style={{ rowGap: 0, margin: ".5rem 0", width: "min(100%, 600px)" }}
-          onClick={(e) => e.stopPropagation()}
+          className=" fx-centered fx-col"
+          style={{ rowGap: 0, margin: ".5rem 0" }}
         >
           <div className="fit-container fx-centered fx-col">
             <div
@@ -238,9 +232,8 @@ export default function AddCuration({ event, exit }) {
                   </p>
                 )}
                 <div
-                  className={`toggle ${kind === 30005 ? "toggle-orange" : ""} ${
-                    kind === 30004 ? "toggle-green" : ""
-                  }`}
+                  className={`toggle ${kind === 30005 ? "toggle-orange" : ""} ${kind === 30004 ? "toggle-green" : ""
+                    }`}
                   onClick={() => {
                     kind === 30004 ? setKind(30005) : setKind(30004);
                   }}
@@ -254,7 +247,7 @@ export default function AddCuration({ event, exit }) {
               style={{ height: "300px" }}
             >
               <p className="gray-c p-italic">{t("ALwDQ8R")} </p>
-              <LoadingDots />
+              <Spinner />
             </div>
           )}
           {!isPostsLoading && (
@@ -328,11 +321,11 @@ export default function AddCuration({ event, exit }) {
               className="btn btn-normal btn-full"
               onClick={confirmPublishing}
             >
-              {isLoading ? <LoadingDots /> : <>{t("As7IjvV")}</>}
+              {isLoading ? <Spinner /> : <>{t("As7IjvV")}</>}
             </button>
           </div>
         </section>
-      </div>
+      </Overlay>
     </>
   );
 }
@@ -363,20 +356,20 @@ const AddArticlesToCuration = ({
       let data = await getSubData(
         contentFrom === "relays"
           ? [
-              {
-                kinds: [postKind],
-                limit: 10,
-                until: lastEventTime,
-              },
-            ]
+            {
+              kinds: [postKind],
+              limit: 10,
+              until: lastEventTime,
+            },
+          ]
           : [
-              {
-                kinds: [postKind],
-                authors: [userPubkey],
-                limit: 10,
-                until: lastEventTime,
-              },
-            ],
+            {
+              kinds: [postKind],
+              authors: [userPubkey],
+              limit: 10,
+              until: lastEventTime,
+            },
+          ],
       );
       setNostrPosts((prev) => [
         ...prev,
@@ -473,35 +466,19 @@ const AddArticlesToCuration = ({
   };
   if (!isLoaded)
     return (
-      <div
-        className="fixed-container fx-centered "
-        style={{ zIndex: "100000" }}
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
-        <LoadingDots />
-      </div>
+      <Overlay exit={exit}>
+        <Spinner />
+      </Overlay>
     );
   return (
     <>
-      <section
-        className="fixed-container fx-centered fx-col fx-start-h"
-        style={{ overflow: "scroll", zIndex: "100000" }}
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={600}>
         <div
-          className="fx-centered fx-col sc-s-19 bg-sp  art-t-cur-container"
+          className="fx-centered fx-col art-t-cur-container"
           style={{
-            width: "min(100%, 600px)",
             height: "100vh",
             borderRadius: "0",
           }}
-          onClick={(e) => e.stopPropagation()}
         >
           <div
             className="box-pad-h"
@@ -521,25 +498,22 @@ const AddArticlesToCuration = ({
             >
               <div className="fit-container fx-centered fx-start-h">
                 <button
-                  className={`btn btn-small fx-centered fx-shrink ${
-                    contentFrom === "relays" ? "btn-normal-gray" : "btn-gst-nc"
-                  }`}
+                  className={`btn btn-small fx-centered fx-shrink ${contentFrom === "relays" ? "btn-normal-gray" : "btn-gst-nc"
+                    }`}
                   onClick={() => switchContentSource("relays")}
                 >
                   {t("AR9ctVs")}
                 </button>
                 <button
-                  className={`btn btn-small fx-centered fx-shrink ${
-                    contentFrom === "user" ? "btn-normal-gray" : "btn-gst-nc"
-                  }`}
+                  className={`btn btn-small fx-centered fx-shrink ${contentFrom === "user" ? "btn-normal-gray" : "btn-gst-nc"
+                    }`}
                   onClick={() => switchContentSource("user")}
                 >
                   {arts ? t("AB9K6IK") : t("AStkKfQ")}
                 </button>
                 <button
-                  className={`btn btn-small fx-centered fx-shrink ${
-                    contentFrom === "search" ? "btn-normal-gray" : "btn-gst-nc"
-                  }`}
+                  className={`btn btn-small fx-centered fx-shrink ${contentFrom === "search" ? "btn-normal-gray" : "btn-gst-nc"
+                    }`}
                   onClick={() => switchContentSource("search")}
                 >
                   {t("AVv3kNf")}
@@ -569,9 +543,8 @@ const AddArticlesToCuration = ({
                     )}
                     {searchRes.length > 0 && (
                       <div
-                        className={`fx-centered fx-start-h fx-col posts-cards ${
-                          isLoading ? "flash" : ""
-                        }`}
+                        className={`fx-centered fx-start-h fx-col posts-cards ${isLoading ? "flash" : ""
+                          }`}
                         style={{
                           overflow: "scroll",
                           overflowX: "hidden",
@@ -629,9 +602,8 @@ const AddArticlesToCuration = ({
                   <>
                     {NostrPosts.length > 0 && (
                       <div
-                        className={`fx-centered fx-start-h fx-col ${
-                          isLoading ? "flash" : ""
-                        }`}
+                        className={`fx-centered fx-start-h fx-col ${isLoading ? "flash" : ""
+                          }`}
                         style={{
                           height: "87%",
                           overflow: "scroll",
@@ -689,7 +661,7 @@ const AddArticlesToCuration = ({
                       <div className="fx-centered fit-container">
                         <div className="gray-c">
                           {t("AKvHyxG")}
-                          <LoadingDots />
+                          <Spinner />
                         </div>
                       </div>
                     )}
@@ -709,9 +681,8 @@ const AddArticlesToCuration = ({
                   />
                 </div>
                 <div
-                  className={`fit-container fx-centered fx-start-h fx-col ${
-                    isLoading ? "flash" : ""
-                  }`}
+                  className={`fit-container fx-centered fx-start-h fx-col ${isLoading ? "flash" : ""
+                    }`}
                   style={{
                     overflow: "scroll",
                     overflowX: "hidden",
@@ -780,9 +751,8 @@ const AddArticlesToCuration = ({
               </button>
             )}
             <button
-              className={`btn fx-centered ${
-                posts.length > 0 ? "btn-normal" : "btn-disabled"
-              }`}
+              className={`btn fx-centered ${posts.length > 0 ? "btn-normal" : "btn-disabled"
+                }`}
               disabled={!(posts.length > 0)}
               onClick={() => setPosts_(posts)}
             >
@@ -791,7 +761,7 @@ const AddArticlesToCuration = ({
             </button>
           </div>
         </div>
-      </section>
+      </Overlay>
     </>
   );
 };

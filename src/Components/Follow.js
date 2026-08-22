@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { filterRelays } from "@/Helpers/Encryptions";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
@@ -112,13 +112,12 @@ const FollowText = ({
         "",
         tempTags.map((p) => ["p", p])
       );
-      if(!eventInitEx) return;
+      if (!eventInitEx) { setIsLoading(false); return; }
       dispatch(
         setToPublish({
           eventInitEx,
         })
       );
-      // setTags(tempTags);å
       setIsLoading(false);
     } catch (err) {
       console.log(err);
@@ -147,9 +146,8 @@ const FollowText = ({
       <>
         {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
         <button
-          className={`btn btn-normal  ${size === "small" ? "btn-small" : ""} ${
-            full ? "btn-full" : ""
-          }`}
+          className={`btn btn-normal  ${size === "small" ? "btn-small" : ""} ${full ? "btn-full" : ""
+            }`}
           disabled={isLoading}
           onClick={() => setIsLogin(true)}
         >
@@ -160,9 +158,8 @@ const FollowText = ({
   if (!toFollowKey || toFollowKey === userKeys.pub)
     return (
       <button
-        className={`btn btn-disabled  ${size === "small" ? "btn-small" : ""} ${
-          full ? "btn-full" : ""
-        }`}
+        className={`btn btn-disabled  ${size === "small" ? "btn-small" : ""} ${full ? "btn-full" : ""
+          }`}
         disabled={isLoading}
       >
         {FOLLOW_}
@@ -171,12 +168,10 @@ const FollowText = ({
   if (bulk)
     return (
       <button
-        className={`btn ${size === "small" ? "btn-small" : ""} ${
-          isFollowing.bulk
-            ? `btn-green`
-            : // ? `${isFollowing.status ? "btn-gray" : "btn-normal"}`
-              `${isFollowing.status ? "btn-gray" : "btn-normal"}`
-        } ${full ? "btn-full" : ""}`}
+        className={`btn ${size === "small" ? "btn-small" : ""} ${isFollowing.bulk
+          ? `btn-green`
+          : `${isFollowing.status ? "btn-gray" : "btn-normal"}`
+          } ${full ? "btn-full" : ""}`}
         style={{
           borderColor: isFollowing.bulk && !isFollowing.status ? "initial" : "",
           minWidth: "max-content",
@@ -185,7 +180,7 @@ const FollowText = ({
         onClick={handleBulkList}
       >
         {isLoading ? (
-          <LoadingDots />
+          <Spinner />
         ) : isFollowing.bulk ? (
           isFollowing.status ? (
             TOFOLLOW
@@ -202,14 +197,13 @@ const FollowText = ({
 
   return (
     <button
-      className={`btn ${isFollowing.status ? "btn-gray" : "btn-normal"} ${
-        size === "small" ? "btn-small" : ""
-      } ${full ? "btn-full" : ""}`}
+      className={`btn ${isFollowing.status ? "btn-gray" : "btn-normal"} ${size === "small" ? "btn-small" : size === "tiny" ? "btn-tiny" : ""
+        } ${full ? "btn-full" : ""}`}
       disabled={isLoading}
       onClick={followUnfollow}
       data-tooltip={isFollowing.status ? t("ASi0a0d") : t("A9o2pLM")}
     >
-      {isLoading ? <LoadingDots /> : isFollowing.status ? FOLLOWING_ : FOLLOW_}
+      {isLoading ? <Spinner /> : isFollowing.status ? FOLLOWING_ : FOLLOW_}
     </button>
   );
 };
@@ -277,7 +271,6 @@ const FollowIcon = ({
           allRelays: [...filterRelays(relaysOnPlatform, userRelays)],
         })
       );
-      // setTags(tempTags);å
       setIsLoading(false);
     } catch (err) {
       console.log(err);
@@ -306,9 +299,8 @@ const FollowIcon = ({
       <>
         {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
         <div
-          className={`round-icon round-icon-tooltip btn-gst  ${
-            size === "small" ? "round-icon-small" : ""
-          }`}
+          className={`round-icon round-icon-tooltip btn-gst  ${size === "small" ? "round-icon-small" : ""
+            }`}
           disabled={isLoading}
           onClick={() => setIsLogin(true)}
           data-tooltip={t("A7xXZ7B")}
@@ -320,9 +312,8 @@ const FollowIcon = ({
   if (!toFollowKey || toFollowKey === userKeys.pub)
     return (
       <div
-        className={`round-icon if-disabled  ${
-          size === "small" ? "round-icon-small" : ""
-        }`}
+        className={`round-icon if-disabled  ${size === "small" ? "round-icon-small" : ""
+          }`}
         disabled={isLoading}
       >
         {FOLLOW}
@@ -331,13 +322,11 @@ const FollowIcon = ({
   if (bulk)
     return (
       <div
-        className={`round-icon round-icon-tooltip ${
-          size === "small" ? "round-icon-small" : ""
-        } ${
-          isFollowing.bulk
+        className={`round-icon round-icon-tooltip ${size === "small" ? "round-icon-small" : ""
+          } ${isFollowing.bulk
             ? `${isFollowing.status ? "btn-orange" : "btn-orange-gst"}`
             : `${isFollowing.status ? "btn-normal" : "btn-gst"}`
-        }`}
+          }`}
         style={{
           borderColor: isFollowing.bulk && !isFollowing.status ? "initial" : "",
         }}
@@ -350,7 +339,7 @@ const FollowIcon = ({
         onClick={handleBulkList}
       >
         {isLoading ? (
-          <LoadingDots />
+          <Spinner />
         ) : isFollowing.bulk ? (
           isFollowing.status ? (
             FOLLOW
@@ -367,14 +356,13 @@ const FollowIcon = ({
 
   return (
     <div
-      className={`round-icon round-icon-tooltip ${
-        isFollowing.status ? "btn-normal" : "btn-gst"
-      } ${size === "small" ? "round-icon-small" : ""}`}
+      className={`round-icon round-icon-tooltip ${isFollowing.status ? "btn-normal" : "btn-gst"
+        } ${size === "small" ? "round-icon-small" : ""}`}
       disabled={isLoading}
       onClick={followUnfollow}
       data-tooltip={isFollowing.status ? t("ASi0a0d") : t("A9o2pLM")}
     >
-      {isLoading ? <LoadingDots /> : isFollowing.status ? FOLLOWING : FOLLOW}
+      {isLoading ? <Spinner /> : isFollowing.status ? FOLLOWING : FOLLOW}
     </div>
   );
 };

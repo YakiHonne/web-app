@@ -13,7 +13,7 @@ import KindSix from "@/Components/KindSix";
 import { saveUsers } from "@/Helpers/DB";
 import { getSubData } from "@/Helpers/Controlers";
 import { straightUp } from "@/Helpers/Helpers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import KindOne from "@/Components/KindOne";
 import bannedList from "@/Content/BannedList";
 import { useRouter } from "next/router";
@@ -220,9 +220,8 @@ const HomeFeed = ({ relay }) => {
     <div className="fx-centered  fx-wrap fit-container" style={{ gap: 0 }}>
       {["recent", "recent_with_replies"].includes("global") &&
         notes?.length > 0 && (
-          <div className="fit-container box-pad-h">
-            <hr />
-            <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-pad-v-m">
+          <div className="fit-container box-pad-h box-pad-v-m sc-s">
+            <div className="fit-container fx-centered fx-start-h fx-start-v ">
               <div>
                 <Icon name="eye-opened" size={24} />
               </div>
@@ -231,8 +230,6 @@ const HomeFeed = ({ relay }) => {
                 <p className="gray-c">{t("AstvJYT")}</p>
               </div>
             </div>
-            <hr />
-            <hr />
           </div>
         )}
       {notes?.length === 0 && !isLoading && isConnected && (
@@ -300,7 +297,7 @@ const HomeFeed = ({ relay }) => {
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "60vh" }}
         >
-          <LoadingLogo size={64} />
+          <Spinner size={32} />
         </div>
       )}
     </div>

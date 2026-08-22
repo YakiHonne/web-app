@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import LoadingScreen from "@/Components/LoadingScreen";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function ToUpdateRelay({ exit }) {
   const dispatch = useDispatch();
@@ -136,17 +137,10 @@ export default function ToUpdateRelay({ exit }) {
 
   if (!isLoaded) return <LoadingScreen />;
   return (
-    <section
-      className="fixed-container fx-centered fx-wrap box-pad-h box-pad-v"
-      style={{
-        pointerEvents: isLoading ? "none" : "auto",
-        overflow: "scroll",
-        overflowX: "hidden",
-      }}
-    >
+    <Overlay exit={exit} width={1000}>
       <div
         className="fx-centered fx-wrap fx-start-v "
-        style={{ rowGap: "32px", width: "min(100%, 1000px)" }}
+        style={{ rowGap: "32px", pointerEvents: isLoading ? "none" : "auto" }}
       >
         <div
           className="fx-centered fx-col slide-up"
@@ -295,19 +289,19 @@ export default function ToUpdateRelay({ exit }) {
                 onClick={exit}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                {isLoading ? <Spinner /> : t("AB4BSCe")}
               </button>
               <button
                 className="btn btn-normal fx"
                 onClick={saveRelays}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingDots /> : t("AZWpmir")}
+                {isLoading ? <Spinner /> : t("AZWpmir")}
               </button>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </Overlay>
   );
 }

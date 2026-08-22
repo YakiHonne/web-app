@@ -1,14 +1,14 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import NumberShrink from "@/Components/NumberShrink";
 import { useSelector } from "react-redux";
 import ShowUsersList from "./ShowUsersList";
 import { useTranslation } from "react-i18next";
 import Like from "./Reactions/Like";
-import Repost from "./Reactions/Repost";
-import Quote from "./Reactions/Quote";
+import RepostWithQuote from "./Reactions/RepostWithQuote";
 import Zap from "./Reactions/Zap";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function PostReaction({
   event,
@@ -21,6 +21,7 @@ export default function PostReaction({
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const [usersList, setUsersList] = useState(false);
+  const zapRef = useRef(null);
   const { reactionsSettings } = useCustomizationSettings();
   const order = useMemo(() => {
     const reactionsOrder = reactionsSettings.reduce(
@@ -54,6 +55,7 @@ export default function PostReaction({
       ? postActions.reposts.reposts.find((item) => item.pubkey === userKeys.pub)
       : false;
   }, [postActions, userKeys]);
+
   const isQuoted = useMemo(() => {
     return userKeys
       ? postActions.quotes.quotes.find((item) => item.pubkey === userKeys.pub)
@@ -66,6 +68,13 @@ export default function PostReaction({
       : false;
   }, [postActions, userKeys]);
 
+  const repostQuoteTotal =
+    postActions.reposts.reposts.length + postActions.quotes.quotes.length;
+
+  const showRepostQuote =
+    event.kind === 1 && (order.repost > -1 || order.quote > -1);
+  const repostQuoteOrder =
+    order.repost > -1 ? order.repost : order.quote > -1 ? order.quote : -1;
   return (
     <>
       {usersList && (
@@ -77,146 +86,90 @@ export default function PostReaction({
           extrasType={usersList.extrasType}
         />
       )}
-      <div className="fx-centered" style={{ columnGap: "24px" }}>
+      <div className="fx-centered" style={{ columnGap: "18px" }}>
         {order.likes > -1 && (
           <div
-            className={`fx-centered pointer `}
-            style={{ columnGap: "8px", order: order.likes }}
+            className="fx-centered pointer reaction-btn"
+            style={{ columnGap: "4px", order: order.likes, borderRadius: "20px", padding: "4px 8px", transition: "background-color 0.15s ease" }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
           >
             <Like
               isLiked={isLiked}
               event={event}
               actions={postActions}
               tagKind={event.kind > 30000 ? "a" : "e"}
+              total={postActions.likes.likes.length}
             />
-            <div
-              className={`round-icon-tooltip ${isLiked ? "orange-c" : ""}`}
-              data-tooltip={t("Alz0E9Y")}
-              onClick={(e) => {
-                e.stopPropagation();
-                postActions.likes.likes.length > 0 &&
-                  setUsersList({
-                    title: t("Alz0E9Y"),
-                    list: postActions.likes.likes.map((item) => item.pubkey),
-                    extras: postActions.likes.likes,
-                    extrasType: "reaction",
-                  });
-              }}
-            >
-              <div className={isLiked ? "" : "opacity-4"}>
-                <NumberShrink value={postActions.likes.likes.length} />
-              </div>
-            </div>
+            {/* <span className={`p-medium ${isLiked ? "orange-c" : "opacity-4"}`}>
+              <NumberShrink value={postActions.likes.likes.length} />
+            </span> */}
           </div>
         )}
         {order.replies > -1 && (
           <div
-            className={`fx-centered pointer `}
-            style={{ columnGap: "8px", order: order.replies }}
+            className="fx-centered pointer reaction-btn"
+            style={{ columnGap: "4px", order: order.replies, borderRadius: "20px", padding: "4px 8px", transition: "background-color 0.15s ease" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (postActions.replies.replies.length > 0) setShowComments(true);
+              else setOpenComment(!openComment);
+            }}
           >
-            <div className="round-icon-tooltip" data-tooltip={t("ADHdLfJ")}>
-              <Icon
-                name="comment"
-                size={24}
-                className="comment-24"
-                opacity={0.4}
-                onClick={() => setOpenComment(!openComment)}
-              />
-            </div>
-            <div className="round-icon-tooltip" data-tooltip={t("AMBxvKP")}>
-              <div onClick={() => setShowComments(true)} className="opacity-4">
-                <NumberShrink value={postActions.replies.replies.length} />
-              </div>
-            </div>
+            <Icon
+              name={iconsNames.chat_circle}
+              size={20}
+              v={2}
+              opacity={0.4}
+            />
+            <span className="p-medium opacity-4">
+              <NumberShrink value={postActions.replies.replies.length} />
+            </span>
           </div>
         )}
-        {event.kind === 1 && order.repost > -1 && (
-          <div
-            className={`fx-centered pointer `}
-            style={{ columnGap: "8px", order: order.repost }}
-          >
-            <Repost
+        {showRepostQuote && (
+          <div style={{ order: repostQuoteOrder }}>
+            <RepostWithQuote
               isReposted={isReposted}
+              isQuoted={isQuoted}
               event={event}
               actions={postActions}
+              totalCount={repostQuoteTotal}
             />
-            <div
-              className={`round-icon-tooltip ${isReposted ? "orange-c" : ""}`}
-              data-tooltip={t("Aai65RJ")}
-              onClick={(e) => {
-                e.stopPropagation();
-                postActions.reposts.reposts.length > 0 &&
-                  setUsersList({
-                    title: t("Aai65RJ"),
-                    list: postActions.reposts.reposts.map(
-                      (item) => item.pubkey,
-                    ),
-                    extras: [],
-                  });
-              }}
-            >
-              <div className={isReposted ? "" : "opacity-4"}>
-                <NumberShrink value={postActions.reposts.reposts.length} />
-              </div>
-            </div>
-          </div>
-        )}
-        {order.quote > -1 && (
-          <div
-            className={`fx-centered pointer `}
-            style={{ columnGap: "8px", order: order.quote }}
-          >
-            <Quote isQuoted={isQuoted} event={event} actions={postActions} />
-            <div
-              className={`round-icon-tooltip ${isQuoted ? "orange-c" : ""}`}
-              data-tooltip={t("AWmDftG")}
-              onClick={(e) => {
-                e.stopPropagation();
-                postActions.quotes.quotes.length > 0 &&
-                  setUsersList({
-                    title: t("AWmDftG"),
-                    list: postActions.quotes.quotes.map((item) => item.pubkey),
-                    extras: [],
-                  });
-              }}
-            >
-              <div className={isQuoted ? "" : "opacity-4"}>
-                <NumberShrink value={postActions.quotes.quotes.length} />
-              </div>
-            </div>
           </div>
         )}
         {order.zap > -1 && (
           <div
-            className="fx-centered"
-            style={{ columnGap: "8px", order: order.zap }}
+            className="fx-centered pointer reaction-btn"
+            style={{ columnGap: "4px", order: order.zap, borderRadius: "20px", padding: "4px 8px", transition: "background-color 0.15s ease" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              zapRef.current?.open();
+            }}
           >
-            <div className="round-icon-tooltip" data-tooltip="Tip note">
-              <Zap
-                user={userProfile}
-                event={event}
-                actions={postActions}
-                isZapped={isZapped}
-              />
-            </div>
-            <div
-              data-tooltip={t("AO0OqWT")}
-              className={`pointer round-icon-tooltip ${
-                isZapped ? "orange-c" : ""
-              }`}
-              onClick={() =>
-                postActions.zaps.total > 0 &&
-                setUsersList({
-                  title: t("AVDZ5cJ"),
-                  list: postActions.zaps.zaps.map((item) => item.pubkey),
-                  extras: postActions.zaps.zaps,
-                })
-              }
+            <Zap
+              ref={zapRef}
+              user={userProfile}
+              event={event}
+              actions={postActions}
+              isZapped={isZapped}
+              amount={postActions.zaps.total}
+            />
+            {/* <span
+              className={`p-medium ${isZapped ? "orange-c" : "opacity-4"}`}
+            // onClick={(e) => {
+            //   e.stopPropagation();
+            //   postActions.zaps.total > 0 &&
+            //     setUsersList({
+            //       title: t("AVDZ5cJ"),
+            //       list: postActions.zaps.zaps.map((item) => item.pubkey),
+            //       extras: postActions.zaps.zaps,
+            //     });
+            // }}
             >
-              <div className={isZapped ? "" : "opacity-4"}>
-                <NumberShrink value={postActions.zaps.total} />
-              </div>
-            </div>
+              <NumberShrink value={postActions.zaps.total} />
+            </span> */}
           </div>
         )}
       </div>

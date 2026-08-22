@@ -39,9 +39,8 @@ export default function Gifs({ setGif, exit, position = "left" }) {
         maxHeight: "300px",
         overflow: "scroll",
         position: "absolute",
-        // [position]: 0,
         bottom: "calc(100% + 5px)",
-        width: "200px",
+        width: "300px",
         zIndex: 102,
       }}
       ref={ref}
@@ -59,7 +58,7 @@ export default function Gifs({ setGif, exit, position = "left" }) {
             border: "1px solid var(--very-dim-gray)",
           }}
         >
-          <Icon name="search" size={24} />
+          <Icon name="search_magnifying_glass" v={2} size={24} />
           <input
             type="text"
             placeholder={t("AWYdgPH")}

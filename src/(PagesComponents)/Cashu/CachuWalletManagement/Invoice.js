@@ -3,6 +3,7 @@ import { copyText } from "@/Helpers/Helpers";
 import { useTranslation } from "react-i18next";
 import QRCode from "react-qr-code";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function Invoice({
   invoice,
@@ -13,10 +14,10 @@ export default function Invoice({
 }) {
   const { t } = useTranslation();
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit}>
       <div
-        className="fx-centered fx-col fit-container sc-s bg-sp box-pad-h-m box-pad-v-m"
-        style={{ width: "max-content", height: "max-content" }}
+        className="fx-centered fx-col fit-container box-pad-h-m box-pad-v-m"
+        style={{ height: "max-content" }}
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -51,6 +52,6 @@ export default function Invoice({
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

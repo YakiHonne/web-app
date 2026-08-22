@@ -8,6 +8,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import { InitEvent } from "@/Helpers/Controlers";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
+import Overlay from "@/Components/Overlay";
 
 export default function AddRelaySet({ exit, toEdit, allRelays }) {
   const { t } = useTranslation();
@@ -60,22 +61,9 @@ export default function AddRelaySet({ exit, toEdit, allRelays }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      style={{ zIndex: 301 }}
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500} allowOverFlow={true}>
       <div
-        className="sc-s bg-sp slide-up box-pad-h box-pad-v fx-centered fx-col"
-        style={{
-          position: "relative",
-          width: "min(500px, 100%)",
-          overflow: "visible",
-        }}
-        onClick={(e) => e.stopPropagation()}
+        className="slide-up box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -163,6 +151,6 @@ export default function AddRelaySet({ exit, toEdit, allRelays }) {
           {t("A8alhKV")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 }

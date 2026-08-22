@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import UserProfilePic from "@/Components/UserProfilePic";
 import ShowUsersList from "@/Components/ShowUsersList";
 import Date_ from "@/Components/Date_";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { translate } from "@/Helpers/Controlers";
 import useNoteStats from "@/Hooks/useNoteStats";
@@ -10,7 +10,7 @@ import Comments from "@/Components/Reactions/Comments";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import ZapAd from "@/Components/ZapAd";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import PostReaction from "./PostReaction";
@@ -18,6 +18,12 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import useIsMute from "@/Hooks/useIsMute";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import { iconsNames } from "@/Content/IconV2URL";
+import EventStats from "./EventStats";
+import CommentsSection from "@/Components/CommentsSection";
+import Overlay from "@/Components/Overlay";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 export default function NotesComment({
   event,
@@ -28,12 +34,16 @@ export default function NotesComment({
   isHistory = false,
   tagKind = "e",
   rootKind = null,
+  fromKindOne = false,
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
+  const { handleTranslateError } = useQuotaGuard();
+  const userKeys = useSelector((state) => state.userKeys);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(event.pubkey);
   const { isMuted } = useIsMute(event.pubkey);
   const [toggleComment, setToggleComment] = useState(false);
+  const [showComments, setShowComments] = useState(false);
   const [usersList, setUsersList] = useState(false);
   const { postActions } = useNoteStats(event.id, event.pubkey);
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
@@ -64,6 +74,15 @@ export default function NotesComment({
   };
 
   const translateNote = async () => {
+    if (!userKeys) {
+      dispatch(
+        setToast({
+          type: 3,
+          desc: t("ALtr4nL"),
+        }),
+      );
+      return;
+    }
     setIsNoteTranslating(true);
     if (translatedNote) {
       setShowTranslation(true);
@@ -78,21 +97,8 @@ export default function NotesComment({
         return;
       }
       let res = await translate(event.content);
-      if (res.status === 500) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AZ5VQXL"),
-          }),
-        );
-      }
-      if (res.status === 400) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AJeHuH1"),
-          }),
-        );
+      if (res.status !== 200) {
+        handleTranslateError(res);
       }
       if (res.status === 200) {
         let noteTree = getNoteTree(
@@ -112,7 +118,7 @@ export default function NotesComment({
       dispatch(
         setToast({
           type: 2,
-          desc: t("AZ5VQXL"),
+          desc: err?.response?.status === 401 ? t("ALtr4nL") : t("AZ5VQXL"),
         }),
       );
     }
@@ -120,6 +126,30 @@ export default function NotesComment({
   if (isDeleted) return;
   return (
     <>
+      {showComments && fromKindOne && (
+        <Overlay exit={() => setShowComments(false)} width={550}>
+          <div
+            className="fx-centered fx-col fx-start-v fx-start-h"
+            style={{
+              overflow: "scroll",
+              scrollBehavior: "smooth",
+              borderRadius: 0,
+              gap: 0,
+            }}
+          >
+            <div className="close" onClick={() => setShowComments(false)}>
+              <div></div>
+            </div>
+            <CommentsSection
+              noteTags={event.tags}
+              id={event.id}
+              eventPubkey={event.pubkey}
+              author={userProfile}
+              isRoot={event.isComment ? false : true}
+            />
+          </div>
+        </Overlay>
+      )}
       {usersList && (
         <ShowUsersList
           exit={() => setUsersList(false)}
@@ -131,9 +161,8 @@ export default function NotesComment({
       )}
 
       <div
-        className={`fit-container box-pad-h-s ${
-          isHistory ? "" : "box-pad-v-s"
-        }`}
+        className={`fit-container box-pad-h-s ${isHistory ? "" : "box-pad-v-s"
+          }`}
         style={{
           transition: ".2s ease-in-out",
           overflow: "visible",
@@ -143,9 +172,8 @@ export default function NotesComment({
       >
         {isReply && <div className="reply-tail"></div>}
         <div
-          className={`${
-            isHistory ? "box-pad-h-s " : "box-pad-h-m box-pad-v-m"
-          } fit-container`}
+          className={`${isHistory ? "box-pad-h-s " : "box-pad-h-m box-pad-v-m"
+            } fit-container`}
           style={{
             transition: ".2s ease-in-out",
             overflow: "visible",
@@ -172,7 +200,7 @@ export default function NotesComment({
                         {userProfile.display_name || userProfile.name}
                       </p>
                       {isNip05Verified && <Icon name="checkmark-c1" isColored />}
-                      <p className="gray-c p-medium">&#8226;</p>
+                      {proUser.isProUser && <Badge data={proUser} size={16} />}
                       <p className="gray-c p-medium">
                         <Date_
                           toConvert={new Date(event.created_at * 1000)}
@@ -190,13 +218,17 @@ export default function NotesComment({
                     </div>
                   )}
                 </div>
-                {!noReactions && (
-                  <EventOptions
-                    event={event}
-                    component="notes"
-                    refreshAfterDeletion={() => setIsDeleted(true)}
-                  />
-                )}
+                <div className="fx-centered">
+                  {!isNoteTranslating && <Icon name={"translate"} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                  {isNoteTranslating && <Spinner />}
+                  {!noReactions && (
+                    <EventOptions
+                      event={event}
+                      component="notes"
+                      refreshAfterDeletion={() => setIsDeleted(true)}
+                    />
+                  )}
+                </div>
               </div>
             )}
             {isMuted && (
@@ -216,7 +248,6 @@ export default function NotesComment({
                     <p className={isHistory ? "" : "p-medium"}>
                       {t("A8APYES")}
                     </p>
-                    <p className="gray-c p-medium">&#8226;</p>
                     <p className="gray-c p-medium">
                       <Date_
                         toConvert={new Date(event.created_at * 1000)}
@@ -230,13 +261,9 @@ export default function NotesComment({
           </div>
 
           <div
-            className={`fx-centered fx-col fit-container note-indent-2 ${
-              hasReplies ? "reply-side-border-2" : ""
-            }`}
-            style={{
-              // paddingTop: "1rem",
-              paddingBottom: isHistory ? "1rem" : "unset",
-            }}
+            className={`fx-centered fx-col note-indent-2 ${hasReplies ? "reply-side-border-2" : ""
+              }`}
+            style={{ width: hasReplies ? "calc(100% - 1rem)" : "100%", paddingBottom: isHistory ? "1rem" : "unset" }}
           >
             {!isMuted && (
               <>
@@ -252,6 +279,7 @@ export default function NotesComment({
                     {showTranslation ? translatedNote : event.note_tree}
                   </div>
                 </Link>
+                <div id={`slider-${event.id}`} />
                 {event.isCollapsedNote && (
                   <div
                     className="fit-container fx-centered fx-start-h pointer"
@@ -293,30 +321,21 @@ export default function NotesComment({
                         openComment={toggleComment}
                         postActions={postActions}
                         userProfile={userProfile}
+                        setShowComments={fromKindOne ? setShowComments : () => setToggleComment(true)}
                       />
-                      <div className="fx-centered">
-                        <div className="fit-container box-pad-h-m">
-                          {!isNoteTranslating && !showTranslation && (
-                            <div
-                              className="round-icon-tooltip"
-                              data-tooltip={t("AdHV2qJ")}
-                              onClick={translateNote}
-                            >
-                              <Icon name="translate" size={24} className="opacity-4" />
-                            </div>
-                          )}
-                          {!isNoteTranslating && showTranslation && (
-                            <div
-                              className="round-icon-tooltip"
-                              data-tooltip={t("AE08Wte")}
-                              onClick={() => setShowTranslation(false)}
-                            >
-                              <Icon name="translate" size={24} className="opacity-4" />
-                            </div>
-                          )}
-                          {isNoteTranslating && <LoadingDots />}
-                        </div>
-                      </div>
+                      {/* <div className="fx-centered">
+                        {!isNoteTranslating && (
+                          <Icon
+                            v={2}
+                            name={iconsNames.globe}
+                            onClick={translateNote}
+                            opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"}
+                            size={20}
+                          />
+                        )}
+                        {isNoteTranslating && <Spinner />}
+                      </div> */}
+                      <EventStats postActions={postActions} />
                     </div>
                   </>
                 )}

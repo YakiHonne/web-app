@@ -5,6 +5,7 @@ import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getDataForSSG } from "@/Helpers/lib";
+import { safeDecode } from "@/Helpers/ssgParams";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Note"), {
   ssr: false,
@@ -29,8 +30,12 @@ export default function Page({ event, author, nevent }) {
 
 export async function getStaticProps({ params }) {
   const { nevent } = params;
-  let id = nip19.decode(nevent)?.data.id || nip19.decode(nevent)?.data;
-  let relays = nip19.decode(nevent)?.data.relays || [];
+  const decoded = safeDecode(nevent);
+  if (!decoded || !["nevent", "note"].includes(decoded.type))
+    return { notFound: true, revalidate: 3600 };
+  let id = decoded.type === "note" ? decoded.data : decoded.data?.id;
+  if (!id) return { notFound: true, revalidate: 3600 };
+  let relays = decoded.type === "nevent" ? decoded.data?.relays || [] : [];
   const res = await getDataForSSG(
     [{ ids: [id] }],
     1000,
@@ -40,12 +45,13 @@ export async function getStaticProps({ params }) {
   let event =
     res.data.length > 0
       ? {
-          ...res.data[0],
-        }
+        ...res.data[0],
+      }
       : null;
   const author = event
     ? await getDataForSSG([{ authors: [event.pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata("");
+  const isPremium = event && event?.tags.find(_ => _[0] === 'nip63') ? true : false;
   return {
     props: {
       event,
@@ -54,8 +60,8 @@ export async function getStaticProps({ params }) {
         author.data?.length > 0
           ? getParsedAuthor(author.data[0])
           : { ...author },
-      revalidate: !event ? 604800 : 2,
     },
+    revalidate: isPremium ? 2 : event ? 604800 : 3600,
   };
 }
 

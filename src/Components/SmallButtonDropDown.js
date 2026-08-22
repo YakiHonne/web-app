@@ -2,6 +2,8 @@ import { Fragment, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 export default function SmallButtonDropDown({
   options,
@@ -10,7 +12,9 @@ export default function SmallButtonDropDown({
   showSettings = false,
 }) {
   const [showOptions, setShowOptions] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   const optionsRef = useRef(null);
+  const isMobile = useIsMobile();
   const { t } = useTranslation();
   const categoryDisplayName = {
     highlights: t("AWj53bb"),
@@ -22,10 +26,17 @@ export default function SmallButtonDropDown({
     explore: t("A9aq49d"),
     following: t("A9TqNxQ"),
   };
+
+  const close = () => {
+    if (isMobile) { setShowOptions(false); return; }
+    setDismissing(true);
+    setTimeout(() => { setShowOptions(false); setDismissing(false); }, 200);
+  };
+
   useEffect(() => {
     const handleOffClick = (e) => {
       if (optionsRef.current && !optionsRef.current.contains(e.target))
-        setShowOptions(false);
+        close();
     };
     document.addEventListener("mousedown", handleOffClick);
     return () => {
@@ -49,7 +60,7 @@ export default function SmallButtonDropDown({
             options.length > 1 &&
             !showSettings) ||
           (options.includes(selectedCategory) && showSettings)
-            ? setShowOptions(!showOptions)
+            ? showOptions ? close() : setShowOptions(true)
             : setSelectedCategory(options[0])
         }
       >
@@ -65,50 +76,70 @@ export default function SmallButtonDropDown({
           <Icon name="arrow" size={12} />
         )}
       </div>
-      {showOptions && (
-        <div
-          style={{
-            position: "absolute",
-       
-            top: "110%",
-            backgroundColor: "var(--dim-gray)",
-            border: "none",
-            minWidth: "200px",
-            width: "max-content",
-            zIndex: 1000,
-            rowGap: "0",
-          }}
-          className="sc-s-18 fx-centered fx-col fx-start-v pointer drop-down-r"
-        >
-          {options.map((option, index) => {
-            return (
+      {isMobile ? (
+        <MobileSheet open={showOptions} onClose={close}>
+          <div className="fx-centered fx-col fx-start-v fit-container" style={{ padding: "0 8px" }}>
+            {options.map((option, index) => (
               <p
                 key={index}
-                onClick={() => {
-                  setSelectedCategory(option);
-                  setShowOptions(false);
-                }}
-                className={`box-pad-h-m box-pad-v-s fit-container p-maj p-maj ${
-                  selectedCategory === option ? "c1-c" : " "
-                }`}
+                onClick={() => { setSelectedCategory(option); close(); }}
+                className={`fit-container p-maj ${selectedCategory === option ? "c1-c" : ""}`}
+                style={{ padding: "0.85rem 1.25rem", borderRadius: "12px", cursor: "pointer", fontSize: "1rem" }}
               >
                 {categoryDisplayName[option]}
-                {/* {option.replaceAll("-", " ")} */}
               </p>
-            );
-          })}
-          {showSettings && (
-            <Link
-              href="/settings"
-              state={{ tab: "customization" }}
-              className="fit-container fx-scattered  pointer box-pad-h-m box-pad-v-s"
-              style={{ backgroundColor: "var(--c1-side)" }}
-            >
-              <p className="p-medium gray-c btn-text-gray">{t("AV40SRR")}</p>
-              <Icon name="setting" size={12} />
-            </Link>
-          )}
-        </div>
+            ))}
+            {showSettings && (
+              <Link
+                href="/settings"
+                state={{ tab: "customization" }}
+                className="fit-container fx-scattered pointer"
+                style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: "0.85rem 1.25rem", marginTop: "4px" }}
+              >
+                <p className="p-medium" style={{ color: "rgba(255,255,255,0.5)", fontSize: "1rem" }}>{t("AV40SRR")}</p>
+                <Icon name="setting" size={16} />
+              </Link>
+            )}
+          </div>
+        </MobileSheet>
+      ) : (
+        showOptions && (
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 6px)",
+              minWidth: "200px",
+              width: "max-content",
+              zIndex: 1000,
+              rowGap: "0",
+              borderRadius: "16px",
+              transformOrigin: "top left",
+            }}
+            className={`fx-centered fx-col fx-start-v pointer drop-down-r bg-dropdown dynamic-island-dropdown${dismissing ? " dismissing" : ""}`}
+          >
+            {options.map((option, index) => (
+              <p
+                key={index}
+                onClick={() => { setSelectedCategory(option); close(); }}
+                className={`box-pad-h-m box-pad-v-s fit-container p-maj ${selectedCategory === option ? "c1-c" : ""}`}
+                style={{ padding: ".6rem 1rem", borderRadius: "10px" }}
+              >
+                {categoryDisplayName[option]}
+              </p>
+            ))}
+            {showSettings && (
+              <Link
+                href="/settings"
+                state={{ tab: "customization" }}
+                className="fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
+                style={{ borderTop: "1px solid rgba(255,255,255,0.08)", padding: ".6rem 1rem", borderRadius: "0 0 16px 16px" }}
+              >
+                <p className="p-medium" style={{ color: "rgba(255,255,255,0.5)" }}>{t("AV40SRR")}</p>
+                <Icon name="setting" size={12} />
+              </Link>
+            )}
+          </div>
+        )
       )}
     </div>
   );

@@ -5,6 +5,7 @@ import NDK, {
   NDKRelayAuthPolicies,
 } from "@nostr-dev-kit/ndk";
 import { getKeys } from "@/Helpers/ClientHelpers";
+import { relayConnectionFilter } from "@/Helpers/utils/relayConnectionFilter";
 
 const ndkInstancesCache = new Map();
 
@@ -23,6 +24,7 @@ const initiateNDKInstance = async (relay, list, isRelayList) => {
   let userKeys = getKeys();
   const ndkInstance = new NDK({
     explicitRelayUrls: isRelayList ? list : [relay],
+    relayConnectionFilter,
   });
 
   if (userKeys?.ext) {
@@ -47,6 +49,9 @@ const initiateNDKInstance = async (relay, list, isRelayList) => {
     await signer.blockUntilReady();
     ndkInstance.signer = signer;
   }
+  ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
+    ndk: ndkInstance,
+  });
   await ndkInstance.connect(4000);
   if (
     !isRelayList &&
@@ -55,9 +60,6 @@ const initiateNDKInstance = async (relay, list, isRelayList) => {
   ) {
     return false;
   }
-  ndkInstance.relayAuthDefaultPolicy = NDKRelayAuthPolicies.signIn({
-    ndk: ndkInstance,
-  });
   setNDKInstance(relay, ndkInstance);
   return ndkInstance;
 };

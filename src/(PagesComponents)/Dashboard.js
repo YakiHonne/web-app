@@ -3,7 +3,7 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import { useDispatch, useSelector } from "react-redux";
 import Date_ from "@/Components/Date_";
 import { getPopularNotes, getUserStats } from "@/Helpers/WSInstance";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import NumberShrink from "@/Components/NumberShrink";
 import axios from "axios";
 import { getSubData } from "@/Helpers/Controlers";
@@ -40,7 +40,6 @@ import InterestSuggestions from "@/Content/InterestSuggestions";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { customHistory } from "@/Helpers/History";
-import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import ShowPeople from "@/Components/ShowPeople";
 import UserFollowers from "@/Components/UserFollowers";
@@ -51,6 +50,8 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { DraggableComp } from "@/Components/DraggableComp";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
+import { SelectTabs } from "@/Components/SelectTabs";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -103,24 +104,23 @@ const getLocalDrafts = () => {
       noteDraft: noteDraft
         ? { kind: 11, content: noteDraft, created_at: false }
         : false,
-      // smartWidgetDraft: false,
       smartWidgetDraft: smartWidgetDraft
         ? {
-            kind: 300331,
-            content: smartWidgetDraft,
-            created_at: smartWidgetDraft.created_at,
-          }
+          kind: 300331,
+          content: smartWidgetDraft,
+          created_at: smartWidgetDraft.created_at,
+        }
         : false,
       artDraft: artDraft.default
         ? false
         : artDraft.title || artDraft.content
           ? {
-              created_at: artDraft.created_at || Math.floor(Date.now() / 1000),
-              kind: 30024,
-              title: artDraft.title || "Untitled",
-              content: artDraft.content || "Untitled",
-              local: true,
-            }
+            created_at: artDraft.created_at || Math.floor(Date.now() / 1000),
+            kind: 30024,
+            title: artDraft.title || "Untitled",
+            content: artDraft.content || "Untitled",
+            local: true,
+          }
           : false,
     };
     return localDraft.artDraft ||
@@ -189,8 +189,8 @@ export default function Dashboard() {
         ]);
         userProfile = userProfile
           ? JSON.parse(
-              userProfile.find((event) => event.kind === 10000105).content,
-            )
+            userProfile.find((event) => event.kind === 10000105).content,
+          )
           : { time_joined: Math.floor(Date.now() / 1000) };
 
         let zaps_sent = sats
@@ -242,6 +242,17 @@ export default function Dashboard() {
       return { ...prev, latestPublished: sortEvents(latestPublished) };
     });
   };
+  const tabs = [
+    t("AJDdA3h"),
+    t("AYIXG83"),
+    t("AesMg52"),
+    t("AVysZ1s"),
+    t("AStkKfQ"),
+    t("Aa73Zgk"),
+    t("A2mdxcf"),
+    t("AqwEL0G"),
+    t("AvcFYqP"),
+  ];
   return (
     <>
       {postToNote !== false && (
@@ -261,18 +272,15 @@ export default function Dashboard() {
               className="fit-height fit-container feed-container"
               style={{ overflow: "scroll" }}
             >
-              <SideMenu
-                selectedTab={selectedTab}
-                setSelectedTab={setSelectedTab}
-              />
               <div className="fit-container">
+                <SelectTabs tabs={tabs} setSelectedTab={setSelectedTab} selectedTab={selectedTab} />
                 {selectedTab === 0 && isLoading && (
                   <div
                     className="fit-container fx-centered"
                     style={{ height: "100vh" }}
                   >
                     <div className="fx-centered">
-                      <LoadingLogo />
+                      <Spinner size={32} />
                     </div>
                   </div>
                 )}
@@ -490,22 +498,15 @@ const SideMenuMobile = ({ setSelectedTab, selectedTab }) => {
         ></div>
       </div>
       {showMenu && (
-        <div
-          className="fixed-container fx-centered fx-end-h"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowMenu(false);
-          }}
-        >
+        <Overlay exit={() => setShowMenu(false)}>
           <div
-            className="fx-centered fx-start-h fx-start-v fx-col sc-s-18 slide-right"
+            className="fx-centered fx-start-h fx-start-v fx-col slide-right"
             style={{
               gap: "0",
               width: "70%",
               height: "100vh",
               borderRadius: "0",
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             <div className="box-pad-h box-pad-v fx-scattered fit-container">
               <h4>{t("ALBhi3j")}</h4>
@@ -535,7 +536,7 @@ const SideMenuMobile = ({ setSelectedTab, selectedTab }) => {
               );
             })}
           </div>
-        </div>
+        </Overlay>
       )}
     </div>
   );
@@ -633,7 +634,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
       }
       setLastEventTime(
         events[contentFrom][events[contentFrom].length - 1]?.created_at ||
-          undefined,
+        undefined,
       );
     };
     document
@@ -828,7 +829,7 @@ const Content = ({ filter, setPostToNote, localDraft, init }) => {
               style={{ height: "40vh" }}
             >
               <div className="fx-centered">
-                <LoadingLogo />
+                <Spinner size={32} />
               </div>
             </div>
           )}
@@ -937,7 +938,7 @@ const Widgets = ({ setPostToNote, localDrafte }) => {
       }
       setLastEventTime(
         events[contentFrom][events[contentFrom].length - 1]?.created_at ||
-          undefined,
+        undefined,
       );
     };
     document
@@ -962,11 +963,6 @@ const Widgets = ({ setPostToNote, localDrafte }) => {
   const handleEventDeletion = (eventID) => {
     let tempArray = structuredClone(events[contentFrom]);
     tempArray = tempArray.filter((event) => event.id !== eventID);
-    // dispatchEvents({
-    //   type: "remove-event",
-    //   toRemoveType: contentFrom,
-    //   events: tempArray,
-    // });
     dispatchEvents({ type: contentFrom, events: tempArray });
 
     setDeleteEvent(false);
@@ -1010,7 +1006,6 @@ const Widgets = ({ setPostToNote, localDrafte }) => {
                   </>
                 )}
               </div>
-              {/* {events[contentFrom].length > 0 && <p>{t("AQG30hM")}</p>} */}
             </div>
           )}
           <div className="fit-container fx-scattered">
@@ -1050,7 +1045,7 @@ const Widgets = ({ setPostToNote, localDrafte }) => {
                   style={{ height: "40vh" }}
                 >
                   <div className="fx-centered">
-                    <LoadingLogo />
+                    <Spinner size={32} />
                   </div>
                 </div>
               )}
@@ -1327,12 +1322,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
         />
       )}
       <div className="fit-container box-pad-h">
-        <div className="fit-container fx-scattered">
-          {/* <h4>{t("AJDdA3h")}</h4> */}
-          {/* <div style={{ width: "150px" }}>
-          <WriteNew exit={() => null} />
-        </div> */}
-        </div>
+        <div className="fit-container fx-scattered"></div>
         <div className="fit-container fx-centered fx-col box-pad-v">
           <div className="fit-container fx-centered fx-stretch fx-wrap">
             <div
@@ -1358,7 +1348,7 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                 <div
                   style={{
                     border: "6px solid var(--c1-side)",
-                    borderRadius: "22px",
+                    borderRadius: "50%",
                   }}
                 >
                   <UserProfilePic mainAccountUser={true} size={150} />
@@ -1372,9 +1362,6 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
                           new Date(data.userProfile.time_joined * 1000),
                         ),
                       })}{" "}
-                      {/* <Date_
-                      toConvert={new Date(data.userProfile.time_joined * 1000)}
-                      /> */}
                     </p>
                   </div>
                   <Link href={`/yaki-points`}>
@@ -1541,7 +1528,6 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
           className="fit-container fx-even sticky box-pad-h"
           style={{
             top: "-1px",
-            // padding: "1rem",
             paddingTop: 0,
             paddingBottom: 0,
             columnGap: 0,
@@ -1550,25 +1536,22 @@ const HomeTab = ({ data, setPostToNote, setSelectedTab, handleUpdate }) => {
           }}
         >
           <div
-            className={`list-item-b fx-centered fx ${
-              selectedCategory === 0 ? "selected-list-item-b" : ""
-            }`}
+            className={`list-item-b fx-centered fx ${selectedCategory === 0 ? "selected-list-item-b" : ""
+              }`}
             onClick={() => setSelectedCategory(0)}
           >
             {t("At9t6yz")}
           </div>
           <div
-            className={`list-item-b fx-centered fx ${
-              selectedCategory === 1 ? "selected-list-item-b" : ""
-            }`}
+            className={`list-item-b fx-centered fx ${selectedCategory === 1 ? "selected-list-item-b" : ""
+              }`}
             onClick={() => setSelectedCategory(1)}
           >
             {t("Ayh5F4w")}
           </div>
           <div
-            className={`list-item-b fx-centered fx ${
-              selectedCategory === 2 ? "selected-list-item-b" : ""
-            }`}
+            className={`list-item-b fx-centered fx ${selectedCategory === 2 ? "selected-list-item-b" : ""
+              }`}
             onClick={() => setSelectedCategory(2)}
           >
             {t("AU2yMBa")}
@@ -2560,7 +2543,7 @@ const BookmarkContent = ({ bookmark, exit }) => {
         )}
         {isLoading && (
           <div className="fx-centered fit-container" style={{ height: "30vh" }}>
-            <LoadingLogo />
+            <Spinner size={32} />
           </div>
         )}
       </div>
@@ -2658,7 +2641,7 @@ const ManageInterest = ({ exit }) => {
           className={`btn ${isChanged ? "btn-normal" : "btn-disabled"}`}
           onClick={saveInterestList}
         >
-          {isLoading ? <LoadingDots /> : t("A29aBCD")}
+          {isLoading ? <Spinner /> : t("A29aBCD")}
         </button>
       </div>
       <div className="fit-container fx-centered fx-col box-pad-h">
@@ -2669,7 +2652,7 @@ const ManageInterest = ({ exit }) => {
           }}
           className="if fit-container fx-scattered"
         >
-          <Icon name="search" size={24} />
+          <Icon name="search_magnifying_glass" v={2} size={24} />
           <input
             value={newInterest}
             onChange={(e) => setNewInterest(e.target.value)}

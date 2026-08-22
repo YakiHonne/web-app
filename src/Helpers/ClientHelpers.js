@@ -1,12 +1,17 @@
-import AudioLoader from "@/Components/AudioLoader";
+import dynamic from "next/dynamic";
 import Gallery from "@/Components/Gallery";
+
+const AudioLoader = dynamic(() => import("@/Components/AudioLoader"), {
+  ssr: false,
+});
 import IMGElement from "@/Components/IMGElement";
 import LinkPreview from "@/Components/LinkPreview";
 import LNBCInvoice from "@/Components/LNBCInvoice";
 import Nip19Parsing from "@/Components/Nip19Parsing";
 import VideoLoader from "@/Components/VideoLoader";
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, createContext, useContext, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { localStorage_ } from "./utils/clientLocalStorage";
 import { nip19 } from "nostr-tools";
 import React from "react";
@@ -19,8 +24,194 @@ import { nanoid } from "nanoid";
 import { hkdf } from "@noble/hashes/hkdf.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { checkJWT, decodeJWT } from "./Encryptions";
-import RedPacketBox from "@/Components/RedPacket/RedPacketBox";
+const RedPacketBox = dynamic(
+  () => import("@/Components/RedPacket/RedPacketBox"),
+  { ssr: false },
+);
 import Icon from "@/Components/Icon";
+import { useVideoThumbnail } from "@/Hooks/useVideoThumbnail";
+import Carousel from "@/Components/Carousel";
+
+const NoteMediaContext = createContext(null);
+
+const NoteTreeWithMedia = ({ children, mediaItems, pubkey, noBlur, sliderPortalId }) => {
+  const [galleryIndex, setGalleryIndex] = useState(null);
+  const [portalTarget, setPortalTarget] = useState(null);
+
+  useEffect(() => {
+    if (!sliderPortalId) return;
+    const el = document.getElementById(sliderPortalId);
+    if (el) setPortalTarget(el);
+  }, [sliderPortalId]);
+
+  const slider = mediaItems.length > 0 && (
+    <MediaSlider mediaItems={mediaItems} onOpen={setGalleryIndex} pubkey={pubkey} noBlur={noBlur} />
+  );
+
+  return (
+    <NoteMediaContext.Provider value={{ mediaItems, openGallery: setGalleryIndex }}>
+      {children}
+      {!portalTarget && slider}
+      {portalTarget && createPortal(slider, portalTarget)}
+      {galleryIndex !== null && (
+        <Carousel
+          imgs={mediaItems}
+          selectedImage={galleryIndex}
+          back={(e) => {
+            if (e) { e.stopPropagation(); e.preventDefault(); }
+            setGalleryIndex(null);
+          }}
+        />
+      )}
+    </NoteMediaContext.Provider>
+  );
+};
+
+const MediaChip = ({ type, url, mediaIndex }) => {
+  const ctx = useContext(NoteMediaContext);
+  const iconName = type === "image" ? "image_01" : "monitor_play";
+  const label = type === "image" ? "image" : "video";
+  return (
+    <span
+      style={{ position: "relative", display: "inline-flex", verticalAlign: "middle" }}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (ctx?.openGallery) ctx.openGallery(mediaIndex);
+      }}
+    >
+      <span
+        className="pointer sticker sticker-normal sticker-small fx-centered"
+        style={{ gap: "4px", transform: "translateY(2px)", cursor: "pointer", color: "var(--gray-c)" }}
+      >
+        <Icon name={iconName} v={2} size={14} />
+        <p style={{ margin: 0 }}>{label}</p>
+      </span>
+    </span>
+  );
+};
+
+const SLIDE_WIDTH = "calc((100% - 8px) / 2.3)";
+
+const slideStyle = {
+  position: "relative",
+  flex: `0 0 ${SLIDE_WIDTH}`,
+  width: SLIDE_WIDTH,
+  aspectRatio: "9/16",
+  borderRadius: "var(--border-r-18)",
+  overflow: "hidden",
+  background: "var(--very-dim-gray)",
+  cursor: "pointer",
+};
+
+const VideoThumbnailSlide = ({ url, onOpen, index, onSlideClick }) => {
+  const thumbnail = useVideoThumbnail(url);
+  return (
+    <div
+      className="pointer"
+      style={slideStyle}
+      onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSlideClick(e, index); }}
+    >
+      {thumbnail ? (
+        <img
+          src={thumbnail}
+          alt="video"
+          draggable={false}
+          onDragStart={(e) => e.preventDefault()}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
+        />
+      ) : (
+        <div style={{ width: "100%", height: "100%", background: "var(--very-dim-gray)" }} />
+      )}
+      <div
+        className="fx-centered"
+        style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.3)" }}
+      >
+        <Icon name="play_circle" v={2} size={40} isColored={false} />
+      </div>
+    </div>
+  );
+};
+
+const ImageSlide = ({ url, onOpen, index, onSlideClick }) => (
+  <div
+    className="pointer"
+    style={slideStyle}
+    onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSlideClick(e, index); }}
+  >
+    <img
+      src={url}
+      alt="media"
+      draggable={false}
+      onDragStart={(e) => e.preventDefault()}
+      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
+    />
+  </div>
+);
+
+const DRAG_THRESHOLD = 5;
+
+const MediaSlider = ({ mediaItems, onOpen }) => {
+  const trackRef = useRef(null);
+  const didDrag = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const onSlideClick = (_e, index) => {
+    if (didDrag.current) return;
+    onOpen(index);
+  };
+
+  const onMouseDown = (e) => {
+    didDrag.current = false;
+    startX.current = e.pageX;
+    scrollLeft.current = trackRef.current.scrollLeft;
+    trackRef.current.style.cursor = "grabbing";
+    trackRef.current.style.userSelect = "none";
+
+    const onMove = (ev) => {
+      const dx = ev.pageX - startX.current;
+      if (Math.abs(dx) >= DRAG_THRESHOLD) didDrag.current = true;
+      trackRef.current.scrollLeft = scrollLeft.current - dx;
+    };
+
+    const onUp = () => {
+      trackRef.current.style.cursor = "grab";
+      trackRef.current.style.userSelect = "";
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+  };
+
+  return (
+    <div style={{ marginTop: "12px", width: "100%" }}>
+      <div
+        ref={trackRef}
+        onMouseDown={onMouseDown}
+        style={{
+          display: "flex",
+          gap: "8px",
+          overflowX: "auto",
+          cursor: "grab",
+          paddingBottom: "4px",
+          scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
+        {mediaItems.map((item, index) =>
+          item.type === "video" ? (
+            <VideoThumbnailSlide key={index} url={item.url} onOpen={onOpen} index={index} onSlideClick={onSlideClick} />
+          ) : (
+            <ImageSlide key={index} url={item.url} onOpen={onOpen} index={index} onSlideClick={onSlideClick} />
+          )
+        )}
+      </div>
+    </div>
+  );
+};
 
 let nostrClients = [
   "nstart.me",
@@ -59,6 +250,43 @@ const doesContainNostrSchema = (url) => {
   }
 };
 
+const CUSTOM_EMOJI_REGEX = /:([a-zA-Z0-9_+-]+):/g;
+
+const renderCustomEmojis = (text, emojiMap) => {
+  if (!emojiMap || !text || !text.includes(":")) return text;
+  CUSTOM_EMOJI_REGEX.lastIndex = 0;
+  if (!CUSTOM_EMOJI_REGEX.test(text)) return text;
+  CUSTOM_EMOJI_REGEX.lastIndex = 0;
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+  while ((match = CUSTOM_EMOJI_REGEX.exec(text)) !== null) {
+    const url = emojiMap[match[1]];
+    if (!url) continue;
+    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    parts.push(
+      <img
+        key={`${match[1]}-${match.index}`}
+        src={url}
+        alt={`:${match[1]}:`}
+        title={`:${match[1]}:`}
+        className="custom-emoji"
+        loading="lazy"
+      />,
+    );
+    lastIndex = match.index + match[0].length;
+  }
+  if (parts.length === 0) return text;
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  return parts.map((part, index) =>
+    typeof part === "string" ? (
+      <Fragment key={index}>{part}</Fragment>
+    ) : (
+      part
+    ),
+  );
+};
+
 export function getNoteTree(
   note,
   minimal = false,
@@ -66,6 +294,8 @@ export function getNoteTree(
   wordsCount = 150,
   pubkey,
   noBlur = false,
+  sliderPortalId = null,
+  emojiMap = null,
 ) {
   if (!note) return "";
   let tree = note
@@ -74,7 +304,26 @@ export function getNoteTree(
     .flatMap((segment) => (segment === "\n" ? "\n" : segment.split(/\s+/)))
     .filter(Boolean);
 
+  let totalMedia = 0;
+  for (let i = 0; i < (isCollapsedNote ? wordsCount : tree.length); i++) {
+    const el_ = tree[i]?.replaceAll("nostr:", "") || "";
+    if (
+      (/(https?:\/\/)/i.test(el_) || el_.startsWith("data:image")) &&
+      !el_.includes("https://yakihonne.com/smart-widget-checker?naddr=") &&
+      !minimal
+    ) {
+      const cleanUrl_ = el_.replace(/[.,|']+$/, "");
+      if (!isVid(cleanUrl_)) {
+        const check_ = isImageUrl(cleanUrl_);
+        if (check_?.type === "image" || check_?.type === "video") totalMedia++;
+      }
+    }
+  }
+  const useChipMode = totalMedia > 1;
+
   let finalTree = [];
+  let mediaItems = [];
+  let chipPositions = [];
   let maxChar = isCollapsedNote ? wordsCount : tree.length;
   for (let i = 0; i < maxChar; i++) {
     const el = tree[i].replaceAll("nostr:", "");
@@ -110,11 +359,39 @@ export function getNoteTree(
           const checkURL = isImageUrl(cleanUrl);
           if (checkURL) {
             if (checkURL.type === "image") {
-              finalTree.push(<IMGElement src={cleanUrl} key={key} />);
+              if (useChipMode) {
+                const mediaIndex = mediaItems.length;
+                mediaItems.push({ url: cleanUrl, type: "image" });
+                chipPositions.push({ mediaIndex, treeIndex: finalTree.length });
+                finalTree.push(
+                  <MediaChip
+                    key={key}
+                    type="image"
+                    url={cleanUrl}
+                    mediaIndex={mediaIndex}
+                  />,
+                );
+              } else {
+                finalTree.push(<IMGElement src={cleanUrl} key={key} />);
+              }
             } else if (checkURL.type === "video") {
-              finalTree.push(
-                <VideoLoader pubkey={pubkey} key={key} src={cleanUrl} />,
-              );
+              if (useChipMode) {
+                const mediaIndex = mediaItems.length;
+                mediaItems.push({ url: cleanUrl, type: "video" });
+                chipPositions.push({ mediaIndex, treeIndex: finalTree.length });
+                finalTree.push(
+                  <MediaChip
+                    key={key}
+                    type="video"
+                    url={cleanUrl}
+                    mediaIndex={mediaIndex}
+                  />,
+                );
+              } else {
+                finalTree.push(
+                  <VideoLoader pubkey={pubkey} key={key} src={cleanUrl} />,
+                );
+              }
             }
           } else if (
             cleanUrl.includes(".mp3") ||
@@ -229,7 +506,6 @@ export function getNoteTree(
       finalTree.push(<LNURLParsing lnurl={el} key={key} />);
     } else if (el?.startsWith("#")) {
       const match = el.match(/(#+)([^\s#]+)/);
-      // const match = el.match(/(#+)([\w-+]+)/);
       if (match) {
         const hashes = match[1];
         const text = match[2];
@@ -283,7 +559,7 @@ export function getNoteTree(
               }}
               key={key}
             >
-              {el}{" "}
+              {renderCustomEmojis(el, emojiMap)}{" "}
             </span>,
           );
         }
@@ -296,14 +572,46 @@ export function getNoteTree(
             }}
             key={key}
           >
-            {el}{" "}
+            {renderCustomEmojis(el, emojiMap)}{" "}
           </span>,
         );
       }
     }
   }
 
-  return mergeConsecutivePElements(finalTree, pubkey, noBlur);
+  let trailingMediaIndices = new Set();
+  if (useChipMode && chipPositions.length > 0) {
+    let lastNonMediaIdx = -1;
+    for (let i = finalTree.length - 1; i >= 0; i--) {
+      const el = finalTree[i];
+      const isChip = el?.type === MediaChip;
+      const isBr = el?.type === "br";
+      if (!isChip && !isBr) {
+        lastNonMediaIdx = i;
+        break;
+      }
+    }
+    for (const cp of chipPositions) {
+      if (cp.treeIndex > lastNonMediaIdx) {
+        trailingMediaIndices.add(cp.mediaIndex);
+      }
+    }
+  }
+
+  const prunedTree = finalTree.map((el) => {
+    if (el?.type === MediaChip && trailingMediaIndices.has(el.props.mediaIndex)) {
+      return null;
+    }
+    return el;
+  }).filter(Boolean);
+
+  const mergedTree = mergeConsecutivePElements(prunedTree, pubkey, noBlur);
+  if (mediaItems.length === 0) return mergedTree;
+  return (
+    <NoteTreeWithMedia mediaItems={mediaItems} pubkey={pubkey} noBlur={noBlur} sliderPortalId={sliderPortalId}>
+      {mergedTree}
+    </NoteTreeWithMedia>
+  );
 }
 
 export function getComponent(children) {
@@ -313,9 +621,8 @@ export function getComponent(children) {
     if (typeof children[i] === "string") {
       let all = children[i].toString().split(" ");
       for (let child of all) {
-        let key = `${i}-${child}-${
-          Date.now() / Math.floor(Math.random() * 100000)
-        }`;
+        let key = `${i}-${child}-${Date.now() / Math.floor(Math.random() * 100000)
+          }`;
         let child_ = getNIP21FromURL(child.toString());
         if (child_.startsWith("nostr:")) {
           try {
@@ -435,6 +742,33 @@ export function getComponent(children) {
   return <div className="fit-container">{mergeConsecutivePElements(res)}</div>;
 }
 
+export function getNip22Refs(event) {
+  if (!event || event.kind !== 1111) return null;
+  let root, rootKind, parentKind;
+  let lowerTags = [];
+  for (let tag of event.tags) {
+    if (!root && ["A", "E", "I"].includes(tag[0]) && tag[1]) root = tag;
+    if (["a", "e", "i"].includes(tag[0]) && tag[1]) lowerTags.push(tag);
+    if (!rootKind && tag[0] === "K" && tag[1]) rootKind = tag[1];
+    if (!parentKind && tag[0] === "k" && tag[1]) parentKind = tag[1];
+  }
+  if (!root) return null;
+  let rootType = root[0] === "A" ? "a" : root[0] === "E" ? "e" : "i";
+  let parent = lowerTags.find((tag) => tag[1] !== root[1]) || lowerTags[0];
+  if (parentKind === "1111")
+    parent = lowerTags.find((tag) => tag[0] === "e" && tag[1] !== root[1]) || parent;
+  let parentValue = parent ? parent[1] : root[1];
+  return {
+    rootType,
+    rootValue: root[1],
+    rootKind,
+    parentType: parent ? parent[0] : rootType,
+    parentValue,
+    parentKind: parentKind || rootKind,
+    isTopLevel: parentValue === root[1],
+  };
+}
+
 export function getParsedNote(
   event,
   isCollapsedNote = false,
@@ -442,7 +776,32 @@ export function getParsedNote(
 ) {
   try {
     if (!event) return;
-    let expiration = event.tags.find((tag) => tag[0] === "expiration");
+
+    let expiration, isQuote, isPremium, checkForLabel, isComment, isNotRoot, isReply, isProtected, nip22Root, nip22Parent, emojiMap;
+    for (let tag of event.tags) {
+      if (!expiration && tag[0] === "expiration") expiration = tag;
+      if (!isQuote && tag[0] === "q") isQuote = tag;
+      if (!isPremium && tag[0] === "nip63") isPremium = tag;
+      if (!checkForLabel && tag[0] === "l") checkForLabel = tag;
+      if (!isComment && tag.length > 0 && tag[3] === "root") isComment = tag;
+      if (!isNotRoot && tag.length > 3 && tag[3] === "root") isNotRoot = tag;
+      if (!isReply && tag.length > 3 && tag[3] === "reply") isReply = tag;
+      if (!isProtected && tag[0] === "-") isProtected = tag;
+      if (tag[0] === "emoji" && tag[1] && tag[2]) {
+        if (!emojiMap) emojiMap = {};
+        emojiMap[tag[1]] = tag[2];
+      }
+      if (!nip22Root && ["A", "E", "I"].includes(tag[0]) && tag[1]) nip22Root = tag;
+      if (!nip22Parent && ["a", "e", "i"].includes(tag[0]) && tag[1]) nip22Parent = tag;
+    }
+
+    if (event.kind === 1111 && nip22Root) {
+      const rootKind = nip22Root[0] === "A" ? "a" : nip22Root[0] === "E" ? "e" : "i";
+      const parentValue = nip22Parent ? nip22Parent[1] : nip22Root[1];
+      isNotRoot = [rootKind, nip22Root[1]];
+      isReply = parentValue !== nip22Root[1] ? ["e", parentValue] : undefined;
+    }
+
     let isExpired = expiration && parseInt(expiration[1]) < Date.now() / 1000;
     if (isExpired) return;
     let isNoteLong = event.content.split(" ").length > 150;
@@ -451,20 +810,6 @@ export function getParsedNote(
       isCollapsedNoteEnabled === undefined ? true : isCollapsedNoteEnabled;
     let isCollapsedNote_ =
       isCollapsedNoteEnabled && isCollapsedNote && isNoteLong;
-    let isQuote = event.tags.find((tag) => tag[0] === "q");
-    let checkForLabel = event.tags.find((tag) => tag[0] === "l");
-    let isComment = event.tags.find(
-      (tag) => tag.length > 0 && tag[3] === "root",
-    );
-
-    let isNotRoot =
-      event.tags.length === 0
-        ? false
-        : event.tags.find((tag) => tag.length > 3 && tag[3] === "root");
-    let isReply =
-      event.tags.length === 0
-        ? false
-        : event.tags.find((tag) => tag.length > 3 && tag[3] === "reply");
     let isPaidNote = false;
     if (checkForLabel && ["UNCENSORED NOTE"].includes(checkForLabel[1]))
       return false;
@@ -475,16 +820,18 @@ export function getParsedNote(
     let nEvent = event?.encode ? event.encode() : nEventEncode(event.id);
 
     let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
-    let isProtected = event.tags.find((tag) => tag[0] === "-");
     if (event.kind === 1 || event.kind === 1111) {
       let note_tree = parseContent
         ? getNoteTree(
-            event.content,
-            undefined,
-            isCollapsedNote_,
-            undefined,
-            event.pubkey,
-          )
+          event.content,
+          undefined,
+          isCollapsedNote_,
+          undefined,
+          event.pubkey,
+          false,
+          `slider-${event.id}`,
+          emojiMap,
+        )
         : event.content;
 
       return {
@@ -499,6 +846,7 @@ export function getParsedNote(
         isCollapsedNote: isCollapsedNote_,
         nEvent,
         isProtected,
+        isPremium
       };
     }
 
@@ -610,6 +958,7 @@ export function isVid(url) {
     if (match[0].includes("youtu")) platform = "YouTube";
 
     if (platform === "YouTube") {
+      if (/^(channel\/|c\/|@|playlist\b|user\/)/.test(videoId)) return false;
       return {
         isYT: true,
         videoId: videoId.replace("shorts/", ""),
@@ -737,22 +1086,22 @@ const checkForNewAddedSettings = (prevSettings) => {
       prevSettings.reactionsSettings !== undefined
         ? prevSettings.reactionsSettings
         : [
-            { reaction: "likes", status: true },
-            { reaction: "replies", status: true },
-            { reaction: "repost", status: true },
-            { reaction: "quote", status: true },
-            { reaction: "zap", status: true },
-          ],
+          { reaction: "likes", status: true },
+          { reaction: "replies", status: true },
+          { reaction: "repost", status: true },
+          { reaction: "quote", status: true },
+          { reaction: "zap", status: true },
+        ],
     notification:
       prevSettings.notification !== undefined
         ? prevSettings.notification
         : [
-            { tab: "mentions", isHidden: false },
-            { tab: "reactions", isHidden: false },
-            { tab: "reposts", isHidden: false },
-            { tab: "zaps", isHidden: false },
-            { tab: "following", isHidden: false },
-          ],
+          { tab: "mentions", isHidden: false },
+          { tab: "reactions", isHidden: false },
+          { tab: "reposts", isHidden: false },
+          { tab: "zaps", isHidden: false },
+          { tab: "following", isHidden: false },
+        ],
   };
   return settings;
 };
@@ -1127,7 +1476,8 @@ export function redirectToLogin() {
 export function getPostToEdit(naddr) {
   if (!naddr) return {};
   try {
-    let post = localStorage.getItem("ArticleToEdit");
+    let post =
+      localStorage.getItem(naddr) || localStorage.getItem("ArticleToEdit");
     if (post) {
       post = JSON.parse(post);
       return post;
@@ -1158,7 +1508,6 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
   const result = [];
   let currentTextElement = null;
   let currentImages = [];
-  // Helpers
   const isImage = (el) =>
     el && typeof el.type !== "string" && el.type === IMGElement;
 
@@ -1176,7 +1525,6 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
   const isMediaOrComponent = (el) =>
     isImage(el) || isVideo(el) || isComponent(el);
 
-  // Step 1: collapse/clean br
   const cleanedArray = [];
   for (let i = 0; i < arr.length; i++) {
     const el = arr[i];
@@ -1185,44 +1533,37 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
       const prev = arr[i - 1];
       const next = arr[i + 1];
 
-      // 1. remove br between media/components
       if (isMediaOrComponent(prev) || isMediaOrComponent(next)) {
         continue;
       }
 
-      // 2. remove br if next is br and prev is media/component
       if (next?.type === "br" && isMediaOrComponent(prev)) {
         continue;
       }
-      // 2. remove br if next is br and prev is media/component
       if (["p", "span"].includes(next?.type) && isMediaOrComponent(prev)) {
         continue;
       }
 
-      // Count trailing <br> in cleanedArray
       let trailingBrCount = 0;
       for (let j = cleanedArray.length - 1; j >= 0; j--) {
         if (cleanedArray[j].type === "br") trailingBrCount++;
         else break;
       }
 
-      // 3. If already 2 br → only allow more if next is text
       if (trailingBrCount >= 2) {
         if (["p", "span"].includes(next?.type)) {
-          continue; // cap at 2 before text
+          continue;
         } else {
-          continue; // remove any more before media/component
+          continue;
         }
       }
 
-      // Otherwise keep this br
       cleanedArray.push(el);
     } else {
       cleanedArray.push(el);
     }
   }
 
-  // Step 2: merge p/span & group images
   for (const element of cleanedArray) {
     if (["p", "span"].includes(element.type)) {
       if (!currentTextElement) {
@@ -1241,9 +1582,8 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
           typeof tempPrevChildren[tempPrevChildren.length - 1] === "string" &&
           typeof element.props.children === "string"
         ) {
-          tempPrevChildren[tempPrevChildren.length - 1] = `${
-            tempPrevChildren[tempPrevChildren.length - 1]
-          } ${element.props.children}`;
+          tempPrevChildren[tempPrevChildren.length - 1] = `${tempPrevChildren[tempPrevChildren.length - 1]
+            } ${element.props.children}`;
         }
         if (
           typeof tempPrevChildren[tempPrevChildren.length - 1] !== "string" &&
@@ -1279,7 +1619,6 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
     }
   }
 
-  // Flush leftovers
   if (currentTextElement) result.push(currentTextElement);
   if (currentImages.length > 0)
     result.push(createImageGrid(currentImages, pubkey, noBlur));
@@ -1293,7 +1632,7 @@ function isRelayUrl(value) {
 
     if (!/^wss?:$/i.test(u.protocol)) return false;
 
-    const host = u.hostname; //
+    const host = u.hostname;
 
     if (host === "localhost") return true;
 
@@ -1353,3 +1692,23 @@ const getNIP21FromURL = (url) => {
     return url;
   }
 };
+
+const WALLET_RETURN_KEY = "yaki-wallet-return";
+
+export function setWalletReturnPath(path) {
+  try {
+    if (path) sessionStorage.setItem(WALLET_RETURN_KEY, path);
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+export function consumeWalletReturnPath() {
+  try {
+    const path = sessionStorage.getItem(WALLET_RETURN_KEY);
+    if (path) sessionStorage.removeItem(WALLET_RETURN_KEY);
+    return path || "";
+  } catch (err) {
+    return "";
+  }
+}

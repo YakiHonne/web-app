@@ -3,6 +3,7 @@ import { copyText } from "@/Helpers/Helpers";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function RelayRequestCode({ code, exit }) {
   const { t } = useTranslation();
@@ -11,17 +12,9 @@ export default function RelayRequestCode({ code, exit }) {
     exit();
   };
   return (
-    <div
-      className="fixed-container box-pad-h fx-centered"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col slide-up"
-        style={{ position: "relative", width: "min(100%, 500px)" }}
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h box-pad-v fx-centered fx-col slide-up"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -36,6 +29,6 @@ export default function RelayRequestCode({ code, exit }) {
           <Icon name="copy" />
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

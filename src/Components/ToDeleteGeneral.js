@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function ToDeleteGeneral({
   title,
@@ -61,11 +62,9 @@ export default function ToDeleteGeneral({
   };
 
   return (
-    <section className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={cancel} width={450}>
       <section
-        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
-        style={{ width: "450px" }}
-        onClick={(e) => e.stopPropagation()}
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div
           className="fx-centered box-marg-s"
@@ -99,13 +98,13 @@ export default function ToDeleteGeneral({
             onClick={deleteEvent}
             disabled={isLoading}
           >
-            {isLoading ? <LoadingDots /> : t("Almq94P")}
+            {isLoading ? <Spinner /> : t("Almq94P")}
           </button>
           <button className="fx btn btn-red" onClick={cancel}>
-            {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+            {isLoading ? <Spinner /> : t("AB4BSCe")}
           </button>
         </div>
       </section>
-    </section>
+    </Overlay>
   );
 }

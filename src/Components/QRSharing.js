@@ -6,6 +6,7 @@ import QRCode from "react-qr-code";
 import { getBech32, shortenKey } from "@/Helpers/Encryptions";
 import { useTranslation } from "react-i18next";
 import { nip19 } from "nostr-tools";
+import Overlay from "@/Components/Overlay";
 import Icon from "@/Components/Icon";
 
 export default function QRSharing({ user, exit, isVerified }) {
@@ -24,14 +25,9 @@ export default function QRSharing({ user, exit, isVerified }) {
   };
 
   return (
-    <div className="fixed-container box-pad-h fx-centered" onClick={exit}>
+    <Overlay exit={exit} width={400}>
       <div
-        className="sc-s-18 bg-sp box-pad-h box-pad-v"
-        style={{
-          width: "min(100%,400px)",
-          position: "relative",
-        }}
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -128,6 +124,6 @@ export default function QRSharing({ user, exit, isVerified }) {
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { webln } from "@getalby/sdk";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { customHistory } from "@/Helpers/History";
+import { consumeWalletReturnPath } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
@@ -63,11 +64,11 @@ export default function WalletNWC() {
           });
           oldVersion.push(nwcNode);
           updateWallets(oldVersion);
-          customHistory("/lightning-wallet");
+          customHistory(consumeWalletReturnPath() || "/lightning-wallet");
           return;
         } catch (err) {
           updateWallets([nwcNode]);
-          customHistory("/lightning-wallet");
+          customHistory(consumeWalletReturnPath() || "/lightning-wallet");
           return;
         }
       }
@@ -75,7 +76,7 @@ export default function WalletNWC() {
 
       nwc.close();
       setIsLoading(false);
-      customHistory("/lightning-wallet");
+      customHistory(consumeWalletReturnPath() || "/lightning-wallet");
     } catch (err) {
       console.log(err);
       setIsLoading(false);
@@ -131,7 +132,7 @@ export default function WalletNWC() {
               onClick={addNWC}
               disabled={isLoading}
             >
-              {isLoading ? <LoadingDots /> : t("Azb0lto")}
+              {isLoading ? <Spinner /> : t("Azb0lto")}
             </button>
           </div>
         </div>

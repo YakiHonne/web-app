@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { getParsedSW } from "@/Helpers/Encryptions";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useSelector } from "react-redux";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { t } from "i18next";
@@ -255,17 +255,15 @@ const SWSet = ({ external }) => {
               }}
             >
               <div
-                className={`list-item-b fx-centered fx-shrink ${
-                  type === "tool" ? "selected-list-item-b" : ""
-                }`}
+                className={`list-item-b fx-centered fx-shrink ${type === "tool" ? "selected-list-item-b" : ""
+                  }`}
                 onClick={() => switchContentType("tool")}
               >
                 Tool widgets
               </div>
               <div
-                className={`list-item-b fx-centered fx-shrink ${
-                  type === "basic" ? "selected-list-item-b" : ""
-                }`}
+                className={`list-item-b fx-centered fx-shrink ${type === "basic" ? "selected-list-item-b" : ""
+                  }`}
                 onClick={() => switchContentType("basic")}
               >
                 Basic widgets
@@ -315,7 +313,7 @@ const SWSet = ({ external }) => {
               style={{ height: "150px" }}
               className="fit-container fx-centered"
             >
-              <LoadingDots />
+              <Spinner />
             </div>
           )}
         </div>
@@ -380,7 +378,6 @@ function InputField({ status = true, handleSearch }) {
     <div
       className="sc-s box-pad-h-s box-pad-v-s fx-centered fx-col sw-search-box fit-container"
       style={{
-        // width: "min(100%, 600px)",
         cursor: status ? "unset" : "not-allowed",
         overflow: "visible",
       }}
@@ -416,21 +413,19 @@ function InputField({ status = true, handleSearch }) {
       <div className="fit-container fx-scattered box-pad-h-m box-pad-v-m">
         <div className="fx-centered">
           <Link
-            className={`sc-s box-pad-h-m box-pad-v-s ${
-              status ? "option pointer" : "if-disabled"
-            } fx-centered`}
+            className={`sc-s box-pad-h-m box-pad-v-s ${status ? "option pointer" : "if-disabled"
+              } fx-centered`}
             style={{
               backgroundColor: "var(--pale-gray)",
             }}
             href={"/smart-widgets"}
           >
-            <Icon name="search" />
+            <Icon name="search_magnifying_glass" v={2} />
             {t("AYZh36g")}
           </Link>
           <Link
-            className={`sc-s box-pad-h-m box-pad-v-s ${
-              status ? "option pointer" : "if-disabled"
-            } fx-centered`}
+            className={`sc-s box-pad-h-m box-pad-v-s ${status ? "option pointer" : "if-disabled"
+              } fx-centered`}
             style={{
               backgroundColor: "",
             }}

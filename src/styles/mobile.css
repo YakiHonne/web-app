@@ -325,6 +325,10 @@
     top: 80px
   }
 
+  .rep-event-comments-back-row {
+    top: 0;
+  }
+
   .page-container {
     position: relative;
     top: 80px

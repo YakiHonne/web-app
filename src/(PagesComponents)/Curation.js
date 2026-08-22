@@ -8,7 +8,7 @@ import {
 } from "@/Helpers/Encryptions";
 import Date_ from "@/Components/Date_";
 import UserProfilePic from "@/Components/UserProfilePic";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import ZapTip from "@/Components/ZapTip";
 import ShowUsersList from "@/Components/ShowUsersList";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
@@ -285,7 +285,7 @@ export default function Curation({ event, userProfile }) {
                         style={{ height: "20vh" }}
                       >
                         <p className="gray-c p-medium">{t("AKvHyxG")}</p>
-                        <LoadingDots />
+                        <Spinner />
                       </div>
                     )}
                     {articlesOnCuration.length > 0 && isArtsLoaded && (

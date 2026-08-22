@@ -10,7 +10,7 @@ import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
 import Overlay from "../Overlay";
 import { useEffect, useState } from "react";
-import LoadingDots from "../LoadingDots";
+import Spinner from "../Spinner";
 import useLightningWallets from "@/Hooks/useLightningWallets";
 import useImageDominantColor from "@/Hooks/useImageDominantColor";
 
@@ -130,7 +130,7 @@ export default function RedPacketEnv({
             {!preview && !isLoading && (
               <p className="p-bold c1-c">{t("Ax27FNG")}</p>
             )}
-            {isLoading && <LoadingDots />}
+            {isLoading && <Spinner />}
           </div>
         </div>
         {!preview && (

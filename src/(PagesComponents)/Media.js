@@ -1,10 +1,14 @@
 import ArrowUp from "@/Components/ArrowUp";
 import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import MediaMasonryList from "@/Components/MediaMasonryList";
 import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
-import { filterContent, getParsedMedia } from "@/Helpers/Encryptions";
+import {
+  filterContent,
+  getBackupWOTList,
+  getParsedMedia,
+} from "@/Helpers/Encryptions";
 import { straightUp } from "@/Helpers/Helpers";
 import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
 import React, { useEffect, useReducer, useState } from "react";
@@ -204,10 +208,10 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           ? await getNDKInstance(selectedCategory.value)
           : selectedCategory.group === "rsf"
             ? await getNDKInstance(
-                selectedCategory.value,
-                selectedCategory.relays,
-                true,
-              )
+              selectedCategory.value,
+              selectedCategory.relays,
+              true,
+            )
             : undefined;
       if (ndk === false) {
         setIsConnected(false);
@@ -262,9 +266,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         userFollowings?.length < 5 &&
         isUserFollowingsLoaded &&
         notes?.length > 0 && (
-          <div className="fit-container box-pad-h">
-            <hr />
-            <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-pad-v-m">
+          <div className="fit-container box-pad-h box-pad-v-m sc-s">
+            <div className="fit-container fx-centered fx-start-h fx-start-v ">
               <div>
                 <Icon name="eye-opened" size={24} />
               </div>
@@ -273,8 +276,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
                 <p className="gray-c">{t("AstvJYT")}</p>
               </div>
             </div>
-            <hr />
-            <hr />
           </div>
         )}
       {!selectedFilter.default &&
@@ -331,7 +332,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "60vh" }}
         >
-          <LoadingLogo size={64} />
+          <Spinner size={32} />
         </div>
       )}
     </>

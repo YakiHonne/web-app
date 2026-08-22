@@ -7,6 +7,7 @@ import { nanoid } from "nanoid";
 import { useDispatch } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { InitEvent } from "@/Helpers/Controlers";
+import Overlay from "@/Components/Overlay";
 
 export default function AddPack({ exit, toEdit, kind }) {
   const dispatch = useDispatch();
@@ -69,15 +70,9 @@ export default function AddPack({ exit, toEdit, kind }) {
     exit();
   };
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={500} allowOverFlow={true}>
       <div
-        className="sc-s bg-sp slide-up box-pad-h box-pad-v fx-centered fx-col"
-        style={{
-          position: "relative",
-          width: "min(500px, 100%)",
-          overflow: "visible",
-        }}
-        onClick={(e) => e.stopPropagation()}
+        className="slide-up box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -170,6 +165,6 @@ export default function AddPack({ exit, toEdit, kind }) {
           {toEdit?.d ? t("A8alhKV") : t("ARWeWgJ")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 }

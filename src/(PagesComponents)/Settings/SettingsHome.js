@@ -33,18 +33,18 @@ export default function SettingsHome() {
     <>
       <div>
         <div
-          className="fx-centered fit-container fx-start-v"
+          className="fx-centered fit-container fx-start-v fx-col"
           style={{ gap: 0 }}
         >
-          <div className="main-middle-wide">
+          <div className="fit-container">
             {userMetadata &&
               (userKeys.sec || userKeys.ext || userKeys.bunker) && (
                 <>
-                  <h3 className="box-pad-h box-pad-v-m">{t("ABtsLBp")}</h3>
+                  {/* <h3 className="box-pad-h box-pad-v-m">{t("ABtsLBp")}</h3> */}
                   <SettingsHeader userKeys={userKeys} />
                   <div
-                    className="fit-container fx-centered fx-col main-middle-wide"
-                    style={{ gap: 0 }}
+                    className="fit-container fx-centered fx-col box-pad-v-s"
+                  // style={{ gap: 0 }}
                   >
                     <KeysManagement
                       selectedTab={selectedTab}
@@ -92,7 +92,7 @@ export default function SettingsHome() {
                     />
                     <YakiChestManagement />
                     <UserLogout />
-                    <hr />
+
                     <div className="box-pad-h-m box-pad-v-m desk-hide-1000 fit-container">
                       <SettingsFooter userKeys={userKeys} />
                     </div>
@@ -107,7 +107,7 @@ export default function SettingsHome() {
               )}
             {!userMetadata && <PagePlaceholder page={"nostr-not-connected"} />}
           </div>
-          <div className="extras-homepage">
+          <div className="fit-container">
             <SettingsFooter userKeys={userKeys} />
           </div>
         </div>

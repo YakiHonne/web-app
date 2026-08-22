@@ -5,6 +5,7 @@ import {
   downloadAsFile,
   getBech32,
   getHex,
+  hexToUint8Array,
 } from "@/Helpers/Encryptions";
 import * as secp from "@noble/secp256k1";
 import { generateSecretKey, getPublicKey } from "nostr-tools";
@@ -12,23 +13,26 @@ import { FilePicker } from "@/Components/FilePicker";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
-import axios from "axios";
+import axiosInstance from "@/Helpers/HTTP_Client";
 import { NDKEvent, NDKPrivateKeySigner } from "@nostr-dev-kit/ndk";
-import { FileUpload } from "@/Helpers/Helpers";
+import { FileUpload, LoginToAPI } from "@/Helpers/Helpers";
+import { setIsConnectedToYaki } from "@/Store/Slides/YakiChest";
 import { updateWallets } from "@/Helpers/ClientHelpers";
 import { setUserKeys } from "@/Store/Slides/UserData";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { relaysOnPlatform } from "@/Content/Relays";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getUser, getUserFromNOSTR } from "@/Helpers/Controlers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
 
 export default function LoginSignup({ exit }) {
   const { t } = useTranslation();
-  let sk = bytesTohex(generateSecretKey());
-  let pk = getPublicKey(sk);
+  let sk_ = generateSecretKey();
+  let sk = bytesTohex(sk_);
+  let pk = getPublicKey(sk_);
   let userKeys = { pub: pk, sec: sk };
   const [isLogin, setIsLogin] = useState(true);
 
@@ -58,22 +62,11 @@ export default function LoginSignup({ exit }) {
   }, []);
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h fx-end-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={450}>
       <div
-        className="sc-s-18 bg-sp box-pad-h box-pad-v fx-scattered fx-col slide-right"
+        className="box-pad-h box-pad-v fx-scattered fx-col slide-right"
         style={{
-          width: "min(100%, 450px)",
-          position: "relative",
           height: "95%",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
         }}
       >
         <div className="close" onClick={exit}>
@@ -103,7 +96,7 @@ export default function LoginSignup({ exit }) {
         </div>
         <div style={{ height: "5vh" }}></div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 
@@ -146,11 +139,12 @@ const LoginScreen = ({ switchScreen, exit }) => {
       try {
         let hex = getHex(inputKey);
         if (secp.utils.isValidPrivateKey(hex)) {
-          let user = await getUserFromNOSTR(getPublicKey(hex));
+          let secKey = hexToUint8Array(hex);
+          let user = await getUserFromNOSTR(getPublicKey(secKey));
           if (user) {
             let keys = {
               sec: hex,
-              pub: getPublicKey(hex),
+              pub: getPublicKey(secKey),
             };
 
             dispatch(setUserKeys(keys));
@@ -171,11 +165,12 @@ const LoginScreen = ({ switchScreen, exit }) => {
       }
     }
     if (secp.utils.isValidPrivateKey(inputKey)) {
-      let user = await getUserFromNOSTR(getPublicKey(inputKey));
+      let secKey = hexToUint8Array(inputKey);
+      let user = await getUserFromNOSTR(getPublicKey(secKey));
       if (user) {
         let keys = {
           sec: inputKey,
-          pub: getPublicKey(inputKey),
+          pub: getPublicKey(secKey),
         };
 
         dispatch(setUserKeys(keys));
@@ -238,7 +233,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
         <input
           type="text"
           className="if ifs-full box-marg-s"
-          placeholder="npub, nsec, hex"
+          placeholder={t("ArcAsZe")}
           value={key}
           onChange={(e) => setKey(e.target.value)}
         />
@@ -248,7 +243,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
             className="btn btn-normal btn-full"
             onClick={() => onLogin(key)}
           >
-            {isLoading ? <LoadingDots /> : <>{t("AmOtzoL")}</>}
+            {isLoading ? <Spinner /> : <>{t("AmOtzoL")}</>}
           </button>
           {checkExt && (
             <>
@@ -258,7 +253,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
                 disabled={!checkExt}
                 onClick={onLoginWithExt}
               >
-                {isLoading ? <LoadingDots /> : <>{t("AgG7T1H")}</>}
+                {isLoading ? <Spinner /> : <>{t("AgG7T1H")}</>}
               </button>
             </>
           )}
@@ -283,6 +278,7 @@ const LoginScreen = ({ switchScreen, exit }) => {
 
 const SignupScreen = ({ switchScreen, userKeys, exit }) => {
   const dispatch = useDispatch();
+  const previousUserKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [about, setAbout] = useState("");
@@ -307,7 +303,18 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
         return false;
       }
       setIsCreatingWalletLoading(true);
-      let url = await axios.post("https://wallet.yakihonne.com/api/wallets", {
+
+      if (previousUserKeys) {
+        try {
+          await axiosInstance.post("/api/v1/logout");
+        } catch (err) {
+          console.log(err);
+        }
+        dispatch(setIsConnectedToYaki(false));
+      }
+      await LoginToAPI(userKeys.pub, userKeys);
+
+      let url = await axiosInstance.post("/api/v1/wallet", {
         username: userName?.toLowerCase(),
       });
       setNWCAddr(url.data.lightningAddress);
@@ -634,9 +641,8 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
 
           {!NWCAddr && enableWalletLinking && (
             <div
-              className={`fit-container fit-container fx-centered fx-col ${
-                isCreatingWalletLoading ? "flash" : ""
-              }`}
+              className={`fit-container fit-container fx-centered fx-col ${isCreatingWalletLoading ? "flash" : ""
+                }`}
             >
               <div className="fit-container fx-centered">
                 <input
@@ -648,15 +654,15 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
                   style={{
                     borderColor:
                       showErrorMessage ||
-                      showEmptyUNMessage ||
-                      showInvalidMessage
+                        showEmptyUNMessage ||
+                        showInvalidMessage
                         ? "var(--red-main)"
                         : "",
                   }}
                   disabled={isCreatingWalletLoading || isLoading}
                 />
                 <p className="gray-c p-big" style={{ minWidth: "max-content" }}>
-                  @wallet.yakihonne.com
+                  {t("An427hr")}
                 </p>
               </div>
               {showErrorMessage && (
@@ -707,7 +713,7 @@ const SignupScreen = ({ switchScreen, userKeys, exit }) => {
           disabled={isCreatingWalletLoading || isLoading}
         >
           {isCreatingWalletLoading || isLoading ? (
-            <LoadingDots />
+            <Spinner />
           ) : (
             t("AHXrr4Y")
           )}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 let s2 = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/s2-yma.png";
 let s1 = "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/s1-yma.png";
@@ -21,29 +22,28 @@ export default function YakiMobileApp() {
       style={{ backgroundColor: "black", minHeight: "100vh" }}
     >
       {showTuto && (
-        <div
-          className="fixed-container fx-centered fx-col box-pad-h"
-          style={{ background: "rgba(0, 0, 0, 0.75)" }}
-        >
-          <iframe
-            style={{
-              aspectRatio: "16/9",
-              width: "min(100%, 800px)",
-            }}
-            src="https://www.youtube.com/embed/w5yCsULjwxw"
-            title="YakiHonne mobile app demo"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-          ></iframe>
-          <div
-            className="close box-pad-v"
-            style={{ position: "static" }}
-            onClick={() => setShowTuto(false)}
-          >
-            <div></div>
+        <Overlay exit={() => setShowTuto(false)} width={800}>
+          <div className="fx-centered fx-col box-pad-h">
+            <iframe
+              style={{
+                aspectRatio: "16/9",
+                width: "100%",
+              }}
+              src="https://www.youtube.com/embed/w5yCsULjwxw"
+              title="YakiHonne mobile app demo"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            ></iframe>
+            <div
+              className="close box-pad-v"
+              style={{ position: "static" }}
+              onClick={() => setShowTuto(false)}
+            >
+              <div></div>
+            </div>
           </div>
-        </div>
+        </Overlay>
       )}
       <div
         style={{

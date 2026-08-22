@@ -7,9 +7,11 @@ import Date_ from "./Date_";
 import UserProfilePic from "./UserProfilePic";
 import PostReaction from "./PostReaction";
 import ZapAd from "./ZapAd";
-import LoadingDots from "./LoadingDots";
+import Spinner from "./Spinner";
 import useVideoVolume from "@/Hooks/useVideoVolume";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import EventStats from "./EventStats";
 
 const getParsedContent = (item) => {
   let content = "";
@@ -18,14 +20,15 @@ const getParsedContent = (item) => {
   return content;
 };
 export default function MediaOverlay({ item, postActions, full = false }) {
-  const { userProfile, isNip05Verified } = useUserProfile(item.pubkey);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(item.pubkey);
   const content = getParsedContent(item);
   const [openComment, setOpenComment] = useState(false);
   return (
     <div
       style={{
-        width: "min(100%, 1400px)",
-        height: full ? "100vh" : "85vh",
+        // width: "min(100%, 1400px)",
+        // height: full ? "100vh" : "85vh",
+        // height: "80vh",
         gap: 0,
       }}
       className="fx-centered fx-stretch media-overlay"
@@ -34,9 +37,9 @@ export default function MediaOverlay({ item, postActions, full = false }) {
       }}
     >
       <div
-        className="fx-scattered fit-container desk-hide-1000 box-pad-h-m box-pad-v-m sc-s-18 fx-shrink"
+        className="fx-scattered fit-container  box-pad-h-m box-pad-v-s fx-shrink"
         style={{
-          backgroundColor: "var(--white)",
+          // backgroundColor: "var(--white)",
           borderBottomLeftRadius: 0,
           borderBottomRightRadius: 0,
           border: full ? "none" : "",
@@ -44,7 +47,7 @@ export default function MediaOverlay({ item, postActions, full = false }) {
         }}
       >
         <div className="fx-centered fx-start-v fx-start-h">
-          <div>
+          <div className="fx-centered">
             <UserProfilePic
               size={48}
               mainAccountUser={false}
@@ -63,6 +66,7 @@ export default function MediaOverlay({ item, postActions, full = false }) {
                   {userProfile.display_name || userProfile.name}
                 </p>
                 {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+                {proUser.isProUser && <Badge data={proUser} size={16} />}
               </div>
               <p className="gray-c p-medium" style={{ margin: 0 }}>
                 <Date_
@@ -77,11 +81,14 @@ export default function MediaOverlay({ item, postActions, full = false }) {
           <EventOptions event={item} component="media" />
         </div>
       </div>
-      {item.kind === 20 && <Image item={item} border={!full} />}
-      {item.kind !== 20 && <Video src={item.url} />}
+      <div className="fit-container box-pad-h-m">
+
+        {item.kind === 20 && <Image item={item} border={!full} />}
+        {item.kind !== 20 && <Video src={item.url} />}
+      </div>
 
       <div
-        className="sc-s-18 bg-sp media-overlay-r-side"
+        className="media-overlay-r-side"
         style={{
           border: full ? "none" : "",
           borderRight: full ? "1px solid var(--dim-gray)" : "",
@@ -89,11 +96,11 @@ export default function MediaOverlay({ item, postActions, full = false }) {
       >
         <div
           className={
-            "fit-container fx-centered fx-start-h fx-start-v fx-col box-pad-h box-pad-v "
+            "fit-container fx-centered fx-start-h fx-start-v fx-col box-pad-h "
           }
           style={{ gap: "16px" }}
         >
-          <div className="fx-scattered fit-container mb-hide-1000">
+          {/* <div className="fx-scattered fit-container mb-hide-1000">
             <div className="fx-centered fx-start-v fx-start-h">
               <div>
                 <UserProfilePic
@@ -127,8 +134,8 @@ export default function MediaOverlay({ item, postActions, full = false }) {
             <div className="fx-centered">
               <EventOptions event={item} component="media" />
             </div>
-          </div>
-          <div>
+          </div> */}
+          <div style={{ paddingTop: ".5rem" }}>
             <div className="p-six-lines">{content}</div>
           </div>
           {postActions?.zaps?.zaps?.length > 0 && (
@@ -153,6 +160,7 @@ export default function MediaOverlay({ item, postActions, full = false }) {
               postActions={postActions}
               userProfile={userProfile}
             />
+            <EventStats postActions={postActions} />
           </div>
         </div>
         <CommentsSection
@@ -174,7 +182,7 @@ const Image = ({ item, border }) => {
 
   return (
     <div
-      className="fx-centered sc-s-18 bg-sp media-overlay-l-side"
+      className="fx-centered media-overlay-l-side"
       style={{
         position: "relative",
         border: border ? "" : "none",
@@ -192,7 +200,7 @@ const Image = ({ item, border }) => {
           }}
           className="fx-centered"
         >
-          <LoadingDots />
+          <Spinner />
         </div>
       )}
       <img
@@ -202,6 +210,7 @@ const Image = ({ item, border }) => {
           width: "100%",
           height: "auto",
           objectFit: "contain",
+          borderRadius: '20px'
         }}
         onLoad={() => setIsLoaded(true)}
         src={item.url}
@@ -216,7 +225,7 @@ function Video({ src }) {
 
   return (
     <div
-      className="fx-centered sc-s-18 bg-sp media-overlay-l-side"
+      className="fx-centered media-overlay-l-side"
       style={{ position: "relative" }}
     >
       {!isLoaded && (
@@ -230,7 +239,7 @@ function Video({ src }) {
           }}
           className="fx-centered"
         >
-          <LoadingDots />
+          <Spinner />
         </div>
       )}
       <video
@@ -246,6 +255,7 @@ function Video({ src }) {
           width: "100%",
           height: "100%",
           display: "block",
+          borderRadius: '20px'
         }}
         muted={videoVolume}
         onVolumeChange={handleMutedVideos}

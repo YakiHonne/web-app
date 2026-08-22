@@ -10,7 +10,7 @@ import { customHistory } from "@/Helpers/History";
 import { saveFetchedUsers, saveUsers } from "@/Helpers/DB";
 import axios from "axios";
 import SearchUserCard from "@/Components/SearchUserCard";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import Slider from "@/Components/Slider";
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import KindOne from "@/Components/KindOne";
@@ -24,6 +24,7 @@ import Link from "next/link";
 import { Virtuoso } from "react-virtuoso";
 import MediaMasonryList from "@/Components/MediaMasonryList";
 import Icon from "@/Components/Icon";
+import { SelectTabs } from "@/Components/SelectTabs";
 
 const getKeyword = () => {
   let keyword = new URLSearchParams(window.location.search).get("keyword");
@@ -54,7 +55,7 @@ export default function Search() {
   );
   const [lastTimestamp, setLastTimestamp] = useState(undefined);
   const [selectedTab, setSelectedTab] = useState(
-    query?.tab ? query?.tab : "notes"
+    query?.tab ? query?.tab : 0
   );
   const followed = useMemo(() => {
     return userInterestList.find(
@@ -91,7 +92,6 @@ export default function Search() {
       return;
     }
     setSearchKeyword(value);
-    // setResults([]);
   };
 
   useEffect(() => {
@@ -105,8 +105,8 @@ export default function Search() {
     var timer = setTimeout(null);
     if (searchKeyword) {
       timer = setTimeout(async () => {
-        if (selectedTab === "people") searchForUser();
-        if (selectedTab !== "people") {
+        if (selectedTab === 0) searchForUser();
+        if (selectedTab !== 0) {
           searchForContent();
         }
       }, 1000);
@@ -235,10 +235,9 @@ export default function Search() {
       "#t": tags,
       until: lastTimestamp ? lastTimestamp - 1 : lastTimestamp,
     };
-    if (selectedTab === "notes") filter.kinds = [1];
-    if (selectedTab === "articles") filter.kinds = [30023];
-    if (selectedTab === "media") filter.kinds = [34235, 34236, 21, 22, 20];
-    // if (selectedTab === "all-media") filter.kinds = [1, 30023, 34235, 21, 22];
+    if (selectedTab === 1) filter.kinds = [1];
+    if (selectedTab === 2) filter.kinds = [30023];
+    if (selectedTab === 3) filter.kinds = [34235, 34236, 21, 22, 20];
     let content = await getDataForSearch(
       [filter, { ...filter, search: searchKeyword, "#t": undefined }],
       100,
@@ -356,7 +355,7 @@ export default function Search() {
                   }}
                   onSubmit={handleSearch}
                 >
-                  <Icon name="search" size={24} />
+                  <Icon name="search_magnifying_glass" v={2} size={24} />
                   <input
                     type="text"
                     placeholder="Search people, notes and content"
@@ -402,9 +401,8 @@ export default function Search() {
                         data-tooltip={followed ? t("AydCXSh") : t("AdT5mza")}
                       >
                         <button
-                          className={`btn btn-small ${
-                            followed ? "btn-red" : "btn-normal"
-                          } fx-centered`}
+                          className={`btn btn-small ${followed ? "btn-red" : "btn-normal"
+                            } fx-centered`}
                           onClick={saveInterestList}
                         >
                           {!followed && (
@@ -432,27 +430,18 @@ export default function Search() {
               />
             </div>
             {launchSearching && (
-              <div
-                className="fit-container fx-even slide-down"
-                style={{ gap: 0 }}
-              >
-                {["people", "notes", "articles", "media"].map((tag, index) => {
-                  return (
-                    <div
-                      className={`list-item-b fx-centered fx ${
-                        selectedTab === tag ? "selected-list-item-b" : ""
-                      }`}
-                      key={index}
-                      onClick={() => handleSelectedTab(tag)}
-                    >
-                      {tabsContent[tag]}
-                    </div>
-                  );
-                })}
+              <div className="box-pad-v-m fit-container fx-centered">
+                <div>
+                  <SelectTabs
+                    tabs={["people", "notes", "articles", "media"]}
+                    selectedTab={selectedTab}
+                    setSelectedTab={handleSelectedTab}
+                  />
+                </div>
               </div>
             )}
 
-            {selectedTab === "people" &&
+            {selectedTab === 0 &&
               results.map((item, index) => {
                 if (!item.kind) {
                   let url = encodePubkey(item.pubkey);
@@ -467,7 +456,7 @@ export default function Search() {
                     );
                 }
               })}
-            {results.length > 0 && selectedTab !== "media" && (
+            {results.length > 0 && selectedTab !== 3 && (
               <Virtuoso
                 style={{ width: "100%", height: "100vh" }}
                 skipAnimationFrameInResizeObserver={true}
@@ -493,15 +482,15 @@ export default function Search() {
                 }}
               />
             )}
-            {results.length > 0 && selectedTab === "media" && (
-              <MediaMasonryList events={results} setLastEventTime={setLastTimestamp}/>
+            {results.length > 0 && selectedTab === 3 && (
+              <MediaMasonryList events={results} setLastEventTime={setLastTimestamp} />
             )}
             {isLoading && (
               <div
                 className="fit-container fx-centered"
                 style={{ height: "80vh" }}
               >
-                <LoadingLogo />
+                <Spinner size={32} />
               </div>
             )}
             {results.length === 0 && !isLoading && (
@@ -509,7 +498,7 @@ export default function Search() {
                 className="fit-container fx-col fx-centered"
                 style={{ height: "80vh" }}
               >
-                <Icon name="search" size={48} />
+                <Icon name="search_magnifying_glass" v={2} size={48} />
                 <h4 className="box-pad-v-s">{t("AjlW15t")}</h4>
                 <p className="gray-c">{t("A0RqaoC")}</p>
               </div>
@@ -554,9 +543,8 @@ const InterestList = ({
             return (
               <div
                 onClick={() => handleSelectInterest(interest)}
-                className={`sc-s  box-pad-h-s pointer ${
-                  searchKeyword === interest.toLowerCase() ? "" : "bg-sp"
-                }`}
+                className={`sc-s  box-pad-h-s pointer ${searchKeyword === interest.toLowerCase() ? "" : "bg-sp"
+                  }`}
                 key={index}
               >
                 <p>#{interest}</p>

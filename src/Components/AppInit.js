@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLiveQuery } from "dexie-react-hooks";
 import {
   setIsUserFollowingsLoaded,
+  setIsUserDataLoaded,
   setUserAllRelays,
   setUserAppSettings,
   setUserBlossomServers,
@@ -25,6 +26,8 @@ import {
   setUserSearchRelays,
   setUserStarterPacks,
   setUserWotList,
+  setUserWotNetworkList,
+  setUserWotBackupList,
 } from "@/Store/Slides/UserData";
 import {
   getBookmarks,
@@ -66,16 +69,20 @@ import {
   getMediaPacks,
   saveStarterPacks,
   saveMediaPacks,
+  getWotFilterList,
+  saveWotFilterList,
 } from "@/Helpers/DB";
 import {
   addConnectedAccounts,
   getSubData,
+  initiFirstLoginStats,
   saveFavRelaysListsForUsers,
   saveInboxRelaysListsForUsers,
   saveRelayMetadata,
   saveRelaysListsForUsers,
   updateYakiChestStats,
   userLogout,
+  yakiChestDisconnect,
 } from "@/Helpers/Controlers";
 import {
   setInitDMS,
@@ -88,6 +95,7 @@ import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
 import {
   changePrimary,
   handleAppDirection,
+  LoginToAPI,
   toggleColorScheme,
 } from "@/Helpers/Helpers";
 import {
@@ -107,7 +115,14 @@ import axiosInstance from "@/Helpers/HTTP_Client";
 import {
   setIsConnectedToYaki,
   setIsYakiChestLoaded,
+  setYakiChestStats,
 } from "@/Store/Slides/YakiChest";
+import {
+  setSubscriptionStatus,
+  mergeAccountFields,
+  pickAccountFields,
+  clearSubscriptionStatus,
+} from "@/Store/Slides/Subscription";
 import { relaysOnPlatform } from "@/Content/Relays";
 import {
   NDKNip07Signer,
@@ -124,6 +139,7 @@ export default function AppInit() {
   const userKeys = useSelector((state) => state.userKeys);
   const initDMS = useSelector((state) => state.initDMS);
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
+  const prevPubkeyRef = useRef(null);
   const chatrooms =
     useLiveQuery(
       async () => (userKeys ? await getChatrooms(userKeys.pub) : []),
@@ -139,11 +155,11 @@ export default function AppInit() {
       async () => (userKeys ? await getAppSettings(userKeys.pub) : []),
       [userKeys],
     ) || false;
-  const followings =
-    useLiveQuery(
-      async () => (userKeys ? await getFollowings(userKeys.pub) : []),
-      [userKeys],
-    ) || [];
+  const followingsQuery = useLiveQuery(
+    async () => (userKeys ? await getFollowings(userKeys.pub) : []),
+    [userKeys],
+  );
+  const followings = followingsQuery || [];
   const interestsList =
     useLiveQuery(
       async () => (userKeys ? await getInterestsList(userKeys.pub) : []),
@@ -255,7 +271,6 @@ export default function AppInit() {
         relaysURLsToWrite.length > 0 ? relaysURLsToWrite : relaysOnPlatform;
       dispatch(setUserRelays(relaysURLsToWrite));
       dispatch(setUserAllRelays(relays.relays));
-      // addExplicitRelays(relaysURLsToRead);
     }
     if (
       JSON.stringify(previousFavRelays.current) !== JSON.stringify(favRelays)
@@ -296,7 +311,6 @@ export default function AppInit() {
     ) {
       previousFollowings.current = followings;
       dispatch(setUserFollowings(followings?.followings || []));
-      if (followings?.followings) dispatch(setIsUserFollowingsLoaded(true));
     }
 
     if (
@@ -458,8 +472,18 @@ export default function AppInit() {
     let handleUseRKeys = async () => {
       let signer = ndkInstance.signer;
       if (signer) {
-        signer = await ndkInstance.signer.user();
-        signer = signer._pubkey;
+        try {
+          const currentUser = await Promise.race([
+            ndkInstance.signer.user(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error("SIGNER_TIMEOUT")), 5000),
+            ),
+          ]);
+          signer = currentUser?._pubkey;
+        } catch (err) {
+          console.log(err);
+          signer = undefined;
+        }
       }
       if (signer !== userKeys.pub) {
         if (userKeys.ext) {
@@ -471,6 +495,14 @@ export default function AppInit() {
           ndkInstance.signer = signer;
         }
         if (userKeys.bunker) {
+          try {
+            const bunkerRelays = new URL(userKeys.bunker).searchParams.getAll(
+              "relay",
+            );
+            addExplicitRelays(bunkerRelays);
+          } catch (err) {
+            console.log(err);
+          }
           const localKeys = new NDKPrivateKeySigner(userKeys.localKeys.sec);
           const signer = new NDKNip46Signer(
             ndkInstance,
@@ -492,6 +524,76 @@ export default function AppInit() {
     }
     dispatch(setIsUserFollowingsLoaded(false));
     dispatch(setUserFollowings([]));
+    dispatch(setIsUserDataLoaded(false));
+  }, [userKeys]);
+
+  useEffect(() => {
+    if (!userKeys || followingsQuery === undefined) return;
+    dispatch(setIsUserFollowingsLoaded(true));
+  }, [userKeys, followingsQuery, dispatch]);
+
+  useEffect(() => {
+    const pub = userKeys?.pub;
+    const canSign = userKeys && (userKeys.ext || userKeys.sec || userKeys.bunker);
+
+    if (!canSign) {
+      if (prevPubkeyRef.current) {
+        dispatch(setIsConnectedToYaki(false));
+        dispatch(setYakiChestStats(false));
+        dispatch(clearSubscriptionStatus());
+        localStorage.removeItem("connect_yc");
+        axiosInstance.post("/api/v1/logout").catch(() => {});
+      }
+      prevPubkeyRef.current = null;
+      return;
+    }
+
+    if (pub === prevPubkeyRef.current) return;
+
+    const fetchAndStoreSubscription = async (account) => {
+      if (account) dispatch(mergeAccountFields(pickAccountFields(account)));
+      try {
+        const { data } = await axiosInstance.get("/api/v1/subscription-status");
+        dispatch(setSubscriptionStatus(data));
+      } catch {
+        dispatch(setSubscriptionStatus(null));
+      }
+    };
+
+    const autoConnect = async () => {
+      if (prevPubkeyRef.current) {
+        dispatch(setIsConnectedToYaki(false));
+        dispatch(setYakiChestStats(false));
+        dispatch(clearSubscriptionStatus());
+        localStorage.removeItem("connect_yc");
+        try { await axiosInstance.post("/api/v1/logout"); } catch {}
+      }
+      prevPubkeyRef.current = pub;
+
+      try {
+        const online = await axiosInstance.get("/api/v1/online");
+        const onlineData = online?.data;
+        if (onlineData && (onlineData.pubkey === pub || onlineData.user_stats?.pubkey === pub)) {
+          localStorage.setItem("connect_yc", `${new Date().getTime()}`);
+          if (onlineData.user_stats) updateYakiChestStats(onlineData.user_stats);
+          dispatch(setIsConnectedToYaki(true));
+          fetchAndStoreSubscription(onlineData);
+          return;
+        }
+      } catch {}
+
+      try {
+        const data = await LoginToAPI(pub, userKeys);
+        if (data) {
+          localStorage.setItem("connect_yc", `${new Date().getTime()}`);
+          if (data.is_new) initiFirstLoginStats(data);
+          dispatch(setIsConnectedToYaki(true));
+          fetchAndStoreSubscription(data);
+        }
+      } catch {}
+    };
+
+    autoConnect();
   }, [userKeys]);
 
   useEffect(() => {
@@ -751,56 +853,54 @@ export default function AppInit() {
           }
         }
       });
-      subscription.on("eose", () => {
-        saveFollowings(
-          tempUserFollowings,
-          userKeys.pub,
-          lastFollowingsTimestamp,
-        );
-        saveInterests(tempUserInterests, userKeys.pub, lastInterestsTimestamp);
-        saveMutedlist(tempMutedList, userKeys.pub, lastMutedTimestamp);
-        saveRelays(tempRelays, userKeys.pub, lastRelaysTimestamp);
-        savePinnedNotes(
-          tempPinnedNotes,
-          userKeys.pub,
-          lastPinnedNotesTimestamp,
-        );
-        saveInboxRelays(
-          tempInboxRelays,
-          userKeys.pub,
-          lastInboxRelaysTimestamp,
-        );
-        saveFavRelays(tempFavRelays, userKeys.pub, lastFavRelaysTimestamp);
-        saveSearchRelays(
-          tempSearchRelays,
-          userKeys.pub,
-          lastSearchRelaysTimestamp,
-        );
-        saveBlossomServers(
-          tempBlossomServers,
-          userKeys.pub,
-          lastBlossomServersTimestamp,
-        );
-        saveAppSettings(
-          tempAppSettings,
-          userKeys.pub,
-          lastAppSettingsTimestamp,
-        );
-        saveAppSettings(
-          tempAppSettings,
-          userKeys.pub,
-          lastAppSettingsTimestamp,
-        );
-        saveBookmarks(tempBookmarks, userKeys.pub);
-        saveRelaysSet(tempRelaysSet, userKeys.pub);
-        saveStarterPacks(tempStarterPacks, userKeys.pub);
-        saveMediaPacks(tempMediaPacks, userKeys.pub);
+      subscription.on("eose", async () => {
+        await Promise.all([
+          saveFollowings(
+            tempUserFollowings,
+            userKeys.pub,
+            lastFollowingsTimestamp,
+          ),
+          saveInterests(tempUserInterests, userKeys.pub, lastInterestsTimestamp),
+          saveMutedlist(tempMutedList, userKeys.pub, lastMutedTimestamp),
+          saveRelays(tempRelays, userKeys.pub, lastRelaysTimestamp),
+          savePinnedNotes(
+            tempPinnedNotes,
+            userKeys.pub,
+            lastPinnedNotesTimestamp,
+          ),
+          saveInboxRelays(
+            tempInboxRelays,
+            userKeys.pub,
+            lastInboxRelaysTimestamp,
+          ),
+          saveFavRelays(tempFavRelays, userKeys.pub, lastFavRelaysTimestamp),
+          saveSearchRelays(
+            tempSearchRelays,
+            userKeys.pub,
+            lastSearchRelaysTimestamp,
+          ),
+          saveBlossomServers(
+            tempBlossomServers,
+            userKeys.pub,
+            lastBlossomServersTimestamp,
+          ),
+          saveAppSettings(
+            tempAppSettings,
+            userKeys.pub,
+            lastAppSettingsTimestamp,
+          ),
+          saveBookmarks(tempBookmarks, userKeys.pub),
+          saveRelaysSet(tempRelaysSet, userKeys.pub),
+          saveStarterPacks(tempStarterPacks, userKeys.pub),
+          saveMediaPacks(tempMediaPacks, userKeys.pub),
+        ]);
         if (!(tempAuthMetadata && lastUserMetadataTimestamp)) {
           let emptyMetadata = getEmptyuserMetadata(userKeys.pub);
           dispatch(setUserMetadata(emptyMetadata));
           addConnectedAccounts(emptyMetadata, userKeys);
         }
         eose = true;
+        dispatch(setIsUserDataLoaded(true));
       });
     };
 
@@ -1010,7 +1110,7 @@ export default function AppInit() {
         dispatch(setIsYakiChestLoaded(false));
         const data = await axiosInstance.get("/api/v1/yaki-chest/stats");
         if (data.data.user_stats.pubkey !== userKeys.pub) {
-          userLogout();
+          await yakiChestDisconnect();
           localStorage.removeItem("connect_yc");
           dispatch(setIsYakiChestLoaded(true));
           return;
@@ -1029,10 +1129,22 @@ export default function AppInit() {
   }, [userKeys, isConnectedToYaki]);
 
   useEffect(() => {
+    if (!userKeys) return;
+    (async () => {
+      let [networkData, backupData] = await Promise.all([
+        getWotFilterList(`network_${userKeys.pub}`),
+        getWotFilterList(`backup_wot`),
+      ]);
+      dispatch(setUserWotNetworkList(networkData?.wotPubkeys || []));
+      dispatch(setUserWotBackupList(backupData?.wotPubkeys || []));
+    })();
+  }, [userKeys]);
+
+  useEffect(() => {
     const buildWOTList = async () => {
-      let prevData = localStorage.getItem(`network_${userKeys.pub}`);
+      let prevData = await getWotFilterList(`network_${userKeys.pub}`);
       prevData = prevData
-        ? JSON.parse(prevData)
+        ? prevData
         : {
             last_updated: undefined,
           };
@@ -1101,18 +1213,17 @@ export default function AppInit() {
         .filter((_) => _.status)
         .map((_) => _.pubkey)
         .slice(0, 200);
-      localStorage.setItem(
-        `network_${userKeys.pub}`,
-        JSON.stringify({
-          last_updated: Math.floor(Date.now() / 1000),
-          wotPubkeys,
-        }),
-      );
+      let dataToStore = {
+        last_updated: Math.floor(Date.now() / 1000),
+        wotPubkeys,
+      };
+      await saveWotFilterList(`network_${userKeys.pub}`, dataToStore);
+      dispatch(setUserWotNetworkList(wotPubkeys));
     };
     const buildBackupWOTList = async () => {
-      let prevData = localStorage.getItem(`backup_wot`);
+      let prevData = await getWotFilterList(`backup_wot`);
       prevData = prevData
-        ? JSON.parse(prevData)
+        ? prevData
         : {
             last_updated: undefined,
           };
@@ -1187,13 +1298,12 @@ export default function AppInit() {
         .filter((_) => _.status)
         .map((_) => _.pubkey)
         .slice(0, 200);
-      localStorage.setItem(
-        `backup_wot`,
-        JSON.stringify({
-          last_updated: backupFollowings.data[0].created_at + 1,
-          wotPubkeys,
-        }),
-      );
+      let dataToStore = {
+        last_updated: backupFollowings.data[0].created_at + 1,
+        wotPubkeys,
+      };
+      await saveWotFilterList(`backup_wot`, dataToStore);
+      dispatch(setUserWotBackupList(wotPubkeys));
     };
     if (followings && followings?.followings?.length > 0) {
       saveRelaysListsForUsers(followings?.followings);

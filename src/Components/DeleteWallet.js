@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { setToast } from "@/Store/Slides/Publishers";
 import { shortenKey } from "@/Helpers/Encryptions";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function DeleteWallet({ exit, handleDelete, wallet }) {
   const { t } = useTranslation();
@@ -19,10 +20,9 @@ export default function DeleteWallet({ exit, handleDelete, wallet }) {
     );
   };
   return (
-    <section className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={450}>
       <section
-        className="fx-centered fx-col sc-s-18 bg-sp box-pad-h box-pad-v"
-        style={{ width: "450px" }}
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div
           className="fx-centered box-marg-s"
@@ -55,6 +55,6 @@ export default function DeleteWallet({ exit, handleDelete, wallet }) {
           </button>
         </div>
       </section>
-    </section>
+    </Overlay>
   );
 }

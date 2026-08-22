@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import LoadingDots from "../LoadingDots";
+import Spinner from "../Spinner";
 import VideoCoverControler from "./VideoCoverControler";
 import { useTranslation } from "react-i18next";
 
@@ -83,9 +83,8 @@ export default function VideoCover({
             style={{
               aspectRatio: "9/16",
               height: "100px",
-              backgroundImage: `url(${
-                fromDevice || videoTimeframes[currentImgIndex]
-              })`,
+              backgroundImage: `url(${fromDevice || videoTimeframes[currentImgIndex]
+                })`,
             }}
           ></div>
         </div>
@@ -123,7 +122,7 @@ export default function VideoCover({
               style={{ width: "100%", height: "100px" }}
               className="fx-centered"
             >
-              <LoadingDots />
+              <Spinner />
             </div>
           )}
         </div>

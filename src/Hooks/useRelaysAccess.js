@@ -18,13 +18,13 @@ export default function useRelaysAccess({ relay }) {
   const userKeys = useSelector((state) => state.userKeys);
 
   useEffect(() => {
-    if (relayMetadata.self && userKeys) {
+    if ((relayMetadata.self || relayMetadata.pubkey) && userKeys) {
       let isLocked = relayMetadata.supported_nips.includes(43);
       if (isLocked) {
         setIsMembershipRequired(true);
         setIsRelayAccessLoading(true);
         checkMember({
-          relayPubkey: relayMetadata.self,
+          relayPubkey: relayMetadata.self || relayMetadata.pubkey,
           userPubkey: userKeys.pub,
         }).then((status) => {
           console.log(status);
@@ -118,7 +118,7 @@ export default function useRelaysAccess({ relay }) {
       [
         {
           kinds: [28935],
-          authors: [relayMetadata.self],
+          authors: [relayMetadata.self || relayMetadata.pubkey],
         },
       ],
       50,
@@ -156,7 +156,7 @@ export default function useRelaysAccess({ relay }) {
     let attempt = 0;
     while (attempt < 5) {
       let status = await checkMember({
-        relayPubkey: relayMetadata.self,
+        relayPubkey: relayMetadata.self || relayMetadata.pubkey,
         userPubkey: userKeys.pub,
       });
       if (status) {

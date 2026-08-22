@@ -6,9 +6,10 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import ToPublishVideo from "@/Components/ToPublishVideo";
 import UploadFile from "@/Components/UploadFile";
 import { getVideoFromURL } from "@/Helpers/Helpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function AddVideo({ exit, event }) {
   const dispatch = useDispatch();
@@ -103,12 +104,9 @@ export default function AddVideo({ exit, event }) {
 
   return (
     <>
-      <div className="fixed-container fx-centered box-pad-h">
+      <Overlay exit={exit} width={600}>
         <div
-          className="sc-s-18 bg-sp"
           style={{
-            position: "relative",
-            width: "min(100%, 600px)",
             height: "100dvh",
             overflow: "scroll",
           }}
@@ -201,7 +199,7 @@ export default function AddVideo({ exit, event }) {
                     onClick={() => (videoURL ? validate() : null)}
                     disabled={isLoading}
                   >
-                    {isLoading ? <LoadingDots /> : t("AfMMwZC")}
+                    {isLoading ? <Spinner /> : t("AfMMwZC")}
                   </button>
                   <button
                     className="btn btn-gst-red"
@@ -211,7 +209,7 @@ export default function AddVideo({ exit, event }) {
                     }}
                     disabled={isLoading}
                   >
-                    {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                    {isLoading ? <Spinner /> : t("AB4BSCe")}
                   </button>
                 </div>
               </div>
@@ -244,7 +242,7 @@ export default function AddVideo({ exit, event }) {
             }}
           />
         </div>
-      </div>
+      </Overlay>
     </>
   );
 }

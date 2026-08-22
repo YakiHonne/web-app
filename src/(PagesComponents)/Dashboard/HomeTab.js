@@ -12,6 +12,7 @@ import UserFollowers from "@/Components/UserFollowers";
 import Link from "next/link";
 import ContentCard from "./ContentCard";
 import Icon from "@/Components/Icon";
+import { SelectTabs } from "@/Components/SelectTabs";
 
 export default function HomeTab({
   data,
@@ -79,16 +80,11 @@ export default function HomeTab({
         />
       )}
       <div className="fit-container box-pad-h">
-        <div className="fit-container fx-scattered">
-          {/* <h4>{t("AJDdA3h")}</h4> */}
-          {/* <div style={{ width: "150px" }}>
-          <WriteNew exit={() => null} />
-        </div> */}
-        </div>
+        <div className="fit-container fx-scattered"></div>
         <div className="fit-container fx-centered fx-col box-pad-v">
           <div className="fit-container fx-centered fx-stretch fx-wrap">
             <div
-              className="sc-s-18 box-pad-v fx"
+              className="sc-s box-pad-v fx"
               style={{ position: "relative", flex: "1 1 400px" }}
             >
               <div
@@ -110,7 +106,7 @@ export default function HomeTab({
                 <div
                   style={{
                     border: "6px solid var(--c1-side)",
-                    borderRadius: "22px",
+                    borderRadius: "50%",
                   }}
                 >
                   <UserProfilePic mainAccountUser={true} size={150} />
@@ -124,9 +120,6 @@ export default function HomeTab({
                           new Date(data.userProfile.time_joined * 1000),
                         ),
                       })}{" "}
-                      {/* <Date_
-                      toConvert={new Date(data.userProfile.time_joined * 1000)}
-                      /> */}
                     </p>
                   </div>
                   <Link href={`/yaki-points`}>
@@ -289,41 +282,13 @@ export default function HomeTab({
             </div>
           </div>
         </div>
-        <div
-          className="fit-container fx-even sticky box-pad-h"
-          style={{
-            top: "-1px",
-            // padding: "1rem",
-            paddingTop: 0,
-            paddingBottom: 0,
-            columnGap: 0,
-            borderBottom: "1px solid var(--very-dim-gray)",
-            borderTop: "1px solid var(--very-dim-gray)",
-          }}
-        >
-          <div
-            className={`list-item-b fx-centered fx ${
-              selectedCategory === 0 ? "selected-list-item-b" : ""
-            }`}
-            onClick={() => setSelectedCategory(0)}
-          >
-            {t("At9t6yz")}
-          </div>
-          <div
-            className={`list-item-b fx-centered fx ${
-              selectedCategory === 1 ? "selected-list-item-b" : ""
-            }`}
-            onClick={() => setSelectedCategory(1)}
-          >
-            {t("Ayh5F4w")}
-          </div>
-          <div
-            className={`list-item-b fx-centered fx ${
-              selectedCategory === 2 ? "selected-list-item-b" : ""
-            }`}
-            onClick={() => setSelectedCategory(2)}
-          >
-            {t("AU2yMBa")}
+        <div className="fit-container fx-centered fx-start-h">
+          <div>
+            <SelectTabs
+              tabs={[t("At9t6yz"), t("Ayh5F4w"), t("AU2yMBa")]}
+              selectedTab={selectedCategory}
+              setSelectedTab={setSelectedCategory}
+            />
           </div>
         </div>
         {selectedCategory === 0 && (

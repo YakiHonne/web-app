@@ -10,14 +10,13 @@ import { useSelector } from "react-redux";
 import { filterContent, getBackupWOTList } from "@/Helpers/Encryptions";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
 import ArrowUp from "@/Components/ArrowUp";
-import YakiIntro from "@/Components/YakiIntro";
 import KindSix from "@/Components/KindSix";
 import { saveUsers } from "@/Helpers/DB";
 import { getDefaultFilter, getSubData } from "@/Helpers/Controlers";
 import HomeCarouselContentSuggestions from "@/Components/HomeCarouselContentSuggestions";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
 import { straightUp } from "@/Helpers/Helpers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import KindOne from "@/Components/KindOne";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
@@ -29,6 +28,9 @@ import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
 import PostNotePortal from "@/Components/PostNotePortal";
 import { Virtuoso } from "react-virtuoso";
 import Icon from "@/Components/Icon";
+import usePaidNotes from "@/Hooks/usePaidNotes";
+import usePaidNoteCost from "@/Hooks/usePaidNoteCost";
+import PaidNoteAd from "@/Components/PaidNoteAd";
 
 const SUGGESTED_TAGS_VALUE = "_sggtedtags_";
 
@@ -78,8 +80,7 @@ export default function Home() {
 
   return (
     <>
-      <div style={{ overflow: "auto" }}>
-        <YakiIntro />
+      <div>
         <ArrowUp />
         <div className="fit-container fx-centered fx-start-h fx-start-v">
           <div
@@ -99,14 +100,14 @@ export default function Home() {
               />
               <div style={{ height: "75px" }} className="fit-container"></div>
               <HomeCarouselContentSuggestions />
-              <div className="main-middle">
-                <PostNotePortal
+              <div className="main-middle box-pad-h-m">
+                {/* <PostNotePortal
                   protectedRelay={
                     selectedCategory.group === "af"
                       ? selectedCategory.value
                       : false
                   }
-                />
+                /> */}
                 {selectedCategory !== SUGGESTED_TAGS_VALUE && (
                   <HomeFeed
                     selectedCategory={selectedCategory}
@@ -154,6 +155,14 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     [notes],
   );
   const virtuosoRef = useRef(null);
+  const { paidNotes, fetchIfStale: fetchPaidNotesIfStale } = usePaidNotes();
+  const { isPremiumPlan, isBasicPlan } = usePaidNoteCost();
+  const paidNoteAdGap = isBasicPlan ? 15 : 7;
+  const showPaidNoteAds =
+    !isPremiumPlan && notesContentFrom !== "paid" && paidNotes.length > 0;
+  useEffect(() => {
+    fetchPaidNotesIfStale();
+  }, [fetchPaidNotesIfStale]);
   useEffect(() => {
     let contentFromValue = getContentFromValue(selectedCategory);
     if (selectedCategoryValue !== selectedCategory.value) {
@@ -291,10 +300,10 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           ? await getNDKInstance(selectedCategory.value)
           : selectedCategory.group === "rsf"
             ? await getNDKInstance(
-                selectedCategory.value,
-                selectedCategory.relays,
-                true,
-              )
+              selectedCategory.value,
+              selectedCategory.relays,
+              true,
+            )
             : undefined;
       if (ndk === false) {
         setIsConnected(false);
@@ -391,9 +400,8 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
         userFollowings?.length < 5 &&
         isUserFollowingsLoaded &&
         notes?.length > 0 && (
-          <div className="fit-container box-pad-h">
-            <hr />
-            <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-pad-v-m">
+          <div className="fit-container box-pad-h box-pad-v-m sc-s">
+            <div className="fit-container fx-centered fx-start-h fx-start-v ">
               <div>
                 <Icon name="eye-opened" size={24} />
               </div>
@@ -402,8 +410,6 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
                 <p className="gray-c">{t("AstvJYT")}</p>
               </div>
             </div>
-            <hr />
-            <hr />
           </div>
         )}
       {!selectedFilter.default &&
@@ -474,6 +480,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
                   <Fragment key={note.id}>
                     <KindSix event={note} />
                     <SuggestionsCards index={index} />
+                    {showPaidNoteAds && (
+                      <PaidNoteAd index={index} gap={paidNoteAdGap} />
+                    )}
                   </Fragment>
                 );
               if (note.kind !== 6)
@@ -481,6 +490,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
                   <Fragment key={note.id}>
                     <KindOne event={note} border={true} />
                     <SuggestionsCards index={index} />
+                    {showPaidNoteAds && (
+                      <PaidNoteAd index={index} gap={paidNoteAdGap} />
+                    )}
                   </Fragment>
                 );
             }
@@ -492,7 +504,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "60vh" }}
         >
-          <LoadingLogo size={64} />
+          <Spinner size={32} />
         </div>
       )}
     </>

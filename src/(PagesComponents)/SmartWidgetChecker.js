@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PagePlaceholder from "@/Components/PagePlaceholder";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { nip19 } from "nostr-tools";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
@@ -91,15 +91,14 @@ export default function SmartWidgetChecker() {
             >
               <div className="fit-container fx-scattered sticky">
                 <div
-                  className={`fx-centered fx-start-h if ifs-full ${
-                    widget ? "if-disabled" : ""
-                  }`}
+                  className={`fx-centered fx-start-h if ifs-full ${widget ? "if-disabled" : ""
+                    }`}
                   style={{
                     gap: 0,
                     pointerEvents: widget ? "none" : "auto",
                   }}
                 >
-                  <Icon name="search" />
+                  <Icon name="search_magnifying_glass" v={2} />
                   <input
                     type="text"
                     className="if if-no-border ifs-full"
@@ -118,7 +117,7 @@ export default function SmartWidgetChecker() {
                       data-tooltip={t("AboMK2E")}
                     >
                       {isLoading ? (
-                        <LoadingDots />
+                        <Spinner />
                       ) : (
                         <Icon name="trash" isColored />
                       )}
@@ -159,9 +158,8 @@ export default function SmartWidgetChecker() {
                 height: "100vh",
                 overflow: "scroll",
               }}
-              className={`box-pad-h-m box-pad-v sticky ${
-                mbHide ? "mb-hide-800" : ""
-              }`}
+              className={`box-pad-h-m box-pad-v sticky ${mbHide ? "mb-hide-800" : ""
+                }`}
             >
               {widget && (
                 <>

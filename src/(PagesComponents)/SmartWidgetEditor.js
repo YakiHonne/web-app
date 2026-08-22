@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { createPortal } from "react-dom";
 import Lottie from "lottie-react";
 import { nanoid } from "nanoid";
 import PagePlaceholder from "@/Components/PagePlaceholder";
@@ -9,7 +10,7 @@ import {
   getParsedSW,
   timeAgo,
 } from "@/Helpers/Encryptions";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Select from "@/Components/Select";
 import OptionsDropdown from "@/Components/OptionsDropdown";
 import UserSearchBar from "@/Components/UserSearchBar";
@@ -34,6 +35,8 @@ import { useRouter } from "next/router";
 import { getPostToEdit } from "@/Helpers/ClientHelpers";
 import { DraggableComp } from "@/Components/DraggableComp";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
+import ArrowUp from "@/Components/ArrowUp";
 const SWT_YAKIHONNE = "https://swt.yakihonne.com";
 
 const getLocalSWv2Drafts = () => {
@@ -99,8 +102,9 @@ export default function SmartWidgetEditor() {
   };
   return (
     <div>
-      <div className="fx-centered fit-container fx-start-h fx-start-v">
-        <div className="box-pad-h-m fit-container">
+      <ArrowUp />
+      <div className="fit-container fx-centered fx-start-h fx-start-v">
+        <div className="main-middle box-pad-h-m">
           {userKeys && (
             <>
               {(userKeys.sec || userKeys.ext || userKeys.bunker) && (
@@ -160,12 +164,8 @@ export default function SmartWidgetEditor() {
 const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fit-container fit-height fx-scattered "
-      style={{ height: "100vh" }}
-    >
-      <div></div>
-      <div style={{ width: "550px" }} className="fx-centered fx-col">
+    <div className="fit-container fx-centered fx-col">
+      <div style={{ width: "min(100%,550px)" }} className="fx-centered fx-col">
         <div style={{ width: "350px" }} className="fx-centered">
           <Lottie animationData={widget} loop={true} />
         </div>
@@ -174,11 +174,11 @@ const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
           <p className="gray-c p-centered">{t("AG1WdKb")}</p>
         </div>
         <div
-          className="fit-container fx-centered box-pad-v"
+          className="fit-container fx-centered fx-wrap box-pad-v"
           style={{ columnGap: "16px" }}
         >
           <div
-            className="fx fx-centered fx-col sc-s-18 option pointer"
+            className="fx fx-centered fx-col sc-s-18 bg-sp option pointer"
             style={{ height: "200px" }}
             onClick={() => setTemplate(false, true)}
           >
@@ -188,7 +188,7 @@ const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
             <p className="gray-c">{t("AbvONJd")}</p>
           </div>
           <div
-            className="fx fx-centered fx-col sc-s-18 option pointer"
+            className="fx fx-centered fx-col sc-s-18 bg-sp option pointer"
             style={{ height: "200px" }}
             onClick={() => setBuildOption("drafts")}
           >
@@ -196,7 +196,7 @@ const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
             <p className="gray-c">{t("AaXbNvT")}</p>
           </div>
           <div
-            className="fx fx-centered fx-col sc-s-18 option pointer"
+            className="fx fx-centered fx-col sc-s-18 bg-sp option pointer"
             style={{ height: "200px" }}
             onClick={() => setBuildOption("template")}
           >
@@ -216,18 +216,6 @@ const BuildOptions = ({ setTemplate, template, back, setBuildOption }) => {
           </div>
         )}
       </div>
-      <div className="desk-hide"></div>
-      <div
-        style={{
-          height: "100vh",
-          backgroundColor: "var(--pale-gray)",
-          width: "1px",
-          position: "sticky",
-          top: 0,
-          margin: "0 .5rem",
-        }}
-        className="mb-hide-800"
-      ></div>
     </div>
   );
 };
@@ -243,9 +231,11 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
   const [swMetadata, setSwMetadata] = useState(false);
   const [swIcon, setSwIcon] = useState(template?.icon || "");
   const [swTitle, setSwTitle] = useState(template?.title || "");
-  const [mbHide, setMbHide] = useState(true);
   const [selectedComp, setSelectedComp] = useState("");
+  const canvasRef = useRef(null);
   const [showSaveDraft, setShowSaveDraft] = useState(false);
+  const [showNextOverlay, setShowNextOverlay] = useState(false);
+  const [layersOpen, setLayersOpen] = useState(false);
   const [preview, setPreview] = useState(false);
   const [swImage, setSwImage] = useState(template ? template.image : "");
   const [swInput, setSwInput] = useState(
@@ -260,10 +250,10 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
     template
       ? template.components
       : [
-          { value: swImage, type: "image" },
-          { value: swInput, type: "input" },
-          { value: swButtons, type: "button" },
-        ],
+        { value: swImage, type: "image" },
+        { value: swInput, type: "input" },
+        { value: swButtons, type: "button" },
+      ],
   );
   const [widgetToPostInNote, setWidgetToPostInNote] = useState(false);
   const swTypes = [
@@ -359,8 +349,25 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
       return;
     }
     setSelectedComp("");
-    let tags = getTagsArray();
-    if (!tags) return;
+    let tags;
+    if (swType === "basic") {
+      tags = getTagsArray();
+      if (!tags) return;
+    } else {
+      if (!swMetadata) {
+        dispatch(
+          setToast({
+            type: 2,
+            desc: t("AbfIPKv"),
+          }),
+        );
+        return;
+      }
+      tags = [
+        ["image", swMetadata.widget.imageUrl],
+        ["button", swMetadata.widget.buttonTitle, "app", swMetadata.widget.appUrl],
+      ];
+    }
     const sk = bytesTohex(generateSecretKey());
     let ndkInstance_ = new NDK();
     ndkInstance_.signer = new NDKPrivateKeySigner(sk);
@@ -460,7 +467,6 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         "button",
         swMetadata.widget.buttonTitle,
         "app",
-        // "http://localhost:5173/",
         swMetadata.widget.appUrl,
       ],
     ]);
@@ -620,20 +626,10 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
         );
         return;
       }
-      // setSwInput("");
       saveUsers([pubkey]);
       setSwMetadata(data.data);
-      // setSwImage(imageUrl);
       if (!url_) setSwTitle(title);
       setSwIcon(iconUrl);
-      // if (swInput) handleInputInCompSet();
-      // setSwButtons([
-      //   {
-      //     label: buttonTitle,
-      //     type: "app",
-      //     url: appUrl,
-      //   },
-      // ]);
       setSwMetadataIsLoading(false);
     } catch (err) {
       console.log(err);
@@ -663,6 +659,18 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
           swInput={swInput}
         />
       )}
+      {showNextOverlay && (
+        <PublishOverlay
+          exit={() => setShowNextOverlay(false)}
+          swTitle={swTitle}
+          setSwTitle={setSwTitle}
+          handlePublish={handlePublish}
+          openSaveDraft={() => {
+            setShowNextOverlay(false);
+            setShowSaveDraft(true);
+          }}
+        />
+      )}
       {widgetToPostInNote && (
         <PostNoteWithWidget
           widget={widgetToPostInNote}
@@ -670,146 +678,256 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
           exit={() => customHistory.push("/smart-widgets")}
         />
       )}
-      <div className="fit-container fx-centered fx-start-h fx-start-v">
+      <div
+        ref={canvasRef}
+        className="fit-container fx-centered fx-col fx-start-h"
+        style={{ maxWidth: "700px", margin: "0 auto" }}
+      >
         <div
-          style={{ width: "min(100%,800px)", flex: 1.5 }}
-          className={`${!mbHide ? "mb-hide-800" : ""}`}
+          className="fit-container fx-scattered sticky sw-editor-sticky-solid"
+          style={{ zIndex: 120, padding: ".25rem 0" }}
         >
-          <div className="fit-container fx-scattered sticky">
-            <div className="fx-centered">
-              <div
-                className="round-icon-small round-icon-tooltip"
-                data-tooltip={t("AufOzcc")}
-                onClick={handleBack}
-              >
-                <Icon name="arrow" transform="rotate(90deg)" />
-              </div>
-              {preview && (
-                <button
-                  className="btn btn-normal fx-centered"
-                  onClick={handlePReview}
-                >
-                  {t("AsXohpb")}
-                </button>
-              )}
-              {!preview && (
-                <button
-                  className="btn btn-normal fx-centered"
-                  onClick={handlePReview}
-                  disabled={isSaving}
-                >
-                  {isSaving ? <LoadingDots /> : t("Ao1TlO5")}
-                </button>
-              )}
-            </div>
-            <div className="fx-centered">
-              <button
-                className="btn btn-gst"
-                onClick={() => setShowSaveDraft(true)}
-              >
-                {t("ABg9vzA")}
-              </button>
-              <button className="btn btn-normal" onClick={handlePublish}>
-                {t("As7IjvV")}
-              </button>
-              <div
-                className="round-icon-small desk-hide round-icon-tooltip"
-                data-tooltip={t("A3AtiVD")}
-                onClick={() => setMbHide(false)}
-              >
-                <Icon name="layers" />
-              </div>
-            </div>
+          <div
+            className="round-icon round-icon-tooltip bg-dropdown"
+            data-tooltip={t("ATB2h6T")}
+            onClick={handleBack}
+          >
+            <Icon name="arrow" transform="rotate(90deg)" />
           </div>
-          {!preview && swType === "basic" && (
-            <div
-              className="sc-s-18 bg-sp fx-centered fx-col"
-              style={{
-                padding: ".5rem",
-                overflow: "visible",
-              }}
-            >
-              <div
-                className="fit-container pointer"
-                style={{
-                  padding: ".30rem",
-                  borderColor:
-                    selectedComp === "image" ? "var(--c1)" : "var(--pale-gray)",
-                  borderRadius: "var(--border-r-18)",
-                  borderStyle: "dashed",
-                  borderWidth: "2px",
-                }}
-                onClick={() =>
-                  setSelectedComp(selectedComp === `image` ? "" : `image`)
-                }
-              >
+          <div className="fx-centered" style={{ gap: "8px" }}>
+            {swType === "basic" && (
+              <div style={{ position: "relative" }}>
                 <div
-                  className="fit-container fx-centered pointer sc-s-18 bg-sp"
+                  className={`round-icon round-icon-tooltip bg-dropdown ${selectedComp || layersOpen ? "sw-editor-toolbar-btn-active" : ""
+                    }`}
+                  data-tooltip={t("AYmIvXo")}
+                  onClick={() => {
+                    if (selectedComp) {
+                      setSelectedComp("");
+                      setLayersOpen(true);
+                    } else {
+                      setLayersOpen((prev) => !prev);
+                    }
+                  }}
                   style={{
-                    border: "none",
-                    borderBottom: "1px solid var(--pale-gray)",
+                    pointerEvents: preview ? "none" : "auto",
+                    opacity: preview ? ".5" : "1",
                   }}
                 >
-                  {swImage && <img style={{ width: "100%" }} src={swImage} />}
-                  {!swImage && (
-                    <div
-                      className="fit-container fx-centered"
-                      style={{ aspectRatio: "16/9" }}
-                    >
-                      <Icon name="image" size={24} />
-                    </div>
-                  )}
+                  <Icon name="layers" />
                 </div>
+                <SWEditorToolbar
+                  swType={swType}
+                  layersOpen={layersOpen}
+                  setLayersOpen={setLayersOpen}
+                  swComponents={swComponents}
+                  selectedComp={selectedComp}
+                  setSelectedComp={setSelectedComp}
+                  handleInputInCompSet={handleInputInCompSet}
+                  handleRemoveButton={handleRemoveButton}
+                  swButtons={swButtons}
+                  setSwButtons={setSwButtons}
+                  swImage={swImage}
+                  setSwImage={setSwImage}
+                  swInput={swInput}
+                  setSwInput={setSwInput}
+                  canvasRef={canvasRef}
+                />
+              </div>
+            )}
+            <Select
+              value={swType}
+              options={swTypes}
+              setSelectedValue={handleSwitchSWTypes}
+              disabled={swMetadataIsLoading}
+            />
+          </div>
+        </div>
+        {["action", "tool"].includes(swType) && (
+          <div
+            className="fit-container fx-centered"
+            style={{ gap: "8px", marginBottom: "1rem" }}
+          >
+            <input
+              type="text"
+              className={`if ifs-full ${swMetadata ? "if-disabled" : ""}`}
+              placeholder={t("AGzvrvd")}
+              value={swMetadataUrl}
+              disabled={swMetadata}
+              onChange={(e) => setSwMetadataUrl(e.target.value)}
+            />
+            {!swMetadata && (
+              <button
+                className="btn btn-normal"
+                disabled={swMetadataIsLoading}
+                onClick={() => getApp()}
+              >
+                {swMetadataIsLoading ? <Spinner /> : t("ACfptgy")}
+              </button>
+            )}
+            {swMetadata && (
+              <button
+                className="btn btn-red"
+                onClick={() => setSwMetadata(false)}
+              >
+                {t("AitJw8N")}
+              </button>
+            )}
+          </div>
+        )}
+        {swMetadata && swType !== "basic" && (
+          <div className="fit-container" style={{ marginBottom: "1rem" }}>
+            <AppPreview metadata={swMetadata} />
+          </div>
+        )}
+        <div
+          className="fit-container fx-scattered"
+          style={{ marginTop: ".25rem", marginBottom: "1rem" }}
+        >
+          <button
+            className="btn btn-normal fx-centered"
+            onClick={handlePReview}
+            disabled={isSaving}
+          >
+            {isSaving ? (
+              <Spinner />
+            ) : preview ? (
+              t("AsXohpb")
+            ) : (
+              t("Ao1TlO5")
+            )}
+          </button>
+          <button
+            className="btn btn-normal fx-centered"
+            onClick={() => setShowNextOverlay(true)}
+          >
+            {t("AgGi8rh")}
+          </button>
+        </div>
+        {!preview && swType === "basic" && (
+          <div
+            className="fit-container sc-s-18 bg-sp fx-centered fx-col"
+            style={{
+              padding: ".5rem",
+              overflow: "visible",
+            }}
+          >
+            <div
+              className="fit-container pointer"
+              style={{
+                padding: ".30rem",
+                borderColor:
+                  selectedComp === "image" ? "var(--c1)" : "var(--pale-gray)",
+                borderRadius: "var(--border-r-18)",
+                borderStyle: "dashed",
+                borderWidth: "2px",
+              }}
+              onClick={() =>
+                setSelectedComp(selectedComp === `image` ? "" : `image`)
+              }
+            >
+              <div
+                className="fit-container fx-centered pointer sc-s-18 bg-sp"
+                style={{
+                  border: "none",
+                  borderBottom: "1px solid var(--pale-gray)",
+                }}
+              >
+                {swImage && <img style={{ width: "100%" }} src={swImage} />}
+                {!swImage && (
+                  <div
+                    className="fit-container fx-centered"
+                    style={{ aspectRatio: "16/9" }}
+                  >
+                    <Icon name="image" size={24} />
+                  </div>
+                )}
+              </div>
+            </div>
+            <div
+              style={{
+                gap: "8px",
+              }}
+              className="fit-container fx-centered fx-col"
+            >
+              <div className="fit-container fx-scattered">
+                {swComponents.length > 2 && (
+                  <div
+                    className="fit-container pointer"
+                    style={{
+                      padding: ".30rem",
+                      borderColor:
+                        selectedComp === "input"
+                          ? "var(--c1)"
+                          : "var(--pale-gray)",
+                      borderRadius: "var(--border-r-18)",
+                      borderStyle: "dashed",
+                      borderWidth: "2px",
+                    }}
+                    onClick={() =>
+                      setSelectedComp(selectedComp === `input` ? "" : `input`)
+                    }
+                  >
+                    <input
+                      className={"if ifs-full pointer"}
+                      placeholder={swInput}
+                    />
+                  </div>
+                )}
+                {swComponents.length < 3 && (
+                  <>
+                    <div
+                      className="fx-centered fit-container sc-s-d box-pad-h-s box-pad-v-s pointer"
+                      style={{
+                        borderRadius: "var(--border-r-18)",
+                        position: "relative",
+                      }}
+                      onClick={handleInputInCompSet}
+                    >
+                      <Icon name="plus-sign" />{" "}
+                      <p className="gray-c">{t("AqrGbmn")}</p>
+                    </div>
+                  </>
+                )}
               </div>
               <div
                 style={{
                   gap: "8px",
                 }}
-                className="fit-container fx-centered fx-col"
+                className="sw-fit-container sw-fx-centered sw-fx-scattered sw-fx-wrap"
               >
-                <div className="fit-container fx-scattered">
-                  {swComponents.length > 2 && (
-                    <div
-                      className="fit-container pointer"
-                      style={{
-                        padding: ".30rem",
-                        borderColor:
-                          selectedComp === "input"
-                            ? "var(--c1)"
-                            : "var(--pale-gray)",
-                        borderRadius: "var(--border-r-18)",
-                        borderStyle: "dashed",
-                        borderWidth: "2px",
-                      }}
-                      onClick={() =>
-                        setSelectedComp(selectedComp === `input` ? "" : `input`)
-                      }
-                    >
-                      <input
-                        className={"if ifs-full pointer"}
-                        placeholder={swInput}
-                      />
-                      {/* <div className="round-icon" onClick={handleInputInCompSet}>
-                      <Icon name="trash" isColored />
-                    </div> */}
-                    </div>
-                  )}
-                  {swComponents.length < 3 && (
-                    <>
+                {swButtons.map((_, index) => {
+                  if (index < 3)
+                    return (
                       <div
-                        className="fx-centered fit-container sc-s-d box-pad-h-s box-pad-v-s pointer"
                         style={{
+                          flex: 1,
+                          padding: ".30rem",
+                          borderColor:
+                            selectedComp === `button:${index}`
+                              ? "var(--c1)"
+                              : "var(--pale-gray)",
                           borderRadius: "var(--border-r-18)",
-                          position: "relative",
+                          borderStyle: "dashed",
+                          borderWidth: "2px",
                         }}
-                        onClick={handleInputInCompSet}
+                        onClick={() =>
+                          setSelectedComp(
+                            selectedComp === `button:${index}`
+                              ? ""
+                              : `button:${index}`,
+                          )
+                        }
+                        key={index}
                       >
-                        <Icon name="plus-sign" />{" "}
-                        <p className="gray-c">{t("AqrGbmn")}</p>
+                        <button className={"btn-gray btn btn-full"}>
+                          <p className="sw-p-one-line">{_.label}</p>
+                        </button>
                       </div>
-                    </>
-                  )}
-                </div>
+                    );
+                })}
+              </div>
+              {swButtons.length > 3 && (
                 <div
                   style={{
                     gap: "8px",
@@ -817,7 +935,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                   className="sw-fit-container sw-fx-centered sw-fx-scattered sw-fx-wrap"
                 >
                   {swButtons.map((_, index) => {
-                    if (index < 3)
+                    if (index > 2)
                       return (
                         <div
                           style={{
@@ -847,224 +965,210 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                       );
                   })}
                 </div>
-                {swButtons.length > 3 && (
-                  <div
-                    style={{
-                      gap: "8px",
-                    }}
-                    className="sw-fit-container sw-fx-centered sw-fx-scattered sw-fx-wrap"
-                  >
-                    {swButtons.map((_, index) => {
-                      if (index > 2)
-                        return (
-                          <div
-                            style={{
-                              flex: 1,
-                              padding: ".30rem",
-                              borderColor:
-                                selectedComp === `button:${index}`
-                                  ? "var(--c1)"
-                                  : "var(--pale-gray)",
-                              borderRadius: "var(--border-r-18)",
-                              borderStyle: "dashed",
-                              borderWidth: "2px",
-                            }}
-                            onClick={() =>
-                              setSelectedComp(
-                                selectedComp === `button:${index}`
-                                  ? ""
-                                  : `button:${index}`,
-                              )
-                            }
-                            key={index}
-                          >
-                            <button className={"btn-gray btn btn-full"}>
-                              <p className="sw-p-one-line">{_.label}</p>
-                            </button>
-                          </div>
-                        );
-                    })}
-                  </div>
-                )}
-                {swButtons.length < 6 && (
-                  <div
-                    className="fx-centered fit-container sc-s-d box-pad-h-s box-pad-v-s pointer"
-                    style={{
-                      borderRadius: "var(--border-r-18)",
-                      position: "relative",
-                    }}
-                    onClick={handleAddButton}
-                  >
-                    <Icon name="plus-sign" />{" "}
-                    <p className="gray-c">{t("Amg4EKo")}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          {!preview && swType !== "basic" && (
-            <div
-              className="sc-s-18 bg-sp fx-centered fx-col"
-              style={{
-                overflow: "visible",
-              }}
-            >
-              {swMetadata && (
-                <>
-                  <div
-                    className="fit-container fx-centered pointer sc-s-18 bg-sp"
-                    style={{
-                      border: "none",
-                      borderBottom: "1px solid var(--pale-gray)",
-                    }}
-                  >
-                    {swMetadata.widget.imageUrl && (
-                      <img
-                        style={{ width: "100%" }}
-                        src={swMetadata.widget.imageUrl}
-                      />
-                    )}
-                    {!swMetadata.widget.imageUrl && (
-                      <div
-                        className="fit-container fx-centered"
-                        style={{ aspectRatio: "16/9" }}
-                      >
-                        <Icon name="image" size={24} />
-                      </div>
-                    )}
-                  </div>
-                  {swMetadata.widget.buttonTitle && (
-                    <div className="box-pad-v-m fit-container box-pad-h fx-centered">
-                      <p className="p-one-line ">
-                        {swMetadata.widget.buttonTitle}
-                      </p>
-                    </div>
-                  )}
-                </>
               )}
-              {!swMetadata && (
-                <>
-                  <div
-                    className="fit-container fx-centered pointer sc-s-18 bg-sp"
-                    style={{
-                      border: "none",
-                      borderBottom: "1px solid var(--pale-gray)",
-                    }}
-                  >
+              {swButtons.length < 6 && (
+                <div
+                  className="fx-centered fit-container sc-s-d box-pad-h-s box-pad-v-s pointer"
+                  style={{
+                    borderRadius: "var(--border-r-18)",
+                    position: "relative",
+                  }}
+                  onClick={handleAddButton}
+                >
+                  <Icon name="plus-sign" />{" "}
+                  <p className="gray-c">{t("Amg4EKo")}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {!preview && swType !== "basic" && (
+          <div
+            className="fit-container sc-s-18 bg-sp fx-centered fx-col"
+            style={{
+              overflow: "visible",
+            }}
+          >
+            {swMetadata && (
+              <>
+                <div
+                  className="fit-container fx-centered pointer sc-s-18 bg-sp"
+                  style={{
+                    border: "none",
+                    borderBottom: "1px solid var(--pale-gray)",
+                  }}
+                >
+                  {swMetadata.widget.imageUrl && (
+                    <img
+                      style={{ width: "100%" }}
+                      src={swMetadata.widget.imageUrl}
+                    />
+                  )}
+                  {!swMetadata.widget.imageUrl && (
                     <div
                       className="fit-container fx-centered"
                       style={{ aspectRatio: "16/9" }}
                     >
-                      <Icon name="smart-widget" size={40} />
+                      <Icon name="image" size={24} />
                     </div>
+                  )}
+                </div>
+                {swMetadata.widget.buttonTitle && (
+                  <div className="box-pad-v-m fit-container box-pad-h fx-centered">
+                    <p className="p-one-line ">
+                      {swMetadata.widget.buttonTitle}
+                    </p>
                   </div>
-                </>
-              )}
-            </div>
-          )}
-          {preview && (
+                )}
+              </>
+            )}
+            {!swMetadata && (
+              <div
+                className="fit-container fx-centered sc-s"
+                style={{ aspectRatio: "1/1" }}
+              >
+                <Icon v={2} name="puzzle" size={40} />
+              </div>
+            )}
+          </div>
+        )}
+        {preview && (
+          <div className="fit-container" style={{ width: "100%" }}>
             <Widget
               event={preview}
               onZapButton={() => alert(t("AXNd5xs"))}
               onNostrButton={() => alert(t("AbzzoX6"))}
               widgetBorderColor="var(--pale-gray)"
             />
-          )}
-        </div>
-        <div
-          style={{
-            height: "100vh",
-            backgroundColor: "var(--pale-gray)",
-            width: "1px",
-            position: "sticky",
-            top: 0,
-            margin: "0 .5rem",
-          }}
-          className="mb-hide-800"
-        ></div>
-        <div
-          style={{
-            width: "min(100%,400px)",
-            height: "100vh",
-            overflow: "scroll",
-            padding: "1rem .5rem",
-            flex: 1,
-          }}
-          className={`box-pad-h-m box-pad-v sticky ${
-            mbHide ? "mb-hide-800" : ""
-          }`}
-        >
-          <div className="fx-centered fx-start-h fit-container box-marg-s desk-hide">
-            <div
-              className="round-icon-small  round-icon-tooltip "
-              onClick={() => setMbHide(true)}
-              data-tooltip={t("ATB2h6T")}
-            >
-              <Icon name="arrow" />
+          </div>
+        )}
+        <div style={{ height: "2rem" }}></div>
+      </div>
+    </>
+  );
+};
+
+const SWEditorToolbar = ({
+  swType,
+  layersOpen,
+  setLayersOpen,
+  swComponents,
+  selectedComp,
+  setSelectedComp,
+  handleInputInCompSet,
+  handleRemoveButton,
+  swButtons,
+  setSwButtons,
+  swImage,
+  setSwImage,
+  swInput,
+  setSwInput,
+  canvasRef,
+}) => {
+  const toolbarRef = useRef(null);
+  const editPanelRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      const insideToolbar = toolbarRef.current?.contains(e.target);
+      const insideEditPanel = editPanelRef.current?.contains(e.target);
+      const insideCanvas = canvasRef?.current?.contains(e.target);
+      const insideEscapedDropdown = e.target?.closest?.(".select-escaped-dropdown");
+      if (insideCanvas) {
+        setLayersOpen(false);
+        return;
+      }
+      if (!insideToolbar && !insideEditPanel && !insideEscapedDropdown) {
+        setLayersOpen(false);
+        setSelectedComp("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  if (swType !== "basic" || (!layersOpen && !selectedComp)) return null;
+
+  return (
+    <div ref={toolbarRef}>
+      {!selectedComp && layersOpen && (
+        <div className="sw-editor-toolbar-wrap">
+          <div className="sw-editor-toolbar-panel bg-dropdown">
+            <div className="sw-editor-layers-list">
+              <p className="gray-c p-medium box-pad-h-s">{t("AYmIvXo")}</p>
+              {swComponents.map((comp, index) => (
+                <div className="sw-editor-dock-comp" key={index}>
+                  <div
+                    className="fx-scattered pointer sw-layer-row"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      comp.type === "button"
+                        ? setSelectedComp(`button:0`)
+                        : setSelectedComp(comp.type);
+                    }}
+                  >
+                    <div className="fx-centered fx-start-h">
+                      <div
+                        className={`sw-layer-icon ${comp.type === "input"
+                          ? "container-one-24"
+                          : `${comp.type}-24`
+                          }`}
+                      ></div>
+                      <p className="p-one-line sw-layer-label">{comp.type}</p>
+                    </div>
+                    {comp.type === "input" && (
+                      <Icon
+                        name="trash"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleInputInCompSet();
+                        }}
+                      />
+                    )}
+                  </div>
+                  {Array.isArray(comp.value) && (
+                    <div className="sw-editor-dock-comp-children">
+                      <DraggableComp
+                        children={comp.value.map((_) => {
+                          let id = nanoid();
+                          return { ..._, id };
+                        })}
+                        setNewOrderedList={(data) => setSwButtons(data)}
+                        component={ButtonItem}
+                        props={{
+                          handleRemoveButton,
+                          setSelectedComp,
+                          outterComp: comp,
+                          selectedComp,
+                        }}
+                        background={false}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-            <p>{t("AzZ1GXv")}</p>
           </div>
-          <div className="fit-container fx-scattered">
-            <h4 className="orange-c box-marg-s fit-container">
-              {t("Akxf8vJ")}
-            </h4>
-          </div>
-          {/* <hr style={{margin: "1rem auto"}}/> */}
-          <div className="fx-centered fx-col fx-start-v fit-container">
-            <p className="gray-c">{t("AE9UQ58")}</p>
-            <input
-              type="text"
-              className="if ifs-full"
-              placeholder={t("AqTI7Iu")}
-              value={swTitle}
-              onChange={(e) => setSwTitle(e.target.value)}
-            />
-            <Select
-              value={swType}
-              options={swTypes}
-              setSelectedValue={handleSwitchSWTypes}
-              disabled={swMetadataIsLoading}
-              fullWidth={true}
-            />
-            {["action", "tool"].includes(swType) && (
-              <div className="fit-container fx-centered fx-col">
-                <input
-                  type="text"
-                  className={`if ifs-full ${swMetadata ? "if-disabled" : ""}`}
-                  placeholder={t("AGzvrvd")}
-                  value={swMetadataUrl}
-                  disabled={swMetadata}
-                  onChange={(e) => setSwMetadataUrl(e.target.value)}
-                />
-                {!swMetadata && (
-                  <button
-                    className="btn btn-normal btn-full"
-                    disabled={swMetadataIsLoading}
-                    onClick={() => getApp()}
-                  >
-                    {swMetadataIsLoading ? <LoadingDots /> : t("ACfptgy")}
-                  </button>
-                )}
-                {swMetadata && (
-                  <button
-                    className="btn btn-red btn-full"
-                    onClick={() => setSwMetadata(false)}
-                  >
-                    {t("AitJw8N")}
-                  </button>
-                )}
-              </div>
-            )}
-            {swMetadata && swType !== "basic" && (
-              <AppPreview metadata={swMetadata} />
-            )}
-            {swType === "basic" && (
-              <>
+        </div>
+      )}
+      {selectedComp &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <div className="sw-editor-edit-wrap">
+            <div className="sw-editor-edit-panel bg-dropdown" ref={editPanelRef}>
+              <div className="sw-editor-toolbar-panel-context">
                 {selectedComp === "image" && (
                   <CustomizeImage value={swImage} setValue={setSwImage} />
                 )}
                 {selectedComp === "input" && (
-                  <CustomizeInput value={swInput} setValue={setSwInput} />
+                  <CustomizeInput
+                    value={swInput}
+                    setValue={setSwInput}
+                    onRemove={() => {
+                      handleInputInCompSet();
+                      setSelectedComp("");
+                    }}
+                  />
                 )}
                 {selectedComp.includes("button") && (
                   <CustomizeButton
@@ -1072,101 +1176,22 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
                     value={swButtons}
                     setValue={setSwButtons}
                     swComps={swComponents}
+                    onRemove={
+                      swButtons.length > 1
+                        ? () =>
+                          handleRemoveButton(
+                            parseInt(selectedComp.split(":")[1]),
+                          )
+                        : null
+                    }
                   />
                 )}
-              </>
-            )}
-          </div>
-          {swType === "basic" && (
-            <>
-              <div className="box-pad-v-m"></div>
-              <div className="fit-container fx-scattered">
-                <h4 className="orange-c">{t("AYmIvXo")}</h4>
               </div>
-              <div
-                className="fit-container fx-centered fx-col fx-start-v box-pad-v-m"
-                style={{
-                  pointerEvents: preview ? "none" : "auto",
-                  opacity: preview ? ".5" : "1",
-                }}
-              >
-                {swComponents.map((comp, index) => {
-                  return (
-                    <div
-                      className="fit-container fx-centered fx-col pointer"
-                      key={index}
-                    >
-                      <div
-                        className="fit-container fx-scattered sc-s"
-                        style={{
-                          padding: ".5rem",
-                          borderColor:
-                            selectedComp === comp.type ? "var(--c1)" : "",
-                          borderRadius: "var(--border-r-6)",
-                          backgroundColor: "transparent",
-                        }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          comp.type === "button"
-                            ? setSelectedComp(
-                                selectedComp === `button:0` ? "" : `button:0`,
-                              )
-                            : setSelectedComp(
-                                selectedComp === comp.type ? "" : comp.type,
-                              );
-                        }}
-                      >
-                        <div className="fx-centered fx-start-h">
-                          <div
-                            className={
-                              comp.type === "input"
-                                ? "container-one-24"
-                                : `${comp.type}-24`
-                            }
-                          ></div>
-                          <p>{comp.type}</p>
-                        </div>
-                        {comp.type === "input" && (
-                          <Icon name="trash" onClick={handleInputInCompSet} />
-                        )}
-                      </div>
-                      {Array.isArray(comp.value) && (
-                        <div className="fit-container fx-scattered">
-                          <div style={{ minWidth: "16px" }}></div>
-                          <div className="fit-container fx-centered fx-col">
-                            <DraggableComp
-                              children={comp.value.map((_) => {
-                                let id = nanoid();
-                                return {
-                                  ..._,
-                                  id,
-                                };
-                              })}
-                              setNewOrderedList={(data) => {
-                                setSwButtons(data);
-                              }}
-                              component={ButtonItem}
-                              props={{
-                                handleRemoveButton,
-                                setSelectedComp,
-                                outterComp: comp,
-                                selectedComp,
-                                setSelectedComp,
-                              }}
-                              background={false}
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-    </>
+            </div>
+          </div>,
+          document.body,
+        )}
+    </div>
   );
 };
 
@@ -1203,13 +1228,13 @@ const ButtonItem = ({
         </p>
       </div>
       {outterComp.value.length > 1 && (
-        <div
-          className="trash"
+        <Icon
+          name="trash"
           onClick={(e) => {
             e.stopPropagation();
             handleRemoveButton(index);
           }}
-        ></div>
+        />
       )}
     </div>
   );
@@ -1274,7 +1299,7 @@ const CustomizeImage = ({ value, setValue }) => {
   );
 };
 
-const CustomizeInput = ({ value, setValue }) => {
+const CustomizeInput = ({ value, setValue, onRemove }) => {
   return (
     <div className="fit-container fx-centered fx-col fx-start-v">
       <p className="gray-c">{t("AAmUHSp")}</p>
@@ -1284,11 +1309,16 @@ const CustomizeInput = ({ value, setValue }) => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
       />
+      {onRemove && (
+        <button className="btn btn-red btn-full" onClick={onRemove}>
+          {t("AzkTxuy")}
+        </button>
+      )}
     </div>
   );
 };
 
-const CustomizeButton = ({ index, value, setValue, swComps }) => {
+const CustomizeButton = ({ index, value, setValue, swComps, onRemove }) => {
   const buttonTypes = [
     {
       display_name: "Redirect",
@@ -1302,10 +1332,6 @@ const CustomizeButton = ({ index, value, setValue, swComps }) => {
       display_name: "Nostr",
       value: "nostr",
     },
-    // {
-    //   display_name: "App",
-    //   value: "app",
-    // },
     {
       display_name: "Post",
       value: "post",
@@ -1409,22 +1435,24 @@ const CustomizeButton = ({ index, value, setValue, swComps }) => {
         value[index].type === "post" &&
         value[index].url.includes("swt.yakihonne.com")
       ) && (
-        <>
-          <p className="gray-c p-medium">{t("AGaizjj")}</p>
-          <input
-            placeholder={
-              value[index].type === "zap" ? t("AVLYYDh") : t("AGaizjj")
-            }
-            className="if ifs-full"
-            value={value[index].url}
-            onChange={(e) => handleButtonData("url", e.target.value)}
-          />
-        </>
-      )}
+          <>
+            <p className="gray-c p-medium">{t("AGaizjj")}</p>
+            <input
+              placeholder={
+                value[index].type === "zap" ? t("AVLYYDh") : t("AGaizjj")
+              }
+              className="if ifs-full"
+              value={value[index].url}
+              onChange={(e) => handleButtonData("url", e.target.value)}
+            />
+          </>
+        )}
       <p className="gray-c p-medium">{t("Ayd7Ojf")}</p>
       <Select
         options={buttonTypes}
         fullWidth={true}
+        revert={true}
+        escapeContainer={true}
         className="if"
         setSelectedValue={(value) => handleButtonData("type", value)}
         value={value[index].type}
@@ -1435,6 +1463,8 @@ const CustomizeButton = ({ index, value, setValue, swComps }) => {
           <Select
             options={postFunctions}
             fullWidth={true}
+            revert={true}
+            escapeContainer={true}
             className="if"
             setSelectedValue={(value) => handleButtonData("url", value)}
             value={value[index].url.split("?")[0]}
@@ -1455,6 +1485,11 @@ const CustomizeButton = ({ index, value, setValue, swComps }) => {
               <p className="red-c p-medium box-pad-h-s">{t("A4eRArd")}</p>
             )}
         </>
+      )}
+      {onRemove && (
+        <button className="btn btn-red btn-full" onClick={onRemove}>
+          {t("AzkTxuy")}
+        </button>
       )}
     </div>
   );
@@ -1501,7 +1536,7 @@ const CountdownFunction = ({ url, setUrl }) => {
           setDate(e.target.value);
           setUrl(
             url.split("?")[0] +
-              `?time=${Math.floor(new Date(e.target.value).getTime() / 1000)}`,
+            `?time=${Math.floor(new Date(e.target.value).getTime() / 1000)}`,
           );
         }}
         min={new Date().toISOString().slice(0, 16)}
@@ -1529,13 +1564,12 @@ const HighestZapperFunction = ({ url, setUrl }) => {
           setAddr(e.target.value);
           setUrl(
             url.split("?")[0] +
-              `?lud16=${e.target.value}&starts_at=${Math.floor(
-                new Date().getTime() / 1000,
-              )}${
-                date
-                  ? `&ends_at=${Math.floor(new Date(date).getTime() / 1000)}`
-                  : ""
-              }`,
+            `?lud16=${e.target.value}&starts_at=${Math.floor(
+              new Date().getTime() / 1000,
+            )}${date
+              ? `&ends_at=${Math.floor(new Date(date).getTime() / 1000)}`
+              : ""
+            }`,
           );
         }}
         min={new Date().toISOString().slice(0, 16)}
@@ -1549,11 +1583,11 @@ const HighestZapperFunction = ({ url, setUrl }) => {
           setDate(e.target.value);
           setUrl(
             url.split("?")[0] +
-              `?lud16=${addr}&starts_at=${Math.floor(
-                new Date().getTime() / 1000,
-              )}&ends_at=${Math.floor(
-                new Date(e.target.value).getTime() / 1000,
-              )}`,
+            `?lud16=${addr}&starts_at=${Math.floor(
+              new Date().getTime() / 1000,
+            )}&ends_at=${Math.floor(
+              new Date(e.target.value).getTime() / 1000,
+            )}`,
           );
         }}
         min={new Date().toISOString().slice(0, 16)}
@@ -1639,9 +1673,9 @@ const SWTemplates = ({ templates, setTemplate, setBuildOption }) => {
   return (
     <>
       {isLoading && (
-        <div className="fixed-container fx-centered">
-          <LoadingDots />
-        </div>
+        <Overlay exit={() => { }}>
+          <Spinner />
+        </Overlay>
       )}
       <div className="fit-container fx-centered fx-start-h fx-start-v fx-col">
         <div className="fit-container fx-scattered box-marg-s sticky">
@@ -1667,7 +1701,6 @@ const SWTemplates = ({ templates, setTemplate, setBuildOption }) => {
               >
                 <div
                   style={{
-                    // flex: "1 1 250px",
                     width: "100%",
                     aspectRatio: "16/9",
                     backgroundImage: `url(${sample.thumbnail})`,
@@ -1683,6 +1716,44 @@ const SWTemplates = ({ templates, setTemplate, setBuildOption }) => {
         </div>
       </div>
     </>
+  );
+};
+
+const PublishOverlay = ({
+  exit,
+  swTitle,
+  setSwTitle,
+  handlePublish,
+  openSaveDraft,
+}) => {
+  const { t } = useTranslation();
+  return (
+    <Overlay exit={exit} width={450}>
+      <div className="box-pad-h box-pad-v fx-centered fx-col">
+        <div className="close" onClick={exit}>
+          <div></div>
+        </div>
+        <input
+          type="text"
+          className="if ifs-full"
+          placeholder={t("AqTI7Iu")}
+          value={swTitle}
+          onChange={(e) => setSwTitle(e.target.value)}
+        />
+        <button
+          className="btn btn-normal btn-full"
+          onClick={() => {
+            exit();
+            handlePublish();
+          }}
+        >
+          {t("As7IjvV")}
+        </button>
+        <button className="btn btn-gst btn-full" onClick={openSaveDraft}>
+          {t("ABg9vzA")}
+        </button>
+      </div>
+    </Overlay>
   );
 };
 
@@ -1720,10 +1791,9 @@ const SaveDraft = ({ exit, swButtons, swImage, swInput, swComponents }) => {
     }
   };
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={450}>
       <div
-        style={{ width: "min(100%, 450px)", position: "relative" }}
-        className="box-pad-h box-pad-v fx-centered fx-col sc-s-18 bg-sp"
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -1741,7 +1811,7 @@ const SaveDraft = ({ exit, swButtons, swImage, swInput, swComponents }) => {
           {t("ABg9vzA")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 };
 
@@ -1820,9 +1890,6 @@ const SWDrafts = ({ back, setTemplate }) => {
                   </div>
                   <OptionsDropdown
                     options={[
-                      // <div onClick={() => setTemplate(draft, true)}>
-                      //   {t("As7IjvV")}
-                      // </div>,
                       <div onClick={() => setTemplate(draft)}>
                         {t("AsXohpb")}
                       </div>,

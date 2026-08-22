@@ -1,8 +1,13 @@
 import React, { useMemo, useState } from "react";
 import LoginSignup from "@/Components/LoginSignup";
-import PaymentGateway from "@/Components/PaymentGateway";
+import dynamic from "next/dynamic";
 import { nip19 } from "nostr-tools";
+
+const PaymentGateway = dynamic(() => import("@/Components/PaymentGateway"), {
+  ssr: false,
+});
 import Icon from "@/Components/Icon";
+import { useTranslation } from "react-i18next";
 
 const getNostrEventIDEncode = (aTag, eTag) => {
   try {
@@ -33,9 +38,11 @@ export default function ZapTip({
   smallIcon = false,
   custom = false,
   zapLabel = false,
+  stackedLabel = false,
   setReceivedEvent = () => null,
   isZapped = false,
 }) {
+  const { t } = useTranslation();
   const [showCashier, setCashier] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const nostrEventIDEncode = useMemo(
@@ -100,7 +107,7 @@ export default function ZapTip({
         {zapLabel && (
           <div>
             <Icon name="bolt" size={smallIcon ? 18 : 24} opacity={0.4} />
-            <p className="p-medium">Zap</p>
+            <p className="p-medium">{t("AxTxcFH")}</p>
           </div>
         )}
         {!onlyIcon && !zapLabel && (
@@ -108,7 +115,7 @@ export default function ZapTip({
             className={`${
               smallIcon ? "round-icon-small" : "round-icon"
             }  round-icon-tooltip if-disabled`}
-            data-tooltip="Zap"
+            data-tooltip={t("AxTxcFH")}
           >
             <Icon
               name="lightning"
@@ -147,7 +154,7 @@ export default function ZapTip({
               isBoldThemeColor={isZapped}
               size={smallIcon ? 18 : 24}
             />
-            <p className="p-medium">Zap</p>
+            <p className="p-medium">{t("AxTxcFH")}</p>
           </div>
         )}
         {!onlyIcon && !zapLabel && (
@@ -156,7 +163,7 @@ export default function ZapTip({
               smallIcon ? "round-icon-small" : "round-icon"
             }  round-icon-tooltip`}
             onClick={() => setIsLogin(true)}
-            data-tooltip="Zap"
+            data-tooltip={t("AxTxcFH")}
           >
             <Icon name="lightning" size={smallIcon ? 18 : 24} />
           </div>
@@ -191,7 +198,7 @@ export default function ZapTip({
           className={`${
             smallIcon ? "round-icon-small" : "round-icon"
           }  round-icon-tooltip`}
-          data-tooltip="Zap"
+          data-tooltip={t("AxTxcFH")}
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -202,14 +209,17 @@ export default function ZapTip({
         </div>
       )}
       {zapLabel && (
-        <div onClick={() => setCashier(true)}>
+        <div
+          className={stackedLabel ? "fx-centered fx-col" : ""}
+          onClick={() => setCashier(true)}
+        >
           <Icon
             name={isZapped ? "bolt-bold" : "bolt"}
             size={smallIcon ? 18 : 24}
             isColored={isZapped}
             isBoldThemeColor={isZapped}
           />
-          <p className="p-medium">Zap</p>
+          <p className="p-medium">{t("AxTxcFH")}</p>
         </div>
       )}
     </>

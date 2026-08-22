@@ -18,10 +18,12 @@ import {
   UserAppSettingsReducer,
   UserFavRelaysReducer,
   UserWotListReducer,
+  UserWotFilterListReducer,
   UserBlossomServersReducer,
   UserInboxRelaysReducer,
   UserFollowingsInboxRelaysReducer,
   IsUserFollowingsLoadedReducer,
+  IsUserDataLoadedReducer,
   UserSearchRelaysReducer,
   UserRelaysSetReducer,
   UserPinnedNotesReducer,
@@ -39,6 +41,8 @@ import {
   IsYakiChestLoadedReducer,
   UpdatedActionFromYakiChestSliceReducer,
 } from "./Slides/YakiChest";
+import { SubscriptionReducer } from "./Slides/Subscription";
+import { UpgradeReducer, OnboardingReducer } from "./Slides/Upgrade";
 import { NostrAuthorsReducer, NostrClientsReducer } from "./Slides/Profiles";
 import {
   ToastReducer,
@@ -100,12 +104,14 @@ export const store = configureStore({
     userFavRelays: UserFavRelaysReducer,
     userInboxRelays: UserInboxRelaysReducer,
     userWotList: UserWotListReducer,
+    userWotFilterList: UserWotFilterListReducer,
     userBlossomServers: UserBlossomServersReducer,
     userFollowingsInboxRelays: UserFollowingsInboxRelaysReducer,
     homeSavedNotes: HomeSavedNotesReducer,
     homeCarouselPosts: HomeCarouselPostsReducer,
     relaysStats: RelaysStatsReducer,
     isUserFollowingsLoaded: IsUserFollowingsLoadedReducer,
+    isUserDataLoaded: IsUserDataLoadedReducer,
     refreshAppSettings: RefreshAppSettingsReducer,
     userSearchRelays: UserSearchRelaysReducer,
     notifications: NotificationsReducer,
@@ -119,5 +125,8 @@ export const store = configureStore({
     userNutZaps: UserNutZapsReducer,
     userStarterPacks: UserStarterPacksReducer,
     userMediaPacks: UserMediaPacksReducer,
+    subscription: SubscriptionReducer,
+    upgrade: UpgradeReducer,
+    onboarding: OnboardingReducer,
   },
 });

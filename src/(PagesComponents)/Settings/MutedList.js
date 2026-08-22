@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 import { useSelector } from "react-redux";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import useIsMute from "@/Hooks/useIsMute";
 import UserProfilePic from "@/Components/UserProfilePic";
 import { getSubData } from "@/Helpers/Controlers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import Date_ from "@/Components/Date_";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 
 export function MutedList({ exit }) {
   const { t } = useTranslation();
@@ -43,19 +45,9 @@ export function MutedList({ exit }) {
 
   if (!Array.isArray(userMutedList)) return;
   return (
-    <div
-      className="fixed-container box-pad-h fx-centered"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp slide-up"
-        style={{ width: "min(100%, 500px)", position: "relative" }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -67,17 +59,15 @@ export function MutedList({ exit }) {
           <>
             <div className="fit-container fx-scattered box-marg-s">
               <div
-                className={`list-item-b fx-centered fx ${
-                  contentType === "p" ? "selected-list-item-b" : ""
-                }`}
+                className={`list-item-b fx-centered fx ${contentType === "p" ? "selected-list-item-b" : ""
+                  }`}
                 onClick={() => setContentType("p")}
               >
                 {t("AJ1Zfct")}
               </div>
               <div
-                className={`list-item-b fx-centered fx ${
-                  contentType === "e" ? "selected-list-item-b" : ""
-                }`}
+                className={`list-item-b fx-centered fx ${contentType === "e" ? "selected-list-item-b" : ""
+                  }`}
                 onClick={() => setContentType("e")}
               >
                 {t("AYIXG83")}
@@ -103,19 +93,19 @@ export function MutedList({ exit }) {
                   className="fx-centered fx-col fit-container"
                   style={{ height: "20vh" }}
                 >
-                  <LoadingDots />
+                  <Spinner />
                 </div>
               )}
               {(mutedList.length === 0 ||
                 (!isNotesLoading && notes && notes.size === 0)) && (
-                <div
-                  className="fx-centered fx-col fit-container"
-                  style={{ height: "20vh" }}
-                >
-                  <p>{t("ACzeK4g")}</p>
-                  <p className="gray-c p-medium p-centered">{t("Ap5S8lY")}</p>
-                </div>
-              )}
+                  <div
+                    className="fx-centered fx-col fit-container"
+                    style={{ height: "20vh" }}
+                  >
+                    <p>{t("ACzeK4g")}</p>
+                    <p className="gray-c p-medium p-centered">{t("Ap5S8lY")}</p>
+                  </div>
+                )}
             </div>
           </>
         )}
@@ -130,12 +120,12 @@ export function MutedList({ exit }) {
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 }
 
 const MutedUser = ({ pubkey }) => {
-  const { userProfile, isNip05Verified } = useUserProfile(pubkey);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(pubkey);
   const { muteUnmute } = useIsMute(pubkey);
   const { t } = useTranslation();
 
@@ -150,6 +140,7 @@ const MutedUser = ({ pubkey }) => {
           {userProfile.display_name || userProfile.name}
         </p>
         {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+        {proUser.isProUser && <Badge data={proUser} size={16} />}
       </div>
       <p className="gray-c p-medium p-centered p-one-line">
         {userProfile.name || userProfile.display_name}
@@ -166,7 +157,7 @@ const MutedUser = ({ pubkey }) => {
 };
 
 const MutedNote = ({ event }) => {
-  const { userProfile, isNip05Verified } = useUserProfile(event?.pubkey);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(event?.pubkey);
   const { muteUnmute } = useIsMute(event?.id, "e");
   const { t } = useTranslation();
 
@@ -186,6 +177,7 @@ const MutedNote = ({ event }) => {
                 {userProfile.display_name || userProfile.name}
               </p>
               {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+              {proUser.isProUser && <Badge data={proUser} size={16} />}
             </div>
             <p className="gray-c p-medium" style={{ margin: 0 }}>
               &#8226;

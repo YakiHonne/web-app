@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import Mintslist from "../../MintsList";
 import { useTranslation } from "react-i18next";
 import useLightningWallets from "@/Hooks/useLightningWallets";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import LightningWalletsSelect from "@/Components/LightningWalletsSelect";
 import Toggle from "@/Components/Toggle";
 import { createLightningInvoice } from "@/Helpers/Helpers";
@@ -73,10 +73,10 @@ export default function Lightning({ exit }) {
         invoice = isAddrInvoice
           ? lightningAddr
           : await createLightningInvoice({
-              amount,
-              message,
-              recipientAddr: lightningAddr,
-            });
+            amount,
+            message,
+            recipientAddr: lightningAddr,
+          });
       }
       if (invoice) {
         let status = await swapTokensInvoiceFromMint({
@@ -167,11 +167,10 @@ export default function Lightning({ exit }) {
             className="if p-bold if-no-border ifs-full p-centered"
             placeholder={t("AcDgXKI")}
             style={{
-              fontSize: `max(${
-                amount.toString().length > 5
+              fontSize: `max(${amount.toString().length > 5
                   ? `${80 - (amount.toString().length - 6) * 10}px`
                   : "80px"
-              },50px)`,
+                },50px)`,
               height: "80px",
             }}
             value={invoiceDetails?.amount || amount}
@@ -203,7 +202,7 @@ export default function Lightning({ exit }) {
           disabled={isLoading}
           onClick={handleSend}
         >
-          {isLoading ? <LoadingDots /> : t("A14LwWS")}
+          {isLoading ? <Spinner /> : t("A14LwWS")}
         </button>
       </div>
     </div>

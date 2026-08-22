@@ -1,5 +1,5 @@
 import Icon from "@/Components/Icon";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Overlay from "@/Components/Overlay";
 import { shortenKey } from "@/Helpers/Encryptions";
 import {
@@ -175,10 +175,10 @@ export default function BlossomOps({
                         isSeen
                           ? null
                           : setSelectedServers((prev) =>
-                              isSelected
-                                ? prev.filter((s) => s !== server)
-                                : [...prev, server],
-                            )
+                            isSelected
+                              ? prev.filter((s) => s !== server)
+                              : [...prev, server],
+                          )
                       }
                     />
                     <p>{server}</p>
@@ -191,7 +191,7 @@ export default function BlossomOps({
           onClick={handleAction}
         >
           {isLoading ? (
-            <LoadingDots />
+            <Spinner />
           ) : (
             t(ops === "mirror" ? "A1C3sNc" : "Almq94P")
           )}

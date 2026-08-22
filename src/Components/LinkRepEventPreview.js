@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { getLinkFromAddr } from "@/Helpers/Helpers";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
@@ -9,11 +9,14 @@ import useUserProfile from "@/Hooks/useUsersProfile";
 import Date_ from "./Date_";
 import MediaEventPreview from "./MediaEventPreview";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import PaidNoteInfoOverlay from "@/Components/PaidNoteInfoOverlay";
 
 export default function LinkRepEventPreview({ event, allowClick = true }) {
-  const { isNip05Verified, userProfile } = useUserProfile(event.pubkey);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(event.pubkey);
   let url = getLinkFromAddr(event.naddr || event.nEvent, event.kind);
   const { t } = useTranslation();
+  const [showPaidNoteInfo, setShowPaidNoteInfo] = useState(false);
   const onClick = (e) => {
     e.stopPropagation();
     if (allowClick) {
@@ -61,6 +64,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
                     {userProfile.display_name || userProfile.name}
                   </p>
                   {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+                  {proUser.isProUser && <Badge data={proUser} size={16} />}
                 </div>
                 <p className="gray-c p-medium">&#8226;</p>
                 <p className="gray-c p-medium">
@@ -72,7 +76,18 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
               </div>
               <div className="fx-centered">
                 {event.isPaidNote && (
-                  <div className="sticker sticker-c1">{t("AAg9D6c")}</div>
+                  <div
+                    className="sticker sticker-paid sticker-click pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowPaidNoteInfo(true);
+                    }}
+                  >
+                    {t("AAg9D6c")}
+                  </div>
+                )}
+                {showPaidNoteInfo && (
+                  <PaidNoteInfoOverlay onClose={() => setShowPaidNoteInfo(false)} />
                 )}
               </div>
             </div>
@@ -138,6 +153,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
               {userProfile.display_name || userProfile.name}
             </p>
             {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+            {proUser.isProUser && <Badge data={proUser} size={16} />}
           </div>
         </div>
       </div>

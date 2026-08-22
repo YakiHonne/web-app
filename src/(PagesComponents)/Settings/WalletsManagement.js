@@ -57,16 +57,15 @@ export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
         />
       )}
       <div
-        className={`fit-container fx-scattered fx-col pointer ${
-          selectedTab === "wallets" ? "sc-s box-pad-h-s box-pad-v-s" : ""
-        }`}
+        className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "wallets" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+          }`}
         style={{
-          borderBottom: "1px solid var(--very-dim-gray)",
+          // borderBottom: "1px solid var(--very-dim-gray)",
           gap: 0,
-          borderColor: "var(--very-dim-gray)",
+          // borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
           overflow: "visible",
-          borderRadius: 0,
+          // borderRadius: 0,
         }}
       >
         <div
@@ -124,12 +123,12 @@ export function WalletsManagement({ selectedTab, setSelectedTab, userKeys }) {
                   <div className="fx-centered">
                     <div className="fx-centered">
                       {wallet.kind === 1 && (
-                        <Icon name="webln-logo" size={24} isColored/>
+                        <Icon name="webln-logo" size={24} isColored />
                       )}
                       {wallet.kind === 2 && (
-                        <Icon name="alby-logo" size={24} isColored/>
+                        <Icon name="alby-logo" size={24} isColored />
                       )}
-                      {wallet.kind === 3 && <Icon name="nwc-logo" size={24} isColored/>}
+                      {wallet.kind === 3 && <Icon name="nwc-logo" size={24} isColored />}
                       <div className="fx-centered fx-col">
                         <div className="fx-centered">
                           <p>{wallet.entitle}</p>

@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import NProfilePreviewer from "@/Components/NProfilePreviewer";
 import UserSearchBar from "@/Components/UserSearchBar";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import { sendMessage } from "@/Helpers/DMHelpers";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function InitiConvo({ exit, receiver = false }) {
   const { t } = useTranslation();
@@ -40,23 +41,12 @@ export default function InitiConvo({ exit, receiver = false }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp"
+        className="box-pad-h box-pad-v"
         style={{
-          position: "relative",
-          width: "min(100%, 500px)",
           borderColor: !legacy ? "var(--green-main)" : "",
           transition: ".2s ease-in-out",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
         }}
       >
         <div className="close" onClick={exit}>
@@ -91,7 +81,7 @@ export default function InitiConvo({ exit, receiver = false }) {
               onClick={handleSendMessage}
               disabled={isLoading}
             >
-              {isLoading ? <LoadingDots /> : t("AsEtDNy")}
+              {isLoading ? <Spinner /> : t("AsEtDNy")}
             </button>
             {(userKeys.sec || window?.nostr?.nip44) && (
               <div
@@ -101,9 +91,8 @@ export default function InitiConvo({ exit, receiver = false }) {
                 <p className="p-medium slide-left">{t("ATta6yb")}</p>
 
                 <div
-                  className={`toggle ${legacy ? "toggle-dim-gray" : ""} ${
-                    !legacy ? "toggle-green" : "toggle-dim-gray"
-                  }`}
+                  className={`toggle ${legacy ? "toggle-dim-gray" : ""} ${!legacy ? "toggle-green" : "toggle-dim-gray"
+                    }`}
                   onClick={handleLegacyDMs}
                 ></div>
               </div>
@@ -119,6 +108,6 @@ export default function InitiConvo({ exit, receiver = false }) {
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

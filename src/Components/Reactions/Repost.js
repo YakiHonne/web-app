@@ -7,6 +7,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function Repost({ isReposted, event, actions }) {
   const dispatch = useDispatch();
@@ -110,8 +111,10 @@ export default function Repost({ isReposted, event, actions }) {
         onClick={reactToNote}
       >
         <Icon
-          name={isReposted ? "switch-arrows-bold" : "switch-arrows"}
-          size={24}
+          // name={isReposted ? "switch-arrows-bold" : "switch-arrows"}
+          size={20}
+          name={iconsNames.arrow_reload_02}
+          v={2}
           opacity={!isReposted ? 0.4 : "initial"}
           isColored={isReposted}
           isBoldThemeColor={isReposted}

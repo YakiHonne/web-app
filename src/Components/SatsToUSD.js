@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import useCloseContainer from "@/Hooks/useCloseContainer";
 import { currencies, currenciesSymbols } from "@/Content/currencies";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
@@ -66,7 +66,7 @@ const SatsToUSD = ({ sats, isHidden, selector }) => {
             setCurrency={handleChangeCurrency}
           />
         ) : (
-          <LoadingDots />
+          <Spinner />
         )}
       </div>
     );
@@ -82,7 +82,7 @@ const SatsToUSD = ({ sats, isHidden, selector }) => {
           </p>
         </div>
       ) : (
-        <LoadingDots />
+        <Spinner />
       )}
     </div>
   );

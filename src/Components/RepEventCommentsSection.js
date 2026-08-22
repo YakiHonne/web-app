@@ -24,29 +24,33 @@ export default function RepEventCommentsSection({
   return (
     <div
       className="fit-container fx-centered fx-start-h fx-col"
-      style={{
-        position: "absolute",
-        left: 0,
-        top: 0,
-        zIndex: 20,
-        height: "100dvh",
-        overflow: "scroll",
-        backgroundColor: "var(--white)",
-      }}
     >
       <div className="main-middle">
         <div
-          className="fx-centered fit-container fx-start-h box-pad-v-m sticky"
+          className="fx-centered fit-container fx-start-h box-pad-v-m sticky rep-event-comments-back-row"
           onClick={exit}
-          style={{ padding: "1rem" }}
+          style={{
+            padding: "1rem",
+            backgroundColor: "transparent",
+            backdropFilter: "none",
+            WebkitBackdropFilter: "none",
+          }}
         >
           <button
-            className="btn btn-normal btn-gray"
-            style={{ padding: "0 1rem" }}
+            className="btn btn-normal btn-gray fx-centered"
+            style={{
+              padding: "0 1rem",
+              borderRadius: "50%",
+              aspectRatio: "1/1",
+              width: "44px",
+              height: "44px",
+              backgroundColor: "rgba(20, 20, 20, 0.7)",
+              boxShadow: "0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08)",
+            }}
           >
             <Icon name="arrow" transform="rotate(90deg)" />
           </button>
-          <p>{t("ATB2h6T")}</p>
+
         </div>
         <div className="fit-container box-pad-h-m box-marg-s">
           {event && <LinkRepEventPreview allowClick={false} event={event} />}

@@ -2,6 +2,7 @@ import React from "react";
 import MiniApp from "@/Components/MiniApp";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
+import Overlay from "@/Components/Overlay";
 
 export default function LaunchSW({ metadata, exit }) {
   if (metadata.type !== "basic")
@@ -9,19 +10,9 @@ export default function LaunchSW({ metadata, exit }) {
 
   if (metadata.type === "basic")
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={550}>
         <div
-          style={{ width: "min(100%, 550px)", overflow: "scroll", maxHeight: "80vh" }}
-          className="sc-s-18 fx-centered fx-start-v fx-start-h fx-col bg-sp box-pad-h-m box-pad-v-m"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          className="fx-centered fx-start-v fx-start-h fx-col box-pad-h-m box-pad-v-m"
         >
           <div className="fit-container fx-scattered">
             <h4 className="p-maj">{metadata.title}</h4>
@@ -43,6 +34,6 @@ export default function LaunchSW({ metadata, exit }) {
             authPreviewPosition="top"
           />
         </div>
-      </div>
+    </Overlay>
     );
 }

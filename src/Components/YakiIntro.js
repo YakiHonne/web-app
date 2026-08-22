@@ -4,6 +4,7 @@ import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch } from "react-redux";
 import DonationBoxSuggestionCards from "./SuggestionsCards/DonationBoxSuggestionCards";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 let ymaQR =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/yma-qr.png";
 
@@ -38,47 +39,39 @@ const content = [
   },
 ];
 
-const updatesList = [
-  "Resolved the image pasting overlay issue where pasted images were hidden during note creation.",
-  "Fixed fetching articles, videos and curations with Yakihonne NIP-05 URL.",
-  "Added icons to the BLOSSOM options for a clearer and more intuitive interface.",
+export const updatesList = [
+  "Complete visual redesign of the app with a new top navbar, refreshed layout, and updated styling throughout.",
+  "Migrated the entire interface to a new, consistent icon set.",
+  "Introduced YakiHonne premium plans that unlock more features, payable by card or Lightning.",
+  "Revamped the Yaki Points system with a clear earning and spending model, letting you redeem accumulated points for rewards.",
+  "Paid notes now surface in the home feed for free and basic plan users, giving creators wider reach and stronger incentive to publish premium content.",
+  "Rebuilt the article editor (v2) with support for mentions, Nostr entity embeds, and PDF-to-Markdown import.",
+  "Added an AI writing assistant and a Second Reader with selectable personas, both built directly into the new editor.",
+  "Added Google as a login method and as a private-key recovery option.",
+  "Redesigned the article publishing flow with a new publish modal and article preview.",
+  "Added a guided navbar tour and an in-app announcement introducing the new design.",
+  "Improved the mobile experience with bottom sheets and smoother, hover-aware interactions.",
+  "Added event and note statistics so you can see how content is performing.",
+  "Added Refund Policy and legal document pages.",
+  "Made the app noticeably faster to load and lighter on data usage.",
+  "Added Hungarian language support.",
+  "Added a language preference for translating post content.",
+  "Fixed the cursor hover behavior across the interface.",
+  "Fixed the theme color on the login page.",
+  "Fixed the highlighted icons appearing incorrectly during the tour.",
+  "Fixed tab positioning issues.",
+  "General improvements and bug fixes across the app, and more features to discover.",
 ];
 
 export default function YakiIntro() {
+  return null;
+}
+
+export function YakiIntroBanner() {
   const [swipe, setSwipe] = useState(false);
-  const [up, setUp] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = (e) => {
-      let el = document.querySelector(".main-page-nostr-container");
-      if (!el) return;
-      if (el.scrollTop >= 600) setUp(true);
-      else setUp(false);
-    };
-    window.addEventListener("scroll", handleScroll, true);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   return (
     <>
       {swipe && <Banner exit={() => setSwipe(false)} />}
-      <div
-        style={{
-          position: "fixed",
-          right: "38px",
-          bottom: up ? "94px" : "16px",
-          transition: ".2s ease-in-out",
-          zIndex: "1000000",
-        }}
-        className="fx-centered fx-end-h"
-        id="floating-info"
-      >
-        {!swipe && (
-          <div className="slide-right" onClick={() => setSwipe(!swipe)}>
-            <Icon name="info" size={24} isColored />
-          </div>
-        )}
-      </div>
     </>
   );
 }
@@ -95,10 +88,9 @@ const MobileAppQR = ({ exit }) => {
     );
   };
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={350}>
       <div
-        style={{ width: "min(100%, 350px)", position: "relative" }}
-        className="fx-centered fx-col box-pad-h box-pad-v sc-s-18 bg-sp"
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -126,31 +118,19 @@ const MobileAppQR = ({ exit }) => {
           <Icon name="copy" size={24} />
         </div>
       </div>
-    </div>
+    </Overlay>
   );
+};
+
+export const ChangelogBanner = ({ exit }) => {
+  return <Banner exit={exit} />;
 };
 
 const Banner = ({ exit }) => {
   return (
-    <div
-      style={{
-        position: "fixed",
-        right: "0",
-        top: 0,
-        transition: ".2s ease-in-out",
-        width: "100vw",
-        height: "100vh",
-        zIndex: "100000000",
-      }}
-      className="fixed-container fx-centered fx-col fx-end-v  box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={400}>
       <div
         className="fx-scattered box-pad-v-s"
-        style={{ width: "min(100%, 400px)" }}
       >
         <h4>Updates news</h4>
         <div className="close" style={{ position: "static" }} onClick={exit}>
@@ -165,10 +145,7 @@ const Banner = ({ exit }) => {
           backgroundColor: "transparent",
           border: "none",
         }}
-        className="sc-s-18 bg-img cover-bg fx-centered fx-start-v "
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="bg-img cover-bg fx-centered fx-start-v "
       >
         <div
           className="fit-container fit-height fx-centered fx-col fx-start-h fx-start-v box-pad-h-s box-pad-v-s"
@@ -252,6 +229,6 @@ const Banner = ({ exit }) => {
           <DonationBoxSuggestionCards padding={false} />
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

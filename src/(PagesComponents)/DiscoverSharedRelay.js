@@ -9,7 +9,7 @@ import {
 import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
 import { saveUsers } from "@/Helpers/DB";
 import { getSubData } from "@/Helpers/Controlers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
 import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
@@ -381,7 +381,7 @@ const ExploreFeed = ({ selectedTab, isLoading, setIsLoading, relay }) => {
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "30vh" }}
         >
-          <LoadingLogo />
+          <Spinner size={32} />
         </div>
       )}
       {/* </InfiniteScroll> */}

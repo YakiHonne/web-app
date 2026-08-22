@@ -13,6 +13,9 @@ import EventOptions from "@/Components/ElementOptions/EventOptions";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import PostReaction from "./PostReaction";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import Overlay from "@/Components/Overlay";
+import EventStats from "./EventStats";
 
 const checkFollowing = (list, toFollowKey) => {
   if (!list) return false;
@@ -41,7 +44,7 @@ export default function RepEventPreviewCard({
   const userFollowings = useSelector((state) => state.userFollowings);
   const { t } = useTranslation();
   const [showContent, setShowContent] = useState(!item.contentSensitive);
-  const { isNip05Verified, userProfile } = useUserProfile(item.pubkey);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(item.pubkey);
   const isFollowing = useMemo(() => {
     return checkFollowing(userFollowings, item.pubkey);
   }, [userFollowings]);
@@ -52,9 +55,7 @@ export default function RepEventPreviewCard({
     return (
       <>
         <div
-          className={
-            "fit-container fx-scattered  fx-col sc-s-18 bg-img cover-bg pointer"
-          }
+          className={`fit-container fx-scattered  fx-col sc-s-18 bg-img cover-bg pointer${item.isPremium ? " premium-glass" : ""}`}
           onClick={(e) => {
             e.stopPropagation();
             customHistory(url);
@@ -91,6 +92,7 @@ export default function RepEventPreviewCard({
                     author={userProfile}
                     item={item}
                     isNip05Verified={isNip05Verified}
+                    proUser={proUser}
                   />
                 </div>
               </div>
@@ -106,15 +108,15 @@ export default function RepEventPreviewCard({
   return (
     <>
       <div
-        className={"fit-container fx-scattered box-pad-h-m mediacard"}
+        className={`fit-container fx-scattered box-pad-h-m mediacard sc-s box-marg-s${item.isPremium ? " premium-glass" : ""}`}
         onClick={(e) => e.stopPropagation()}
         style={{
-          border: "none",
+          border: item.isPremium ? undefined : "none",
           position: "relative",
           overflow: "visible",
           columnGap: "16px",
-          paddingBottom: "1rem",
-          borderBottom: border ? "1px solid var(--very-dim-gray)" : "",
+          // paddingBottom: "1rem",
+          // borderBottom: border ? "1px solid var(--very-dim-gray)" : "",
         }}
       >
         {!showContent && (
@@ -139,6 +141,7 @@ export default function RepEventPreviewCard({
                   author={userProfile}
                   item={item}
                   isNip05Verified={isNip05Verified}
+                  proUser={proUser}
                 />
                 {isFollowing && (
                   <div
@@ -177,9 +180,8 @@ export default function RepEventPreviewCard({
                 style={{
                   backgroundColor:
                     "linear-gradient(93deg, #880185 -6.44%, #FA4EFF 138.71%)",
-                  backgroundImage: `url(${
-                    item.image || userProfile.picture || item.imagePP
-                  })`,
+                  backgroundImage: `url(${item.image || userProfile.picture || item.imagePP
+                    })`,
                   width: "max(25%,150px)",
                   aspectRatio: "1/1",
                   border: "none",
@@ -189,19 +191,19 @@ export default function RepEventPreviewCard({
                 {(item.kind === 34235 ||
                   item.kind === 21 ||
                   item.kind === 22) && (
-                  <div
-                    className="fx-centered"
-                    style={{
-                      position: "absolute",
-                      left: 0,
-                      top: 0,
-                      width: "100%",
-                      height: "100%",
-                    }}
-                  >
-                    <Icon name="play-vid" size={58} />
-                  </div>
-                )}
+                    <div
+                      className="fx-centered"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        top: 0,
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    >
+                      <Icon name="play-vid" size={58} />
+                    </div>
+                  )}
               </div>
             </Link>
           </div>
@@ -212,7 +214,8 @@ export default function RepEventPreviewCard({
   );
 }
 
-const AuthorPreview = ({ author, item, isNip05Verified }) => {
+const AuthorPreview = ({ author, item, isNip05Verified, proUser }) => {
+  const { t } = useTranslation();
   return (
     <div className="fx-centered fx-start-h ">
       <UserProfilePic
@@ -226,13 +229,20 @@ const AuthorPreview = ({ author, item, isNip05Verified }) => {
         <div className="fx-centered fx-start-h" style={{ gap: "3px" }}>
           <p className="p-bold">{author.display_name || author.name}</p>
           {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+          {proUser.isProUser && <Badge data={proUser} size={16} />}
+          {item?.isPremium && (
+            <div className="premium-glass-tag">
+              <Icon name="crown" size={12} isColored />
+              {t("AW299l2")}
+            </div>
+          )}
         </div>
         <DynamicIndicator item={item} />
       </div>
     </div>
   );
 };
-const AuthorPreviewMinimal = ({ author, isNip05Verified }) => {
+const AuthorPreviewMinimal = ({ author, isNip05Verified, proUser }) => {
   return (
     <div className="fx-centered fx-start-h ">
       <UserProfilePic
@@ -247,6 +257,7 @@ const AuthorPreviewMinimal = ({ author, isNip05Verified }) => {
           {author.display_name || author.name}
         </p>
         {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+        {proUser.isProUser && <Badge data={proUser} size={16} />}
       </div>
     </div>
   );
@@ -270,39 +281,17 @@ const Reactions = ({ post, author }) => {
         />
       )}
       {showCommentsSection && (
-        <div
-          className="fixed-container fx-centered fx-start-v"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowCommentsSections(false);
-          }}
-        >
-          <div
-            className="main-middle vox-pad-h fx-centered fx-col fx-start-v fx-start-h sc-s-18 bg-sp"
-            style={{
-              overflow: "scroll",
-              scrollBehavior: "smooth",
-              height: "100vh",
-              // width: "min(100%, 550px)",
-              position: "relative",
-              borderRadius: 0,
-              gap: 0,
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            <RepEventCommentsSection
-              id={post.aTag}
-              author={author}
-              eventPubkey={post.pubkey}
-              leaveComment={showCommentsSection.comment}
-              exit={() => setShowCommentsSections(false)}
-              kind={post.kind}
-              event={post}
-            />
-          </div>
-        </div>
+        <Overlay exit={() => setShowCommentsSections(false)}>
+          <RepEventCommentsSection
+            id={post.aTag}
+            author={author}
+            eventPubkey={post.pubkey}
+            leaveComment={showCommentsSection.comment}
+            exit={() => setShowCommentsSections(false)}
+            kind={post.kind}
+            event={post}
+          />
+        </Overlay>
       )}
       <div
         className="fit-container fx-centered fx-col box-pad-v-s"
@@ -329,7 +318,10 @@ const Reactions = ({ post, author }) => {
             postActions={postActions}
             userProfile={author}
           />
-          <EventOptions event={post} component="repEventsCard" />
+          <div className="fx-centered">
+            <EventStats postActions={postActions} />
+            <EventOptions event={post} component="repEventsCard" />
+          </div>
         </div>
       </div>
     </>

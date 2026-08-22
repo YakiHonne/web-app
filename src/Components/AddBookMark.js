@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
+import Overlay from "@/Components/Overlay";
 import { nanoid } from "nanoid";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
@@ -92,13 +93,9 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
   };
 
   return (
-    <section
-      className="fixed-container fx-centered box-pad-h"
-      style={{ zIndex: "10001" }}
-    >
+    <Overlay exit={exit} width={500}>
       <section
-        className="fx-centered fx-col sc-s bg-sp box-pad-v"
-        style={{ width: "500px" }}
+        className="fx-centered fx-col box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -142,7 +139,7 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
             onClick={handleShowRelaysPicker}
           >
             {isLoading ? (
-              <LoadingDots />
+              <Spinner />
             ) : bookmark ? (
               <>{t("A9nS8Wz")}</>
             ) : (
@@ -151,6 +148,6 @@ export default function AddBookmark({ bookmark, exit, tags = [] }) {
           </button>
         </div>
       </section>
-    </section>
+    </Overlay>
   );
 }

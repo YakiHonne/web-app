@@ -4,6 +4,7 @@ import { useDispatch } from "react-redux";
 import { nanoid } from "nanoid";
 import { setToast } from "../../Store/Slides/Publishers";
 import Select from "../../Components/Select";
+import Overlay from "@/Components/Overlay";
 
 export function AddNewTranslationService({
   services,
@@ -60,10 +61,9 @@ export function AddNewTranslationService({
   };
 
   return (
-    <div className="fixed-container fx-centered box-pad-h box-pad-v">
+    <Overlay exit={exit} width={400} allowOverFlow={true}>
       <div
-        className="fx-centered fx-col sc-s-18 bg-sp box-pad-h box-pad-v slide-down"
-        style={{ width: "min(100%, 400px)", overflow: "visible" }}
+        className="fx-centered fx-col box-pad-h box-pad-v slide-down"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -101,7 +101,7 @@ export function AddNewTranslationService({
           {t("ALyj7Li")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 };
 

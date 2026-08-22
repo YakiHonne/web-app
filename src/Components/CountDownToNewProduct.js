@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 let targetTimestamp = 1723813200;
 
@@ -47,20 +48,12 @@ export default function CountDownToNewProduct() {
   return (
     <>
       {showTuto && (
-        <div
-          className="fixed-container fx-centered fx-col box-pad-h"
-          style={{ background: "rgba(0, 0, 0, 0.75)" }}
-          onClick={(e) => {
-            e.stopPropagation();
-            setShowTuto(false);
-          }}
-        >
+        <Overlay exit={() => setShowTuto(false)} width={700}>
           <video
             controls={true}
             autoPlay="autoplay"
             loop="loop"
             playsInline
-            onClick={(e) => e.stopPropagation()}
             onContextMenu={() => {
               return false;
             }}
@@ -70,9 +63,7 @@ export default function CountDownToNewProduct() {
 
             // autoPlay muted loop id="myVideo"
             style={{
-              width: "min(100%, 700px)",
               aspectRatio: "16/9",
-              position: "relative",
               border: "none",
               zIndex: "0",
               borderRadius: "var(--border-r-18)",
@@ -95,7 +86,7 @@ export default function CountDownToNewProduct() {
           >
             <div></div>
           </div>
-        </div>
+        </Overlay>
       )}
 
       <div

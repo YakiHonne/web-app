@@ -13,6 +13,8 @@ import {
 import { getCustomServices } from "@/Helpers/ClientHelpers";
 import {
   getAppLang,
+  getContentLangSetting,
+  setContentLang,
   getContentTranslationConfig,
   handleAppDirection,
   updateContentTranslationConfig,
@@ -20,6 +22,8 @@ import {
 import {
   supportedLanguage,
   supportedLanguageKeys,
+  contentLanguageKeys,
+  getContentLanguages,
 } from "@/Content/SupportedLanguages";
 import Toggle from "@/Components/Toggle";
 import Icon from "@/Components/Icon";
@@ -28,6 +32,9 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [selectedAppLang, setSelectedAppLang] = useState(getAppLang());
+  const [selectedContentLang, setSelectedContentLang] = useState(
+    getContentLangSetting(),
+  );
   const [selectedTransService, setSelectedTransService] = useState("lt");
   const [transServicePlan, setTransServicePlan] = useState(false);
   const [showAPIKey, setShowAPIKey] = useState(false);
@@ -58,6 +65,10 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
     ];
   }, [customServicesPlan]);
   const [showAddCustomService, setShowAddCustomService] = useState(false);
+  const contentLanguages = useMemo(
+    () => getContentLanguages(selectedAppLang, t("AfwKx9Q")),
+    [selectedAppLang, t],
+  );
   const transServicesPlans = [
     {
       display_name: t("AT4BU58"),
@@ -84,6 +95,20 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
       i18next.changeLanguage(value);
       localStorage?.setItem("app-lang", value);
       handleAppDirection(value);
+    } else {
+      dispatch(
+        setToast({
+          type: 3,
+          desc: t("A9WT6DE"),
+        }),
+      );
+    }
+  };
+
+  const handleSwitchContentLang = (value) => {
+    if (value === "app" || contentLanguageKeys.includes(value)) {
+      setSelectedContentLang(value);
+      setContentLang(value);
     } else {
       dispatch(
         setToast({
@@ -178,13 +203,13 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
         />
       )}
       <div
-        className={`fit-container fx-scattered fx-col pointer ${selectedTab === "lang" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
+        className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "lang" ? "sc-s box-pad-h-s box-pad-v-s" : ""}`}
         style={{
-          borderBottom: "1px solid var(--very-dim-gray)",
+          // borderBottom: "1px solid var(--very-dim-gray)",
           gap: 0,
-          borderColor: "var(--very-dim-gray)",
+          // borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
-          borderRadius: 0,
+          // borderRadius: 0,
           overflow: "visible",
         }}
       >
@@ -223,6 +248,19 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
                 />
               </div>
             </div>
+            <div className="fx-scattered fit-container">
+              <div>
+                <p>{t("AB51CKh")}</p>
+                <p className="p-medium gray-c">{t("AUONhun")}</p>
+              </div>
+              <div className="fx-centered" style={{ minWidth: "max-content" }}>
+                <Select
+                  options={contentLanguages}
+                  value={selectedContentLang}
+                  setSelectedValue={handleSwitchContentLang}
+                />
+              </div>
+            </div>
             <hr />
             <div className="fit-container">
               <p className="gray-c">{t("AFz9bzq")}</p>
@@ -250,18 +288,18 @@ export function LanguagesManagement({ selectedTab, setSelectedTab, userKeys }) {
               {{ ...translationServicesEndpoints, ...customServicesPlan }[
                 selectedTransService
               ]?.plans && (
-                <div className="fx-scattered fit-container">
-                  <div>
-                    <p>{t("AFLFvbx")}</p>
-                    <p className="p-medium gray-c">{t("AsYLJGY")}</p>
+                  <div className="fx-scattered fit-container">
+                    <div>
+                      <p>{t("AFLFvbx")}</p>
+                      <p className="p-medium gray-c">{t("AsYLJGY")}</p>
+                    </div>
+                    <Select
+                      options={transServicesPlans}
+                      value={transServicePlan}
+                      setSelectedValue={handleTransServicesPlan}
+                    />
                   </div>
-                  <Select
-                    options={transServicesPlans}
-                    value={transServicePlan}
-                    setSelectedValue={handleTransServicesPlan}
-                  />
-                </div>
-              )}
+                )}
               {!(selectedTransService === "lt" && !transServicePlan) && (
                 <>
                   <label

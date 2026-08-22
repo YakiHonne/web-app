@@ -14,7 +14,7 @@ import KindSix from "@/Components/KindSix";
 import { saveUsers } from "@/Helpers/DB";
 import { getSubData } from "@/Helpers/Controlers";
 import { straightUp } from "@/Helpers/Helpers";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import KindOne from "@/Components/KindOne";
 import bannedList from "@/Content/BannedList";
 import { useRouter } from "next/router";
@@ -32,8 +32,8 @@ import useRelaysAccess from "@/Hooks/useRelaysAccess";
 import RelayJoinRequest from "./RelayJoinRequest";
 import RelayRequestCode from "@/Components/RelayRequestCode";
 import DeleteWarning from "@/Components/DeleteWarning";
-import LoadingDots from "@/Components/LoadingDots";
 import Icon from "@/Components/Icon";
+import { SelectTabs } from "@/Components/SelectTabs";
 
 const notesReducer = (notes, action) => {
   switch (action.type) {
@@ -183,7 +183,7 @@ export default function ContentSharedRelay() {
                             diabled={isRelayAccessLoading}
                           >
                             {isRelayAccessLoading ? (
-                              <LoadingDots />
+                              <Spinner />
                             ) : (
                               t("ApEvULT")
                             )}
@@ -195,16 +195,12 @@ export default function ContentSharedRelay() {
                           >
                             <Icon name="logout" />
                             {isRelayAccessLoading ? (
-                              <LoadingDots />
+                              <Spinner />
                             ) : (
                               t("AUmONF7")
                             )}
                           </button>
                         </div>
-                        <PostNotePortal
-                          protectedRelay={relay}
-                          label={t("AJj3cLI")}
-                        />
                       </>
                     )}
                     {isMembershipRequired && !isMember && (
@@ -215,22 +211,13 @@ export default function ContentSharedRelay() {
                           disabled={isRelayAccessLoading}
                         >
                           {isRelayAccessLoading ? (
-                            <LoadingDots />
+                            <Spinner />
                           ) : (
                             t("AZs7Pyp")
                           )}
                         </button>
                       </div>
                     )}
-                    {!isMembershipRequired && (
-                      <>
-                        <PostNotePortal
-                          protectedRelay={relay}
-                          label={t("AJj3cLI")}
-                        />
-                      </>
-                    )}
-
                     <HomeFeed relay={relay} />
                   </div>
                 </>
@@ -264,7 +251,7 @@ const HomeFeed = ({ relay }) => {
   const [notes, dispatchNotes] = useReducer(notesReducer, []);
   const [isLoading, setIsLoading] = useState(true);
   const [notesLastEventTime, setNotesLastEventTime] = useState(undefined);
-  const [contentFrom, setContentFrom] = useState("notes");
+  const [contentFrom, setContentFrom] = useState(0);
   const [isConnected, setIsConnected] = useState(true);
   const [subFilter, setSubfilter] = useState({ filter: [], relays: [] });
   const since = useMemo(
@@ -296,10 +283,10 @@ const HomeFeed = ({ relay }) => {
         : notesLastEventTime;
       let since = twoDaysPrior;
 
-      if (contentFrom === "notes") kinds = [1, 6];
-      if (contentFrom === "articles") kinds = [30023];
-      if (contentFrom === "media") kinds = [34235, 34236, 20, 21, 22];
-      if (contentFrom === "curations") kinds = [30004, 30005];
+      if (contentFrom === 0) kinds = [1, 6];
+      if (contentFrom === 1) kinds = [30023];
+      if (contentFrom === 2) kinds = [34235, 34236, 20, 21, 22];
+      if (contentFrom === 3) kinds = [30004, 30005];
 
       let ndk = await getNDKInstance(relay);
       if (!ndk) {
@@ -355,44 +342,18 @@ const HomeFeed = ({ relay }) => {
   };
   return (
     <div className="fx-centered  fx-wrap fit-container" style={{ gap: 0 }}>
-      <div
-        className="user-feed-tab sticky fx-even fit-container"
-        style={{ padding: 0, gap: 0 }}
-      >
-        <div
-          className={`list-item-b fx-centered fx ${
-            contentFrom === "notes" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("notes")}
-        >
-          {t("AYIXG83")}
-        </div>
-        <div
-          className={`list-item-b fx-centered fx ${
-            contentFrom === "articles" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("articles")}
-        >
-          {t("AesMg52")}
-        </div>
-
-        <div
-          className={`list-item-b fx-centered fx ${
-            contentFrom === "media" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("media")}
-        >
-          {t("A0i2SOt")}
-        </div>
-        <div
-          className={`list-item-b fx-centered fx ${
-            contentFrom === "curations" ? "selected-list-item-b" : ""
-          }`}
-          onClick={() => switchContentType("curations")}
-        >
-          {t("AVysZ1s")}
+      <div className="fit-container fx-centered box-pad-v-m">
+        <div>
+          <SelectTabs
+            tabs={[t("AYIXG83"),
+            t("AesMg52"),
+            t("A0i2SOt"),
+            t("AVysZ1s")]}
+            selectedTab={contentFrom}
+            setSelectedTab={switchContentType} />
         </div>
       </div>
+
       <RecentPosts
         filter={subFilter}
         since={since}
@@ -400,7 +361,6 @@ const HomeFeed = ({ relay }) => {
         kind={contentFrom}
         position="bottom"
       />
-      {/* <InfiniteScroll events={notes} onRefresh={setNotesLastEventTime}> */}
       {notes.length > 0 && contentFrom !== "media" && (
         <Virtuoso
           ref={virtuosoRef}
@@ -450,34 +410,6 @@ const HomeFeed = ({ relay }) => {
           setLastEventTime={setNotesLastEventTime}
         />
       )}
-      {/* {notes.map((note, index) => {
-          if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
-            if (
-              note.kind === 6 &&
-              ![...userMutedList, ...bannedList].includes(
-                note.relatedEvent.pubkey
-              )
-            )
-              return (
-                <Fragment key={note.id}>
-                  <KindSix event={note} />
-                </Fragment>
-              );
-            if (note.kind === 1)
-              return (
-                <Fragment key={note.id}>
-                  <KindOne event={note} border={true} />
-                </Fragment>
-              );
-            if ([30023, 34235, 21, 22, 30004, 30005].includes(note.kind))
-              return (
-                <Fragment key={note.id}>
-                  <RepEventPreviewCard item={note} />
-                </Fragment>
-              );
-            return null;
-          }
-        })} */}
       {notes?.length === 0 && !isLoading && isConnected && (
         <div
           className="fit-container fx-centered fx-col"
@@ -508,10 +440,9 @@ const HomeFeed = ({ relay }) => {
           className="fit-container box-pad-v fx-centered fx-col"
           style={{ height: "60vh" }}
         >
-          <LoadingLogo size={64} />
+          <Spinner size={32} />
         </div>
       )}
-      {/* </InfiniteScroll> */}
     </div>
   );
 };

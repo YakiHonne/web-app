@@ -6,7 +6,7 @@ import Icon from "@/Components/Icon";
 export function SettingsFooter({ userKeys }) {
   const { t } = useTranslation();
   return (
-    <div className="fit-container fx-centered fx-start-v fx-col">
+    <div className="fit-container fx-centered box-marg-s fx-col">
       <Icon name="yaki-logomark" size={64} />
       <p>
         <span className="c1-c p-bold">
@@ -14,32 +14,32 @@ export function SettingsFooter({ userKeys }) {
         </span>{" "}
         (Updated: {process.env.NEXT_PUBLIC_UPDATE_DATE})
       </p>
-      <p className="gray-c" style={{ maxWidth: "400px" }}>
+      <p className="gray-c p-centered" style={{ maxWidth: "400px" }}>
         {t("AFZ1jAD")}
       </p>
       <div className="fx-centered fit-container fx-col">
-        <hr />
-        <div className="fit-container fx-centered fx-start-h fx-col">
-          <a href="mailto:info@yakihonne.com" className="fit-container ">
+        {/* <hr /> */}
+        <div className="fit-container fx-centered fx-start-h  sc-s box-pad-h-m box-pad-v-m">
+          <a href="mailto:info@yakihonne.com" className="fit-container fx-col fx-centered">
             <div className="fx-centered">
               <Icon name="env" />
               <p className="gray-c">{t("AheSXrs")}</p>
             </div>
           </a>
-         <hr />
+          {/* <hr /> */}
           <a
             href="https://github.com/orgs/YakiHonne/repositories"
-            target="_blank" className="fit-container "
+            target="_blank" className="fit-container fx-col fx-centered"
           >
             <div className="fx-centered">
               <Icon name="github-logo" />
               <p className="gray-c">Github repos</p>
             </div>
           </a>
-         <hr />
+          {/* <hr /> */}
           <a
             href="https://github.com/YakiHonne/web-app/issues"
-            target="_blank" className="fit-container "
+            target="_blank" className="fit-container fx-col fx-centered"
           >
             <div className="fx-centered">
               <Icon name="bug" />
@@ -47,7 +47,7 @@ export function SettingsFooter({ userKeys }) {
             </div>
           </a>
         </div>
-        <hr />
+        {/* <hr /> */}
         <ZapTip
           recipientLNURL={process.env.NEXT_PUBLIC_YAKI_LUD16}
           recipientPubkey={process.env.NEXT_PUBLIC_YAKI_PUBKEY}

@@ -11,7 +11,7 @@ export default function ContentFeedCategoryPreview({
       <div className="fx-centered">
         {category.value === "top" && (
           <div>
-            <Icon name="medal" size={24} />
+            <Icon name="podium" size={24} />
           </div>
         )}
         {category.value === "widgets" && (
@@ -36,7 +36,7 @@ export default function ContentFeedCategoryPreview({
         )}
         {category.value === "network" && (
           <div>
-            <Icon name="posts" size={24} />
+            <Icon name="workflow" size={24} />
           </div>
         )}
         {category.value === "global" && (
@@ -55,29 +55,61 @@ export default function ContentFeedCategoryPreview({
   }
   if (category.group === "af") {
     let metadata = getRelayMetadata(category.value);
+    if (minimal) {
+      return (
+        <div className="fx-centered" style={{ gap: "6px" }}>
+          <RelayImage url={category.value} size={20} />
+          <p className="p-maj p-one-line">{category.display_name}</p>
+        </div>
+      );
+    }
     return (
       <div className="fx-centered">
         <div style={{ position: "relative" }}>
-          <RelayImage url={category.value} size={minimal ? 32 : 40} />
+          <RelayImage url={category.value} size={40} />
         </div>
         <div>
           <p className="p-one-line">{category.display_name}</p>
-          {!minimal && (
-            <p className="gray-c p-one-line p-medium">
-              {metadata?.description || metadata?.value}
-            </p>
-          )}
+          <p className="gray-c p-one-line p-medium">
+            {metadata?.description || metadata?.value}
+          </p>
         </div>
       </div>
     );
   }
   if (category.group === "rsf") {
+    if (minimal) {
+      return (
+        <div className="fx-centered" style={{ gap: "6px" }}>
+          <div
+            style={{
+              minWidth: "20px",
+              minHeight: "20px",
+              borderRadius: "var(--border-r-50)",
+              backgroundColor: "var(--white)",
+              backgroundImage: `url(${category.image})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              flexShrink: 0,
+            }}
+            className="fx-centered"
+          >
+            {!category.image && (
+              <p className="p-bold p-caps" style={{ fontSize: "10px" }}>
+                {category.title.charAt(0)}
+              </p>
+            )}
+          </div>
+          <p className="p-maj p-one-line">{category.title}</p>
+        </div>
+      );
+    }
     return (
       <div className="fx-centered">
         <div
           style={{
-            minWidth: minimal ? "32px" : "40px",
-            minHeight: minimal ? "32px" : "40px",
+            minWidth: "40px",
+            minHeight: "40px",
             borderRadius: "var(--border-r-50)",
             backgroundColor: "var(--white)",
             backgroundImage: `url(${category.image})`,
@@ -87,10 +119,7 @@ export default function ContentFeedCategoryPreview({
           className="fx-centered"
         >
           {!category.image && (
-            <p
-              className={`p-bold p-caps `}
-              style={{ position: "relative", zIndex: 1 }}
-            >
+            <p className="p-bold p-caps" style={{ position: "relative", zIndex: 1 }}>
               {category.title.charAt(0)}
             </p>
           )}
@@ -103,12 +132,38 @@ export default function ContentFeedCategoryPreview({
     );
   }
   if (category.group === "pf") {
+    if (minimal) {
+      return (
+        <div className="fx-centered" style={{ gap: "6px" }}>
+          <div
+            style={{
+              minWidth: "20px",
+              minHeight: "20px",
+              borderRadius: "var(--border-r-50)",
+              backgroundColor: "var(--white)",
+              backgroundImage: `url(${category.image})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              flexShrink: 0,
+            }}
+            className="fx-centered"
+          >
+            {!category.image && (
+              <p className="p-bold p-caps" style={{ fontSize: "10px" }}>
+                {category.title.charAt(0)}
+              </p>
+            )}
+          </div>
+          <p className="p-maj p-one-line">{category.title}</p>
+        </div>
+      );
+    }
     return (
       <div className="fx-centered">
         <div
           style={{
-            minWidth: minimal ? "32px" : "40px",
-            minHeight: minimal ? "32px" : "40px",
+            minWidth: "40px",
+            minHeight: "40px",
             borderRadius: "var(--border-r-50)",
             backgroundColor: "var(--white)",
             backgroundImage: `url(${category.image})`,
@@ -118,10 +173,7 @@ export default function ContentFeedCategoryPreview({
           className="fx-centered"
         >
           {!category.image && (
-            <p
-              className={`p-bold p-caps `}
-              style={{ position: "relative", zIndex: 1 }}
-            >
+            <p className="p-bold p-caps" style={{ position: "relative", zIndex: 1 }}>
               {category.title.charAt(0)}
             </p>
           )}

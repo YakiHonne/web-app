@@ -3,28 +3,14 @@ import { copyText } from "@/Helpers/Helpers";
 import { t } from "i18next";
 import React, { useState } from "react";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function MintDetails({ mintInfo, exit }) {
   const [showAbout, setShowabout] = useState(false);
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={550}>
       <div
-        className="box-pad-h-m box-pad-v sc-s bg-sp slide-up"
-        style={{
-          position: "relative",
-          width: "min(100%,550px)",
-          maxHeight: "80vh",
-          overflow: "scroll",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h-m box-pad-v"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -161,6 +147,6 @@ export default function MintDetails({ mintInfo, exit }) {
           </div>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

@@ -5,11 +5,14 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import useUserProfile from "@/Hooks/useUsersProfile";
 
 export default function SearchUserCard({ user, url, exit }) {
   const { t } = useTranslation();
   const userFollowings = useSelector((state) => state.userFollowings);
   const [verified, setVerified] = useState(false);
+  const { proUser, yakiUsername } = useUserProfile(user.pubkey);
   const isFollowing = useMemo(() => {
     return userFollowings.includes(user.pubkey);
   }, [userFollowings, user]);
@@ -51,6 +54,7 @@ export default function SearchUserCard({ user, url, exit }) {
                   {user.display_name || user.name}
                 </p>
                 {verified && <Icon name="checkmark-c1" isColored />}
+                {proUser.isProUser && <Badge data={proUser} size={16} />}
                 {isFollowing && (
                   <div className="sticker sticker-small sticker-gray-black">
                     {t("AOwS3ca")}
@@ -67,7 +71,7 @@ export default function SearchUserCard({ user, url, exit }) {
     );
   return (
     <Link
-      href={`/profile/${url}`}
+      href={yakiUsername ? `/${yakiUsername}` : `/profile/${url}`}
       className="fx-scattered box-pad-v-s box-pad-h-m fit-container pointer search-bar-post"
       onClick={(e) => {
         exit();
@@ -87,6 +91,7 @@ export default function SearchUserCard({ user, url, exit }) {
                 {user.display_name || user.name}
               </p>
               {verified && <Icon name="checkmark-c1" isColored />}
+              {proUser.isProUser && <Badge data={proUser} size={16} />}
               {isFollowing && (
                 <div className="sticker sticker-small sticker-gray-black">
                   {t("AOwS3ca")}

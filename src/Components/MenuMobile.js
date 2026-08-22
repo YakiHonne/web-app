@@ -9,6 +9,7 @@ import { getConnectedAccounts } from "@/Helpers/ClientHelpers";
 import { redirectToLogin } from "@/Helpers/Helpers";
 import { useSelector } from "react-redux";
 import {
+  getAccountKindTag,
   handleSwitchAccount,
   logoutAllAccounts,
   userLogout,
@@ -104,9 +105,8 @@ export default function MenuMobile({ toggleLogin, exit }) {
             customHistory("/");
             dismiss();
           }}
-          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${
-            isPage("/") ? "active-link" : "inactive-link"
-          }`}
+          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${isPage("/") ? "active-link" : "inactive-link"
+            }`}
         >
           <Icon name="home" size={24} />
           <div className="p-big">{t("AJDdA3h")}</div>
@@ -116,9 +116,8 @@ export default function MenuMobile({ toggleLogin, exit }) {
             customHistory("/media");
             dismiss();
           }}
-          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${
-            isPage("/media") ? "active-link" : "inactive-link"
-          }`}
+          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${isPage("/media") ? "active-link" : "inactive-link"
+            }`}
         >
           <Icon name="media" size={24} />
           <div className="p-big">{t("A0i2SOt")}</div>
@@ -128,9 +127,8 @@ export default function MenuMobile({ toggleLogin, exit }) {
             customHistory("/relay-orbits");
             dismiss();
           }}
-          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${
-            isPage("/relay-orbits") ? "active-link" : "inactive-link"
-          }`}
+          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${isPage("/relay-orbits") ? "active-link" : "inactive-link"
+            }`}
         >
           <Icon name="orbit" size={24} />
           <div className="p-big">{t("AjGFut6")}</div>
@@ -140,9 +138,8 @@ export default function MenuMobile({ toggleLogin, exit }) {
             customHistory("/articles");
             dismiss();
           }}
-          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${
-            isPage("/articles") ? "active-link" : "inactive-link"
-          }`}
+          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${isPage("/articles") ? "active-link" : "inactive-link"
+            }`}
         >
           <Icon name="posts" size={24} />
           <div className="p-big">{t("AesMg52")}</div>
@@ -152,9 +149,8 @@ export default function MenuMobile({ toggleLogin, exit }) {
             customHistory("/smart-widgets");
             dismiss();
           }}
-          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${
-            isPage("/smart-widgets") ? "active-link" : "inactive-link"
-          }`}
+          className={`fx-scattered fit-container fx-start-h pointer box-pad-h-s box-pad-v-s ${isPage("/smart-widgets") ? "active-link" : "inactive-link"
+            }`}
         >
           <Icon name="smart-widget" size={24} />
           <div className="p-big">{t("AkvXmyz")}</div>
@@ -164,9 +160,8 @@ export default function MenuMobile({ toggleLogin, exit }) {
             customHistory("/messages");
             dismiss();
           }}
-          className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s ${
-            isPage("/messages") ? "active-link" : "inactive-link"
-          }`}
+          className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s ${isPage("/messages") ? "active-link" : "inactive-link"
+            }`}
         >
           <div className="fx-centered">
             <Icon name="env" size={24} />
@@ -192,9 +187,8 @@ export default function MenuMobile({ toggleLogin, exit }) {
             }}
           >
             <div
-              className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s ${
-                isPage("/dashboard") ? "active-link" : "inactive-link"
-              }`}
+              className={`pointer fit-container fx-scattered box-pad-h-s box-pad-v-s ${isPage("/dashboard") ? "active-link" : "inactive-link"
+                }`}
               onClick={() => {
                 customHistory("/dashboard");
                 dismiss();
@@ -308,12 +302,7 @@ export default function MenuMobile({ toggleLogin, exit }) {
                             account.name ||
                             minimizeKey(userKeys.pub)}
                         </p>
-                        <p className="gray-c p-medium p-one-line">
-                          @
-                          {account.name ||
-                            account.display_name ||
-                            minimizeKey(account.pubkey)}
-                        </p>
+                        {getAccountKindTag({ account })}
                       </div>
                     </div>
                     <div>

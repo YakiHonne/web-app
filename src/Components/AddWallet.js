@@ -3,24 +3,15 @@ import Link from "next/link";
 import AddYakiWallet from "@/Components/AddYakiWallet";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
+import { setWalletReturnPath } from "@/Helpers/ClientHelpers";
 
-export default function AddWallet({ exit, refresh }) {
+export default function AddWallet({ exit, refresh, returnPath = "" }) {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      style={{ zIndex: "1000" }}
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="sc-s box-pad-h box-pad-v fx-centered fx-col bg-sp"
-        style={{ width: "min(100%,500px)", position: "relative" }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -35,7 +26,10 @@ export default function AddWallet({ exit, refresh }) {
           className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"
           style={{ backgroundColor: "transparent" }}
           href={"/lightning-wallet/nwc"}
-          onClick={exit}
+          onClick={() => {
+            setWalletReturnPath(returnPath);
+            exit();
+          }}
         >
           <div className="fx-centered">
             <Icon name="nwc-logo" size={24} isColored/>
@@ -51,9 +45,10 @@ export default function AddWallet({ exit, refresh }) {
         <div
           className="fit-container fx-scattered sc-s-18 box-pad-h-s box-pad-v-s option pointer"
           style={{ backgroundColor: "transparent" }}
-          onClick={() =>
-            (window.location.href = process.env.NEXT_PUBLIC_ALBY_ALBY_CONNECT)
-          }
+          onClick={() => {
+            setWalletReturnPath(returnPath);
+            window.location.href = process.env.NEXT_PUBLIC_ALBY_ALBY_CONNECT;
+          }}
         >
           <div className="fx-centered">
             <Icon name="alby-logo" size={24} isColored/>
@@ -68,6 +63,6 @@ export default function AddWallet({ exit, refresh }) {
         </div>
         <p className="gray-c p-medium p-centered">{t("APcRx0f")}</p>
       </div>
-    </div>
+    </Overlay>
   );
 }

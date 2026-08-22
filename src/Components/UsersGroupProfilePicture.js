@@ -18,7 +18,9 @@ export default function UsersGroupProfilePicture({
               marginLeft: index > 0 ? "-15px" : "0",
               zIndex: users.length - index,
               position: "relative",
+              height: `${imgSize}px`
             }}
+            className="fx-centered"
           >
             <UserCard pubkey={user} imgSize={imgSize} />
           </div>

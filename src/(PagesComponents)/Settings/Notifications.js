@@ -69,15 +69,14 @@ export function Notifications({ selectedTab, setSelectedTab }) {
 
   return (
     <div
-      className={`fit-container fx-scattered fx-col pointer ${
-        selectedTab === "notifications" ? "sc-s box-pad-h-s box-pad-v-s" : ""
-      }`}
+      className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "notifications" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+        }`}
       style={{
-        borderBottom: "1px solid var(--very-dim-gray)",
+        // borderBottom: "1px solid var(--very-dim-gray)",
         gap: 0,
-        borderColor: "var(--very-dim-gray)",
+        // borderColor: "var(--very-dim-gray)",
         transition: "0.2s ease-in-out",
-        borderRadius: 0,
+        // borderRadius: 0,
       }}
     >
       <div
@@ -131,9 +130,8 @@ export function Notifications({ selectedTab, setSelectedTab }) {
                     </div>
                     <div className="fx-centered">
                       <div
-                        className={`toggle ${
-                          item.isHidden ? "toggle-dim-gray" : ""
-                        } ${!item.isHidden ? "toggle-c1" : "toggle-dim-gray"}`}
+                        className={`toggle ${item.isHidden ? "toggle-dim-gray" : ""
+                          } ${!item.isHidden ? "toggle-c1" : "toggle-dim-gray"}`}
                         onClick={() =>
                           handleNotification(index, !item.isHidden)
                         }

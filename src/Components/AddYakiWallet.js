@@ -1,17 +1,19 @@
-import axios from "axios";
+import axiosInstance from "@/Helpers/HTTP_Client";
 import React, { useState } from "react";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useDispatch, useSelector } from "react-redux";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import { downloadAsFile } from "@/Helpers/Encryptions";
 import Icon from "@/Components/Icon";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 export default function AddYakiWallet({ refresh }) {
   const dispatch = useDispatch();
   const userMetadata = useSelector((state) => state.userMetadata);
   const { t } = useTranslation();
+  const { handleAccessError } = useQuotaGuard();
   const [isLoading, setIsLoading] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showErrorMessage, setShowMessageError] = useState(false);
@@ -30,7 +32,7 @@ export default function AddYakiWallet({ refresh }) {
         return;
       }
       setIsLoading(true);
-      let url = await axios.post("https://wallet.yakihonne.com/api/wallets", {
+      let url = await axiosInstance.post("/api/v1/wallet", {
         username: userName?.toLowerCase(),
       });
       let toSave = [
@@ -81,7 +83,9 @@ export default function AddYakiWallet({ refresh }) {
     } catch (err) {
       console.log(err);
       setIsLoading(false);
-      if (err.response?.status) {
+      if (handleAccessError(err, "wallet-creation")) {
+        return;
+      } else if (err.response?.status) {
         setShowMessageError(true);
       } else {
         dispatch(
@@ -106,9 +110,8 @@ export default function AddYakiWallet({ refresh }) {
 
   return (
     <div
-      className={`fit-container fx-scattered sc-s-18 fx-col box-pad-h-s box-pad-v-s pointer ${
-        showMore ? "" : "option"
-      }`}
+      className={`fit-container fx-scattered sc-s-18 fx-col box-pad-h-s box-pad-v-s pointer ${showMore ? "" : "option"
+        }`}
       style={{ backgroundColor: "transparent" }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -149,7 +152,7 @@ export default function AddYakiWallet({ refresh }) {
               }}
             />
             <p className="gray-c p-big" style={{ minWidth: "max-content" }}>
-              @wallet.yakihonne.com
+              {t("An427hr")}
             </p>
           </div>
           {showErrorMessage && (
@@ -172,7 +175,7 @@ export default function AddYakiWallet({ refresh }) {
             onClick={handleCreateWallet}
           >
             {/* {!isLoading && <>{userName ? t("AvjCl1G") : t("AhQtS0K")}</>} */}
-            {isLoading ? <LoadingDots /> : t("AvjCl1G")}
+            {isLoading ? <Spinner /> : t("AvjCl1G")}
           </button>
         </div>
       )}

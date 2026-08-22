@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import ManageInterest from "./ManageInterest";
 import Icon from "@/Components/Icon";
+import InterestSuggestions from "@/Content/InterestSuggestions";
 
 const getInterestList = (list) => {
   let tempList = [];

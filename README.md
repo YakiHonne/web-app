@@ -16,57 +16,113 @@ YakiHonne also runs its own relays under [nostr-01.yakihonne.com](https://nostr-
 
 # 1. Features
 
-## 1.1 Cient
+## 1.1 Accounts & sign-in
 
-- [x] Login options support: keys, wallet, on-the-go account creation (NIP-01, NIP-07)
-- [x] Bech32 encoding support (NIP-19)
-- [x] Global Feed based on user all relays
-- [x] Custom Feed based on user following
-- [x] Top creators list based on all relays/selected relay
-- [x] Top curators list based on nostr-01.yaihonne.com relay
-- [x] Latest discussed topics based on hashtags
-- [x] Home carousel containing latest published curations
-- [x] Curations: topic-related curated articles (NIP-51)
-- [x] My curations, My articles sections as a space for creators to manage and organize their content
-- [x] Rich markdown editor to write and preview long-form content (NIP-23)
-- [x] The ability to draft/edit/delete articles (NIP-09, NIP-23)
-- [x] Topic-related search using hashtags (NIP-12)
-- [x] Users search using pubkeys
-- [x] Built-in upload for user profile images and banners within nostr-01.yakikhonne.com
-- [x] User profile page: following/followers/zapping/published articles
-- [x] URI scheme support (currenly only naddr) (NIP-21)
-- [x] Users follow/unfollow (NIP-02)
-- [x] Lightning zaps: via QR codes or dedicted wallet (NIP-57)
-- [x] Customizable user settings: Keypair, Lightning Addres, relay list
-- [x] Relay list metadata support (NIP-65)
-- [x] And many others feel free to visit or download YakiHonne to explore 
+- [x] Private key sign-in: `nsec` or raw hex (NIP-19)
+- [x] Browser extension signing (NIP-07)
+- [x] Remote signer / bunker support (NIP-46)
+- [x] Google sign-in, with FROST threshold key recovery — the key is split into shards across signer relays, so no server ever holds the whole key
+- [x] On-the-go account creation
+- [x] Multi-account switching, with keys encrypted at rest in local storage
 
-## 1.2 Relay
+## 1.2 Content
 
-[nostr-01.yakihonne.com](https://nostr-01.yakihonne.com) and [nostr-02.yakihonne.com](https://nostr-02.yakihonne.com) relay is fully based on [strfry](https://github.com/hoytech/strfry) implementation and writted in Typescript.
+| Type | Route | Kinds |
+|---|---|---|
+| Notes | `/note/[nevent]` | 1 |
+| Long-form articles | `/article/[naddr]`, `/write-article` | 30023, 30024 (drafts) |
+| Videos | `/video/[naddr]` | 21, 22, 34235, 34236 |
+| Images | `/image/[nevent]` | 20 |
+| Curations | `/curation/[naddr]` | 30004, 30005 |
+| Smart widgets | `/smart-widgets`, `/smart-widget-builder` | 30033 |
+| Flash news | — | 11 |
+| Starter & media packs | `/pack/s`, `/pack/m` | — |
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+- [x] Feeds: home, `/discover`, `/explore`, `/media`, plus DVM-backed content feeds
+- [x] Paid notes — surfaced in the home feed for free and basic plan users
+- [x] Direct messages (NIP-04 and NIP-44), notifications, and event/note statistics
+- [x] Event scheduling via DVM (NIP-90), gift-wrapped (NIP-59)
 
-## Getting Started
+## 1.3 Article editor (v2)
 
-First, run the development server:
+- [x] TipTap-based WYSIWYG that serializes to markdown
+- [x] Mentions and Nostr entity embeds (`nevent`, `naddr`, `npub`, `note`, `nprofile`)
+- [x] Tables, math (KaTeX), syntax-highlighted code blocks, text alignment, images
+- [x] PDF-to-Markdown import
+- [x] AI writing assistant and a Second Reader with selectable personas (paid plans)
+- [x] Drafts, autosave, publish modal and article preview
+
+## 1.4 Wallets & payments
+
+- [x] Built-in Yaki wallet, auto-provisioned over NWC
+- [x] Nostr Wallet Connect (NIP-47) and Alby
+- [x] WebLN
+- [x] Cashu / eCash wallet with nutzaps (NIP-60, NIP-61)
+- [x] Lightning zaps via QR or connected wallet (NIP-57)
+- [x] YakiHonne premium plans — free / basic / premium, plus a trial. Payable by card (hosted checkout, handled server-side) or Lightning
+- [x] Creator subscriptions, so fans can subscribe directly to a creator
+- [x] Yaki Points: earn, spend, and redeem for rewards
+
+## 1.5 Media & relays
+
+- [x] Blossom media servers for uploads, with a management UI at `/blossom`
+- [x] Relay management and Relay Orbits at `/relay-orbits`
+- [x] Relay list metadata and outbox model (NIP-65)
+- [x] Relay authentication (NIP-42)
+- [x] Premium relays for paid plans
+
+## 1.6 Smart widgets
+
+- [x] Builder, checker, and playground (`/smart-widget-builder`, `/smart-widget-checker`, `/sw-playground`)
+- [x] AI-assisted widget generation (`/sw-ai`)
+- [x] Developer docs under `/docs/sw`
+
+## 1.7 Interface
+
+- [x] 12 interface languages: Arabic, Chinese, English, French, Hindi, Hungarian, Italian, Japanese, Portuguese, Russian, Spanish, Thai
+- [x] Separate content language preference for post translation, with pluggable translation services
+- [x] Light and dark themes
+- [x] Mobile-oriented layout with bottom sheets
+- [x] Guided navbar tour and in-app changelog
+- [x] Installable as a PWA
+
+## 1.8 Supported NIPs
+
+NIP-01, NIP-02, NIP-04, NIP-05, NIP-07, NIP-09, NIP-17, NIP-18, NIP-19, NIP-21, NIP-23, NIP-25, NIP-30, NIP-42, NIP-44, NIP-46, NIP-47, NIP-51, NIP-57, NIP-58, NIP-59, NIP-60, NIP-61, NIP-65, NIP-68, NIP-71, NIP-78, NIP-89, NIP-90, NIP-94, NIP-98.
+
+Media uploads additionally implement the [Blossom](https://github.com/hzrd149/blossom) (BUD) spec, which is not a NIP.
+
+## 1.9 Relay
+
+[nostr-01.yakihonne.com](https://nostr-01.yakihonne.com) and [nostr-02.yakihonne.com](https://nostr-02.yakihonne.com) are fully based on the [strfry](https://github.com/hoytech/strfry) implementation.
+
+# 2. Tech stack
+
+- [Next.js](https://nextjs.org) 15 (pages router) with React 19
+- [NDK](https://github.com/nostr-dev-kit/ndk) for Nostr, with a Dexie/IndexedDB cache adapter
+- Redux Toolkit for state
+- i18next + react-i18next, locales fetched at runtime from `public/locales/{lng}/common.json`
+- TipTap 3 for the article editor
+- Plain CSS in `src/styles/`, themed with `next-themes`
+- `next-pwa` for the service worker
+- A custom ISR cache handler (`cache-handler.cjs`) that hashes over-long cache keys
+
+# 3. Getting started
+
+Requires [pnpm](https://pnpm.io).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.example .env.local   # then fill in the values
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The dev server runs on [http://localhost:3400](http://localhost:3400).
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+```bash
+pnpm build   # production build
+pnpm start   # serve the production build
+pnpm lint
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
-
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Pages live in `src/pages`, shared components in `src/Components`, page-level components in `src/(PagesComponents)`, and Nostr/helper logic in `src/Helpers`.

@@ -1,5 +1,5 @@
 import React from "react";
-import LoadingDots from "../LoadingDots";
+import Spinner from "../Spinner";
 import VideoTrimControler from "./VideoTrimControler";
 import { useTranslation } from "react-i18next";
 
@@ -44,7 +44,7 @@ export default function VideoTrim({
             style={{ width: "100%", height: "100px" }}
             className="fx-centered sc-s-18"
           >
-            <LoadingDots />
+            <Spinner />
           </div>
         )}
         {videoTimeframes.length > 0 && (

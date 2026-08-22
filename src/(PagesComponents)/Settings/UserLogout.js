@@ -9,10 +9,10 @@ export default function UserLogout() {
   const userKeys = useSelector((state) => state.userKeys);
   return (
     <div
-      className="fit-container fx-scattered box-pad-h-m box-pad-v-m pointer"
+      className="fit-container fx-scattered pointer"
       onClick={() => userLogout(userKeys.pub)}
     >
-      <div className="fx-centered fx-start-h">
+      <div className="fit-container fx-centered  btn btn-red">
         <Icon name="logout" size={24} />
         <p>{t("AyXwdfE")}</p>
       </div>

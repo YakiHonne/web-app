@@ -1,3 +1,27 @@
+# (v6.0.0) 23/07/2026
+
+- Complete visual redesign of the app with a new top navbar, refreshed layout, and updated styling throughout.
+- Migrated the entire interface to a new, consistent icon set.
+- Introduced YakiHonne premium plans that unlock more features, payable by card or Lightning.
+- Revamped the Yaki Points system with a clear earning and spending model, letting you redeem accumulated points for rewards.
+- Paid notes now surface in the home feed for free and basic plan users, giving creators wider reach and stronger incentive to publish premium content.
+- Rebuilt the article editor (v2) with support for mentions, Nostr entity embeds, and PDF-to-Markdown import.
+- Added an AI writing assistant and a Second Reader with selectable personas, both built directly into the new editor.
+- Added Google as a login method and as a private-key recovery option.
+- Redesigned the article publishing flow with a new publish modal and article preview.
+- Added a guided navbar tour and an in-app announcement introducing the new design.
+- Improved the mobile experience with bottom sheets and smoother, hover-aware interactions.
+- Added event and note statistics so you can see how content is performing.
+- Added Refund Policy and legal document pages.
+- Made the app noticeably faster to load and lighter on data usage.
+- Added Hungarien language support.
+- Added a language preference for translating post content.
+- Fixed the cursor hover behavior across the interface.
+- Fixed the theme color on the login page.
+- Fixed the highlighted icons appearing incorrectly during the tour.
+- Fixed tab positioning issues.
+- General improvements and bug fixes across the app, and more feature to discover.
+
 # (v5.9.1) 13/05/2026
 
 - Resolved the image pasting overlay issue where pasted images were hidden during note creation.

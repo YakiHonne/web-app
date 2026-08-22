@@ -162,7 +162,7 @@ export default function MiniTool({ url, setReturnedData }) {
         <iframe
           ref={iframeRef}
           src={url}
-          allow="microphone; camera; clipboard-write 'src'"
+          allow="clipboard-write 'src'"
           sandbox="allow-forms allow-scripts allow-same-origin allow-popups"
           style={{ border: "none", height: "60vh", margin: 0 }}
           className="fit-container"

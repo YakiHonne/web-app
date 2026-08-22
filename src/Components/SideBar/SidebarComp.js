@@ -6,7 +6,7 @@ import NotificationCenter from "@/Components/SideBar/NotificationCenter";
 import { useEffect } from "react";
 import { useRef } from "react";
 import ProgressCirc from "@/Components/ProgressCirc";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import LoginWithAPI from "@/Components/LoginWithAPI";
 import WriteNew from "@/Components/WriteNew";
 import UserBalance from "@/Components/UserBalance";
@@ -20,6 +20,7 @@ import { redirectToLogin } from "@/Helpers/Helpers";
 import { useSelector } from "react-redux";
 import {
   exportAllWallets,
+  getAccountKindTag,
   handleSwitchAccount,
   logoutAllAccounts,
   userLogout,
@@ -36,6 +37,7 @@ import { customHistory } from "@/Helpers/History";
 import useDirectMessages from "@/Hooks/useDirectMessages";
 import { SidebarNavItem } from "@/Components/SideBar/SidebarNavItem";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function SidebarComp() {
   const { t } = useTranslation();
@@ -239,7 +241,7 @@ export default function SidebarComp() {
               }}
               isActive={isPage("/")}
             >
-              <Icon name={isPage("/") ? "home-bold" : "home"} size={24} />
+              <Icon name={isPage("/") ? "home-bold" : "home"} size={24} strokeWidth={2} />
               <div className="link-label">{t("AJDdA3h")}</div>
             </SidebarNavItem>
             <SidebarNavItem
@@ -250,7 +252,7 @@ export default function SidebarComp() {
             >
               <Icon
                 name={isPage("/media") ? "media-bold" : "media"}
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("A0i2SOt")}</div>
             </SidebarNavItem>
@@ -262,7 +264,7 @@ export default function SidebarComp() {
             >
               <Icon
                 name={isPage("/relay-orbits") ? "orbit-bold" : "orbit"}
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("AjGFut6")}</div>
             </SidebarNavItem>
@@ -274,7 +276,7 @@ export default function SidebarComp() {
             >
               <Icon
                 name={isPage("/explore") ? "discover-bold" : "discover"}
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("ABxLOSx")}</div>
             </SidebarNavItem>
@@ -286,7 +288,7 @@ export default function SidebarComp() {
             >
               <Icon
                 name={isPage("/articles") ? "posts-bold" : "posts"}
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("AesMg52")}</div>
             </SidebarNavItem>
@@ -303,7 +305,7 @@ export default function SidebarComp() {
                     ? "smart-widget-bold"
                     : "smart-widget"
                 }
-                size={24}
+                size={24} strokeWidth={2}
               />
               <div className="link-label">{t("A2mdxcf")}</div>
             </SidebarNavItem>
@@ -315,7 +317,7 @@ export default function SidebarComp() {
               <div className="fx-centered">
                 <Icon
                   name={isPage("/messages") ? "env-bold" : "env"}
-                  size={24}
+                  size={24} strokeWidth={2}
                 />
                 <div className="link-label">{t("As2zi6P")}</div>
               </div>
@@ -329,7 +331,7 @@ export default function SidebarComp() {
                   isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
                   isPage(
                     "/profile/" +
-                      nip19.nprofileEncode({ pubkey: userKeys.pub }),
+                    nip19.nprofileEncode({ pubkey: userKeys.pub }),
                   ) ||
                   isPage("/profile/" + userMetadata.nip05)
                 }
@@ -338,15 +340,15 @@ export default function SidebarComp() {
                 <Icon
                   name={
                     isPage("/profile/" + getBech32("npub", userKeys.pub)) ||
-                    isPage(
-                      "/profile/" +
+                      isPage(
+                        "/profile/" +
                         nip19.nprofileEncode({ pubkey: userKeys.pub }),
-                    ) ||
-                    isPage("/profile/" + userMetadata.nip05)
+                      ) ||
+                      isPage("/profile/" + userMetadata.nip05)
                       ? "user-bold"
                       : "user"
                   }
-                  size={24}
+                  size={24} strokeWidth={2}
                 />
                 <div className="link-label">{t("AyBBPWE")}</div>
               </SidebarNavItem>
@@ -360,7 +362,7 @@ export default function SidebarComp() {
               >
                 <Icon
                   name={isPage("/dashboard") ? "dashboard-bold" : "dashboard"}
-                  size={24}
+                  size={24} strokeWidth={2}
                 />
                 <div className="link-label">{t("ALBhi3j")}</div>
               </SidebarNavItem>
@@ -388,7 +390,7 @@ export default function SidebarComp() {
                   }}
                 >
                   <div className="mb-show round-icon">
-                    <Icon name="setting" size={24} />
+                    <Icon name="setting" size={24} strokeWidth={2} />
                   </div>
                   <div
                     className="fx-centered fx-start-h pointer"
@@ -501,7 +503,7 @@ export default function SidebarComp() {
                     </div>
                   )}
 
-                  {!isYakiChestLoaded && <LoadingDots />}
+                  {!isYakiChestLoaded && <Spinner />}
                 </div>
                 {showSettings && (
                   <div
@@ -596,30 +598,7 @@ export default function SidebarComp() {
                                 </div>
                               </div>
                               <div className="fx-centered">
-                                {account.userKeys.ext && (
-                                  <div
-                                    className="sticker sticker-small sticker-orange-side"
-                                    style={{ minWidth: "max-content" }}
-                                  >
-                                    Extension
-                                  </div>
-                                )}
-                                {account.userKeys.sec && (
-                                  <div
-                                    className="sticker sticker-small sticker-red-side"
-                                    style={{ minWidth: "max-content" }}
-                                  >
-                                    Private Key
-                                  </div>
-                                )}
-                                {account.userKeys.bunker && (
-                                  <div
-                                    className="sticker sticker-small sticker-green-side"
-                                    style={{ minWidth: "max-content" }}
-                                  >
-                                    Remote
-                                  </div>
-                                )}
+                                {getAccountKindTag({ account })}
                                 {userKeys.pub !== account.pubkey && (
                                   <div
                                     className="fx-centered"
@@ -696,7 +675,7 @@ export default function SidebarComp() {
                 onClick={() => redirectToLogin()}
               >
                 <div className="link-label">{t("AmOtzoL")}</div>
-                <Icon name="connect" size={24} />
+                <Icon name="connect" size={24} strokeWidth={2} />
               </button>
             )}
           </div>
@@ -719,7 +698,7 @@ const AccountSwitching = ({ exit }) => {
   }, []);
 
   return (
-    <div className="fixed-container fx-centered">
+    <Overlay exit={exit}>
       <div className="fx-centered fx-col">
         <div className="fx-centered popout">
           <div style={{ borderRadius: "var(--border-r-50)" }}>
@@ -736,7 +715,7 @@ const AccountSwitching = ({ exit }) => {
           <p className="gray-c">@{userMetadata.name}</p>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };
 
@@ -744,10 +723,9 @@ const ConfirmmationBox = ({ exit, handleOnClick }) => {
   const { t } = useTranslation();
 
   return (
-    <section className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={450}>
       <section
-        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
-        style={{ width: "450px" }}
+        className="fx-centered fx-col box-pad-h box-pad-v"
       >
         <div
           className="fx-centered box-marg-s"
@@ -776,6 +754,6 @@ const ConfirmmationBox = ({ exit, handleOnClick }) => {
           </button>
         </div>
       </section>
-    </section>
+    </Overlay>
   );
 };

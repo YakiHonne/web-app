@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { setToPublish } from "@/Store/Slides/Publishers";
 import InterestSuggestions from "@/Content/InterestSuggestions";
 import InterestSuggestionsCards from "@/Components/SuggestionsCards/InterestSuggestionsCards";
@@ -115,7 +115,7 @@ export default function ManageInterest({ exit }) {
           className={`btn ${isChanged ? "btn-normal" : "btn-disabled"}`}
           onClick={saveInterestList}
         >
-          {isLoading ? <LoadingDots /> : t("A29aBCD")}
+          {isLoading ? <Spinner /> : t("A29aBCD")}
         </button>
       </div>
       <div className="fit-container fx-centered fx-col box-pad-h">
@@ -126,7 +126,7 @@ export default function ManageInterest({ exit }) {
           }}
           className="if fit-container fx-scattered"
         >
-          <Icon name="search" size={24} />
+          <Icon name="search_magnifying_glass" v={2} size={24} />
           <input
             value={newInterest}
             onChange={(e) => setNewInterest(e.target.value)}
