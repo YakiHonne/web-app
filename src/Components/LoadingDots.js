@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function LoadingDots() {
-  
+
   return (
     <div className="fx-centered loading-dots">
       <div

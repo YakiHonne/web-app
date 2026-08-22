@@ -6,6 +6,7 @@ import OptionsDropdown from "./OptionsDropdown";
 import { useTranslation } from "react-i18next";
 import { copyText } from "@/Helpers/Helpers";
 import Icon from "@/Components/Icon";
+import { useTheme } from "next-themes";
 
 const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   const videoRef = useRef();
@@ -169,6 +170,14 @@ const CustomVideoControls = ({ videoRef, src, setIsFullScreen }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(1);
   const [isPaused, setIsPaused] = useState(true);
+  const { resolvedTheme } = useTheme();
+  const isLight = resolvedTheme === "light" || resolvedTheme === "white";
+  const isCreamy = resolvedTheme === "creamy";
+  const controllerGradient = isLight
+    ? "linear-gradient(0deg,rgba(220,220,220,0.95) 0%, rgba(210,210,210,0.50) 35%, rgba(210,210,210,0) 50%)"
+    : isCreamy
+    ? "linear-gradient(0deg,rgba(200,180,155,0.95) 0%, rgba(200,180,155,0.50) 35%, rgba(200,180,155,0) 50%)"
+    : "linear-gradient(0deg,rgba(0,0,0,1) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0) 50%)";
 
   useEffect(() => {
     const video = videoRef;
@@ -228,8 +237,7 @@ const CustomVideoControls = ({ videoRef, src, setIsFullScreen }) => {
         left: 0,
         bottom: 0,
         height: "100%",
-        background:
-          "linear-gradient(0deg,rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.45) 35%, rgba(0, 0, 0, 0) 50%)",
+        background: controllerGradient,
       }}
       onClick={(e) => {
         e.preventDefault();

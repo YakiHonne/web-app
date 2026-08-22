@@ -2,9 +2,10 @@ import Lottie from "lottie-react";
 import React, { useEffect, useState } from "react";
 import successJSON from "@/JSONs/success.json";
 import { checkProofsStatus, publishProofs } from "@/Helpers/CashuHelpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function SyncTokens({ tokens = [], exit, cashuTokens, mint }) {
   const { t } = useTranslation();
@@ -44,28 +45,15 @@ export default function SyncTokens({ tokens = [], exit, cashuTokens, mint }) {
 
   if (faultyTokens.length === 0)
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={550}>
         <div
-          className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col slide-up"
-          style={{
-            width: "min(100%, 550px)",
-            position: "relative",
-            height: "20vh",
-          }}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
+          className="box-pad-h box-pad-v fx-centered fx-col"
+          style={{ height: "20vh" }}
         >
           <div className="close" onClick={exit}>
             <div></div>
           </div>
-          {!isSyncingFinished && <LoadingDots />}
+          {!isSyncingFinished && <Spinner />}
           {isSyncingFinished && (
             <div className="fx-centered fx-col" style={{ height: "20vh" }}>
               <h2>👌🏻</h2>
@@ -76,27 +64,14 @@ export default function SyncTokens({ tokens = [], exit, cashuTokens, mint }) {
             </div>
           )}
         </div>
-      </div>
+      </Overlay>
     );
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={550}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col slide-up"
-        style={{
-          width: "min(100%, 550px)",
-          position: "relative",
-          height: "20vh",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        className="box-pad-h box-pad-v fx-centered fx-col"
+        style={{ height: "20vh" }}
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -113,14 +88,14 @@ export default function SyncTokens({ tokens = [], exit, cashuTokens, mint }) {
                 onClick={syncTokens}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingDots /> : t("A7hStNv")}
+                {isLoading ? <Spinner /> : t("A7hStNv")}
               </button>
               <button
                 className="btn btn-gst-red "
                 onClick={exit}
                 disabled={isLoading}
               >
-                {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                {isLoading ? <Spinner /> : t("AB4BSCe")}
               </button>
             </div>
           </>
@@ -137,6 +112,6 @@ export default function SyncTokens({ tokens = [], exit, cashuTokens, mint }) {
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 }

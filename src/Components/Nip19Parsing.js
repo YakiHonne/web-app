@@ -11,14 +11,19 @@ import { getParsedNote } from "@/Helpers/ClientHelpers";
 import { nip19 } from "nostr-tools";
 import Link from "next/link";
 import KindOne from "@/Components/KindOne";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import MinimalPreviewWidget from "@/Components/SmartWidget/MinimalPreviewWidget";
 import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
-import ZapPollsComp from "@/Components/SmartWidget/ZapPollsComp";
+import dynamic from "next/dynamic";
 import WidgetCardV2 from "@/Components/WidgetCardV2";
+
+const ZapPollsComp = dynamic(
+  () => import("@/Components/SmartWidget/ZapPollsComp"),
+  { ssr: false },
+);
 import UserProfilePic from "./UserProfilePic";
 import { getLinkFromAddr } from "@/Helpers/Helpers";
 import UnsupportedKindPreview from "./UnsupportedKindPreview";
@@ -267,10 +272,11 @@ function Nip19Parsing({ addr, minimal = false }) {
           <>
             {(event?.kind === 1 || event?.kind === 1111) && (
               <div
-                className="fit-container sc-s-18 "
+                className="fit-container sc-s "
                 style={{
                   marginTop: ".5rem",
                   backgroundColor: "var(--c1-side)",
+                  border: "1px solid var(--dim-gray)"
                 }}
               >
                 <KindOne event={event} reactions={false} minimal={true} />
@@ -287,10 +293,10 @@ function Nip19Parsing({ addr, minimal = false }) {
                   backgroundColor: "var(--c1-side)",
                   marginTop: ".5rem",
                 }}
-                className="fit-container box-pad-h box-pad-v sc-s-18 fx-centered"
+                className="fit-container box-pad-h box-pad-v sc-s fx-centered"
               >
                 <p className="p-medium gray-c">{t("AgfmpuR")}</p>
-                <LoadingDots />
+                <Spinner />
               </div>
             )}
             {!isLoading && !event && (
@@ -299,7 +305,7 @@ function Nip19Parsing({ addr, minimal = false }) {
                   backgroundColor: "var(--c1-side)",
                   marginTop: ".5rem",
                 }}
-                className="fit-container box-pad-h-m box-pad-v-m sc-s-18 fx-centered"
+                className="fit-container box-pad-h-m box-pad-v-m sc-s fx-centered"
               >
                 <p className="p-medium gray-c">{t("AQeXcer")}</p>
               </div>

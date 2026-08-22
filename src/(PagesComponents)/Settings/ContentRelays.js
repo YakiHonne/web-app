@@ -7,6 +7,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import RelaysPicker from "@/Components/RelaysPicker";
 import RelayImage from "@/Components/RelayImage";
 import Icon from "@/Components/Icon";
+import { SSGRelays } from "@/Content/Relays";
 
 export function ContentRelays({ setShowRelaysInfo, allRelays }) {
   const { t } = useTranslation();
@@ -26,6 +27,12 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
       total: relaysStatus.length,
     };
   }, [relaysStatus]);
+  const suggestedRelays = useMemo(() => {
+    if (tempUserRelays.length === 0) return SSGRelays;
+    return SSGRelays.filter((relay) => {
+      return !tempUserRelays.some((item) => item.url === relay);
+    });
+  }, [tempUserRelays]);
   useEffect(() => {
     try {
       setTempUserRelays(userAllRelays);
@@ -125,13 +132,6 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
       if (!isThere) return [{ url, read: true, write: true }, ...prev];
       return prev;
     });
-    // let timeout = setTimeout(() => {
-    //   if (relaysContainer.current) {
-    //     relaysContainer.current.scrollTop =
-    //       relaysContainer.current.scrollHeight;
-    //   }
-    //   clearTimeout(timeout);
-    // }, 50);
   };
 
   const removePermanently = (index) => {
@@ -275,6 +275,38 @@ export function ContentRelays({ setShowRelaysInfo, allRelays }) {
                       </button>
                     </div>
                   )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {suggestedRelays.length > 0 && (
+          <div className="fx-centered fx-col fit-container box-pad-h-s box-pad-v-s fx-start-v fx-start-h">
+            {tempUserRelays.length === 0 && (
+              <p className="gray-c box-pad-v-s p-italic">{t("AR04C4C")}</p>
+            )}
+
+            <p>{t("AoO5zem")}</p>
+            {suggestedRelays.map((relay, index) => {
+              return (
+                <div
+                  className="fx-scattered fit-container box-pad-v-s option"
+                  style={{
+                    borderBottom:
+                      index !== suggestedRelays.length - 1
+                        ? "1px solid var(--very-dim-gray)"
+                        : "",
+                  }}
+                  key={index}
+                  onClick={() => addRelay(relay)}
+                >
+                  <div className="fx-centered">
+                    <RelayImage url={relay} />
+                    <p>{relay}</p>
+                  </div>
+                  <div className="sticker sticker-gray-black">
+                    {t("ARWeWgJ")}
+                  </div>
                 </div>
               );
             })}

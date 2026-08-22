@@ -19,7 +19,7 @@ import {
   compactContent,
 } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import ZapAd from "@/Components/ZapAd";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import NotesComment from "@/Components/NotesComment";
@@ -33,10 +33,17 @@ import UnsupportedKindPreview from "./UnsupportedKindPreview";
 import Link from "next/link";
 import LinkRepEventPreview from "./LinkRepEventPreview";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
 import {
   getEventFromCache,
   setEventFromCache,
 } from "@/Helpers/utils/eventsCache";
+import Overlay from "@/Components/Overlay";
+import EventStats from "./EventStats";
+import PaidNoteInfoOverlay from "@/Components/PaidNoteInfoOverlay";
+import Follow from "./Follow";
+import { iconsNames } from "@/Content/IconV2URL";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 function KindOne({
   event,
@@ -44,14 +51,18 @@ function KindOne({
   border = false,
   minimal = false,
   getReposts = () => null,
+  followButton = false,
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const { isNip05Verified, userProfile } = useUserProfile(event?.pubkey);
+  const { handleTranslateError } = useQuotaGuard();
+  const userKeys = useSelector((state) => state.userKeys);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(event?.pubkey);
   const [toggleComment, setToggleComment] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
   const [usersList, setUsersList] = useState(false);
+  const [showPaidNoteInfo, setShowPaidNoteInfo] = useState(false);
   const { postActions } = useNoteStats(event?.id, event?.pubkey);
   const [isNoteTranslating, setIsNoteTranslating] = useState("");
   const [translatedNote, setTranslatedNote] = useState("");
@@ -88,10 +99,8 @@ function KindOne({
     for (let i = 0; i < range.length; i++) {
       let cleanElement = range[i].trim().replace("nostr:", "");
 
-      // Early exit if max components reached
       if (checkForComponents >= MAX_COMPONENTS) break;
 
-      // Check for note prefixes first (faster)
       let hasNotePrefix = false;
       for (let prefix of NOTE_PREFIXES) {
         if (cleanElement.startsWith(prefix)) {
@@ -101,7 +110,6 @@ function KindOne({
         }
       }
 
-      // Only check for media if no note prefix found
       if (!hasNotePrefix) {
         if (isImageUrl(cleanElement)?.type === "image") {
           checkForComponents++;
@@ -156,7 +164,6 @@ function KindOne({
 
       customHistory(`/note/${event.nEvent}`);
 
-      // Reset navigation state after a short delay
       setTimeout(() => setIsNavigating(false), 1000);
     } catch (error) {
       console.error("Error in onClick handler:", error);
@@ -165,6 +172,15 @@ function KindOne({
   };
 
   const translateNote = async () => {
+    if (!userKeys) {
+      dispatch(
+        setToast({
+          type: 3,
+          desc: t("ALtr4nL"),
+        }),
+      );
+      return;
+    }
     setIsNoteTranslating(true);
     if (translatedNote) {
       setShowTranslation(true);
@@ -179,21 +195,8 @@ function KindOne({
         return;
       }
       let res = await translate(event.content);
-      if (res.status === 500) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AZ5VQXL"),
-          }),
-        );
-      }
-      if (res.status === 400) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AJeHuH1"),
-          }),
-        );
+      if (res.status !== 200) {
+        handleTranslateError(res);
       }
       if (res.status === 200) {
         let noteTree = getNoteTree(
@@ -202,6 +205,12 @@ function KindOne({
           undefined,
           undefined,
           event.pubkey,
+          false,
+          `slider-${event.id}`,
+          (event.tags || []).reduce((map, tag) => {
+            if (tag[0] === "emoji" && tag[1] && tag[2]) map[tag[1]] = tag[2];
+            return map;
+          }, {}),
         );
         setTranslatedNote(noteTree);
         setShowTranslation(true);
@@ -213,7 +222,7 @@ function KindOne({
       dispatch(
         setToast({
           type: 2,
-          desc: t("AZ5VQXL"),
+          desc: err?.response?.status === 401 ? t("ALtr4nL") : t("AZ5VQXL"),
         }),
       );
     }
@@ -307,9 +316,9 @@ function KindOne({
         />
       )}
       <div
-        className="box-pad-v-m fit-container note-item"
+        className={`box-pad-v-m fit-container note-item${event.isPremium ? " premium-glass" : ""}`}
         id={event.id}
-        style={{ borderBottom: border ? "1px solid var(--very-dim-gray)" : "" }}
+        style={{ border: event.isPremium ? undefined : "unset" }}
       >
         {event.isComment && isThread && (
           <RelatedEvent
@@ -333,8 +342,8 @@ function KindOne({
               overflow: "visible",
             }}
           >
-            <div className="fit-container fx-centered fx-start-h fx-start-v">
-              <div>
+            <div className="fit-container fx-centered fx-start-h fx-start-v note-card-row">
+              <div className="note-card-avatar fx-centered fx-col">
                 <UserProfilePic
                   size={40}
                   mainAccountUser={false}
@@ -342,6 +351,7 @@ function KindOne({
                   img={userProfile.picture}
                   metadata={minimal ? undefined : userProfile}
                 />
+
               </div>
               <div
                 className={
@@ -349,30 +359,63 @@ function KindOne({
                 }
                 style={{ gap: "6px" }}
               >
-                <div className="fx-scattered fit-container">
-                  <div className="fx-centered" style={{ gap: "3px" }}>
-                    <div className="fx-centered" style={{ gap: "3px" }}>
-                      <p className="p-bold p-one-line" style={{ margin: 0 }}>
-                        {userProfile.display_name || userProfile.name}
-                      </p>
-                      {isNip05Verified && (
-                        <Icon name="checkmark-c1" isColored />
-                      )}
-                    </div>
-                    <p className="gray-c p-medium" style={{ margin: 0 }}>
-                      &#8226;
-                    </p>
-                    <p className="gray-c p-medium" style={{ margin: 0 }}>
-                      <Date_
-                        toConvert={new Date(event.created_at * 1000)}
-                        time={true}
+                <div className="fx-scattered fit-container note-card-header">
+                  <div className="fx-centered" style={{ gap: "8px" }}>
+                    <div className="fx-centered note-card-avatar-mobile">
+                      <UserProfilePic
+                        size={36}
+                        mainAccountUser={false}
+                        user_id={userProfile.pubkey}
+                        img={userProfile.picture}
+                        metadata={minimal ? undefined : userProfile}
                       />
-                    </p>
+                    </div>
+                    <div className="fx-centered" style={{ gap: "3px" }}>
+                      <div className="fx-centered" style={{ gap: "3px" }}>
+                        <p className="p-bold p-one-line" style={{ margin: 0 }}>
+                          {userProfile.display_name || userProfile.name}
+                        </p>
+                        {isNip05Verified && (
+                          <Icon name="checkmark-c1" isColored />
+                        )}
+                        {proUser.isProUser && <Badge data={proUser} size={16} />}
+                      </div>
+                      {event.isPremium &&
+                        <div className="premium-glass-tag">
+                          <Icon name="crown" size={12} isColored />
+                          {t("AW299l2")}
+                        </div>
+                      }
+                      <p className="gray-c p-medium" style={{ margin: 0 }}>
+                        <Date_
+                          toConvert={new Date(event.created_at * 1000)}
+                          time={true}
+                        />
+                      </p>
+                      {event.isPaidNote && followButton &&
+                        <div className="box-pad-h-s">
+                          <Follow icon={false} toFollowKey={event.pubkey} toFollowName={userProfile.display_name || userProfile.name} size="tiny" />
+                        </div>
+                      }
+                    </div>
                   </div>
                   <div className="fx-centered">
                     {event.isPaidNote && (
-                      <div className="sticker sticker-c1">{t("AAg9D6c")}</div>
+                      <div
+                        className="sticker sticker-paid sticker-click pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPaidNoteInfo(true);
+                        }}
+                      >
+                        {t("AAg9D6c")}
+                      </div>
                     )}
+                    {showPaidNoteInfo && (
+                      <PaidNoteInfoOverlay onClose={() => setShowPaidNoteInfo(false)} />
+                    )}
+                    {!isNoteTranslating && <Icon name="translate" onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                    {isNoteTranslating && <Spinner />}
                     {reactions && (
                       <EventOptions
                         event={event}
@@ -409,6 +452,7 @@ function KindOne({
                     </div>
                   </div>
                 </Link>
+                {!minimal && <div id={`slider-${event.id}`} />}
               </div>
             </div>
             {isClamped !== 10000 && (
@@ -451,37 +495,7 @@ function KindOne({
                     userProfile={userProfile}
                     setShowComments={setShowComments}
                   />
-                  <div className="fx-centered">
-                    <div className="fit-container">
-                      {!isNoteTranslating && !showTranslation && (
-                        <div
-                          className="round-icon-tooltip"
-                          data-tooltip={t("AdHV2qJ")}
-                          onClick={translateNote}
-                        >
-                          <Icon
-                            name="translate"
-                            size={24}
-                            className="opacity-4"
-                          />
-                        </div>
-                      )}
-                      {!isNoteTranslating && showTranslation && (
-                        <div
-                          className="round-icon-tooltip"
-                          data-tooltip={t("AE08Wte")}
-                          onClick={() => setShowTranslation(false)}
-                        >
-                          <Icon
-                            name="translate"
-                            size={24}
-                            className="opacity-4"
-                          />
-                        </div>
-                      )}
-                      {isNoteTranslating && <LoadingDots />}
-                    </div>
-                  </div>
+                  <EventStats postActions={postActions} />
                 </div>
               </>
             )}
@@ -493,6 +507,7 @@ function KindOne({
               replyId={event.id}
               replyPubkey={event.pubkey}
               actions={postActions}
+              label={event.isComment ? "" : t("AABwCJX")}
             />
           )}
         </div>
@@ -553,15 +568,15 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
           kind === 0
             ? await getSubData([{ ids: [ids] }], 500)
             : await getSubData(
-                [
-                  {
-                    kinds: [kind],
-                    authors: [ids.pubkey],
-                    "#d": [ids.identifier],
-                  },
-                ],
-                500,
-              );
+              [
+                {
+                  kinds: [kind],
+                  authors: [ids.pubkey],
+                  "#d": [ids.identifier],
+                },
+              ],
+              500,
+            );
         if (event_.data.length > 0) {
           let post = event_.data[0];
           saveUsers([post.pubkey]);
@@ -632,6 +647,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
                 hasReplies={true}
                 isHistory={true}
                 noReactions={!reactions}
+                fromKindOne={true}
               />
             )}
             {relatedEvent.kind !== 1 && relatedEvent.kind !== 1111 && (
@@ -666,7 +682,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
         style={{ gap: 0 }}
       >
         <div className="sc-s bg-sp box-pad-h-s box-pad-v-s ">
-          <LoadingDots />
+          <Spinner />
         </div>
         <div
           style={{
@@ -704,7 +720,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
         ) : (
           <div className="fx-centered">
             <p className="gray-c">{t("AoUrRsg")}</p>
-            <LoadingDots />
+            <Spinner />
           </div>
         )}
       </div>
@@ -746,42 +762,21 @@ const FastAccessCS = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered fx-start-v"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={550}>
       <div
-        className="fx-centered fx-col fx-start-v fx-start-h sc-s-18 bg-sp"
+        className="fx-centered fx-col fx-start-v fx-start-h"
         style={{
           overflow: "scroll",
           scrollBehavior: "smooth",
-          height: "100vh",
-          width: "min(100%, 550px)",
-          position: "relative",
           borderRadius: 0,
           gap: 0,
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
       >
         <div
-          className="fit-container fx-centered sticky"
-          style={{ borderBottom: "1px solid var(--very-dim-gray)" }}
+          className="close"
+          onClick={exit}
         >
-          <div className="fx-scattered fit-container box-pad-h">
-            <h4 className="p-caps">{t("Aog1ulK")}</h4>
-            <div
-              className="close"
-              style={{ position: "static" }}
-              onClick={exit}
-            >
-              <div></div>
-            </div>
-          </div>
+          <div></div>
         </div>
         <CommentsSection
           noteTags={noteTags}
@@ -791,6 +786,6 @@ const FastAccessCS = ({
           isRoot={isRoot}
         />
       </div>
-    </div>
+    </Overlay>
   );
 };

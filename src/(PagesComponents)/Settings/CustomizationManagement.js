@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 // import PostReactionsPreview from "@/Components/PostReactionsPreview";
 let boxView =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/box-view.png";
@@ -354,16 +355,15 @@ export function CustomizationManagement({
       )}
 
       <div
-        className={`fit-container fx-scattered fx-col pointer ${
-          selectedTab === "customization" ? "sc-s box-pad-h-s box-pad-v-s" : ""
-        }`}
+        className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "customization" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+          }`}
         style={{
-          borderBottom: "1px solid var(--very-dim-gray)",
+          // borderBottom: "1px solid var(--very-dim-gray)",
           gap: 0,
-          borderColor: "var(--very-dim-gray)",
+          // borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
           overflow: "visible",
-          borderRadius: 0,
+          // borderRadius: 0,
         }}
       >
         <div
@@ -478,24 +478,13 @@ const FeedSettings = ({
 }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container box-pad-h fx-centered"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp slide-up fx-centered fx-col fx-start-h fx-start-v"
+        className="box-pad-h box-pad-v slide-up fx-centered fx-col fx-start-h fx-start-v"
         style={{
-          width: "min(100%, 500px)",
           maxHeight: "90vh",
           overflowY: "scroll",
-          position: "relative",
           padding: "2rem",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
         }}
       >
         <div className="close" onClick={exit}>
@@ -626,7 +615,7 @@ const FeedSettings = ({
           />
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };
 

@@ -89,7 +89,7 @@ export async function getStaticProps({ locale, params }) {
         nprofile: nip19.nprofileEncode({ pubkey: pubkey }),
       },
     },
-    revalidate: metadata_ ? 2 : 3600,
+    revalidate: metadata_ ? 86400 : 3600,
   };
 }
 

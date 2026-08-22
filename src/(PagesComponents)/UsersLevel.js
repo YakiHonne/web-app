@@ -9,25 +9,21 @@ import PagePlaceholder from "@/Components/PagePlaceholder";
 import { getCurrentLevel, levelCount } from "@/Helpers/Helpers";
 import { userLogout } from "@/Helpers/Controlers";
 import { useSelector } from "react-redux";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import { timeAgo } from "@/Helpers/Encryptions";
 import Link from "next/link";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 let chart_ = [
   { action: "flashnews_post", all_time_points: 0, last_updated: null },
-  { action: "un_write", all_time_points: 0, last_updated: null },
-  { action: "un_rate", all_time_points: 0, last_updated: null },
-  { action: "curation_post", all_time_points: 0, last_updated: null },
   { action: "article_post", all_time_points: 0, last_updated: null },
   { action: "article_draft", all_time_points: 0, last_updated: null },
-  { action: "video_post", all_time_points: 0, last_updated: null },
   { action: "bookmark", all_time_points: 0, last_updated: null },
   { action: "zap", all_time_points: 0, last_updated: null },
   { action: "reaction", all_time_points: 0, last_updated: null },
   { action: "dms", all_time_points: 0, last_updated: null },
-  { action: "user_impact", all_time_points: 0, last_updated: null },
   { action: "comment_post", all_time_points: 0, last_updated: null },
 ];
 
@@ -77,17 +73,12 @@ export default function UserLevels() {
     topics_setup: t("AQQFa7F"),
     follow_yaki: t("AyIwX8s"),
     flashnews_post: t("AIbcFuI"),
-    un_write: t("AZYR1td"),
-    un_rate: t("AiUEDe3"),
-    curation_post: t("AP6dp7w"),
     article_post: t("ATFKth1"),
     article_draft: t("Aweyw6L"),
-    video_post: t("A5qKCQ4"),
     bookmark: t("AuOVsg9"),
     zap: t("AetoahH"),
     reaction: t("Alz0E9Y"),
     dms: t("AwpwbAl"),
-    user_impact: t("Ag6EZcj"),
     comment_post: t("AsCfe1h"),
   };
   useEffect(() => {
@@ -145,12 +136,13 @@ export default function UserLevels() {
         }).display_name;
         setTiers(tiers);
         setCurrentTier(currentTierDisplayName);
+        let visibleStats = tempStats.filter((item) => levels[item.action]);
         setOneTimeRewardStats(
-          tempStats.filter((item) => item.cooldown === 0 && item.count > 0)
+          visibleStats.filter((item) => item.cooldown === 0 && item.count > 0)
         );
 
         setRepeatedRewardsStats(
-          tempStats.filter(
+          visibleStats.filter(
             (item) =>
               item.cooldown > 0 || (item.cooldown === 0 && item.count === 0)
           )
@@ -211,16 +203,12 @@ export default function UserLevels() {
           className="fx-centered fx-start-v"
         >
           <div
-            // style={{ width: "min(100%, 700px)" }}
             className={`fx-centered  fx-wrap box-pad-h main-middle`}
           >
             {isConnectedToYaki && (
               <>
                 {isLoaded && (
                   <>
-                    <div className="box-pad-v fit-container">
-                      <h4>{t("Ae2D51K")}</h4>
-                    </div>
                     <div
                       className="fit-container fx-centered fx-col"
                       style={{ rowGap: "16px" }}
@@ -357,19 +345,17 @@ export default function UserLevels() {
                           />
                           <div className="fit-container fx-scattered">
                             <p className="gray-c p-medium">{t("AetHYzn")}</p>
-                            <p className="gray-c p-medium">
-                              {t("ABcjNuL", {
-                                date:
-                                  headerStats.xp ===
-                                  headerStats.consumablePoints
-                                    ? "N/A"
-                                    : timeAgo(
-                                        new Date(
-                                          headerStats.consumablePointsLU * 1000
-                                        )
-                                      ),
-                              })}
-                            </p>
+                            {headerStats.xp !==
+                              headerStats.consumablePoints && <p className="gray-c p-medium">
+                                {t("ABcjNuL", {
+                                  date:
+                                    timeAgo(
+                                      new Date(
+                                        headerStats.consumablePointsLU * 1000
+                                      )
+                                    ),
+                                })}
+                              </p>}
                           </div>
                         </div>
                       </div>
@@ -409,10 +395,9 @@ export default function UserLevels() {
                                   </p>
                                   <div
                                     style={{
-                                      height: `${
-                                        (item.all_time_points * 100) /
+                                      height: `${(item.all_time_points * 100) /
                                         maxValueInChart
-                                      }%`,
+                                        }%`,
                                       minHeight: "5px",
                                       backgroundColor:
                                         item.all_time_points === maxValueInChart
@@ -457,10 +442,10 @@ export default function UserLevels() {
                                           date: !item.last_updated
                                             ? "N/A"
                                             : timeAgo(
-                                                new Date(
-                                                  item.last_updated * 1000
-                                                )
-                                              ),
+                                              new Date(
+                                                item.last_updated * 1000
+                                              )
+                                            ),
                                         })}
                                       </p>
                                     </div>
@@ -474,7 +459,6 @@ export default function UserLevels() {
                       </div>
                       <div
                         className="fit-container fx-centered fx-col box-marg-s"
-                        // style={{ rowGap: "24px" }}
                       >
                         <div className="fit-container">
                           <p className=" gray-c">{t("A2Tafrd")}</p>
@@ -505,9 +489,9 @@ export default function UserLevels() {
                                   </p>
                                   {(item.user_stat?.all_time_points || 0) ===
                                     item.points[0] *
-                                      (item.user_stat?.count || 1) && (
-                                    <Icon name="checkmark" />
-                                  )}
+                                    (item.user_stat?.count || 1) && (
+                                      <Icon name="checkmark" isColored={true} />
+                                    )}
                                 </div>
                               </div>
 
@@ -523,7 +507,7 @@ export default function UserLevels() {
                                     className={
                                       item.count -
                                         (item.user_stat?.count || 0) ===
-                                      0
+                                        0
                                         ? "red-c"
                                         : "green-c"
                                     }
@@ -543,9 +527,9 @@ export default function UserLevels() {
                         {repeatedRewardsStats.map((item) => {
                           let cooldown = item.user_stat
                             ? getCooldown(
-                                item.user_stat.last_updated,
-                                item.cooldown
-                              )
+                              item.user_stat.last_updated,
+                              item.cooldown
+                            )
                             : 0;
                           return (
                             <div
@@ -575,9 +559,9 @@ export default function UserLevels() {
                                     percentage={
                                       item.cooldown > 0
                                         ? Math.floor(
-                                            (cooldown * 100) /
-                                              (item.cooldown / 60)
-                                          )
+                                          (cooldown * 100) /
+                                          (item.cooldown / 60)
+                                        )
                                         : 100
                                     }
                                     inversed={item.cooldown > 0 ? true : false}
@@ -624,7 +608,7 @@ export default function UserLevels() {
                     className="fit-container fx-centered"
                     style={{ height: "80vh" }}
                   >
-                    <LoadingLogo size={100} />
+                    <Spinner size={32} />
                   </div>
                 )}
               </>
@@ -642,23 +626,14 @@ export default function UserLevels() {
 const TierDemo = ({ tier, exit }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={450}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col fx-start-h slide-up"
-        style={{ width: "min(100%, 450px)" }}
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up"
       >
         <div className="box-pad-h-s box-pad-v-s">
           <div className={tier.image} style={{ width: "180px" }}></div>
         </div>
         <div className="fx-centered fx-col  fit-container">
-          {/* <h3>{tier.display_name}</h3> */}
           <div
             className="fx-centered fx-col fit-container"
             style={{ rowGap: "5px" }}
@@ -707,38 +682,68 @@ const TierDemo = ({ tier, exit }) => {
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };
+const POINTS_USES = [
+  {
+    icon: "star-bold",
+    title: "Redeem a subscription plan",
+    desc: "Spend your points to unlock Basic or Premium subscription plans and their perks.",
+  },
+  {
+    icon: "note-bold",
+    title: "Publish paid notes",
+    desc: "Cover the fee for a paid note with your points instead of paying in SATs.",
+  },
+  {
+    icon: "bolt-bold",
+    title: "Redeem points for SATs",
+    desc: "Request a redeem code once you're eligible and cash it out to your lightning address.",
+  },
+];
+
 const PointsDesc = ({ exit }) => {
   const { t } = useTranslation();
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
-      <div
-        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col fx-start-h slide-up"
-        style={{ width: "min(100%, 450px)" }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        <h3 className="p-centered box-pad-h box-marg-s">{t("AIdLWAb")}</h3>
-        <p className="p-centered gray-c">{t("AIjkhSn")}</p>
-          <p className="p-centered gray-c">{"> " + t("A6fM6gw") + " <"}</p>
-          <p className="p-centered gray-c">{"> " + t("AaZQAOK") + " <"}</p>
-          <p className="p-centered gray-c">{"> " + t("Av0e6zQ") + " <"}</p>
-        <p className="green-c p-centered box-pad-h box-marg-s">{t("A3moqWy")}</p>
+    <Overlay exit={exit} width={450}>
+      <div className="box-pad-h box-pad-v fx-centered fx-col fx-start-h slide-up">
+        <h3 className="p-centered box-marg-s">{t("AIdLWAb")}</h3>
+        <p className="p-centered gray-c box-marg-s">
+          Your points are consumable and can be spent across the platform. Here's
+          what you can do with them:
+        </p>
+        <div
+          className="fit-container fx-centered fx-col"
+          style={{ rowGap: "12px" }}
+        >
+          {POINTS_USES.map((item) => (
+            <div
+              className="fit-container fx-centered fx-start-h sc-s-18 box-pad-h-m box-pad-v-m"
+              style={{
+                backgroundColor: "var(--c1-side)",
+                border: "none",
+                columnGap: "14px",
+              }}
+              key={item.title}
+            >
+              <div className="round-icon" style={{ minWidth: "40px" }}>
+                <Icon name={item.icon} />
+              </div>
+              <div className="fx-centered fx-col fx-start-v" style={{ rowGap: "2px" }}>
+                <p className="p-bold">{item.title}</p>
+                <p className="gray-c p-medium">{item.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="green-c p-centered box-marg-s">{t("A3moqWy")}</p>
         <div className="fx-centered fx-col fit-container">
           <button className="btn btn-normal btn-full" onClick={exit}>
             {t("AGLUuNR")}
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

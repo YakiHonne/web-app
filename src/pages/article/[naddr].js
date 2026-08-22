@@ -9,6 +9,7 @@ import {
 import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getDataForSSG } from "@/Helpers/lib";
+import { safeDecode } from "@/Helpers/ssgParams";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Article"), {
   ssr: false,
@@ -43,7 +44,12 @@ export default function Page({ event, author, naddrData, naddr }) {
 
 export async function getStaticProps({ params }) {
   const { naddr } = params;
-  let { pubkey, identifier, kind, relays } = nip19.decode(naddr).data || {};
+  const decoded = safeDecode(naddr);
+  if (!decoded || decoded.type !== "naddr")
+    return { notFound: true, revalidate: 3600 };
+  let { pubkey, identifier, kind, relays } = decoded.data || {};
+  if (!pubkey || kind === undefined)
+    return { notFound: true, revalidate: 3600 };
   const res = await getDataForSSG(
     [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }],
     5000,
@@ -59,6 +65,7 @@ export async function getStaticProps({ params }) {
   const author = event
     ? await getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata(pubkey);
+  const isPremium = event && event?.tags.find((_) => _[0] === "nip63") ? true : false;
   return {
     props: {
       event,
@@ -69,6 +76,7 @@ export async function getStaticProps({ params }) {
           ? getParsedAuthor(author.data[0])
           : { ...author },
     },
+    revalidate: isPremium ? 2 : event ? 604800 : 3600,
   };
 }
 

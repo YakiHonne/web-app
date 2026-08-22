@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import LoginSignup from "@/Components/LoginSignup";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
+import Overlay from "@/Components/Overlay";
 
 export default function Quote({ isQuoted, event, actions }) {
   const { t } = useTranslation();
@@ -32,8 +34,8 @@ export default function Quote({ isQuoted, event, actions }) {
   return (
     <>
       {showQuoteBox && (
-        <div className="fixed-container fx-centered box-pad-h">
-          <div style={{ width: "min(100%, 600px)" }}>
+        <Overlay exit={() => setShowQuoteBox(false)} width={600}>
+          <div>
             <WriteNote
               exit={() => setShowQuoteBox(false)}
               linkedEvent={event}
@@ -41,7 +43,7 @@ export default function Quote({ isQuoted, event, actions }) {
               content={""}
             />
           </div>
-        </div>
+        </Overlay>
       )}
       {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
       <div
@@ -50,7 +52,9 @@ export default function Quote({ isQuoted, event, actions }) {
         onClick={() => (userKeys ? setShowQuoteBox(true) : setIsLogin(true))}
       >
         <Icon
-          name={isQuoted ? "quote-bold" : "quote"}
+          // name={isQuoted ? "quote-bold" : "quote"}
+          v={2}
+          name={iconsNames.double_quotes_r}
           size={24}
           opacity={!isQuoted ? 0.4 : "initial"}
           isColored={isQuoted}

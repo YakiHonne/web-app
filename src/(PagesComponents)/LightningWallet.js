@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { webln } from "@getalby/sdk";
 import ArrowUp from "@/Components/ArrowUp";
 import axios from "axios";
@@ -18,7 +19,7 @@ import { relaysOnPlatform } from "@/Content/Relays";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
 import QRCode from "react-qr-code";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getZapEventRequest } from "@/Helpers/NostrPublisher";
 import AddWallet from "@/Components/AddWallet";
 import UserSearchBar from "@/Components/UserSearchBar";
@@ -37,6 +38,11 @@ import { SelectTabsNoIndex } from "@/Components/SelectTabsNoIndex";
 import { customHistory } from "@/Helpers/History";
 import { useRouter } from "next/router";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
+import { SelectTabs } from "@/Components/SelectTabs";
+import { iconsNames } from "@/Content/IconV2URL";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 export default function LightningWallet() {
   const dispatch = useDispatch();
@@ -58,17 +64,16 @@ export default function LightningWallet() {
   const [isLoading, setIsLoading] = useState(false);
   const [showAddWallet, setShowAddWallet] = useState(false);
   const [showWalletsList, setShowWalletList] = useState(false);
+  const [dismissingWallets, setDismissingWallets] = useState(false);
   const [timestamp, setTimestamp] = useState(Date.now());
   const walletListRef = useRef(null);
+  const walletTriggerRef = useRef(null);
+  const walletPortalRef = useRef(null);
+  const [walletDropPos, setWalletDropPos] = useState(null);
+  const isMobile = useIsMobile();
   const pageTabs = [
-    {
-      display_name: t("AQtRwt6"),
-      value: 0,
-    },
-    {
-      display_name: t("ALrBEok"),
-      value: 1,
-    },
+    t("AQtRwt6"),
+    t("ALrBEok")
   ];
   const checkIsLinked = (addr) => {
     if (userMetadata) {
@@ -192,9 +197,9 @@ export default function LightningWallet() {
 
   const getBalancWebLN = async () => {
     try {
-      // setIsLoading(true);
       await window.webln.enable();
       let data = await window.webln.getBalance();
+      console.log(data)
       setIsLoading(false);
       setWalletBalance(data.balance);
     } catch (err) {
@@ -204,7 +209,6 @@ export default function LightningWallet() {
   };
   const getAlbyData = async (activeWallet) => {
     try {
-      // setIsLoading(true);
       let checkTokens = await checkAlbyToken(wallets, activeWallet);
       let b = await getBalanceAlbyAPI(
         checkTokens.activeWallet.data.access_token,
@@ -260,7 +264,6 @@ export default function LightningWallet() {
 
   const getNWCData = async (activeWallet) => {
     try {
-      // setIsLoading(true);
       const nwc = new webln.NWC({ nostrWalletConnectUrl: activeWallet.data });
       await nwc.enable();
       const ONE_WEEK_IN_SECONDS = 60 * 60 * 24 * 90;
@@ -290,6 +293,30 @@ export default function LightningWallet() {
     }
   };
 
+  const closeWalletsList = () => {
+    setDismissingWallets(true);
+    setTimeout(() => { setShowWalletList(false); setDismissingWallets(false); }, 220);
+  };
+
+  useEffect(() => {
+    if (!showWalletsList || isMobile) return;
+    const handleClick = (e) => {
+      if (
+        walletPortalRef.current && !walletPortalRef.current.contains(e.target) &&
+        walletTriggerRef.current && !walletTriggerRef.current.contains(e.target)
+      ) {
+        closeWalletsList();
+      }
+    };
+    const handleScroll = () => closeWalletsList();
+    document.addEventListener("mousedown", handleClick);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
+  }, [showWalletsList, isMobile]);
+
   const handleSelectWallet = (walletID) => {
     let index = wallets.findIndex((wallet) => wallet.id == walletID);
 
@@ -304,7 +331,7 @@ export default function LightningWallet() {
     setWallets(tempWallets);
     updateWallets(tempWallets);
     setOps("");
-    setShowWalletList(false);
+    closeWalletsList();
   };
 
   const refreshAfterDeletion = (w) => {
@@ -329,6 +356,54 @@ export default function LightningWallet() {
     setOps("");
     setWalletBalance(walletBalance + amount);
   };
+
+  const walletsListContent = wallets.map((wallet) => {
+    let isLinked = checkIsLinked(wallet.entitle);
+    return (
+      <div
+        key={wallet.id}
+        className="option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
+        onClick={(e) => {
+          e.stopPropagation();
+          handleSelectWallet(wallet.id);
+        }}
+        style={{
+          border: "none",
+          overflow: "visible",
+        }}
+      >
+        <div className="fx-centered">
+          {wallet.active && (
+            <div
+              style={{
+                minWidth: "8px",
+                aspectRatio: "1/1",
+                backgroundColor: "var(--green-main)",
+                borderRadius: "var(--border-r-50)",
+              }}
+            ></div>
+          )}
+          <p className={`p-one-line ${wallet.active ? "green-c" : ""}`}>
+            {wallet.entitle}
+          </p>
+          {isLinked && (
+            <div className="round-icon-tooltip" data-tooltip={t("ANExIY1")}>
+              <div className="sticker sticker-small sticker-green-pale">
+                {t("AqlBPla")}
+              </div>
+            </div>
+          )}
+        </div>
+        {wallet.kind !== 1 && (
+          <EventOptions
+            event={wallet}
+            component={"wallet"}
+            refreshAfterDeletion={refreshAfterDeletion}
+          />
+        )}
+      </div>
+    );
+  });
 
   return (
     <>
@@ -367,11 +442,13 @@ export default function LightningWallet() {
               wallets.length === 0 && (
                 <div className="fx-centered fx-col fx-start-h">
                   <div className="fit-container fx-centered box-pad-v">
-                    <SelectTabsNoIndex
-                      tabs={pageTabs}
-                      selectedTab={0}
-                      setSelectedTab={handleSelectPageTab}
-                    />
+                    <div>
+                      <SelectTabs
+                        tabs={pageTabs}
+                        selectedTab={0}
+                        setSelectedTab={handleSelectPageTab}
+                      />
+                    </div>
                   </div>
 
                   <PagePlaceholder
@@ -385,13 +462,14 @@ export default function LightningWallet() {
               wallets.length > 0 && (
                 <div className="box-pad-v box-pad-h">
                   <div className="fit-container fx-centered">
-                    <SelectTabsNoIndex
-                      tabs={pageTabs}
-                      selectedTab={0}
-                      setSelectedTab={handleSelectPageTab}
-                    />
+                    <div>
+                      <SelectTabs
+                        tabs={pageTabs}
+                        selectedTab={0}
+                        setSelectedTab={handleSelectPageTab}
+                      />
+                    </div>
                   </div>
-                  {/* <h3>{t("AQtRwt6")}</h3> */}
                   <div className="fit-container box-pad-v">
                     <div
                       className="fit-container fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v"
@@ -414,7 +492,7 @@ export default function LightningWallet() {
                                     <p className="gray-c">{t("A1yJkHJ")}</p>
                                     <h2>{walletBalance}</h2>
                                   </div>
-                                  <span className="gray-c p-big">sats</span>
+                                  <span className="gray-c p-big">{t("A8ck81V")}</span>
                                 </div>
                                 <p className="box-pad-h-m">|</p>
                                 <div className="fx-centered fx-col fx-start-h fx-start-v">
@@ -432,9 +510,9 @@ export default function LightningWallet() {
                                     onClick={() =>
                                       selectedWallet.entitle.includes("@")
                                         ? copyText(
-                                            selectedWallet.entitle,
-                                            t("ALR84Tq"),
-                                          )
+                                          selectedWallet.entitle,
+                                          t("ALR84Tq"),
+                                        )
                                         : walletWarning()
                                     }
                                   >
@@ -450,7 +528,7 @@ export default function LightningWallet() {
                               className="fx-centered fx-col box-pad-v box-pad-h"
                               style={{ height: "150px" }}
                             >
-                              <LoadingDots />
+                              <Spinner />
                             </div>
                           )}
                         </div>
@@ -473,103 +551,77 @@ export default function LightningWallet() {
                               </p>
                               {selectedWallet && (
                                 <div
+                                  ref={walletTriggerRef}
                                   className="fit-container fx-scattered if if-no-border option pointer"
                                   style={{
                                     height: "var(--40)",
                                     padding: "1rem",
                                   }}
-                                  onClick={() =>
-                                    setShowWalletList(!showWalletsList)
-                                  }
+                                  onClick={() => {
+                                    if (showWalletsList) { closeWalletsList(); return; }
+                                    if (walletTriggerRef.current) {
+                                      const r = walletTriggerRef.current.getBoundingClientRect();
+                                      setWalletDropPos({ top: r.bottom + 6, left: r.left, width: r.width });
+                                    }
+                                    setShowWalletList(true);
+                                  }}
                                 >
                                   <p>{selectedWallet.entitle}</p>
                                   <Icon name="arrow" size={12} />
                                 </div>
                               )}
-                              {showWalletsList && (
-                                <div
-                                  className="fx-centered fx-col sc-s-18 bg-sp box-pad-v-s box-pad-h-s fx-start-v drop-down"
-                                  style={{
-                                    width: "400px",
-                                    backgroundColor: "var(--c1-side)",
-                                    position: "absolute",
-                                    top: "calc(100% + 5px)",
-                                    rowGap: 0,
-                                    overflow: "visible",
-                                  }}
-                                >
-                                  <div className="fit-container fx-scattered">
-                                    <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
-                                      {t("AnXYtQy")}
-                                    </p>
+                              {isMobile ? (
+                                <MobileSheet
+                                  open={showWalletsList}
+                                  onClose={closeWalletsList}
+                                  title={t("AnXYtQy")}
+                                  titleRight={
                                     <div
                                       className="round-icon-tooltip fx-centered btn btn-small btn-gray"
-                                      // data-tooltip={t("A8fEwNq")}
                                       onClick={() => setShowAddWallet(true)}
+                                      style={{ flexShrink: 0, whiteSpace: "nowrap" }}
                                     >
                                       <Icon name="plus-sign" />
-                                      <p>{t("A8fEwNq")}</p>
+                                      <p style={{ whiteSpace: "nowrap" }}>{t("A8fEwNq")}</p>
                                     </div>
+                                  }
+                                >
+                                  <div className="fx-centered fx-col fx-start-h fx-start-v" style={{ padding: "0 8px" }}>
+                                    {walletsListContent}
                                   </div>
-                                  {wallets.map((wallet) => {
-                                    let isLinked = checkIsLinked(
-                                      wallet.entitle,
-                                    );
-                                    return (
-                                      <div
-                                        key={wallet.id}
-                                        className="option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s"
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleSelectWallet(wallet.id);
-                                        }}
-                                        style={{
-                                          border: "none",
-                                          overflow: "visible",
-                                        }}
-                                      >
-                                        <div className="fx-centered">
-                                          {wallet.active && (
-                                            <div
-                                              style={{
-                                                minWidth: "8px",
-                                                aspectRatio: "1/1",
-                                                backgroundColor:
-                                                  "var(--green-main)",
-                                                borderRadius:
-                                                  "var(--border-r-50)",
-                                              }}
-                                            ></div>
-                                          )}
-                                          <p
-                                            className={`p-one-line ${wallet.active ? "green-c" : ""}`}
-                                          >
-                                            {wallet.entitle}
-                                          </p>
-                                          {isLinked && (
-                                            <div
-                                              className="round-icon-tooltip"
-                                              data-tooltip={t("ANExIY1")}
-                                            >
-                                              <div className="sticker sticker-small sticker-green-pale">
-                                                {t("AqlBPla")}
-                                              </div>
-                                            </div>
-                                          )}
+                                </MobileSheet>
+                              ) : (
+                                showWalletsList && walletDropPos && typeof document !== "undefined" && createPortal(
+                                  <div
+                                    ref={walletPortalRef}
+                                    style={{
+                                      position: "fixed",
+                                      top: walletDropPos.top,
+                                      left: walletDropPos.left,
+                                      width: "max(400px, " + walletDropPos.width + "px)",
+                                      zIndex: 99999,
+                                    }}
+                                    className={`bg-dropdown di-wrapper${dismissingWallets ? " dismissing" : ""}`}
+                                  >
+                                    <div className="fit-container fx-scattered" style={{ flexWrap: "nowrap" }}>
+                                      <p className="p-medium gray-c box-pad-h-m box-pad-v-s" style={{ whiteSpace: "nowrap" }}>
+                                        {t("AnXYtQy")}
+                                      </p>
+                                      <div className="box-pad-h-s box-pad-v-s">
+                                        <div
+                                          className="round-icon-tooltip fx-centered btn btn-small btn-gray"
+                                          onClick={() => setShowAddWallet(true)}
+                                          style={{ whiteSpace: "nowrap" }}
+                                        >
+                                          <Icon name="plus-sign" />
+                                          <p style={{ minWidth: "max-content" }}>{t("A8fEwNq")}</p>
                                         </div>
-                                        {wallet.kind !== 1 && (
-                                          <EventOptions
-                                            event={wallet}
-                                            component={"wallet"}
-                                            refreshAfterDeletion={
-                                              refreshAfterDeletion
-                                            }
-                                          />
-                                        )}
                                       </div>
-                                    );
-                                  })}
-                                </div>
+                                    </div>
+                                    {walletsListContent}
+                                  </div>,
+                                  document.body
+                                )
                               )}
                             </div>
                           </div>
@@ -629,7 +681,7 @@ export default function LightningWallet() {
                       className="fit-container fx-centered"
                       style={{ height: "40vh" }}
                     >
-                      <p className="gray-c">{t("AZhgADD")}</p> <LoadingDots />
+                      <p className="gray-c">{t("AZhgADD")}</p> <Spinner />
                     </div>
                   )}
                   {!isLoading && (
@@ -647,9 +699,8 @@ export default function LightningWallet() {
                               return (
                                 <div
                                   key={transaction.id}
-                                  className="fit-container fx-scattered fx-col box-pad-v-m box-pad-h-m sc-s-18 bg-sp"
+                                  className="fit-container fx-scattered fx-col box-pad-v-m box-pad-h-m sc-s"
                                   style={{
-                                    // border: "none",
                                     overflow: "visible",
                                   }}
                                 >
@@ -697,7 +748,7 @@ export default function LightningWallet() {
                                           <span className="orange-c">
                                             {" "}
                                             {transaction.amount}{" "}
-                                            <span className="gray-c">Sats</span>
+                                            <span className="gray-c">{t("AQv2Hnr")}</span>
                                           </span>
                                         </p>
                                       </div>
@@ -712,7 +763,7 @@ export default function LightningWallet() {
                                             : setDisplayMessage(transaction.id)
                                         }
                                       >
-                                        <Icon name="comment-not" />
+                                        <Icon name={iconsNames.chat_circle} v={2} />
                                       </div>
                                     )}
                                   </div>
@@ -756,10 +807,10 @@ export default function LightningWallet() {
                               let isZap = transaction.metadata?.zap_request;
                               let author = isZap
                                 ? nostrAuthors.find(
-                                    (author) =>
-                                      author.pubkey ===
-                                      transaction.metadata.zap_request.pubkey,
-                                  )
+                                  (author) =>
+                                    author.pubkey ===
+                                    transaction.metadata.zap_request.pubkey,
+                                )
                                 : false;
                               return (
                                 <div
@@ -775,25 +826,25 @@ export default function LightningWallet() {
                                       {(!isZap ||
                                         (isZap &&
                                           transaction.type === "outgoing")) && (
-                                        <>
-                                          {transaction.type === "outgoing" && (
-                                            <div
-                                              className="round-icon round-icon-tooltip"
-                                              data-tooltip={t("AkPQ73T")}
-                                            >
-                                              <p className="red-c">&#8593;</p>
-                                            </div>
-                                          )}
-                                          {transaction.type !== "outgoing" && (
-                                            <div
-                                              className="round-icon round-icon-tooltip"
-                                              data-tooltip={t("A4G4OJ7")}
-                                            >
-                                              <p className="green-c">&#8595;</p>
-                                            </div>
-                                          )}
-                                        </>
-                                      )}
+                                          <>
+                                            {transaction.type === "outgoing" && (
+                                              <div
+                                                className="round-icon round-icon-tooltip"
+                                                data-tooltip={t("AkPQ73T")}
+                                              >
+                                                <p className="red-c">&#8593;</p>
+                                              </div>
+                                            )}
+                                            {transaction.type !== "outgoing" && (
+                                              <div
+                                                className="round-icon round-icon-tooltip"
+                                                data-tooltip={t("A4G4OJ7")}
+                                              >
+                                                <p className="green-c">&#8595;</p>
+                                              </div>
+                                            )}
+                                          </>
+                                        )}
                                       {isZap &&
                                         transaction.type !== "outgoing" && (
                                           <>
@@ -835,7 +886,7 @@ export default function LightningWallet() {
                                             toConvert={
                                               new Date(
                                                 transaction.creation_date *
-                                                  1000,
+                                                1000,
                                               )
                                             }
                                             time={true}
@@ -845,58 +896,58 @@ export default function LightningWallet() {
                                           {(!isZap ||
                                             (isZap &&
                                               transaction.type ===
-                                                "outgoing")) && (
-                                            <>
-                                              {transaction.type === "outgoing"
-                                                ? t("ATyFagO")
-                                                : t("AyVA6Q3")}
-                                            </>
-                                          )}
+                                              "outgoing")) && (
+                                              <>
+                                                {transaction.type === "outgoing"
+                                                  ? t("ATyFagO")
+                                                  : t("AyVA6Q3")}
+                                              </>
+                                            )}
                                           {(isZap ||
                                             (isZap &&
                                               transaction.type !==
-                                                "outgoing")) && (
-                                            <>
-                                              {t("AdrOPfO", {
-                                                name: author
-                                                  ? author.display_name ||
+                                              "outgoing")) && (
+                                              <>
+                                                {t("AdrOPfO", {
+                                                  name: author
+                                                    ? author.display_name ||
                                                     author.name
-                                                  : getBech32(
+                                                    : getBech32(
                                                       "npub",
                                                       isZap.pubkey,
                                                     ).substring(0, 10),
-                                              })}
-                                            </>
-                                          )}
+                                                })}
+                                              </>
+                                            )}
                                           <span className="orange-c">
                                             {" "}
                                             {transaction.amount}{" "}
-                                            <span className="gray-c">Sats</span>
+                                            <span className="gray-c">{t("AQv2Hnr")}</span>
                                           </span>
                                         </p>
                                       </div>
                                     </div>
                                     {(transaction.memo ||
                                       transaction.comment) && (
-                                      <div
-                                        className="round-icon-small round-icon-tooltip"
-                                        data-tooltip={t("AYMJ2uj")}
-                                        onClick={() =>
-                                          displayMessage ===
-                                          transaction.identifier
-                                            ? setDisplayMessage(false)
-                                            : setDisplayMessage(
+                                        <div
+                                          className="round-icon-small round-icon-tooltip"
+                                          data-tooltip={t("AYMJ2uj")}
+                                          onClick={() =>
+                                            displayMessage ===
+                                              transaction.identifier
+                                              ? setDisplayMessage(false)
+                                              : setDisplayMessage(
                                                 transaction.identifier,
                                               )
-                                        }
-                                      >
-                                        <Icon name="comment-not" />
-                                      </div>
-                                    )}
+                                          }
+                                        >
+                                          <Icon name="comment-not" />
+                                        </div>
+                                      )}
                                   </div>
                                   {(transaction.memo || transaction.comment) &&
                                     displayMessage ===
-                                      transaction.identifier && (
+                                    transaction.identifier && (
                                       <div
                                         className="fit-container sc-s box-pad-h-s box-pad-v-s p-medium"
                                         style={{
@@ -936,17 +987,16 @@ export default function LightningWallet() {
                               let isZap = transaction.metadata?.zap_request;
                               let author = isZap
                                 ? nostrAuthors.find(
-                                    (author) =>
-                                      author.pubkey ===
-                                      transaction.metadata.zap_request.pubkey,
-                                  )
+                                  (author) =>
+                                    author.pubkey ===
+                                    transaction.metadata.zap_request.pubkey,
+                                )
                                 : false;
                               return (
                                 <div
                                   key={`${transaction.invoice}-${index}`}
                                   className="fit-container fx-scattered fx-col sc-s-18 bg-sp box-pad-h-s box-pad-v-s"
                                   style={{
-                                    // border: "none",
                                     overflow: "visible",
                                   }}
                                 >
@@ -955,25 +1005,25 @@ export default function LightningWallet() {
                                       {(!isZap ||
                                         (isZap &&
                                           transaction.type === "outgoing")) && (
-                                        <>
-                                          {transaction.type === "outgoing" && (
-                                            <div
-                                              className="round-icon round-icon-tooltip"
-                                              data-tooltip={t("AkPQ73T")}
-                                            >
-                                              <p className="red-c">&#8593;</p>
-                                            </div>
-                                          )}
-                                          {transaction.type !== "outgoing" && (
-                                            <div
-                                              className="round-icon round-icon-tooltip"
-                                              data-tooltip={t("A4G4OJ7")}
-                                            >
-                                              <p className="green-c">&#8595;</p>
-                                            </div>
-                                          )}
-                                        </>
-                                      )}
+                                          <>
+                                            {transaction.type === "outgoing" && (
+                                              <div
+                                                className="round-icon round-icon-tooltip"
+                                                data-tooltip={t("AkPQ73T")}
+                                              >
+                                                <p className="red-c">&#8593;</p>
+                                              </div>
+                                            )}
+                                            {transaction.type !== "outgoing" && (
+                                              <div
+                                                className="round-icon round-icon-tooltip"
+                                                data-tooltip={t("A4G4OJ7")}
+                                              >
+                                                <p className="green-c">&#8595;</p>
+                                              </div>
+                                            )}
+                                          </>
+                                        )}
                                       {isZap &&
                                         transaction.type !== "outgoing" && (
                                           <>
@@ -1024,34 +1074,34 @@ export default function LightningWallet() {
                                           {(!isZap ||
                                             (isZap &&
                                               transaction.type ===
-                                                "outgoing")) && (
-                                            <>
-                                              {transaction.type === "outgoing"
-                                                ? t("ATyFagO")
-                                                : t("AyVA6Q3")}
-                                            </>
-                                          )}
+                                              "outgoing")) && (
+                                              <>
+                                                {transaction.type === "outgoing"
+                                                  ? t("ATyFagO")
+                                                  : t("AyVA6Q3")}
+                                              </>
+                                            )}
                                           {(isZap ||
                                             (isZap &&
                                               transaction.type !==
-                                                "outgoing")) && (
-                                            <>
-                                              {t("AdrOPfO", {
-                                                name: author
-                                                  ? author.display_name ||
+                                              "outgoing")) && (
+                                              <>
+                                                {t("AdrOPfO", {
+                                                  name: author
+                                                    ? author.display_name ||
                                                     author.name
-                                                  : getBech32(
+                                                    : getBech32(
                                                       "npub",
                                                       isZap.pubkey,
                                                     ).substring(0, 10),
-                                              })}
-                                            </>
-                                          )}
+                                                })}
+                                              </>
+                                            )}
 
                                           <span className="orange-c">
                                             {" "}
                                             {transaction.amount}{" "}
-                                            <span className="gray-c">Sats</span>
+                                            <span className="gray-c">{t("AQv2Hnr")}</span>
                                           </span>
                                         </p>
                                       </div>
@@ -1064,8 +1114,8 @@ export default function LightningWallet() {
                                           displayMessage === transaction.invoice
                                             ? setDisplayMessage(false)
                                             : setDisplayMessage(
-                                                transaction.invoice,
-                                              )
+                                              transaction.invoice,
+                                            )
                                         }
                                       >
                                         <Icon name="comment-not" />
@@ -1289,8 +1339,8 @@ const SendPayment = ({
         let event = getEvent(sats, addr_, hex);
         const res = isZap
           ? await axios(
-              `${callback}?amount=${sats}&nostr=${event}&lnurl=${addr_}`,
-            )
+            `${callback}?amount=${sats}&nostr=${event}&lnurl=${addr_}`,
+          )
           : await axios(`${callback}?amount=${sats}&lnurl=${addr_}`);
 
         if (selectedWallet.kind === 1) {
@@ -1353,17 +1403,10 @@ const SendPayment = ({
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v slide-up"
-        style={{ marginTop: "1rem", width: "min(100%, 500px)" }}
-        onClick={(e) => e.stopPropagation()}
+        className="fx-centered fx-col box-pad-h box-pad-v"
+        style={{ marginTop: "1rem" }}
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -1380,9 +1423,8 @@ const SendPayment = ({
         >
           <p>{t("AI19tdC")}</p>
           <div
-            className={`toggle ${invoiceData ? "toggle-dim-gray" : ""} ${
-              !invoiceData ? "toggle-c1" : "toggle-dim-gray"
-            }`}
+            className={`toggle ${invoiceData ? "toggle-dim-gray" : ""} ${!invoiceData ? "toggle-c1" : "toggle-dim-gray"
+              }`}
           ></div>
         </div>
 
@@ -1424,18 +1466,17 @@ const SendPayment = ({
                 className="if p-bold if-no-border ifs-full p-centered"
                 placeholder={t("AcDgXKI")}
                 style={{
-                  fontSize: `max(${
-                    amount.toString().length > 5
-                      ? `${80 - (amount.toString().length - 6) * 10}px`
-                      : "80px"
-                  },50px)`,
+                  fontSize: `max(${amount.toString().length > 5
+                    ? `${80 - (amount.toString().length - 6) * 10}px`
+                    : "80px"
+                    },50px)`,
                   height: "80px",
                 }}
                 value={amount}
                 onChange={(e) => setAmount(parseInt(e.target.value))}
                 autoFocus
               />
-              <p className="gray-c p-big">Sats</p>
+              <p className="gray-c p-big">{t("AQv2Hnr")}</p>
             </div>
             <input
               type="text"
@@ -1457,10 +1498,10 @@ const SendPayment = ({
           onClick={handleSendPayment}
           disabled={isLoading}
         >
-          {isLoading ? <LoadingDots /> : t("A14LwWS")}
+          {isLoading ? <Spinner /> : t("A14LwWS")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 };
 
@@ -1570,38 +1611,6 @@ const ReceivePayment = ({
       );
     }
   };
-  // const generateWithNWC = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const nwc = new webln.NWC({ nostrWalletConnectUrl: selectedWallet.data });
-  //     await nwc.enable();
-  //     const invoice = await nwc.makeInvoice({
-  //       defaultMemo: comment,
-  //       amount,
-  //     });
-  //     setIsLoading(false);
-  //     setInvoiceRequest(invoice.paymentRequest);
-  //     let t = 0;
-  //     while (t !== 1) {
-  //       const lookup = await nwc.lookupInvoice(invoice);
-  //       if (lookup.preimage) {
-  //         t = -1;
-  //       } else t = t + 1;
-  //       await sleepTimer(2000);
-  //     }
-  //     nwc.close();
-  //   } catch (err) {
-  //     console.log(err);
-  //     setIsLoading(false);
-  //     if (err?.includes("User rejected")) return;
-  //     dispatch(
-  //       setToast({
-  //         type: 2,
-  //         desc: t("Acr4Slu"),
-  //       }),
-  //     );
-  //   }
-  // };
   const generateWithAlby = async (code) => {
     try {
       setIsLoading(true);
@@ -1636,7 +1645,6 @@ const ReceivePayment = ({
     }
     if (selectedWallet.kind === 3) {
       setTriggerNWC(Date.now());
-      // generateWithNWC();
     }
   };
 
@@ -1653,14 +1661,8 @@ const ReceivePayment = ({
   return (
     <>
       {invoiceRequest && (
-        <div
-          className="fixed-container fx-centered fx-col box-pad-h"
-          style={{ zIndex: 9999999999 }}
-        >
-          <div
-            className="fx-centered fx-col sc-s-18"
-            style={{ width: "min(100%, 500px)" }}
-          >
+        <Overlay exit={exit} width={500}>
+          <div className="fx-centered fx-col">
             <QRCode
               style={{ width: "100%", aspectRatio: "1/1" }}
               size={500}
@@ -1681,23 +1683,16 @@ const ReceivePayment = ({
             </div>
           </div>
           {triggerNWC && (
-            <div className="fx-centered sc-s bg-sp box-pad-h-m box-pad-v-s">
-              <LoadingDots /> <p className="gray-c">{t("AJ99n5o")}</p>{" "}
+            <div className="fx-centered box-pad-h-m box-pad-v-s">
+              <Spinner /> <p className="gray-c">{t("AJ99n5o")}</p>{" "}
             </div>
           )}
-        </div>
+        </Overlay>
       )}
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit} width={500}>
         <div
-          className="fx-centered fx-col sc-s bg-sp box-pad-h box-pad-v slide-up"
-          style={{ marginTop: "1rem", width: "min(100%, 500px)" }}
-          onClick={(e) => e.stopPropagation()}
+          className="fx-centered fx-col box-pad-h box-pad-v"
+          style={{ marginTop: "1rem" }}
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -1712,18 +1707,17 @@ const ReceivePayment = ({
               className="if p-bold if-no-border ifs-full p-centered"
               placeholder={t("AcDgXKI")}
               style={{
-                fontSize: `max(${
-                  amount.toString().length > 5
-                    ? `${80 - (amount.toString().length - 6) * 10}px`
-                    : "80px"
-                },50px)`,
+                fontSize: `max(${amount.toString().length > 5
+                  ? `${80 - (amount.toString().length - 6) * 10}px`
+                  : "80px"
+                  },50px)`,
                 height: "80px",
               }}
               value={amount}
               onChange={(e) => setAmount(parseInt(e.target.value))}
               autoFocus
             />
-            <p className="gray-c p-big">Sats</p>
+            <p className="gray-c p-big">{t("AQv2Hnr")}</p>
           </div>
           <input
             type="text"
@@ -1743,10 +1737,10 @@ const ReceivePayment = ({
             onClick={generateInvoice}
             disabled={isLoading}
           >
-            {isLoading ? <LoadingDots /> : t("AuOH50L")}
+            {isLoading ? <Spinner /> : t("AuOH50L")}
           </button>
         </div>
-      </div>
+      </Overlay>
     </>
   );
 };

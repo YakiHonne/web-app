@@ -1,51 +1,63 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 export default function OptionsDropdown({
   options,
   border = false,
   vertical = true,
-  tooltip = true,
   icon = "dots",
   minWidth = 180,
   parent = window,
 }) {
-  const { t } = useTranslation();
   const triggerRef = useRef(null);
   const dropdownRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   const [position, setPosition] = useState(null);
   const [displayAbove, setDisplayAbove] = useState(false);
   const [displayLeft, setDisplayLeft] = useState(false);
+  const isMobile = useIsMobile();
+
+  const close = () => {
+    if (isMobile) { setOpen(false); return; }
+    setDismissing(true);
+    setTimeout(() => { setOpen(false); setDismissing(false); }, 200);
+  };
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isMobile) return;
 
     const handleClick = (e) => {
       if (
         !triggerRef.current?.contains(e.target) &&
         !dropdownRef.current?.contains(e.target)
       ) {
-        setOpen(false);
+        close();
       }
     };
 
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
+  }, [open, isMobile]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || isMobile) return;
 
-    const close = () => setOpen(false);
-    window.addEventListener("scroll", close, true);
-    window.addEventListener("resize", close);
+    const handleScroll = (e) => {
+      if (dropdownRef.current?.contains(e.target)) return;
+      if (e.target?.closest?.("[data-dropdown-submenu]")) return;
+      close();
+    };
+    const handleResize = () => close();
+    window.addEventListener("scroll", handleScroll, true);
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("scroll", close, true);
-      window.removeEventListener("resize", close);
+      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("resize", handleResize);
     };
   }, [open]);
 
@@ -53,10 +65,15 @@ export default function OptionsDropdown({
     e.preventDefault();
     e.stopPropagation();
 
-    if (!open && triggerRef.current) {
+    if (open) {
+      close();
+      return;
+    }
+
+    if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
 
-      const itemHeight = 37.5;
+      const itemHeight = 44;
       const dropdownHeight = itemHeight * options.length;
       const dropdownWidth = minWidth;
 
@@ -78,31 +95,28 @@ export default function OptionsDropdown({
       });
     }
 
-    setOpen((v) => !v);
+    setOpen(true);
   };
 
   return (
     <>
       <div ref={triggerRef} onClick={toggle} style={{ display: "inline-flex" }}>
         <div
-          className={`${border ? "round-icon" : "round-icon-small"} ${
-            tooltip ? "round-icon-tooltip" : ""
-          }`}
+          className={`${border ? "round-icon" : "round-icon-small"}`}
           style={{ border: border ? "" : "none" }}
-          data-tooltip={icon === "arrow" ? "" : t("A5DDopE")}
         >
           {icon === "dots" && (
             <div
               className={`fx-centered ${vertical ? "fx-col" : ""}`}
-              style={{ gap: 0 }}
+              style={{ gap: '1px' }}
             >
-              <p className="gray-c fx-centered" style={{ height: "6px" }}>
+              <p className="gray-c fx-centered" style={{ height: "4px", fontSize: "14px" }}>
                 &#x2022;
               </p>
-              <p className="gray-c fx-centered" style={{ height: "6px" }}>
+              <p className="gray-c fx-centered" style={{ height: "4px", fontSize: "14px" }}>
                 &#x2022;
               </p>
-              <p className="gray-c fx-centered" style={{ height: "6px" }}>
+              <p className="gray-c fx-centered" style={{ height: "4px", fontSize: "14px" }}>
                 &#x2022;
               </p>
             </div>
@@ -111,34 +125,42 @@ export default function OptionsDropdown({
         </div>
       </div>
 
-      {open &&
+      {isMobile ? (
+        <MobileSheet open={open} onClose={close}>
+          <div className="fx-centered fx-col fx-start-v pointer" style={{ padding: "0 8px" }}>
+            {options.map((option, i) => (
+              <Fragment key={i}>{option}</Fragment>
+            ))}
+          </div>
+        </MobileSheet>
+      ) : (
+        open &&
         position &&
         createPortal(
           <div
             ref={dropdownRef}
             style={{
               position: "fixed",
-              top: displayAbove ? "auto" : position.top,
-              bottom: displayAbove ? parent.innerHeight - position.top : "auto",
+              top: displayAbove ? "auto" : position.top + 6,
+              bottom: displayAbove
+                ? parent.innerHeight - position.top + 6
+                : "auto",
               left: displayLeft ? position.left - minWidth : position.left,
               minWidth,
               width: "max-content",
-              zIndex: 999999,
-              backgroundColor: "var(--dim-gray)",
-              overflow: "visible",
+              zIndex: 1000002,
             }}
-            className="box-pad-h-s box-pad-v-s sc-s-18 bg-sp fx-centered fx-col fx-start-v pointer drop-down"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen(false);
-            }}
+            className={`bg-dropdown-t di-wrapper${dismissing ? " dismissing" : ""}${displayAbove ? " origin-bottom" : ""}`}
           >
-            {options.map((option, i) => (
-              <Fragment key={i}>{option}</Fragment>
-            ))}
+            <div className="box-pad-h-s box-pad-v-s fx-centered fx-col fx-start-v pointer">
+              {options.map((option, i) => (
+                <Fragment key={i}>{option}</Fragment>
+              ))}
+            </div>
           </div>,
           document.body,
-        )}
+        )
+      )}
     </>
   );
 }

@@ -1,10 +1,17 @@
 import React, { useState } from "react";
-import { Widget } from "smart-widget-previewer";
 import { customHistory } from "@/Helpers/History";
 import { useSelector } from "react-redux";
 import MiniApp from "@/Components/MiniApp";
-import PaymentGateway from "@/Components/PaymentGateway";
+import dynamic from "next/dynamic";
 import Icon from "@/Components/Icon";
+
+const PaymentGateway = dynamic(() => import("@/Components/PaymentGateway"), {
+  ssr: false,
+});
+const Widget = dynamic(
+  () => import("smart-widget-previewer").then((mod) => mod.Widget),
+  { ssr: false },
+);
 
 export default function SWCard({ widget, onNextWidget }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -495,7 +502,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //                 }}
 //                 disabled={isLoading}
 //               >
-//                 {isLoading ? <LoadingDots /> : t("AWADEEz")}
+//                 {isLoading ? <Spinner /> : t("AWADEEz")}
 //               </button>
 //               <button
 //                 className="btn btn-normal btn-full fx-centered"
@@ -503,7 +510,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //                 disabled={isLoading}
 //               >
 //                 {isLoading ? (
-//                   <LoadingDots />
+//                   <Spinner />
 //                 ) : (
 //                   <>
 //                     {lnbcAmount ? (
@@ -537,7 +544,7 @@ export default function SWCard({ widget, onNextWidget }) {
 //             {!onlyInvoice && (
 //               <div className="fit-container fx-centered box-pad-v-s">
 //                 <p className="gray-c p-medium">{t("A1ufjMM")}</p>
-//                 <LoadingDots />
+//                 <Spinner />
 //               </div>
 //             )}
 //             {onlyInvoice && (

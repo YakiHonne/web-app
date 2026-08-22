@@ -4,12 +4,13 @@ import { getSubData } from "@/Helpers/Controlers";
 import { getParsedSW } from "@/Helpers/Encryptions";
 import SWActionPreview from "./SWActionPreview";
 import { saveUsers } from "@/Helpers/DB";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import MiniTool from "./MiniTool";
 import UserProfilePic from "./UserProfilePic";
 import { useSelector } from "react-redux";
 import Icon from "@/Components/Icon";
 import Overlay from "./Overlay";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function ActionTools({ setData }) {
   const [showActions, setShowActions] = useState(false);
@@ -24,7 +25,7 @@ export default function ActionTools({ setData }) {
           }}
         />
       )}
-      <Icon name="categories" size={24} onClick={() => setShowActions(true)} />
+      <Icon v={2} name={iconsNames.puzzle} size={24} onClick={() => setShowActions(true)} opacity=".5" />
     </>
   );
 }
@@ -76,9 +77,6 @@ const Actions = ({ exit, setReturnedData }) => {
           maxHeight: "60vh",
           overflow: "scroll",
         }}
-        // onClick={(e) => {
-        //   e.stopPropagation();
-        // }}
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -138,7 +136,7 @@ const Actions = ({ exit, setReturnedData }) => {
             </div>
             <div className="fit-container box-pad-v-s">
               <div className="fit-container fx-start-h fx-centered sc-s-18 bg-sp box-pad-h-m">
-                <Icon name="search" />
+                <Icon name="search_magnifying_glass" v={2} />
                 <input
                   type="text"
                   className="if if-no-border ifs-full"
@@ -182,7 +180,7 @@ const Actions = ({ exit, setReturnedData }) => {
                   style={{ height: "200px" }}
                   className="fit-container fx-centered"
                 >
-                  <LoadingDots />
+                  <Spinner />
                 </div>
               )}
             </div>

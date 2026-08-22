@@ -93,13 +93,13 @@ const launchDataFetching = async (
 };
 
 export const parseNip05 = async (userId) => {
-  if (userId.includes("yakihonne.com")) {
-    const name = userId.split("@")[0];
-    if (json.names[name]) {
-      return json.names[name];
-    }
-    return null;
-  }
+  // if (userId.includes("yakihonne.com")) {
+  //   const name = userId.split("@")[0];
+  //   if (json.names[name]) {
+  //     return json.names[name];
+  //   }
+  //   return null;
+  // }
   let pubkey = await getAuthPubkeyFromNip05(userId);
   return pubkey;
 };

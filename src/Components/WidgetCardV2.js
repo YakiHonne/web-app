@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { nip19 } from "nostr-tools";
 import OptionsDropdown from "@/Components/OptionsDropdown";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Link from "next/link";
 import ShareLink from "@/Components/ShareLink";
 import AuthorPreview from "@/Components/AuthorPreview";
@@ -20,6 +20,7 @@ import { nanoid } from "nanoid";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { NDKUser } from "@nostr-dev-kit/ndk";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function WidgetCardV2({
   widget,
@@ -118,9 +119,8 @@ export default function WidgetCardV2({
         />
       )}
       <div
-        className={`fx-centered fit-container fx-start-h fx-start-v ${
-          header ? "box-pad-h-s box-pad-v-s sc-s-18 bg-sp" : ""
-        }`}
+        className={`fx-centered fit-container fx-start-h fx-start-v ${header ? "box-pad-h-s box-pad-v-s sc-s-18 bg-sp" : ""
+          }`}
         style={{
           overflow: "visible",
           flexWrap: authPreviewPosition === "bottom" ? "wrap" : "wrap-reverse",
@@ -164,12 +164,12 @@ export default function WidgetCardV2({
                         onClick={() =>
                           swMetadata.id === widget.id
                             ? setPostNoteWithWidget(
-                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
-                              )
+                              `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
+                            )
                             : setInitPublish({
-                                publish: true,
-                                publishInNote: true,
-                              })
+                              publish: true,
+                              publishInNote: true,
+                            })
                         }
                       >
                         <Icon name="add-note" />
@@ -252,11 +252,10 @@ export default function WidgetCardV2({
                       <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
                         <ShareLink
                           label={t("AGB5vpj")}
-                          path={`/smart-widget/${
-                            isNIP05Verified
+                          path={`/smart-widget/${isNIP05Verified
                               ? `${authorData.nip05}/${widget.metadata.d}`
                               : widget.metadata.naddr
-                          }`}
+                            }`}
                           title={swMetadata.title || swMetadata.description}
                           description={
                             swMetadata.description || swMetadata.title
@@ -415,12 +414,12 @@ export default function WidgetCardV2({
                         onClick={() =>
                           swMetadata.id === widget.id
                             ? setPostNoteWithWidget(
-                                `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
-                              )
+                              `https://yakihonne.com/smart-widget/${widget.metadata.naddr}`,
+                            )
                             : setInitPublish({
-                                publish: true,
-                                publishInNote: true,
-                              })
+                              publish: true,
+                              publishInNote: true,
+                            })
                         }
                       >
                         <Icon name="add-note" />
@@ -503,11 +502,10 @@ export default function WidgetCardV2({
                       <div className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale">
                         <ShareLink
                           label={t("AGB5vpj")}
-                          path={`/smart-widget/${
-                            isNIP05Verified
+                          path={`/smart-widget/${isNIP05Verified
                               ? `${authorData.nip05}/${widget.metadata.d}`
                               : widget.metadata.naddr
-                          }`}
+                            }`}
                           title={swMetadata.title || swMetadata.description}
                           description={
                             swMetadata.description || swMetadata.title
@@ -649,20 +647,15 @@ const PublishWidget = ({
   };
   if (isLoading) {
     return (
-      <div className="fixed-container fx-centered">
-        <LoadingDots />
-      </div>
+      <Overlay exit={() => { }}>
+        <Spinner />
+      </Overlay>
     );
   }
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => e.stopPropagation()}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        style={{ width: "min(100%, 500px)", position: "relative" }}
-        className="box-pad-h box-pad-v sc-s-18 bg-sp fx-centered fx-col"
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -691,10 +684,10 @@ const PublishWidget = ({
             onClick={() => setPostNoteWithWidget(pWidget.url)}
             disabled={isImageLoading}
           >
-            {isImageLoading ? <LoadingDots /> : t("AB8DnjO")}
+            {isImageLoading ? <Spinner /> : t("AB8DnjO")}
           </button>
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 };

@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import ArrowUp from "@/Components/ArrowUp";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
-import LoadingDots from "@/Components/LoadingDots";
-import { useDispatch } from "react-redux";
+import Spinner from "@/Components/Spinner";
+import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { getSubData, translate } from "@/Helpers/Controlers";
 import useNoteStats from "@/Hooks/useNoteStats";
@@ -11,7 +11,6 @@ import CommentsSection from "@/Components/CommentsSection";
 import HistorySection from "@/Components/HistorySection";
 import { useTranslation } from "react-i18next";
 import {
-  getCustomServices,
   getNoteTree,
   getParsedNote,
 } from "@/Helpers/ClientHelpers";
@@ -27,13 +26,18 @@ import { getContentTranslationConfig, straightUp } from "@/Helpers/Helpers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { customHistory } from "@/Helpers/History";
 import { nip19 } from "nostr-tools";
-import LoadingLogo from "@/Components/LoadingLogo";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import EventStats from "@/Components/EventStats";
+import PaidNoteInfoOverlay from "@/Components/PaidNoteInfoOverlay";
+import useQuotaGuard from "@/Hooks/useQuotaGuard";
 
 export default function Note({ event, nevent }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const { handleTranslateError } = useQuotaGuard();
+  const userKeys = useSelector((state) => state.userKeys);
   const [showHistory, setShowHistory] = useState(false);
   const [isLoading, setIsLoading] = useState(event ? false : true);
   const [usersList, setUsersList] = useState(false);
@@ -46,18 +50,18 @@ export default function Note({ event, nevent }) {
     note?.pubkey,
   );
   const customService = getContentTranslationConfig();
-
-  const { userProfile, isNip05Verified } = useUserProfile(note?.pubkey);
+  const [showPaidNoteInfo, setShowPaidNoteInfo] = useState(false);
+  const { userProfile, isNip05Verified, proUser } = useUserProfile(note?.pubkey);
   const { postActions } = useNoteStats(note?.id, note?.pubkey);
   const unsupportedKind = useMemo(() => {
-    return note?.kind !== 1;
+    return ![1, 1111].includes(note?.kind);
   }, [note]);
   useEffect(() => {
     const fetchNote = async () => {
       setIsLoading(true);
       let id = nip19.decode(nevent)?.data.id || nip19.decode(nevent)?.data;
       let relays = nip19.decode(nevent)?.data.relays || [];
-      const res = await getSubData([{ ids: [id] }], 2000, relays, undefined, 1);
+      const res = await getSubData([{ ids: [id] }], 2000, relays, undefined, 1, undefined, "ONLY_RELAY");
       if (res.data.length === 0) {
         setIsLoading(false);
         return;
@@ -71,15 +75,22 @@ export default function Note({ event, nevent }) {
     if (event && customService?.autoTranslate) {
       translateNote();
     }
-    // if (state) {
-    //   let { triggerTranslation } = state;
-    //   if (triggerTranslation) translateNote();
-    // }
     straightUp();
-    saveUsers([event.pubkey]);
+    if (event?.pubkey) {
+      saveUsers([event?.pubkey]);
+    }
   }, [event]);
 
   const translateNote = async () => {
+    if (!userKeys) {
+      dispatch(
+        setToast({
+          type: 3,
+          desc: t("ALtr4nL"),
+        }),
+      );
+      return;
+    }
     setIsNoteTranslating(true);
     if (translatedNote) {
       setShowTranslation(true);
@@ -88,22 +99,9 @@ export default function Note({ event, nevent }) {
     }
     try {
       let res = await translate(note.content);
-      // if (res.status === 500) {
-      //   dispatch(
-      //     setToast({
-      //       type: 2,
-      //       desc: t("AZ5VQXL"),
-      //     }),
-      //   );
-      // }
-      // if (res.status === 400) {
-      //   dispatch(
-      //     setToast({
-      //       type: 2,
-      //       desc: t("AJeHuH1"),
-      //     }),
-      //   );
-      // }
+      if (res.status !== 200) {
+        handleTranslateError(res);
+      }
       if (res.status === 200) {
         let noteTree = getNoteTree(
           res.res,
@@ -139,7 +137,7 @@ export default function Note({ event, nevent }) {
         className="fit-container fx-centered fx-col"
         style={{ height: "100vh" }}
       >
-        <LoadingLogo />
+        <Spinner size={32} />
       </div>
     );
 
@@ -156,7 +154,7 @@ export default function Note({ event, nevent }) {
         </Link>
       </div>
     );
-  if (note?.kind !== 1)
+  if (![1, 1111].includes(note?.kind))
     return customHistory(
       "/unsupported/" + nip19.neventEncode({ id: event?.id }),
     );
@@ -183,19 +181,16 @@ export default function Note({ event, nevent }) {
               {note && !note.isRoot && (
                 <>
                   <div
-                    className="fit-container box-pad-h box-pad-v-m box-marg-s fx-centered pointer sticky"
-                    style={{
-                      borderTop: "1px solid var(--very-dim-gray)",
-                      borderBottom: "1px solid var(--very-dim-gray)",
-                    }}
+                    className="bg-dropdown box-marg-s fx-centered pointer sticky"
+                    style={{ top: "94px", width: "max-content" }}
                     onClick={() => setShowHistory(!showHistory)}
                   >
-                    <div className="fx-centered">
-                      <p>
+                    <div className="fx-centered box-pad-h-m" style={{ maxHeight: "0px" }}>
+                      <p className="gray-c">
                         {showHistory && t("ApSnq9V")}
                         {!showHistory && t("AUScjxu")}
                       </p>
-                      <Icon name="arrow" size={12} />
+                      <Icon name="arrow" size={12} transform={showHistory ? "rotate(180deg)" : ""} />
                     </div>
                   </div>
                   <HistorySection
@@ -226,23 +221,50 @@ export default function Note({ event, nevent }) {
                         {isNip05Verified && (
                           <Icon name="checkmark-c1" size={24} isColored />
                         )}
+                        {proUser.isProUser && <Badge data={proUser} size={24} />}
                       </div>
-                      <p className="gray-c">
-                        <Date_
-                          toConvert={new Date(note.created_at * 1000)}
-                          time={true}
-                        />
-                      </p>
+                      <div className="fx-centered">
+                        {note.isPremium &&
+                          <div className="fx-centered" style={{ fontSize: "12px", lineHeight: 0, backgroundColor: "#ffed4b5c", borderRadius: "10px", height: "20px", padding: "0 8px", minWidth: "max-content" }}>
+                            {t("AW299l2")}
+                          </div>
+                        }
+                        <p className="gray-c">
+                          <Date_
+                            toConvert={new Date(note.created_at * 1000)}
+                            time={true}
+                          />
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  {note.isPaidNote && (
-                    <div
-                      className="sticker sticker-c1"
-                      style={{ minWidth: "max-content" }}
-                    >
-                      {t("AAg9D6c")}
-                    </div>
-                  )}
+                  <div className="fx-centered">
+                    {note.isPaidNote && (
+                      <div
+                        className="sticker sticker-paid sticker-click pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPaidNoteInfo(true);
+                        }}
+                      >
+                        {t("AAg9D6c")}
+                      </div>
+                    )}
+                    {showPaidNoteInfo && (
+                      <PaidNoteInfoOverlay onClose={() => setShowPaidNoteInfo(false)} />
+                    )}
+                    {!isNoteTranslating && <Icon name="translate" onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                    {isNoteTranslating && <Spinner />}
+                    <EventOptions
+                      event={note}
+                      component={"notes"}
+                      refreshAfterDeletion={() =>
+                        customHistory(
+                          `/profile/${nip19.nprofileEncode({ pubkey: event.pubkey })}`,
+                        )
+                      }
+                    />
+                  </div>
                 </div>
                 <div className="fit-container box-pad-h-m" dir="auto">
                   {showTranslation ? translatedNote : note.note_tree}
@@ -272,44 +294,7 @@ export default function Note({ event, nevent }) {
                     userProfile={userProfile}
                   />
                   <div className="fx-centered">
-                    <div className="fit-container">
-                      {!isNoteTranslating && !showTranslation && (
-                        <div
-                          className="round-icon-tooltip"
-                          data-tooltip={t("AdHV2qJ")}
-                          onClick={translateNote}
-                        >
-                          <Icon
-                            name="translate"
-                            size={24}
-                            className="opacity-4"
-                          />
-                        </div>
-                      )}
-                      {!isNoteTranslating && showTranslation && (
-                        <div
-                          className="round-icon-tooltip"
-                          data-tooltip={t("AE08Wte")}
-                          onClick={() => setShowTranslation(false)}
-                        >
-                          <Icon
-                            name="translate"
-                            size={24}
-                            className="opacity-4"
-                          />
-                        </div>
-                      )}
-                      {isNoteTranslating && <LoadingDots />}
-                    </div>
-                    <EventOptions
-                      event={note}
-                      component={"notes"}
-                      refreshAfterDeletion={() =>
-                        customHistory(
-                          `/profile/${nip19.nprofileEncode({ pubkey: event.pubkey })}`,
-                        )
-                      }
-                    />
+                    <EventStats postActions={postActions} />
                   </div>
                 </div>
                 <MutedThreadWarning event={note} />

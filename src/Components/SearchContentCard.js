@@ -36,7 +36,7 @@ export default function SearchContentCard({ event, exit, userProfile = true }) {
     fetchAuthor();
   }, [nostrAuthors]);
 
-  if (event.kind === 1)
+  if (event.kind === 1 && event.id)
     return (
       <Link
         href={`/note/${nEventEncode(event.id)}`}
@@ -68,80 +68,83 @@ export default function SearchContentCard({ event, exit, userProfile = true }) {
         </div>
       </Link>
     );
-  return (
-    <Link
-      href={getLinkFromAddr(event.naddr)}
-      className="fx-centered fx-start-h box-pad-v-s box-pad-h-m fit-container pointer search-bar-post"
-      onClick={(e) => {
-        exit();
-      }}
-    >
-      <div style={{ position: "relative" }}>
-        {!event.image && (
-          <div
-            className="round-icon"
-            style={{ minWidth: "48px", aspectRatio: "1/1" }}
-          >
-            {[30004, 30005].includes(event.kind) && (
-              <Icon name="curation" size={24} />
-            )}
-            {[30023].includes(event.kind) && <Icon name="posts" size={24} />}
-            {[34235, 21, 22].includes(event.kind) && <Icon name="play" size={24} />}
-            {[30031].includes(event.kind) && (
-              <Icon name="smart-widget" size={24} />
-            )}
-          </div>
-        )}
-        {event.image && (
-          <div
-            className="sc-s-18 bg-img cover-bg"
-            style={{
-              backgroundImage: `url(${event.image})`,
-              minWidth: "48px",
-              aspectRatio: "1/1",
-            }}
-          ></div>
-        )}
-        {userProfile && (
-          <div
-            className="round-icon"
-            style={{
-              position: "absolute",
-              right: "-5px",
-              bottom: "-5px",
-              backgroundColor: "var(--white)",
-              border: "none",
-              minWidth: "24px",
-              aspectRatio: "1/1",
-            }}
-          >
-            <UserProfilePic
-              img={user.picture || ""}
-              size={20}
-              allowClick={false}
-              user_id={user.pubkey}
-            />
-          </div>
-        )}
-      </div>
-      <div
-        className="fx-centered fx-col fx-start-h fx-start-v"
-        style={{ gap: "4px" }}
+  if (getLinkFromAddr(event.naddr))
+    return (
+      <Link
+        href={getLinkFromAddr(event.naddr)}
+        className="fx-centered fx-start-h box-pad-v-s box-pad-h-m fit-container pointer search-bar-post"
+        onClick={(e) => {
+          exit();
+        }}
       >
-        <div className="fx-centered" style={{ gap: "3px" }}>
-          <div className="fx-centered" style={{ gap: "3px" }}>
-            <p className="p-medium">{user.display_name || user.name}</p>
-            {isNip05Verified && <Icon name="checkmark-c1" isColored />}
-          </div>
-          <p className="p-medium gray-c">|</p>
-          <DynamicIndicator item={event} />
-        </div>
-        <p className="p-one-line">
-          {event.title || (
-            <span className="p-italic gray-c">{t("AMvUjqZ")}</span>
+        <div style={{ position: "relative" }}>
+          {!event.image && (
+            <div
+              className="round-icon"
+              style={{ minWidth: "48px", aspectRatio: "1/1" }}
+            >
+              {[30004, 30005].includes(event.kind) && (
+                <Icon name="curation" size={24} />
+              )}
+              {[30023].includes(event.kind) && <Icon name="posts" size={24} />}
+              {[34235, 21, 22].includes(event.kind) && <Icon name="play" size={24} />}
+              {[30031].includes(event.kind) && (
+                <Icon name="smart-widget" size={24} />
+              )}
+            </div>
           )}
-        </p>
-      </div>
-    </Link>
-  );
+          {event.image && (
+            <div
+              className="sc-s-18 bg-img cover-bg"
+              style={{
+                backgroundImage: `url(${event.image})`,
+                minWidth: "48px",
+                aspectRatio: "1/1",
+              }}
+            ></div>
+          )}
+          {userProfile && (
+            <div
+              className="round-icon"
+              style={{
+                position: "absolute",
+                right: "-5px",
+                bottom: "-5px",
+                backgroundColor: "var(--white)",
+                border: "none",
+                width: "24px",
+                height: "24px",
+                aspectRatio: "1/1",
+              }}
+            >
+              <UserProfilePic
+                img={user.picture || ""}
+                size={20}
+                allowClick={false}
+                user_id={user.pubkey}
+              />
+            </div>
+          )}
+        </div>
+        <div
+          className="fx-centered fx-col fx-start-h fx-start-v"
+          style={{ gap: "4px" }}
+        >
+          <div className="fx-centered" style={{ gap: "3px" }}>
+            <div className="fx-centered" style={{ gap: "3px" }}>
+              <p className="p-medium">{user.display_name || user.name}</p>
+              {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+            </div>
+            <p className="p-medium gray-c">|</p>
+            <DynamicIndicator item={event} />
+          </div>
+          <p className="p-one-line">
+            {event.title || (
+              <span className="p-italic gray-c">{t("AMvUjqZ")}</span>
+            )}
+          </p>
+        </div>
+      </Link>
+    );
+  return null
 }

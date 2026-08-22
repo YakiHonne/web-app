@@ -4,7 +4,7 @@ import { checkForLUDS, convertDate } from "@/Helpers/Encryptions";
 import { relaysOnPlatform } from "@/Content/Relays";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { decode } from "light-bolt11-decoder";
 import axios from "axios";
 import {
@@ -26,6 +26,7 @@ import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function ZapPollsComp({
   event,
@@ -191,10 +192,10 @@ export default function ZapPollsComp({
         let zapLNBCAmount = zap.tags.find((tag) => tag[0] === "bolt11");
         zapLNBCAmount = zapLNBCAmount
           ? parseInt(
-              decode(zapLNBCAmount[1]).sections.find(
-                (section) => section.name === "amount",
-              ).value,
-            ) / 1000
+            decode(zapLNBCAmount[1]).sections.find(
+              (section) => section.name === "amount",
+            ).value,
+          ) / 1000
           : null;
         zapEvent = zapEvent ? JSON.parse(zapEvent[1]) : null;
 
@@ -323,7 +324,7 @@ export default function ZapPollsComp({
     return (
       <div className="fx-centered">
         <p className="gray-c p-italic p-medium">{t("AKvHyxG")}</p>
-        <LoadingDots />
+        <Spinner />
       </div>
     );
   return (
@@ -397,18 +398,16 @@ export default function ZapPollsComp({
             return (
               <div
                 key={index}
-                className={`box-pad-h-m box-pad-v-s sc-s fit-container ${
-                  edit ? "" : "option"
-                }`}
+                className={`box-pad-h-m box-pad-v-s sc-s fit-container ${edit ? "" : "option"
+                  }`}
                 style={{
                   border:
                     isVoted &&
-                    isVoted == index &&
-                    !isVotesLoading &&
-                    isStatsShowing
-                      ? `1px solid ${
-                          options_foreground_color || "var(--orange-main)"
-                        }`
+                      isVoted == index &&
+                      !isVotesLoading &&
+                      isStatsShowing
+                      ? `1px solid ${options_foreground_color || "var(--orange-main)"
+                      }`
                       : "none",
                   backgroundColor:
                     options_background_color || "var(--very-dim-gray)",
@@ -480,7 +479,7 @@ export default function ZapPollsComp({
             )}
             {isVotesLoading && (
               <div className="box-pad-h-m box-pad-v-s">
-                <LoadingDots />
+                <Spinner />
               </div>
             )}
             {closingTime.time && !closingTime.status && (
@@ -781,37 +780,17 @@ const Cashier = ({
 
   if (isVotesLoading)
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-      >
+      <Overlay exit={exit}>
         <div className="fx-centered">
           <p className="gray-c p-medium">{t("AKvHyxG")}</p>
-          <LoadingDots />
+          <Spinner />
         </div>
-      </div>
+      </Overlay>
     );
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500} allowOverFlow={true}>
       <section
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        className="sc-s box-pad-h box-pad-v"
-        style={{
-          width: "min(100%, 500px)",
-          position: "relative",
-          overflow: "visible",
-        }}
+        className="box-pad-h box-pad-v"
       >
         <div
           className="close"
@@ -958,9 +937,8 @@ const Cashier = ({
               {predefined_amounts.map((item, index) => {
                 return (
                   <div
-                    className={`fx fx-col fx-centered box-pad-h-m box-pad-v-m sc-s-18  ${
-                      item.amount === null ? "if-disabled" : "pointer option"
-                    }`}
+                    className={`fx fx-col fx-centered box-pad-h-m box-pad-v-m sc-s-18  ${item.amount === null ? "if-disabled" : "pointer option"
+                      }`}
                     key={index}
                     style={{
                       borderColor: amount === item.amount ? "var(--black)" : "",
@@ -975,9 +953,8 @@ const Cashier = ({
               })}
             </div>
             <button
-              className={`btn ${
-                amountWarning ? "btn-disabled" : "btn-normal"
-              } btn-full`}
+              className={`btn ${amountWarning ? "btn-disabled" : "btn-normal"
+                } btn-full`}
               onClick={onConfirmation}
             >
               {lnbcAmount ? t("AloNXcI", { amount }) : t("AMMzniY")}
@@ -1001,7 +978,7 @@ const Cashier = ({
             </div>
             <div className="fit-container fx-centered">
               <p className="gray-c p-medium">{t("A1ufjMM")}</p>
-              <LoadingDots />
+              <Spinner />
             </div>
           </div>
         )}
@@ -1021,7 +998,7 @@ const Cashier = ({
           </div>
         )}
       </section>
-    </div>
+    </Overlay>
   );
 };
 

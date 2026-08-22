@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
 import ProgressBar from "@/Components/ProgressBar";
 import Icon from "@/Components/Icon";
+import VideoLoader from "@/Components/VideoLoader";
 import { createPortal } from "react-dom";
 
+// imgs can be an array of strings (image URLs) or {url, type} objects
 export default function Carousel({ imgs, selectedImage, back }) {
   const [currentImg, setCurrentImg] = useState(selectedImage);
   const [mounted, setMounted] = useState(false);
+  const normalizedImgs = imgs.map((item) =>
+    typeof item === "string" ? { url: item, type: "image" } : item,
+  );
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
   useEffect(() => {
     setCurrentImg(selectedImage);
   }, [selectedImage]);
@@ -17,11 +23,15 @@ export default function Carousel({ imgs, selectedImage, back }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowRight") {
-        setCurrentImg((prev) => (prev + 1 < imgs.length ? prev + 1 : 0));
+        setCurrentImg((prev) =>
+          prev + 1 < normalizedImgs.length ? prev + 1 : 0,
+        );
       }
 
       if (e.key === "ArrowLeft") {
-        setCurrentImg((prev) => (prev > 0 ? prev - 1 : imgs.length - 1));
+        setCurrentImg((prev) =>
+          prev > 0 ? prev - 1 : normalizedImgs.length - 1,
+        );
       }
 
       if (e.key === "Escape") {
@@ -34,7 +44,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [imgs.length, back]);
+  }, [normalizedImgs.length, back]);
 
   const content = (
     <div
@@ -46,7 +56,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
         <div></div>
       </div>
       <div className="fit-container fx-centered">
-        {imgs.length > 1 && (
+        {normalizedImgs.length > 1 && (
           <div
             className="pointer"
             style={{
@@ -62,7 +72,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
               e.preventDefault();
               currentImg > 0
                 ? setCurrentImg(currentImg - 1)
-                : setCurrentImg(imgs.length - 1);
+                : setCurrentImg(normalizedImgs.length - 1);
             }}
           >
             <Icon name="arrow" size={38} transform="rotate(90deg)" />
@@ -83,33 +93,41 @@ export default function Carousel({ imgs, selectedImage, back }) {
                 columnGap: 0,
               }}
             >
-              {imgs.map((item, index) => {
+              {normalizedImgs.map((item, index) => {
                 return (
                   <div
                     key={index}
-                    className="fit-container fx-centered fx-shrink bg-img contained-bg"
-                    style={{
-                      height: "100vh",
-                    }}
+                    className="fit-container fx-centered fx-shrink"
+                    style={{ height: "100vh" }}
+                    onClick={(e) => { e.stopPropagation(); }}
                   >
-                    <img
-                      src={item}
-                      style={{ objectFit: "contain" }}
-                      className="fit-container fit-height"
-                    />
+                    {item.type === "video" ? (
+                      <div
+                        style={{ width: "min(100%, 720px)", maxHeight: "100vh" }}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <VideoLoader src={item.url} />
+                      </div>
+                    ) : (
+                      <img
+                        src={item.url}
+                        style={{ objectFit: "contain" }}
+                        className="fit-container fit-height"
+                      />
+                    )}
                   </div>
                 );
               })}
             </div>
           </div>
         </div>
-        {imgs.length > 1 && (
+        {normalizedImgs.length > 1 && (
           <div
             className="pointer "
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              currentImg + 1 < imgs.length
+              currentImg + 1 < normalizedImgs.length
                 ? setCurrentImg(currentImg + 1)
                 : setCurrentImg(0);
             }}
@@ -125,7 +143,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
           </div>
         )}
       </div>
-      {imgs.length > 1 && (
+      {normalizedImgs.length > 1 && (
         <div
           className="fit-container fx-centered box-pad-v-s slide-down"
           style={{ position: "fixed", left: 0, bottom: 0 }}
@@ -133,17 +151,18 @@ export default function Carousel({ imgs, selectedImage, back }) {
           <div
             style={{
               width: "min(100%, 400px)",
-              backgroundColor: "var(--white-transparent)",
+              // backgroundColor: "var(--white-transparent)",
               border: "none",
             }}
-            className="fx-centered box-pad-h-m box-pad-v-s sc-s"
+            className="fx-centered box-pad-h-m box-pad-v-s bg-dropdown"
           >
             <p style={{ minWidth: "max-content" }}>
-              {currentImg + 1} / <span className="gray-c">{imgs.length}</span>
+              {currentImg + 1} /{" "}
+              <span className="gray-c">{normalizedImgs.length}</span>
             </p>
             <ProgressBar
               current={currentImg + 1}
-              total={imgs.length}
+              total={normalizedImgs.length}
               full={true}
             />
           </div>
@@ -154,8 +173,8 @@ export default function Carousel({ imgs, selectedImage, back }) {
 
   return mounted
     ? createPortal(
-        content,
-        document.getElementById("portal-root") || document.body,
-      )
+      content,
+      document.getElementById("portal-root") || document.body,
+    )
     : null;
 }

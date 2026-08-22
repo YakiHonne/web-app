@@ -7,6 +7,7 @@ import { setToPublish } from "@/Store/Slides/Publishers";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { deleteRelaysSet } from "@/Helpers/DB";
+import Overlay from "@/Components/Overlay";
 
 export default function RelaysSetSettings({ exit, allRelays }) {
   const dispatch = useDispatch();
@@ -41,18 +42,9 @@ export default function RelaysSetSettings({ exit, allRelays }) {
           allRelays={allRelays}
         />
       )}
-      <div
-        className="fixed-container fx-centered box-pad-h box-pad-v"
-        onClick={(e) => {
-          e.stopPropagation();
-          exit();
-        }}
-        style={{ zIndex: 300 }}
-      >
+      <Overlay exit={exit} width={500}>
         <div
-          className="sc-s box-pad-h bg-sp"
-          style={{ position: "relative", width: "min(500px, 100%)", position: "relative" }}
-          onClick={(e) => e.stopPropagation()}
+          className="box-pad-h"
         >
             <div className="close" onClick={exit}>
                 <div></div>
@@ -88,7 +80,7 @@ export default function RelaysSetSettings({ exit, allRelays }) {
             )}
           </div>
         </div>
-      </div>
+      </Overlay>
     </>
   );
 }

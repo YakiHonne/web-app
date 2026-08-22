@@ -8,7 +8,7 @@ import {
 } from "@/Helpers/Encryptions";
 import { getEventStats, saveEventStats } from "@/Helpers/DB";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getWotConfig } from "@/Helpers/ClientHelpers";
+import { getNip22Refs, getWotConfig } from "@/Helpers/ClientHelpers";
 
 const filterStatsByWot = (stats) => {
   const { score, reactions } = getWotConfig();
@@ -95,8 +95,13 @@ const useNoteStats = (noteID, notePubkey) => {
             since: actions.quotes.since,
           },
           {
-            kinds: [1],
+            kinds: [1, 1111],
             "#e": [noteID],
+            since: actions.replies.since,
+          },
+          {
+            kinds: [1111],
+            "#E": [noteID],
             since: actions.replies.since,
           },
           {
@@ -119,17 +124,18 @@ const useNoteStats = (noteID, notePubkey) => {
                 pubkey: zapper.pubkey,
                 content: zapper.message,
                 amount: sats,
+                created_at: event.created_at,
               });
               kind9735_ = kind9735_ + sats;
             }
           }
-          if (event.kind === 7) {
+          if (event.kind === 7 && event.content !== "-") {
             if (!kind7Since || kind7Since < event.created_at)
               kind7Since = event.created_at;
             let content = !event.content.includes(":")
               ? event.content
               : (event.tags.find((tag) => `:${tag[1]}:` === event.content) ||
-                  [])[2] || "+";
+                [])[2] || "+";
             let checkValid7 = event.tags.find(
               (tag) => tag[0] === "e" && tag[1] === noteID,
             );
@@ -141,12 +147,35 @@ const useNoteStats = (noteID, notePubkey) => {
                 : true;
             let checkRedundant7 = kind7.find((_) => _.pubkey === event.pubkey);
             if (checkValid7 && !checkRedundant7)
-              kind7.push({ id: event.id, pubkey: event.pubkey, content });
+              kind7.push({
+                id: event.id,
+                pubkey: event.pubkey,
+                content,
+                created_at: event.created_at,
+              });
           }
           if (event.kind === 6) {
             if (!kind6Since || kind6Since < event.created_at)
               kind6Since = event.created_at;
-            kind6.push({ id: event.id, pubkey: event.pubkey });
+            kind6.push({
+              id: event.id,
+              pubkey: event.pubkey,
+              created_at: event.created_at,
+            });
+          }
+          if (event.kind === 1111) {
+            let refs = getNip22Refs(event);
+            let isComment =
+              refs && (refs.rootValue === noteID || refs.parentValue === noteID);
+            if (isComment) {
+              if (!kind1Since || kind1Since < event.created_at)
+                kind1Since = event.created_at;
+              kind1.push({
+                id: event.id,
+                pubkey: event.pubkey,
+                created_at: event.created_at,
+              });
+            }
           }
           if (event.kind === 1) {
             let check_kind1 = {
@@ -165,12 +194,20 @@ const useNoteStats = (noteID, notePubkey) => {
             ) {
               if (!kind1_Since || kind1_Since < event.created_at)
                 kind1_Since = event.created_at;
-              kind1_.push({ id: event.id, pubkey: event.pubkey });
+              kind1_.push({
+                id: event.id,
+                pubkey: event.pubkey,
+                created_at: event.created_at,
+              });
             }
             if (check_kind1.isComment) {
               if (!kind1Since || kind1Since < event.created_at)
                 kind1Since = event.created_at;
-              kind1.push({ id: event.id, pubkey: event.pubkey });
+              kind1.push({
+                id: event.id,
+                pubkey: event.pubkey,
+                created_at: event.created_at,
+              });
             }
           }
         }

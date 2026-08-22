@@ -6,7 +6,7 @@ import {
   getParsedRepEvent,
 } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import PreviewWidget from "@/Components/SmartWidget/PreviewWidget";
 import { useSelector } from "react-redux";
 import { getUser } from "@/Helpers/Controlers";
@@ -14,6 +14,7 @@ import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function BrowseSmartWidgets({ setWidget, exit }) {
   const userKeys = useSelector((state) => state.userKeys);
@@ -136,23 +137,14 @@ export default function BrowseSmartWidgets({ setWidget, exit }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered fx-start-v"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-      id="sw-browser"
-    >
+    <Overlay exit={exit} width={700} id="sw-browser">
       <div
-        className="fit-height overlay-container fx-centered fx-start-v fx-start-h fx-col sc-s-18"
+        className="fit-height overlay-container fx-centered fx-start-v fx-start-h fx-col"
         style={{
-          width: "min(100%,700px)",
           overflow: "scroll",
           borderRadius: "0",
           border: "1px solid var(--pale-gray)",
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div
           className="box-pad-h-m  fit-container fx-col fx-centered fx-start-h fx-start-v"
@@ -164,17 +156,15 @@ export default function BrowseSmartWidgets({ setWidget, exit }) {
           >
             <div className="fit-container fx-centered ">
               <div
-                className={`list-item fx-centered fx ${
-                  contentSource === "community" ? "selected-list-item" : ""
-                }`}
+                className={`list-item fx-centered fx ${contentSource === "community" ? "selected-list-item" : ""
+                  }`}
                 onClick={() => handleContentSource("community")}
               >
                 <p>{t("A1RYH3h")}</p>
               </div>
               <div
-                className={`list-item fx-centered fx ${
-                  contentSource === "self" ? "selected-list-item" : ""
-                }`}
+                className={`list-item fx-centered fx ${contentSource === "self" ? "selected-list-item" : ""
+                  }`}
                 onClick={() => handleContentSource("self")}
               >
                 <p>{t("Ak5dbF4")}</p>
@@ -219,12 +209,12 @@ export default function BrowseSmartWidgets({ setWidget, exit }) {
               style={{ height: "30vh" }}
             >
               <p className="gray-c">{t("AKvHyxG")}</p>
-              <LoadingDots />
+              <Spinner />
             </div>
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }
 

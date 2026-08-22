@@ -56,7 +56,7 @@ export default function Navbar() {
             className="menu-toggle"
             onClick={() => setShowSearchMobile(!showSearchMobile)}
           >
-            <Icon name="search" size={24} />
+            <Icon name="search_magnifying_glass" v={2} size={24} />
           </div>
           <div
             className={"menu-toggle"}

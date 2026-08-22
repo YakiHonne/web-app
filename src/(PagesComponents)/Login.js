@@ -1,6 +1,6 @@
-import React, { Fragment, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { getUser, getUserFromNOSTR } from "@/Helpers/Controlers";
 import { setUserKeys } from "@/Store/Slides/UserData";
 import {
@@ -9,6 +9,7 @@ import {
   getEmptyuserMetadata,
   getHex,
   hexToUint8Array,
+  shortenKey,
 } from "@/Helpers/Encryptions";
 import {
   generateSecretKey,
@@ -18,21 +19,21 @@ import {
   nip44,
 } from "nostr-tools";
 import * as secp from "@noble/secp256k1";
-import { copyText, FileUpload, sleepTimer } from "@/Helpers/Helpers";
+import { copyText, FileUpload, LoginToAPI, sleepTimer } from "@/Helpers/Helpers";
+import { setIsConnectedToYaki } from "@/Store/Slides/YakiChest";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
 import { setToast } from "@/Store/Slides/Publishers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import InterestSuggestions from "@/Content/InterestSuggestions";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { saveUsers } from "@/Helpers/DB";
-import axios from "axios";
+import axiosInstance from "@/Helpers/HTTP_Client";
 import {
   NDKEvent,
   NDKNip46Signer,
   NDKPrivateKeySigner,
 } from "@nostr-dev-kit/ndk";
 import { FilePicker } from "@/Components/FilePicker";
-import LoadingLogo from "@/Components/LoadingLogo";
 import { useTranslation } from "react-i18next";
 import {
   BUNKER_REGEX,
@@ -41,24 +42,39 @@ import {
 } from "nostr-tools/nip46";
 import { NostrConnect } from "nostr-tools/kinds";
 import QRCode from "react-qr-code";
-import Link from "next/link";
 import Router from "next/router";
+import Overlay from "@/Components/Overlay";
 import useRecommendedPacks from "@/Hooks/useRecommendedPacks";
 import PackPreview from "./Explore/PackPreview";
 import PackPreviewOnboarding from "@/Components/PackPreviewOnboarding";
 import Icon from "@/Components/Icon";
+import DotGrid from "@/Components/DotGrid/DotGrid";
+import { SelectTabs } from "@/Components/SelectTabs";
+import { useTheme } from "next-themes";
+import {
+  CENTRAL_URL,
+  OPERATOR_URLS,
+  DEFAULT_OPERATOR_URLS,
+  CENTRALS,
+} from "@/Content/pomegrenate";
+import {
+  massageURL,
+  isValidServerURL,
+  hostOf,
+  authenticateWithGoogle,
+  getAccount,
+  resolveDefaultBunker,
+  findSetupOnOtherCentral,
+  publishConfigEvent,
+  createPomegranateAccount,
+} from "@/Helpers/Pomegranate";
 let profilePlaceholder =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/profile-avatar.png";
-let s8e =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/s8-e-yma.png";
-let ymaHero =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/login-yma-hero.png";
-let ymaQR =
-  "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/yma-qr.png";
-let stepsNumber = 4;
 let isNewAccount = getWallets().length > 0 ? true : false;
 
+
 export default function Login() {
+  const { resolvedTheme } = useTheme()
   const { t } = useTranslation();
   let sk_ = generateSecretKey();
   let sk = bytesTohex(sk_);
@@ -78,39 +94,68 @@ export default function Login() {
   }, []);
 
   return (
-    <div
-      className="fit-container fx-centered"
-      style={{ height: "100vh", gap: 0 }}
-    >
-      <LeftSection />
-      <div
-        className="fx-centered fx-col box-pad-h"
-        style={{ width: "min(100%,500px)" }}
-      >
-        <div className="box-marg-s">
-          {isLogin && <h3 className="slide-up">{t("AITU9z0")}</h3>}
-          {!isLogin && <h3 className="slide-down">{t("AHXrr4Y")}</h3>}
-        </div>
-        {isLogin && (
-          <LoginScreen
-            switchScreen={() => setIsLogin(!isLogin)}
-            userKeys={userKeys}
-          />
-        )}
+    <div className="login-stage">
+      <div className="login-bg-layer">
+        <DotGrid
+          dotSize={7}
+          gap={19}
+          baseColor={["dark", "gray"].includes(resolvedTheme) ? "#2b2b2b" : "#e8e8e8"}
+          activeColor="#ff5c27"
+          proximity={270}
+          shockRadius={250}
+          shockStrength={14}
+          resistance={1350}
+          returnDuration={1.7}
+        />
+      </div>
+      <div className="login-vignette"></div>
+      <div className="login-brandmark">
+        <Icon name="yakihonne-logo" width={120} height={42} isColored={false} />
+      </div>
+      <div className="login-stage-content">
+        <div className="login-card bg-dropdown-t">
+          <button
+            className="btn btn-normal btn-gray fx-centered bg-dropdown login-back-btn"
+            onClick={() => Router.back()}
+          >
+            <Icon name="arrow" transform="rotate(90deg)" />
+          </button>
+          <div className="login-card-head">
+            <p className="login-card-eyebrow">{t("ANbrnTP")}</p>
+            <h3 className="login-card-title-plain" key={isLogin ? "login" : "signup"}>
+              {isLogin ? t("AITU9z0") : t("AHXrr4Y")}
+            </h3>
+          </div>
+          <div className="login-mode-tabs fx-centered">
+            <div>
+              <SelectTabs
+                selectedTab={isLogin ? 0 : 1}
+                tabs={[t("AmOtzoL"), t("AHXrr4Y")]}
+                setSelectedTab={(index) => setIsLogin(index === 0)}
+              />
+            </div>
+          </div>
+          {isLogin && (
+            <LoginScreen
+              switchScreen={() => setIsLogin(!isLogin)}
+              userKeys={userKeys}
+            />
+          )}
 
-        {!isLogin && (
-          <SignupScreen
-            switchScreen={() => setIsLogin(!isLogin)}
-            userKeys={userKeys}
-            recommendedStarterPacks={recommendedStarterPacks}
-          />
-        )}
+          {!isLogin && (
+            <SignupScreen
+              switchScreen={() => setIsLogin(!isLogin)}
+              userKeys={userKeys}
+              recommendedStarterPacks={recommendedStarterPacks}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-const Bunker = () => {
+const Bunker = ({ autoLaunch = false }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const [nostrConnectURI, setNostrConnectURI] = useState("");
@@ -137,8 +182,6 @@ const Bunker = () => {
       [{ kinds: [NostrConnect], "#p": [localKeys.pubkey] }],
       {
         groupable: false,
-        // skipVerification: true,
-        // skipValidation: true,
       },
     );
 
@@ -256,89 +299,115 @@ const Bunker = () => {
     Router.back();
   };
 
+  useEffect(() => {
+    if (autoLaunch) launchBunkerWindow();
+  }, []);
+
   return (
     <>
       {nostrConnectURI && (
-        <div className="fixed-container fx-centered box-pad-h">
-          <div
-            className="sc-s-18 bg-sp box-pad-h box-pad-v fx-centered fx-col slide-up"
-            style={{ position: "relative", width: "min(100%,340px)" }}
-          >
+        <Overlay exit={() => setNostrConnectURI("")} width={360}>
+          <div className="login-bunker-overlay box-pad-h box-pad-v bg-dropdown-t">
             <div className="close" onClick={() => setNostrConnectURI("")}>
               <div></div>
             </div>
-            <div className="fit-container fx-centered fx-col">
-              <h4>{t("A9eQr6B")}</h4>
-              <p className="box-pad-h p-centered gray-c">{t("AJdT1m0")}</p>
-              <div
-                className="sc-s-18 fx-centered box-pad-h-m box-pad-v-m"
-                style={{ backgroundColor: "white" }}
-              >
-                <QRCode value={nostrConnectURI} width={400} />
-              </div>
-              <div
-                className="fit-container fx-scattered box-pad-h-m box-pad-v-s sc-s-d pointer"
-                onClick={() => copyText(nostrConnectURI, t("AB1PYvA"))}
-              >
-                <p className="p-one-line gray-c">{nostrConnectURI}</p>
-                <Icon name="copy" />
-              </div>
+            <h4 className="login-card-title" style={{ fontSize: "1.3rem" }}>
+              {t("A9eQr6B")}
+            </h4>
+            <p className="login-card-subtitle">{t("AJdT1m0")}</p>
+            <div className="login-qr-frame">
+              <QRCode value={nostrConnectURI} width={220} />
             </div>
-            <div className="fit-container fx-centered">
-              <p className="gray-c">{t("Ax46s4g")}</p>
+            <div
+              className="login-bunker-uri"
+              onClick={() => copyText(nostrConnectURI, t("AB1PYvA"))}
+            >
+              <p className="p-one-line gray-c">{nostrConnectURI}</p>
+              <Icon name="copy" />
             </div>
-            <div className="fit-container fx-centered fx-col">
-              <input
-                type="text"
-                className="if ifs-full"
-                placeholder="bunker://..."
-                value={bunkerURL}
-                onChange={(e) => setBunkerURL(e.target.value)}
-              />
-              <div className="fit-container fx-centered">
-                <button
-                  className="btn btn-normal btn-full"
-                  style={{ minWidth: "max-content" }}
-                  onClick={handleBunker}
-                  disabled={isLoading || !bunkerURL}
-                >
-                  {isLoading ? <LoadingDots /> : t("AmOtzoL")}
+            <div className="login-divider-row">
+              <hr />
+              <span>{t("Ax46s4g")}</span>
+              <hr />
+            </div>
+            <input
+              type="text"
+              className="if ifs-full"
+              placeholder="bunker://..."
+              value={bunkerURL}
+              onChange={(e) => setBunkerURL(e.target.value)}
+            />
+            <div className="login-actions fit-container">
+              <button
+                className="btn btn-normal btn-full"
+                onClick={handleBunker}
+                disabled={isLoading || !bunkerURL}
+              >
+                {isLoading ? <Spinner /> : t("AmOtzoL")}
+              </button>
+              {isLoading && (
+                <button className="btn btn-gst btn-full">
+                  {t("AB4BSCe")}
                 </button>
-                {isLoading && (
-                  <button className="btn-red btn btn-full">
-                    {t("AB4BSCe")}
-                  </button>
-                )}
-              </div>
+              )}
             </div>
           </div>
-        </div>
+        </Overlay>
       )}
-      <button className="btn btn-gray btn-full" onClick={launchBunkerWindow}>
-        {t("A9eQr6B")}
-      </button>
+      {!autoLaunch && (
+        <button className="btn btn-gst btn-full" onClick={launchBunkerWindow}>
+          {t("A9eQr6B")}
+        </button>
+      )}
     </>
   );
 };
 
-const LeftSection = () => {
-  return (
-    <div
-      style={{ height: "70vh", width: "700px" }}
-      className="box-pad-h box-pad-v fx-centered mb-hide-800 "
-    >
-      <MobileAd />
-    </div>
-  );
-};
-
-const LoginScreen = ({ switchScreen }) => {
+const LoginScreen = () => {
   const dispatch = useDispatch();
   const { t } = useTranslation();
 
   const [key, setKey] = useState("");
   const [checkExt, setCheckExt] = useState(window.nostr ? true : false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeMethod, setActiveMethod] = useState("");
+  const [showGoogleLogin, setShowGoogleLogin] = useState(false);
+
+  const methods = [
+    {
+      id: "key",
+      icon: "key-icon",
+      title: t("AHm6tIw"),
+      desc: t("A7uff0L"),
+    },
+    {
+      id: "ext",
+      icon: "puzzle",
+      iconV: 2,
+      title: t("AHm6tIx"),
+      desc: t("AHm6tIu"),
+      disabled: !checkExt,
+    },
+    {
+      id: "bunker",
+      icon: "bolt",
+      title: t("A9eQr6B"),
+      desc: t("AJdT1m0"),
+    },
+    {
+      id: "google",
+      icon: "google",
+      title: "Login with Google",
+      desc: "Sign in using your Google account",
+    },
+  ];
+
+  const handleMethodClick = (method) => {
+    if (method.disabled) return;
+    if (method.id === "ext") { onLoginWithExt(); return; }
+    if (method.id === "google") { setShowGoogleLogin(true); return; }
+    setActiveMethod(method.id);
+  };
 
   const onLogin = async (inputKey) => {
     if (!inputKey) return;
@@ -395,11 +464,12 @@ const LoginScreen = ({ switchScreen }) => {
       }
     }
     if (secp.utils.isValidPrivateKey(inputKey)) {
-      let user = await getUserFromNOSTR(getPublicKey(inputKey));
+      let secKey = hexToUint8Array(inputKey);
+      let user = await getUserFromNOSTR(getPublicKey(secKey));
       if (user) {
         let keys = {
           sec: inputKey,
-          pub: getPublicKey(inputKey),
+          pub: getPublicKey(secKey),
         };
 
         dispatch(setUserKeys(keys));
@@ -439,7 +509,6 @@ const LoginScreen = ({ switchScreen }) => {
 
       if (wallet.length > 0) dispatch(setUserKeys(keys));
 
-      // }
       setIsLoading(false);
       Router.back();
       return;
@@ -457,74 +526,853 @@ const LoginScreen = ({ switchScreen }) => {
 
   return (
     <>
-      <div className="fit-container">
-        <input
-          type="text"
-          className="if ifs-full box-marg-s"
-          placeholder="npub, nsec, hex"
-          value={key}
-          onChange={(e) => setKey(e.target.value)}
-        />
+      <div className="login-conversation">
+        <p className="login-convo-question fx-centered gray-c">{t("AHm6tIv")}</p>
 
-        <div className="fx-centered fx-col fit-container">
-          <button
-            className="btn btn-normal btn-full"
-            onClick={() => onLogin(key)}
-          >
-            {isLoading ? <LoadingDots /> : <>{t("AmOtzoL")}</>}
-          </button>
-          <p>{t("Ax46s4g")}</p>
-          <Bunker />
-          {checkExt && (
-            <button
-              className="btn btn-gray btn-full"
-              disabled={!checkExt}
-              onClick={onLoginWithExt}
+        {activeMethod !== "key" && (
+          <div className="login-convo-options" key="options">
+            {methods.map((method, index) => (
+              <div
+                key={method.id}
+                className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${method.disabled ? "disabled" : ""}`}
+                style={{ "--stagger-i": index }}
+                onClick={() => handleMethodClick(method)}
+                disabled={method.disabled}
+              >
+                <span className="login-convo-option-icon">
+                  <Icon name={method.icon} v={method.iconV || 1} size={32} />
+                </span>
+                <span className="login-convo-option-copy">
+                  <b>{method.title}</b>
+                  <span>{method.desc}</span>
+                </span>
+                <span className="login-convo-option-go">
+                  <Icon name="arrow" size={14} transform="rotate(-90deg)" />
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+        {activeMethod === "bunker" && <Bunker autoLaunch />}
+        {activeMethod === "key" && (
+          <div className="login-convo-answer" key={activeMethod}>
+            <div
+              className="login-convo-back"
+              onClick={() => setActiveMethod("")}
             >
-              {isLoading ? <LoadingDots /> : <>{t("AgG7T1H")}</>}
-            </button>
-          )}
-          {!checkExt && (
-            <button className="btn btn-disabled btn-full" disabled={true}>
-              <>{t("AgG7T1H")}</>
-            </button>
-          )}
+              <Icon name="arrow" size={13} transform="rotate(90deg)" />
+              {t("AyGDBDa")}
+            </div>
+
+            <div className="login-convo-field">
+              <input
+                type="text"
+                className="if ifs-full"
+                placeholder={t("A7uff0L")}
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+                autoFocus
+              />
+              <div className="login-actions">
+                <button
+                  className="btn btn-normal btn-full"
+                  onClick={() => onLogin(key)}
+                  disabled={isLoading || !key}
+                >
+                  {isLoading ? <Spinner /> : <>{t("AmOtzoL")}</>}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      {showGoogleLogin && (
+        <GoogleLoginOverlay onClose={() => setShowGoogleLogin(false)} />
+      )}
+    </>
+  );
+};
+
+const GoogleLoginOverlay = ({ onClose }) => {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+
+  const [phase, setPhase] = useState("central");
+  const [status, setStatus] = useState("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [token, setToken] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const localKeys = useMemo(() => NDKPrivateKeySigner.generate(), []);
+
+  const centrals = useMemo(() => CENTRALS.map((c) => ({ ...c, url: massageURL(c.url) })), []);
+  const [selectedCentral, setSelectedCentral] = useState(centrals[0].url);
+  const [useCustomCentral, setUseCustomCentral] = useState(false);
+  const [customCentral, setCustomCentral] = useState("");
+
+  const [keyMode, setKeyMode] = useState("generate");
+  const [secretKey, setSecretKey] = useState(() => generateSecretKey());
+  const [importedKey, setImportedKey] = useState("");
+  const [importError, setImportError] = useState("");
+
+  const [operators, setOperators] = useState(() =>
+    DEFAULT_OPERATOR_URLS.map(massageURL),
+  );
+  const [newOperator, setNewOperator] = useState("");
+  const [threshold, setThreshold] = useState(
+    () => Math.min(2, DEFAULT_OPERATOR_URLS.length),
+  );
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const [foundSetup, setFoundSetup] = useState(null);
+  const [foundUser, setFoundUser] = useState(null);
+
+  useEffect(() => {
+    if (!foundSetup?.pubkey) {
+      setFoundUser(null);
+      return;
+    }
+    let cancelled = false;
+    getUserFromNOSTR(foundSetup.pubkey).then((user) => {
+      if (!cancelled) setFoundUser(user);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [foundSetup?.pubkey]);
+
+  const central = useCustomCentral
+    ? isValidServerURL(customCentral)
+      ? massageURL(customCentral)
+      : ""
+    : selectedCentral;
+
+  const suggestedOperators = OPERATOR_URLS.map(massageURL).filter(
+    (op) => !operators.includes(op),
+  );
+
+  const nsec = nip19.nsecEncode(secretKey);
+  const busy = !["idle", "error"].includes(status);
+
+  const statusLabel =
+    {
+      authenticating: t("Apom004"),
+      checking: t("Apom005"),
+      creating: t("Apom006"),
+    }[status] || "";
+
+  const downloadKey = (nsecValue) => {
+    const content = [
+      "Important: Store this information securely.",
+      "---",
+      `Private key: ${nsecValue}`,
+    ].join("\n");
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "nostr-private-key.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSaveAccount = ({ pubkey, bunkerUrl, central, email }) => {
+    let toSave = {
+      localKeys: {
+        sec: localKeys.privateKey,
+        pub: getPublicKey(hexToUint8Array(localKeys.privateKey)),
+      },
+      pub: pubkey,
+      bunker: bunkerUrl,
+      central,
+      email,
+    };
+    dispatch(setUserKeys(toSave));
+    Router.back();
+  };
+
+  const connectExisting = async (centralUrl, googleToken) => {
+    const account = await getAccount(centralUrl, googleToken);
+    if (!account) return false;
+    const bunkerUrl = await resolveDefaultBunker(centralUrl, googleToken);
+    handleSaveAccount({
+      pubkey: account.pubkey,
+      bunkerUrl,
+      central: centralUrl,
+      email: googleToken.email,
+    });
+    return true;
+  };
+
+  const handleStart = async (targetCentral = central) => {
+    if (!targetCentral) return;
+    setErrorMsg("");
+    setStatus("authenticating");
+    try {
+      const googleToken = await authenticateWithGoogle(targetCentral);
+      setToken(googleToken);
+      setStatus("checking");
+
+      if (await connectExisting(targetCentral, googleToken)) {
+        setStatus("idle");
+        onClose();
+        return;
+      }
+
+      const existing = await findSetupOnOtherCentral(
+        googleToken.email,
+        targetCentral,
+      );
+      if (existing) {
+        setFoundSetup(existing);
+        setStatus("idle");
+        setPhase("found");
+        return;
+      }
+
+      setStatus("idle");
+      setPhase("setup");
+    } catch (err) {
+      if (err.message === "POPUP_CLOSED") {
+        setStatus("idle");
+        return;
+      }
+      if (err.message === "POPUP_BLOCKED") {
+        setStatus("error");
+        setErrorMsg(t("AHqyO3m"));
+        return;
+      }
+      setStatus("error");
+      setErrorMsg(err.message || t("AEH0z9N"));
+    }
+  };
+
+  const handleConnectFound = async () => {
+    if (!foundSetup?.central) return;
+    setErrorMsg("");
+    setStatus("authenticating");
+    try {
+      const googleToken = await authenticateWithGoogle(foundSetup.central);
+      setToken(googleToken);
+      setStatus("checking");
+      if (await connectExisting(foundSetup.central, googleToken)) {
+        setStatus("idle");
+        onClose();
+        return;
+      }
+      setStatus("idle");
+      setFoundSetup(null);
+      setPhase("setup");
+    } catch (err) {
+      if (err.message === "POPUP_CLOSED") {
+        setStatus("idle");
+        return;
+      }
+      setStatus("error");
+      setErrorMsg(err.message || t("AEH0z9N"));
+    }
+  };
+
+  const handleCreateInstead = () => {
+    setFoundSetup(null);
+    setErrorMsg("");
+    setStatus("idle");
+    setPhase("setup");
+  };
+
+  const applyImportedKey = () => {
+    setImportError("");
+    const value = importedKey.trim();
+    if (!value) return null;
+    try {
+      if (value.startsWith("nsec")) {
+        const { type, data } = nip19.decode(value);
+        if (type !== "nsec") throw new Error();
+        return data;
+      }
+      if (!/^[0-9a-fA-F]{64}$/.test(value)) throw new Error();
+      return hexToUint8Array(value);
+    } catch {
+      setImportError(t("AIdFeYb"));
+      return null;
+    }
+  };
+
+  const addOperator = () => {
+    const value = newOperator.trim();
+    if (!value || !isValidServerURL(value)) return;
+    const url = massageURL(value);
+    if (operators.includes(url)) {
+      setNewOperator("");
+      return;
+    }
+    setOperators([...operators, url]);
+    setNewOperator("");
+  };
+
+  const removeOperator = (url) => {
+    const next = operators.filter((op) => op !== url);
+    setOperators(next);
+    if (threshold > next.length) setThreshold(Math.max(1, next.length));
+  };
+
+  const handleCreate = async () => {
+    if (!token || !central) return;
+    setErrorMsg("");
+
+    let keyToUse = secretKey;
+    if (keyMode === "import") {
+      const imported = applyImportedKey();
+      if (!imported) return;
+      keyToUse = imported;
+      setSecretKey(imported);
+    }
+
+    if (operators.length === 0 || threshold < 1 || threshold > operators.length) {
+      setErrorMsg(t("AxnAEcr"));
+      return;
+    }
+
+    setStatus("creating");
+    try {
+      if (keyMode === "generate") {
+        downloadKey(nip19.nsecEncode(keyToUse));
+        dispatch(setToast({ type: 1, desc: t("Apom010") }));
+      }
+
+      await createPomegranateAccount(
+        central,
+        token,
+        operators,
+        threshold,
+        keyToUse,
+      );
+
+      let account = null;
+      for (let i = 0; i < 10; i++) {
+        await new Promise((r) => setTimeout(r, 1500));
+        account = await getAccount(central, token);
+        if (account) break;
+      }
+      if (!account) throw new Error(t("Ar66dzx"));
+
+      await publishConfigEvent({
+        email: token.email,
+        central,
+        operators,
+        threshold,
+        secretKey: keyToUse,
+      });
+
+      const bunkerUrl = await resolveDefaultBunker(central, token);
+
+      handleSaveAccount({
+        pubkey: account.pubkey,
+        bunkerUrl,
+        central,
+        email: token.email,
+      });
+
+      setStatus("idle");
+      onClose();
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err.message || t("AEH0z9N"));
+    }
+  };
+
+  const handleCopy = () => {
+    copyText(nsec, t("AStACDI"));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const backTo = (target) => {
+    setPhase(target);
+    setErrorMsg("");
+    setStatus("idle");
+  };
+
+  return (
+    <Overlay exit={onClose} width={480}>
+      <div className="login-google-overlay box-pad-h box-pad-v bg-dropdown-t">
+        <div className="close" onClick={onClose}>
+          <div></div>
         </div>
-        <div className="fit-container  box-pad-v-m fx-scattered">
-          <div className="fx-centered pointer">
-            {isNewAccount ? (
-              <div className="round-icon-small">
-                <Icon name="arrow" transform="rotate(90deg)" />
+
+        {phase === "central" && (
+          <>
+            <div className="login-google-head">
+              <Icon name="google" size={32} />
+              <h4 className="p-big">
+                {t("Apom001")}
+              </h4>
+              <p className="gray-c">{t("Apom011")}</p>
+            </div>
+
+            <div className="fit-container">
+              <p className="p-bold">{t("A8SE9H1")}</p>
+              <p className="gray-c">{t("AdoAL8m")}</p>
+            </div>
+
+            <div className="login-convo-options" style={{ marginTop: 0 }}>
+              {centrals.map((item, index) => {
+                const isSelected = !useCustomCentral && selectedCentral === item.url;
+                return (
+                  <div
+                    key={item.url}
+                    className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${isSelected ? "selected-option" : ""}`}
+                    style={{ "--stagger-i": index }}
+                    onClick={() => {
+                      setUseCustomCentral(false);
+                      setSelectedCentral(item.url);
+                    }}
+                  >
+                    <span className="login-convo-option-icon">
+                      <Icon
+                        name={isSelected ? "circle_check" : "circle"}
+                        size={20}
+                        v={2}
+                        isBoldThemeColor={isSelected}
+                      />
+                    </span>
+                    <span className="login-convo-option-copy">
+                      <b>{hostOf(item.url)}</b>
+                    </span>
+                    <span className="sticker pom-central-tag">
+                      {item.kind === "default" ? t("ANmIqNJ") : t("ATqpiwj")}
+                    </span>
+                  </div>
+                );
+              })}
+
+              <div
+                className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${useCustomCentral ? "selected-option" : ""}`}
+                style={{ "--stagger-i": centrals.length }}
+                onClick={() => setUseCustomCentral(true)}
+              >
+                <span className="login-convo-option-icon">
+                  <Icon
+                    name={useCustomCentral ? "circle_check" : "circle"}
+                    size={20}
+                    v={2}
+                    isBoldThemeColor={useCustomCentral}
+                  />
+                </span>
+                <span className="login-convo-option-copy">
+                  <b>{t("AabmNg4")}</b>
+                </span>
+              </div>
+            </div>
+
+            {useCustomCentral && (
+              <input
+                type="text"
+                className="if ifs-full"
+                placeholder={t("AG91nf9")}
+                value={customCentral}
+                onChange={(e) => setCustomCentral(e.target.value)}
+                autoFocus
+              />
+            )}
+
+            {errorMsg && (
+              <p className="red-c" style={{ textAlign: "center" }}>
+                {errorMsg}
+              </p>
+            )}
+
+            {busy ? (
+              <div className="login-google-busy fx-centered fx-col">
+                <Spinner size={24} />
+                <p className="gray-c">{statusLabel}</p>
               </div>
             ) : (
-              <Icon name="user" size={24} />
-            )}{" "}
-            <p className="gray-c" onClick={() => Router.back()}>
-              {isNewAccount ? t("AB4BSCe") : t("AVCdQku")}
-            </p>
-          </div>
-          <div className=" fx-centered" onClick={switchScreen}>
-            <p className="gray-c">
-              <span className="orange-c pointer p-bold">
-                {t("AHXrr4Y")}
-              </span>{" "}
-            </p>
-          </div>
-        </div>
+              <button
+                className="btn btn-normal btn-full"
+                onClick={() => handleStart()}
+                disabled={!central}
+              >
+                {errorMsg ? t("AhOnn0t") : t("Apom003")}
+              </button>
+            )}
+          </>
+        )}
+
+        {phase === "found" && (
+          <>
+            <div className="login-google-head">
+              <Icon name="server" size={32} isBoldThemeColor />
+              <h4 className="p-big">
+                {t("AR7xWde")}
+              </h4>
+              <p className="gray-c">
+                {t("A5uh9MU", { central: hostOf(foundSetup?.central || "") })}
+              </p>
+            </div>
+
+            {errorMsg && (
+              <p className="red-c" style={{ textAlign: "center" }}>
+                {errorMsg}
+              </p>
+            )}
+
+            {busy ? (
+              <div className="login-google-busy fx-centered fx-col">
+                <Spinner size={24} />
+                <p className="gray-c">{statusLabel}</p>
+              </div>
+            ) : (
+              <>
+                <div className="pom-identity-cards">
+                  <div className="pom-identity-card">
+                    <UserProfilePic
+                      user_id={foundSetup?.pubkey}
+                      img={foundUser?.picture}
+                      size={64}
+                      allowClick={false}
+                    />
+                    <div className="pom-identity-copy">
+                      <p className="p-bold p-one-line">
+                        {foundUser
+                          ? foundUser.display_name.startsWith("npub")
+                            ? shortenKey(foundUser.display_name)
+                            : foundUser.display_name
+                          : ""}
+                      </p>
+                      {foundUser &&
+                        !foundUser.name.startsWith("npub") &&
+                        foundUser.name !== foundUser.display_name && (
+                          <p className="gray-c p-medium p-one-line">
+                            @{foundUser.name}
+                          </p>
+                        )}
+                    </div>
+                    <button
+                      className="btn btn-normal btn-full"
+                      onClick={handleConnectFound}
+                    >
+                      {t("ANqJi0v", {
+                        central: hostOf(foundSetup?.central || ""),
+                      })}
+                    </button>
+                  </div>
+
+                  <div className="pom-identity-card">
+                    <div className="pom-identity-unknown fx-centered">
+                      <span>?</span>
+                    </div>
+                    <div className="pom-identity-copy">
+                      <p className="p-bold p-one-line">{t("AAvmg0n")}</p>
+                      <p className="gray-c p-medium p-one-line">
+                        {t("AMUoqQa")}
+                      </p>
+                    </div>
+                    <button
+                      className="btn btn-gst btn-full"
+                      onClick={handleCreateInstead}
+                    >
+                      {t("ACwufz6")}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="fx-centered fit-container">
+                  <button
+                    className="btn btn-normal btn-gray fx-centered bg-dropdown"
+                    style={{
+                      padding: "0 1rem",
+                      borderRadius: "50%",
+                      aspectRatio: "1/1",
+                      width: "44px",
+                      height: "44px",
+                    }}
+                    onClick={() => {
+                      setFoundSetup(null);
+                      backTo("central");
+                    }}
+                  >
+                    <Icon name="arrow" transform="rotate(90deg)" size={16} />
+                  </button>
+                </div>
+              </>
+            )}
+          </>
+        )}
+
+        {phase === "setup" && (
+          <>
+            <div className="login-google-head">
+              <h4 className="p-big">
+                {t("AcNNqSN")}
+              </h4>
+              <p className="gray-c">{t("AMQOKdV")}</p>
+            </div>
+
+            <div className="login-convo-options" style={{ marginTop: 0 }}>
+              <div
+                className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${keyMode === "generate" ? "selected-option" : ""}`}
+                style={{ "--stagger-i": 0 }}
+                onClick={() => setKeyMode("generate")}
+              >
+                <span className="login-convo-option-icon">
+                  <Icon name="star" size={24} />
+                </span>
+                <span className="login-convo-option-copy">
+                  <b>{t("AfQb7HD")}</b>
+                  <span>{t("AjhCCrK")}</span>
+                </span>
+                <span className="login-convo-option-go">
+                  <Icon
+                    name={keyMode === "generate" ? "circle_check" : "circle"}
+                    size={20}
+                    v={2}
+                    isBoldThemeColor={keyMode === "generate"}
+                  />
+                </span>
+              </div>
+
+              <div
+                className={`login-convo-option box-pad-h-m box-pad-v-s bg-dropdown-t ${keyMode === "import" ? "selected-option" : ""}`}
+                style={{ "--stagger-i": 1 }}
+                onClick={() => setKeyMode("import")}
+              >
+                <span className="login-convo-option-icon">
+                  <Icon name="key-icon" size={24} />
+                </span>
+                <span className="login-convo-option-copy">
+                  <b>{t("AbXKi4r")}</b>
+                  <span>{t("AmQjQOI")}</span>
+                </span>
+                <span className="login-convo-option-go">
+                  <Icon
+                    name={keyMode === "import" ? "circle_check" : "circle"}
+                    size={20}
+                    v={2}
+                    isBoldThemeColor={keyMode === "import"}
+                  />
+                </span>
+              </div>
+            </div>
+
+            {keyMode === "generate" && (
+              <div className="login-google-key-field">
+                <p className="p-bold">{t("Apom008")}</p>
+                <div className="login-google-key-row">
+                  <input
+                    type="text"
+                    className="if ifs-full"
+                    value={nsec}
+                    readOnly
+                    onClick={(e) => e.target.select()}
+                  />
+                  <button
+                    className="btn btn-normal btn-gray fx-centered bg-dropdown"
+                    style={{
+                      padding: "0 1rem",
+                      borderRadius: "50%",
+                      aspectRatio: "1/1",
+                      width: "44px",
+                      height: "44px",
+                    }}
+                    onClick={handleCopy}
+                    disabled={busy}
+                  >
+                    <Icon
+                      name={copied ? "check_big" : "copy"}
+                      size={16}
+                      v={copied ? 2 : 1}
+                    />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {keyMode === "import" && (
+              <div className="login-google-key-field">
+                <p className="p-bold">{t("ArPMdgT")}</p>
+                <input
+                  type="password"
+                  className="if ifs-full"
+                  placeholder={t("A7uff0L")}
+                  value={importedKey}
+                  onChange={(e) => {
+                    setImportedKey(e.target.value);
+                    setImportError("");
+                  }}
+                />
+                {importError && <p className="red-c">{importError}</p>}
+              </div>
+            )}
+
+            <div className="fit-container">
+              <div
+                className={`fx-scattered pointer fit-container ${showAdvanced ? "pom-advanced-toggle" : ""}`}
+                onClick={() => setShowAdvanced(!showAdvanced)}
+              >
+                <div className="fx-centered">
+                  <Icon name="settings" size={18} v={2} />
+                  <p className="p-bold">{t("AsoXjsL")}</p>
+                </div>
+                <Icon
+                  name="arrow"
+                  size={14}
+                  transform={showAdvanced ? "rotate(180deg)" : "rotate(0deg)"}
+                />
+              </div>
+
+              {showAdvanced && (
+                <div className="sc-s-18 box-pad-h-m box-pad-v-m fit-container fx-col fx-centered fx-start-v bg-dropdown">
+                  <div className="fit-container">
+                    <p className="p-bold gray-c">{t("A51mB0F")}</p>
+                    <p className="gray-c pom-section-label">
+                      {t("Apndhzt")}
+                    </p>
+                  </div>
+
+                  <div className="fit-container fx-col fx-centered">
+                    {operators.map((op) => (
+                      <div key={op} className="pom-operator-row">
+                        <p>{hostOf(op)}</p>
+                        <div
+                          className="pom-operator-remove"
+                          onClick={() => removeOperator(op)}
+                          title={t("AzkTxuy")}
+                        >
+                          <Icon name="trash" size={17} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="fx-centered fit-container">
+                    <input
+                      type="text"
+                      className="if ifs-full"
+                      placeholder={t("AHuJAY1")}
+                      value={newOperator}
+                      onChange={(e) => setNewOperator(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          addOperator();
+                        }
+                      }}
+                    />
+                    <button
+                      className="btn btn-normal btn-small"
+                      onClick={addOperator}
+                      disabled={!newOperator.trim()}
+                    >
+                      {t("AflwmPU")}
+                    </button>
+                  </div>
+
+                  {suggestedOperators.length > 0 && (
+                    <div className="fit-container">
+                      <p className="gray-c pom-section-label">
+                        {t("AjJP77C")}
+                      </p>
+                      <div className="pom-chips">
+                        {suggestedOperators.map((op) => (
+                          <div
+                            key={op}
+                            className="pom-chip"
+                            onClick={() => setOperators([...operators, op])}
+                          >
+                            <Icon name="add_plus" size={14} v={2} />
+                            <p>{hostOf(op)}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="fit-container">
+                    <p className="p-bold gray-c pom-section-label">
+                      {t("ABnF1Ro")}
+                    </p>
+                    <div className="pom-stepper">
+                      <button
+                        className="pom-stepper-btn"
+                        onClick={() => setThreshold(Math.max(1, threshold - 1))}
+                        disabled={threshold <= 1}
+                      >
+                        <Icon name="remove_minus" size={15} v={2} />
+                      </button>
+                      <p className="pom-stepper-value">{threshold}</p>
+                      <button
+                        className="pom-stepper-btn"
+                        onClick={() =>
+                          setThreshold(Math.min(operators.length, threshold + 1))
+                        }
+                        disabled={threshold >= operators.length}
+                      >
+                        <Icon name="add_plus" size={15} v={2} />
+                      </button>
+                      <p className="gray-c">
+                        {t("Av55soW", { count: operators.length })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {errorMsg && (
+              <p className="red-c" style={{ textAlign: "center" }}>
+                {errorMsg}
+              </p>
+            )}
+
+            {busy ? (
+              <div className="login-google-busy fx-centered fx-col">
+                <Spinner size={24} />
+                <p className="gray-c">{statusLabel}</p>
+              </div>
+            ) : (
+              <div className="login-google-setup-actions">
+                <button
+                  className="btn btn-normal btn-gray fx-centered bg-dropdown"
+                  style={{
+                    padding: "0 1rem",
+                    borderRadius: "50%",
+                    aspectRatio: "1/1",
+                    width: "44px",
+                    height: "44px",
+                  }}
+                  onClick={() => {
+                    setToken(null);
+                    backTo("central");
+                  }}
+                  disabled={busy}
+                >
+                  <Icon name="arrow" transform="rotate(90deg)" size={16} />
+                </button>
+                <button
+                  className="btn btn-normal"
+                  onClick={handleCreate}
+                  disabled={busy || (keyMode === "import" && !importedKey.trim())}
+                >
+                  {errorMsg ? t("AhOnn0t") : t("AP9F5rl")}
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </>
+    </Overlay>
   );
 };
 
 const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
   const dispatch = useDispatch();
+  const previousUserKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
   const [name, setName] = useState("");
   const [about, setAbout] = useState("");
   const [pictureFile, setPictureFile] = useState("");
   const [picture, setPicture] = useState("");
   const [bannerFile, setBannerFile] = useState("");
-  const [banner, setBanner] = useState("");
   const [NWCURL, setNWCURL] = useState("");
   const [NWAddr, setNWCAddr] = useState("");
   const [isCreatingWalletLoading, setIsCreatingWalletLoading] = useState(false);
@@ -535,25 +1383,34 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
   const [showEmptyUNMessage, setShowMessageEmtpyUN] = useState(false);
   const [showInvalidMessage, setShowInvalidMessage] = useState(false);
   const [userName, setUserName] = useState("");
-  const [enableWalletLinking, setEnablingWalletLinking] = useState(true);
   const [selectedPacks, setSelectedPacks] = useState([]);
+
+  const railSteps = [
+    { id: 1, label: t("AyBBPWE") },
+    { id: 2, label: t("AVzZUeP") },
+    { id: 3, label: t("Ah1Kxvl") },
+    { id: 4, label: t("AimqDYY") },
+  ];
+
+  const stepTitles = {
+    1: t("AyBBPWE"),
+    2: t("AVzZUeP"),
+    3: t("AqBdu7X"),
+    4: t("AimqDYY"),
+  };
+
   const handleNextSteps = () => {
-    if (![1, 2, 3, 4].includes(step)) return;
-    if (step == 1) {
+    if (![1, 2, 3].includes(step)) return;
+    if (step === 1) {
       if (!name) {
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AdrCWCj"),
-          }),
-        );
+        dispatch(setToast({ type: 2, desc: t("AdrCWCj") }));
         return;
       }
     }
     setStep(step + 1);
   };
   const handlePrevSteps = () => {
-    if (![2, 3, 4, 5].includes(step)) return;
+    if (![2, 3, 4].includes(step)) return;
     setStep(step - 1);
   };
 
@@ -591,7 +1448,18 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
         return;
       }
       setIsCreatingWalletLoading(true);
-      let url = await axios.post("https://wallet.yakihonne.com/api/wallets", {
+
+      if (previousUserKeys) {
+        try {
+          await axiosInstance.post("/api/v1/logout");
+        } catch (err) {
+          console.log(err);
+        }
+        dispatch(setIsConnectedToYaki(false));
+      }
+      await LoginToAPI(userKeys.pub, userKeys);
+
+      let url = await axiosInstance.post("/api/v1/wallet", {
         username: userName?.toLowerCase(),
       });
 
@@ -611,6 +1479,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
         false,
       );
       setIsCreatingWalletLoading(false);
+      setStep(4);
     } catch (err) {
       console.log(err);
       setIsCreatingWalletLoading(false);
@@ -628,7 +1497,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
 
   const initializeAccount = async () => {
     try {
-      setStep(6);
+      setStep(5);
       let picture_ = pictureFile
         ? await FileUpload({ file: pictureFile, userKeys })
         : "";
@@ -640,7 +1509,6 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
           }),
         );
         setStep(4);
-
         return;
       }
       let banner_ = bannerFile
@@ -653,8 +1521,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
             desc: t("AnmPNHc"),
           }),
         );
-
-        setStep(5);
+        setStep(4);
         return;
       }
 
@@ -719,7 +1586,7 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
       metadata.about = about;
       metadata.picture = profilePicture || "";
       metadata.banner = bannerPicture || "";
-      if (NWAddr && enableWalletLinking) metadata.lud16 = NWAddr;
+      if (NWAddr) metadata.lud16 = NWAddr;
       ndkEvent.kind = 0;
       ndkEvent.content = JSON.stringify(metadata);
 
@@ -841,453 +1708,176 @@ const SignupScreen = ({ switchScreen, userKeys, recommendedStarterPacks }) => {
 
   return (
     <>
-      <div
-        className="fit-container sc-s slide-right"
-        style={{ backgroundColor: "transparent" }}
-      >
+      {step <= 4 && (
+        <div className="signup-rail">
+          {railSteps.map((railStep, i) => (
+            <div
+              key={railStep.id}
+              className={`signup-rail-item ${step === railStep.id ? "active" : ""} ${step > railStep.id ? "done" : ""}`}
+            >
+              <span className="signup-rail-marker" style={{ "--marker-i": i }}>
+                {step > railStep.id ? (
+                  <Icon name="check_big" v={2} size={20} isBoldThemeColor />
+                ) : (
+                  railStep.id
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="fit-container signup-step-body" key={step}>
+        {step <= 4 && (
+          <p className="signup-step-title">{stepTitles[step]}</p>
+        )}
         {step === 1 && (
           <>
-            <div
-              className="fit-container fx-centered fx-end-v"
-              style={{ height: "200px", position: "relative" }}
-            >
-              <div
-                className="fit-container bg-img cover-bg sc-s"
-                style={{
-                  backgroundImage: `url(${banner})`,
-                  height: "70%",
-                  zIndex: 0,
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  borderBottom: "1px solid var(--very-dim-gray)",
-                  border: "none",
-                  borderRadius: "0",
-                }}
-              ></div>
-              <div
-                className="fx-centered pointer"
-                style={{
-                  position: "absolute",
-                  right: "16px",
-                  top: "16px",
-                }}
-              >
-                {!banner && (
-                  <FilePicker
-                    element={
-                      <div className="fx-centered sticker  sticker-gray-gray">
-                        {t("A1HsCqp")}
-                        <Icon name="plus-sign" />
-                      </div>
-                    }
-                    setFile={(data) => {
-                      setBannerFile(data.file);
-                      setBanner(data.url);
-                    }}
-                  />
-                )}
-
-                {banner && (
-                  <div
-                    className="close"
-                    onClick={() => setBanner("")}
-                    style={{ position: "static" }}
-                  >
-                    <div></div>
-                  </div>
-                )}
-              </div>
-              <FilePicker
-                element={
-                  <div className="fit-container fx-col fx-centered box-pad-h">
+            <FilePicker
+              element={
+                <div className="fit-container fx-col fx-centered box-pad-h">
+                  <div className="signup-avatar-wrap">
                     <div
-                      style={{
-                        border: "6px solid var(--white)",
-                        borderRadius: "var(--border-r-50)",
-                        position: "relative",
-                        overflow: "hidden",
-                      }}
-                      className="settings-profile-pic"
-                    >
-                      <div
-                        style={{
-                          backgroundImage: `url(${
-                            picture || profilePlaceholder
-                          })`,
-                          border: "none",
-                          minWidth: "128px",
-                          aspectRatio: "1/1",
-                          borderRadius: "50%",
-                        }}
-                        className="bg-img cover-bg sc-s"
-                      ></div>
-                      <div
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          top: 0,
-                          width: "100%",
-                          height: "100%",
-                          zIndex: 1,
-                          backgroundColor: "rgba(0,0,0,.8)",
-                        }}
-                        className="fx-centered pointer toggle fx-col"
-                      >
-                        <Icon name="image" size={24} />
-                        <p className="gray-c">{t("AnD39Ci")}</p>
-                      </div>
+                      className="bg-img cover-bg sc-s signup-avatar-img"
+                      style={{ backgroundImage: `url(${picture || profilePlaceholder})` }}
+                    ></div>
+                    <div className="signup-avatar-overlay fx-centered fx-col pointer toggle">
+                      <Icon name="image" size={24} />
+                      <p className="gray-c p-medium" >{t("AnD39Ci")}</p>
                     </div>
                   </div>
-                }
-                setFile={(data) => {
-                  setPictureFile(data.file);
-                  setPicture(data.url);
-                }}
-              />
-            </div>
-            <div className="fit-container box-pad-h box-pad-v fx-centered fx-col">
+                </div>
+              }
+              setFile={(data) => {
+                setPictureFile(data.file);
+                setPicture(data.url);
+              }}
+            />
+            <div className="fit-container fx-centered fx-col signup-name-field">
               <input
                 type="text"
-                className="if ifs-full "
+                className="if ifs-full p-bold p-centered if-no-border"
                 placeholder={t("At0Sp8H")}
                 value={name}
                 onChange={(e) => {
                   setUserName(e.target.value);
                   setName(e.target.value);
                 }}
-              />
-              <textarea
-                className="txt-area if ifs-full "
-                placeholder={t("ARTqPc0")}
-                value={about}
-                onChange={(e) => setAbout(e.target.value)}
+                autoFocus
               />
             </div>
           </>
         )}
         {step === 2 && (
-          <>
-            <div className="box-pad-h box-pad-v fx-centered fx-start-v fx-col">
-              <h4>{t("AVzZUeP")}</h4>
-              <p className="gray-c">{t("Aj7xwXe")}</p>
-            </div>
-            <div
-              className="fx-centered fx-end-h fx-wrap box-marg-s"
-              style={{ maxHeight: "50vh", overflow: "scroll", gap: 0 }}
-            >
-              {recommendedStarterPacks.map((_) => {
-                return (
-                  <PackPreviewOnboarding
-                    pack={_}
-                    handleMultiSelection={handleMultiSelection}
-                    handleSingleSelection={handleSingleSelection}
-                    selectedPubkeys={selectedPacks}
-                    key={_.id}
-                  />
-                );
-              })}
-            </div>
-          </>
+          <div className="signup-packs-list">
+            {recommendedStarterPacks.map((_) => (
+              <PackPreviewOnboarding
+                pack={_}
+                handleMultiSelection={handleMultiSelection}
+                handleSingleSelection={handleSingleSelection}
+                selectedPubkeys={selectedPacks}
+                key={_.id}
+              />
+            ))}
+          </div>
         )}
         {step === 3 && (
-          <>
-            <div className="box-pad-h box-pad-v fx-centered fx-start-v fx-col">
-              <h4>{t("A3fxtP2")}</h4>
-              <p className="gray-c">{t("AmiGAX0")}</p>
-            </div>
-            <div
-              className="fx-centered fx-end-h fx-wrap box-marg-s"
-              style={{ maxHeight: "50vh", overflow: "scroll", gap: 0 }}
-            >
-              {InterestSuggestions.map((interest, index) => {
-                let isAdded = selectedInterests.find(
-                  (_) => _.tag === interest.main_tag,
-                );
-                return (
-                  <Fragment key={index}>
-                    <div
-                      className={`fit-container box-pad-h box-pad-v-s fx-scattered pointer ${
-                        selectedInterest === index ? "sc-s-18" : ""
-                      }`}
-                      key={index}
-                      style={{ border: "none", borderRadius: "0" }}
-                      onClick={() => handleSelectedInterest(index)}
-                    >
-                      <div className="fx-centered">
-                        <div
-                          className="sc-s-18 bg-img cover-bg"
-                          style={{
-                            backgroundImage: `url(${interest.icon})`,
-                            border: "none",
-                            aspectRatio: "1/1",
-                            minWidth: "64px",
-                          }}
-                        ></div>
-                        <div>
-                          <p className="">{interest.main_tag}</p>
-                          <div className="fx-centered fx-end-v">
-                            <ProfilePreview
-                              pubkeys={Array.from(interest.pubkeys).splice(
-                                0,
-                                3,
-                              )}
-                            />
-                            <p className="gray-c p-medium">
-                              {t("AZzyBMI", {
-                                count: interest.pubkeys.length - 3,
-                              })}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="fx-centered">
-                        {isAdded && (
-                          <div
-                            style={{
-                              minWidth: "8px",
-                              aspectRatio: "1/1",
-                              backgroundColor: "var(--c1)",
-                              borderRadius: "var(--border-r-50)",
-                            }}
-                          ></div>
-                        )}
-                        <div
-                          className="round-icon-small"
-                          style={{ backgroundColor: "var(--c1)" }}
-                        >
-                          <Icon name="plus-sign" />
-                        </div>
-                      </div>
-                    </div>
-                    {selectedInterest === index && (
-                      <Suggestions
-                        index={index}
-                        handleSelectInterests={handleSelectInterests}
-                        selectedInterests={selectedInterests}
-                      />
-                    )}
-                  </Fragment>
-                );
-              })}
-            </div>
-          </>
+          <div className="fit-container fx-centered fx-col">
+            <WalletIllustration
+              isLoading={isCreatingWalletLoading}
+              isCreated={NWCURL}
+            />
+            {!NWCURL && (
+              <div className="fit-container fx-centered fx-col slide-up signup-wallet-field">
+                <div className="fit-container fx-centered">
+                  <input
+                    type="text"
+                    className="if ifs-full"
+                    placeholder={t("ALCpv2S")}
+                    value={userName}
+                    onChange={handleInputField}
+                    style={{
+                      borderColor: showErrorMessage || showEmptyUNMessage || showInvalidMessage
+                        ? "var(--red-main)"
+                        : "",
+                    }}
+                  />
+                  <p className="gray-c p-big signup-wallet-domain">@wallet.yakihonne.com</p>
+                </div>
+                {showErrorMessage && (
+                  <p className="red-c p-medium fit-container box-pad-h-m">{t("AgrHddv")}</p>
+                )}
+                {showEmptyUNMessage && (
+                  <p className="red-c p-medium fit-container box-pad-h-m">{t("AhQtS0K")}</p>
+                )}
+                {showInvalidMessage && (
+                  <p className="red-c p-medium fit-container box-pad-h-m">{t("AqSxggD")}</p>
+                )}
+              </div>
+            )}
+            {NWCURL && (
+              <div className="signup-wallet-address">
+                <span className="signup-wallet-address-label">{t("A40BuYB")}</span>
+                <span className="signup-wallet-address-value">{NWAddr}</span>
+              </div>
+            )}
+          </div>
         )}
         {step === 4 && (
-          <>
-            <div className="box-pad-h box-pad-v fx-centered  fx-col">
-              {!NWCURL && (
-                <>
-                  <h4>{t("AqBdu7X")}</h4>
-                  <p
-                    className="p-centered gray-c"
-                    style={{ maxWidth: "400px" }}
-                  >
-                    {t("AOxmFz5")}
-                  </p>
-                </>
-              )}
-              {NWCURL && <h4>{t("AimqDYY")}</h4>}
-
-              <WalletIllustration
-                isLoading={isCreatingWalletLoading}
-                isCreated={NWCURL}
-              />
-              {!NWCURL && (
-                <div className="fit-container fit-container fx-centered fx-col slide-up">
-                  <div className="fit-container fx-centered">
-                    <input
-                      type="text"
-                      className="ifs-full if"
-                      placeholder={t("ALCpv2S")}
-                      value={userName}
-                      onChange={handleInputField}
-                      style={{
-                        borderColor:
-                          showErrorMessage ||
-                          showEmptyUNMessage ||
-                          showInvalidMessage
-                            ? "var(--red-main)"
-                            : "",
-                      }}
-                    />
-                    <p
-                      className="gray-c p-big"
-                      style={{ minWidth: "max-content" }}
-                    >
-                      @wallet.yakihonne.com
-                    </p>
-                  </div>
-                  {showErrorMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AgrHddv")}</p>
-                    </div>
-                  )}
-                  {showEmptyUNMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AhQtS0K")}</p>
-                    </div>
-                  )}
-                  {showInvalidMessage && (
-                    <div className="fit-container box-pad-h-m">
-                      <p className="red-c p-medium">{t("AqSxggD")}</p>
-                    </div>
-                  )}
-                  <button
-                    className="btn btn-normal btn-full"
-                    onClick={handleCreateWallet}
-                    disabled={isCreatingWalletLoading}
-                  >
-                    {isCreatingWalletLoading ? <LoadingDots /> : t("AvjCl1G")}
-                  </button>
-                </div>
-              )}
-              {NWCURL && (
-                <div className="fx-centered sc-s-18 box-pad-h-s box-pad-v-s">
-                  <Icon name="bolt" />
-                  {NWAddr}
-                </div>
-              )}
-              {NWCURL && (
-                <>
-                  <label className=" fx-centered" htmlFor="wallet-checkbox">
-                    <input
-                      type="checkbox"
-                      value={enableWalletLinking}
-                      onChange={() =>
-                        setEnablingWalletLinking(!enableWalletLinking)
-                      }
-                      checked={enableWalletLinking}
-                      name="wallet-checkbox"
-                      id="wallet-checkbox"
-                    />
-                    {t("AoR0AIr")}
-                  </label>
-                  <p className="p-centered gray-c">{t("Ag7XtTn")}</p>
-                </>
-              )}
-            </div>
-          </>
-        )}
-        {step === 5 && (
-          <>
-            <div
-              className="fit-container fx-centered fx-end-v"
-              style={{ height: "200px", position: "relative" }}
-            >
+          <div className="fit-container fx-centered fx-col signup-allset">
+            <div className="signup-allset-avatar" style={{ "--allset-i": 0 }}>
               <div
-                className="fit-container bg-img cover-bg sc-s"
-                style={{
-                  backgroundImage: `url(${banner})`,
-                  height: "70%",
-                  zIndex: 0,
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  borderBottom: "1px solid var(--very-dim-gray)",
-                  border: "none",
-                  borderRadius: "0",
-                }}
+                className="bg-img cover-bg sc-s"
+                style={{ backgroundImage: `url(${picture || profilePlaceholder})` }}
               ></div>
-              <div
-                style={{
-                  border: "6px solid var(--white)",
-                  borderRadius: "var(--border-r-50)",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-                className="settings-profile-pic"
-              >
-                <div
-                  style={{
-                    backgroundImage: `url(${picture || profilePlaceholder})`,
-                    border: "none",
-                    minWidth: "128px",
-                    aspectRatio: "1/1",
-                    borderRadius: "50%",
-                  }}
-                  className="bg-img cover-bg sc-s"
-                ></div>
+            </div>
+            <h4 className="signup-allset-name" style={{ "--allset-i": 1 }}>{name}</h4>
+            {NWAddr && (
+              <div className="signup-wallet-address signup-wallet-address-sm" style={{ "--allset-i": 2 }}>
+                <span className="signup-wallet-address-label">{t("A40BuYB")}</span>
+                <span className="signup-wallet-address-value">{NWAddr}</span>
               </div>
-            </div>
-            <div className="fit-container fx-centered fx-col box-pad-v-m">
-              <h4>{name}</h4>
-              <p
-                className="gray-c p-centered p-four-lines"
-                style={{ maxWidth: "400px" }}
-              >
-                {about || "N/A"}
-              </p>
-            </div>
-            <div className="fit-container fx-centered box-pad-v">
-              <div
-                className="sc-s-18 box-pad-h-s box-pad-v-m fx-centered"
-                style={{ maxWidth: "400px", gap: "16px" }}
-              >
-                <div className="round-icon">
-                  <Icon name="key-icon" size={24} />
-                </div>
-                <p className="c1-c">
-                  {NWAddr && t("AZfj4DI")}
-                  {!NWAddr && t("AxGSiUc")}
-                </p>
-              </div>
-            </div>
-            {/* <SignUpDataToCopy /> */}
-          </>
+            )}
+          </div>
         )}
-        {step !== 6 && (
-          <>
-            <div className="fit-container fx-scattered box-pad-h box-marg-s">
-              {step > 1 && (
-                <button
-                  className="btn btn-gst slide-right btn-small"
-                  onClick={() => handlePrevSteps()}
-                >
-                  {t("AF7iGeG")}
-                </button>
-              )}
-              {step === 1 && <div></div>}
-
+        {step <= 4 && (
+          <div className={`login-step-nav${step === 3 && !NWCURL ? " login-step-nav--wallet" : ""}`}>
+            {step > 1 && (
               <button
-                className="btn btn-normal btn-small"
-                onClick={() =>
-                  step !== 4 ? handleNextSteps() : initializeAccount()
-                }
+                className="btn btn-gray"
+                onClick={handlePrevSteps}
+                disabled={isCreatingWalletLoading}
+              >
+                {t("AF7iGeG")}
+              </button>
+            )}
+            {step === 3 && !NWCURL && (
+              <button
+                className="btn btn-gray"
+                onClick={handleNextSteps}
+                disabled={isCreatingWalletLoading}
+              >
+                {t("AWallet1")}
+              </button>
+            )}
+            {step === 3 && !NWCURL ? (
+              <button
+                className="btn btn-normal"
+                onClick={handleCreateWallet}
+                disabled={isCreatingWalletLoading}
+              >
+                {isCreatingWalletLoading ? <Spinner /> : t("AWallet2")}
+              </button>
+            ) : (
+              <button
+                className="btn btn-normal"
+                onClick={step !== 4 ? handleNextSteps : initializeAccount}
               >
                 {step !== 4 ? t("AgGi8rh") : t("AB0SnxL")}
               </button>
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                bottom: 0,
-                height: "5px",
-                width: `${Math.ceil((step * 100) / stepsNumber)}%`,
-                backgroundColor: "var(--c1)",
-                transition: ".2s ease-in-out",
-              }}
-            ></div>
-          </>
-        )}
-        {step === 6 && <InitiProfile />}
-      </div>
-      <div className="fx-scattered  fit-container box-pad-v-m">
-        <div className="fx-centered pointer">
-          <div className="round-icon-small">
-            <Icon name="arrow" transform="rotate(90deg)" />{" "}
+            )}
           </div>
-          <p className="gray-c" onClick={() => Router.back()}>
-            {isNewAccount ? t("AB4BSCe") : t("AVCdQku")}
-          </p>
-        </div>
-        <div className="fx-centered" onClick={switchScreen}>
-          <p className="gray-c">
-            {t("AKJqtlx")}{" "}
-            <span className="orange-c pointer p-bold">{t("AmOtzoL")}</span>{" "}
-          </p>
-        </div>
+        )}
+        {step === 5 && <InitiProfile />}
       </div>
     </>
   );
@@ -1299,254 +1889,16 @@ const InitiProfile = () => {
       className="fit-container fx-centered fx-col"
       style={{ height: "500px" }}
     >
-      <LoadingLogo size={200} />
-    </div>
-  );
-};
-
-const MobileAd = () => {
-  const { t } = useTranslation();
-  return (
-    <div className="login-screen-heros fit-container fx-centered  box-pad-v fit-height">
-      <div
-        className="carousel-card-desc box-pad-h box-pad-v fit-container sc-s fx-even fx-stretch"
-        style={{
-          padding: "2rem 1rem",
-        }}
-      >
-        <div
-          className="fx-centered fx-col box-pad-v"
-          style={{ rowGap: "5px", width: "40%" }}
-        >
-          <p style={{ color: "white" }}>{t("A2MbZUY")}</p>
-          <p className="gray-c p-medium p-centered">{t("AbACpNI")}</p>
-          <div
-            className="fit-container carousel-card-desc box-pad-h-m box-pad-v-m fx-centered sc-s"
-            style={{ background: "#838EAC55" }}
-          >
-            <img
-              className="sc-s-18 fit-container"
-              src={ymaQR}
-              style={{ aspectRatio: "1/1" }}
-            />
-          </div>
-          <Link
-            className="fit-container box-pad-v-m"
-            href="/yakihonne-mobile-app-links"
-            target="_blank"
-          >
-            <img className="fit-container" src={s8e} />
-          </Link>
-        </div>
-        <div className="fx-centered " style={{ width: "40%" }}>
-          <img
-            className="fit-container"
-            style={{ objectFit: "contain" }}
-            src={ymaHero}
-            // style={{ objectFit: "contain" }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const ProfilePreview = ({ pubkeys }) => {
-  let nostrAuthors = useSelector((state) => state.nostrAuthors);
-  let [images, setImages] = useState(pubkeys);
-
-  useEffect(() => {
-    try {
-      let authors = [];
-      for (let author of pubkeys) {
-        let pubkey = getHex(author);
-        let auth = getUser(pubkey);
-        if (auth) authors.push(auth.picture);
-        else authors.push("");
-      }
-      setImages(authors);
-    } catch (err) {
-      console.log(err);
-    }
-  }, [nostrAuthors]);
-
-  return (
-    <div style={{ position: "relative", minWidth: "32px", minHeight: "32px" }}>
-      <div style={{ position: "absolute", left: 0, bottom: "0" }}>
-        <UserProfilePic
-          user_id={pubkeys[0]}
-          mainAccountUser={false}
-          img={images[0] || ""}
-          size={10}
-        />
-      </div>
-      <div style={{ position: "absolute", left: "16px", top: "10px" }}>
-        <UserProfilePic
-          user_id={pubkeys[1]}
-          mainAccountUser={false}
-          img={images[1] || ""}
-          size={8}
-        />
-      </div>
-      <div style={{ position: "absolute", left: "16px", bottom: "-4px" }}>
-        <UserProfilePic
-          user_id={pubkeys[2]}
-          mainAccountUser={false}
-          img={images[2] || ""}
-          size={12}
-        />
-      </div>
-    </div>
-  );
-};
-
-const Suggestions = ({ index, selectedInterests, handleSelectInterests }) => {
-  const { t } = useTranslation();
-  const isInterested = useMemo(() => {
-    let tag = InterestSuggestions[index].main_tag;
-    let interest = selectedInterests.find((interest) => interest.tag === tag);
-    return interest;
-  }, [selectedInterests]);
-
-  const followUnfollow = (pubkey, index_, isFollowed) => {
-    if (isInterested) {
-      if (!isFollowed)
-        handleSelectInterests({
-          ...isInterested,
-          pubkeys: [...isInterested.pubkeys, pubkey],
-        });
-      if (isFollowed) {
-        let pubkeys = Array.from(isInterested.pubkeys);
-        pubkeys = pubkeys.splice(index_, 0);
-        handleSelectInterests({
-          ...isInterested,
-          pubkeys,
-        });
-      }
-    }
-    if (!isInterested) {
-      handleSelectInterests({
-        tag: InterestSuggestions[index].main_tag,
-        pubkeys: [pubkey],
-      });
-    }
-  };
-  const followUnfollowAll = (toFollowAll) => {
-    if (!toFollowAll) {
-      handleSelectInterests({
-        tag: InterestSuggestions[index].main_tag,
-        pubkeys: [],
-      });
-    }
-    if (toFollowAll) {
-      handleSelectInterests({
-        tag: InterestSuggestions[index].main_tag,
-        pubkeys: InterestSuggestions[index].pubkeys.map((pubkey) => {
-          return getHex(pubkey);
-        }),
-      });
-    }
-  };
-  const isFollowed = (pubkey) => {
-    if (isInterested) {
-      return isInterested.pubkeys.find((_) => _ === pubkey) ? true : false;
-    }
-    return false;
-  };
-
-  return (
-    <div
-      className="sc-s-18 box-pad-h-m box-pad-v-m fit-container box-marg-s slide-down"
-      style={{
-        maxHeight: "33vh",
-        overflow: "scroll",
-        border: "none",
-        borderRadius: "0",
-      }}
-    >
-      <div className="fit-container fx-scattered box-marg-s">
-        <p className="gray-c">{t("AoO5zem")}</p>
-        {isInterested?.pubkeys?.length !==
-          InterestSuggestions[index].pubkeys.length && (
-          <button
-            className="btn btn-gst btn-small"
-            onClick={() => followUnfollowAll(true)}
-          >
-            {t("AzkUxnd")}
-          </button>
-        )}
-        {isInterested?.pubkeys?.length ===
-          InterestSuggestions[index].pubkeys.length && (
-          <button
-            className="btn btn-normal btn-small"
-            onClick={() => followUnfollowAll(false)}
-          >
-            {t("AyohNeT")}
-          </button>
-        )}
-      </div>
-      <div
-        className="fx-centered fx-col fx-start-h fx-start-v"
-        style={{ gap: "16px" }}
-      >
-        {InterestSuggestions[index].pubkeys.map((_, index_) => {
-          let pubkey = getHex(_);
-          let author = getUser(pubkey) || getEmptyuserMetadata(pubkey);
-          let checkIsFollowed = isFollowed(pubkey);
-          return (
-            <div className="fit-container fx-scattered" key={index_}>
-              <div className="fx-centered">
-                <UserProfilePic
-                  user_id={pubkey}
-                  mainAccountUser={false}
-                  img={author.picture}
-                  size={48}
-                />
-                <div>
-                  <p>{author.display_name || author.name}</p>
-                  <p className="gray-c p-medium">
-                    @{author.name || author.display_name}
-                  </p>
-                </div>
-              </div>
-              {!checkIsFollowed && (
-                <button
-                  className="btn btn-gst btn-small"
-                  onClick={() => followUnfollow(pubkey, index_, false)}
-                >
-                  {t("A9o2pLM")}
-                </button>
-              )}
-              {checkIsFollowed && (
-                <button
-                  className="btn btn-normal btn-small"
-                  onClick={() => followUnfollow(pubkey, index_, true)}
-                >
-                  {t("ASi0a0d")}
-                </button>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <Spinner size={32} />
     </div>
   );
 };
 
 const WalletIllustration = ({ isCreated, isLoading }) => {
   return (
-    <div style={{ position: "relative" }} className="box-pad-v-m">
-      <div
-        className={`round-icon ${isLoading ? "pulse-orange" : ""}`}
-        style={{
-          width: "140px",
-          borderColor: isCreated ? "var(--green-main)" : "",
-        }}
-      >
-        <div
-          className={isCreated ? "wallet-confirm" : "wallet-add"}
-          style={{ width: "60px", height: "60px" }}
-        ></div>
+    <div className="signup-wallet-illustration">
+      <div className={`signup-wallet-ring ${isLoading ? "pulse-orange" : ""} ${isCreated ? "signup-wallet-ring--done" : ""}`}>
+        <span className="signup-wallet-btc">₿</span>
       </div>
     </div>
   );

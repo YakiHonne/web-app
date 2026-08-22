@@ -48,8 +48,8 @@ export default function Followings({
   return (
     <div className="fit-container fx-centered fx-col box-pad-v">
       {userFollowings && userFollowings?.length < 5 && (
-        <div className="fit-container ">
-          <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h box-marg-s">
+        <div className="fit-container box-pad-h box-pad-v-m sc-s">
+          <div className="fit-container fx-centered fx-start-h fx-start-v ">
             <div>
               <Icon name="eye-opened" size={24} />
             </div>

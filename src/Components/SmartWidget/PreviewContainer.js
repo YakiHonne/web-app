@@ -1,7 +1,12 @@
 import React from "react";
 import VideoComp from "@/Components/SmartWidget/VideoComp";
-import ZapPollsComp from "@/Components/SmartWidget/ZapPollsComp";
+import dynamic from "next/dynamic";
 import ImgComp from "@/Components/SmartWidget/ImgComp";
+
+const ZapPollsComp = dynamic(
+  () => import("@/Components/SmartWidget/ZapPollsComp"),
+  { ssr: false },
+);
 import ButtonComp from "@/Components/SmartWidget/ButtonComp";
 import TextComp from "@/Components/SmartWidget/TextComp";
 

@@ -13,7 +13,7 @@ export default function SearchSidebar() {
         onClick={() => setSearchPage(true)}
         className={`pointer fit-container fx-start-h fx-centered box-pad-h-s box-pad-v-s inactive-link`}
       >
-        <Icon name="search" size={24} />
+        <Icon name="search_magnifying_glass" v={2} size={24} />
         <div className="link-label">{t("Ap6NR3x")}</div>
       </div>
     </>

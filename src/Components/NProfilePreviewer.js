@@ -23,9 +23,9 @@ export default function NProfilePreviewer({
 
   return (
     <div
-      className={`fit-container sc-s-18 bg-sp fx-scattered  box-pad-h-s box-pad-v-s ${
-        margin ? "box-marg-s" : ""
-      }`}
+      className={`fit-container sc-s-18 bg-sp fx-scattered  box-pad-h-s box-pad-v-s ${margin ? "box-marg-s" : ""
+        }`}
+      style={{ border: "1px solid var(--dim-gray)" }}
     >
       <div className="fx-centered" style={{ columnGap: "12px" }}>
         <UserProfilePic img={author.picture} size={40} user_id={pubkey} />
@@ -50,7 +50,7 @@ export default function NProfilePreviewer({
         </div>
       )}
       {close && custom && (
-       <button className="bnt btn-normal btn-small" onClick={onClose}>{custom}</button>
+        <button className="bnt btn-normal btn-small" onClick={onClose}>{custom}</button>
       )}
     </div>
   );

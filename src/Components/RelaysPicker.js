@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useTranslation } from "react-i18next";
 import RelayImage from "./RelayImage";
-import LoadingDots from "./LoadingDots";
+import Spinner from "./Spinner";
 import { saveRelayMetadata } from "@/Helpers/Controlers";
 import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 import RelayMetadataPreview from "./RelayMetadataPreview";
@@ -60,7 +60,7 @@ export default function RelaysPicker({
         ref={optionsRef}
         onClick={() => setShowList(true)}
       >
-        <Icon name="search" />
+        <Icon name="search_magnifying_glass" v={2} />
         <input
           placeholder={t("ALPrAZz")}
           className="if if-no-border ifs-full"
@@ -76,9 +76,7 @@ export default function RelaysPicker({
               position: "absolute",
               left: 0,
               top: "calc(100% + 5px)",
-              // height: selectedRelay ? "600px" : "300px",
               height: "300px",
-              // maxHeight: "600px",
               overflow: "scroll",
               zIndex: "200",
               gap: 0,
@@ -131,7 +129,6 @@ export default function RelaysPicker({
                   <div className="sticker sticker-gray-black">
                     <Icon name="plus-sign" />
                   </div>
-                  {/* <div className="sticker sticker-gray-black">{t("ARWeWgJ")}</div> */}
                 </div>
               </div>
             )}
@@ -164,7 +161,7 @@ const SelectedRelayPreview = ({ url }) => {
   if (!metadata && !isLoading) {
     return (
       <div className="fit-container box-pad-v fx-centered">
-        <LoadingDots />
+        <Spinner />
       </div>
     );
   }

@@ -39,7 +39,7 @@ export default function CashuHistory({ cashuHistory }) {
 const CashuHistoryItem = React.memo(({ item }) => {
   const { userProfile } = useUserProfile(item.sender);
   return (
-    <div className="fit-container box-pad-h-m box-pad-v-m sc-s-18 bg-sp box-marg-s">
+    <div className="fit-container box-pad-h-m box-pad-v-m sc-s" style={{ marginBottom: ".5rem" }}>
       {item.sender && (
         <TransactionFromUser item={item} userProfile={userProfile} />
       )}
@@ -71,11 +71,11 @@ const InternalTransaction = React.memo(({ item }) => {
         <p>
           {item.sent
             ? t("ANGpcn3", {
-                sats: item.amount,
-              })
+              sats: item.amount,
+            })
             : t("AYc8o1c", {
-                sats: item.amount,
-              })}
+              sats: item.amount,
+            })}
         </p>
       </div>
     </div>

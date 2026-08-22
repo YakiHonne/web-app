@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 import axios from "axios";
 import RelaysInfo from "./RelaysInfo";
 import ContentRelays from "./ContentRelays";
@@ -41,14 +42,10 @@ export function RelaysConfig() {
         />
       )}
       {showStatus && (
-        <div className="fixed-container fx-centered box-pad-h">
+        <Overlay exit={() => setShowStatus(false)} width={400}>
           <div
-            style={{
-              width: "min(100%, 400px)",
-              position: "relative",
-              gap: "20px",
-            }}
-            className="fx-centered fx-start-v fx-col box-pad-v box-pad-h sc-s-18 bg-sp slide-up"
+            style={{ gap: "20px" }}
+            className="fx-centered fx-start-v fx-col box-pad-v box-pad-h"
           >
             <div className="close" onClick={() => setShowStatus(false)}>
               <div></div>
@@ -81,7 +78,7 @@ export function RelaysConfig() {
             <hr />
             <p className="gray-c">{t("AugXNf5")}</p>
           </div>
-        </div>
+        </Overlay>
       )}
       <div className="fit-container fx-scattered box-pad-h">
         {selectedTab == 0 && (

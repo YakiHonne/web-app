@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { useDispatch, useSelector } from "react-redux";
 import { updateYakiChestStats } from "@/Helpers/Controlers";
@@ -9,8 +9,10 @@ import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import {
   getOutboxRelays,
+  getPublishedEvents as getPublishedEventsDB,
   removeEventStats,
   removeRecordFromNDKStore,
+  savePublishedEvents,
 } from "@/Helpers/DB";
 import { relaysOnPlatform } from "@/Content/Relays";
 import {
@@ -20,9 +22,9 @@ import {
 import Date_ from "./Date_";
 import ProgressCirc from "./ProgressCirc";
 import { useTranslation } from "react-i18next";
-import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import { eventKinds } from "@/Content/Extra";
 import Icon from "@/Components/Icon";
+import Overlay from "./Overlay";
 
 const PUBLISHING_TIMEOUT = 3000;
 
@@ -63,17 +65,6 @@ const getOutboxPubkey = (kind, tags) => {
   return pTag[1];
 };
 
-const getPublishedEvents = () => {
-  try {
-    let publishedEvents = localStorage_.getItem("publishedEvents");
-    if (publishedEvents) return JSON.parse(publishedEvents);
-    return [];
-  } catch (err) {
-    console.log(err);
-    return [];
-  }
-};
-
 export default function Publishing({ displayOff = false }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -84,8 +75,23 @@ export default function Publishing({ displayOff = false }) {
 
   const [showDetails, setShowDetails] = useState(false);
   const [showEventStats, setShowEventStats] = useState(false);
-  const [publishedEvents, setPublishedEvents] = useState(getPublishedEvents());
+  const [publishedEvents, setPublishedEvents] = useState([]);
   const [showToast, setShowToast] = useState(false);
+  const [isPublishedEventsLoaded, setIsPublishedEventsLoaded] =
+    useState(false);
+
+  useEffect(() => {
+    let isCancelled = false;
+    getPublishedEventsDB().then((events) => {
+      if (!isCancelled) {
+        setPublishedEvents(events);
+        setIsPublishedEventsLoaded(true);
+      }
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const succeededEvents = useMemo(() => {
     return publishedEvents.filter((event) =>
@@ -123,6 +129,7 @@ export default function Publishing({ displayOff = false }) {
   }, [publishedEvents]);
 
   useEffect(() => {
+    if (!isPublishedEventsLoaded) return;
     let tempArray = Array.from(publishedEvents);
 
     tempArray = tempArray.map((event) => {
@@ -141,14 +148,13 @@ export default function Publishing({ displayOff = false }) {
       setPublishedEvents(tempArray);
     }
     saveLocal(tempArray);
-  }, [publishedEvents]);
+  }, [publishedEvents, isPublishedEventsLoaded]);
 
   const saveLocal = (events) => {
     try {
-      localStorage_.setItem("publishedEvents", JSON.stringify(events));
+      savePublishedEvents(events);
     } catch (error) {
       console.log(error);
-      saveLocal(events.slice(0, events.length - 5));
     }
   };
 
@@ -158,17 +164,17 @@ export default function Publishing({ displayOff = false }) {
       let relaysToPublish =
         allRelays?.length > 0
           ? allRelays.map((relay) => {
-              return {
-                url: relay,
-                status: 0,
-              };
-            })
+            return {
+              url: relay,
+              status: 0,
+            };
+          })
           : userRelays.map((relay) => {
-              return {
-                url: relay,
-                status: 0,
-              };
-            }) || [];
+            return {
+              url: relay,
+              status: 0,
+            };
+          }) || [];
 
       if (relaysToPublish.length === 0)
         relaysToPublish = relaysOnPlatform.map((relay) => {
@@ -232,9 +238,22 @@ export default function Publishing({ displayOff = false }) {
       relaysToPublish = removeDuplicatedRelays(outboxRelays, relaysToPublish);
 
       try {
-        await ndkEvent.sign();
+        await Promise.race([
+          ndkEvent.sign(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("SIGNING_TIMEOUT")), 30000),
+          ),
+        ]);
       } catch (err) {
-        console.log(err);
+        console.error("[publish] signing failed", {
+          error: err,
+          message: err?.message,
+          kind,
+          signer: ndkInstance.signer?.constructor?.name,
+          bunkerPubkey: ndkInstance.signer?.bunkerPubkey,
+          userPubkey: ndkInstance.signer?.userPubkey,
+          relayUrls: ndkInstance.signer?.relayUrls,
+        });
         dispatch(
           setToast({
             type: 2,
@@ -312,19 +331,6 @@ export default function Publishing({ displayOff = false }) {
         });
     };
     publish();
-    // if (relay.connected) {
-    //   publish();
-    // } else {
-    //   console.log(relay);
-    //   let ndkFromFav = await getNDKInstance(relay.url);
-    //   let relay_ = ndkFromFav.pool.getRelay(relay.url);
-    //   console.log(relay_)
-    //   publish(relay_);
-    //   // relay.connect().then((res) => {
-    //   //   console.log(res)
-    //   //   publish();
-    //   // });
-    // }
   };
   const initPublishing = async (relays, event, index, action_key) => {
     try {
@@ -411,7 +417,6 @@ export default function Publishing({ displayOff = false }) {
         }
       }
     } catch (err) {
-      // console.log(err);
     }
   };
   const getActionKey = () => {
@@ -466,7 +471,7 @@ export default function Publishing({ displayOff = false }) {
       (tag) =>
         tag[0] === "p" &&
         tag[1] ===
-          "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3",
+        "20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3",
     );
     if (receiver) return 44;
     return 4;
@@ -523,23 +528,17 @@ export default function Publishing({ displayOff = false }) {
   return (
     <>
       {showDetails && (
-        <div
-          className="fixed-container fx-centered"
-          onClick={(e) => {
+        <Overlay
+          width={700}
+          exit={(e) => {
             e.stopPropagation();
             setShowDetails(false);
           }}
-          style={{ zIndex: 200000 }}
+
         >
           <div
-            className="fx-centered fx-start-h box-pad-v fx-col slide-up box-pad-h sc-s bg-sp"
-            style={{
-              width: "700px",
-              minHeight: "50vh",
-              maxHeight: "80vh",
-              overflow: "scroll",
-              position: "relative",
-            }}
+            className="fx-centered fx-start-h box-pad-v fx-col  box-pad-h"
+
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -651,7 +650,7 @@ export default function Publishing({ displayOff = false }) {
                                     <p className="red-c">{relay.url}</p>
                                   )}
                                   {relay.status === 1 && <p>{relay.url}</p>}
-                                  {relay.status === 0 && <LoadingDots />}
+                                  {relay.status === 0 && <Spinner />}
                                   {relay.status === 2 && (
                                     <Icon
                                       name="crossmark-tt"
@@ -711,13 +710,13 @@ export default function Publishing({ displayOff = false }) {
               </div>
             )}
           </div>
-        </div>
+        </Overlay>
       )}
       {showToast && (
         <div className="fit-container box-pad-v-m box-pad-h-m box-marg-s sc-s-18 slide-up-down fx-scattered link-label">
           <div className="fx-centered ">
             <p>{t("Aas6Xk5")}</p>
-            <LoadingDots />
+            <Spinner />
           </div>
           <ProgressCirc percentage={lastEventStats.percentage} size={32} />
         </div>
@@ -729,14 +728,6 @@ export default function Publishing({ displayOff = false }) {
           </div>
         </div>
       )}
-      <div
-        className="fx-centered desk-hide mb-show"
-        onClick={() => setShowDetails(true)}
-      >
-        <div className="round-icon">
-          <Icon name="succeeded-events" />
-        </div>
-      </div>
       <div
         className="sc-s-18 fit-container fx-centered pointer option link-label"
         style={{
@@ -752,7 +743,6 @@ export default function Publishing({ displayOff = false }) {
             position: "relative",
           }}
         >
-          {/* <p className="gray-c p-medium">Publishing status</p> */}
           <div className="fit-container fx-scattered">
             <div className="fx-centered">
               <Icon name="total-events" size={24} />

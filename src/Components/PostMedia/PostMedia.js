@@ -1,7 +1,7 @@
 import { extractNip19, FileUpload } from "@/Helpers/Helpers";
 import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import LoadingDots from "../LoadingDots";
+import Spinner from "../Spinner";
 import { IMAGE_FILTERS } from "@/Content/ImageFilterConfig";
 import MediaUploadArea from "./MediaUploadArea";
 import ImageComp from "./ImageComp";
@@ -9,7 +9,6 @@ import VideoComp from "./VideoComp";
 import MediaPostData from "./MediaPostData";
 import ImageFilter from "./ImageFilter";
 import VideoEditor from "./VideoEditor";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { InitEvent } from "@/Helpers/Controlers";
 import { useDispatch } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -45,6 +44,7 @@ const applyImageFilter = (file, filter = "grayscale(1)") => {
 };
 
 const trimVideoFile = async (file, range) => {
+  const { FFmpeg } = await import("@ffmpeg/ffmpeg");
   const ffmpeg = new FFmpeg({ log: true });
 
   await ffmpeg.load();
@@ -348,16 +348,15 @@ export default function PostMedia({ exit }) {
                   onClick={clearWorkspace}
                   disabled={isLoading}
                 >
-                  {isLoading ? <LoadingDots /> : <Icon name="arrow" />}
+                  {isLoading ? <Spinner /> : <Icon name="arrow" />}
                 </button>
                 <button
-                  className={`btn btn-normal btn-full ${
-                    !isPublishingEnabled ? "btn-disabled" : ""
-                  }`}
+                  className={`btn btn-normal btn-full ${!isPublishingEnabled ? "btn-disabled" : ""
+                    }`}
                   onClick={publishPost}
                   disabled={isLoading || !isPublishingEnabled}
                 >
-                  {isLoading ? <LoadingDots /> : "Publish"}
+                  {isLoading ? <Spinner /> : "Publish"}
                 </button>
               </div>
             </div>

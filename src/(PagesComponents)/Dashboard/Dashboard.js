@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { getPopularNotes, getUserStats } from "@/Helpers/WSInstance";
 import axios from "axios";
@@ -7,7 +7,7 @@ import { getParsedRepEvent, sortEvents } from "@/Helpers/Encryptions";
 import { sleepTimer } from "@/Helpers/Helpers";
 import { getArticleDraft, getNoteDraft } from "@/Helpers/ClientHelpers";
 import PostAsNote from "@/Components/PostAsNote";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useRouter } from "next/router";
 import SideMenu from "./SideMenu";
 import Content from "./Content";
@@ -16,6 +16,8 @@ import Bookmarks from "./Bookmarks";
 import Interests from "./Interests";
 import HomeTab from "./HomeTab";
 import Scheduled from "./Scheduled";
+import { SelectTabs } from "@/Components/SelectTabs";
+import { useTranslation } from "react-i18next";
 
 const getLocalDrafts = () => {
   try {
@@ -34,24 +36,23 @@ const getLocalDrafts = () => {
       noteDraft: noteDraft
         ? { kind: 11, content: noteDraft, created_at: false }
         : false,
-      // smartWidgetDraft: false,
       smartWidgetDraft: smartWidgetDraft
         ? {
-            kind: 300331,
-            content: smartWidgetDraft,
-            created_at: smartWidgetDraft.created_at,
-          }
+          kind: 300331,
+          content: smartWidgetDraft,
+          created_at: smartWidgetDraft.created_at,
+        }
         : false,
       artDraft: artDraft.default
         ? false
         : artDraft.title || artDraft.content
           ? {
-              created_at: artDraft.created_at || Math.floor(Date.now() / 1000),
-              kind: 30024,
-              title: artDraft.title || "Untitled",
-              content: artDraft.content || "Untitled",
-              local: true,
-            }
+            created_at: artDraft.created_at || Math.floor(Date.now() / 1000),
+            kind: 30024,
+            title: artDraft.title || "Untitled",
+            content: artDraft.content || "Untitled",
+            local: true,
+          }
           : false,
     };
     return localDraft.artDraft ||
@@ -65,6 +66,7 @@ const getLocalDrafts = () => {
 };
 
 export default function Dashboard() {
+  const { t } = useTranslation()
   const { query } = useRouter();
   const userKeys = useSelector((state) => state.userKeys);
   const [selectedTab, setSelectedTab] = useState(
@@ -73,6 +75,38 @@ export default function Dashboard() {
   const [userPreview, setUserPreview] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [postToNote, setPostToNote] = useState(query?.init ? "" : false);
+  const [barHidden, setBarHidden] = useState(false);
+  const [tabsRect, setTabsRect] = useState(null);
+  const [tabsBarHeight, setTabsBarHeight] = useState(0);
+  const lastY = useRef(0);
+  const columnRef = useRef(null);
+  const tabsBarRef = useRef(null);
+
+  useEffect(() => {
+    const getY = () => window.scrollY || document.documentElement.scrollTop;
+    const updateRect = () => {
+      const col = columnRef.current;
+      if (col) {
+        const r = col.getBoundingClientRect();
+        setTabsRect({ left: r.left, width: r.width });
+      }
+      const bar = tabsBarRef.current;
+      if (bar) setTabsBarHeight(bar.getBoundingClientRect().height);
+    };
+    const onScroll = () => {
+      const y = getY();
+      setBarHidden(y > lastY.current && y > 80);
+      lastY.current = y;
+      updateRect();
+    };
+    updateRect();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updateRect);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", updateRect);
+    };
+  }, []);
 
   const getNostrBandStats = async (pubkey) => {
     try {
@@ -104,8 +138,8 @@ export default function Dashboard() {
         ]);
         userProfile = userProfile
           ? JSON.parse(
-              userProfile.find((event) => event.kind === 10000105).content,
-            )
+            userProfile.find((event) => event.kind === 10000105).content,
+          )
           : { time_joined: Math.floor(Date.now() / 1000) };
 
         let zaps_sent = sats
@@ -157,6 +191,17 @@ export default function Dashboard() {
       return { ...prev, latestPublished: sortEvents(latestPublished) };
     });
   };
+  const tabs = [
+    t("AJDdA3h"),
+    t("AYIXG83"),
+    t("AesMg52"),
+    t("AVysZ1s"),
+    t("AStkKfQ"),
+    t("Aa73Zgk"),
+    t("A2mdxcf"),
+    t("AqwEL0G"),
+    t("AvcFYqP"),
+  ];
   return (
     <>
       {postToNote !== false && (
@@ -174,20 +219,35 @@ export default function Dashboard() {
           <div className="dahsboard-section fit-container">
             <div
               className="fit-height fit-container feed-container"
-              style={{ overflow: "scroll" }}
+              style={{ overflow: "visible" }}
             >
-              <SideMenu
-                selectedTab={selectedTab}
-                setSelectedTab={setSelectedTab}
-              />
-              <div className="fit-container">
+              <div ref={columnRef} className="fit-container">
+                <div
+                  ref={tabsBarRef}
+                  className="box-pad-h-m"
+                  style={{
+                    position: "fixed",
+                    top: "96px",
+                    left: tabsRect ? `${tabsRect.left}px` : 0,
+                    width: tabsRect ? `${tabsRect.width}px` : "auto",
+                    boxSizing: "border-box",
+                    zIndex: 200,
+                    transform: barHidden ? "translateY(-24px)" : "translateY(0)",
+                    opacity: barHidden ? 0 : 1,
+                    pointerEvents: barHidden ? "none" : "auto",
+                    transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease",
+                  }}
+                >
+                  <SelectTabs tabs={tabs} setSelectedTab={setSelectedTab} selectedTab={selectedTab} />
+                </div>
+                <div style={{ height: "52px" }} />
                 {selectedTab === 0 && isLoading && (
                   <div
                     className="fit-container fx-centered"
                     style={{ height: "100vh" }}
                   >
                     <div className="fx-centered">
-                      <LoadingLogo />
+                      <Spinner size={32} />
                     </div>
                   </div>
                 )}

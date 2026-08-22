@@ -51,26 +51,28 @@ export default function KindSix({ event }) {
         }}
       >
         <div
-          className="fx-centered fx-start-h sc-s-18 box-pad-h-s  round-icon-tooltip pointer"
+          className="fx-centered fx-start-h bg-dropdown box-pad-h-s  round-icon-tooltip pointer"
           style={{
             overflow: "visible",
-            marginLeft: "1rem",
+            // marginLeft: "1rem",
             marginTop: "1rem",
-            backgroundColor: "transparent",
+            marginBottom: ".5rem",
+            // backgroundColor: "transparent",
             height: "32px",
+
           }}
           data-tooltip={
             reposts.length > 1
               ? `${reposts.length} people reposted this`
               : `${user.display_name} reposted this on ${new Date(
-                  event.created_at * 1000
-                ).toLocaleDateString()}, ${new Date(
-                  event.created_at * 1000
-                ).toLocaleTimeString()}`
+                event.created_at * 1000
+              ).toLocaleDateString()}, ${new Date(
+                event.created_at * 1000
+              ).toLocaleTimeString()}`
           }
           onClick={() => (reposts.length > 1 ? setShowReposts(true) : null)}
         >
-          <Icon name="switch-arrows" />
+          <Icon name="arrow_reload_02" v={2} />
           <UserProfilePic
             size={18}
             mainAccountUser={false}

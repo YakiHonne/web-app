@@ -21,12 +21,16 @@ import useIsMute from "@/Hooks/useIsMute";
 import { sleepTimer } from "@/Helpers/Helpers";
 import AvatarPlaceholder from "@/Components/AvatarPlaceholder";
 import Icon from "@/Components/Icon";
+import useCreatorSubscription from "@/Hooks/useCreatorSubscription";
+import SubscriptionButton from "@/Components/SubscriptionButton";
+import { iconsNames } from "@/Content/IconV2URL";
+import Badge from "@/Helpers/Badge";
 
 export default function UserMetadata({ user }) {
   const { t } = useTranslation();
   const id = user.pubkey;
   const userKeys = useSelector((state) => state.userKeys);
-  const { isNip05Verified } = useUserProfile(user.pubkey);
+  const { isNip05Verified, proUser } = useUserProfile(user.pubkey);
   const { muteUnmute, isMuted } = useIsMute(user.pubkey);
   const [showPeople, setShowPeople] = useState(false);
   const [timestamp, setTimestamp] = useState(new Date().getTime());
@@ -35,7 +39,7 @@ export default function UserMetadata({ user }) {
   const [showQR, setShowQR] = useState(false);
   const [showMetadataCarousel, setShowMetadataCarousel] = useState(false);
   const [selectedItemInCarousel, setSelectedItemInCarousel] = useState(0);
-
+  console.log(proUser)
   useEffect(() => {
     getUserFollowers();
   }, [timestamp]);
@@ -154,8 +158,7 @@ export default function UserMetadata({ user }) {
               backgroundColor: "var(--very-dim-gray)",
               overflow: "visible",
               zIndex: 0,
-              borderTopLeftRadius: "0",
-              borderTopRightRadius: "0",
+
               cursor: user?.banner ? "zoom-in" : "default",
             }}
             onClick={() => handleCarouselItems(0)}
@@ -208,9 +211,8 @@ export default function UserMetadata({ user }) {
                         setReceivedEvent={() => null}
                       />
                       <div
-                        className={`round-icon round-icon-tooltip ${
-                          !userKeys || userKeys.bunker ? "if-disabled" : ""
-                        }`}
+                        className={`round-icon round-icon-tooltip ${!userKeys || userKeys.bunker ? "if-disabled" : ""
+                          }`}
                         data-tooltip={
                           userKeys && (userKeys.sec || userKeys.ext)
                             ? t("AEby39n", { name: user?.name || "" })
@@ -224,7 +226,7 @@ export default function UserMetadata({ user }) {
                         }}
                         onClick={handleInitConvo}
                       >
-                        <Icon name="env-edit" size={24} />
+                        <Icon name={iconsNames.chat_add} v={2} size={20} />
                       </div>
                     </div>
                   )}
@@ -245,13 +247,16 @@ export default function UserMetadata({ user }) {
           >
             <div className="fx-centered" style={{ gap: "6px" }}>
               <h3 className="p-caps">{user?.display_name || user?.name}</h3>
-              {isNip05Verified && <Icon name="checkmark-c1" size={24} isColored />}
+              {isNip05Verified && (
+                <Icon name="checkmark-c1" size={24} isColored />
+              )}
+              {proUser.isProUser && <Badge data={proUser} size={24} />}
               <div
                 className="fx-centered pointer"
                 onClick={() => setShowQR(true)}
               >
                 <div>
-                  <Icon name="qrcode" />
+                  <Icon name={iconsNames.qr_code} v={2} size={20} />
                 </div>
               </div>
             </div>
@@ -263,8 +268,8 @@ export default function UserMetadata({ user }) {
                     {user?.nip05?.length < 50
                       ? user?.nip05
                       : typeof user?.nip05 === "string"
-                      ? shortenKey(user?.nip05, 15)
-                      : "N/A"}
+                        ? shortenKey(user?.nip05, 15)
+                        : "N/A"}
                   </p>
                 )}
                 {!user?.nip05 && <p>N/A</p>}
@@ -326,6 +331,9 @@ export default function UserMetadata({ user }) {
               </div>
             </div>
           </div>
+        </div>
+        <div className="fit-container box-pad-h-m">
+          <SubscriptionButton pubkey={id} />
         </div>
       </div>
     </>

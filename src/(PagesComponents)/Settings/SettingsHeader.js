@@ -8,11 +8,11 @@ export function SettingsHeader({ userKeys }) {
   const { t } = useTranslation();
   return (
     <div
-      className="fit-container fx-scattered pointer box-pad-v-m box-pad-h-m"
-      style={{
-        borderBottom: "1px solid var(--very-dim-gray)",
-        borderTop: "1px solid var(--very-dim-gray)",
-      }}
+      className="sc-s fit-container fx-scattered pointer box-pad-v-m box-pad-h-m"
+    // style={{
+    //   borderBottom: "1px solid var(--very-dim-gray)",
+    //   borderTop: "1px solid var(--very-dim-gray)",
+    // }}
     >
       <UserProfilePic mainAccountUser={true} size={64} />
       <div className="fx-centered">

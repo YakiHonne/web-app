@@ -8,7 +8,7 @@ import {
 import QRCode from "react-qr-code";
 import { relaysOnPlatform } from "@/Content/Relays";
 import { getZapEventRequest } from "@/Helpers/NostrPublisher";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import { webln } from "@getalby/sdk";
 import { decode } from "light-bolt11-decoder";
 import { getWallets, updateWallets } from "@/Helpers/ClientHelpers";
@@ -25,11 +25,15 @@ import successJSON from "@/JSONs/success.json";
 import useCashu from "@/Hooks/useCachu";
 import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import Overlay from "@/Components/Overlay";
 
 export default function PaymentGateway({
   recipientAddr,
   paymentAmount,
   recipientPubkey,
+  specificRelays = [],
+  extraMetadataTags = [],
   nostrEventIDEncode,
   setReceivedEvent = () => null,
   setConfirmPayment = () => null,
@@ -85,27 +89,18 @@ export default function PaymentGateway({
 
   if (isLoading)
     return (
-      <div className="fixed-container fx-centered" style={{ zIndex: 2000000 }}>
-        <LoadingDots />
-      </div>
+      <Overlay exit={exit} width={300}>
+        <div style={{ height: "300px" }} className="fx-centered">
+          <Spinner />
+        </div>
+      </Overlay>
     );
   if (wallets.length === 0)
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        style={{ zIndex: 2000000 }}
-      >
+      <Overlay exit={exit} width={400} allowOverFlow={true}>
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="sc-s bg-sp box-pad-h box-pad-v fx-centered fx-col slide-up"
-          style={{
-            width: "min(100%, 400px)",
-            position: "relative",
-            overflow: "visible",
-            padding: "3rem 1rem",
-          }}
+          className="box-pad-h box-pad-v fx-centered fx-col"
+          style={{ padding: "3rem 1rem" }}
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -115,7 +110,7 @@ export default function PaymentGateway({
             <button className="btn btn-normal">{t("A8fEwNq")}</button>
           </Link>
         </div>
-      </div>
+      </Overlay>
     );
   if (
     !recipientAddr ||
@@ -123,34 +118,24 @@ export default function PaymentGateway({
     (!lnbcAmount && recipientAddr.startsWith("lnbc"))
   )
     return (
-      <div
-        className="fixed-container fx-centered box-pad-h"
-        style={{ zIndex: 2000000 }}
-      >
+      <Overlay exit={exit} width={400} allowOverFlow={true}>
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="sc-s bg-sp box-pad-h box-pad-v fx-centered fx-col slide-up"
-          style={{
-            width: "min(100%, 400px)",
-            position: "relative",
-            overflow: "visible",
-          }}
+          className="box-pad-h box-pad-v fx-centered fx-col"
         >
           <div className="close" onClick={exit}>
             <div></div>
           </div>
-          <Icon name="crossmark-tt" size={50} isColored/>
+          <Icon name="crossmark-tt" size={50} isColored />
           <h4>{t("AI8bhpw")}</h4>
           <p className="box-pad-h gray-c p-centered">{t("ACOXf0z")}</p>
         </div>
-      </div>
+      </Overlay>
     );
   return (
     <Cashier
       recipientAddr={recipientAddr}
       recipientPubkey={recipientPubkey}
+      extraMetadataTags={extraMetadataTags}
       callback={callback}
       recipientInfo={userProfile}
       nostrEventIDEncode={nostrEventIDEncode}
@@ -159,6 +144,7 @@ export default function PaymentGateway({
       exit={exit}
       setReceivedEvent={setReceivedEvent}
       setConfirmPayment={setConfirmPayment}
+      specificRelays={specificRelays}
     />
   );
 }
@@ -166,6 +152,7 @@ export default function PaymentGateway({
 const Cashier = ({
   recipientAddr,
   recipientPubkey,
+  extraMetadataTags,
   callback,
   nostrEventIDEncode,
   paymentAmount,
@@ -173,6 +160,7 @@ const Cashier = ({
   exit,
   setReceivedEvent,
   setConfirmPayment,
+  specificRelays,
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -223,11 +211,16 @@ const Cashier = ({
       if (!isLNBC) {
         let sats = amount * 1000;
         let tags = [
-          ["relays", ...relaysOnPlatform],
+          [
+            "relays",
+            ...(specificRelays.length > 0 ? specificRelays : relaysOnPlatform),
+          ],
           ["amount", sats.toString()],
           ["lnurl", recipientAddr],
           ["p", recipientPubkey],
+          ...extraMetadataTags,
         ];
+
         let extraTags = nostrEventIDEncode
           ? getNostrEventInfo(nostrEventIDEncode)
           : [];
@@ -242,8 +235,7 @@ const Cashier = ({
           : recipientAddr;
         try {
           const res = await axios(
-            `${callback}${callback.includes("?") ? "&" : "?"}amount=${sats}${
-              event ? `&nostr=${event}` : ""
+            `${callback}${callback.includes("?") ? "&" : "?"}amount=${sats}${event ? `&nostr=${event}` : ""
             }&lnurl=${tempRecipientLNURL}`,
           );
           if (res.data.status === "ERROR") {
@@ -465,24 +457,10 @@ const Cashier = ({
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-      style={{ zIndex: 2000000 }}
-    >
+    <Overlay exit={exit} width={400} allowOverFlow={true}>
       <div
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-        className="sc-s bg-sp box-pad-h box-pad-v slide-up"
-        style={{
-          width: "min(100%, 400px)",
-          position: "relative",
-          overflow: "visible",
-        }}
+        className="box-pad-h box-pad-v"
+        style={{ position: "relative" }}
       >
         {confirmation === "initiated" && (
           <div className="fx-centered fx-col fit-container fx-start-v">
@@ -533,17 +511,17 @@ const Cashier = ({
                       <div className="fx-centered">
                         {selectedWallet.kind === 1 && (
                           <div className="round-icon-small">
-                            <Icon name="webln-logo" size={24} isColored/>
+                            <Icon name="webln-logo" size={24} isColored />
                           </div>
                         )}
                         {selectedWallet.kind === 2 && (
                           <div className="round-icon-small">
-                            <Icon name="alby-logo" size={24} isColored/>
+                            <Icon name="alby-logo" size={24} isColored />
                           </div>
                         )}
                         {selectedWallet.kind === 3 && (
                           <div className="round-icon-small">
-                            <Icon name="nwc-logo" size={24} isColored/>
+                            <Icon name="nwc-logo" size={24} isColored />
                           </div>
                         )}
                         {selectedWallet.kind === -1 && (
@@ -576,7 +554,6 @@ const Cashier = ({
                     <div
                       className="fx-centered fx-col sc-s-18 bg-sp box-pad-h-s box-pad-v-s fx-start-v fx-start-h fit-container"
                       style={{
-                        // width: "400px",
                         backgroundColor: "var(--c1-side)",
                         position: "absolute",
                         right: "0",
@@ -601,7 +578,6 @@ const Cashier = ({
                             }}
                             style={{
                               border: "none",
-                              // minWidth: "max-content",
                               overflow: "visible",
                             }}
                           >
@@ -614,7 +590,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <Icon name="webln-logo" size={24} isColored/>
+                                  <Icon name="webln-logo" size={24} isColored />
                                 </div>
                               )}
                               {wallet.kind === 2 && (
@@ -625,7 +601,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <Icon name="alby-logo" size={24} isColored/>
+                                  <Icon name="alby-logo" size={24} isColored />
                                 </div>
                               )}
                               {wallet.kind === 3 && (
@@ -636,7 +612,7 @@ const Cashier = ({
                                     minHeight: "32px",
                                   }}
                                 >
-                                  <Icon name="nwc-logo" size={24} isColored/>
+                                  <Icon name="nwc-logo" size={24} isColored />
                                 </div>
                               )}
                               <p className="p-one-line">{wallet.entitle}</p>
@@ -707,18 +683,17 @@ const Cashier = ({
                         className="if p-bold if-no-border ifs-full p-centered"
                         placeholder={t("AcDgXKI")}
                         style={{
-                          fontSize: `max(${
-                            amount.toString().length > 5
-                              ? `${80 - (amount.toString().length - 6) * 10}px`
-                              : "80px"
-                          },50px)`,
+                          fontSize: `max(${amount.toString().length > 5
+                            ? `${80 - (amount.toString().length - 6) * 10}px`
+                            : "80px"
+                            },50px)`,
                           height: "80px",
                         }}
                         value={amount}
                         onChange={(e) => setAmount(parseInt(e.target.value))}
                         autoFocus
                       />
-                      <p className="gray-c p-big">Sats</p>
+                      <p className="gray-c p-big">{t("AQv2Hnr")}</p>
                     </div>
                     <input
                       type="text"
@@ -738,15 +713,15 @@ const Cashier = ({
               )}
               {(isLNBC ||
                 (paymentAmount !== 0 && paymentAmount !== undefined)) && (
-                <div className="fx-centered fx-col box-pad-v-m">
-                  <div className="fx-centered fx-col">
-                    <p className="gray-c p-big">{t("A82pzWN")}</p>
+                  <div className="fx-centered fx-col box-pad-v-m">
+                    <div className="fx-centered fx-col">
+                      <p className="gray-c p-big">{t("A82pzWN")}</p>
 
-                    <h1 style={{ fontSize: "80px" }}>{amount}</h1>
-                    <p className="gray-c p-big">Sats</p>
+                      <h1 style={{ fontSize: "80px" }}>{amount}</h1>
+                      <p className="gray-c p-big">{t("AQv2Hnr")}</p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </div>
             <div className="fit-container fx-centered" style={{ gap: "16px" }}>
               <div
@@ -759,7 +734,7 @@ const Cashier = ({
                 onClick={isLoading ? null : exit}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <p className="red-c p-big" style={{ height: "20px" }}>
@@ -781,7 +756,7 @@ const Cashier = ({
                 }}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <Icon name="qrcode" size={24} />
@@ -799,7 +774,7 @@ const Cashier = ({
                 onClick={() => (isLoading ? null : onConfirmation())}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : (
                   <>
                     <p className="p-big" style={{ height: "20px" }}>
@@ -823,7 +798,6 @@ const Cashier = ({
               className="sc-s-18 box-pad-h-m box-pad-v-m fx-centered fit-container"
             >
               <QRCode
-                // style={{ width: "100%", aspectRatio: "1/1" }}
                 size={320}
                 value={invoice}
               />
@@ -839,7 +813,7 @@ const Cashier = ({
             {!onlyInvoice && (
               <div className="fit-container fx-centered box-pad-v-s">
                 <p className="gray-c p-medium">{t("A1ufjMM")}</p>
-                <LoadingDots />
+                <Spinner />
               </div>
             )}
             {onlyInvoice && (
@@ -878,7 +852,7 @@ const Cashier = ({
             className="fx-centered fx-col fit-container"
             style={{ height: "16vh" }}
           >
-            <Icon name="crossmark-tt" size={50} isColored/>
+            <Icon name="crossmark-tt" size={50} isColored />
             <h4 className="slide-down box-pad-v-m">{t("AI8bhpw")}</h4>
             <button className="btn btn-normal slide-up" onClick={exit}>
               {t("Acglhzb")}
@@ -886,14 +860,14 @@ const Cashier = ({
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 };
 
 const ReceiverInfo = ({ pubkey, isLNBC, recipientAddr }) => {
   const { t } = useTranslation();
   const ref = useRef(null);
-  const { isNip05Verified, userProfile } = useUserProfile(pubkey);
+  const { isNip05Verified, userProfile, proUser } = useUserProfile(pubkey);
   const [showInfo, setShowInfo] = useState(false);
 
   useEffect(() => {
@@ -939,6 +913,7 @@ const ReceiverInfo = ({ pubkey, isLNBC, recipientAddr }) => {
           <div className="fx-centered fx-start-h">
             <p className="p-maj">{userProfile?.display_name}</p>
             {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+            {proUser.isProUser && <Badge data={proUser} size={16} />}
           </div>
           {!isLNBC && (
             <p className="p-one-line gray-c">

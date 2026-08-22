@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import RatingPreview from "./RatingPreview";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
-import LoadingDots from "../LoadingDots";
+import Spinner from "../Spinner";
 import { useDispatch } from "react-redux";
 import { setToPublish } from "@/Store/Slides/Publishers";
+import Overlay from "@/Components/Overlay";
 
 export default function SubmitReview({ exit, relay, handleSubmittedReview }) {
   const { t } = useTranslation();
@@ -38,17 +39,9 @@ export default function SubmitReview({ exit, relay, handleSubmittedReview }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={500}>
       <div
-        className="sc-s bg-sp box-pad-h box-pad-v fx-centered fx-col"
-        style={{ width: "min(100%,500px)", position: "relative" }}
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close">
           <div onClick={exit}></div>
@@ -72,9 +65,9 @@ export default function SubmitReview({ exit, relay, handleSubmittedReview }) {
           onClick={handleSubmitReview}
           disabled={isLoading}
         >
-          {isLoading ? <LoadingDots /> : t("AKzczuT")}
+          {isLoading ? <Spinner /> : t("AKzczuT")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 }

@@ -9,8 +9,9 @@ import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import PostMedia from "./PostMedia/PostMedia";
 import Icon from "@/Components/Icon";
 import Overlay from "./Overlay";
+import { iconsNames } from "@/Content/IconV2URL";
 
-export default function WriteNew({ exit }) {
+export default function WriteNew({ exit, asNavButton = false }) {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const [redirectLinks, setRedirectLinks] = useState(false);
@@ -79,23 +80,41 @@ export default function WriteNew({ exit }) {
       )}
       {showPostNote && <PostAsNote exit={() => setShowPostNote(false)} />}
       {showPostMedia && <PostMedia exit={() => setShowPostMedia(false)} />}
-      <button
-        className="btn btn-full btn-orange fx-centered"
-        style={{ padding: 0 }}
-        onClick={() =>
-          !(userKeys.ext || userKeys.sec || userKeys.bunker)
-            ? setIsLogin(true)
-            : setRedirectLinks(true)
-        }
-        onMouseDown={handlePressStart}
-        onMouseUp={handlePressEnd}
-        onMouseLeave={handlePressEnd}
-        onTouchStart={handlePressStart}
-        onTouchEnd={handlePressEnd}
-      >
-        <Icon name="plus-sign-w" />
-        <div className="link-label">{t("AAxCaYH")}</div>
-      </button>
+      {asNavButton ? (
+        <button
+          className="uplift-post-btn"
+          onClick={() =>
+            !(userKeys?.ext || userKeys?.sec || userKeys?.bunker)
+              ? setIsLogin(true)
+              : setRedirectLinks(true)
+          }
+          onMouseDown={handlePressStart}
+          onMouseUp={handlePressEnd}
+          onMouseLeave={handlePressEnd}
+          onTouchStart={handlePressStart}
+          onTouchEnd={handlePressEnd}
+        >
+          <Icon name={iconsNames.add_plus} size={20} v={2} />
+        </button>
+      ) : (
+        <button
+          className="btn btn-full btn-orange fx-centered"
+          style={{ padding: 0 }}
+          onClick={() =>
+            !(userKeys?.ext || userKeys?.sec || userKeys?.bunker)
+              ? setIsLogin(true)
+              : setRedirectLinks(true)
+          }
+          onMouseDown={handlePressStart}
+          onMouseUp={handlePressEnd}
+          onMouseLeave={handlePressEnd}
+          onTouchStart={handlePressStart}
+          onTouchEnd={handlePressEnd}
+        >
+          <Icon name="plus-sign-w" />
+          <div className="link-label">{t("AAxCaYH")}</div>
+        </button>
+      )}
     </>
   );
 }

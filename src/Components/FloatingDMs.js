@@ -10,9 +10,10 @@ import { ConversationBox } from "./ConversationBox";
 import { handleUpdateConversation } from "@/Helpers/DMHelpers";
 import { getNoteTree } from "@/Helpers/ClientHelpers";
 import InitiConvo from "./InitConvo";
-import LoadingDots from "./LoadingDots";
+import Spinner from "./Spinner";
 import { Virtuoso } from "react-virtuoso";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function FloatingDMs() {
   const { t } = useTranslation();
@@ -97,7 +98,7 @@ export default function FloatingDMs() {
       <div
         style={{
           position: "fixed",
-          right: "74px",
+          right: "16px",
           bottom: "16px",
           zIndex: "10001",
         }}
@@ -108,11 +109,12 @@ export default function FloatingDMs() {
       >
         {!open && !selectedConvo && (
           <div
-            className="sc-s fx-centered fx-start-h box-pad-h-m box-pad-v-m option slide-right"
+            className="sc-s fx-centered fx-start-h box-pad-h-s box-pad-v-s option slide-right"
             onClick={() => setOpen(true)}
+            style={{ borderRadius: "50px" }}
           >
-            <Icon name="send" size={24} />
-            <p className="box-pad-h-s">{t("As2zi6P")}</p>
+            <Icon name="send" size={20} />
+            <p className="box-pad-h-s gray-c">{t("As2zi6P")}</p>
             {isNewMsg && (
               <div
                 style={{
@@ -129,8 +131,9 @@ export default function FloatingDMs() {
           <div
             className="sc-s fx-centered fx-start-h box-pad-h-s box-pad-v-s option slide-right"
             onClick={() => setOpen(true)}
+            style={{ borderRadius: "50px" }}
           >
-            <div className="box-pad-h-s">
+            <div className="box-pad-h-s fx-centered">
               <UserProfilePic
                 img={selectedConvo.picture}
                 size={30}
@@ -167,16 +170,17 @@ export default function FloatingDMs() {
         )}
         {open && (
           <div
-            className="sc-s slide-up"
+            className="bg-dropdown slide-up"
             ref={convoBoxRef}
             style={{
-              [selectedConvo ? "height" : "maxHeight"]: "60vh",
+              [selectedConvo ? "height" : "maxHeight"]: "70vh",
               overflowY: "scroll",
-              width: selectedConvo ? "450px" : "350px",
+              width: "450px",
+              // width: selectedConvo ? "450px" : "350px",
             }}
           >
             <div
-              className="sticky fx-scattered fit-container box-pad-h-m box-pad-v-m pointer"
+              className="sticky fx-scattered fit-container box-pad-h-s box-pad-v-s pointer"
               style={{
                 borderBottom: "1px solid var(--dim-gray)",
                 padding: "1rem",
@@ -216,11 +220,12 @@ export default function FloatingDMs() {
                   </div>
                 </div>
               )}
-              {!selectedConvo && <p className="p-big">{t("As2zi6P")}</p>}
+              {!selectedConvo && <p>{t("As2zi6P")}</p>}
               <div className="fx-centered">
                 {!selectedConvo && (
                   <Icon
-                    name="env-edit"
+                    v={2}
+                    name={iconsNames.chat_add}
                     size={24}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -239,7 +244,7 @@ export default function FloatingDMs() {
             </div>
 
             <div
-              className="fit-container fx-scattered fx-col fx-start-h fx-start-v fit-container box-pad-h-s box-pad-v-s bg-sp"
+              className="fit-container fx-scattered fx-col fx-start-h fx-start-v fit-container box-pad-h-s box-pad-v-s"
               style={{
                 height: selectedConvo ? "calc(100% - 75px)" : "auto",
                 position: "relative",
@@ -448,7 +453,7 @@ export default function FloatingDMs() {
                   className="fit-container fx-centered"
                   style={{ height: "300px" }}
                 >
-                  <LoadingDots />
+                  <Spinner />
                 </div>
               )} */}
             </div>

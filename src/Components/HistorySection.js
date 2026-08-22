@@ -3,10 +3,10 @@ import NotesComment from "@/Components/NotesComment";
 import { getSubData } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { saveUsers } from "@/Helpers/DB";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
 import { useTranslation } from "react-i18next";
-import { getParsedNote } from "@/Helpers/ClientHelpers";
+import { getNip22Refs, getParsedNote } from "@/Helpers/ClientHelpers";
 import { getParsedMedia, getParsedRepEvent } from "@/Helpers/Encryptions";
 
 const traceEventPath = (id, all, mainEventID, tagKind) => {
@@ -22,10 +22,8 @@ const traceEventPath = (id, all, mainEventID, tagKind) => {
     let parentId = null;
 
     if (event.kind === 1111) {
-      const parentTag = event.tags.find(
-        (tag) => tag[0] === "e" && (!tag[3] || tag[3] === ""),
-      );
-      parentId = parentTag ? parentTag[1] : null;
+      const refs = getNip22Refs(event);
+      parentId = refs && !refs.isTopLevel ? refs.parentValue : null;
     } else {
       const parentRoot = event.tags.find(
         (tag) => tag.length > 3 && tag[3] === "root",
@@ -87,16 +85,20 @@ export default function HistorySection({
     const fetchData = async () => {
       setIsLoading(true);
 
-      const commentKinds = tagKind === "a" ? [1, 1111] : [1];
-      
+      const commentKinds = [1, 1111];
+
       let filter = isRoot
         ? []
         : [
-            {
-              kinds: commentKinds,
-              [`#${tagKind}`]: [id],
-            },
-          ];
+          {
+            kinds: commentKinds,
+            [`#${tagKind}`]: [id],
+          },
+          {
+            kinds: [1111],
+            [`#${tagKind.toUpperCase()}`]: [id],
+          },
+        ];
       let checkEventKind = id.split(":");
       if (checkEventKind.length > 2) {
         filter.push({
@@ -121,13 +123,18 @@ export default function HistorySection({
   useEffect(() => {
     if (isLoading) return;
 
-    const commentKinds = tagKind === "a" ? [1, 1111] : [1];
-    
+    const commentKinds = [1, 1111];
+
     const sub = ndkInstance.subscribe(
       [
         {
           kinds: commentKinds,
           [`#${tagKind}`]: [id],
+          since: Math.floor(Date.now() / 1000),
+        },
+        {
+          kinds: [1111],
+          [`#${tagKind.toUpperCase()}`]: [id],
           since: Math.floor(Date.now() / 1000),
         },
       ],
@@ -160,7 +167,7 @@ export default function HistorySection({
         style={{ height: "5vh" }}
         className="fit-container box-pad-h-m fx-centered"
       >
-        <LoadingDots />
+        <Spinner />
       </div>
     );
   if (netComments.length === 0)

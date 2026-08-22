@@ -30,7 +30,7 @@ import {
   saveUsers,
 } from "./DB";
 import {
-  getAppLang,
+  getContentLang,
   getContentTranslationConfig,
   getCurrentLevel,
   levelCount,
@@ -47,11 +47,13 @@ import {
   saveLocalRelaysMetadata,
   setRelayMetadata,
 } from "./utils/relayMetadataCache";
+import { relayConnectionFilter } from "@/Helpers/utils/relayConnectionFilter";
 
 const ConnectNDK = async (relays) => {
   try {
     const ndk = new NDK({
       explicitRelayUrls: relays,
+      relayConnectionFilter,
     });
     await ndk.connect();
     return ndk;
@@ -222,7 +224,13 @@ const yakiChestDisconnect = async () => {
 };
 
 const logoutAllAccounts = async () => {
-  let ignore = ["app-lang", "yaki-wallets", "i18nextLng", "chsettings"];
+  let ignore = [
+    "app-lang",
+    "content-lang",
+    "yaki-wallets",
+    "i18nextLng",
+    "chsettings",
+  ];
   downloadAllKeys();
   Object.keys(localStorage).forEach((key) => {
     if (!ignore.includes(key)) {
@@ -245,10 +253,9 @@ const downloadAllKeys = () => {
     .map((account) => {
       return [
         `Account username: ${account.display_name || account.name}`,
-        `Private key: ${
-          account?.userKeys?.sec
-            ? getBech32("nsec", account?.userKeys?.sec)
-            : ""
+        `Private key: ${account?.userKeys?.sec
+          ? getBech32("nsec", account?.userKeys?.sec)
+          : ""
         }`,
         `Public key: ${getBech32("npub", account?.userKeys?.pub)}`,
       ];
@@ -336,10 +343,9 @@ const userLogout = async (pubkey) => {
       let toSave = [
         "Important: Store this information securely. If you lose it, recovery may not be possible. Keep it private and protected at all times",
         "---",
-        `Private key: ${
-          accounts[accountIndex]?.userKeys?.sec
-            ? getBech32("nsec", accounts[accountIndex]?.userKeys?.sec)
-            : ""
+        `Private key: ${accounts[accountIndex]?.userKeys?.sec
+          ? getBech32("nsec", accounts[accountIndex]?.userKeys?.sec)
+          : ""
         }`,
         `Public key: ${getBech32(
           "npub",
@@ -378,6 +384,8 @@ const updateYakiChestStats = (user_stats) => {
       totalPointInLevel,
       inBetweenLevelPoints,
       remainingPointsToNextLevel,
+      consumablePoints: user_stats.current_points?.points,
+      consumablePointsLU: user_stats.current_points?.last_updated,
     }),
   );
 };
@@ -644,9 +652,10 @@ const InitEvent = async (
         return false;
       }
     } else if (userKeys.bunker) {
+
       const bunkerPointer = await parseBunkerInput(userKeys.bunker);
       const bunker = BunkerSigner.fromBunker(
-        userKeys.localKeys.sec,
+        hexToUint8Array(userKeys.localKeys.sec),
         bunkerPointer,
         {
           onauth: (url) => {
@@ -692,7 +701,7 @@ const getEventStatAfterEOSE = (
     let content = !reaction.content.includes(":")
       ? reaction.content
       : reaction.tags.find((tag) => `:${tag[1]}:` === reaction.content)[2] ||
-        "+";
+      "+";
     stats[kind][kind] = removeObjDuplicants(stats[kind][kind], [
       { id: reaction.id, pubkey: reaction.pubkey, content },
     ]);
@@ -716,13 +725,26 @@ const translate = async (text) => {
       ...customServices[service.service],
     };
   }
-  let lang = getAppLang();
-  let res = await axiosInstance.post("/api/v1/translate", {
-    service,
-    lang,
-    text,
-  });
-  return res.data;
+  let lang = getContentLang();
+  try {
+    let res = await axiosInstance.post("/api/v1/translate", {
+      service,
+      lang,
+      text,
+    });
+    return res.data;
+  } catch (err) {
+    // axios throws on non-2xx HTTP statuses (e.g. 429 rate limit);
+    // normalize them into the { status, res } shape callers expect
+    if (err.response) {
+      return {
+        status: err.response.status,
+        reason: err.response.data?.reason || null,
+        res: err.response.data?.message || err.response.data?.res,
+      };
+    }
+    throw err;
+  }
 };
 
 const publishEvent = async (event, relays = relaysOnPlatform) => {
@@ -913,6 +935,44 @@ const fetchRelayMetadata = async (relay) => {
   }
 };
 
+
+const getAccountKindTag = ({ account }) => {
+  if (account.userKeys.ext) {
+    return <div
+      className="sticker sticker-small sticker-orange-side"
+      style={{ minWidth: "max-content" }}
+    >
+      Extension
+    </div>
+  }
+  if (
+    account.userKeys.sec)
+    return <div
+      className="sticker sticker-small sticker-red-side"
+      style={{ minWidth: "max-content" }}
+    >
+      Private Key
+    </div>
+
+  if (
+    account.userKeys.bunker && !account.userKeys.central)
+    return <div
+      className="sticker sticker-small sticker-green-side"
+      style={{ minWidth: "max-content" }}
+    >
+      Remote
+    </div>
+
+  if (account.userKeys.central)
+    return <div
+      className="sticker sticker-small sticker-blue-side"
+      style={{ minWidth: "max-content" }}
+    >
+      Google
+    </div>
+
+}
+
 export {
   ConnectNDK,
   aggregateUsers,
@@ -922,6 +982,7 @@ export {
   logoutAllAccounts,
   handleSwitchAccount,
   userLogout,
+  yakiChestDisconnect,
   exportAllWallets,
   exportWallet,
   updateYakiChestStats,
@@ -945,4 +1006,5 @@ export {
   saveInboxRelaysListsForUsers,
   walletWarning,
   saveRelayMetadata,
+  getAccountKindTag
 };

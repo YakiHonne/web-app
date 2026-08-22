@@ -7,7 +7,7 @@ import {
   getHashFromFile,
   getMediaType,
 } from "@/Helpers/Helpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import ProgressCirc from "@/Components/ProgressCirc";
 import axios from "axios";
 import { store } from "@/Store/Store";
@@ -87,10 +87,10 @@ export default function UploadBlossom({ exit, servers, refreshLists }) {
                 type: 2,
                 desc:
                   server +
-                    ": " +
-                    (result.reason?.response?.data?.message ||
-                      result.reason?.response?.data ||
-                      result.reason?.message) ||
+                  ": " +
+                  (result.reason?.response?.data?.message ||
+                    result.reason?.response?.data ||
+                    result.reason?.message) ||
                   `Could not upload to ${server}`,
               }),
             );
@@ -164,7 +164,7 @@ export default function UploadBlossom({ exit, servers, refreshLists }) {
           className={`btn btn-full ${selectedServers.length > 0 && file ? "btn-normal" : "btn-disabled"}`}
           onClick={handleUpload}
         >
-          {isLoading ? <LoadingDots /> : t("AiINSld")}
+          {isLoading ? <Spinner /> : t("A5AaVbz")}
         </button>
       </div>
     </Overlay>

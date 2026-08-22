@@ -10,7 +10,8 @@ import { encrypt44 } from "@/Helpers/Encryptions";
 import { InitEvent } from "@/Helpers/Controlers";
 import successJSON from "@/JSONs/success.json";
 import Lottie from "lottie-react";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
+import Overlay from "@/Components/Overlay";
 import { useSelector } from "react-redux";
 
 export default function WalletRestoration({ activeMint, exit }) {
@@ -128,17 +129,9 @@ export default function WalletRestoration({ activeMint, exit }) {
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        !isLoading && exit();
-      }}
-    >
+    <Overlay exit={() => !isLoading && exit()} width={550}>
       <div
-        className="box-pad-h box-pad-v sc-s bg-sp fx-centered fx-col slide-up"
-        style={{ width: "min(100%, 550px)", position: "relative" }}
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h box-pad-v fx-centered fx-col"
       >
         <div className="close" onClick={() => !isLoading && exit()}>
           <div></div>
@@ -193,13 +186,12 @@ export default function WalletRestoration({ activeMint, exit }) {
             )}
             <div className="fit-container fx-centered box-pad-v-s box-pad-h-m">
               <button
-                className={`btn btn-normal btn-full ${
-                  isAllFilled.isAllFilled ? "" : "btn-disabled"
-                }`}
+                className={`btn btn-normal btn-full ${isAllFilled.isAllFilled ? "" : "btn-disabled"
+                  }`}
                 disabled={!isAllFilled.isAllFilled || isLoading}
                 onClick={restoreWallet}
               >
-                {isLoading ? <LoadingDots /> : t("ADmoKen")}
+                {isLoading ? <Spinner /> : t("ADmoKen")}
               </button>
             </div>
           </>
@@ -225,6 +217,6 @@ export default function WalletRestoration({ activeMint, exit }) {
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 }

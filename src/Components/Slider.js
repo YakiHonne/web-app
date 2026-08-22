@@ -58,7 +58,7 @@ export default function Slider({
     >
       {showArrows && (
         <div
-          className="pointer slide-right fit-height fx-centered gradient-bg-left"
+          className="pointer slide-right fit-height fx-centered"
           onClick={slideLeft}
           style={{
             position: "absolute",
@@ -73,7 +73,6 @@ export default function Slider({
             style={{
               backgroundColor: "var(--c1-side)",
               marginRight: "1px",
-              border: "none",
             }}
           >
             <Icon name="arrow" transform="rotate(90deg)" />
@@ -96,8 +95,8 @@ export default function Slider({
             transform: `translateX(-${scrollPX}px)`,
             transition: ".3s ease-in-out",
             columnGap: noGap ? 0 : `${gap}px`,
-            paddingLeft: showArrows ? "1.5rem" : 0,
-            paddingRight: showArrows ? "1.5rem" : 0,
+            paddingLeft: showArrows ? "2rem" : 0,
+            paddingRight: showArrows ? "2rem" : 0,
           }}
           ref={noScrollBarContainer}
         >
@@ -117,7 +116,7 @@ export default function Slider({
 
       {showArrows && (
         <div
-          className="pointer fit-height fx-centered gradient-bg-right"
+          className="pointer fit-height fx-centered"
           onClick={slideRight}
           style={{
             position: "absolute",
@@ -132,7 +131,7 @@ export default function Slider({
             style={{
               backgroundColor: "var(--c1-side)",
               marginRight: "1px",
-              border: "none",
+
             }}
           >
             <Icon name="arrow" transform="rotate(-90deg)" />

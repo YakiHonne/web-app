@@ -10,6 +10,7 @@ import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import Icon from "@/Components/Icon";
+import { iconsNames } from "@/Content/IconV2URL";
 
 export default function NoteCard({ event, refreshAfterDeletion }) {
   const { t } = useTranslation();
@@ -26,9 +27,9 @@ export default function NoteCard({ event, refreshAfterDeletion }) {
     : false;
   return (
     <div
-      className="fit-container fx-scattered sc-s-18 box-pad-h-m box-pad-v-m  pointer"
+      className="fit-container fx-scattered sc-s box-pad-h-m box-pad-v-m  pointer"
       style={{
-        backgroundColor: "transparent",
+
         gap: "32px",
         overflow: "visible",
       }}
@@ -52,17 +53,17 @@ export default function NoteCard({ event, refreshAfterDeletion }) {
           <p className="p-two-lines">
             {compactContent(isRepost.content, isRepost.pubkey)}
           </p>
-          <div className="fx-centered">
+          <div className="fx-centered" style={{ gap: "20px" }}>
             <div className="fx-centered">
-              <Icon name="heart" />
+              <Icon name={iconsNames.heart_01} v={2} opacity=".5" />
               <div className="gray-c">{postActions.likes.likes.length}</div>
             </div>
             <div className="fx-centered">
-              <Icon name="comment-icon" />
+              <Icon name={iconsNames.chat_circle} v={2} opacity=".5" />
               <p className="gray-c">{postActions.replies.replies.length}</p>
             </div>
             <div className="fx-centered">
-              <Icon name="bolt" />
+              <Icon name="bolt" opacity=".5" />
               <p className="gray-c">{postActions.zaps.total}</p>
             </div>
             {isFlashNews && (
@@ -72,7 +73,7 @@ export default function NoteCard({ event, refreshAfterDeletion }) {
             )}
             {event.kind === 6 && (
               <div className="sticker sticker-normal sticker-gray-black fx-centered">
-                {t("AqWa0gF")} <Icon name="switch-arrows" />
+                {t("AqWa0gF")} <Icon name={iconsNames.arrow_reload_02} v={2} />
               </div>
             )}
           </div>

@@ -35,7 +35,7 @@ function RelayPreview({
         <ShareRelay exit={() => setShowRelaySharing(false)} relay={url} />
       )}
       <div
-        className="fit-container fx-scattered fx-col box-pad-h-m box-pad-v-m sc-s-18 bg-sp pointer"
+        className="fit-container fx-scattered fx-col box-pad-h-m box-pad-v-m sc-s pointer"
         style={{ overflow: "visible" }}
         onClick={() => {
           setOpen(!open);
@@ -77,16 +77,6 @@ function RelayPreview({
             {!addToFavList && (
               <>
                 <RelayStatus status={relayStats.monitor.rttOpen} />
-                {/* <div
-                className="round-icon-tooltip"
-                data-tooltip={t("AlQx13z")}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  customHistory("/r/notes?r=" + url);
-                }}
-              >
-                <Icon name="share-icon" />
-              </div> */}
               </>
             )}
             {addToFavList && <AddToFavList url={url} />}
@@ -97,86 +87,86 @@ function RelayPreview({
         {(relayStats.followings.pubkeys.length > 0 ||
           relayStats.monitor.rttOpen ||
           favoredList.length > 0) && (
-          <>
-            <hr style={{ margin: ".5rem 0" }} />
-            <div className="fit-container fx-scattered slide-up">
-              <div className="fx-centered" style={{ gap: "0" }}>
-                <div
-                  className="fx-centered round-icon-tooltip"
-                  data-tooltip={t("A9TqNxQ")}
-                >
-                  {relayStats.followings.pubkeys.length > 0 && (
-                    <>
-                      <p className="gray-c p-medium p-maj">{t("A0eIk2z")}</p>
-                      <p>
-                        {relayStats.followings.pubkeys.length > 1000
-                          ? "+1k"
-                          : relayStats.followings.pubkeys.length}
-                      </p>
-                      <UsersGroupProfilePicture
-                        pubkeys={relayStats.followings.pubkeys}
-                        number={3}
-                        imgSize={20}
-                      />
-                    </>
-                  )}
-                  {relayStats.followings.pubkeys.length === 0 && userKeys && (
-                    <p className="gray-c p-medium p-maj">{t("A0dZ5MX")}</p>
-                  )}
-                </div>
-                {favoredList.length > 0 && (
-                  <>
-                    <p className="gray-c box-pad-h-s">|</p>
-                    <div
-                      className="fx-centered round-icon-tooltip"
-                      data-tooltip={t("AFfSn3R")}
-                    >
-                      <p className="gray-c p-medium p-maj">{t("AFfSn3R")}</p>
-                      <p>
-                        {favoredList.length > 1000 ? "+1k" : favoredList.length}
-                      </p>
-                      <UsersGroupProfilePicture
-                        pubkeys={favoredList}
-                        number={3}
-                        imgSize={20}
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="fx-centered " style={{ gap: "26px" }}>
-                {(relayStats.monitor.isAuthRequired ||
-                  relayMetadata.limitation?.auth_required) && (
-                  <div
-                    className="round-icon-small round-icon-tooltip"
-                    data-tooltip={t("AuCcYnT")}
-                  >
-                    <Icon name="protected-2" />
-                  </div>
-                )}
-                {(relayStats.monitor.isPaymentRequired ||
-                  relayMetadata.limitation?.payment_required) && (
-                  <div
-                    className="round-icon-small round-icon-tooltip"
-                    data-tooltip={t("AAg9D6c")}
-                  >
-                    <p>₿</p>
-                  </div>
-                )}
-                <RelayRtt rtt={relayStats.monitor.rttOpen} />
-                {relayStats.monitor.countryFlag && (
+            <>
+              <hr style={{ margin: ".5rem 0" }} />
+              <div className="fit-container fx-scattered slide-up">
+                <div className="fx-centered" style={{ gap: "0" }}>
                   <div
                     className="fx-centered round-icon-tooltip"
-                    data-tooltip={t("ACWLa4B")}
+                    data-tooltip={t("A9TqNxQ")}
                   >
-                    <p>{relayStats.monitor.countryFlag}</p>
-                    <p className="p-medium">{relayStats.monitor.countryCode}</p>
+                    {relayStats.followings.pubkeys.length > 0 && (
+                      <>
+                        <p className="gray-c p-medium p-maj">{t("A0eIk2z")}</p>
+                        <p>
+                          {relayStats.followings.pubkeys.length > 1000
+                            ? "+1k"
+                            : relayStats.followings.pubkeys.length}
+                        </p>
+                        <UsersGroupProfilePicture
+                          pubkeys={relayStats.followings.pubkeys}
+                          number={3}
+                          imgSize={20}
+                        />
+                      </>
+                    )}
+                    {relayStats.followings.pubkeys.length === 0 && userKeys && (
+                      <p className="gray-c p-medium p-maj">{t("A0dZ5MX")}</p>
+                    )}
                   </div>
-                )}
+                  {favoredList.length > 0 && (
+                    <>
+                      <p className="gray-c box-pad-h-s">|</p>
+                      <div
+                        className="fx-centered round-icon-tooltip"
+                        data-tooltip={t("AFfSn3R")}
+                      >
+                        <p className="gray-c p-medium p-maj">{t("AFfSn3R")}</p>
+                        <p>
+                          {favoredList.length > 1000 ? "+1k" : favoredList.length}
+                        </p>
+                        <UsersGroupProfilePicture
+                          pubkeys={favoredList}
+                          number={3}
+                          imgSize={20}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+                <div className="fx-centered " style={{ gap: "26px" }}>
+                  {(relayStats.monitor.isAuthRequired ||
+                    relayMetadata.limitation?.auth_required) && (
+                      <div
+                        className="round-icon-small round-icon-tooltip"
+                        data-tooltip={t("AuCcYnT")}
+                      >
+                        <Icon name="protected-2" />
+                      </div>
+                    )}
+                  {(relayStats.monitor.isPaymentRequired ||
+                    relayMetadata.limitation?.payment_required) && (
+                      <div
+                        className="round-icon-small round-icon-tooltip"
+                        data-tooltip={t("AAg9D6c")}
+                      >
+                        <p>₿</p>
+                      </div>
+                    )}
+                  <RelayRtt rtt={relayStats.monitor.rttOpen} />
+                  {relayStats.monitor.countryFlag && (
+                    <div
+                      className="fx-centered round-icon-tooltip"
+                      data-tooltip={t("ACWLa4B")}
+                    >
+                      <p>{relayStats.monitor.countryFlag}</p>
+                      <p className="p-medium">{relayStats.monitor.countryCode}</p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </>
-        )}
+            </>
+          )}
         {!addToFavList && (
           <>
             <hr style={{ margin: ".5rem 0" }} />

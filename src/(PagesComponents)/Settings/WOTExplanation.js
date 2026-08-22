@@ -1,21 +1,14 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Overlay from "@/Components/Overlay";
 
 export default function WOTExplanation({ exit }) {
   const { t } = useTranslation();
   const [isBriefly, setIsBriefly] = useState(true);
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
+    <Overlay exit={exit} width={550}>
       <div
-        className="box-pad-h-s box-pad-v-s sc-s bg-sp"
-        style={{ width: "min(100%, 550px)", position: "relative", maxHeight: "80vh" }}
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h-s box-pad-v-s"
       >
         <div className="close" onClick={exit}>
           <div></div>
@@ -124,6 +117,6 @@ export default function WOTExplanation({ exit }) {
           )}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

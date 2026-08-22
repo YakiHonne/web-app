@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { setToast } from "../../Store/Slides/Publishers";
-import LoadingDots from "../../Components/LoadingDots";
+import Spinner from "../../Components/Spinner";
 import { MutedList } from "./MutedList";
 import { MediaUploader } from "./MediaUploader";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
@@ -152,15 +152,14 @@ export function ContentModerationManagement({
       )}
 
       <div
-        className={`fit-container fx-scattered fx-col pointer ${
-          selectedTab === "moderation" ? "sc-s box-pad-h-s box-pad-v-s" : ""
-        }`}
+        className={`sc-s fit-container fx-scattered fx-col pointer ${selectedTab === "moderation" ? "sc-s box-pad-h-s box-pad-v-s" : ""
+          }`}
         style={{
-          borderBottom: "1px solid var(--very-dim-gray)",
+          // borderBottom: "1px solid var(--very-dim-gray)",
           gap: 0,
-          borderColor: "var(--very-dim-gray)",
+          // borderColor: "var(--very-dim-gray)",
           transition: "0.2s ease-in-out",
-          borderRadius: 0,
+          // borderRadius: 0,
         }}
       >
         <div
@@ -231,14 +230,14 @@ export function ContentModerationManagement({
                   onClick={addNewServer}
                   disabled={isLoading}
                 >
-                  {isLoading ? <LoadingDots /> : t("ALyj7Li")}
+                  {isLoading ? <Spinner /> : t("ALyj7Li")}
                 </button>
                 <button
                   className="btn btn-red"
                   onClick={() => setCustomServer(false)}
                   disabled={isLoading}
                 >
-                  {isLoading ? <LoadingDots /> : t("AB4BSCe")}
+                  {isLoading ? <Spinner /> : t("AB4BSCe")}
                 </button>
               </div>
             )}
@@ -353,9 +352,8 @@ export function ContentModerationManagement({
             <div className="fx-scattered fit-container">
               <p>{t("A3KL0O7")}</p>
               <div
-                className={`toggle ${legacyDM ? "toggle-dim-gray" : ""} ${
-                  !legacyDM ? "toggle-c1" : "toggle-dim-gray"
-                }`}
+                className={`toggle ${legacyDM ? "toggle-dim-gray" : ""} ${!legacyDM ? "toggle-c1" : "toggle-dim-gray"
+                  }`}
                 onClick={handleLegacyDMs}
               ></div>
             </div>

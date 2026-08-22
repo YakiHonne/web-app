@@ -3,29 +3,15 @@ import { useTranslation } from "react-i18next";
 import ECash from "./ECash";
 import Lightning from "./Lightning";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function ReceiveTokens({ exit }) {
   const { t } = useTranslation();
   const [method, setMethod] = useState("");
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-    >
-      <div
-        className="sc-s bg-sp"
-        style={{
-          width: "min(100%, 650px)",
-          position: "relative",
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
+    <Overlay exit={exit} width={650}>
+      <div>
         <div
           className="box-pad-h box-pad-v fx-centered fx-col fx-start-h fx-start-v"
           style={{
@@ -88,6 +74,6 @@ export default function ReceiveTokens({ exit }) {
           {method === "lightning" && <Lightning exit={() => setMethod("")} />}
         </div>
       </div>
-    </div>
+    </Overlay>
   );
 }

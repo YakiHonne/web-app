@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef, forwardRef, useImperativeHandle } from "react";
 import { nip19 } from "nostr-tools";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Link from "next/link";
 import { isHex } from "@/Helpers/Helpers";
 import SearchUserCard from "@/Components/SearchUserCard";
@@ -8,12 +8,16 @@ import { useTranslation } from "react-i18next";
 import useSearchUsers from "@/Hooks/useSearchUsers";
 import Icon from "@/Components/Icon";
 
-export default function MentionSuggestions({
-  mention,
-  setSelectedMention,
-  setSelectedMentionMetadata,
-  displayAbove = false,
-}) {
+const MentionSuggestions = forwardRef(function MentionSuggestions(
+  {
+    mention,
+    setSelectedMention,
+    setSelectedMentionMetadata,
+    displayAbove = false,
+    disableKeyboard = false,
+  },
+  ref,
+) {
   const { t } = useTranslation();
   const { users, isSearchLoading } = useSearchUsers(mention);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
@@ -33,6 +37,29 @@ export default function MentionSuggestions({
     }
   };
 
+  const confirmSelection = useCallback(() => {
+    if (!users || users.length === 0 || highlightedIndex < 0) return false;
+    const user = users[highlightedIndex];
+    const url = encodePubkey(user.pubkey);
+    if (!url) return false;
+    setSelectedMention?.(url);
+    setSelectedMentionMetadata?.({ ...user, npub: url });
+    return true;
+  }, [users, highlightedIndex, setSelectedMention, setSelectedMentionMetadata]);
+
+  useImperativeHandle(ref, () => ({
+    moveDown: () => {
+      if (!users || users.length === 0) return;
+      setHighlightedIndex((prev) => (prev < users.length - 1 ? prev + 1 : prev));
+    },
+    moveUp: () => {
+      if (!users || users.length === 0) return;
+      setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : prev));
+    },
+    confirm: confirmSelection,
+    hasResults: () => !!users && users.length > 0,
+  }), [users, confirmSelection]);
+
   const handleKeyDown = useCallback(
     (e) => {
       if (!users || users.length === 0) return;
@@ -47,15 +74,10 @@ export default function MentionSuggestions({
         setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : prev));
       } else if (e.key === "Enter" && highlightedIndex >= 0) {
         e.preventDefault();
-        const user = users[highlightedIndex];
-        const url = encodePubkey(user.pubkey);
-        if (url) {
-          setSelectedMention?.(url);
-          setSelectedMentionMetadata?.({ ...user, npub: url });
-        }
+        confirmSelection();
       }
     },
-    [users, highlightedIndex, setSelectedMention, setSelectedMentionMetadata],
+    [users, highlightedIndex, confirmSelection],
   );
 
   useEffect(() => {
@@ -68,9 +90,10 @@ export default function MentionSuggestions({
   }, [highlightedIndex]);
 
   useEffect(() => {
+    if (disableKeyboard) return;
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
+  }, [handleKeyDown, disableKeyboard]);
 
   if (users === false) return null;
 
@@ -106,7 +129,9 @@ export default function MentionSuggestions({
           width: "100%",
           maxHeight: "200px",
           overflowY: "auto",
+          border: "1px solid var(--dim-gray)",
           zIndex: 100,
+          gap: 0,
         }}
         className="sc-s-18 fx-centered fx-start-v fx-start-h fx-col box-pad-v-s"
       >
@@ -114,7 +139,7 @@ export default function MentionSuggestions({
           <>
             <div className="fx-centered fit-container box-pad-v-s">
               <p className="p-small gray-c">{t("AKvHyxG")}</p>
-              <LoadingDots />
+              <Spinner />
             </div>
             <hr />
           </>
@@ -130,9 +155,8 @@ export default function MentionSuggestions({
             <div
               key={user.pubkey}
               ref={(el) => (itemRefs.current[index] = el)}
-              className={`fx-scattered box-pad-v-s box-pad-h-m fit-container pointer search-bar-post ${
-                isHighlighted ? "keyboard-active" : ""
-              }`}
+              className={`fx-scattered box-pad-v-s box-pad-h-m fit-container pointer search-bar-post ${isHighlighted ? "keyboard-active" : ""
+                }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setSelectedMention?.(url);
@@ -162,4 +186,6 @@ export default function MentionSuggestions({
       </div>
     </>
   );
-}
+});
+
+export default MentionSuggestions;

@@ -25,7 +25,7 @@ export default function Emojis({ setEmoji, position = "left" }) {
   return (
     <div style={{ position: "relative" }} ref={optionsRef}>
       <div className="pointer" onClick={() => setShowEmoji(!showEmoji)}>
-        <Icon name="emoji" size={24} />
+        <Icon name="emoji" size={24} opacity=".5" />
       </div>
       {showEmoji && (
         <div

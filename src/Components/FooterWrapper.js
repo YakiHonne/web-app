@@ -16,6 +16,10 @@ export default function FooterWrapper() {
           <p className="p-medium gray-c">{t("A5LsZ43")}</p>
         </Link>
         <p className="p-small gray-c">&#9679;</p>
+        <Link href={"/refund-policy"} target="_blank">
+          <p className="p-medium gray-c">{t("ARbkkUU")}</p>
+        </Link>
+        <p className="p-small gray-c">&#9679;</p>
         <Link href={"/points-system"} target="_blank">
           <p className="p-medium gray-c">{t("Af8As64")}</p>
         </Link>

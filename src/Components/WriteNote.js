@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import UploadFile from "@/Components/UploadFile";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import MentionSuggestions from "@/Components/MentionSuggestions";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
@@ -11,15 +11,19 @@ import { getZapEventRequest } from "@/Helpers/NostrPublisher";
 import { encryptEventData, shortenKey } from "@/Helpers/Encryptions";
 import axios from "axios";
 import { ndkInstance } from "@/Helpers/NDKInstance";
-import QRCode from "react-qr-code";
-import Gifs from "@/Components/Gifs";
-import Emojis from "@/Components/Emojis";
+import dynamic from "next/dynamic";
 import NotePreview from "@/Components/NotePreview";
+
+const QRCode = dynamic(() => import("react-qr-code"), { ssr: false });
+
+const Gifs = dynamic(() => import("@/Components/Gifs"), { ssr: false });
+const Emojis = dynamic(() => import("@/Components/Emojis"), { ssr: false });
 import { useTranslation } from "react-i18next";
 import ActionTools from "@/Components/ActionTools";
 import BrowseSmartWidgetsV2 from "@/Components/BrowseSmartWidgetsV2";
 import ProfilesPicker from "@/Components/ProfilesPicker";
 import { useRouter } from "next/navigation";
+import { useRouter as router } from "next/router";
 import Toggle from "./Toggle";
 import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
@@ -33,8 +37,11 @@ import LightningWalletsSelect from "./LightningWalletsSelect";
 import Overlay from "./Overlay";
 import { nip19 } from "nostr-tools";
 import Link from "next/link";
-
-const PAID_NOTE_AMOUNT = process.env.NEXT_PUBLIC_PAID_NOTE_AMOUNT;
+import { iconsNames } from "@/Content/IconV2URL";
+import usePaidNoteCost from "@/Hooks/usePaidNoteCost";
+import usePoints from "@/Hooks/usePoints";
+import { publishPaidNoteWithPoints } from "@/Endpoints/Points";
+import NumberShrink from "@/Components/NumberShrink";
 
 export default function WriteNote({
   exit,
@@ -46,10 +53,18 @@ export default function WriteNote({
   protectedRelay = false,
 }) {
   const navigateTo = useRouter();
+  const { query: { r } } = router();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
   const userRelays = useSelector((state) => state.userRelays);
+  const { paidNoteAmount, isPremiumPlan, isBasicPlan } = usePaidNoteCost();
+  const { config: pointsConfig, fetchConfig: fetchPointsConfig, refreshBalance: refreshPointsBalance } = usePoints();
+  const consumablePoints = useSelector((state) => state.yakiChestStats?.consumablePoints);
+  const pointsCost = pointsConfig?.paid_note?.[isBasicPlan ? "basic" : "free"];
+  const isPointsEligible = typeof pointsCost === "number" && typeof consumablePoints === "number" && consumablePoints >= pointsCost;
+  const relayFromURL = r ? r : false;
+  const singleRelayToPublish = protectedRelay || relayFromURL || false;
   const {
     selectedWallet,
     setSelectedWallet,
@@ -66,7 +81,7 @@ export default function WriteNote({
   const [showSmartWidgets, setShowSmartWidgets] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPaid, setIsPaid] = useState(false);
-  const [isProtected, setIsProtected] = useState(protectedRelay);
+  const [isProtected, setIsProtected] = useState(singleRelayToPublish || relayFromURL || false);
   const [invoice, setInvoice] = useState(false);
   const [showWarningBox, setShowWarningBox] = useState(false);
   const [selectedTab, setSelectedTab] = useState(0);
@@ -76,6 +91,11 @@ export default function WriteNote({
   const [imetas, setImetas] = useState([]);
   const [selectedScheduleDate, setSelectedScheduleDate] = useState(undefined);
   const ref = useRef();
+
+  useEffect(() => {
+    fetchPointsConfig();
+    refreshPointsBalance();
+  }, [fetchPointsConfig, refreshPointsBalance]);
 
   useEffect(() => {
     adjustHeight();
@@ -123,7 +143,7 @@ export default function WriteNote({
     if (textareaRef.current) textareaRef.current.focus();
   };
 
-  const publishNote = async () => {
+  const publishNote = async (payMethod) => {
     try {
       if (isLoading) return;
       if (!userKeys) return;
@@ -160,7 +180,7 @@ export default function WriteNote({
         );
       }
 
-      if (isProtected && protectedRelay) {
+      if (isProtected && singleRelayToPublish) {
         tags.push(["-"]);
       }
 
@@ -170,13 +190,14 @@ export default function WriteNote({
         publishAsPaid(
           processedContent.content,
           [...tags, ...processedTags, ...imetasTags],
-          isProtected && protectedRelay ? protectedRelay : false,
+          isProtected && singleRelayToPublish ? singleRelayToPublish : false,
+          payMethod,
         );
       } else {
         publishAsFree(
           processedContent.content,
           [...tags, ...processedTags, ...imetasTags],
-          isProtected && protectedRelay ? protectedRelay : false,
+          isProtected && singleRelayToPublish ? singleRelayToPublish : false,
         );
       }
     } catch (err) {
@@ -225,7 +246,7 @@ export default function WriteNote({
       if (selectedScheduleDate) navigateTo.push("/dashboard?tabNumber=9");
       navigateTo.push(
         "/profile/" +
-          nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+        nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
       );
       exit();
       setIsLoading(false);
@@ -233,7 +254,108 @@ export default function WriteNote({
     }, 1000);
   };
 
-  const publishAsPaid = async (content, tags_, relay) => {
+  const proceedToPublish = (eventInitEx, relay) => {
+    if (selectedScheduleDate)
+      publishScheduledEvent({
+        event: eventInitEx,
+        relays: relay ? [relay] : userRelays,
+      });
+    else
+      dispatch(
+        setToPublish({
+          eventInitEx,
+          allRelays: relay ? [relay] : [],
+          isFavRelay: relay ? relay : false,
+        }),
+      );
+    updateNoteDraft("root", "");
+    navigateTo.push(
+      "/profile/" +
+      nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+    );
+    exit();
+    setIsLoading(false);
+  };
+
+  const payWithLightning = async (eventInitEx, relay) => {
+    let sats = paidNoteAmount * 1000;
+
+    let zapTags = [
+      ["relays", ...userRelays],
+      ["amount", sats.toString()],
+      ["lnurl", process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR],
+      ["p", process.env.NEXT_PUBLIC_YAKI_PUBKEY],
+      ["e", eventInitEx.id],
+    ];
+
+    var zapEvent = await getZapEventRequest(
+      selectedProfile || userKeys,
+      `${userMetadata.name} paid for a paid note.`,
+      zapTags,
+    );
+    if (!zapEvent) {
+      setIsLoading(false);
+      return;
+    }
+
+    const res = await axios(
+      `${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR_CALLBACK}?amount=${sats}&nostr=${zapEvent}&lnurl=${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR}`,
+    );
+
+    if (res.data.status === "ERROR") {
+      setIsLoading(false);
+      dispatch(
+        setToast({
+          type: 2,
+          desc: t("AZ43zpG"),
+        }),
+      );
+      return;
+    }
+
+    setInvoice(res.data.pr);
+
+    let sub = ndkInstance.subscribe(
+      [
+        {
+          kinds: [9735],
+          "#p": [process.env.NEXT_PUBLIC_YAKI_PUBKEY],
+          "#e": [eventInitEx.id],
+        },
+      ],
+      { groupable: false, cacheUsage: "ONLY_RELAY" },
+    );
+
+    sub.on("event", () => {
+      setInvoice("");
+      dispatch(
+        setToast({
+          type: 1,
+          desc: t("ACDUO1d"),
+        }),
+      );
+      sub.stop();
+      proceedToPublish(eventInitEx, relay);
+    });
+  };
+
+  const payWithPoints = async (eventInitEx, relay) => {
+    try {
+      await publishPaidNoteWithPoints();
+      await refreshPointsBalance();
+      proceedToPublish(eventInitEx, relay);
+    } catch (err) {
+      setIsLoading(false);
+      dispatch(
+        setToast({
+          type: 2,
+          desc: err?.response?.data?.message || t("AXNt63U"),
+        }),
+      );
+    }
+  };
+
+  const publishAsPaid = async (content, tags_, relay, payMethod) => {
     try {
       setIsLoading(true);
 
@@ -255,83 +377,17 @@ export default function WriteNote({
         setIsLoading(false);
         return;
       }
-      let sats = PAID_NOTE_AMOUNT * 1000;
 
-      let zapTags = [
-        ["relays", ...userRelays],
-        ["amount", sats.toString()],
-        ["lnurl", process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR],
-        ["p", process.env.NEXT_PUBLIC_YAKI_PUBKEY],
-        ["e", eventInitEx.id],
-      ];
-
-      var zapEvent = await getZapEventRequest(
-        selectedProfile || userKeys,
-        `${userMetadata.name} paid for a paid note.`,
-        zapTags,
-      );
-      if (!zapEvent) {
-        setIsLoading(false);
+      if (!paidNoteAmount) {
+        proceedToPublish(eventInitEx, relay);
         return;
       }
 
-      const res = await axios(
-        `${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR_CALLBACK}?amount=${sats}&nostr=${zapEvent}&lnurl=${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR}`,
-      );
-
-      if (res.data.status === "ERROR") {
-        setIsLoading(false);
-        dispatch(
-          setToast({
-            type: 2,
-            desc: t("AZ43zpG"),
-          }),
-        );
-        return;
+      if (payMethod === "points") {
+        await payWithPoints(eventInitEx, relay);
+      } else {
+        await payWithLightning(eventInitEx, relay);
       }
-
-      setInvoice(res.data.pr);
-
-      let sub = ndkInstance.subscribe(
-        [
-          {
-            kinds: [9735],
-            "#p": [process.env.NEXT_PUBLIC_YAKI_PUBKEY],
-            "#e": [eventInitEx.id],
-          },
-        ],
-        { groupable: false, cacheUsage: "ONLY_RELAY" },
-      );
-
-      sub.on("event", () => {
-        setInvoice("");
-        dispatch(
-          setToast({
-            type: 1,
-            desc: t("ACDUO1d"),
-          }),
-        );
-        if (selectedScheduleDate)
-          publishScheduledEvent({
-            event: eventInitEx,
-            relays: relay ? [relay] : userRelays,
-          });
-        else
-          dispatch(
-            setToPublish({
-              eventInitEx,
-              allRelays: relay ? [relay] : [],
-            }),
-          );
-        sub.stop();
-        updateNoteDraft("root", "");
-        navigateTo.push(
-          "/profile/" +
-            nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
-        );
-        exit();
-        setIsLoading(false);
-      });
     } catch (err) {
       setIsLoading(false);
       console.log(err);
@@ -352,8 +408,8 @@ export default function WriteNote({
     if (note)
       setNote(
         note +
-          " " +
-          `https://yakihonne.com/smart-widget-checker?naddr=${data} `,
+        " " +
+        `https://yakihonne.com/smart-widget-checker?naddr=${data} `,
       );
     if (!note)
       setNote(`https://yakihonne.com/smart-widget-checker?naddr=${data} `);
@@ -457,10 +513,10 @@ export default function WriteNote({
         <Overlay exit={() => setShowWarningBox(false)} width={500}>
           <div
             className="box-pad-h box-pad-v fx-centered"
-            style={{ width: "min(100%, 500px)" }}
+
           >
             <div className="fx-centered fx-col">
-              <h4>{linkedEvent ? "Heads up!" : "Save draft?"}</h4>
+              <h4>{linkedEvent ? t("AirKalq") : t("AGNjoi1")}</h4>
               <p className="gray-c p-centered box-pad-v-m">
                 {t(linkedEvent ? "AwNtfnu" : "ATjCUcj")}
               </p>
@@ -549,9 +605,9 @@ export default function WriteNote({
                     disabled={isSendingLoading}
                   >
                     {isSendingLoading ? (
-                      <LoadingDots />
+                      <Spinner />
                     ) : (
-                      t("AloNXcI", { amount: PAID_NOTE_AMOUNT })
+                      t("AloNXcI", { amount: paidNoteAmount })
                     )}
                   </button>
                 </div>
@@ -559,7 +615,7 @@ export default function WriteNote({
             )}
             <div className="fit-container fx-centered ">
               <p className="gray-c p-medium">{t("AoXe2Kx")}</p>
-              <LoadingDots />
+              <Spinner />
             </div>
           </div>
         </Overlay>
@@ -575,16 +631,6 @@ export default function WriteNote({
         />
       )}
       <div
-        className="fit-container fx-centered fx-col fx-start-v fx-stretch  bg-sp"
-        style={{
-          overflow: "visible",
-          // height: linkedEvent ? "65vh" : "55vh",
-          backgroundColor: !border ? "transparent" : "",
-          // border: border ? "1px solid var(--very-dim-gray)" : "none",
-          // borderBottom: borderBottom
-          //   ? "1px solid var(--very-dim-gray)"
-          //   : "none",
-        }}
         ref={ref}
         onClick={() => {
           textareaRef?.current?.focus();
@@ -628,7 +674,7 @@ export default function WriteNote({
                       setSelectedTab={setSelectedTab}
                     />
                   </div>
-                  {protectedRelay && (
+                  {singleRelayToPublish && (
                     <div className="fx fx-centered fx-start-h">
                       <div
                         className="fx-centered  box-pad-h-m"
@@ -645,12 +691,11 @@ export default function WriteNote({
                             {t("A0qEczF")}
                           </p>
                           <div className="fx-centered" style={{ gap: "3px" }}>
-                            <RelayImage url={protectedRelay} size={16} />
+                            <RelayImage url={singleRelayToPublish} size={16} />
                             <span className="p-one-line">
-                              {protectedRelay.substring(0, 25)}
-                              {protectedRelay.length > 25 ? "..." : ""}
+                              {singleRelayToPublish.substring(0, 25)}
+                              {singleRelayToPublish.length > 25 ? "..." : ""}
                             </span>
-                            {/* <span className="p-one-line">{protectedRelay.replace("wss://", "").replace("ws://", "")}</span> */}
                           </div>
                         </div>
                         <Toggle
@@ -737,7 +782,7 @@ export default function WriteNote({
         )}
         <div
           className="fit-container fx-centered fx-col box-pad-h box-pad-v-m"
-          style={{ borderTop: "1px solid var(--pale-gray)" }}
+
         >
           <div className="fit-container fx-scattered fx-wrap">
             <div className="fx-centered" style={{ gap: "12px" }}>
@@ -751,18 +796,19 @@ export default function WriteNote({
                 <div
                   className="p-small box-pad-v-s box-pad-h-s pointer fx-centered"
                   style={{
-                    padding: ".125rem .25rem",
-                    border: "1.5px solid var(--gray)",
+                    padding: ".09rem .125rem",
+                    border: "2px solid var(--black)",
                     borderRadius: "6px",
                     backgroundColor: showGIFs ? "var(--black)" : "transparent",
                     color: showGIFs ? "var(--white)" : "",
+                    opacity: ".5"
                   }}
                   onClick={() => {
                     setShowGIFs(!showGIFs);
                     setShowMentionSuggestions(false);
                   }}
                 >
-                  GIFs
+                  {t("A9IJuyo")}
                 </div>
                 {showGIFs && (
                   <Gifs
@@ -775,7 +821,7 @@ export default function WriteNote({
                 setData={(data) => handleInsertTextInPosition(data)}
               />
               <div onClick={() => setShowDatePicker(true)}>
-                <Icon name="calendar" size={24} />
+                <Icon v={2} opacity=".5" name={iconsNames.calendar} size={24} />
               </div>
               <div className="fx-centered sc-s-18 bg-sp box-pad-h-s ">
                 <p
@@ -787,20 +833,29 @@ export default function WriteNote({
                 <Toggle status={isPaid} setStatus={setIsPaid} small={true} />
               </div>
             </div>
-            <div>
+            <div className="fx-centered fx-wrap" style={{ gap: "8px" }}>
               <button
                 className="btn btn-normal btn-small"
-                onClick={publishNote}
+                onClick={() => publishNote()}
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <LoadingDots />
+                  <Spinner />
                 ) : isPaid ? (
-                  t("A559jVY")
+                  paidNoteAmount ? t("A559jVY", { amount: paidNoteAmount }) : t("A559jVZ")
                 ) : (
                   t("AT4tygn")
                 )}
               </button>
+              {isPaid && !!paidNoteAmount && !isPremiumPlan && isPointsEligible && (
+                <button
+                  className="btn btn-normal btn-small"
+                  onClick={() => publishNote("points")}
+                  disabled={isLoading}
+                >
+                  {isLoading ? <Spinner /> : t("Apts013", { amount: pointsCost })}
+                </button>
+              )}
             </div>
           </div>
         </div>

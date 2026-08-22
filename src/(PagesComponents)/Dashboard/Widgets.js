@@ -7,7 +7,7 @@ import Select from "@/Components/Select";
 import { saveUsers } from "@/Helpers/DB";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { customHistory } from "@/Helpers/History";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import SWActionPreview from "@/Components/SWActionPreview";
 import LaunchSW from "@/Components/LaunchSW";
@@ -308,7 +308,7 @@ export default function Widgets({ setPostToNote, localDrafte }) {
                   style={{ height: "40vh" }}
                 >
                   <div className="fx-centered">
-                    <LoadingLogo />
+                    <Spinner size={32} />
                   </div>
                 </div>
               )}

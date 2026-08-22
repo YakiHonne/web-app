@@ -6,16 +6,17 @@ import { useTranslation } from "react-i18next";
 import { getUser } from "@/Helpers/Controlers";
 import Slider from "./Slider";
 import { sendMessage } from "@/Helpers/DMHelpers";
-import LoadingDots from "./LoadingDots";
+import Spinner from "./Spinner";
 import useSearchUsers from "@/Hooks/useSearchUsers";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import { customHistory } from "@/Helpers/History";
-import QRCodeStyling from "qr-code-styling";
 import { saveUsers } from "@/Helpers/DB";
 import Icon from "@/Components/Icon";
+import Badge from "@/Helpers/Badge";
+import Overlay from "@/Components/Overlay";
 
 function shuffleArray(arr) {
-  const a = arr.slice(); // copy
+  const a = arr.slice();
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
@@ -24,9 +25,7 @@ function shuffleArray(arr) {
 }
 
 function pick50(arr) {
-  let shuffled = shuffleArray(arr).slice(0, 50);
-  saveUsers(shuffled);
-  return shuffled;
+  return shuffleArray(arr).slice(0, 50);
 }
 
 const allColors = [
@@ -53,7 +52,6 @@ const YakiLogo = (color) => {
     </svg>
   `;
 
-  // safer encoding for UTF-8
   const base64 = btoa(unescape(encodeURIComponent(svgFile)));
   return `data:image/svg+xml;base64,${base64}`;
 };
@@ -125,7 +123,7 @@ export default function ShareLink({
   );
 }
 
-const SharingWindow = ({ path, title, description, exit }) => {
+export const SharingWindow = ({ path, title, description, exit }) => {
   const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
@@ -136,14 +134,22 @@ const SharingWindow = ({ path, title, description, exit }) => {
   const { users, isSearchLoading } = useSearchUsers(toSearch);
   const [isLoading, setIsLoading] = useState(false);
 
-  const batch = useMemo(() => {
-    return pick50(userFollowings);
-  }, [userFollowings]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const batch = useMemo(() => pick50(userFollowings), []);
+
+  useEffect(() => {
+    if (batch.length > 0) saveUsers(batch);
+  }, [batch]);
+
+  const authorsByPubkey = useMemo(() => {
+    const map = new Map();
+    for (const author of nostrAuthors) map.set(author.pubkey, author);
+    return map;
+  }, [nostrAuthors]);
+
   const contact = useMemo(() => {
-    return batch.map((_) => {
-      return getUser(_);
-    });
-  }, [nostrAuthors, batch]);
+    return batch.map((pubkey) => authorsByPubkey.get(pubkey) || getUser(pubkey));
+  }, [authorsByPubkey, batch]);
 
   const handleSelectedUsers = (metadata) => {
     if (isLoading) return;
@@ -159,16 +165,12 @@ const SharingWindow = ({ path, title, description, exit }) => {
 
   return (
     <>
-      <div className="fixed-container fx-centered box-pad-h">
+      <Overlay exit={exit} width={550} allowOverFlow={true}>
         <div
-          className=" fx-centered fx-col sc-s bg-sp "
+          className=" fx-centered fx-col "
           style={{
-            position: "relative",
-            width: "min(100%, 550px)",
             gap: 0,
-            overflow: "visible",
           }}
-          onClick={(e) => e.stopPropagation()}
         >
           <div className="close" onClick={exit}>
             <div></div>
@@ -181,8 +183,7 @@ const SharingWindow = ({ path, title, description, exit }) => {
                 style={{ position: "relative" }}
               >
                 <div className="fit-container fx-centered box-pad-h-m box-pad-v-s fx-start-h sc-s-18 bg-sp">
-                  {/* <UserSearchBar full={true} /> */}
-                  <Icon name="search" size={24} />
+                  <Icon name="search_magnifying_glass" v={2} size={24} />
                   <input
                     type="text"
                     placeholder={t("AowMF91")}
@@ -360,13 +361,13 @@ const SharingWindow = ({ path, title, description, exit }) => {
             />
           )}
         </div>
-      </div>
+      </Overlay>
     </>
   );
 };
 
 const UserShowCard = ({ metadata, onClick }) => {
-  const { isNip05Verified } = useUserProfile(metadata.pubkey);
+  const { isNip05Verified, proUser } = useUserProfile(metadata.pubkey, false);
   return (
     <div
       className="fx-centered fx-col box-pad-h-s box-pad-v-s option pointer"
@@ -385,6 +386,7 @@ const UserShowCard = ({ metadata, onClick }) => {
           {metadata.display_name || metadata.name}
         </p>
         {isNip05Verified && <Icon name="checkmark-c1" isColored />}
+        {proUser.isProUser && <Badge data={proUser} size={16} />}
       </div>
     </div>
   );
@@ -443,7 +445,7 @@ const ShareWith = ({
         disabled={isLoading}
       >
         {isLoading ? (
-          <LoadingDots />
+          <Spinner />
         ) : successfulSendingTo.length < selectedUsers.length &&
           successfulSendingTo.length > 0 ? (
           t("AhOnn0t")
@@ -510,7 +512,7 @@ const ShareOnOptions = ({ path, title, description }) => {
             <div className="round-icon">
               <Icon name="env" size={24} />
             </div>
-            <p className="gray-c p-medium">Email</p>
+            <p className="gray-c p-medium">{t("AJSyHW1")}</p>
           </div>
         </a>
 
@@ -534,7 +536,7 @@ const ShareOnOptions = ({ path, title, description }) => {
           <div className="round-icon">
             <Icon name="qrcode" size={24} />
           </div>
-          <p className="gray-c p-medium">QR</p>
+          <p className="gray-c p-medium">{t("AwGy6lT")}</p>
         </div>
       </div>
     </>
@@ -547,45 +549,51 @@ export const ShareQRCode = ({ path, exit }) => {
   const [selectedFgColor, setSelectedFgColor] = useState("#000000");
   const containerRef = useRef(null);
   const qrRef = useRef(null);
-  const qrCodeRef = useRef(
-    new QRCodeStyling({
-      type: "canvas",
-      shape: "square",
-      width: 300,
-      height: 300,
-      data: fullURL,
-      margin: 0,
-      qrOptions: { typeNumber: "0", mode: "Byte", errorCorrectionLevel: "Q" },
-      imageOptions: {
-        saveAsBlob: true,
-        hideBackgroundDots: true,
-        imageSize: 0.4,
-        margin: 0,
-      },
-      dotsOptions: {
-        type: "rounded",
-        color: "#000000",
-        roundSize: true,
-      },
-      backgroundOptions: { round: 0, color: "#ffffff" },
-      image: YakiLogo("#000000"),
-      cornersSquareOptions: {
-        type: "extra-rounded",
-        color: "#000000",
-      },
-      cornersDotOptions: { type: "dot", color: "#000000" },
-    })
-  );
+  const qrCodeRef = useRef(null);
 
   useEffect(() => {
-    qrCodeRef.current.append(qrRef.current);
+    let active = true;
+    import("qr-code-styling").then(({ default: QRCodeStyling }) => {
+      if (!active || !qrRef.current) return;
+      qrCodeRef.current = new QRCodeStyling({
+        type: "canvas",
+        shape: "square",
+        width: 300,
+        height: 300,
+        data: fullURL,
+        margin: 0,
+        qrOptions: { typeNumber: "0", mode: "Byte", errorCorrectionLevel: "Q" },
+        imageOptions: {
+          saveAsBlob: true,
+          hideBackgroundDots: true,
+          imageSize: 0.4,
+          margin: 0,
+        },
+        dotsOptions: {
+          type: "rounded",
+          color: "#000000",
+          roundSize: true,
+        },
+        backgroundOptions: { round: 0, color: "#ffffff" },
+        image: YakiLogo("#000000"),
+        cornersSquareOptions: {
+          type: "extra-rounded",
+          color: "#000000",
+        },
+        cornersDotOptions: { type: "dot", color: "#000000" },
+      });
+      qrCodeRef.current.append(qrRef.current);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const changeQRColor = (color) => {
     setSelectedFgColor(color);
     let image = YakiLogo(color);
 
-    qrCodeRef.current.update({
+    qrCodeRef.current?.update({
       image,
       dotsOptions: {
         color,
@@ -600,23 +608,15 @@ export const ShareQRCode = ({ path, exit }) => {
   };
 
   const onDownloadClick = () => {
-    qrCodeRef.current.download({
+    qrCodeRef.current?.download({
       extension: "png",
     });
   };
 
   return (
-    <div
-      className="fixed-container fx-centered box-pad-h box-pad-v"
-      onClick={(e) => {
-        e.stopPropagation();
-        exit();
-      }}
-      style={{ zIndex: 100000 }}
-    >
+    <Overlay exit={exit}>
       <div
-        className="box-pad-h-m fx-centered fx-col sc-s box-pad-h box-pad-v bg-sp slide-up"
-        onClick={(e) => e.stopPropagation()}
+        className="box-pad-h-m fx-centered fx-col box-pad-h box-pad-v slide-up"
       >
         <div
           className="box-pad-h-m box-pad-v-m fx-centered fx-col"
@@ -661,757 +661,6 @@ export const ShareQRCode = ({ path, exit }) => {
           {t("Acglhzb")}
         </button>
       </div>
-    </div>
+    </Overlay>
   );
 };
-
-// export const ShareQRCode = ({ path, exit }) => {
-//   let fullURL = `${window.location.protocol}//${window.location.hostname}${path}`;
-//   const { t } = useTranslation();
-//   const [selectedFgColor, setSelectedFgColor] = useState("#000000");
-//   const containerRef = useRef(null);
-//   const allColors = [
-//     "#000000",
-//     "#007AFF",
-//     "#FF5A5F",
-//     "#00C853",
-//     "#FF9500",
-//     "#9B51E0",
-//     "#00B8D9",
-//     "#FF2D55",
-//     "#F5A623",
-//   ];
-
-//   return (
-//     <div
-//       className="fixed-container fx-centered box-pad-h box-pad-v"
-//       onClick={(e) => {
-//         e.stopPropagation();
-//         exit();
-//       }}
-//       style={{ zIndex: 100000 }}
-//     >
-//       <div
-//         className="box-pad-h-m fx-centered fx-col sc-s box-pad-h box-pad-v bg-sp slide-up"
-//         onClick={(e) => e.stopPropagation()}
-//       >
-//         <div
-//           className="box-pad-h-m box-pad-v-m fx-centered fx-col"
-//           style={{
-//             borderRadius: "18px",
-//             backgroundColor: "white",
-//             gap: "20px",
-//           }}
-//           ref={containerRef}
-//         >
-//           <QRCode
-//             value={fullURL}
-//             size={256}
-//             level="L"
-//             fgColor={selectedFgColor}
-//           />
-//           <div>
-//             <p className="p-centered" style={{ color: selectedFgColor }}>
-//               Post shared on {new Date().toLocaleDateString()}
-//             </p>
-//             <p className="p-centered" style={{ color: selectedFgColor }}>
-//               From YakiHonne.com
-//             </p>
-//           </div>
-//         </div>
-//         <div className="fit-container sc-s bg-sp fx-even box-pad-v-s box-pad-h-s">
-//           {allColors.map((_) => {
-//             return (
-//               <div
-//                 key={_}
-//                 onClick={() => setSelectedFgColor(_)}
-//                 style={{
-//                   backgroundColor: _,
-//                   minWidth: "20px",
-//                   minHeight: "20px",
-//                   borderRadius: "50%",
-
-//                   outline:
-//                     selectedFgColor === _
-//                       ? "1px solid var(--black)"
-//                       : "1px solid var(--pale-gray)",
-//                 }}
-//               ></div>
-//             );
-//           })}
-//         </div>
-//         <button className="btn btn-gray btn-full fx-centered">
-//           <Icon name="download-file" />
-//           {t("AxyxzkE")}
-//         </button>
-//         <button className="btn btn-normal btn-full">{t("Acglhzb")}</button>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default function ShareLink({
-//   label = false,
-//   path = "",
-//   title = "",
-//   description = "",
-//   shareImgData = false,
-//   kind = false,
-// }) {
-//   const dispatch = useDispatch();
-//   const { t } = useTranslation();
-//   const [showSharing, setShowSharing] = useState(false);
-//   const [showCopyURL, setShowCopyURL] = useState(false);
-//   const [showShareSocial, setShowShareSocial] = useState(false);
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [nostrURL, setNostURL] = useState("");
-//   const [isMobile, setIsMobile] = useState(false);
-//   const [_, convert, ref] = useToPng({
-//     selector: "#to-print",
-//     quality: 0.8,
-//     onSuccess: (data) => {
-//       const link = document.createElement("a");
-//       link.download = "shared-from-YAKIHONNE.jpeg";
-//       link.href = data;
-//       link.click();
-//     },
-//   });
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       let url = await getNostrLink(path);
-//       setNostURL(url);
-//     };
-//     fetchData();
-//   }, []);
-
-//   const copyLink = (toCopy) => {
-//     navigator.clipboard.writeText(toCopy);
-//     dispatch(
-//       setToast({
-//         type: 1,
-//         desc: `${t("AxBmdge")} 👏`,
-//       })
-//     );
-//   };
-//   const handleSharing = async (e) => {
-//     e.stopPropagation();
-//     let isTouchScreen = window.matchMedia("(pointer: coarse)").matches;
-//     if (navigator.share && isTouchScreen) {
-//       setIsMobile(true);
-//       setShowSharing(true);
-//     } else {
-//       setShowSharing(true);
-//       console.log(
-//         "Web share is currently not supported on this browser. Please provide a callback"
-//       );
-//     }
-//   };
-
-//   const handleSharingInMobile = async () => {
-//     if (navigator.share) {
-//       try {
-//         let shareDetails = {
-//           url: `${window.location.protocol}//${window.location.hostname}${path}`,
-//           title: title,
-//           text: description,
-//         };
-//         await navigator.share(shareDetails).then(() => console.log("shared"));
-//       } catch (error) {
-//         console.log(`Oops! I couldn't share to the world because: ${error}`);
-//       }
-//     } else {
-//       setShowSharing(true);
-//     }
-//   };
-//   if (!shareImgData && isMobile) {
-//     handleSharingInMobile();
-//     return;
-//   }
-//   return (
-//     <>
-//       {showSharing && (
-//         <div
-//           className="fixed-container fx-centered box-pad-h"
-//           onClick={(e) => {
-//             e.stopPropagation();
-//             setShowSharing(false);
-//           }}
-//         >
-//           <div
-//             className="box-pad-v-m box-pad-h-m fx-centered fx-col sc-s-18"
-//             onClick={(e) => e.stopPropagation()}
-//             style={{ position: "relative", width: "400px", gap: 0 }}
-//           >
-//             <div className="close" onClick={() => setShowSharing(false)}>
-//               <div></div>
-//             </div>
-//             <h4 className="box-marg-s">{t("AGB5vpj")}</h4>
-//             {shareImgData && !showCopyURL && !showShareSocial && (
-//               <ShareImg
-//                 data={shareImgData}
-//                 kind={kind}
-//                 path={`${window.location.protocol}//${window.location.hostname}${path}`}
-//                 isLoading={isLoading}
-//                 setIsLoading={setIsLoading}
-//               />
-//             )}
-//             {!(showCopyURL || showShareSocial) && (
-//               <div
-//                 className="fit-container fx-centered fx-col"
-//                 style={{ columnGap: "30px" }}
-//               >
-//                 <div className="fx-centered fit-container">
-//                   {!isMobile && (
-//                     <button
-//                       className="btn btn-normal btn-full fx-centered"
-//                       onClick={() => setShowShareSocial(true)}
-//                     >
-//                       {t("AFnYfjs")}
-//                     </button>
-//                   )}
-//                   <button
-//                     className="btn btn-normal btn-full fx-centered"
-//                     onClick={() =>
-//                       isMobile ? handleSharingInMobile() : setShowCopyURL(true)
-//                     }
-//                   >
-//                     {t("AahCFK4")}
-//                   </button>
-//                 </div>
-//                 {shareImgData && (
-//                   <button
-//                     className={`btn btn-gray btn-full ${
-//                       isLoading ? "flash" : "round-icon-tooltip"
-//                     } fx-centered`}
-//                     onClick={() => (isLoading ? null : convert())}
-//                   >
-//                     <Icon name="download-file" /> {t("AxyxzkE")}
-//                   </button>
-//                 )}
-//               </div>
-//             )}
-//             {showCopyURL && (
-//               <div
-//                 className="fit-container fx-centered fx-col fx-start-v  slide-up"
-//                 style={{ maxWidth: "400px" }}
-//               >
-//                 <p className="c1-c p-left fit-container">{t("Aw5f61f")}</p>
-//                 <div
-//                   className={`fx-scattered if pointer fit-container dashed-onH`}
-//                   style={{ borderStyle: "dashed" }}
-//                   onClick={() =>
-//                     copyLink(
-//                       `${window.location.protocol}//${window.location.hostname}${path}`
-//                     )
-//                   }
-//                 >
-//                   <p className="p-one-line">{`${window.location.protocol}//${window.location.hostname}${path}`}</p>
-//                   <Icon name="copy" size={24} />
-//                 </div>
-//                 <p className="c1-c p-left fit-container">{t("AezhEDd")}</p>
-//                 <div
-//                   className="fx-scattered if pointer dashed-onH fit-container"
-//                   style={{ borderStyle: "dashed" }}
-//                   onClick={() => copyLink(nostrURL)}
-//                 >
-//                   <p className="p-one-line">{nostrURL}</p>
-//                   <Icon name="copy" size={24} />
-//                 </div>
-//                 <button
-//                   className="btn btn-normal btn-full fx-centered"
-//                   onClick={() => setShowCopyURL(false)}
-//                 >
-//                   <Icon name="arrow" />
-//                   {t("ATB2h6T")}
-//                 </button>
-//               </div>
-//             )}
-//             {showShareSocial && (
-//               <div
-//                 className="fit-container fx-centered fx-col fx-start-v  slide-up"
-//                 style={{ maxWidth: "400px" }}
-//               >
-//                 <a
-//                   className="twitter-share-button btn-gray btn btn-full fx-centered"
-//                   href={`https://twitter.com/intent/tweet?text=${`${window.location.protocol}//${window.location.hostname}${path}`}`}
-//                   target="_blank"
-//                 >
-//                   <Icon name="twitter-logo" size={24} /> {t("AroZoen")}
-//                 </a>
-//                 <a
-//                   href={`whatsapp://send?text=${`${window.location.protocol}//${window.location.hostname}${path}`}`}
-//                   data-action="share/whatsapp/share"
-//                   target="_blank"
-//                   className="twitter-share-button fit-container"
-//                 >
-//                   <button className="btn btn-gray btn-full fx-centered">
-//                     <Icon name="whatsapp-icon" size={24} /> WhatsApp
-//                   </button>
-//                 </a>
-//                 <a
-//                   href={`https://www.linkedin.com/shareArticle?mini=true&url=${`${
-//                     window.location.protocol
-//                   }//${"yakihonne.com"}${path}`}&title=${title}&summary=${description}&source=${"https://yakihonne.com"}`}
-//                   data-action="share/whatsapp/share"
-//                   target="_blank"
-//                   className="twitter-share-button fit-container"
-//                 >
-//                   <button className="btn btn-gray btn-full fx-centered">
-//                     <Icon name="in-icon" size={24} /> LinkedIn
-//                   </button>
-//                 </a>
-//                 <button
-//                   className="btn btn-normal btn-full fx-centered"
-//                   onClick={() => setShowShareSocial(false)}
-//                 >
-//                   <Icon name="arrow" />
-//                   {t("ATB2h6T")}
-//                 </button>
-//               </div>
-//             )}
-//           </div>
-//         </div>
-//       )}
-//       <div
-//         className={label ? "fx-centered fx-start-h fit-container" : "round-icon-tooltip"}
-//         data-tooltip={t("AGB5vpj")}
-//         onClick={handleSharing}
-//       >
-//         <Icon name="share-v2" />
-//         {label && <p>{label}</p>}
-//       </div>
-//     </>
-//   );
-// }
-
-// const ShareImg = ({ data, kind, path, setIsLoading }) => {
-//   const { t } = useTranslation();
-//   const followersCountSL = useSelector((state) => state.followersCountSL);
-//   const [ppBase64, setPpBase64] = useState(data.author.picture || "");
-//   const [thumbnailBase64, setThumbnailBase64] = useState(data.post.image || "");
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         setIsLoading(true);
-//         let [_pp, _thumbnail] = await Promise.all([
-//           axiosInstance.post("/api/v1/url-to-base64", {
-//             images: [data.author.picture],
-//           }),
-//           axiosInstance.post("/api/v1/url-to-base64", {
-//             images: [data.post.image],
-//           }),
-//         ]);
-//         setIsLoading(false);
-//         setThumbnailBase64(_thumbnail.data[0] || data.post.image);
-//         setPpBase64(_pp.data[0] || data.author.picture);
-//       } catch (err) {
-//         setIsLoading(false);
-//       }
-//     };
-//     fetchData();
-//   }, []);
-
-//   const getBG = () => {
-//     if (data.label.toLowerCase() === "flash news") return kind1BG.fn;
-//     if (data.label.toLowerCase() === "uncensored note") return kind1BG.un;
-//     if (data.label.toLowerCase() === "buzz feed") return kind1BG.bf;
-//     if (data.label.toLowerCase() === "note") return kind1BG.nt;
-//   };
-
-//   if (kind === 1)
-//     return (
-//       <div
-//         className="box-pad-h box-pad-v fx-centered fx-col "
-//         id="to-print"
-//         style={{ width: "380px", maxHeight: "600px", minHeight: "400px" }}
-//       >
-//         <div
-//           className="fit-container fx-centered fx-col sc-s-18"
-//           style={{
-//             border: "none",
-//             height: "100%",
-//             position: "relative",
-//             rowGap: 0,
-//             background: getBG(),
-//           }}
-//         >
-//           <div>
-//             <div
-//               className="yakihonne-logo"
-//               style={{
-//                 width: "128px",
-//                 height: "60px",
-//                 filter: "brightness(0) invert()",
-//               }}
-//             ></div>
-//           </div>
-//           <div style={{ backgroundColor: "white" }} className="fit-container">
-//             <div className="fit-container box-pad-h-m box-pad-v-m ">
-//               <p
-//                 style={{
-//                   color: "black",
-//                   maxHeight: "250px",
-//                   overflow: "hidden",
-//                 }}
-//                 className=" p-medium gray-c"
-//               >
-//                 {data.post.content}
-//               </p>
-//               <p style={{ color: "black" }}>...</p>
-//               {data.post.description && (
-//                 <p className="p-three-lines p-medium gray-c">
-//                   {data.post.description}
-//                 </p>
-//               )}
-//               {thumbnailBase64 && (
-//                 <div
-//                   className="fit-container bg-img cover-bg sc-s-18"
-//                   style={{
-//                     aspectRatio: "16/9",
-//                     margin: ".5rem auto",
-//                     backgroundImage: `url(${thumbnailBase64})`,
-//                   }}
-//                 ></div>
-//               )}
-//               {data.extra && data.extra.is_sealed && (
-//                 <div style={{ marginTop: ".5rem" }} className="fit-container">
-//                   <UN
-//                     data={JSON.parse(data.extra.content)}
-//                     state="sealed"
-//                     scaled={true}
-//                     setTimestamp={() => null}
-//                     flashNewsAuthor={data.author.pubkey}
-//                     sealedCauses={data.extra.tags
-//                       .filter((tag) => tag[0] === "cause")
-//                       .map((cause) => cause[1])}
-//                   />
-//                 </div>
-//               )}
-//               {data.extra && !data.extra.is_sealed && (
-//                 <div style={{ marginTop: ".5rem" }} className="fit-container">
-//                   <div
-//                     className="fit-container sc-s-18 fx-centered fx-col"
-//                     style={{ rowGap: 0, overflow: "visible" }}
-//                   >
-//                     <div className="fit-container  box-pad-h-m box-pad-v-s">
-//                       <div className="fit-container fx-scattered">
-//                         <div className="fx-centered fit-container ">
-//                           <p className="p-bold p-medium green-c">
-//                             {t("ABgVYCn")}
-//                           </p>
-//                         </div>
-//                       </div>
-//                     </div>
-//                     <hr />
-//                     <div
-//                       className="fit-container fx-centered box-pad-h-m box-pad-v-s"
-//                       style={{ rowGap: "0px" }}
-//                     >
-//                       <p className="p-medium p-centered">{t("ASm8U6V")}</p>
-//                     </div>
-//                   </div>
-//                 </div>
-//               )}
-//             </div>
-//             <div style={{ height: "50px" }}></div>
-//             <div className="fx-centered fx-start-h box-pad-h-m box-pad-v-s ">
-//               <UserProfilePic
-//                 mainAccountUser={false}
-//                 size={24}
-//                 img={ppBase64}
-//                 allowClick={false}
-//               />
-//               <div>
-//                 <p className="p-small" style={{ color: "black" }}>
-//                   {t("AsXpL4b", {
-//                     name:
-//                       data.author.display_name ||
-//                       data.author.name ||
-//                       getBech32("npub", data.author.pubkey).substring(0, 10),
-//                   })}
-//                 </p>
-//               </div>
-//             </div>
-//           </div>
-//           <div className="fit-container box-pad-h-m box-pad-v-s">
-//             <p className="p-bold" style={{ color: "white" }}>
-//               {data.label}
-//             </p>
-//             <p style={{ color: "white" }} className="p-medium">
-//               <Date_
-//                 toConvert={new Date(data.post.created_at * 1000)}
-//                 time={true}
-//               />
-//             </p>
-//           </div>
-//           <div
-//             className="fx-centered"
-//             style={{ position: "absolute", right: "8px", bottom: "8px" }}
-//           >
-//             <div
-//               className="fx-centered fx-col box-pad-h-s box-pad-v-s sc-s-18"
-//               style={{ background: "white", border: "none" }}
-//             >
-//               <QRCode value={path} size={100} />
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     );
-//   if (kind === 0)
-//     return (
-//       <div className="box-pad-h box-pad-v fx-centered fx-col" id="to-print">
-//         <div
-//           className="fx-centered fx-col fx-end-h fx-end-h sc-s-18"
-//           style={{
-//             width: "380px",
-//             height: "600px",
-//             border: "none",
-//             position: "relative",
-//           }}
-//         >
-//           <div
-//             className="fx-centered sc-s-18 bg-img cover-bg fit-container"
-//             style={{
-//               position: "absolute",
-//               left: 0,
-//               top: 0,
-//               zIndex: 0,
-//               height: "100%",
-//               border: "none",
-//               backgroundImage: `url(${thumbnailBase64})`,
-//               filter: "blur(10px) brightness(70%)",
-//             }}
-//           ></div>
-//           <div
-//             className="sc-s-18 fx-scattered fx-col"
-//             style={{
-//               backgroundColor: "white",
-//               width: "90%",
-//               // height: "80%",
-//               aspectRatio: "1/1",
-//               position: "relative",
-//               overflow: "visible",
-//               zIndex: 1,
-//               rowGap: 0,
-//             }}
-//           >
-//             <div
-//               style={{
-//                 position: "absolute",
-//                 left: "50%",
-//                 top: "-49px",
-//                 transform: "translateX(-50%)",
-//               }}
-//             >
-//               <UserProfilePic
-//                 mainAccountUser={false}
-//                 size={98}
-//                 img={ppBase64}
-//                 allowClick={false}
-//               />
-//             </div>
-//             <div
-//               className="fit-container fx-centered fx-col box-pad-h-m "
-//               style={{ padding: "4.5rem 1rem 1rem" }}
-//             >
-//               <h4 className="p-one-line" style={{ color: "black" }}>
-//                 {data.author.display_name || data.author.name}
-//               </h4>
-//               <p className="gray-c p-three-lines p-medium p-centered box-pad-h-m">
-//                 {data.author.about}
-//               </p>
-//               {data.author.nip05 && (
-//                 <div className="fx-centered  box-pad-h-m">
-//                   <p className="orange-c p-medium p-centered">
-//                     {data.author.nip05}
-//                   </p>
-//                   <Icon name="checkmark-c1" isColored />
-//                 </div>
-//               )}
-//             </div>
-//             <hr style={{ margin: 0 }} />
-//             <div className="fit-container fx-centered  box-pad-h-m box-pad-v-s">
-//               <div className="fx-centered">
-//                 <p style={{ color: "black" }}>{data.followings}</p>
-//                 <p className="p-medium gray-c">{t("A9TqNxQ")}</p>
-//               </div>
-//               <div className="fx-centered">
-//                 <p style={{ color: "black" }}>{followersCountSL.length}</p>
-//                 <p className="p-medium gray-c">{t("A6huCnT")}</p>
-//               </div>
-//             </div>
-//             <hr />
-//             <div
-//               className="fx-scattered fx-stretch fit-container"
-//               style={{ columnGap: 0, marginTop: "1rem" }}
-//             >
-//               <div style={{ width: "100%" }} className="fx-centered fx-col">
-//                 <QRCode value={path} size={160} />
-//               </div>
-//             </div>
-
-//             <div
-//               className="fit-container fx-centered box-pad-h-m "
-//               style={{ height: "50px" }}
-//             >
-//               <div>
-//                 <div
-//                   className="yakihonne-logo"
-//                   style={{ width: "70px", filter: "brightness(0)" }}
-//                 ></div>
-//               </div>
-//             </div>
-//           </div>
-//           <div className="box-marg-s"></div>
-//         </div>
-//       </div>
-//     );
-//   if ([30023, 34235, 30004, 21, 22].includes(kind))
-//     return (
-//       <div
-//         className="box-pad-h box-pad-v fx-centered fx-col"
-//         id="to-print"
-//         style={{ maxHeight: "70dvh" }}
-//       >
-//         <div
-//           className="fx-centered sc-s-18"
-//           style={{
-//             width: "380px",
-//             height: "600px",
-//             border: "none",
-//             position: "relative",
-//           }}
-//         >
-//           <div
-//             className="fx-centered sc-s-18 bg-img cover-bg fit-container"
-//             style={{
-//               position: "absolute",
-//               left: 0,
-//               top: 0,
-//               zIndex: 0,
-//               height: "100%",
-//               border: "none",
-//               backgroundImage: `url(${thumbnailBase64})`,
-//               filter: "blur(10px) brightness(70%)",
-//             }}
-//           ></div>
-//           <div
-//             className="sc-s-18 fx-scattered fx-col"
-//             style={{
-//               backgroundColor: "white",
-//               width: "90%",
-//               // height: "80%",
-//               aspectRatio: "1/1",
-//               position: "relative",
-//               zIndex: 1,
-//               rowGap: 0,
-//             }}
-//           >
-//             <div
-//               className="fit-container fx-scattered box-pad-h-m "
-//               style={{ height: "40px" }}
-//             >
-//               {kind === 30023 && (
-//                 <div className="fx-centered">
-//                   <Icon name="posts" />
-//                   <p className="p-medium" style={{ color: "black" }}>
-//                     Article
-//                   </p>
-//                 </div>
-//               )}
-//               {kind === 30004 && (
-//                 <div className="fx-centered">
-//                   <Icon name="curation" />
-//                   <p className="p-medium" style={{ color: "black" }}>
-//                     {t("Ac6UnVb")}
-//                   </p>
-//                 </div>
-//               )}
-//               {(kind === 34235 || kind === 21 || kind === 22) && (
-//                 <div className="fx-centered">
-//                   <Icon name="video" />
-//                   <p className="p-medium" style={{ color: "black" }}>
-//                     {t("AVdmifm")}
-//                   </p>
-//                 </div>
-//               )}
-//               <div className="fx-centered">
-//                 <div className="fx-centered">
-//                   <p className="p-medium" style={{ color: "black" }}>
-//                     {data.likes}
-//                   </p>
-//                   <Icon name="heart" />
-//                   <Icon name="like" />
-//                   {(kind === 34235 || kind === 21 || kind === 22) && (
-//                     <p className="p-medium" style={{ color: "black" }}>
-//                       {t("AginxGR", { count: data.views })}
-//                     </p>
-//                   )}
-//                 </div>
-//               </div>
-//             </div>
-//             <hr style={{ margin: 0 }} />
-//             <div
-//               className="fx-scattered fx-stretch fit-container"
-//               style={{ height: "260px", columnGap: 0 }}
-//             >
-//               <div style={{ width: "100%" }} className="fx-centered fx-col">
-//                 <p
-//                   style={{ color: "black" }}
-//                   className="p-medium p-centered box-pad-h-m p-three-lines"
-//                 >
-//                   {data.post.title}
-//                 </p>
-
-//                 <p className="p-medium p-centered box-pad-h-m p-two-lines">
-//                   {data.post.description}
-//                 </p>
-//                 <QRCode value={path} size={100} />
-//                 {data.author.nip05 && (
-//                   <p className="c1-c p-medium p-centered box-pad-h-m">
-//                     yakihonne.com/profile/{data.author.nip05}
-//                   </p>
-//                 )}
-//               </div>
-//             </div>
-//             <hr style={{ margin: 0 }} />
-//             <div
-//               className="fit-container fx-scattered box-pad-h-m "
-//               style={{ height: "50px" }}
-//             >
-//               <div className="fx-centered">
-//                 <UserProfilePic
-//                   mainAccountUser={false}
-//                   size={24}
-//                   img={ppBase64}
-//                   allowClick={false}
-//                 />
-//                 <div>
-//                   <p className="p-small" style={{ color: "black" }}>
-//                     {t("AsXpL4b", {
-//                       name:
-//                         data.author.display_name ||
-//                         data.author.name ||
-//                         getBech32("npub", data.post.author_pubkey).substring(
-//                           0,
-//                           10
-//                         ),
-//                     })}
-//                   </p>
-//                 </div>
-//               </div>
-//               <div>
-//                 <div
-//                   className="yakihonne-logo"
-//                   style={{ width: "70px", filter: "brightness(0)" }}
-//                 ></div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     );
-// };

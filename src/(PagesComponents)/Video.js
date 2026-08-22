@@ -22,7 +22,7 @@ import useIsMute from "@/Hooks/useIsMute";
 import Link from "next/link";
 import PostReaction from "@/Components/PostReaction";
 import useUserProfile from "@/Hooks/useUsersProfile";
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import Icon from "@/Components/Icon";
 
 export default function Video({ event, userProfile, naddrData }) {
@@ -147,7 +147,7 @@ export default function Video({ event, userProfile, naddrData }) {
         className="fit-container fx-centered fx-col"
         style={{ height: "100vh" }}
       >
-        <LoadingLogo />
+        <Spinner size={32} />
       </div>
     );
 

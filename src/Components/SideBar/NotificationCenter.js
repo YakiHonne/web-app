@@ -48,8 +48,8 @@ export default function NotificationCenter({
       }}
     >
       <div className="fx-centered">
-        {!isCurrent && <Icon name="ringbell" size={24} />}
-        {isCurrent && <Icon name="ringbell-bold" size={24} />}
+        {!isCurrent && <Icon name="ringbell" size={24} strokeWidth={2} />}
+        {isCurrent && <Icon name="ringbell-bold" size={24} strokeWidth={2} />}
         {!icon && (
           <div className={`link-label ${mobile ? "p-big" : ""}`}>
             {t("ASSFfFZ")}

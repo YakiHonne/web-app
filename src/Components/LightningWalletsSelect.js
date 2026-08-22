@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import Icon from "@/Components/Icon";
+import MobileSheet from "@/Components/MobileSheet";
+import useIsMobile from "@/Hooks/useIsMobile";
 
 export default function LightningWalletsSelect({
   selectedWallet,
@@ -14,10 +16,17 @@ export default function LightningWalletsSelect({
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const [dismissing, setDismissing] = useState(false);
   const [position, setPosition] = useState(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!open) return;
+
+    const closeDropdown = () => {
+      setDismissing(true);
+      setTimeout(() => { setOpen(false); setDismissing(false); }, 200);
+    };
 
     const handleOffClick = (e) => {
       if (
@@ -26,7 +35,7 @@ export default function LightningWalletsSelect({
         dropdownRef.current &&
         !dropdownRef.current.contains(e.target)
       ) {
-        setOpen(false);
+        closeDropdown();
       }
     };
 
@@ -54,15 +63,20 @@ export default function LightningWalletsSelect({
   }, [open]);
 
   const toggleOpen = () => {
-    if (!open && containerRef.current) {
+    if (open) {
+      setDismissing(true);
+      setTimeout(() => { setOpen(false); setDismissing(false); }, 200);
+      return;
+    }
+    if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       setPosition({
-        top: rect.bottom + 5,
+        top: rect.bottom + 6,
         left: rect.left,
         width: rect.width,
       });
     }
-    setOpen((v) => !v);
+    setOpen(true);
   };
 
   const handleSelectWallet = (walletID) => {
@@ -77,7 +91,8 @@ export default function LightningWalletsSelect({
     tempWallets[index].active = true;
     setSelectedWallet(wallets[index]);
     setWallets(tempWallets);
-    setOpen(false);
+    setDismissing(true);
+    setTimeout(() => { setOpen(false); setDismissing(false); }, 200);
   };
 
   return (
@@ -125,14 +140,34 @@ export default function LightningWalletsSelect({
         )}
       </div>
 
-      {open &&
+      {isMobile ? (
+        <MobileSheet open={open} onClose={() => setOpen(false)} title={t("AnXYtQy")}>
+          <div className="fx-centered fx-col fx-start-v fit-container" style={{ padding: "0 8px" }}>
+            {wallets.map((wallet) => (
+              <div
+                key={wallet.id}
+                className={`option-no-scale fit-container fx-scattered pointer ${wallet.active ? "sc-s-18" : ""}`}
+                onClick={(e) => { e.stopPropagation(); handleSelectWallet(wallet.id); }}
+                style={{ padding: "0.85rem 1.25rem", borderRadius: "12px", border: "none" }}
+              >
+                <div className="fx-centered">
+                  {wallet.active && (
+                    <div style={{ minWidth: "8px", aspectRatio: "1/1", backgroundColor: "var(--green-main)", borderRadius: "var(--border-r-50)" }} />
+                  )}
+                  <p className={wallet.active ? "green-c" : ""}>{wallet.entitle}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </MobileSheet>
+      ) : (
+        open &&
         position &&
         createPortal(
           <div
             ref={dropdownRef}
-            className="fx-centered fx-col sc-s-18 bg-sp box-pad-h-s box-pad-v-s fx-start-v fx-start-h"
+            className={`fx-centered fx-col bg-dropdown box-pad-h-s box-pad-v-s fx-start-v fx-start-h dynamic-island-dropdown${dismissing ? " dismissing" : ""}`}
             style={{
-              backgroundColor: "var(--c1-side)",
               position: "fixed",
               left: position.left,
               top: position.top,
@@ -142,49 +177,31 @@ export default function LightningWalletsSelect({
               rowGap: 0,
               overflow: "auto",
               maxHeight: "300px",
-              zIndex: 999999,
-              boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+              zIndex: 1000002,
+              borderRadius: "16px",
+              transformOrigin: "top center",
             }}
           >
-            <p className="p-medium gray-c box-pad-h-m box-pad-v-s">
-              {t("AnXYtQy")}
-            </p>
-            {wallets.map((wallet) => {
-              return (
-                <div
-                  key={wallet.id}
-                  className={`option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s ${wallet.active ? "sc-s-18" : ""}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSelectWallet(wallet.id);
-                  }}
-                  style={{
-                    border: "none",
-                    minWidth: "max-content",
-                    overflow: "visible",
-                  }}
-                >
-                  <div className="fx-centered">
-                    {wallet.active && (
-                      <div
-                        style={{
-                          minWidth: "8px",
-                          aspectRatio: "1/1",
-                          backgroundColor: "var(--green-main)",
-                          borderRadius: "var(--border-r-50)",
-                        }}
-                      ></div>
-                    )}
-                    <p className={wallet.active ? "green-c" : ""}>
-                      {wallet.entitle}
-                    </p>
-                  </div>
+            <p className="p-medium gray-c box-pad-h-m box-pad-v-s">{t("AnXYtQy")}</p>
+            {wallets.map((wallet) => (
+              <div
+                key={wallet.id}
+                className={`option-no-scale fit-container fx-scattered pointer box-pad-h-m box-pad-v-s ${wallet.active ? "sc-s-18" : ""}`}
+                onClick={(e) => { e.stopPropagation(); handleSelectWallet(wallet.id); }}
+                style={{ border: "none", minWidth: "max-content", overflow: "visible" }}
+              >
+                <div className="fx-centered">
+                  {wallet.active && (
+                    <div style={{ minWidth: "8px", aspectRatio: "1/1", backgroundColor: "var(--green-main)", borderRadius: "var(--border-r-50)" }} />
+                  )}
+                  <p className={wallet.active ? "green-c" : ""}>{wallet.entitle}</p>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>,
           document.body,
-        )}
+        )
+      )}
     </div>
   );
 }

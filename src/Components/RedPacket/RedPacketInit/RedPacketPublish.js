@@ -1,6 +1,6 @@
 import React from "react";
 import LightningWalletsSelect from "../../LightningWalletsSelect";
-import LoadingDots from "../../LoadingDots";
+import Spinner from "../../Spinner";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 
@@ -29,11 +29,10 @@ export default function RedPacketPublish({
           className="if p-bold if-no-border ifs-full p-centered"
           placeholder={t("AcDgXKI")}
           style={{
-            fontSize: `max(${
-              amount.toString().length > 5
+            fontSize: `max(${amount.toString().length > 5
                 ? `${80 - (amount.toString().length - 6) * 10}px`
                 : "80px"
-            },50px)`,
+              },50px)`,
             height: "80px",
           }}
           value={amount}
@@ -84,7 +83,7 @@ export default function RedPacketPublish({
           {t("AF7iGeG")}
         </button>
         <button className="btn btn-normal btn-full" onClick={createRedPacket}>
-          {isLoading ? <LoadingDots /> : t("AeOth8r")}
+          {isLoading ? <Spinner /> : t("AeOth8r")}
         </button>
       </div>
     </div>

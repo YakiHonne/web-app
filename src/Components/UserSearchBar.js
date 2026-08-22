@@ -62,7 +62,7 @@ export default function UserSearchBar({
           paddingRight: "0",
         }}
       >
-        <Icon name="search" size={24} />
+        <Icon name="search_magnifying_glass" v={2} size={24} />
         <input
           id="search-input"
           type="search"

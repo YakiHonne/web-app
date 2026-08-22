@@ -1,4 +1,5 @@
 import { getCustomSettings } from "@/Helpers/ClientHelpers";
+import { removeNotificationsSet, saveNotificationsSet } from "@/Helpers/DB";
 import {
   clearNotifications,
   setRefreshNotifications,
@@ -15,15 +16,23 @@ export default function useNotifications() {
   const isNotificationsLoading = useSelector(
     (state) => state.isNotificationsLoading,
   );
+  const { userMutedList } = useSelector((state) => state.userMutedList);
+  const unmutedNotifications = useMemo(() => {
+    if (!Array.isArray(userMutedList) || userMutedList.length === 0)
+      return globalNotifications;
+    return globalNotifications.filter(
+      (_) => !userMutedList.includes(_.pubkey),
+    );
+  }, [globalNotifications, userMutedList]);
   const notifications = useMemo(() => {
-    return globalNotifications.filter((_) => !_.isNew);
-  }, [globalNotifications]);
+    return unmutedNotifications.filter((_) => !_.isNew);
+  }, [unmutedNotifications]);
   const newNotifications = useMemo(() => {
-    return globalNotifications.filter((_) => _.isNew);
-  }, [globalNotifications]);
+    return unmutedNotifications.filter((_) => _.isNew);
+  }, [unmutedNotifications]);
   const notReadNotifications = useMemo(() => {
-    return globalNotifications.filter((_) => !_.isRead).length;
-  }, [globalNotifications]);
+    return unmutedNotifications.filter((_) => !_.isRead).length;
+  }, [unmutedNotifications]);
   const notificationSettings = (() => {
     let settings =
       getCustomSettings().notification || getCustomSettings("").notification;
@@ -44,7 +53,7 @@ export default function useNotifications() {
 
   const refreshNotifications = () => {
     if (isNotificationsLoading) return;
-    localStorage.removeItem(`notificationsSet_${userKeys.pub}`);
+    removeNotificationsSet(userKeys.pub);
     dispatch(clearNotifications());
     dispatch(setRefreshNotifications(Date.now()));
   };
@@ -98,16 +107,7 @@ export default function useNotifications() {
   };
 
   const saveInLocalStorage = (notifications) => {
-    try {
-      localStorage.setItem(
-        `notificationsSet_${userKeys.pub}`,
-        JSON.stringify(notifications),
-      );
-    } catch (err) {
-      if (notifications.length > 300) {
-        saveInLocalStorage(notifications.slice(0, notifications.length - 20));
-      }
-    }
+    saveNotificationsSet(userKeys.pub, notifications);
   };
 
   return {

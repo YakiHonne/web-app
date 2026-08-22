@@ -2,6 +2,7 @@ import useRecentNotes from "@/Hooks/useRecentNotes";
 import React, { useMemo } from "react";
 import useRecentPosts from "@/Hooks/useRecentPosts";
 import UsersGroupProfilePicture from "./UsersGroupProfilePicture";
+import Icon from "@/Components/Icon";
 
 export default function RecentPosts({
   filter,
@@ -44,11 +45,12 @@ const RecentPostsContent = ({ pubkeys, notesLength, onClick, position = "top" })
           <div className="main-page-nostr-container fx-centered">
             <div className="fit-container fx-centered">
               <div
-                className="sc-s  box-pad-h-s box-pad-v-s fx-scattered slide-down pointer"
+                className="bg-dropdown box-pad-h-s box-pad-v-s fx-scattered slide-down pointer"
                 style={{
-                  backgroundColor: "var(--c1)",
+                  // backgroundColor: "var(--c1)",
                   border: "none",
                   gap: "10px",
+                  borderRadius: "50px"
                 }}
                 onClick={onClick}
               >
@@ -60,11 +62,17 @@ const RecentPostsContent = ({ pubkeys, notesLength, onClick, position = "top" })
                     gap: "0",
                   }}
                 >
-                  <p className="white-c">
+                  <p className="gray-c">
                     {notesLength > 99 ? "+99" : notesLength} new{" "}
                     {notesLength === 1 ? "post" : "posts"}
                   </p>
-                  <p className="white-c box-pad-h-s">&#8593;</p>
+                  <Icon
+                    name="chevron_up"
+                    v={2}
+                    size={18}
+                    className="gray-c box-pad-h-s"
+                    isColored
+                  />
                 </div>
               </div>
             </div>

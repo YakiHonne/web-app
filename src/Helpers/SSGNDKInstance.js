@@ -1,26 +1,38 @@
-import NDK from "@nostr-dev-kit/ndk";
+import NDK, { NDKRelay, normalizeRelayUrl } from "@nostr-dev-kit/ndk";
 import { SSGRelays, searchRelays } from "@/Content/Relays";
 let ssgInstance;
 let searchInstance;
 
+const HINT_RELAY_TTL = 30000;
+
+const useHintRelays = (instance, extRelays) => {
+  if (!Array.isArray(extRelays) || extRelays.length === 0) return;
+  for (let relay of extRelays) {
+    try {
+      let url = normalizeRelayUrl(`${relay}`);
+      if (instance.explicitRelayUrls?.includes(url)) continue;
+      let hintRelay = new NDKRelay(
+        url,
+        instance.relayAuthDefaultPolicy,
+        instance,
+      );
+      instance.pool.useTemporaryRelay(hintRelay, HINT_RELAY_TTL);
+    } catch (err) {
+      continue;
+    }
+  }
+};
+
 export function getSSGNdkInstance(extRelays = []) {
   if (!ssgInstance) {
     ssgInstance = new NDK({
-      explicitRelayUrls: [...new Set([...SSGRelays, ...extRelays])],
+      explicitRelayUrls: [...new Set(SSGRelays)],
     });
     ssgInstance.connect(2000).catch(() => {
       console.warn("[NDK] relay connection failed (SSG ssgInstance)");
     });
   }
-  if (extRelays.length > 0 && Array.isArray(extRelays)) {
-    let tempRelayList = extRelays.filter(
-      (relay) => !ssgInstance.explicitRelayUrls.includes(`${relay}`)
-    );
-    if (tempRelayList.length > 0)
-      for (let relay of tempRelayList) {
-        ssgInstance.addExplicitRelay(relay, undefined, true);
-      }
-  }
+  useHintRelays(ssgInstance, extRelays);
   if (ssgInstance.pool.status === "idle") {
     ssgInstance.connect(2000).catch(() => {
       console.warn("[NDK] relay connection failed (SSG ssgInstance)");
@@ -32,23 +44,14 @@ export function getSSGNdkInstance(extRelays = []) {
 export function getSearchNdkInstance(extRelays = []) {
   if (!searchInstance) {
     searchInstance = new NDK({
-      explicitRelayUrls: [...new Set([...searchRelays, ...extRelays])],
+      explicitRelayUrls: [...new Set(searchRelays)],
     });
     searchInstance.connect(2000).catch(() => {
       console.warn("[NDK] relay connection failed (SSG searchInstance)");
     });
   }
-  if (extRelays.length > 0 && Array.isArray(extRelays)) {
-    let tempRelayList = extRelays.filter(
-      (relay) => !searchInstance.explicitRelayUrls.includes(`${relay}`)
-    );
-    if (tempRelayList.length > 0)
-      for (let relay of tempRelayList) {
-        searchInstance.addExplicitRelay(relay, undefined, true);
-      }
-  }
+  useHintRelays(searchInstance, extRelays);
   if (searchInstance.pool.status === "idle") {
-    console.log(searchInstance.pool.status);
     searchInstance.connect(2000).catch(() => {
       console.warn("[NDK] relay connection failed (SSG searchInstance)");
     });

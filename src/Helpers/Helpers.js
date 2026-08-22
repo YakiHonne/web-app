@@ -21,7 +21,10 @@ import { t } from "i18next";
 import axiosInstance from "./HTTP_Client";
 import { InitEvent } from "./Controlers";
 import { localStorage_ } from "./utils/clientLocalStorage";
-import { supportedLanguageKeys } from "@/Content/SupportedLanguages";
+import {
+  supportedLanguageKeys,
+  contentLanguageKeys,
+} from "@/Content/SupportedLanguages";
 import {
   getMediaUploader,
   getParsedNote,
@@ -347,14 +350,14 @@ const getVideoContent = (video) => {
     image,
     naddr: d
       ? nip19.naddrEncode({
-          pubkey: video.pubkey,
-          kind: video.kind,
-          identifier: d,
-        })
+        pubkey: video.pubkey,
+        kind: video.kind,
+        identifier: d,
+      })
       : nip19.neventEncode({
-          id: video.id,
-          pubkey: video.pubkey,
-        }),
+        id: video.id,
+        pubkey: video.pubkey,
+      }),
     aTag: d ? `${video.kind}:${video.pubkey}:${d}` : video.id,
     fallbacks,
   };
@@ -451,11 +454,11 @@ const formatMinutesToMMSS = (seconds) => {
 
 const levelCount = (nextLevel) => {
   if (nextLevel === 1) return 0;
-  else return levelCount(nextLevel - 1) + (nextLevel - 1) * 50;
+  else return levelCount(nextLevel - 1) + (nextLevel - 1) * 4;
 };
 
 const getCurrentLevel = (points) => {
-  return Math.floor((1 + Math.sqrt(1 + (8 * points) / 50)) / 2);
+  return Math.floor((1 + Math.sqrt(1 + (100 * points) / 50)) / 2);
 };
 
 const validateWidgetValues = (value, kind, type) => {
@@ -561,6 +564,36 @@ const getAppLang = () => {
   let lang = userLang || browserLanguage;
   if (supportedLanguageKeys.includes(lang)) return lang;
   return "en";
+};
+
+const getContentLang = () => {
+  try {
+    let userLang = localStorage_.getItem("content-lang");
+    if (userLang && contentLanguageKeys.includes(userLang)) return userLang;
+  } catch (err) {
+    return getAppLang();
+  }
+  return getAppLang();
+};
+
+const getContentLangSetting = () => {
+  try {
+    let userLang = localStorage_.getItem("content-lang");
+    if (userLang && contentLanguageKeys.includes(userLang)) return userLang;
+  } catch (err) {
+    return "app";
+  }
+  return "app";
+};
+
+const setContentLang = (value) => {
+  try {
+    if (value === "app") localStorage_.removeItem("content-lang");
+    else if (contentLanguageKeys.includes(value))
+      localStorage_.setItem("content-lang", value);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const getContentTranslationConfig = () => {
@@ -684,14 +717,13 @@ const toggleColorScheme = (theme) => {
           }
         }
       }
-    } catch (err) {}
+    } catch (err) { }
   }
 };
 
 const getCAEATooltip = (published_at, created_at) => {
-  return `CA ${new Date(published_at * 1000).toISOString().split("T")[0]}, EA ${
-    new Date(created_at * 1000).toISOString().split("T")[0]
-  }`;
+  return `CA ${new Date(published_at * 1000).toISOString().split("T")[0]}, EA ${new Date(created_at * 1000).toISOString().split("T")[0]
+    }`;
 };
 
 const FileUpload = async ({ file, userKeys, cb, includeImeta = false }) => {
@@ -1650,6 +1682,9 @@ export {
   sleepTimer,
   copyText,
   getAppLang,
+  getContentLang,
+  getContentLangSetting,
+  setContentLang,
   handleAppDirection,
   getContentTranslationConfig,
   updateContentTranslationConfig,

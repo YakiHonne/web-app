@@ -9,7 +9,7 @@ import useFollowUsers from "@/Hooks/useFollowUsers";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Link from "next/link";
 import OptionsDropdown from "@/Components/OptionsDropdown";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import ShareLink from "@/Components/ShareLink";
 import AddPack from "@/Components/ContentSettings/ContentSource/AddPack";
 import Icon from "@/Components/Icon";
@@ -83,7 +83,7 @@ export default function PackPreview({ pack, noRedirect = false }) {
                         }}
                       >
                         {isFollowLoading ? (
-                          <LoadingDots />
+                          <Spinner />
                         ) : (
                           <>
                             {!isAllFollowing ? (

@@ -3,7 +3,7 @@ import Mintslist from "../../MintsList";
 import { useTranslation } from "react-i18next";
 import useCashu from "@/Hooks/useCachu";
 import { generateToken, publishProofs } from "@/Helpers/CashuHelpers";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import Invoice from "../Invoice";
 import useSentTokensAsHash from "@/Hooks/useSentTokensAsHash";
 import Icon from "@/Components/Icon";
@@ -91,11 +91,10 @@ export default function ECash({ exit }) {
                 className="if p-bold if-no-border ifs-full p-centered"
                 placeholder={t("AcDgXKI")}
                 style={{
-                  fontSize: `max(${
-                    amount.toString().length > 5
+                  fontSize: `max(${amount.toString().length > 5
                       ? `${80 - (amount.toString().length - 6) * 10}px`
                       : "80px"
-                  },50px)`,
+                    },50px)`,
                   height: "80px",
                 }}
                 value={amount}
@@ -119,13 +118,12 @@ export default function ECash({ exit }) {
             />
           </div>
           <button
-            className={`btn btn-normal btn-full ${
-              amount > cashuTokens[mintFrom.url]?.total ? "btn-disabled" : ""
-            }`}
+            className={`btn btn-normal btn-full ${amount > cashuTokens[mintFrom.url]?.total ? "btn-disabled" : ""
+              }`}
             onClick={createToken}
             disabled={isLoading || amount > cashuTokens[mintFrom.url]?.total}
           >
-            {isLoading ? <LoadingDots /> : t("AhOFjL5")}
+            {isLoading ? <Spinner /> : t("AhOFjL5")}
           </button>
         </div>
       </div>

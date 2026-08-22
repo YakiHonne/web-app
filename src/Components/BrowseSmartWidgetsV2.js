@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { nip19 } from "nostr-tools";
 import { getEmptyuserMetadata, getParsedSW } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
-import LoadingDots from "@/Components/LoadingDots";
+import Spinner from "@/Components/Spinner";
 import PreviewWidget from "@/Components/SmartWidget/PreviewWidget";
 import { useSelector } from "react-redux";
 import { getUser } from "@/Helpers/Controlers";
@@ -151,17 +151,15 @@ export default function BrowseSmartWidgetsV2({ setWidget, exit }) {
           >
             <div className="fit-container fx-centered ">
               <div
-                className={`list-item fx-centered fx ${
-                  contentSource === "community" ? "selected-list-item" : ""
-                }`}
+                className={`list-item fx-centered fx ${contentSource === "community" ? "selected-list-item" : ""
+                  }`}
                 onClick={() => handleContentSource("community")}
               >
                 <p>{t("A1RYH3h")}</p>
               </div>
               <div
-                className={`list-item fx-centered fx ${
-                  contentSource === "self" ? "selected-list-item" : ""
-                }`}
+                className={`list-item fx-centered fx ${contentSource === "self" ? "selected-list-item" : ""
+                  }`}
                 onClick={() => handleContentSource("self")}
               >
                 <p>{t("Ak5dbF4")}</p>
@@ -210,7 +208,7 @@ export default function BrowseSmartWidgetsV2({ setWidget, exit }) {
               style={{ height: "30vh" }}
             >
               <p className="gray-c">{t("AKvHyxG")}</p>
-              <LoadingDots />
+              <Spinner />
             </div>
           )}
         </div>

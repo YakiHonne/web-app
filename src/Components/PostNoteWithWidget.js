@@ -4,21 +4,19 @@ import { useTranslation } from "react-i18next";
 import PostAsNote from "@/Components/PostAsNote";
 import { customHistory } from "@/Helpers/History";
 import Icon from "@/Components/Icon";
+import Overlay from "@/Components/Overlay";
 
 export default function PostNoteWithWidget({ widget, exit, onlyNext = true }) {
   const [next, setNext] = useState(onlyNext);
   const { t } = useTranslation();
 
   return (
-    <div className="fixed-container fx-centered box-pad-h">
+    <Overlay exit={exit} width={500}>
       <div
         style={{
-          width: "min(100%, 500px)",
           gap: 0,
-          maxHeight: "85vh",
-          overflow: "scroll",
         }}
-        className="fx-centered sc-s-18 fx-centered fx-wrap"
+        className="fx-centered fx-centered fx-wrap"
       >
         <div
           className="fit-container fx-scattered sticky"
@@ -69,6 +67,6 @@ export default function PostNoteWithWidget({ widget, exit, onlyNext = true }) {
           </div>
         )}
       </div>
-    </div>
+    </Overlay>
   );
 }

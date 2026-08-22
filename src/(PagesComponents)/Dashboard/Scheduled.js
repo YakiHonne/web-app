@@ -1,4 +1,4 @@
-import LoadingLogo from "@/Components/LoadingLogo";
+import Spinner from "@/Components/Spinner";
 import useScheduledEvents from "@/Hooks/useScheduledEvents";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -35,7 +35,7 @@ export default function Scheduled() {
       {isScheduledEventsLoading && (
         <div className="fit-container fx-centered" style={{ height: "40vh" }}>
           <div className="fx-centered">
-            <LoadingLogo />
+            <Spinner size={32} />
           </div>
         </div>
       )}

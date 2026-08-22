@@ -3,7 +3,7 @@ import React from "react";
 import Head from "next/head";
 import HeadMetadata from "@/Components/HeadMetadata";
 
-const ClientComponent = dynamic(() => import("@/(PagesComponents)/ChildSafetyLegacy"), {
+const ClientComponent = dynamic(() => import("@/(PagesComponents)/ChildSafety"), {
   ssr: true,
 });
 
