@@ -36,6 +36,7 @@ export async function getStaticProps({ params }) {
   let id = decoded.type === "note" ? decoded.data : decoded.data?.id;
   if (!id) return { notFound: true, revalidate: 3600 };
   let relays = decoded.type === "nevent" ? decoded.data?.relays || [] : [];
+
   const res = await getDataForSSG(
     [{ ids: [id] }],
     1000,

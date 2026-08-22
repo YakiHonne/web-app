@@ -5311,3 +5311,27 @@ input[type="range"]::-moz-range-thumb {
     object-fit: contain;
     margin: 0 1px;
 }
+
+.note-not-found {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: max-content;
+    max-width: 100%;
+    padding: 11px 14px;
+    border: 1px dashed var(--pale-gray);
+    border-radius: 12px;
+}
+
+.note-not-found-connector {
+    height: 20px;
+    margin-left: calc(1rem + 16px);
+    border-left: 1px solid var(--pale-gray);
+}
+
+[dir="rtl"] .note-not-found-connector {
+    margin-left: unset;
+    margin-right: calc(1rem + 16px);
+    border-left: unset;
+    border-right: 1px solid var(--pale-gray);
+}
