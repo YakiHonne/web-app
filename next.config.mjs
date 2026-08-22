@@ -21,8 +21,23 @@ const markdownItCjs = tiptapRequire.resolve("markdown-it/dist/index.cjs.js");
 const markdownItCjsRelative =
   "./" + path.relative(process.cwd(), markdownItCjs).split(path.sep).join("/");
 
+const defaultRuntimeCaching = require("next-pwa/cache.js");
+
+const runtimeCaching = defaultRuntimeCaching.map((entry) => {
+  if (typeof entry.urlPattern !== "function") return entry;
+  const original = entry.urlPattern;
+  return {
+    ...entry,
+    urlPattern: (ctx) => {
+      if (ctx?.url?.protocol === "http:") return false;
+      return original(ctx);
+    },
+  };
+});
+
 const withPWA = withPWAInit({
   dest: "public",
+  runtimeCaching,
   register: true,
   skipWaiting: true,
   clientsClaim: true,

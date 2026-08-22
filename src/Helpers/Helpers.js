@@ -822,11 +822,23 @@ const blossomServerFileUpload = async ({
     store.dispatch(
       setToast({
         type: 2,
-        desc: t("AOKDMRt"),
+        desc: getBlossomErrorMessage(err) || t("AOKDMRt"),
       }),
     );
     return false;
   }
+};
+
+const getBlossomErrorMessage = (err) => {
+  let reason = err?.response?.headers?.["x-reason"];
+  if (typeof reason === "string" && reason.trim()) return reason.trim();
+  let data = err?.response?.data;
+  if (typeof data === "string" && data.trim() && !data.trim().startsWith("<"))
+    return data.trim().slice(0, 200);
+  let message = data?.message || data?.reason || data?.error;
+  if (typeof message === "string" && message.trim())
+    return message.trim().slice(0, 200);
+  return "";
 };
 
 const getDominantColor = (imageUrl) => {
