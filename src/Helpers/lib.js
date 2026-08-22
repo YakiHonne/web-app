@@ -12,10 +12,13 @@ export async function getDataForSSG(
   maxEvents = 1,
   relays = [],
 ) {
-  const ndkInstance = getSSGNdkInstance(relays);
+  const ndkInstance = await getSSGNdkInstance(relays);
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
-  let data = await launchDataFetching(filter, timeout, maxEvents, ndkInstance);
-  return data;
+  let data = await Promise.race([
+    launchDataFetching(filter, timeout, maxEvents, ndkInstance),
+    sleepTimer(Math.max(timeout, 1000) + 4000),
+  ]);
+  return data || { data: [], pubkeys: [] };
 }
 
 export async function getDataForSearch(
@@ -24,7 +27,7 @@ export async function getDataForSearch(
   maxEvents = 1,
   relays = [],
 ) {
-  const ndkInstance = getSearchNdkInstance(relays);
+  const ndkInstance = await getSearchNdkInstance(relays);
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
   let data = await Promise.race([
     launchDataFetching(filter, timeout, maxEvents, ndkInstance),
@@ -71,6 +74,8 @@ const launchDataFetching = async (
         });
       }, timeout);
     };
+
+    startTimer();
 
     sub.on("event", (event) => {
       if (events.length <= maxEvents) {

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { getParsedNote } from "@/Helpers/ClientHelpers";
+import { relaysOnPlatform } from "@/Content/Relays";
 import { getParsedMedia, getParsedRepEvent } from "@/Helpers/Encryptions";
 import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
@@ -533,6 +534,8 @@ const getPreviouslyFetchedEvent = (id) => {
   return parsedEvent;
 };
 
+const RELATED_EVENT_RELAYS = [...relaysOnPlatform, "wss://relay.primal.net"];
+
 const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
   const nostrAuthors = useSelector((state) => state.nostrAuthors);
   const { t } = useTranslation();
@@ -566,7 +569,7 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
         setIsRelatedEventLoaded(false);
         let event_ =
           kind === 0
-            ? await getSubData([{ ids: [ids] }], 500)
+            ? await getSubData([{ ids: [ids] }], 2500, RELATED_EVENT_RELAYS)
             : await getSubData(
               [
                 {
@@ -575,8 +578,12 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
                   "#d": [ids.identifier],
                 },
               ],
-              500,
+              2500,
+              RELATED_EVENT_RELAYS,
             );
+        if (event_.data.length === 0) {
+          setIsNotFound(true);
+        }
         if (event_.data.length > 0) {
           let post = event_.data[0];
           saveUsers([post.pubkey]);
@@ -637,9 +644,9 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
   };
 
   if (isThread)
-    return relatedEvent ? (
+    return isRelatedEventLoaded || relatedEvent ? (
       <div className=" fit-container">
-        {!isUnsupported && !isNotFound && (
+        {relatedEvent && !isUnsupported && !isNotFound && (
           <>
             {(relatedEvent.kind === 1 || relatedEvent.kind === 1111) && (
               <NotesComment
@@ -663,17 +670,23 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
             )}
           </>
         )}
-        {isUnsupported && !isNotFound && (
+        {relatedEvent && isUnsupported && !isNotFound && (
           <UnsupportedKindPreview
             addr={relatedEvent.nEvent || relatedEvent.naddr}
           />
         )}
         {isNotFound && (
-          <div className="box-pad-h-m fx-centered fx-start-h box-pad-v-m">
-            <div className=" fx-scattered bg-sp  box-pad-h-m box-pad-v-s sc-s">
-              <p className="gray-c">{t("AAbA1Xn")}</p>
+          <>
+            <div className="box-pad-h-m fit-container">
+              <div className="note-not-found">
+                <Icon name={iconsNames.info} size={15} v={2} />
+                <p className="gray-c" style={{ margin: 0 }}>
+                  {t("AAbA1Xn")}
+                </p>
+              </div>
             </div>
-          </div>
+            <div className="note-not-found-connector"></div>
+          </>
         )}
       </div>
     ) : (
