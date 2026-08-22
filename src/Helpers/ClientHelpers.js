@@ -344,6 +344,7 @@ export function getNoteTree(
     ) {
       let cleanUrl = el.replace(/[.,|']+$/, "");
       const isURLCommonPlatformVid = isVid(cleanUrl);
+      const secureUrl = toSecureMediaUrl(cleanUrl);
       if (!minimal) {
         if (isURLCommonPlatformVid) {
           finalTree.push(
@@ -361,35 +362,35 @@ export function getNoteTree(
             if (checkURL.type === "image") {
               if (useChipMode) {
                 const mediaIndex = mediaItems.length;
-                mediaItems.push({ url: cleanUrl, type: "image" });
+                mediaItems.push({ url: secureUrl, type: "image" });
                 chipPositions.push({ mediaIndex, treeIndex: finalTree.length });
                 finalTree.push(
                   <MediaChip
                     key={key}
                     type="image"
-                    url={cleanUrl}
+                    url={secureUrl}
                     mediaIndex={mediaIndex}
                   />,
                 );
               } else {
-                finalTree.push(<IMGElement src={cleanUrl} key={key} />);
+                finalTree.push(<IMGElement src={secureUrl} key={key} />);
               }
             } else if (checkURL.type === "video") {
               if (useChipMode) {
                 const mediaIndex = mediaItems.length;
-                mediaItems.push({ url: cleanUrl, type: "video" });
+                mediaItems.push({ url: secureUrl, type: "video" });
                 chipPositions.push({ mediaIndex, treeIndex: finalTree.length });
                 finalTree.push(
                   <MediaChip
                     key={key}
                     type="video"
-                    url={cleanUrl}
+                    url={secureUrl}
                     mediaIndex={mediaIndex}
                   />,
                 );
               } else {
                 finalTree.push(
-                  <VideoLoader pubkey={pubkey} key={key} src={cleanUrl} />,
+                  <VideoLoader pubkey={pubkey} key={key} src={secureUrl} />,
                 );
               }
             }
@@ -694,7 +695,7 @@ export function getComponent(children) {
                 className="sc-s-18"
                 style={{ margin: "1rem auto" }}
                 width={"100%"}
-                src={children[i].props?.href}
+                src={toSecureMediaUrl(children[i].props?.href)}
                 alt="el"
                 loading="lazy"
                 key={key}
@@ -702,7 +703,12 @@ export function getComponent(children) {
             );
           }
           if (checkURL.type === "video") {
-            res.push(<VideoLoader key={key} src={children[i].props?.href} />);
+            res.push(
+              <VideoLoader
+                key={key}
+                src={toSecureMediaUrl(children[i].props?.href)}
+              />,
+            );
           }
         }
         if (!checkURL) {
@@ -884,7 +890,9 @@ export function compactContent(note, pubkey) {
       word.startsWith("data:image") ||
       /(https?:\/\/[^ ]*\.(?:gif|png|jpg|jpeg|webp))/i.test(word)
     )
-      compactedContent.push(<IMGElement src={word} key={index} />);
+      compactedContent.push(
+        <IMGElement src={toSecureMediaUrl(word)} key={index} />,
+      );
     else if (word === "\n") {
       compactedContent.push(<br key={index} />);
     } else {
@@ -914,6 +922,20 @@ export function compactContent(note, pubkey) {
     index++;
   }
   return mergeConsecutivePElements(compactedContent, pubkey);
+}
+
+export function toSecureMediaUrl(url) {
+  if (typeof url !== "string") return url;
+  if (!/^http:\/\//i.test(url)) return url;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1")
+      return url;
+    parsed.protocol = "https:";
+    return parsed.toString();
+  } catch (err) {
+    return url.replace(/^http:\/\//i, "https://");
+  }
 }
 
 export function isImageUrl(url) {
