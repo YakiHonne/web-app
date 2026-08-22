@@ -107,5 +107,10 @@
     "buffer": "^6.0.3",
     "eslint": "^9",
     "process": "^0.11.10"
+  },
+  "pnpm": {
+    "overrides": {
+      "i18next-fs-backend": "2.6.6"
+    }
   }
 }
