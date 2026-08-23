@@ -148,10 +148,20 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
   const generateLightningInvoice = async (plan) => {
     const lnAddr = process.env.NEXT_PUBLIC_YAKIPRO_LIGHTNING_ADDR;
     if (!lnAddr) return null;
+    const sats = Number(plan.sats_price);
+    if (!Number.isFinite(sats) || sats <= 0) return null;
     const [username, domain] = lnAddr.split("@");
     const lnurlRes = await axios.get(`https://${domain}/.well-known/lnurlp/${username}`);
+    const amount = sats * 1000;
+    const { minSendable, maxSendable } = lnurlRes.data;
+    if (
+      (typeof minSendable === "number" && amount < minSendable) ||
+      (typeof maxSendable === "number" && amount > maxSendable)
+    ) {
+      return null;
+    }
     const invoiceRes = await axios.get(lnurlRes.data.callback, {
-      params: { amount: 1 * 1000, comment: JSON.stringify({ plan: plan.id, pubkey: userPub }) },
+      params: { amount, comment: JSON.stringify({ plan: plan.id, pubkey: userPub }) },
     });
     return invoiceRes.data.pr;
   };
