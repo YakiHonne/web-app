@@ -2,9 +2,9 @@ import {
   getSearchNdkInstance,
   getSSGNdkInstance,
 } from "@/Helpers/SSGNDKInstance";
-import { sortEvents } from "nostr-tools";
+import { nip19, sortEvents } from "nostr-tools";
 import { getAuthPubkeyFromNip05, sleepTimer } from "./Helpers";
-import json from "@/nip05Names/nostr.json" assert { type: "json" };
+import axios from "axios";
 
 export async function getDataForSSG(
   filter,
@@ -97,14 +97,28 @@ const launchDataFetching = async (
   });
 };
 
+const resolveSelfHostedNip05 = async (name) => {
+  try {
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/.well-known/nostr.json?name=${encodeURIComponent(name)}`,
+      { timeout: 5000 },
+    );
+    const pubkey = data?.names?.[name];
+    if (!pubkey) return null;
+    return pubkey.startsWith("npub") ? nip19.decode(pubkey).data : pubkey;
+  } catch (err) {
+    return null;
+  }
+};
+
 export const parseNip05 = async (userId) => {
-  // if (userId.includes("yakihonne.com")) {
-  //   const name = userId.split("@")[0];
-  //   if (json.names[name]) {
-  //     return json.names[name];
-  //   }
-  //   return null;
-  // }
+  const appHost = process.env.NEXT_PUBLIC_APP_HOST;
+  const [name, domain] = userId.split("@");
+
+  if (appHost && domain && domain.toLowerCase() === appHost.toLowerCase()) {
+    return await resolveSelfHostedNip05(name);
+  }
+
   let pubkey = await getAuthPubkeyFromNip05(userId);
   return pubkey;
 };

@@ -1118,7 +1118,7 @@ export const generateAuthorizationHeaderForBlossomServer = async ({
       tags: [
         ["t", tTag],
         ...(sha256_ ? [["x", sha256_]] : []),
-        ...servers.map((server) => ["server", server]),
+        // ...servers.map((server) => ["server", server]),
         ["expiration", expiration],
       ],
     };

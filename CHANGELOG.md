@@ -1,4 +1,4 @@
-# (v6.0.0) 23/07/2026
+# (v6.0.0) 21/08/2026
 
 - Complete visual redesign of the app with a new top navbar, refreshed layout, and updated styling throughout.
 - Migrated the entire interface to a new, consistent icon set.
