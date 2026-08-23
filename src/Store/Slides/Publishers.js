@@ -41,10 +41,22 @@ const isPublishingSlice = createSlice({
   },
 });
 
+const publishedEventSlice = createSlice({
+  name: "publishedEvent",
+  initialState,
+  reducers: {
+    setPublishedEvent(state, action) {
+      return action.payload;
+    },
+  },
+});
+
 export const { setToast, clearToast } = toastSlice.actions;
 export const { setToPublish } = toPublishSlice.actions;
 export const { setIsPublishing } = isPublishingSlice.actions;
+export const { setPublishedEvent } = publishedEventSlice.actions;
 
 export const ToastReducer = toastSlice.reducer;
 export const ToPublishReducer = toPublishSlice.reducer;
 export const IsPublishingReducer = isPublishingSlice.reducer;
+export const PublishedEventReducer = publishedEventSlice.reducer;

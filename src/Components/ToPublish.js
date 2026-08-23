@@ -12,7 +12,6 @@ import { removeArticleDraft } from "@/Helpers/ClientHelpers";
 import UploadFile from "@/Components/UploadFile";
 import { useTranslation } from "react-i18next";
 import { InitEvent } from "@/Helpers/Controlers";
-import { useRouter } from "next/router";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
 
@@ -41,7 +40,6 @@ export default function ToPublish({
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const router = useRouter();
   const [selectedCategories, setSelectedCategories] = useState(
     tags.length > 0
       ? tags
@@ -132,6 +130,18 @@ export default function ToPublish({
         setToPublish({
           eventInitEx,
           allRelays: [],
+          showResult: {
+            kind: "article",
+            article: {
+              title: postTitle,
+              summary: desc,
+              image: cover,
+              readTime: Math.max(
+                1,
+                Math.ceil(postContent.trim().split(/\s+/).length / 200),
+              ),
+            },
+          },
         }),
       );
       if (deleteDraft) {
@@ -151,10 +161,6 @@ export default function ToPublish({
             userKeys,
           );
           if (!eventInitEx) {
-            router.push({
-              pathname: "/dashboard",
-              query: { tabNumber: 2, filter: "articles" },
-            });
             exit();
             setIsLoading(false);
             return;
@@ -167,18 +173,11 @@ export default function ToPublish({
           );
           removeArticleDraft();
           setIsLoading(false);
-          router.push({
-            pathname: "/dashboard",
-            query: { tabNumber: 2, filter: "articles" },
-          });
           exit();
         }, 1000);
       } else {
         removeArticleDraft();
-        router.push({
-          pathname: "/dashboard",
-          query: { tabNumber: 2, filter: "articles" },
-        });
+        setIsLoading(false);
         exit();
         return;
       }
