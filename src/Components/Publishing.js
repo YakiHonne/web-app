@@ -1,9 +1,13 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Spinner from "@/Components/Spinner";
 import axiosInstance from "@/Helpers/HTTP_Client";
 import { useDispatch, useSelector } from "react-redux";
 import { updateYakiChestStats } from "@/Helpers/Controlers";
-import { setToast, setToPublish } from "@/Store/Slides/Publishers";
+import {
+  setToast,
+  setToPublish,
+  setPublishedEvent,
+} from "@/Store/Slides/Publishers";
 import { setUpdatedActionFromYakiChest } from "@/Store/Slides/YakiChest";
 import { NDKEvent } from "@nostr-dev-kit/ndk";
 import { ndkInstance } from "@/Helpers/NDKInstance";
@@ -76,6 +80,7 @@ export default function Publishing({ displayOff = false }) {
   const [showDetails, setShowDetails] = useState(false);
   const [showEventStats, setShowEventStats] = useState(false);
   const [publishedEvents, setPublishedEvents] = useState([]);
+  const confirmedRef = useRef({});
   const [showToast, setShowToast] = useState(false);
   const [isPublishedEventsLoaded, setIsPublishedEventsLoaded] =
     useState(false);
@@ -160,7 +165,11 @@ export default function Publishing({ displayOff = false }) {
 
   useEffect(() => {
     const publishPost = async () => {
-      let { kind, content, tags, eventInitEx, allRelays } = toPublish;
+      let { kind, content, tags, eventInitEx, allRelays, showResult } =
+        toPublish;
+      let resultMeta = showResult
+        ? { ...showResult, token: `${Date.now()}-${Math.random()}` }
+        : null;
       let relaysToPublish =
         allRelays?.length > 0
           ? allRelays.map((relay) => {
@@ -214,7 +223,7 @@ export default function Publishing({ displayOff = false }) {
             publisedAt: Date.now(),
           },
         ]);
-        initPublishing(relaysToPublish, ndkEvent, index, ak);
+        initPublishing(relaysToPublish, ndkEvent, index, ak, resultMeta);
         setShowToast(true);
         let timer = setTimeout(() => {
           setShowToast(false);
@@ -273,7 +282,7 @@ export default function Publishing({ displayOff = false }) {
           publisedAt: Date.now(),
         },
       ]);
-      initPublishing(relaysToPublish, ndkEvent, index, ak);
+      initPublishing(relaysToPublish, ndkEvent, index, ak, resultMeta);
       setShowToast(true);
       let timer = setTimeout(() => {
         setShowToast(false);
@@ -286,7 +295,7 @@ export default function Publishing({ displayOff = false }) {
     }
   }, [toPublish]);
 
-  const handlePublishEvent = async (relay, event, index) => {
+  const handlePublishEvent = async (relay, event, index, resultMeta) => {
     let publish = () => {
       relay
         .publish(event, PUBLISHING_TIMEOUT)
@@ -301,6 +310,17 @@ export default function Publishing({ displayOff = false }) {
                 tempArray[index].relaysToPublish[index_].status = 1;
               return tempArray;
             });
+            if (resultMeta && !confirmedRef.current[resultMeta.token]) {
+              confirmedRef.current[resultMeta.token] = true;
+              dispatch(
+                setPublishedEvent({
+                  event: event.rawEvent ? event.rawEvent() : event,
+                  kind: resultMeta.kind,
+                  article: resultMeta.article,
+                  isPaid: resultMeta.isPaid,
+                }),
+              );
+            }
           }
         })
         .catch((err) => {
@@ -332,7 +352,7 @@ export default function Publishing({ displayOff = false }) {
     };
     publish();
   };
-  const initPublishing = async (relays, event, index, action_key) => {
+  const initPublishing = async (relays, event, index, action_key, resultMeta) => {
     try {
       if (event.kind === 5) {
         let { aTag, toRemoveFromCache } = toPublish;
@@ -349,7 +369,7 @@ export default function Publishing({ displayOff = false }) {
 
       for (let i = 0; i < relays.length; i++) {
         let relay = ndkInstance.pool.getRelay(relays[i].url);
-        handlePublishEvent(relay, event, index);
+        handlePublishEvent(relay, event, index, resultMeta);
       }
     } catch (err) {
       console.log(err);

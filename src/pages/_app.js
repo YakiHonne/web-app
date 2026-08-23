@@ -59,6 +59,10 @@ const InitiateCashu = dynamic(() => import("@/Components/InitiateCashu"), {
 const UpgradeSheetHost = dynamic(() => import("@/Components/UpgradeSheetHost"), {
   ssr: false,
 });
+const PublishResultHostClient = dynamic(
+  () => import("@/Components/PublishResultHost"),
+  { ssr: false },
+);
 const OnboardingHost = dynamic(
   () => import("@/Components/Onboarding/OnboardingHost"),
   { ssr: false },
@@ -223,6 +227,7 @@ function App({ Component, pageProps }) {
         <IinitiateNotifications />
         <InitiateCashu />
         <UpgradeSheetHost />
+        <PublishResultHostClient />
         <OnboardingHost />
         <NavbarClient />
         {!shouldHideSidebar && <TopNavbarClient />}

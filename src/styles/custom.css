@@ -3161,6 +3161,15 @@ input[type="range"]::-moz-range-thumb {
     gap: 24px;
 }
 
+.lp-pricing-cards-3 {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+}
+
+.lp-pricing-cards-3 .lp-plan-card {
+    padding: 28px 24px;
+}
+
 .lp-plan-card {
     background: var(--very-dim-gray);
     border: 1px solid var(--pale-gray);
@@ -3337,7 +3346,7 @@ input[type="range"]::-moz-range-thumb {
 
 .lp-compare-row {
     display: grid;
-    grid-template-columns: 1fr 120px 120px;
+    grid-template-columns: 1fr 120px 120px 120px;
     border-bottom: 1px solid var(--pale-gray);
 }
 
@@ -3457,17 +3466,29 @@ input[type="range"]::-moz-range-thumb {
     color: var(--black);
 }
 
+@media (max-width: 1100px) {
+    .lp-pricing-cards-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .lp-pricing-cards-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 640px) {
     .lp-pricing-cards {
         grid-template-columns: 1fr;
     }
 
     .lp-compare-row {
-        grid-template-columns: 1fr 80px 80px;
+        grid-template-columns: 1fr 64px 64px 64px;
     }
 
     .lp-compare-cell {
-        padding: 10px 12px;
+        padding: 10px 8px;
         font-size: 0.75rem;
     }
 }

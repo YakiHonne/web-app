@@ -433,6 +433,7 @@ function CurrentPlanCard({ status, onCancel, onResume, cancelling, resuming, onU
                 })}
               </p>
             </div>
+            <p className="gray-c p-centered">{t("ATr1Bas")}</p>
             <button className="btn btn-normal btn-full" onClick={onUpgrade}>
               {t("AApRZBN")}
             </button>

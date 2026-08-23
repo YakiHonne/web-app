@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setToast } from "@/Store/Slides/Publishers";
+import { setToast, setPublishedEvent } from "@/Store/Slides/Publishers";
 import { nanoid } from "nanoid";
 import { extractNip19, filterImetas } from "@/Helpers/Helpers";
 import { FileUpload } from "@/Helpers/Helpers";
@@ -9,7 +9,7 @@ import Spinner from "@/Components/Spinner";
 import Icon from "@/Components/Icon";
 import Toggle from "@/Components/Toggle";
 import Button from "@/Components/UI/Button";
-import { InitEvent, publishEvent } from "@/Helpers/Controlers";
+import { InitEvent, publishEvent, saveRelayMetadata } from "@/Helpers/Controlers";
 import { getRelayMetadata } from "@/Helpers/utils/relayMetadataCache";
 import { useTranslation } from "react-i18next";
 
@@ -151,15 +151,18 @@ export default function ArticlePublishModalV2({
       return;
     }
 
-    const premiumRelays = userRelays
-      .filter((r) => {
-        const metadata = getRelayMetadata(r.url);
-        return metadata?.supported_nips?.includes(63) && (r.read || r.write);
-      })
-      .map((r) => r.url);
-
-    const relaysToPublish = isPremium ? premiumRelays : [];
-    await publishEvent(eventInitEx, relaysToPublish);
+    let relaysToPublish = [];
+    if (isPremium) {
+      const relayUrls = (userRelays || []).filter(
+        (relay) => typeof relay === "string" && relay,
+      );
+      await saveRelayMetadata(relayUrls);
+      relaysToPublish = relayUrls.filter((url) => {
+        const metadata = getRelayMetadata(url);
+        return metadata?.supported_nips?.includes(63);
+      });
+    }
+    const isPublished = await publishEvent(eventInitEx, relaysToPublish);
 
     if (kind === 30023 && editKind === 30024 && editEventId) {
       const deletionEvent = await InitEvent(
@@ -173,10 +176,28 @@ export default function ArticlePublishModalV2({
     }
 
     setIsLoading(false);
+
+    if (!isPublished) {
+      dispatch(setToast({ type: 2, desc: t("Acr4Slu") }));
+      return;
+    }
+
+    if (kind === 30024) {
+      dispatch(setToast({ type: 1, desc: t("ARWJbjS") }));
+      exit();
+      return;
+    }
+
     dispatch(
-      setToast({
-        type: 1,
-        desc: kind === 30024 ? t("ARWJbjS") : t("Aem28Ji"),
+      setPublishedEvent({
+        event: eventInitEx,
+        kind: "article",
+        article: {
+          title,
+          summary,
+          image: coverUrl,
+          readTime: mins,
+        },
       }),
     );
     exit();

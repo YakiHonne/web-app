@@ -13,18 +13,30 @@ import useLightningPayment from "@/Hooks/useLightningPayment";
 import { useTranslation } from "react-i18next";
 
 const COMPARE_ROWS = [
-  { labelKey: "ALx6onZ", creator: true, pro: true },
-  { labelKey: "ASL87jw", creator: true, pro: true },
-  { labelKey: "AAHCjSA", creator: true, pro: true },
-  { labelKey: "A50fFes", creator: true, pro: true },
-  { labelKey: "A2o7YV8", creator: true, pro: true },
-  { labelKey: "A8SkkKn", creator: "50 GB", pro: "100 GB" },
-  { labelKey: "AxpgMtE", creator: "3 months", pro: "3 years" },
-  { labelKey: "Av9K4Uc", creator: false, pro: true },
-  { labelKey: "Ada9y3u", creator: "weekly limit", pro: "more limit" },
-  { labelKey: "AiJc9Ml", creator: "weekly limit", pro: "more limit" },
-  { labelKey: "A5A5LVD", creator: "weekly limit", pro: "more limit" },
-  { labelKey: "AC03DMc", creator: true, pro: true },
+  { labelKey: "ALx6onZ", free: true, creator: true, pro: true },
+  { labelKey: "ASL87jw", free: true, creator: true, pro: true },
+  { labelKey: "AAHCjSA", free: false, creator: true, pro: true },
+  { labelKey: "A50fFes", free: false, creator: true, pro: true },
+  { labelKey: "A2o7YV8", free: false, creator: true, pro: true },
+  { labelKey: "A8SkkKn", free: "500 MB", creator: "50 GB", pro: "100 GB" },
+  { labelKey: "AyLG9Tv", free: "1 wallet", creator: "3 wallets", pro: "unlimited" },
+  { labelKey: "AiiQLRF", free: "limited", creator: "unlimited", pro: "unlimited" },
+  { labelKey: "AxpgMtE", free: false, creator: "3 months", pro: "3 years" },
+  { labelKey: "Av9K4Uc", free: false, creator: false, pro: true },
+  { labelKey: "Ada9y3u", free: false, creator: "weekly limit", pro: "more limit" },
+  { labelKey: "AiJc9Ml", free: false, creator: "weekly limit", pro: "more limit" },
+  { labelKey: "A5A5LVD", free: false, creator: "weekly limit", pro: "more limit" },
+  { labelKey: "AC03DMc", free: false, creator: true, pro: true },
+];
+
+const FREE_PLAN_PERK_KEYS = [
+  "A2jFm8k",
+  "AmFAKpa",
+  "AFH6sE7",
+  "AeL1qIL",
+  "AEk5RU5",
+  "ASIalHq",
+  "Ag3kgG7",
 ];
 
 const FAQ_ITEMS = [
@@ -52,12 +64,17 @@ function useReveal(dep, rootRef) {
 function CellValue({ value, t }) {
   if (value === true) return <Icon name="check" size={20} v={2} isBoldThemeColor />;
   if (value === false) return <span style={{ color: "var(--gray)", fontSize: "0.9rem" }}>–</span>;
+  if (value === "500 MB") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("Arau1Qq")}</span>;
   if (value === "50 GB") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("ASR1V0c")}</span>;
   if (value === "100 GB") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AJXhgWC")}</span>;
   if (value === "3 months") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AVnJlbF")}</span>;
   if (value === "3 years") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AN9MDu8")}</span>;
   if (value === "weekly limit") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AJeNfeN")}</span>;
   if (value === "more limit") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AckR4Vd")}</span>;
+  if (value === "1 wallet") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AMvr2S9")}</span>;
+  if (value === "3 wallets") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AKrisd9")}</span>;
+  if (value === "unlimited") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AwM2mly")}</span>;
+  if (value === "limited") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("A9dtmlH")}</span>;
 }
 
 function WaitingDots() {
@@ -115,9 +132,9 @@ function LightningInvoiceModal({ invoice, planName, sats, onClose, userPub }) {
           <QRCode value={invoice} size={220} />
         </div>
         <div
-          className="fit-container fx-scattered round-corner border-all box-pad-h-m box-pad-v-s"
-          style={{ cursor: "pointer", columnGap: "12px" }}
-          onClick={() => copyText(invoice, t("A3FRcsM"))}
+          className="fit-container fx-scattered border-all box-pad-h-m box-pad-v-s"
+          style={{ cursor: "pointer", columnGap: "12px", borderRadius: "999px" }}
+          onClick={(e) => copyText(invoice, t("A3FRcsM"), e)}
         >
           <p className="gray-c" style={{ fontSize: "0.72rem", fontFamily: "monospace", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", flex: 1, margin: 0 }}>
             {invoice.slice(0, 48)}…
@@ -206,7 +223,34 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
         </div>
       </div>
 
-      <div className="lp-pricing-cards ip-reveal" style={{ maxWidth: 780, margin: "0 auto" }}>
+      <div className="lp-pricing-cards ip-reveal lp-pricing-cards-3" style={{ maxWidth: 1080, margin: "0 auto" }}>
+        <div className="lp-plan-card bg-dropdown">
+          <div>
+            <div className="lp-plan-name">{t("Ap8rwzW")}</div>
+            <div className="lp-plan-price-row">
+              {isPoints ? (
+                <span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>0</span>
+              ) : isLn ? (
+                <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>0</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()} / month</span></>
+              ) : (
+                <><span className="lp-plan-amount">$0</span><span className="lp-plan-period"> / month</span></>
+              )}
+              {isPoints && <span className="lp-plan-period"> {t("A4IGG0z")} / month</span>}
+            </div>
+            <div className="lp-plan-sats">
+              <span>{t("AOceRQe")}</span>
+            </div>
+          </div>
+          <div className="lp-plan-divider" />
+          <ul className="lp-plan-features">
+            {FREE_PLAN_PERK_KEYS.map((perkKey) => (
+              <li key={perkKey} className="lp-plan-feature">
+                <span className="lp-plan-feature-icon"><Icon name="check" size={20} v={2} isBoldThemeColor /></span>
+                {t(perkKey)}
+              </li>
+            ))}
+          </ul>
+        </div>
         {plans.map((plan, planIdx) => {
           const isHighlighted = planIdx === plans.length - 1;
           const pointsEligible = !!eligibility?.[plan.id]?.eligible;
@@ -277,15 +321,17 @@ function CompareTable({ plans }) {
         <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c1)", marginBottom: 8 }}>{t("AoFbKNF")}</p>
         <h2 style={{ margin: 0 }}>{t("AJQdVdV")}</h2>
       </div>
-      <div className="lp-compare-table ip-reveal ip-reveal-d1" style={{ maxWidth: 780, margin: "0 auto" }}>
+      <div className="lp-compare-table ip-reveal ip-reveal-d1" style={{ maxWidth: 1080, margin: "0 auto" }}>
         <div className="lp-compare-row header">
           <div className="lp-compare-cell header-cell">{t("ALvzv9F")}</div>
+          <div className="lp-compare-cell center header-cell">{t("Ap8rwzW")}</div>
           <div className="lp-compare-cell center header-cell">{plans[0]?.name ?? ""}</div>
           <div className="lp-compare-cell center header-cell" style={{ color: "var(--c1)" }}>{plans[1]?.name ?? ""}</div>
         </div>
         {COMPARE_ROWS.map((row) => (
           <div key={row.labelKey} className="lp-compare-row">
             <div className="lp-compare-cell">{t(row.labelKey)}</div>
+            <div className="lp-compare-cell center"><CellValue value={row.free} t={t} /></div>
             <div className="lp-compare-cell center"><CellValue value={row.creator} t={t} /></div>
             <div className="lp-compare-cell center"><CellValue value={row.pro} t={t} /></div>
           </div>
@@ -357,7 +403,7 @@ function UpgradeOverlay({ plans, onClose, userPub, eligibility, pointsConfig, re
         </button>
       </div>
 
-      <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 24px 80px" }}>
+      <div style={{ maxWidth: 1180, margin: "0 auto", padding: "24px 24px 80px" }}>
         <div className="ip-reveal" style={{ textAlign: "center", marginBottom: "48px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
           <Icon name="checkmark-c1" size={72} isColored />
           <h2 style={{ margin: 0 }}>{t("AqAJ3zy")}</h2>

@@ -179,7 +179,7 @@ export default function ToastMessage() {
         position: "fixed",
         top: "24px",
         right: "24px",
-        zIndex: 10000000,
+        zIndex: 2000000002,
         display: "flex",
         flexDirection: "column",
         alignItems: "flex-end",
