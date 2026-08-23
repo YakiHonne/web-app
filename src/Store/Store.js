@@ -48,6 +48,7 @@ import {
   ToastReducer,
   ToPublishReducer,
   IsPublishingReducer,
+  PublishedEventReducer,
 } from "./Slides/Publishers";
 import {
   IsDarkModeReducer,
@@ -91,6 +92,7 @@ export const store = configureStore({
     toast: ToastReducer,
     toPublish: ToPublishReducer,
     isPublishing: IsPublishingReducer,
+    publishedEvent: PublishedEventReducer,
     isDarkMode: IsDarkModeReducer,
     initDMS: InitDMSReducer,
     followersCountSL: FollowersCountSLReducer,

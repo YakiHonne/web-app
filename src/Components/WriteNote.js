@@ -7,10 +7,8 @@ import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { extractNip19, filterImetas } from "@/Helpers/Helpers";
 import { getNoteDraft, updateNoteDraft } from "@/Helpers/ClientHelpers";
 import { InitEvent } from "@/Helpers/Controlers";
-import { getZapEventRequest } from "@/Helpers/NostrPublisher";
-import { encryptEventData, shortenKey } from "@/Helpers/Encryptions";
+import { encodeJWT, encryptEventData, shortenKey } from "@/Helpers/Encryptions";
 import axios from "axios";
-import { ndkInstance } from "@/Helpers/NDKInstance";
 import dynamic from "next/dynamic";
 import NotePreview from "@/Components/NotePreview";
 
@@ -28,7 +26,6 @@ import Toggle from "./Toggle";
 import RelayImage from "./RelayImage";
 import { SelectTabs } from "./SelectTabs";
 import LinkRepEventPreview from "./LinkRepEventPreview";
-import { customHistory } from "@/Helpers/History";
 import { publishScheduledEvent } from "@/Helpers/EventSchedulerHelper";
 import DatePicker from "./DatePicker";
 import Icon from "@/Components/Icon";
@@ -40,7 +37,7 @@ import Link from "next/link";
 import { iconsNames } from "@/Content/IconV2URL";
 import usePaidNoteCost from "@/Hooks/usePaidNoteCost";
 import usePoints from "@/Hooks/usePoints";
-import { publishPaidNoteWithPoints } from "@/Endpoints/Points";
+import { publishPaidNoteWithPoints, waitForPaidNote } from "@/Endpoints/Points";
 import NumberShrink from "@/Components/NumberShrink";
 
 export default function WriteNote({
@@ -231,48 +228,48 @@ export default function WriteNote({
         event: eventInitEx,
         relays: relay ? [relay] : userRelays,
       });
+      updateNoteDraft("root", "");
+      let timer = setTimeout(() => {
+        navigateTo.push("/dashboard?tabNumber=9");
+        exit();
+        setIsLoading(false);
+        clearTimeout(timer);
+      }, 1000);
+      return;
+    }
+    dispatch(
+      setToPublish({
+        eventInitEx,
+        allRelays: relay ? [relay] : [],
+        isFavRelay: relay ? relay : false,
+        showResult: { kind: "note", isPaid: false },
+      }),
+    );
+    updateNoteDraft("root", "");
+    exit();
+    setIsLoading(false);
+  };
+
+  const proceedToPublish = (eventInitEx, relay, isPaid = false) => {
+    if (selectedScheduleDate) {
+      publishScheduledEvent({
+        event: eventInitEx,
+        relays: relay ? [relay] : userRelays,
+      });
+      navigateTo.push(
+        "/profile/" +
+        nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
+      );
     } else
       dispatch(
         setToPublish({
           eventInitEx,
           allRelays: relay ? [relay] : [],
           isFavRelay: relay ? relay : false,
+          showResult: { kind: "note", isPaid },
         }),
       );
     updateNoteDraft("root", "");
-    let timer = setTimeout(() => {
-      if (window.location.pathname !== "/" && !selectedScheduleDate)
-        customHistory("/");
-      if (selectedScheduleDate) navigateTo.push("/dashboard?tabNumber=9");
-      navigateTo.push(
-        "/profile/" +
-        nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
-      );
-      exit();
-      setIsLoading(false);
-      clearTimeout(timer);
-    }, 1000);
-  };
-
-  const proceedToPublish = (eventInitEx, relay) => {
-    if (selectedScheduleDate)
-      publishScheduledEvent({
-        event: eventInitEx,
-        relays: relay ? [relay] : userRelays,
-      });
-    else
-      dispatch(
-        setToPublish({
-          eventInitEx,
-          allRelays: relay ? [relay] : [],
-          isFavRelay: relay ? relay : false,
-        }),
-      );
-    updateNoteDraft("root", "");
-    navigateTo.push(
-      "/profile/" +
-      nip19.nprofileEncode({ pubkey: (selectedProfile || userKeys).pub }),
-    );
     exit();
     setIsLoading(false);
   };
@@ -280,26 +277,13 @@ export default function WriteNote({
   const payWithLightning = async (eventInitEx, relay) => {
     let sats = paidNoteAmount * 1000;
 
-    let zapTags = [
-      ["relays", ...userRelays],
-      ["amount", sats.toString()],
-      ["lnurl", process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR],
-      ["p", process.env.NEXT_PUBLIC_YAKI_PUBKEY],
-      ["e", eventInitEx.id],
-    ];
-
-    var zapEvent = await getZapEventRequest(
-      selectedProfile || userKeys,
-      `${userMetadata.name} paid for a paid note.`,
-      zapTags,
-    );
-    if (!zapEvent) {
-      setIsLoading(false);
-      return;
-    }
+    const description = encodeJWT({
+      pubkey: (selectedProfile || userKeys).pub,
+      note_id: eventInitEx.id,
+    });
 
     const res = await axios(
-      `${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR_CALLBACK}?amount=${sats}&nostr=${zapEvent}&lnurl=${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR}`,
+      `${process.env.NEXT_PUBLIC_YAKI_FUNDS_ADDR_CALLBACK}?amount=${sats}&comment=${encodeURIComponent(description)}`,
     );
 
     if (res.data.status === "ERROR") {
@@ -315,35 +299,35 @@ export default function WriteNote({
 
     setInvoice(res.data.pr);
 
-    let sub = ndkInstance.subscribe(
-      [
-        {
-          kinds: [9735],
-          "#p": [process.env.NEXT_PUBLIC_YAKI_PUBKEY],
-          "#e": [eventInitEx.id],
-        },
-      ],
-      { groupable: false, cacheUsage: "ONLY_RELAY" },
-    );
+    const paid = await waitForPaidNote(eventInitEx.id);
 
-    sub.on("event", () => {
-      setInvoice("");
+    setInvoice("");
+
+    if (!paid) {
+      setIsLoading(false);
       dispatch(
         setToast({
-          type: 1,
-          desc: t("ACDUO1d"),
+          type: 2,
+          desc: t("AZ43zpG"),
         }),
       );
-      sub.stop();
-      proceedToPublish(eventInitEx, relay);
-    });
+      return;
+    }
+
+    dispatch(
+      setToast({
+        type: 1,
+        desc: t("ACDUO1d"),
+      }),
+    );
+    proceedToPublish(eventInitEx, relay, true);
   };
 
   const payWithPoints = async (eventInitEx, relay) => {
     try {
-      await publishPaidNoteWithPoints();
+      await publishPaidNoteWithPoints({ note_id: eventInitEx.id });
       await refreshPointsBalance();
-      proceedToPublish(eventInitEx, relay);
+      proceedToPublish(eventInitEx, relay, true);
     } catch (err) {
       setIsLoading(false);
       dispatch(
