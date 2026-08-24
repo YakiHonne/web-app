@@ -11,22 +11,31 @@ import { iconsNames } from "@/Content/IconV2URL";
 import NumberShrink from "@/Components/NumberShrink";
 import useLightningPayment from "@/Hooks/useLightningPayment";
 import { useTranslation } from "react-i18next";
+import { customHistory } from "@/Helpers/History";
 
 const COMPARE_ROWS = [
   { labelKey: "ALx6onZ", free: true, creator: true, pro: true },
   { labelKey: "ASL87jw", free: true, creator: true, pro: true },
-  { labelKey: "AAHCjSA", free: false, creator: true, pro: true },
-  { labelKey: "A50fFes", free: false, creator: true, pro: true },
-  { labelKey: "A2o7YV8", free: false, creator: true, pro: true },
+  { labelKey: "ACmpEdt", free: true, creator: true, pro: true },
   { labelKey: "A8SkkKn", free: "500 MB", creator: "50 GB", pro: "100 GB" },
   { labelKey: "AyLG9Tv", free: "1 wallet", creator: "3 wallets", pro: "unlimited" },
   { labelKey: "AiiQLRF", free: "limited", creator: "unlimited", pro: "unlimited" },
+  { labelKey: "ACmpPts", free: true, creator: true, pro: true },
+  { labelKey: "ACmpPdN", free: "all", creator: "less", pro: "none" },
+  { labelKey: "ACmpPEd", free: false, creator: true, pro: true },
+  { labelKey: "AAHCjSA", free: false, creator: true, pro: true },
+  { labelKey: "A50fFes", free: false, creator: true, pro: true },
+  { labelKey: "A2o7YV8", free: false, creator: true, pro: true },
+  { labelKey: "ACmpNip", free: false, creator: true, pro: true },
+  { labelKey: "Ap3wrvF", free: false, creator: true, pro: true },
+  { labelKey: "AEpny9c", free: false, creator: true, pro: true },
+  { labelKey: "AC03DMc", free: false, creator: true, pro: true },
   { labelKey: "AxpgMtE", free: false, creator: "3 months", pro: "3 years" },
-  { labelKey: "Av9K4Uc", free: false, creator: false, pro: true },
   { labelKey: "Ada9y3u", free: false, creator: "weekly limit", pro: "more limit" },
   { labelKey: "AiJc9Ml", free: false, creator: "weekly limit", pro: "more limit" },
   { labelKey: "A5A5LVD", free: false, creator: "weekly limit", pro: "more limit" },
-  { labelKey: "AC03DMc", free: false, creator: true, pro: true },
+  { labelKey: "ACmpRdm", free: false, creator: "weekly limit", pro: "more redeeming" },
+  { labelKey: "ACmpIns", free: false, creator: false, pro: true },
 ];
 
 const FREE_PLAN_PERK_KEYS = [
@@ -75,6 +84,10 @@ function CellValue({ value, t }) {
   if (value === "3 wallets") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AKrisd9")}</span>;
   if (value === "unlimited") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AwM2mly")}</span>;
   if (value === "limited") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("A9dtmlH")}</span>;
+  if (value === "all") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("AR9ctVs")}</span>;
+  if (value === "less") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("ACmpLes")}</span>;
+  if (value === "none") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("ACmpNon")}</span>;
+  if (value === "more redeeming") return <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--c1)" }}>{t("ACmpMrR")}</span>;
 }
 
 function WaitingDots() {
@@ -184,6 +197,11 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
   };
 
   const handleCheckout = async (plan) => {
+    if (!userPub) {
+      if (onClose) onClose();
+      customHistory("/login");
+      return;
+    }
     if (isPoints) {
       await onRedeemSubscription(plan.id);
       onClose();
@@ -223,15 +241,15 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
         </div>
       </div>
 
-      <div className="lp-pricing-cards ip-reveal lp-pricing-cards-3" style={{ maxWidth: 1080, margin: "0 auto" }}>
+      <div className="lp-pricing-cards ip-reveal lp-pricing-cards-3" style={{ maxWidth: 1320, margin: "0 auto" }}>
         <div className="lp-plan-card bg-dropdown">
           <div>
             <div className="lp-plan-name">{t("Ap8rwzW")}</div>
             <div className="lp-plan-price-row">
               {isPoints ? (
-                <span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>0</span>
+                <span className="lp-plan-amount">0</span>
               ) : isLn ? (
-                <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>0</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()} / month</span></>
+                <><span className="lp-plan-amount">0</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()} / month</span></>
               ) : (
                 <><span className="lp-plan-amount">$0</span><span className="lp-plan-period"> / month</span></>
               )}
@@ -268,11 +286,11 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
                 <div className="lp-plan-name">{plan.name}</div>
                 <div className="lp-plan-price-row">
                   {isPoints ? (
-                    <span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>
+                    <span className="lp-plan-amount">
                       {typeof pointsCost === "number" ? <NumberShrink value={pointsCost} /> : pointsCost}
                     </span>
                   ) : isLn ? (
-                    <><span className="lp-plan-amount" style={{ fontSize: "2.2rem" }}>{plan.sats_price?.toLocaleString()}</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()} / month</span></>
+                    <><span className="lp-plan-amount">{plan.sats_price?.toLocaleString()}</span><span className="lp-plan-period"> {t("AQv2Hnr").toLowerCase()} / month</span></>
                   ) : (
                     <><span className="lp-plan-amount">${plan.usd_price}</span><span className="lp-plan-period"> / month</span></>
                   )}
@@ -298,8 +316,7 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
                 ))}
               </ul>
               <button
-                className={`lp-btn lp-btn-lg${cardDisabled ? " btn-disabled" : isHighlighted ? " lp-btn-primary" : " lp-btn-outline"}`}
-                style={{ width: "100%", borderRadius: 8 }}
+                className={`btn btn-full${cardDisabled ? " btn-disabled" : isHighlighted ? " btn-normal" : " btn-gst"}`}
                 disabled={isLoading || isRedeeming || cardDisabled}
                 onClick={() => !cardDisabled && handleCheckout(plan)}
               >
@@ -321,7 +338,7 @@ function CompareTable({ plans }) {
         <p style={{ fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c1)", marginBottom: 8 }}>{t("AoFbKNF")}</p>
         <h2 style={{ margin: 0 }}>{t("AJQdVdV")}</h2>
       </div>
-      <div className="lp-compare-table ip-reveal ip-reveal-d1" style={{ maxWidth: 1080, margin: "0 auto" }}>
+      <div className="lp-compare-table ip-reveal ip-reveal-d1" style={{ maxWidth: 1320, margin: "0 auto" }}>
         <div className="lp-compare-row header">
           <div className="lp-compare-cell header-cell">{t("ALvzv9F")}</div>
           <div className="lp-compare-cell center header-cell">{t("Ap8rwzW")}</div>
@@ -403,7 +420,7 @@ function UpgradeOverlay({ plans, onClose, userPub, eligibility, pointsConfig, re
         </button>
       </div>
 
-      <div style={{ maxWidth: 1180, margin: "0 auto", padding: "24px 24px 80px" }}>
+      <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 24px 80px" }}>
         <div className="ip-reveal" style={{ textAlign: "center", marginBottom: "48px", display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
           <Icon name="checkmark-c1" size={72} isColored />
           <h2 style={{ margin: 0 }}>{t("AqAJ3zy")}</h2>

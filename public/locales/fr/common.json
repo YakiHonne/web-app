@@ -1772,7 +1772,7 @@
   "AZcdCkV": "Mon contenu est-il portable ?",
   "AbJvLWu": "Complètement. ",
   "AKvEPn9": "Puis-je payer en Bitcoin ?",
-  "AIZxnGr": "Oui. ",
+  "AIZxnGr": "Oui. Payez via Lightning pour n’importe quel forfait. Les factures sont générées instantanément, sans portefeuille dépositaire.",
   "ACQpwGH": "Bientôt réinitialisé",
   "APwGSMO": "Réinitialise dans {{count}} minutes)",
   "AeDw1O8": "Réinitialise dans {{count}} heures)",
@@ -2089,5 +2089,18 @@
   "AMvr2S9": "1 portefeuille",
   "AKrisd9": "3 portefeuilles",
   "AwM2mly": "Illimité",
-  "A9dtmlH": "Limité"
+  "A9dtmlH": "Limité",
+  "APrcng1": "Tarifs",
+  "APrcTtl": "Des tarifs simples et honnêtes",
+  "APrcSub": "Aucuns frais cachés, aucun engagement. Payez en monnaie fiat, en sats ou en Yaki Points, et annulez quand vous le souhaitez.",
+  "ACmpEdt": "Éditeur classique",
+  "ACmpNip": "Adresse NIP-05 personnalisée",
+  "ACmpPdN": "Notes payantes dans le fil",
+  "ACmpPts": "Payer avec des Yaki Points",
+  "ACmpLes": "Moins",
+  "ACmpNon": "Aucune",
+  "ACmpIns": "Analyses détaillées par période",
+  "ACmpPEd": "Éditeur premium",
+  "ACmpRdm": "Échanger des codes sats avec des Yaki Points",
+  "ACmpMrR": "Plus d’échanges"
 }

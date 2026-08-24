@@ -1765,7 +1765,7 @@
   "AZcdCkV": "我的内容可以移植吗？",
   "AbJvLWu": "完全地。",
   "AKvEPn9": "我可以用比特币支付吗？",
-  "AIZxnGr": "是的。",
+  "AIZxnGr": "是的。任何套餐都可通过闪电网络支付。发票即时生成——无需托管钱包。",
   "ACQpwGH": "很快就会重置",
   "APwGSMO": "重置于 {{count}} 分钟）",
   "AeDw1O8": "重置于 {{count}} 小时",
@@ -2082,5 +2082,18 @@
   "AMvr2S9": "1 个",
   "AKrisd9": "3 个",
   "AwM2mly": "无限制",
-  "A9dtmlH": "有限制"
+  "A9dtmlH": "有限制",
+  "APrcng1": "定价",
+  "APrcTtl": "简单诚实的定价",
+  "APrcSub": "没有隐藏费用，没有长期绑定。可使用法币、聪或 Yaki 积分支付，随时可取消。",
+  "ACmpEdt": "经典编辑器",
+  "ACmpNip": "自定义 NIP-05 地址",
+  "ACmpPdN": "信息流中的付费笔记",
+  "ACmpPts": "使用 Yaki 积分支付",
+  "ACmpLes": "更少",
+  "ACmpNon": "无",
+  "ACmpIns": "各周期详细洞察",
+  "ACmpPEd": "高级编辑器",
+  "ACmpRdm": "用 Yaki 积分兑换 sats 码",
+  "ACmpMrR": "更多兑换"
 }

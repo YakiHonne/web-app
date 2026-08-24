@@ -724,6 +724,19 @@ export default function TopNavbar() {
                     <span className={isPage(page.path) ? "" : "gray-c"}>{page.label}</span>
                   </div>
                 ))}
+                <div
+                  className="uplift-more-drawer-item"
+                  style={{ textDecoration: "none" }}
+                  onClick={() => {
+                    setShowMore(false);
+                    customHistory("/pricing", true);
+                  }}
+                >
+                  <div className="uplift-more-drawer-item-icon">
+                    <Icon name="sats" size={20} opacity={1} isBoldThemeColor />
+                  </div>
+                  <span className="orange-c">{t("APrcng1")}</span>
+                </div>
                 <a
                   href="https://pro.yakihonne.com"
                   target="_blank"
@@ -733,9 +746,9 @@ export default function TopNavbar() {
                   onClick={closeProfileMenu}
                 >
                   <div className="uplift-more-drawer-item-icon">
-                    <Icon name={iconsNames.wavy_check} v={2} size={20} opacity=".5" />
+                    <Icon name={iconsNames.wavy_check} v={2} size={20} opacity={1} isBoldThemeColor />
                   </div>
-                  <span className="gray-c">YakiPro</span>
+                  <span className="orange-c">YakiPro</span>
                 </a>
                 <div
                   className="uplift-more-drawer-item"
@@ -746,9 +759,9 @@ export default function TopNavbar() {
                   }}
                 >
                   <div className="uplift-more-drawer-item-icon">
-                    <Icon name={iconsNames.mobile} v={2} size={20} opacity=".5" />
+                    <Icon name={iconsNames.mobile} v={2} size={20} opacity={1} isBoldThemeColor />
                   </div>
-                  <span className="gray-c">{t("Ai28b6B")}</span>
+                  <span className="orange-c">{t("Ai28b6B")}</span>
                 </div>
               </div>
 

@@ -1798,7 +1798,7 @@
   "AZcdCkV": "Hordozható a tartalmam?",
   "AbJvLWu": "Teljesen. Minden cikk egy aláírt Nostr esemény az általad választott relayeken. Bármelyik Nostr-kompatibilis kliensben olvashatod és újra közzéteheted a tartalmadat.",
   "AKvEPn9": "Fizethetek Bitcoinnal?",
-  "AIZxnGr": "Igen. Fizess Lightningon, és 10% kedvezményt kapsz bármelyik csomagra. A számlák azonnal elkészülnek — nincs szükség letétkezelős tárcára.",
+  "AIZxnGr": "Igen. Bármelyik csomagot fizetheted Lightningon. A számlák azonnal elkészülnek — nincs szükség letétkezelős tárcára.",
   "ACQpwGH": "Hamarosan visszaáll",
   "APwGSMO": "Visszaáll {{count}} perc múlva",
   "AeDw1O8": "Visszaáll {{count}} óra múlva",
@@ -2282,5 +2282,18 @@
   "AwL4Oin": "Kifizetett számlák",
   "AC8k2xO": "Alkotói előfizetések",
   "Atx65xp": "Kezeld a kedvenc alkotóidat támogató fizetős előfizetéseidet, és nézd át az összes számlát egy helyen.",
-  "ATr1Bas": "Fizess elő a Basic megtartásához, vagy folytasd a Free csomaggal, amikor lejár a próbaidőszakod."
+  "ATr1Bas": "Fizess elő a Basic megtartásához, vagy folytasd a Free csomaggal, amikor lejár a próbaidőszakod.",
+  "APrcng1": "Árak",
+  "APrcTtl": "Egyszerű, tisztességes árazás",
+  "APrcSub": "Nincsenek rejtett díjak és hűségidő. Fizess fiat pénzzel, sattal vagy Yaki Pontokkal – és bármikor lemondhatod.",
+  "ACmpEdt": "Klasszikus szerkesztő",
+  "ACmpNip": "Egyéni NIP-05 cím",
+  "ACmpPdN": "Fizetős jegyzetek a hírfolyamban",
+  "ACmpPts": "Fizetés Yaki Pontokkal",
+  "ACmpLes": "Kevesebb",
+  "ACmpNon": "Nincs",
+  "ACmpIns": "Részletes időszaki elemzések",
+  "ACmpPEd": "Prémium szerkesztő",
+  "ACmpRdm": "Sats kódok beváltása Yaki Pontokkal",
+  "ACmpMrR": "Több beváltás"
 }
