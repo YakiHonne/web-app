@@ -237,7 +237,7 @@ function App({ Component, pageProps }) {
           className={`page-container fit-container fx-centered fx-start-v${!shouldHideSidebar ? " uplift-page-offset" : ""}`}
           style={{ minHeight: "100dvh" }}
         >
-          <div className={`main-container${router.pathname === "/write-article" ? " main-container--wide" : ""}`}>
+          <div className={`main-container${router.pathname === "/write-article" ? " main-container--wide" : ""}${router.pathname === "/pricing" ? " main-container--xwide" : ""}`}>
             <main className="fit-container fx-centered fx-end-h fx-start-v">
               <div
                 className="fit-container"

@@ -1798,7 +1798,7 @@
   "AZcdCkV": "Is my content portable?",
   "AbJvLWu": "Completely. Every article is a signed Nostr event on relays you control. You can read and republish your content with any Nostr-compatible client.",
   "AKvEPn9": "Can I pay in Bitcoin?",
-  "AIZxnGr": "Yes. Pay via Lightning and get a 10% discount on any plan. Invoices are generated instantly — no custodial wallets required.",
+  "AIZxnGr": "Yes. Pay via Lightning for any plan. Invoices are generated instantly — no custodial wallets required.",
   "ACQpwGH": "Resets soon",
   "APwGSMO": "Resets in {{count}} minute(s)",
   "AeDw1O8": "Resets in {{count}} hour(s)",
@@ -2282,5 +2282,18 @@
   "AwL4Oin": "Paid invoices",
   "AC8k2xO": "Creators subscriptions",
   "Atx65xp": "Manage the paid subscriptions supporting your favorite creators, and review every invoice in one place.",
-  "ATr1Bas": "Subscribe to keep Basic, or continue with the Free plan when your trial ends."
+  "ATr1Bas": "Subscribe to keep Basic, or continue with the Free plan when your trial ends.",
+  "APrcng1": "Pricing",
+  "APrcTtl": "Simple, honest pricing",
+  "APrcSub": "No hidden fees, no lock-in. Pay in fiat, sats, or Yaki Points — and cancel whenever you want.",
+  "ACmpEdt": "Classic editor",
+  "ACmpNip": "Custom NIP-05 address",
+  "ACmpPdN": "Paid notes on feed",
+  "ACmpPts": "Pay with Yaki Points",
+  "ACmpLes": "Less",
+  "ACmpNon": "None",
+  "ACmpIns": "Detailed period insights",
+  "ACmpPEd": "Premium editor",
+  "ACmpRdm": "Redeem sats codes with Yaki Points",
+  "ACmpMrR": "More redeeming"
 }
