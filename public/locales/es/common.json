@@ -1765,7 +1765,7 @@
   "AZcdCkV": "¿Mi contenido es portátil?",
   "AbJvLWu": "Completamente. ",
   "AKvEPn9": "¿Puedo pagar en Bitcoin?",
-  "AIZxnGr": "Sí. ",
+  "AIZxnGr": "Sí. Paga con Lightning en cualquier plan. Las facturas se generan al instante, sin necesidad de monederos custodiados.",
   "ACQpwGH": "Se reinicia pronto",
   "APwGSMO": "Se reinicia en {{count}} minutos)",
   "AeDw1O8": "Se reinicia en {{count}} horas)",
@@ -2082,5 +2082,18 @@
   "AMvr2S9": "1 monedero",
   "AKrisd9": "3 monederos",
   "AwM2mly": "Ilimitado",
-  "A9dtmlH": "Limitado"
+  "A9dtmlH": "Limitado",
+  "APrcng1": "Precios",
+  "APrcTtl": "Precios simples y honestos",
+  "APrcSub": "Sin cargos ocultos ni permanencia. Paga en moneda fiat, sats o Yaki Points, y cancela cuando quieras.",
+  "ACmpEdt": "Editor clásico",
+  "ACmpNip": "Dirección NIP-05 personalizada",
+  "ACmpPdN": "Notas de pago en el feed",
+  "ACmpPts": "Pagar con Yaki Points",
+  "ACmpLes": "Menos",
+  "ACmpNon": "Ninguna",
+  "ACmpIns": "Información detallada por periodo",
+  "ACmpPEd": "Editor premium",
+  "ACmpRdm": "Canjear códigos de sats con Yaki Points",
+  "ACmpMrR": "Más canjes"
 }

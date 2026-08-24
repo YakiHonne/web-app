@@ -903,6 +903,10 @@ main {
     width: min(100%, 1000px);
 }
 
+.main-container.main-container--xwide {
+    width: min(100%, 1320px);
+}
+
 .main-page-nostr-container {
     width: calc(100% - 230px);
     position: relative;
@@ -3173,7 +3177,7 @@ input[type="range"]::-moz-range-thumb {
 .lp-plan-card {
     background: var(--very-dim-gray);
     border: 1px solid var(--pale-gray);
-    border-radius: 14px;
+    border-radius: 24px;
     padding: 36px;
     display: flex;
     flex-direction: column;
@@ -3231,7 +3235,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .lp-plan-period {
-    font-size: 0.875rem;
+    font-size: 1rem;
     color: var(--gray);
 }
 
@@ -3239,7 +3243,7 @@ input[type="range"]::-moz-range-thumb {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.78rem;
+    font-size: 0.95rem;
     color: var(--c1);
     font-weight: 600;
 }
@@ -3346,7 +3350,7 @@ input[type="range"]::-moz-range-thumb {
 
 .lp-compare-row {
     display: grid;
-    grid-template-columns: 1fr 120px 120px 120px;
+    grid-template-columns: 1fr 170px 170px 170px;
     border-bottom: 1px solid var(--pale-gray);
 }
 
@@ -3365,6 +3369,10 @@ input[type="range"]::-moz-range-thumb {
     color: var(--gray);
     display: flex;
     align-items: center;
+}
+
+.lp-compare-cell.center {
+    white-space: nowrap;
 }
 
 .lp-compare-cell.center {
