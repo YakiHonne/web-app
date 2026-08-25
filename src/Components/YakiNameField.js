@@ -32,6 +32,8 @@ export default function YakiNameField({
   badge = false,
   action,
   onChange,
+  onContainerClick,
+  inputRef,
 }) {
   const { t } = useTranslation();
   const hint = disabled ? null : nameHint({ state, reason }, t);
@@ -45,7 +47,12 @@ export default function YakiNameField({
 
   return (
     <div
-      className="fit-container sc-s-18 no-bg box-pad-v-s"
+      className={`fit-container sc-s-18 no-bg box-pad-v-s${
+        onContainerClick
+          ? ` pointer${accent ? "" : " yaki-name-field-clickable"}`
+          : ""
+      }`}
+      onClick={onContainerClick}
       style={accent ? { borderColor: `color-mix(in srgb, ${accent} 35%, transparent)` } : undefined}
     >
       <div className="fx-centered fx-start-h box-pad-h-m" style={{ gap: "4px" }}>
@@ -59,6 +66,7 @@ export default function YakiNameField({
           </p>
         )}
         <input
+          ref={inputRef}
           className="if ifs-full if-no-border"
           style={{
             height: "36px",
@@ -67,10 +75,11 @@ export default function YakiNameField({
             flex: "1 1 auto",
             width: "auto",
             minWidth: 0,
+            cursor: disabled && onContainerClick ? "pointer" : undefined,
           }}
           placeholder={placeholder}
           value={value}
-          disabled={disabled}
+          readOnly={disabled}
           spellCheck={false}
           autoCapitalize="none"
           autoCorrect="off"

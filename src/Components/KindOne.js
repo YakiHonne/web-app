@@ -305,6 +305,7 @@ function KindOne({
           author={userProfile}
           exit={() => setShowComments(false)}
           isRoot={event.isComment ? false : true}
+          parentKind={event.kind}
         />
       )}
       {usersList && (
@@ -508,6 +509,7 @@ function KindOne({
               replyId={event.id}
               replyPubkey={event.pubkey}
               actions={postActions}
+              parentKind={event.kind}
               label={event.isComment ? "" : t("AABwCJX")}
             />
           )}
@@ -772,6 +774,7 @@ const FastAccessCS = ({
   author,
   exit,
   isRoot = true,
+  parentKind = null,
 }) => {
   const { t } = useTranslation();
   return (
@@ -797,6 +800,7 @@ const FastAccessCS = ({
           eventPubkey={eventPubkey}
           author={author}
           isRoot={isRoot}
+          parentKind={parentKind}
         />
       </div>
     </Overlay>

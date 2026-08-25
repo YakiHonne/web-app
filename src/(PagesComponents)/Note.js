@@ -53,6 +53,14 @@ export default function Note({ event, nevent }) {
   const [showPaidNoteInfo, setShowPaidNoteInfo] = useState(false);
   const { userProfile, isNip05Verified, proUser } = useUserProfile(note?.pubkey);
   const { postActions } = useNoteStats(note?.id, note?.pubkey);
+  const relayHints = useMemo(() => {
+    try {
+      const decoded = nip19.decode(nevent);
+      return Array.isArray(decoded?.data?.relays) ? decoded.data.relays : [];
+    } catch (err) {
+      return [];
+    }
+  }, [nevent]);
   const unsupportedKind = useMemo(() => {
     return ![1, 1111].includes(note?.kind);
   }, [note]);
@@ -306,8 +314,9 @@ export default function Note({ event, nevent }) {
                   nEvent={note.nEvent}
                   postActions={postActions}
                   author={userProfile}
-                  isRoot={note.isRoot}
                   rootData={note.rootData}
+                  parentKind={note.kind}
+                  relays={relayHints}
                   leaveComment={openComment}
                 />
               </div>

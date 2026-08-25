@@ -26,7 +26,7 @@ export default function UpgradeSheetHost() {
     fetchEligibility();
   }, [isOpen, fetchConfig, fetchEligibility]);
 
-  if (!isOpen || plans.length === 0) return null;
+  if (!isOpen) return null;
 
   return (
     <UpgradeOverlay

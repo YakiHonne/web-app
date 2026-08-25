@@ -30,9 +30,14 @@ const getSeriesItems = (postActions, key) => {
     return postActions[key]?.[key] || []
 }
 
-const buildChartBuckets = (postActions) => {
+const getChartSeries = (isRepEvent = false) =>
+    isRepEvent
+        ? REACTION_SERIES.filter((s) => s.key !== "reposts")
+        : REACTION_SERIES
+
+const buildChartBuckets = (postActions, seriesList = REACTION_SERIES) => {
     const all = []
-    for (const series of REACTION_SERIES) {
+    for (const series of seriesList) {
         for (const item of getSeriesItems(postActions, series.key)) {
             if (item?.created_at) all.push({ created_at: item.created_at, key: series.key })
         }
@@ -55,7 +60,7 @@ const buildChartBuckets = (postActions) => {
         return {
             start,
             end: min + (i + 1) * step,
-            counts: REACTION_SERIES.reduce((acc, s) => ({ ...acc, [s.key]: 0 }), {}),
+            counts: seriesList.reduce((acc, s) => ({ ...acc, [s.key]: 0 }), {}),
         }
     })
 
@@ -68,7 +73,7 @@ const buildChartBuckets = (postActions) => {
 
     let maxCount = 0
     for (const b of buckets) {
-        for (const s of REACTION_SERIES) {
+        for (const s of seriesList) {
             if (b.counts[s.key] > maxCount) maxCount = b.counts[s.key]
         }
     }
@@ -84,14 +89,15 @@ const formatBucketDate = (seconds) => {
     }
 }
 
-const StatsBarChart = ({ postActions }) => {
+const StatsBarChart = ({ postActions, isRepEvent = false }) => {
     const { t } = useTranslation()
     const { resolvedTheme } = useTheme()
     const isLight = resolvedTheme === 'light' || resolvedTheme === 'white' || resolvedTheme === 'creamy'
     const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.07)'
     const [hovered, setHovered] = React.useState(null)
 
-    const chart = React.useMemo(() => buildChartBuckets(postActions), [postActions])
+    const seriesList = React.useMemo(() => getChartSeries(isRepEvent), [isRepEvent])
+    const chart = React.useMemo(() => buildChartBuckets(postActions, seriesList), [postActions, seriesList])
 
     if (!chart) return null
 
@@ -104,7 +110,7 @@ const StatsBarChart = ({ postActions }) => {
     return (
         <div className="fit-container fx-centered fx-col" style={{ rowGap: '12px', paddingBottom: '4px' }}>
             <div className="fx-centered fx-wrap" style={{ columnGap: '16px', rowGap: '6px', justifyContent: 'center' }}>
-                {REACTION_SERIES.map(s => (
+                {seriesList.map(s => (
                     <div className="fx-centered" style={{ columnGap: '6px' }} key={s.key}>
                         <span style={{ width: '10px', height: '10px', borderRadius: '3px', backgroundColor: s.color, flexShrink: 0 }} />
                         <p className="gray-c p-medium">{t(s.labelKey)}</p>
@@ -139,7 +145,7 @@ const StatsBarChart = ({ postActions }) => {
                             <p className="p-medium" style={{ fontWeight: 600 }}>
                                 {formatBucketDate(hoveredBucket.start)}
                             </p>
-                            {REACTION_SERIES.map(s => (
+                            {seriesList.map(s => (
                                 <div className="fx-centered" style={{ columnGap: '4px' }} key={s.key}>
                                     <span style={{ width: '8px', height: '8px', borderRadius: '2px', backgroundColor: s.color, flexShrink: 0 }} />
                                     <p className="p-medium">{hoveredBucket.counts[s.key]}</p>
@@ -179,7 +185,7 @@ const StatsBarChart = ({ postActions }) => {
                                     transition: 'opacity .15s ease',
                                 }}
                             >
-                                {REACTION_SERIES.map(s => {
+                                {seriesList.map(s => {
                                     const c = b.counts[s.key]
                                     const heightPct = maxCount ? (c / maxCount) * 100 : 0
                                     return (
@@ -242,25 +248,37 @@ const StatsBarChart = ({ postActions }) => {
     )
 }
 
-export default function EventStats({ postActions }) {
+export default function EventStats({ postActions, isRepEvent = false }) {
     const [showStats, setShowStats] = React.useState(false)
     return (
         <>
-            {showStats && <StatsOverlay postActions={postActions} exit={() => setShowStats(false)} />}
+            {showStats && <StatsOverlay postActions={postActions} isRepEvent={isRepEvent} exit={() => setShowStats(false)} />}
             <Icon v={2} name={iconsNames.chart_bar_vertical_01} size={20} opacity='.5' onClick={() => setShowStats(true)} />
         </>
     )
 }
 
-const getItemsForTab = (postActions, tabIndex) => {
+const getStatsTabs = (isRepEvent = false) =>
+    isRepEvent
+        ? [
+            { key: "likes", labelKey: "Alz0E9Y" },
+            { key: "replies", labelKey: "AENEcn9" },
+            { key: "quotes", labelKey: "AWmDftG" },
+            { key: "zaps", labelKey: "AVDZ5cJ" },
+        ]
+        : [
+            { key: "likes", labelKey: "Alz0E9Y" },
+            { key: "replies", labelKey: "AENEcn9" },
+            { key: "reposts", labelKey: "Aai65RJ" },
+            { key: "quotes", labelKey: "AWmDftG" },
+            { key: "zaps", labelKey: "AVDZ5cJ" },
+        ]
+
+const getItemsForTab = (postActions, tabIndex, isRepEvent = false) => {
     if (!postActions) return []
-    switch (tabIndex) {
-        case 0: return postActions.likes?.likes || []
-        case 1: return postActions.reposts?.reposts || []
-        case 2: return postActions.quotes?.quotes || []
-        case 3: return postActions.zaps?.zaps || []
-        default: return []
-    }
+    const entry = getStatsTabs(isRepEvent)[tabIndex]
+    if (!entry) return []
+    return postActions[entry.key]?.[entry.key] || []
 }
 
 const PeopleList = ({ items, tab, cache, setCache }) => {
@@ -393,31 +411,30 @@ const PeopleList = ({ items, tab, cache, setCache }) => {
     )
 }
 
-const StatsOverlay = ({ postActions, exit }) => {
+const StatsOverlay = ({ postActions, isRepEvent = false, exit }) => {
     const { t } = useTranslation()
     const [selectedTab, setSelectedTab] = React.useState(0)
     const [peopleCache, setPeopleCache] = React.useState({})
 
-    const counts = [
-        postActions.likes?.likes?.length || 0,
-        postActions.reposts?.reposts?.length || 0,
-        postActions.quotes?.quotes?.length || 0,
-        postActions.zaps?.zaps?.length || 0,
-    ]
+    const tabEntries = React.useMemo(() => getStatsTabs(isRepEvent), [isRepEvent])
 
-    const tabs = React.useMemo(() => [
-        `${t("Alz0E9Y")} (${counts[0]})`,
-        `${t("Aai65RJ")} (${counts[1]})`,
-        `${t("AWmDftG")} (${counts[2]})`,
-        `${t("AVDZ5cJ")} (${counts[3]})`,
-    ], [t, counts[0], counts[1], counts[2], counts[3]])
+    const counts = tabEntries.map(
+        (entry) => postActions[entry.key]?.[entry.key]?.length || 0,
+    )
 
-    const items = React.useMemo(() => getItemsForTab(postActions, selectedTab), [postActions, selectedTab])
+    const countsKey = counts.join("-")
+
+    const tabs = React.useMemo(
+        () => tabEntries.map((entry, index) => `${t(entry.labelKey)} (${counts[index]})`),
+        [t, tabEntries, countsKey],
+    )
+
+    const items = React.useMemo(() => getItemsForTab(postActions, selectedTab, isRepEvent), [postActions, selectedTab, isRepEvent])
 
     return (
         <Overlay exit={exit} width={600}>
             <div className="fx-centered fx-col fx-start-h fit-container box-pad-v-m box-pad-h-m" style={{ rowGap: '16px' }}>
-                <StatsBarChart postActions={postActions} />
+                <StatsBarChart postActions={postActions} isRepEvent={isRepEvent} />
                 <SelectTabs selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabs={tabs} />
                 <PeopleList key={selectedTab} items={items} tab={selectedTab} cache={peopleCache} setCache={setPeopleCache} />
             </div>

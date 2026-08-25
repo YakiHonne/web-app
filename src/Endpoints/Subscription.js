@@ -61,10 +61,11 @@ export const getSubscriberBillingPortal = async ({ creator_pubkey, return_url })
 let _plansCache = null;
 
 export const getPlans = async () => {
-  if (_plansCache) return _plansCache;
+  if (_plansCache?.length) return _plansCache;
   const { data } = await axiosInstance.get("/api/v1/plans");
-  _plansCache = data.plans ?? [];
-  return _plansCache;
+  const plans = data.plans ?? [];
+  if (plans.length) _plansCache = plans;
+  return plans;
 };
 
 export const clearPlansCache = () => { _plansCache = null; };

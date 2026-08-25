@@ -4,114 +4,81 @@ import { getWOTScoreForPubkeyLegacy } from "@/Helpers/Encryptions";
 import { useSelector } from "react-redux";
 import { getSubData } from "@/Helpers/Controlers";
 import { ndkInstance } from "@/Helpers/NDKInstance";
-import { saveUsers } from "@/Helpers/DB";
+import { getEventStats, saveEventStats, saveUsers } from "@/Helpers/DB";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Comments from "@/Components/Reactions/Comments";
 import Spinner from "@/Components/Spinner";
 import { customHistory } from "@/Helpers/History";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
-import { getNip22Refs, getParsedNote, getWotConfig } from "@/Helpers/ClientHelpers";
+import { getParsedNote, getWotConfig } from "@/Helpers/ClientHelpers";
+import {
+  buildCommentsTree,
+  flattenCommentsTree,
+  getMissingParents,
+  getRefType,
+  getThreadRefs,
+} from "@/Helpers/Threads";
+import { relaysOnPlatform, SSGRelays } from "@/Content/Relays";
 import Icon from "@/Components/Icon";
 
-const filterComments = (all, id, isRoot, rootValue) => {
-  if (isRoot) return filterRootComments(all, id, rootValue);
-  return filterRepliesComments(all, id);
-};
-const filterRepliesComments = (all, id) => {
-  let temp = [];
-  for (let comment of all) {
-    let hasNip10Tag = comment.tags.find(
-      (item) =>
-        item[0] === "e" &&
-        item[1] === id &&
-        ["reply", "root"].includes(item[3]),
-    );
+const COMMENT_KINDS = [1, 1111];
+const MAX_ROUNDS = 4;
+const MAX_IDS_PER_QUERY = 100;
+const FETCH_TIMEOUT = 1000;
+const THREAD_RELAYS = [...new Set([...relaysOnPlatform, ...SSGRelays])];
 
-    let nip22Refs = comment.kind === 1111 ? getNip22Refs(comment) : null;
-    let hasNip22Tag =
-      nip22Refs && !nip22Refs.isTopLevel && nip22Refs.parentValue === id;
-
-    if (hasNip10Tag || hasNip22Tag) {
-      let note_tree = getParsedNote(comment, true);
-      let replies = countReplies(comment.id, all);
-      if (note_tree)
-        temp.push({
-          ...note_tree,
-          replies,
-        });
-    }
-  }
-  return temp;
+const getUserReadRelays = (userAllRelays) => {
+  if (!Array.isArray(userAllRelays)) return [];
+  return userAllRelays
+    .filter((relay) => relay?.url && relay.read !== false)
+    .map((relay) => relay.url);
 };
 
-const filterRootComments = (all, id, rootValue) => {
-  let temp = [];
-  let scope = rootValue || id;
-
-  for (let comment of all) {
-    let isTopLevel = false;
-
-    if (comment.kind === 1111) {
-      let refs = getNip22Refs(comment);
-      isTopLevel = refs
-        ? refs.isTopLevel && (!scope || refs.rootValue === scope)
-        : false;
-    } else {
-      let isRoot = comment.tags.find(
-        (item) => item[0] === "e" && item[3] === "root",
-      );
-      let isReply = comment.tags.find(
-        (item) => item[0] === "e" && item[3] === "reply",
-      );
-      isTopLevel =
-        !isReply ||
-        (Array.isArray(isReply) &&
-          Array.isArray(isRoot) &&
-          isReply[1] === isRoot[1]) ||
-        (Array.isArray(isReply) && !isRoot && isReply[1] === id);
-    }
-
-    if (isTopLevel) {
-      let note_tree = getParsedNote(comment, true);
-      let replies = countReplies(comment.id, all);
-      if (note_tree)
-        temp.push({
-          ...note_tree,
-          replies,
-        });
-    }
+const buildThreadFilters = (refs, since) => {
+  const grouped = {};
+  for (const ref of refs) {
+    if (!ref?.value) continue;
+    if (!grouped[ref.type]) grouped[ref.type] = new Set();
+    grouped[ref.type].add(ref.value);
   }
-  return temp;
+  const filters = [];
+  for (const [type, values] of Object.entries(grouped)) {
+    const list = [...values];
+    const extra = since ? { since } : {};
+    filters.push({ kinds: COMMENT_KINDS, [`#${type}`]: list, ...extra });
+    filters.push({ kinds: [1111], [`#${type.toUpperCase()}`]: list, ...extra });
+  }
+  return filters;
 };
 
-const countReplies = (id, all) => {
-  let replies = [];
+const isAcceptedComment = (event, wot) => {
+  if (!event?.id || !Array.isArray(event.tags)) return false;
+  const label = event.tags.find((tag) => tag[0] === "l");
+  if (label && label[1] === "UNCENSORED NOTE") return false;
+  const refs = getThreadRefs(event);
+  if (!refs) return false;
+  const isQuote = event.tags.some((tag) => tag[0] === "q");
+  if (isQuote && !refs.marked) return false;
+  return getWOTScoreForPubkeyLegacy(event.pubkey, wot.reactions, wot.score)
+    .status;
+};
 
-  for (let comment of all) {
-    let hasNip10Reply = comment.tags.find(
-      (item) => item[3] === "reply" && item[0] === "e" && item[1] === id,
-    );
+const toNode = (node) => {
+  const parsed = getParsedNote(node.event, true);
+  if (!parsed) return null;
+  return {
+    ...parsed,
+    replies: node.replies.map(toNode).filter(Boolean),
+  };
+};
 
-    let nip22Refs = comment.kind === 1111 ? getNip22Refs(comment) : null;
-    let hasNip22Reply =
-      nip22Refs && !nip22Refs.isTopLevel && nip22Refs.parentValue === id;
-
-    if (hasNip10Reply || hasNip22Reply) {
-      let nestedReplies = countReplies(comment.id, all);
-      let _ = getParsedNote(comment, true);
-      if (_) {
-        replies.push({
-          ..._,
-          replies: nestedReplies,
-        });
-      }
-    }
+const flattenNodes = (nodes, out = []) => {
+  for (const node of nodes) {
+    out.push(node);
+    flattenNodes(node.replies, out);
   }
-
-  replies.sort((a, b) => b.created_at - a.created_at);
-
-  return replies;
+  return out;
 };
 
 const repliesCount = (comment) => {
@@ -119,7 +86,6 @@ const repliesCount = (comment) => {
   if (comment.replies.length === 0) return 0;
   count += comment.replies.length;
   for (let reply of comment.replies) count += repliesCount(reply);
-
   return count;
 };
 
@@ -129,13 +95,15 @@ export default function CommentsSection({
   eventPubkey,
   postActions,
   author,
-  isRoot,
   tagKind = "e",
   leaveComment = false,
   rootData,
   rootKind = null,
+  parentKind = null,
+  relays = [],
 }) {
   const userKeys = useSelector((state) => state.userKeys);
+  const userAllRelays = useSelector((state) => state.userAllRelays);
   const { userMutedList } = useSelector((state) => state.userMutedList);
   const { t } = useTranslation();
   const [comments, setComments] = useState([]);
@@ -147,119 +115,176 @@ export default function CommentsSection({
     return !netComments.find((_) => !userMutedList?.includes(_.pubkey));
   }, [netComments, userMutedList]);
 
-  useEffect(() => {
-    let parsedCom = () => {
-      let res = filterComments(
-        comments,
-        id,
-        isRoot,
-        rootData ? rootData[1] : id,
-      );
-      setNetComments(res.filter((_) => _.id));
-      if (res.length !== 0 || comments.length > 0) setIsLoading(false);
-    };
-    parsedCom();
-  }, [comments]);
+  const threadRoot = useMemo(() => {
+    if (rootData && rootData[1] && rootData[1] !== id)
+      return { type: getRefType(rootData[1], rootData[0]), value: rootData[1] };
+    if (Array.isArray(noteTags)) {
+      const refs = getThreadRefs({
+        kind: Number(parentKind) || 1,
+        tags: noteTags,
+      });
+      if (refs?.root?.value && refs.root.value !== id) return refs.root;
+    }
+    return null;
+  }, [id, rootData, noteTags, parentKind]);
+
+  const targetRefs = useMemo(() => {
+    const refs = [{ type: getRefType(id, tagKind), value: id }];
+    if (threadRoot) refs.push(threadRoot);
+    return refs;
+  }, [id, tagKind, threadRoot]);
+
+  const relayUrls = useMemo(
+    () => [
+      ...new Set([
+        ...THREAD_RELAYS,
+        ...getUserReadRelays(userAllRelays),
+        ...(relays || []),
+      ]),
+    ],
+    [userAllRelays, JSON.stringify(relays || [])],
+  );
 
   useEffect(() => {
+    const tree = buildCommentsTree(comments, id);
+    setNetComments(tree.map(toNode).filter(Boolean));
+  }, [comments, id]);
+
+  useEffect(() => {
+    let cancelled = false;
     const fetchData = async () => {
       setIsLoading(true);
-      const { score, reactions } = getWotConfig();
+      const wot = getWotConfig();
+      const accepted = new Map();
+      const pubkeys = new Set();
+      const ingest = (list) => {
+        let added = 0;
+        for (const event of list || []) {
+          if (!event?.id || accepted.has(event.id)) continue;
+          if (!isAcceptedComment(event, wot)) continue;
+          accepted.set(event.id, event);
+          pubkeys.add(event.pubkey);
+          added++;
+        }
+        return added;
+      };
 
-      const commentKinds = [1, 1111];
+      const publish = () => {
+        if (cancelled) return;
+        setComments([...accepted.values()]);
+        setIsLoading(false);
+        saveUsers([...pubkeys]);
+      };
 
-      const rootValue = rootData ? rootData[1] : id;
-      const events = await getSubData(
-        [
-          {
-            kinds: commentKinds,
-            [`#${tagKind}`]: [rootValue],
-          },
-          {
-            kinds: [1111],
-            [`#${tagKind.toUpperCase()}`]: [rootValue],
-          },
-        ],
-        300,
+      const initial = await getSubData(
+        buildThreadFilters(targetRefs),
+        FETCH_TIMEOUT,
+        relayUrls,
       );
+      ingest(initial.data);
+      publish();
 
-      let tempEvents = events.data
-        .map((event) => {
-          let is_un = event.tags.find((tag) => tag[0] === "l");
-          let is_comment =
-            event.kind === 1111 ||
-            event.tags.find(
-              (tag) =>
-                tag.length > 3 && ["root", "reply"].includes(tag[3]),
-            );
-          let is_quote = event.tags.find((tag) => tag[0] === "q");
-          let is_mention = event.tags.filter(
-            (tag) => tag.length > 3 && tag[3] === "mention" && tag[1] === id,
-          );
-          let scoreStatus = getWOTScoreForPubkeyLegacy(
-            event.pubkey,
-            reactions,
-            score,
-          );
-          if (
-            !(
-              (is_un && is_un[1] === "UNCENSORED NOTE") ||
-              (is_quote && !is_comment) ||
-              (is_mention.length > 0 && !is_comment)
-            ) &&
-            scoreStatus.status
-          ) {
-            return event;
+      const requested = new Set();
+      const expanded = new Set(targetRefs.map((ref) => ref.value));
+      for (let round = 0; round < MAX_ROUNDS; round++) {
+        if (cancelled) return;
+        let added = 0;
+
+        const missing = getMissingParents([...accepted.values()], id)
+          .filter((parent) => !requested.has(parent.id))
+          .slice(0, MAX_IDS_PER_QUERY);
+        if (missing.length > 0) {
+          const hints = new Set(relayUrls);
+          for (const parent of missing) {
+            requested.add(parent.id);
+            parent.relays.forEach((url) => hints.add(url));
           }
-        })
-        .filter((_) => _);
+          const parents = await getSubData(
+            [{ ids: missing.map((parent) => parent.id) }],
+            FETCH_TIMEOUT,
+            [...hints],
+          );
+          added += ingest(parents.data);
+        }
 
-      if (tempEvents.length === 0) setIsLoading(false);
-      setComments(tempEvents);
-      saveUsers(events.pubkeys);
+        const branchIds = flattenCommentsTree(
+          buildCommentsTree([...accepted.values()], id),
+        )
+          .map((event) => event.id)
+          .filter((eventId) => !expanded.has(eventId))
+          .slice(0, MAX_IDS_PER_QUERY);
+        if (branchIds.length > 0) {
+          branchIds.forEach((eventId) => expanded.add(eventId));
+          const branches = await getSubData(
+            buildThreadFilters(
+              branchIds.map((value) => ({ type: "e", value })),
+            ),
+            FETCH_TIMEOUT,
+            relayUrls,
+          );
+          added += ingest(branches.data);
+        }
+
+        if (added > 0) publish();
+        if (added === 0 || (missing.length === 0 && branchIds.length === 0))
+          break;
+      }
     };
     fetchData();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
   useEffect(() => {
+    if (isLoading || netComments.length === 0) return;
+    let cancelled = false;
+    const syncStats = async () => {
+      const stats = await getEventStats(id);
+      if (cancelled || !stats?.replies?.replies) return;
+      const known = new Set(stats.replies.replies.map((reply) => reply.id));
+      const additions = flattenNodes(netComments)
+        .filter((node) => !known.has(node.id))
+        .map((node) => ({
+          id: node.id,
+          pubkey: node.pubkey,
+          created_at: node.created_at,
+        }));
+      if (additions.length === 0) return;
+      saveEventStats(id, {
+        ...stats,
+        replies: {
+          ...stats.replies,
+          replies: [...stats.replies.replies, ...additions],
+        },
+      });
+    };
+    syncStats();
+    return () => {
+      cancelled = true;
+    };
+  }, [netComments, isLoading, postActions]);
+
+  useEffect(() => {
     if (isLoading) return;
-
-    const commentKinds = [1, 1111];
-
-    const rootValue = rootData ? rootData[1] : id;
+    const wot = getWotConfig();
     const sub = ndkInstance.subscribe(
-      [
-        {
-          kinds: commentKinds,
-          [`#${tagKind}`]: [rootValue],
-          since: Math.floor(Date.now() / 1000),
-        },
-        {
-          kinds: [1111],
-          [`#${tagKind.toUpperCase()}`]: [rootValue],
-          since: Math.floor(Date.now() / 1000),
-        },
-      ],
+      buildThreadFilters(targetRefs, Math.floor(Date.now() / 1000)),
       { cacheUsage: "ONLY_RELAY", groupable: false },
     );
 
     sub.on("event", (event) => {
-      let is_un = event.tags.find((tag) => tag[0] === "l");
-      let is_quote = event.tags.find((tag) => tag[0] === "q");
-      if (!((is_un && is_un[1] === "UNCENSORED NOTE") || is_quote)) {
-        setComments((prev) => {
-          let newCom = [...prev, event.rawEvent()];
-          return newCom.sort(
-            (item_1, item_2) => item_2.created_at - item_1.created_at,
-          );
-        });
-        saveUsers([event.pubkey]);
-      }
+      if (!isAcceptedComment(event, wot)) return;
+      setComments((prev) => {
+        if (prev.some((item) => item.id === event.id)) return prev;
+        return [...prev, event];
+      });
+      saveUsers([event.pubkey]);
     });
     return () => {
       if (sub) sub.stop();
     };
-  }, [isLoading]);
+  }, [isLoading, id]);
 
   useEffect(() => {
     setShowWriteNote(leaveComment);
@@ -297,6 +322,7 @@ export default function CommentsSection({
                   actions={postActions}
                   tagKind={tagKind}
                   rootKind={rootKind}
+                  parentKind={parentKind}
                   label={t("AABwCJX")}
                 />
               </div>
@@ -339,7 +365,7 @@ export default function CommentsSection({
               <h4>{t("AENEcn9")}</h4>
             </div>
           )}
-          {netComments.map((comment, index) => {
+          {netComments.map((comment) => {
             return (
               <Comment
                 comment={comment}
@@ -360,14 +386,6 @@ export default function CommentsSection({
               <Icon name="yaki-logomark" size={48} />
               <p className="p-centered gray-c">{t("A84Nx8y")}</p>
             </div>
-            // <div
-            //   className="fit-container fx-centered fx-col"
-            //   style={{ height: "20vh" }}
-            // >
-            //   <h4>{t("ARe2fkn")}</h4>
-            //   <p className="p-centered gray-c">{t("AkLuU1q")}</p>
-            //   <Icon name="comment" size={24} />
-            // </div>
           )}
         </div>
       </div>
@@ -389,44 +407,12 @@ const Comment = ({
   let allRepliesCount = useMemo(() => {
     let count = comment.replies.length > 0 ? repliesCount(comment) : 0;
     return count == 0 || count >= 10 ? count : `0${count}`;
-  }, []);
+  }, [comment]);
 
   if (userMutedList.includes(comment.pubkey)) return;
-  // if (userMutedList.includes(comment.pubkey) && !isReply) return <h1>hkjkh</h1>;
-  if (userMutedList.includes(comment.pubkey))
-    return (
-      <div
-        className={`fit-container ${isReplyBorder ? "reply-side-border" : ""}`}
-      >
-        <div className="fit-container fx-centered fx-start-h">
-          <div
-            className=" fx-centered fx-start-h box-pad-h pointer"
-            style={{
-              minWidth: `calc(100% - 2.5rem)`,
-              position: "relative",
-              paddingTop: "2rem",
-            }}
-          >
-            {isReply && (
-              <div
-                className="reply-tail"
-                style={{ left: isReplyBorder ? "-.0625rem" : 0 }}
-              ></div>
-            )}
-            <div
-              className="fx-centered box-pad-h-s box-pad-v-s sc-s-18"
-              style={{ padding: ".25rem .5rem" }}
-            >
-              <p className="red-c p-medium">{t("AgJ47NX")}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
   return (
     <div
       className={`fit-container ${isReplyBorder ? "reply-side-border" : ""}`}
-    // style={{ borderLeft: isReplyBorder ? "1px solid var(--dim-gray)" : "" }}
     >
       <NotesComment
         event={comment}

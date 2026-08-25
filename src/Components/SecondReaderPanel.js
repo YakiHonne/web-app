@@ -168,38 +168,52 @@ function ReactionCard({ reaction, onFocus, onFix, onIgnore, aiQuotaExceeded }) {
         ? " severity-critical"
         : "";
 
+  const isPositive = reaction.sentiment === "positive";
+  const isNegative = reaction.sentiment === "negative";
+  const fixLabel = isNegative ? t("AvGTiVQ") : t("AxbUj3I");
+
+  const stateClass = isFixed
+    ? " sr-reaction-treated"
+    : isIgnored
+      ? " sr-reaction-ignored"
+      : "";
+
   return (
     <div
-      className={`sr-reaction-card${severityClass}${isResolved ? " sr-reaction-ignored" : ""}`}
+      className={`sr-reaction-card${severityClass}${stateClass}`}
       onClick={() => !isResolved && onFocus(reaction.paragraphIndex)}
     >
       <div className="sr-reaction-meta">
         <span className="sr-para-label">¶{reaction.paragraphIndex + 1}</span>
         <SentimentIcon sentiment={reaction.sentiment} />
       </div>
-      <p className="sr-reaction-text">{reaction.comment}</p>
+      <p className={`sr-reaction-text${isResolved ? " sr-reaction-text-done" : ""}`}>
+        {reaction.comment}
+      </p>
 
       {!isResolved && (
         <div className="sr-reaction-actions">
-          <button
-            className={`sr-fix-btn${aiQuotaExceeded ? " sr-fix-btn-disabled" : ""}`}
-            disabled={aiQuotaExceeded}
-            title={aiQuotaExceeded ? "AI quota exceeded" : undefined}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (aiQuotaExceeded) return;
-              onFix(reaction);
-            }}
-          >
-            {aiQuotaExceeded ? (
-              <>
-                <Icon name={iconsNames.circle_warning} size={13} />
-                Limit reached
-              </>
-            ) : (
-              <>{t("AvGTiVQ")} →</>
-            )}
-          </button>
+          {!isPositive && (
+            <button
+              className={`sr-fix-btn${aiQuotaExceeded ? " sr-fix-btn-disabled" : ""}`}
+              disabled={aiQuotaExceeded}
+              title={aiQuotaExceeded ? "AI quota exceeded" : undefined}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (aiQuotaExceeded) return;
+                onFix(reaction);
+              }}
+            >
+              {aiQuotaExceeded ? (
+                <>
+                  <Icon name={iconsNames.circle_warning} size={13} />
+                  Limit reached
+                </>
+              ) : (
+                <>{fixLabel} →</>
+              )}
+            </button>
+          )}
           <button
             className="sr-ignore-btn"
             onClick={(e) => {
@@ -212,7 +226,7 @@ function ReactionCard({ reaction, onFocus, onFix, onIgnore, aiQuotaExceeded }) {
         </div>
       )}
 
-      {isFixed && <p className="sr-ignored-label">✓ {t("A07lIrt")}</p>}
+      {isFixed && <p className="sr-treated-label">✓ {t("AmTXugY")}</p>}
       {isIgnored && <p className="sr-ignored-label">{t("AzWK36X")}</p>}
     </div>
   );
@@ -396,6 +410,8 @@ export default function SecondReaderPanel({
   onOpenAIChat,
   lastEditedParagraph,
   suppressInvalidationRef,
+  resetSignal = 0,
+  reanalyzeOnReset = false,
 }) {
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -623,6 +639,27 @@ export default function SecondReaderPanel({
     deleteStoredReactions(pubkey, activePersona.id);
     setReactions([]);
   }, [pubkey, activePersona]);
+
+  const handleSelectPersonaRef = useRef(null);
+  handleSelectPersonaRef.current = handleSelectPersona;
+
+  const reanalyzeOnResetRef = useRef(reanalyzeOnReset);
+  reanalyzeOnResetRef.current = reanalyzeOnReset;
+
+  useEffect(() => {
+    if (!resetSignal) return;
+    const persona = activePersonaRef.current;
+    Object.keys(reactionsCache.current).forEach((id) => {
+      deleteStoredReactions(pubkey, id);
+    });
+    reactionsCache.current = {};
+    setReactions([]);
+    if (persona && reanalyzeOnResetRef.current) {
+      handleSelectPersonaRef.current?.(persona);
+    } else {
+      setView("picker");
+    }
+  }, [resetSignal, pubkey]);
 
   return (
     <div

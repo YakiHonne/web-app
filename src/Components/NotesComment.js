@@ -146,6 +146,7 @@ export default function NotesComment({
               eventPubkey={event.pubkey}
               author={userProfile}
               isRoot={event.isComment ? false : true}
+              parentKind={event.kind}
             />
           </div>
         </Overlay>
@@ -348,6 +349,7 @@ export default function NotesComment({
                     actions={postActions}
                     tagKind={tagKind}
                     rootKind={rootKind}
+                    parentKind={event.kind}
                   />
                 )}
               </>

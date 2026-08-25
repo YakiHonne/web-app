@@ -37,7 +37,7 @@ import useCashu from "@/Hooks/useCachu";
 import useCustomizationSettings from "@/Hooks/useCustomizationSettings";
 import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
 import { iconsNames } from "@/Content/IconV2URL";
-import { updatesList } from "@/Components/YakiIntro";
+import { proUpdatesList, proUpdatesVersion, updatesList } from "@/Components/YakiIntro";
 import Overlay from "@/Components/Overlay";
 import useIsMobile from "@/Hooks/useIsMobile";
 import MobileDemo from "./MobileDemo";
@@ -324,7 +324,6 @@ export default function TopNavbar() {
     { icon: iconsNames.compass, iconBold: "discover-bold", label: t("ABxLOSx"), path: "/explore" },
     { icon: iconsNames.puzzle, iconBold: "smart-widget-bold", label: t("A2mdxcf"), path: "/smart-widgets" },
     ...(userKeys ? [
-      { icon: iconsNames.user_01, iconBold: "user-bold", label: t("AyBBPWE"), path: null, onClick: handleProfileLink },
       { icon: iconsNames.cloud, iconBold: "media-bold", label: t("A8SkkKn"), path: "/blossom" },
       { icon: iconsNames.chart_line, iconBold: "dashboard-bold", label: t("ALBhi3j"), path: "/dashboard" },
       { icon: iconsNames.star, iconBold: "dashboard-bold", label: t("ABsx3n9"), path: "/yaki-points" },
@@ -379,6 +378,17 @@ export default function TopNavbar() {
             <div className="box-pad-v-s" />
             <ul className="fit-container" style={{ paddingLeft: "1.25rem", display: "flex", flexDirection: "column", rowGap: "0.5rem" }}>
               {updatesList.map((item, i) => (
+                <li key={i} style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.875rem", lineHeight: 1.5 }}>{item}</li>
+              ))}
+            </ul>
+            <div className="box-pad-v-s" />
+            <div className="fit-container fx-scattered">
+              <p className="p-bold">YakiPro</p>
+              <p className="orange-c p-medium">v{proUpdatesVersion}</p>
+            </div>
+            <div className="box-pad-v-s" />
+            <ul className="fit-container" style={{ paddingLeft: "1.25rem", display: "flex", flexDirection: "column", rowGap: "0.5rem" }}>
+              {proUpdatesList.map((item, i) => (
                 <li key={i} style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.875rem", lineHeight: 1.5 }}>{item}</li>
               ))}
             </ul>

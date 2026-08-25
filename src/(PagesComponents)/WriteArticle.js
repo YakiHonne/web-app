@@ -444,7 +444,11 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
   const [imetas, setImetas] = useState([]);
   const [showAIPanel, setShowAIPanel] = useState(false);
   const [showSecondReader, setShowSecondReader] = useState(false);
-  const [aiChatPrefill, setAiChatPrefill] = useState("");
+  const [srResetSignal, setSrResetSignal] = useState(0);
+  const [srReanalyzeOnReset, setSrReanalyzeOnReset] = useState(false);
+  const [aiResetSignal, setAiResetSignal] = useState(0);
+  const [showV2ClearPopup, setShowV2ClearPopup] = useState(false);
+  const [aiChatPrefill, setAiChatPrefill] = useState(null);
   const [diffHunks, setDiffHunks] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isAILoading, setIsAILoading] = useState(false);
@@ -553,6 +557,16 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
     if (!initialContent) return;
     setTimeout(() => { editor.commands.setContent(initialContent); }, 0);
   }, [editor]);
+
+  const editEntryHandledRef = useRef(false);
+  useEffect(() => {
+    if (!editor || !editEvent?.content) return;
+    if (editEntryHandledRef.current) return;
+    editEntryHandledRef.current = true;
+    setAiResetSignal((n) => n + 1);
+    setSrReanalyzeOnReset(true);
+    setTimeout(() => setSrResetSignal((n) => n + 1), 0);
+  }, [editor, editEvent]);
 
   useEffect(() => {
     if (!editor || externalMarkdown == null) return;
@@ -671,7 +685,7 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
   );
 
   const handleOpenAIChat = useCallback((prefillMessage) => {
-    setAiChatPrefill(prefillMessage);
+    setAiChatPrefill({ text: prefillMessage, token: Date.now() });
     setShowAIPanel(true);
     setShowSecondReader(false);
   }, []);
@@ -694,11 +708,14 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
     setShowRestored(false);
     onMarkdownChange?.("");
     onHasContentChange?.(false);
+    setAiResetSignal((n) => n + 1);
+    setSrReanalyzeOnReset(false);
+    setSrResetSignal((n) => n + 1);
   }, [editor, pub, onMarkdownChange, onSaveStatusChange, onHasContentChange]);
 
   useEffect(() => {
-    if (onClearRequest) onClearRequest(handleClear);
-  }, [handleClear, onClearRequest]);
+    if (onClearRequest) onClearRequest(() => setShowV2ClearPopup(true));
+  }, [onClearRequest]);
 
   useEffect(() => {
     onExportRequest?.(() => getMarkdown());
@@ -770,7 +787,7 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
           }}
         >
           <div className="fit-container fx-centered" style={{ width: "100%", minWidth: 0 }}>
-            <div>
+            <div data-ai-panel-keep-open>
               <SelectTabs
                 selectedTab={showSecondReader ? 0 : showAIPanel ? 1 : -1}
                 tabs={[`✦ ${t("ASLmW7h")}`, `✦ ${t("APshghB")}`]}
@@ -781,7 +798,7 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
 
         </div>
 
-        <div className="tiptap-shell fit-container">
+        <div className="tiptap-shell fit-container" data-ai-panel-keep-open>
           <Toolbar editor={editor} onImageUpload={triggerImageUpload} isUploading={isUploading} />
           {diffHunks ? (
             <AIDiffViewer
@@ -816,13 +833,15 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
 
       <ArticleAIPanel
         isOpen={showAIPanel}
-        onClose={() => { setShowAIPanel(false); setAiChatPrefill(""); }}
+        onClose={() => { setShowAIPanel(false); setAiChatPrefill(null); }}
         getMarkdown={getMarkdown}
         editor={editor}
         onDiffReady={handleDiffReady}
         isAILoading={isAILoading}
         setIsAILoading={setIsAILoading}
         prefillMessage={aiChatPrefill}
+        onPrefillConsumed={() => setAiChatPrefill(null)}
+        resetSignal={aiResetSignal}
       />
 
       <SecondReaderPanel
@@ -835,10 +854,41 @@ function ArticleEditorV2({ editEvent = null, onMarkdownChange, externalMarkdown,
         onOpenAIChat={handleOpenAIChat}
         lastEditedParagraph={lastEditedParagraph}
         suppressInvalidationRef={srSuppressInvalidationRef}
+        resetSignal={srResetSignal}
+        reanalyzeOnReset={srReanalyzeOnReset}
       />
+
+      {showV2ClearPopup && (
+        <ClearEditorAIPopup
+          onConfirm={() => { setShowV2ClearPopup(false); handleClear(); }}
+          onCancel={() => setShowV2ClearPopup(false)}
+        />
+      )}
     </>
   );
 }
+
+const ClearEditorAIPopup = ({ onConfirm, onCancel }) => {
+  const { t } = useTranslation();
+  return (
+    <Overlay exit={onCancel} width={450}>
+      <div className="fx-centered fx-col box-pad-h box-pad-v slide-up">
+        <div
+          className="fx-centered box-marg-s"
+          style={{ minWidth: "54px", minHeight: "54px", borderRadius: "var(--border-r-50)", backgroundColor: "var(--red-main)" }}
+        >
+          <Icon name="warning" />
+        </div>
+        <h3 className="p-centered" style={{ wordBreak: "break-word" }}>{t("AirKalq")}</h3>
+        <p className="p-centered gray-c box-pad-v-m">{t("A79HuhP")}</p>
+        <div className="fx-centered fit-container">
+          <button className="fx btn btn-gst-red" onClick={onConfirm}>{t("AUdbtv8")}</button>
+          <button className="fx btn btn-red" onClick={onCancel}>{t("AB4BSCe")}</button>
+        </div>
+      </div>
+    </Overlay>
+  );
+};
 
 const getUploadsHistory = () => {
   let history = localStorage?.getItem("YakihonneUploadsHistory");
