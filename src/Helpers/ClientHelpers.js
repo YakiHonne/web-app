@@ -31,6 +31,7 @@ const RedPacketBox = dynamic(
 import Icon from "@/Components/Icon";
 import { useVideoThumbnail } from "@/Hooks/useVideoThumbnail";
 import Carousel from "@/Components/Carousel";
+import { getNip22Refs, getThreadRefs } from "@/Helpers/Threads";
 
 const NoteMediaContext = createContext(null);
 
@@ -748,32 +749,7 @@ export function getComponent(children) {
   return <div className="fit-container">{mergeConsecutivePElements(res)}</div>;
 }
 
-export function getNip22Refs(event) {
-  if (!event || event.kind !== 1111) return null;
-  let root, rootKind, parentKind;
-  let lowerTags = [];
-  for (let tag of event.tags) {
-    if (!root && ["A", "E", "I"].includes(tag[0]) && tag[1]) root = tag;
-    if (["a", "e", "i"].includes(tag[0]) && tag[1]) lowerTags.push(tag);
-    if (!rootKind && tag[0] === "K" && tag[1]) rootKind = tag[1];
-    if (!parentKind && tag[0] === "k" && tag[1]) parentKind = tag[1];
-  }
-  if (!root) return null;
-  let rootType = root[0] === "A" ? "a" : root[0] === "E" ? "e" : "i";
-  let parent = lowerTags.find((tag) => tag[1] !== root[1]) || lowerTags[0];
-  if (parentKind === "1111")
-    parent = lowerTags.find((tag) => tag[0] === "e" && tag[1] !== root[1]) || parent;
-  let parentValue = parent ? parent[1] : root[1];
-  return {
-    rootType,
-    rootValue: root[1],
-    rootKind,
-    parentType: parent ? parent[0] : rootType,
-    parentValue,
-    parentKind: parentKind || rootKind,
-    isTopLevel: parentValue === root[1],
-  };
-}
+export { getNip22Refs } from "@/Helpers/Threads";
 
 export function getParsedNote(
   event,
@@ -783,7 +759,7 @@ export function getParsedNote(
   try {
     if (!event) return;
 
-    let expiration, isQuote, isPremium, checkForLabel, isComment, isNotRoot, isReply, isProtected, nip22Root, nip22Parent, emojiMap;
+    let expiration, isQuote, isPremium, checkForLabel, isComment, isNotRoot, isReply, isProtected, nip22Root, emojiMap;
     for (let tag of event.tags) {
       if (!expiration && tag[0] === "expiration") expiration = tag;
       if (!isQuote && tag[0] === "q") isQuote = tag;
@@ -798,14 +774,15 @@ export function getParsedNote(
         emojiMap[tag[1]] = tag[2];
       }
       if (!nip22Root && ["A", "E", "I"].includes(tag[0]) && tag[1]) nip22Root = tag;
-      if (!nip22Parent && ["a", "e", "i"].includes(tag[0]) && tag[1]) nip22Parent = tag;
     }
 
     if (event.kind === 1111 && nip22Root) {
-      const rootKind = nip22Root[0] === "A" ? "a" : nip22Root[0] === "E" ? "e" : "i";
-      const parentValue = nip22Parent ? nip22Parent[1] : nip22Root[1];
-      isNotRoot = [rootKind, nip22Root[1]];
-      isReply = parentValue !== nip22Root[1] ? ["e", parentValue] : undefined;
+      const refs = getNip22Refs(event);
+      if (refs) {
+        isNotRoot = [refs.rootType, refs.rootValue];
+        isReply = refs.isTopLevel ? undefined : ["e", refs.parentValue];
+        if (!isComment) isComment = isReply || isNotRoot;
+      }
     }
 
     let isExpired = expiration && parseInt(expiration[1]) < Date.now() / 1000;
@@ -1733,4 +1710,84 @@ export function consumeWalletReturnPath() {
   } catch (err) {
     return "";
   }
+}
+
+export function buildNip22Tags({
+  parentId,
+  parentPubkey,
+  parentKind,
+  parentTags = [],
+  parentRelay = "",
+  tagKind = "e",
+}) {
+  const kind = parentKind !== undefined && parentKind !== null ? String(parentKind) : "";
+  const isParentComment = kind === "1111";
+  let tags = [];
+  let rootPubkey = parentPubkey;
+
+  if (isParentComment) {
+    let rootTag, rootKindTag, rootPubkeyTag;
+    for (let tag of parentTags) {
+      if (!rootTag && ["A", "E", "I"].includes(tag[0]) && tag[1]) rootTag = tag;
+      if (!rootKindTag && tag[0] === "K" && tag[1]) rootKindTag = tag;
+      if (!rootPubkeyTag && tag[0] === "P" && tag[1]) rootPubkeyTag = tag;
+    }
+    if (rootTag) {
+      tags.push([rootTag[0], rootTag[1], rootTag[2] || ""]);
+      if (rootTag[0] === "A") tags.push(["a", rootTag[1], rootTag[2] || ""]);
+      tags.push(["K", rootKindTag ? rootKindTag[1] : ""]);
+      if (rootPubkeyTag) {
+        rootPubkey = rootPubkeyTag[1];
+        tags.push(["P", rootPubkeyTag[1], rootPubkeyTag[2] || ""]);
+      }
+      tags.push(["e", parentId, parentRelay, parentPubkey]);
+      tags.push(["k", "1111"]);
+      tags.push(["p", parentPubkey, parentRelay]);
+      return tags;
+    }
+  }
+
+  if (kind === "1") {
+    const refs = getThreadRefs({ kind: 1, tags: parentTags });
+    if (refs?.marked && refs.root.value && refs.root.value !== parentId) {
+      const threadRootType = refs.root.type === "a" ? "a" : "e";
+      let threadRootKind = "1";
+      let threadRootPubkey = "";
+      if (threadRootType === "a") {
+        const parts = String(refs.root.value).split(":");
+        threadRootKind = parts[0] || "";
+        threadRootPubkey = parts[1] || "";
+      }
+      tags.push([threadRootType.toUpperCase(), refs.root.value, parentRelay]);
+      if (threadRootType === "a") tags.push(["a", refs.root.value, parentRelay]);
+      tags.push(["K", threadRootKind]);
+      if (threadRootPubkey) tags.push(["P", threadRootPubkey, parentRelay]);
+      tags.push(["e", parentId, parentRelay, parentPubkey]);
+      tags.push(["k", "1"]);
+      tags.push(["p", parentPubkey, parentRelay]);
+      return tags;
+    }
+  }
+
+  const rootType =
+    tagKind === "a" && String(parentId).split(":").length >= 3 ? "a" : "e";
+  let rootKind = kind;
+  if (rootType === "a") {
+    const parts = String(parentId).split(":");
+    if (parts.length >= 3) {
+      rootKind = parts[0];
+      rootPubkey = parts[1];
+    }
+  }
+
+  tags.push([rootType.toUpperCase(), parentId, parentRelay]);
+  if (rootType === "a") tags.push(["a", parentId, parentRelay]);
+  tags.push(["K", String(rootKind || "")]);
+  if (rootPubkey) tags.push(["P", rootPubkey, parentRelay]);
+
+  if (rootType === "e") tags.push(["e", parentId, parentRelay, parentPubkey]);
+  tags.push(["k", String(rootKind || "")]);
+  if (rootPubkey) tags.push(["p", rootPubkey, parentRelay]);
+
+  return tags;
 }

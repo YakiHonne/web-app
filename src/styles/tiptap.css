@@ -1166,11 +1166,34 @@
   opacity: 0.4;
 }
 
+.sr-reaction-card.sr-reaction-treated {
+  opacity: 0.75;
+  cursor: default;
+  border-left-color: var(--green-main, #22c55e);
+}
+
+.sr-reaction-card.sr-reaction-treated:hover {
+  opacity: 0.75;
+}
+
+.sr-reaction-text-done {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  opacity: 0.7;
+}
+
 .sr-ignored-label {
   font-size: 0.68rem;
   color: var(--gray);
   margin: 6px 0 0;
   font-style: italic;
+}
+
+.sr-treated-label {
+  font-size: 0.68rem;
+  color: var(--green-main, #22c55e);
+  margin: 6px 0 0;
+  font-weight: 600;
 }
 
 .sr-switch-btn {

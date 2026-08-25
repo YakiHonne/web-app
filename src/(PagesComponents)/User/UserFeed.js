@@ -142,7 +142,7 @@ export default function UserFeed({ user }) {
     let pinnedNotesIds = isCurrentUser ? pinnedNotes : userPinnedNotes;
     let kinds = {
       notes: [1, 6],
-      replies: [1],
+      replies: [1, 1111],
       mentions: [1],
       articles: [30023],
       videos: [34235, 34236, 21, 22],
@@ -255,7 +255,7 @@ export default function UserFeed({ user }) {
         let ev = [];
         if (data.length > 0) {
           ev = data.map((event) => {
-            if ([1, 6].includes(event.kind)) {
+            if ([1, 6, 1111].includes(event.kind)) {
               let event_ = getParsedNote(event, true);
               if (event_) {
                 if (

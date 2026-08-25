@@ -319,7 +319,7 @@ const Reactions = ({ post, author }) => {
             userProfile={author}
           />
           <div className="fx-centered">
-            <EventStats postActions={postActions} />
+            <EventStats postActions={postActions} isRepEvent={true} />
             <EventOptions event={post} component="repEventsCard" />
           </div>
         </div>

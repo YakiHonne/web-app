@@ -75,6 +75,8 @@ export default function ArticleAIPanel({
   isAILoading,
   setIsAILoading,
   prefillMessage,
+  onPrefillConsumed,
+  resetSignal = 0,
 }) {
   const { t } = useTranslation();
   const pubkey = useSelector((state) => state.userKeys?.pub) || "";
@@ -93,13 +95,21 @@ export default function ArticleAIPanel({
   const closeTimerRef = useRef(null);
   const prefillTimerRef = useRef(null);
   const sendRef = useRef(null);
+  const panelRef = useRef(null);
+
+  const resetSignalRef = useRef(resetSignal);
+  resetSignalRef.current = resetSignal;
 
   useEffect(() => {
     let cancelled = false;
+    const signalAtStart = resetSignalRef.current;
     setSessionLoaded(false);
     setMessages([]);
     loadSession(pubkey).then((saved) => {
-      if (cancelled) return;
+      if (cancelled || resetSignalRef.current !== signalAtStart) {
+        setSessionLoaded(true);
+        return;
+      }
       if (saved.length > 0) {
         const maxId = saved.reduce((m, msg) => Math.max(m, msg.id ?? 0), 0);
         if (maxId >= msgIdCounter) msgIdCounter = maxId + 1;
@@ -124,21 +134,26 @@ export default function ArticleAIPanel({
     saveSession(pubkey, messages);
   }, [pubkey, messages, sessionLoaded]);
 
+  const consumedPrefillRef = useRef(null);
+
   useEffect(() => {
-    if (!isOpen || !prefillMessage) return;
-    setInput(prefillMessage);
+    if (!isOpen || !prefillMessage?.text) return;
+    if (consumedPrefillRef.current === prefillMessage.token) return;
+    consumedPrefillRef.current = prefillMessage.token;
+    setInput(prefillMessage.text);
     clearTimeout(prefillTimerRef.current);
     prefillTimerRef.current = setTimeout(() => {
       setInput((current) => {
         if (current.trim()) {
           setTimeout(() => {
             sendRef.current?.();
+            onPrefillConsumed?.();
           }, 0);
         }
         return current;
       });
     }, 300);
-  }, [isOpen, prefillMessage]);
+  }, [isOpen, prefillMessage, onPrefillConsumed]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -155,6 +170,19 @@ export default function ArticleAIPanel({
     if (!isOpen) return;
     refreshQuota();
   }, [isOpen, refreshQuota]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e) => {
+      const target = e.target;
+      if (!(target instanceof Node)) return;
+      if (panelRef.current?.contains(target)) return;
+      if (target instanceof Element && target.closest("[data-ai-panel-keep-open]")) return;
+      onClose();
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [isOpen, onClose]);
 
   const handleSend = useCallback(async () => {
     const text = input.trim();
@@ -176,7 +204,6 @@ export default function ArticleAIPanel({
 
       if (content) {
         closeTimerRef.current = setTimeout(() => {
-          onClose();
           onDiffReady(content);
         }, 700);
       }
@@ -200,7 +227,7 @@ export default function ArticleAIPanel({
     } finally {
       setIsAILoading(false);
     }
-  }, [input, isAILoading, quotaExceeded, getMarkdown, onClose, onDiffReady, setIsAILoading, refreshQuota, markExceeded, t]);
+  }, [input, isAILoading, quotaExceeded, getMarkdown, onDiffReady, setIsAILoading, refreshQuota, markExceeded, t]);
 
   sendRef.current = handleSend;
 
@@ -208,6 +235,13 @@ export default function ArticleAIPanel({
     setMessages([]);
     clearSession(pubkey);
   }, [pubkey]);
+
+  useEffect(() => {
+    if (!resetSignal) return;
+    setMessages([]);
+    setInput("");
+    clearSession(pubkey);
+  }, [resetSignal, pubkey]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent?.isComposing) {
@@ -224,16 +258,12 @@ export default function ArticleAIPanel({
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? "all" : "none",
         }}
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
       >
         <div
+          ref={panelRef}
           className="ai-panel bg-dropdown"
           style={{ transform: isOpen ? "translateY(0)" : "translateY(100%)" }}
           aria-hidden={!isOpen}
-          onClick={(e) => e.stopPropagation()}
         >
           <div
             className="close pos-absolute pos-right-16 pos-top-16"

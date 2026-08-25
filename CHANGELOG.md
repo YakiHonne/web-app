@@ -1,3 +1,13 @@
+# (v6.0.1) 25/08/2026
+
+* Added a publishing confirmation popup when notes and articles are published successfully.
+* Improved the paid notes payment flow for a smoother premium content experience.
+* Added a dedicated pricing page.
+* Fixed several issues affecting the AI Assistant and Second Reader.
+* Added support for kind 1111 comments and replies.
+* Fixed issues with comment thread display and rendering.
+* Resolved various issues on the Edit Profile page.
+
 # (v6.0.0) 21/08/2026
 
 - Complete visual redesign of the app with a new top navbar, refreshed layout, and updated styling throughout.

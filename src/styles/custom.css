@@ -5301,6 +5301,19 @@ input[type="range"]::-moz-range-thumb {
     margin: 0;
 }
 
+.yaki-name-field-clickable {
+    transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.yaki-name-field-clickable:hover {
+    border-color: var(--gray) !important;
+    background-color: var(--very-dim-gray);
+}
+
+.yaki-username-border-content > .yaki-name-field-clickable:hover {
+    background-color: transparent;
+}
+
 .premium-glass {
     position: relative;
     border: 1px solid transparent !important;

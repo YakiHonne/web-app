@@ -283,7 +283,7 @@ const HomeFeed = ({ relay }) => {
         : notesLastEventTime;
       let since = twoDaysPrior;
 
-      if (contentFrom === 0) kinds = [1, 6];
+      if (contentFrom === 0) kinds = [1, 6, 1111];
       if (contentFrom === 1) kinds = [30023];
       if (contentFrom === 2) kinds = [34235, 34236, 20, 21, 22];
       if (contentFrom === 3) kinds = [30004, 30005];
@@ -301,7 +301,7 @@ const HomeFeed = ({ relay }) => {
         .splice(0, 50)
         .map((event) => {
           eventsPubkeys.push(event.pubkey);
-          if ([1, 6].includes(event.kind)) {
+          if ([1, 6, 1111].includes(event.kind)) {
             let event_ = getParsedNote(event, true);
             if (event_) fallBackEvents.push(event_);
             if (event_) {
@@ -387,7 +387,7 @@ const HomeFeed = ({ relay }) => {
                     <KindSix event={item} />
                   </Fragment>
                 );
-              if (item.kind === 1)
+              if ([1, 1111].includes(item.kind))
                 return (
                   <Fragment key={item.id}>
                     <KindOne event={item} border={true} />

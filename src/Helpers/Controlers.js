@@ -535,6 +535,31 @@ const handleReceivedEvents = (set, event) => {
   return set;
 };
 
+const HEX_64 = /^[0-9a-f]{64}$/;
+
+const isValidHexKey = (value) =>
+  typeof value === "string" && HEX_64.test(value.toLowerCase());
+
+const sanitizeFilters = (filters) => {
+  if (!Array.isArray(filters)) return filters;
+  const hexFields = ["authors", "ids", "#p", "#e", "#P", "#E"];
+  return filters
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const next = { ...entry };
+      for (const field of hexFields) {
+        if (!Array.isArray(next[field])) continue;
+        const cleaned = next[field]
+          .filter(isValidHexKey)
+          .map((value) => value.toLowerCase());
+        if (cleaned.length === 0) return null;
+        next[field] = cleaned;
+      }
+      return next;
+    })
+    .filter(Boolean);
+};
+
 const getSubData = async (
   filter,
   timeout = 1000,
@@ -551,7 +576,7 @@ const getSubData = async (
     let events = [];
     let pubkeys = [];
 
-    let filter_ = filter.map((_) => {
+    let filter_ = sanitizeFilters(filter).map((_) => {
       let temp = { ..._ };
       if (!_["#t"]) {
         delete temp["#t"];

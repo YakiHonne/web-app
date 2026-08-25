@@ -8,7 +8,8 @@ import {
 } from "@/Helpers/Encryptions";
 import { getEventStats, saveEventStats } from "@/Helpers/DB";
 import { useLiveQuery } from "dexie-react-hooks";
-import { getNip22Refs, getWotConfig } from "@/Helpers/ClientHelpers";
+import { getWotConfig } from "@/Helpers/ClientHelpers";
+import { getThreadRefs } from "@/Helpers/Threads";
 
 const filterStatsByWot = (stats) => {
   const { score, reactions } = getWotConfig();
@@ -164,9 +165,10 @@ const useNoteStats = (noteID, notePubkey) => {
             });
           }
           if (event.kind === 1111) {
-            let refs = getNip22Refs(event);
+            let refs = getThreadRefs(event);
             let isComment =
-              refs && (refs.rootValue === noteID || refs.parentValue === noteID);
+              refs &&
+              (refs.root.value === noteID || refs.parent.value === noteID);
             if (isComment) {
               if (!kind1Since || kind1Since < event.created_at)
                 kind1Since = event.created_at;
@@ -178,14 +180,13 @@ const useNoteStats = (noteID, notePubkey) => {
             }
           }
           if (event.kind === 1) {
+            let refs = getThreadRefs(event);
             let check_kind1 = {
               isQuote: event.tags.find((tag) => tag[0] === "q"),
-              isComment: event.tags.find(
-                (tag) =>
-                  tag.length > 3 &&
-                  tag[1] === noteID &&
-                  ["root", "reply"].includes(tag[3]),
-              ),
+              isComment:
+                refs &&
+                (refs.marked || !event.tags.some((tag) => tag[0] === "q")) &&
+                (refs.root.value === noteID || refs.parent.value === noteID),
             };
             if (
               check_kind1.isQuote &&
