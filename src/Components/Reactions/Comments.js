@@ -17,7 +17,7 @@ const Emojis = dynamic(() => import("@/Components/Emojis"), { ssr: false });
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
 import ProfilesPicker from "@/Components/ProfilesPicker";
-import { getNoteDraft, updateNoteDraft } from "@/Helpers/ClientHelpers";
+import { buildNip22Tags, getNoteDraft, updateNoteDraft } from "@/Helpers/ClientHelpers";
 import { SelectTabs } from "../SelectTabs";
 import Overlay from "@/Components/Overlay";
 
@@ -29,6 +29,7 @@ export default function Comments({
   actions,
   tagKind = "e",
   rootKind = null,
+  parentKind = null,
   label = ""
 }) {
   const dispatch = useDispatch();
@@ -90,126 +91,28 @@ export default function Comments({
       let content = extracted.content;
       let tags = [];
 
-      let useNip22 = false;
-      let rootEventTag = null;
-
-      if (noteTags) {
-        rootEventTag = noteTags.find(
-          (tag) => (tag[0] === "a" || tag[0] === "e" || tag[0] === "A" || tag[0] === "E") &&
-            tag.length > 3 && tag[3] === "root"
-        );
-
-        if (rootEventTag && (rootEventTag[0] === "a" || rootEventTag[0] === "A")) {
-          useNip22 = true;
-        }
-      }
-
-      if (tagKind === "a") {
-        useNip22 = true;
-      }
+      const parentKindStr =
+        parentKind !== undefined && parentKind !== null ? String(parentKind) : "";
+      const useNip22 = tagKind === "a" || parentKindStr !== "1";
 
       const commentKind = useNip22 ? 1111 : 1;
       if (commentKind === 1111) {
-        let rootEventPubkey = null;
-        let rootEventKind = rootKind;
+        tags = buildNip22Tags({
+          parentId: replyId,
+          parentPubkey: replyPubkey,
+          parentKind: parentKindStr || rootKind,
+          parentTags: noteTags || [],
+          tagKind,
+        });
 
         if (noteTags) {
-          if (!rootEventTag) {
-            rootEventTag = noteTags.find(
-              (tag) =>
-                (tag[0] === "a" || tag[0] === "e") &&
-                tag.length > 3 &&
-                tag[3] === "root",
-            );
-          }
-          if (!rootEventTag) {
-            rootEventTag = noteTags.find(
-              (tag) => tag[0] === "A" || tag[0] === "E",
-            );
-          }
-          if (rootEventTag) {
-            const rootTagType = rootEventTag[0].toLowerCase();
-
-            if (rootTagType === "a" && rootEventTag[1]) {
-              const addressParts = rootEventTag[1].split(":");
-              if (addressParts.length >= 2) {
-                rootEventPubkey = addressParts[1];
-                rootEventKind = addressParts[0];
-              }
-            }
-            if (rootTagType === "e") {
-              rootEventPubkey = noteTags.find(tag => tag[0] === "P" || (tag[0] === "p" && tag[1] !== replyPubkey))?.[1];
-            }
-
-            tags.push([rootTagType.toUpperCase(), rootEventTag[1], rootEventTag[2] || ""]);
-            if (rootTagType === "a") {
-              // Keep lowercase `a` so article-thread subscriptions by `#a` include nested comments.
-              tags.push(["a", rootEventTag[1], rootEventTag[2] || ""]);
-            }
-            tags.push(["K", String(rootEventKind || "")]);
-            if (rootEventPubkey) {
-              tags.push(["P", rootEventPubkey, ""]);
-            }
-
-            tags.push(["e", replyId, rootEventTag[2] || ""]);
-            const isReplyingToRoot = replyId === rootEventTag[1];
-            tags.push(["k", isReplyingToRoot ? String(rootEventKind || "1") : "1111"]);
-            tags.push(["p", replyPubkey, ""]);
-
-          } else {
-            if (tagKind === "a" && replyId) {
-              const addressParts = replyId.split(":");
-              if (addressParts.length >= 3) {
-                rootEventKind = addressParts[0];
-                rootEventPubkey = addressParts[1];
-              }
-            } else {
-              rootEventPubkey = replyPubkey;
-            }
-
-            tags.push([tagKind.toUpperCase(), replyId, ""]);
-            tags.push(["K", String(rootEventKind || "")]);
-            if (rootEventPubkey) {
-              tags.push(["P", rootEventPubkey, ""]);
-            }
-
-            tags.push([tagKind, replyId, ""]);
-            tags.push(["k", String(rootEventKind || "")]);
-            if (rootEventPubkey) {
-              tags.push(["p", rootEventPubkey, ""]);
-            }
-          }
-
+          const taggedPubkeys = new Set(
+            tags.filter((tag) => tag[0] === "p").map((tag) => tag[1]),
+          );
           let otherPTags = noteTags.filter(
-            tag => tag[0] === "p" &&
-              tag[1] !== replyPubkey &&
-              tag[1] !== rootEventPubkey &&
-              !tags.find(t => t[0] === "p" && t[1] === tag[1])
+            (tag) => tag[0] === "p" && tag[1] && !taggedPubkeys.has(tag[1]),
           );
           tags = [...tags, ...otherPTags];
-
-        } else {
-          if (tagKind === "a" && replyId) {
-            const addressParts = replyId.split(":");
-            if (addressParts.length >= 3) {
-              rootEventKind = addressParts[0];
-              rootEventPubkey = addressParts[1];
-            }
-          } else {
-            rootEventPubkey = replyPubkey;
-          }
-
-          tags.push([tagKind.toUpperCase(), replyId, ""]);
-          tags.push(["K", String(rootEventKind || "")]);
-          if (rootEventPubkey) {
-            tags.push(["P", rootEventPubkey, ""]);
-          }
-
-          tags.push([tagKind, replyId, ""]);
-          tags.push(["k", String(rootEventKind || "")]);
-          if (rootEventPubkey) {
-            tags.push(["p", rootEventPubkey, ""]);
-          }
         }
 
       } else {

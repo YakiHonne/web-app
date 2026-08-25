@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PagePlaceholder from "@/Components/PagePlaceholder";
 import Spinner from "@/Components/Spinner";
 import Date_ from "@/Components/Date_";
@@ -46,6 +46,7 @@ export default function ProfileEdit() {
   const canUseYakiNames = isPaid && !inTrial;
 
   const [claimingUsername, setClaimingUsername] = useState(false);
+  const usernameInputRef = useRef(null);
   const [showNip05Overlay, setShowNip05Overlay] = useState(false);
   const [showWalletOverlay, setShowWalletOverlay] = useState(false);
 
@@ -459,16 +460,16 @@ export default function ProfileEdit() {
                                         reason={t("Azvn2wX")}
                                         disabled
                                         badge
+                                        onContainerClick={() =>
+                                          copyText(
+                                            `https://yakihonne.com/${yakiUsername}`,
+                                            t("AoTWbxS"),
+                                          )
+                                        }
                                         action={
                                           <div
                                             className="pointer fx-centered"
                                             title={t("AoTWbxS")}
-                                            onClick={() =>
-                                              copyText(
-                                                `https://yakihonne.com/${yakiUsername}`,
-                                                t("AoTWbxS"),
-                                              )
-                                            }
                                           >
                                             <Icon name="copy" size={16} />
                                           </div>
@@ -484,26 +485,30 @@ export default function ProfileEdit() {
                                     state={usernameClaim.state}
                                     reason={usernameClaim.reason}
                                     onChange={usernameClaim.onChange}
+                                    inputRef={usernameInputRef}
+                                    onContainerClick={(e) => {
+                                      if (e.target === usernameInputRef.current)
+                                        return;
+                                      usernameInputRef.current?.focus();
+                                    }}
                                   />
                                 )}
                               </>
                             ) : (
-                              <div
-                                className="fit-container pointer"
-                                onClick={() =>
-                                  dispatch(
-                                    openUpgradeSheet({
-                                      source: "profile-username",
-                                    }),
-                                  )
-                                }
-                              >
+                              <div className="fit-container">
                                 <YakiNameField
                                   label={t("Ap3wrvF")}
                                   prefix="yakihonne.com/"
                                   value={yakiUsername || ""}
                                   state="owned"
                                   disabled
+                                  onContainerClick={() =>
+                                    dispatch(
+                                      openUpgradeSheet({
+                                        source: "profile-username",
+                                      }),
+                                    )
+                                  }
                                   action={
                                     <div className="pointer fx-centered">
                                       <Icon name="crown" size={16} />
@@ -578,7 +583,23 @@ export default function ProfileEdit() {
                                 onChange={(e) => setUserWebsite(e.target.value)}
                               />
                             </div>
-                            <div className="fit-container sc-s-18 no-bg box-pad-v-s">
+                            <div
+                              className={`fit-container sc-s-18 no-bg box-pad-v-s${
+                                !canUseYakiNames
+                                  ? " pointer yaki-name-field-clickable"
+                                  : ""
+                              }`}
+                              onClick={
+                                !canUseYakiNames
+                                  ? () =>
+                                      dispatch(
+                                        openUpgradeSheet({
+                                          source: "profile-nip05",
+                                        }),
+                                      )
+                                  : undefined
+                              }
+                            >
                               <div className="fx-scattered fit-container">
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                   <p className="p-medium gray-c box-pad-h-m">
@@ -589,6 +610,7 @@ export default function ProfileEdit() {
                                     style={{ height: "36px" }}
                                     placeholder={t("AsS6BPz")}
                                     value={userNip05}
+                                    onClick={(e) => e.stopPropagation()}
                                     onChange={(e) =>
                                       setUserNip05(e.target.value)
                                     }
@@ -598,15 +620,18 @@ export default function ProfileEdit() {
                                   <button
                                     className="btn btn-small btn-gray"
                                     style={{ minWidth: "max-content" }}
-                                    onClick={() =>
-                                      canUseYakiNames
-                                        ? setShowNip05Overlay(true)
-                                        : dispatch(
-                                            openUpgradeSheet({
-                                              source: "profile-nip05",
-                                            }),
-                                          )
-                                    }
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (canUseYakiNames) {
+                                        setShowNip05Overlay(true);
+                                        return;
+                                      }
+                                      dispatch(
+                                        openUpgradeSheet({
+                                          source: "profile-nip05",
+                                        }),
+                                      );
+                                    }}
                                   >
                                     {t("AikNyQn")}
                                   </button>

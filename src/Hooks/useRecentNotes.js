@@ -46,7 +46,7 @@ export default function useRecentNotes(
         {
           onEvent(event) {
             if (
-              [1, 6].includes(event.kind) &&
+              [1, 6, 1111].includes(event.kind) &&
               event.content &&
               !userMutedList.includes(event.pubkey)
             ) {

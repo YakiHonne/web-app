@@ -228,7 +228,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           : tempUserFollowings.length < 5
             ? [...tempUserFollowings, ...getBackupWOTList()]
             : tempUserFollowings;
-      filter = [{ authors, kinds: [1, 6], until, since, limit: 100 }];
+      let recentKinds =
+        notesContentFrom === "recent_with_replies" ? [1, 6, 1111] : [1, 6];
+      filter = [{ authors, kinds: recentKinds, until, since, limit: 100 }];
       return {
         filter,
       };

@@ -22,6 +22,47 @@ if (typeof window !== "undefined") {
     profileCacheSize: 200,
   });
 }
+const HEX_64 = /^[0-9a-f]{64}$/;
+const HEX_FILTER_FIELDS = ["authors", "ids", "#p", "#e", "#P", "#E"];
+
+const isValidHexKey = (value) =>
+  typeof value === "string" && HEX_64.test(value.toLowerCase());
+
+const sanitizeNdkFilters = (filters) => {
+  const asArray = Array.isArray(filters) ? filters : [filters];
+  const cleaned = asArray
+    .map((entry) => {
+      if (!entry || typeof entry !== "object") return null;
+      const next = { ...entry };
+      for (const field of HEX_FILTER_FIELDS) {
+        if (!Array.isArray(next[field])) continue;
+        const values = next[field]
+          .filter(isValidHexKey)
+          .map((value) => value.toLowerCase());
+        if (values.length === 0) return null;
+        next[field] = values;
+      }
+      return next;
+    })
+    .filter(Boolean);
+  return Array.isArray(filters) ? cleaned : cleaned[0];
+};
+
+const originalSubscribe = ndkInstance.subscribe.bind(ndkInstance);
+ndkInstance.subscribe = (filters, ...rest) => {
+  const safeFilters = sanitizeNdkFilters(filters);
+  const isEmpty = Array.isArray(safeFilters)
+    ? safeFilters.length === 0
+    : !safeFilters;
+  if (isEmpty) {
+    return originalSubscribe(
+      [{ ids: ["0".repeat(64)], limit: 0 }],
+      ...rest,
+    );
+  }
+  return originalSubscribe(safeFilters, ...rest);
+};
+
 ndkInstance.connect(1000).catch(() => {});
 
 export { ndkInstance };
