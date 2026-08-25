@@ -309,7 +309,9 @@ export function getNoteTree(
   for (let i = 0; i < (isCollapsedNote ? wordsCount : tree.length); i++) {
     const el_ = tree[i]?.replaceAll("nostr:", "") || "";
     if (
-      (/(https?:\/\/)/i.test(el_) || el_.startsWith("data:image")) &&
+      (/(https?:\/\/)/i.test(el_) ||
+        el_.startsWith("data:image") ||
+        /^ipfs:\/\//i.test(el_)) &&
       !el_.includes("https://yakihonne.com/smart-widget-checker?naddr=") &&
       !minimal
     ) {
@@ -340,7 +342,9 @@ export function getNoteTree(
         finalTree.push(<br key={key} />);
       }
     } else if (
-      (/(https?:\/\/)/i.test(el) || el.startsWith("data:image")) &&
+      (/(https?:\/\/)/i.test(el) ||
+        el.startsWith("data:image") ||
+        /^ipfs:\/\//i.test(el)) &&
       !el.includes("https://yakihonne.com/smart-widget-checker?naddr=")
     ) {
       let cleanUrl = el.replace(/[.,|']+$/, "");
@@ -400,7 +404,9 @@ export function getNoteTree(
             cleanUrl.includes(".ogg") ||
             cleanUrl.includes(".wav")
           ) {
-            finalTree.push(<AudioLoader audioSrc={cleanUrl} key={key} />);
+            finalTree.push(
+              <AudioLoader audioSrc={toSecureMediaUrl(cleanUrl)} key={key} />,
+            );
           } else if (doesContainNostrSchema(cleanUrl)) {
             let cleanPart = cleanUrl.match(nostrSchemaRegex)?.[0];
             if (cleanPart) {
@@ -865,6 +871,7 @@ export function compactContent(note, pubkey) {
       .replaceAll("@", "");
     if (
       word.startsWith("data:image") ||
+      /^ipfs:\/\//i.test(word) ||
       /(https?:\/\/[^ ]*\.(?:gif|png|jpg|jpeg|webp))/i.test(word)
     )
       compactedContent.push(
@@ -901,8 +908,36 @@ export function compactContent(note, pubkey) {
   return mergeConsecutivePElements(compactedContent, pubkey);
 }
 
+export const DEFAULT_IPFS_GATEWAYS = [
+  "https://ipfs.io",
+  "https://w3s.link",
+  "https://4everland.io",
+];
+
+export function parseIpfsUri(url) {
+  if (typeof url !== "string") return null;
+  let match = /^ipfs:\/\/(?:ipfs\/)?([^?#]+)/i.exec(url.trim());
+  return match ? match[1] : null;
+}
+
+export function getIpfsGateways() {
+  let settings = getCustomSettings();
+  return Array.isArray(settings.ipfsGateways) && settings.ipfsGateways.length
+    ? settings.ipfsGateways
+    : DEFAULT_IPFS_GATEWAYS;
+}
+
+export function resolveIpfsUri(url, gatewayIndex = 0) {
+  let cidPath = parseIpfsUri(url);
+  if (!cidPath) return url;
+  let gateways = getIpfsGateways();
+  let gateway = gateways[Math.min(gatewayIndex, gateways.length - 1)];
+  return `${gateway.replace(/\/+$/, "")}/ipfs/${cidPath}`;
+}
+
 export function toSecureMediaUrl(url) {
   if (typeof url !== "string") return url;
+  if (/^ipfs:\/\//i.test(url)) return resolveIpfsUri(url);
   if (!/^http:\/\//i.test(url)) return url;
   try {
     const parsed = new URL(url);
@@ -919,6 +954,14 @@ export function isImageUrl(url) {
   try {
     if (/^data:image/.test(url)) return { type: "image" };
     if (/^data:video/.test(url)) return { type: "video" };
+    if (/^ipfs:\/\//i.test(url)) {
+      let cidPath = parseIpfsUri(url) || "";
+      if (/\.(gif|png|jpg|jpeg|webp|avif)$/i.test(cidPath))
+        return { type: "image" };
+      if (/\.(mp4|mov|webm|ogg|avi|qt|m3u8)$/i.test(cidPath))
+        return { type: "video" };
+      return false;
+    }
     if (/(https?:\/\/[^ ]*\.(gif|png|jpg|jpeg|webp))/i.test(url))
       return { type: "image" };
     if (/(https?:\/\/[^ ]*\.(mp4|mov|webm|ogg|avi|qt|m3u8))/i.test(url))
@@ -1079,6 +1122,9 @@ const checkForNewAddedSettings = (prevSettings) => {
       prevSettings.blurNonFollowedMedia !== undefined
         ? prevSettings.blurNonFollowedMedia
         : true,
+    ipfsGateways: Array.isArray(prevSettings.ipfsGateways)
+      ? prevSettings.ipfsGateways
+      : DEFAULT_IPFS_GATEWAYS,
     linkPreview:
       prevSettings.linkPreview !== undefined ? prevSettings.linkPreview : true,
     reactionsSettings:
@@ -1134,6 +1180,7 @@ export function getDefaultSettings(pubkey) {
     repliesView: "thread",
     oneTapReaction: false,
     blurNonFollowedMedia: true,
+    ipfsGateways: DEFAULT_IPFS_GATEWAYS,
     linkPreview: true,
     hideMentions: true,
     reactionsSettings: [
