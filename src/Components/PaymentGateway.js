@@ -27,6 +27,7 @@ import { swapTokensInvoiceFromMint } from "@/Helpers/CashuHelpers";
 import Icon from "@/Components/Icon";
 import Badge from "@/Helpers/Badge";
 import Overlay from "@/Components/Overlay";
+import { useRouter } from "next/router";
 
 export default function PaymentGateway({
   recipientAddr,
@@ -37,6 +38,7 @@ export default function PaymentGateway({
   nostrEventIDEncode,
   setReceivedEvent = () => null,
   setConfirmPayment = () => null,
+  redirectOnSuccess = "",
   exit,
 }) {
   const { t } = useTranslation();
@@ -45,6 +47,7 @@ export default function PaymentGateway({
   const [isLoading, setIsLoading] = useState(true);
   const { userProfile } = useUserProfile(recipientPubkey);
   const wallets = getWallets();
+  const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,10 +87,10 @@ export default function PaymentGateway({
         setIsLoading(false);
       }
     };
-    if (!callback) fetchData();
+    if (!callback && !isPaymentConfirmed) fetchData();
   }, [recipientAddr]);
 
-  if (isLoading)
+  if (isLoading && !isPaymentConfirmed)
     return (
       <Overlay exit={exit} width={300}>
         <div style={{ height: "300px" }} className="fx-centered">
@@ -113,9 +116,10 @@ export default function PaymentGateway({
       </Overlay>
     );
   if (
-    !recipientAddr ||
-    (!callback && !recipientAddr.startsWith("lnbc")) ||
-    (!lnbcAmount && recipientAddr.startsWith("lnbc"))
+    !isPaymentConfirmed &&
+    (!recipientAddr ||
+      (!callback && !recipientAddr.startsWith("lnbc")) ||
+      (!lnbcAmount && recipientAddr.startsWith("lnbc")))
   )
     return (
       <Overlay exit={exit} width={400} allowOverFlow={true}>
@@ -145,6 +149,8 @@ export default function PaymentGateway({
       setReceivedEvent={setReceivedEvent}
       setConfirmPayment={setConfirmPayment}
       specificRelays={specificRelays}
+      redirectOnSuccess={redirectOnSuccess}
+      setIsPaymentConfirmed={setIsPaymentConfirmed}
     />
   );
 }
@@ -161,8 +167,11 @@ const Cashier = ({
   setReceivedEvent,
   setConfirmPayment,
   specificRelays,
+  redirectOnSuccess = "",
+  setIsPaymentConfirmed = () => null,
 }) => {
   const { t } = useTranslation();
+  const router = useRouter();
   const dispatch = useDispatch();
   const userKeys = useSelector((state) => state.userKeys);
   const userMetadata = useSelector((state) => state.userMetadata);
@@ -179,6 +188,19 @@ const Cashier = ({
   const [onlyInvoice, setOnlyInvoice] = useState(false);
   const [showWalletsList, setShowWalletList] = useState(false);
   const walletListRef = useRef(null);
+
+  const handleRedirect = () => {
+    exit();
+    router.push(redirectOnSuccess);
+  };
+
+  useEffect(() => {
+    if (!redirectOnSuccess || confirmation !== "confirmed") return;
+    const timeout = setTimeout(() => {
+      handleRedirect();
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [confirmation, redirectOnSuccess]);
 
   useEffect(() => {
     let handleOffClick = (e) => {
@@ -271,7 +293,10 @@ const Cashier = ({
         return;
       }
 
-      let res = await sendPayment(lnbcInvoice);
+      let res = (await sendPayment(lnbcInvoice)) || {
+        status: false,
+        preImage: "",
+      };
       setConfirmPayment(res);
       if (eventToPublish) {
         setReceivedEvent({
@@ -281,6 +306,7 @@ const Cashier = ({
         });
       }
       if (res.status) {
+        setIsPaymentConfirmed(true);
         setConfirmation("confirmed");
       } else {
         setConfirmation("failed");
@@ -358,7 +384,9 @@ const Cashier = ({
       };
     } catch (err) {
       setIsLoading(false);
-      if (err.includes("User rejected")) return;
+      let errMessage =
+        typeof err === "string" ? err : err?.message || String(err || "");
+      if (errMessage.includes("User rejected")) return;
       dispatch(
         setToast({
           type: 2,
@@ -377,7 +405,11 @@ const Cashier = ({
       const nwc = new webln.NWC({ nostrWalletConnectUrl: selectedWallet.data });
       await nwc.enable();
       const res = await nwc.sendPayment(addr_);
-      nwc.close();
+      try {
+        nwc.close();
+      } catch (err) {
+        console.log(err);
+      }
       return {
         status: res.preimage ? true : false,
         preImage: res.preimage,
@@ -842,8 +874,12 @@ const Cashier = ({
             <p className="gray-c box-pad-v-s slide-up">
               {t("ALEgwqA")} <span className="orange-c">{amount} sats</span>
             </p>
-            <button className="btn btn-normal slide-up" onClick={exit}>
-              {t("Acglhzb")}
+            <button
+              className={`btn slide-up fx-centered ${redirectOnSuccess ? "btn-green" : "btn-normal"}`}
+              onClick={redirectOnSuccess ? handleRedirect : exit}
+            >
+              {redirectOnSuccess ? t("A7i5nw4") : t("Acglhzb")}
+              {redirectOnSuccess && <Spinner size={16} color="white" />}
             </button>
           </div>
         )}

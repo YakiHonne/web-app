@@ -18,10 +18,12 @@ import { iconsNames } from "@/Content/IconV2URL";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import Badge from "@/Helpers/Badge";
 import Icon from "@/Components/Icon";
+import { saveUsers } from "@/Helpers/DB";
+import { clearSubscriberSubscriptionsCache } from "@/Hooks/useSubscriberSubscriptions";
 
 export default function Home() {
   const { t } = useTranslation();
-  const { query } = useRouter();
+  const { query, isReady } = useRouter();
   const pubkey = query.p;
   const [isLoading, setIsLoading] = useState(true);
   const { userProfile: metadata, isNip05Verified, isLoading: userIsLoading, proUser } = useUserProfile(pubkey, true)
@@ -32,10 +34,11 @@ export default function Home() {
   }, [rawPlans]);
 
   useEffect(() => {
-    if (pubkey) {
+    if (isReady && pubkey) {
       getData();
+      saveUsers([pubkey]);
     }
-  }, [pubkey]);
+  }, [isReady, pubkey]);
 
   const getData = async () => {
     setIsLoading(true);
@@ -99,7 +102,7 @@ export default function Home() {
     [methods],
   );
 
-  if (isLoading || userIsLoading) {
+  if (!isReady || isLoading || userIsLoading) {
     return (
       <div className="subscribe-container fx-centered">
         <div className="loader"></div>
@@ -239,7 +242,7 @@ function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
   };
 
   const handleConfirmPayment = (data) => {
-    console.log(data);
+    if (data?.status) clearSubscriberSubscriptionsCache();
   };
 
   return (
@@ -256,6 +259,7 @@ function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
           setConfirmPayment={handleConfirmPayment}
           exit={() => setShowPaymentGateway(false)}
           specificRelays={["wss://nostr-01.yakihonne.com"]}
+          redirectOnSuccess={"/creators-subscriptions"}
         />
       )}
       <div className={`bg-dropdown plan-card fx-shrink ${isPremium ? "premium" : ""}`}>

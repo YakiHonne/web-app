@@ -26,7 +26,8 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
       try {
         setIsLoading(true)
         let auth = getUser(pubkey);
-        if (auth) {
+        let isResolved = nostrAuthors.some((item) => item.pubkey === pubkey);
+        if (isResolved) {
           setUserProfile(auth);
           if (verifyNip05) {
             let isChecked =
@@ -38,18 +39,26 @@ const useUserProfile = (pubkey, verifyNip05 = true) => {
             if (userBadge) setProUser(userBadge)
           }
         }
-        setIsLoading(false)
+        if (isResolved) setIsLoading(false)
       } catch (err) {
         console.log(err);
       }
     };
+    if (!pubkey) {
+      if (!userProfile.empty || userProfile.pubkey !== pubkey)
+        setUserProfile({ ...getEmptyuserMetadata(pubkey), empty: true });
+      setIsLoading(false)
+      return
+    }
+    if (userProfile.pubkey !== pubkey) {
+      setUserProfile({ ...getEmptyuserMetadata(pubkey), empty: true });
+      setIsNip05Verified(false);
+      setIsLoading(true)
+      return
+    }
     if (nostrAuthors.length > 0 && !isNip05Verified && userProfile.empty)
       fetchData();
-    if (!pubkey) {
-      setUserProfile({ ...getEmptyuserMetadata(pubkey), empty: true });
-      setIsLoading(false)
-    }
-  }, [nostrAuthors, pubkey, verifyNip05]);
+  }, [nostrAuthors, pubkey, verifyNip05, userProfile.pubkey, userProfile.empty]);
 
   useEffect(() => {
     const cachedProUser = getProUserState(pubkey);

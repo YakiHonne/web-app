@@ -527,6 +527,7 @@ const getPreviouslyFetchedEvent = (id) => {
   if (!event) return false;
   if (event.kind === 1 || event.kind === 1111) {
     parsedEvent = getParsedNote(event);
+    if (!parsedEvent) return false;
     parsedEvent = { ...parsedEvent, isComment: false };
   } else if ([22, 21, 20].includes(event.kind)) {
     parsedEvent = getParsedMedia(event);
@@ -592,6 +593,10 @@ const RelatedEvent = React.memo(({ event, reactions = true, isThread }) => {
           let parsedEvent;
           if (post.kind === 1 || post.kind === 1111) {
             parsedEvent = getParsedNote(post);
+            if (!parsedEvent) {
+              setIsNotFound(true);
+              return;
+            }
             parsedEvent = { ...parsedEvent, isComment: false };
           } else if ([22, 21, 20].includes(post.kind)) {
             parsedEvent = getParsedMedia(post);
