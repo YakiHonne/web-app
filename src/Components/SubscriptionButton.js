@@ -6,18 +6,31 @@ import Icon from "./Icon";
 import Overlay from "./Overlay";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import UserProfilePic from "./UserProfilePic";
-import Link from "next/link";
+import { useRouter } from "next/router";
 import HorizontalScrollWrapper from "./HorizontalScrollWrapper";
+import { useIsSubscribedToCreator } from "@/Hooks/useSubscriberSubscriptions";
 
 export default function SubscriptionButton({ pubkey }) {
   const { t } = useTranslation();
+  const router = useRouter();
   const userKeys = useSelector((state) => state.userKeys);
   const { isSubChekingLoading, providers } = useCreatorSubscription({ pubkey });
+  const isSubscribed = useIsSubscribedToCreator(pubkey);
   const [showProviders, setShowProviders] = useState(false);
   const [showSelfSubWarning, setShowSelfSubWarning] = useState(false);
   const isSelf = userKeys?.pub === pubkey;
   if (isSubChekingLoading) return;
   if (providers.length === 0) return;
+
+  const handleClick = () => {
+    if (isSubscribed) {
+      router.push("/creators-subscriptions");
+      return;
+    }
+    if (isSelf) setShowSelfSubWarning(true);
+    else setShowProviders(true);
+  };
+
   return (
     <>
       {showProviders && (
@@ -27,13 +40,15 @@ export default function SubscriptionButton({ pubkey }) {
         <SelfSubscriptionWarning exit={() => setShowSelfSubWarning(false)} />
       )}
       <button
-        className="btn btn-normal btn-full fx-centered"
-        onClick={() =>
-          isSelf ? setShowSelfSubWarning(true) : setShowProviders(true)
-        }
+        className={`btn btn-full fx-centered ${isSubscribed ? "btn-green" : "btn-normal"}`}
+        onClick={handleClick}
       >
-        <Icon name={"crown"} size={22} strokeWidth={2.5} />
-        {t("AvD6FbL")}
+        {isSubscribed ? (
+          <Icon name={"check"} size={20} strokeWidth={3.5} />
+        ) : (
+          <Icon name={"crown"} size={22} strokeWidth={2.5} />
+        )}
+        {isSubscribed ? t("AwhPdGu") : t("AvD6FbL")}
       </button>
     </>
   );
@@ -65,6 +80,18 @@ const SelfSubscriptionWarning = ({ exit }) => {
   );
 };
 
+const isYakihonneGateway = (provider) => {
+  if (provider.pubkey === process.env.NEXT_PUBLIC_GATEWAY_PUBKEY) return true;
+  try {
+    return (
+      new URL(provider.url, window.location.origin).origin ===
+      window.location.origin
+    );
+  } catch (err) {
+    return false;
+  }
+};
+
 const Providers = ({ providers, exit }) => {
   const { t } = useTranslation();
   return (
@@ -74,7 +101,11 @@ const Providers = ({ providers, exit }) => {
         <p className="gray-c p-centered">{t("Am6p1hr")}</p>
         <HorizontalScrollWrapper centerIfSmall={true}>
           {providers.map((provider) => (
-            <ProviderCard key={provider.pubkey} provider={provider} />
+            <ProviderCard
+              key={provider.pubkey}
+              provider={provider}
+              exit={exit}
+            />
           ))}
         </HorizontalScrollWrapper>
       </div>
@@ -82,9 +113,26 @@ const Providers = ({ providers, exit }) => {
   );
 };
 
-const ProviderCard = ({ provider }) => {
+const ProviderCard = ({ provider, exit }) => {
   const { t } = useTranslation();
+  const router = useRouter();
   const { userProfile } = useUserProfile(provider.pubkey);
+
+  const handleSubscribe = () => {
+    if (isYakihonneGateway(provider)) {
+      exit();
+      try {
+        const url = new URL(provider.url, window.location.origin);
+        router.push(`${url.pathname}${url.search}${url.hash}`);
+      } catch (err) {
+        window.location.href = provider.url;
+      }
+      return;
+    }
+    window.open(provider.url, "_blank", "noopener,noreferrer");
+    exit();
+  };
+
   return (
     <div className="bg-dropdown box-pad-h box-pad-v fx-centered fx-col">
       <UserProfilePic img={userProfile?.picture} size={80} />
@@ -92,12 +140,12 @@ const ProviderCard = ({ provider }) => {
       {userProfile.about && (
         <p className="gray-c p-centered">{userProfile.about}</p>
       )}
-      <Link href={provider.url} target="_blank">
-        <button className="btn btn-normal fx-centered">
-          {t("AaNDAmV")}
+      <button className="btn btn-normal fx-centered" onClick={handleSubscribe}>
+        {t("AaNDAmV")}
+        {!isYakihonneGateway(provider) && (
           <Icon name={"share-icon"} strokeWidth={2} />
-        </button>
-      </Link>
+        )}
+      </button>
     </div>
   );
 };

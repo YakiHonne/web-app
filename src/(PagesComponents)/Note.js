@@ -15,6 +15,9 @@ import {
   getParsedNote,
 } from "@/Helpers/ClientHelpers";
 import PagePlaceholder from "@/Components/PagePlaceholder";
+import PremiumContentGate from "@/Components/PremiumContentGate";
+import { isLockedPremiumEvent } from "@/Helpers/ClientHelpers";
+import { useIsSubscribedToCreator } from "@/Hooks/useSubscriberSubscriptions";
 import ZapAd from "@/Components/ZapAd";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
 import Link from "next/link";
@@ -46,10 +49,14 @@ export default function Note({ event, nevent }) {
   const [showTranslation, setShowTranslation] = useState(false);
   const [openComment, setOpenComment] = useState(false);
   const [note, setNote] = useState(getParsedNote(event));
+  const [lockedPremiumPubkey, setLockedPremiumPubkey] = useState(() =>
+    isLockedPremiumEvent(event) ? event.pubkey : null,
+  );
   const { isMuted: isMutedPubkey, muteUnmute: muteUnmutePubkey } = useIsMute(
     note?.pubkey,
   );
   const customService = getContentTranslationConfig();
+  const isSubscribedToAuthor = useIsSubscribedToCreator(lockedPremiumPubkey);
   const [showPaidNoteInfo, setShowPaidNoteInfo] = useState(false);
   const { userProfile, isNip05Verified, proUser } = useUserProfile(note?.pubkey);
   const { postActions } = useNoteStats(note?.id, note?.pubkey);
@@ -74,7 +81,16 @@ export default function Note({ event, nevent }) {
         setIsLoading(false);
         return;
       }
-      let parsedNote = getParsedNote(res.data[0]);
+      let rawNote = res.data[0];
+      let parsedNote = getParsedNote(rawNote);
+      if (!parsedNote) {
+        if (isLockedPremiumEvent(rawNote)) {
+          setLockedPremiumPubkey(rawNote.pubkey);
+          saveUsers([rawNote.pubkey]);
+        }
+        setIsLoading(false);
+        return;
+      }
       setNote(parsedNote);
       saveUsers([parsedNote.pubkey]);
       setIsLoading(false);
@@ -148,6 +164,15 @@ export default function Note({ event, nevent }) {
         <Spinner size={32} />
       </div>
     );
+
+  if (
+    !note &&
+    !isLoading &&
+    lockedPremiumPubkey &&
+    userKeys?.pub !== lockedPremiumPubkey &&
+    !isSubscribedToAuthor
+  )
+    return <PremiumContentGate pubkey={lockedPremiumPubkey} />;
 
   if (!note && !isLoading)
     return (

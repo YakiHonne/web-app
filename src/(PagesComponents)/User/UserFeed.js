@@ -23,6 +23,9 @@ import MediaMasonryList from "@/Components/MediaMasonryList";
 import { useSelector } from "react-redux";
 import Icon from "@/Components/Icon";
 import useCreatorSubscription from "@/Hooks/useCreatorSubscription";
+import useSubscriberSubscriptions, {
+  useIsSubscribedToCreator,
+} from "@/Hooks/useSubscriberSubscriptions";
 import usePremiumRelays from "@/Hooks/usePremiumRelays";
 
 const eventsReducer = (notes, action) => {
@@ -101,6 +104,14 @@ export default function UserFeed({ user }) {
   const [hidden, setHidden] = useState(false);
   const { isSubChekingLoading, providers } = useCreatorSubscription({ pubkey });
   const hasPremium = !isSubChekingLoading && providers.length > 0;
+  const isSubscribedToCreator = useIsSubscribedToCreator(pubkey);
+  const { isLoading: isSubscriptionsLoading } = useSubscriberSubscriptions();
+  const isPremiumTab = contentFrom.startsWith("premium-");
+  const isPremiumLocked =
+    isPremiumTab &&
+    !isCurrentUser &&
+    !isSubscriptionsLoading &&
+    !isSubscribedToCreator;
   const { premiumRelays, isPremiumRelaysLoading, getPremiumNDK } =
     usePremiumRelays(pubkey, hasPremium);
 
@@ -223,6 +234,11 @@ export default function UserFeed({ user }) {
         const isPremiumFeed = contentFrom.startsWith("premium-");
         let premiumNDK;
         if (isPremiumFeed) {
+          if (isPremiumLocked) {
+            dispatchEvents({ type: "remove-events" });
+            setIsLoading(false);
+            return;
+          }
           if (isPremiumRelaysLoading) return;
           if (premiumRelays.length === 0) {
             setIsLoading(false);
@@ -319,6 +335,7 @@ export default function UserFeed({ user }) {
     pubkey,
     isPremiumRelaysLoading,
     premiumRelays,
+    isPremiumLocked,
   ]);
 
   useEffect(() => {
@@ -403,7 +420,18 @@ export default function UserFeed({ user }) {
       </div>
 
 
-      {["notes", "replies", "mentions", "pinned"].includes(contentFrom) && (
+      {isPremiumLocked && (
+        <div
+          className="fx-centered fx-col box-pad-v"
+          style={{ height: "30vh" }}
+        >
+          <Icon name="crown" size={64} isColored />
+          <h4>{t("AOUEtCq")}</h4>
+          <p className="gray-c p-centered">{t("AMRXPvg")}</p>
+        </div>
+      )}
+      {!isPremiumLocked &&
+        ["notes", "replies", "mentions", "pinned"].includes(contentFrom) && (
         <>
           {events[contentFrom].length === 0 && !isLoading && (
             <div
@@ -473,7 +501,7 @@ export default function UserFeed({ user }) {
           )}
         </>
       )}
-      {selectedTab !== "media" && events[contentFrom].length > 0 && (
+      {!isPremiumLocked && selectedTab !== "media" && events[contentFrom].length > 0 && (
         <>
           <Virtuoso
             style={{ width: "100%", height: "100vh" }}
@@ -509,7 +537,7 @@ export default function UserFeed({ user }) {
           />
         </>
       )}
-      {selectedTab === "media" && events[contentFrom].length > 0 && (
+      {!isPremiumLocked && selectedTab === "media" && events[contentFrom].length > 0 && (
         <>
           <MediaMasonryList
             events={events[contentFrom]}

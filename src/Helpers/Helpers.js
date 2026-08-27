@@ -805,7 +805,9 @@ const blossomServerFileUpload = async ({
           `url ${url}`,
           `x ${imageURL.data.sha256}`,
           `m ${imageURL.data.type}`,
-          `dim ${dim.width}x${dim.height}`,
+          ...(dim.width && dim.height
+            ? [`dim ${dim.width}x${dim.height}`]
+            : []),
           ...mirrors.map((mirror) => `fallback ${mirror}`),
         ],
       };
@@ -894,15 +896,44 @@ const filterImetas = ({ note, imetas }) => {
 
 const getImageDimensions = async (file) => {
   return new Promise((resolve) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
+    const fallback = { width: 0, height: 0 };
+    let url;
+    try {
+      url = URL.createObjectURL(file);
+    } catch (err) {
+      resolve(fallback);
+      return;
+    }
 
-    img.onload = () => {
-      resolve({ width: img.width, height: img.height });
-
+    let settled = false;
+    const finish = (dimensions) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
       URL.revokeObjectURL(url);
+      resolve(dimensions);
     };
 
+    const timer = setTimeout(() => finish(fallback), 10000);
+
+    if (file?.type?.startsWith("video/")) {
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.onloadedmetadata = () =>
+        finish({ width: video.videoWidth, height: video.videoHeight });
+      video.onerror = () => finish(fallback);
+      video.src = url;
+      return;
+    }
+
+    if (!file?.type?.startsWith("image/")) {
+      finish(fallback);
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => finish({ width: img.width, height: img.height });
+    img.onerror = () => finish(fallback);
     img.src = url;
   });
 };
