@@ -751,6 +751,30 @@ export function getComponent(children) {
 
 export { getNip22Refs } from "@/Helpers/Threads";
 
+export const isPremiumNoteAccessible = (pubkey) => {
+  try {
+    const state = store.getState();
+    if (state.userKeys?.pub === pubkey) return true;
+    const { subscriptions } = state.creatorsSubscriptions || {};
+    if (!subscriptions || subscriptions.length === 0) return false;
+    return subscriptions.some((_) => {
+      if (_.creator_pubkey !== pubkey) return false;
+      const displayStatus = _.display_status || _.status;
+      if (displayStatus) return ["active", "canceling"].includes(displayStatus);
+      return Boolean(_.active);
+    });
+  } catch (err) {
+    return false;
+  }
+};
+
+export const isLockedPremiumEvent = (event) => {
+  if (!event?.tags) return false;
+  const isPremium = event.tags.some((tag) => tag[0] === "nip63");
+  if (!isPremium) return false;
+  return !isPremiumNoteAccessible(event.pubkey);
+};
+
 export function getParsedNote(
   event,
   isCollapsedNote = false,
@@ -794,6 +818,7 @@ export function getParsedNote(
     let isCollapsedNote_ =
       isCollapsedNoteEnabled && isCollapsedNote && isNoteLong;
     let isPaidNote = false;
+    if (isPremium && !isPremiumNoteAccessible(event.pubkey)) return false;
     if (checkForLabel && ["UNCENSORED NOTE"].includes(checkForLabel[1]))
       return false;
     if (checkForLabel && ["FLASH NEWS"].includes(checkForLabel[1])) {

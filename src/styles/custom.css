@@ -5343,6 +5343,14 @@ input[type="range"]::-moz-range-thumb {
     background-color: rgba(212, 175, 55, 0.10);
 }
 
+.premium-glass-tag.premium-glass-tag-lg {
+    font-size: 14px;
+    gap: 6px;
+    height: 28px;
+    padding: 0 12px;
+    border-radius: 14px;
+}
+
 
 .custom-emoji {
     display: inline-block;

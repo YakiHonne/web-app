@@ -25,13 +25,19 @@ import { useTranslation } from "react-i18next";
 import { translate } from "@/Helpers/Controlers";
 import { setToast } from "@/Store/Slides/Publishers";
 import PagePlaceholder from "@/Components/PagePlaceholder";
+import PremiumContentGate from "@/Components/PremiumContentGate";
+import { useIsSubscribedToCreator } from "@/Hooks/useSubscriberSubscriptions";
 import bannedList from "@/Content/BannedList";
 import ZapAd from "@/Components/ZapAd";
 import useUserProfile from "@/Hooks/useUsersProfile";
 import { saveUsers } from "@/Helpers/DB";
 import useIsMute from "@/Hooks/useIsMute";
 import EventOptions from "@/Components/ElementOptions/EventOptions";
-import { getSubData } from "@/Helpers/Controlers";
+import { getSubData, getUserRelaysFromNOSTR } from "@/Helpers/Controlers";
+import {
+  getTemporaryNDKInstance,
+  releaseTemporaryNDKInstance,
+} from "@/Helpers/utils/ndkInstancesCache";
 import Link from "next/link";
 import { customHistory } from "@/Helpers/History";
 import PostReaction from "@/Components/PostReaction";
@@ -62,6 +68,9 @@ export default function Article({ event, userProfile, naddrData }) {
     naddrData ? naddrData.pubkey : null,
   );
   const customService = getContentTranslationConfig();
+  const isSubscribedToAuthor = useIsSubscribedToCreator(post?.pubkey);
+  const isPremiumUnlocked =
+    userKeys?.pub === post?.pubkey || isSubscribedToAuthor;
   useEffect(() => {
     const handleScroll = () => {
       if (containerRef.current) {
@@ -93,35 +102,87 @@ export default function Article({ event, userProfile, naddrData }) {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    const articleFilter = [
+      {
+        authors: naddrData?.pubkey ? [naddrData.pubkey] : undefined,
+        kinds: [naddrData?.kind],
+        "#d": [naddrData?.identifier],
+      },
+    ];
+
+    const fetchFromRelays = async (relays) => {
+      if (!relays || relays.length === 0) return [];
+      const tempNDK = await getTemporaryNDKInstance(relays);
+      if (!tempNDK) return [];
+      const res = await getSubData(
+        articleFilter,
+        5000,
+        relays,
+        tempNDK,
+        1,
+        false,
+        "ONLY_RELAY",
+      );
+      return res.data;
+    };
+
+    const getAuthorRelays = async () => {
+      if (!naddrData?.pubkey) return [];
+      const relayListEvent = await getUserRelaysFromNOSTR(naddrData.pubkey);
+      if (!relayListEvent?.tags) return [];
+      return [
+        ...new Set(
+          relayListEvent.tags
+            .filter((tag) => tag[0] === "r" && tag[1])
+            .filter(
+              (tag) => !tag[2] || tag[2] === "read" || tag[2] === "write",
+            )
+            .map((tag) => tag[1]),
+        ),
+      ];
+    };
+
     const fetchPost = async () => {
       setIsLoading(true);
-      const res = await getSubData(
-        [
-          {
-            authors: naddrData.pubkey ? [naddrData.pubkey] : undefined,
-            kinds: [naddrData.kind],
-            "#d": [naddrData.identifier],
-          },
-        ],
-        5000,
-        naddrData.relays || undefined,
-        undefined,
-        1,
-      );
-      if (res.data.length === 0) {
-        setIsLoading(false);
-        return;
+      try {
+        let data = [];
+        const hintRelays = naddrData.relays || [];
+        if (hintRelays.length > 0) data = await fetchFromRelays(hintRelays);
+        if (data.length === 0 && !cancelled) {
+          const res = await getSubData(articleFilter, 5000, undefined, undefined, 1);
+          data = res.data;
+        }
+        if (data.length === 0 && !cancelled) {
+          const authorRelays = await getAuthorRelays();
+          const remaining = authorRelays.filter(
+            (relay) => !hintRelays.includes(relay),
+          );
+          data = await fetchFromRelays(remaining);
+        }
+        if (cancelled) return;
+        if (data.length === 0) {
+          setIsLoading(false);
+          return;
+        }
+        let post_ = {
+          ...data[0],
+        };
+        let parsedPost = getParsedRepEvent(post_);
+        saveUsers([post_.pubkey]);
+        setPost(parsedPost);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
-      let post_ = {
-        ...res.data[0],
-      };
-      let parsedPost = getParsedRepEvent(post_);
-      saveUsers([post_.pubkey]);
-      setPost(parsedPost);
-      setIsLoading(false);
     };
     if (!event && naddrData) fetchPost();
     if (!event && !naddrData) setIsLoading(false);
+    return () => {
+      cancelled = true;
+      releaseTemporaryNDKInstance();
+    };
   }, []);
 
   useEffect(() => {
@@ -184,6 +245,9 @@ export default function Article({ event, userProfile, naddrData }) {
         <Spinner size={32} />
       </div>
     );
+
+  if (post?.isPremium && !isPremiumUnlocked)
+    return <PremiumContentGate pubkey={post.pubkey} />;
 
   if (!post && !isLoading)
     return (
@@ -373,6 +437,14 @@ export default function Article({ event, userProfile, naddrData }) {
                           </p>
                         </div>
                       </div>
+                      {post.isPremium && (
+                        <div className="fit-container fx-centered box-pad-v-s">
+                          <div className="premium-glass-tag premium-glass-tag-lg">
+                            <Icon name="crown" size={16} isColored />
+                            {t("AW299l2")}
+                          </div>
+                        </div>
+                      )}
                       <h1 className="p-centered" dir={showTranslation ? translatedDir : post.dir}>
                         {showTranslation ? translatedTitle : post.title}
                       </h1>

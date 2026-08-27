@@ -103,6 +103,7 @@ import {
   getMetadataFromCachedAccounts,
 } from "@/Helpers/ClientHelpers";
 import { setNostrAuthors, setNostrClients } from "@/Store/Slides/Profiles";
+import useSubscriberSubscriptions from "@/Hooks/useSubscriberSubscriptions";
 import {
   decrypt04,
   getEmptyuserMetadata,
@@ -140,6 +141,7 @@ export default function AppInit() {
   const initDMS = useSelector((state) => state.initDMS);
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
   const prevPubkeyRef = useRef(null);
+  useSubscriberSubscriptions();
   const chatrooms =
     useLiveQuery(
       async () => (userKeys ? await getChatrooms(userKeys.pub) : []),

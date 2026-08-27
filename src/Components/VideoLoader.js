@@ -43,6 +43,7 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === "Escape") {
+        setFloatingElementsZIndex(10001);
         setIsFullScreen(false);
       }
     };
@@ -103,17 +104,15 @@ const VideoLoader = ({ src, pubkey, isCommonPlatform = false }) => {
     );
   }
 
-  const handleFullScreen = () => {
+  const setFloatingElementsZIndex = (zIndex) => {
     let dm = document.getElementById("floating-dms");
     let info = document.getElementById("floating-info");
-    if (!isFullScreen) {
-      dm.style.zIndex = -1;
-      info.style.zIndex = -1;
-    } else {
-      dm.style.zIndex = 10001;
-      info.style.zIndex = 10001;
-    }
+    if (dm) dm.style.zIndex = zIndex;
+    if (info) info.style.zIndex = zIndex;
+  };
 
+  const handleFullScreen = () => {
+    setFloatingElementsZIndex(isFullScreen ? 10001 : -1);
     setIsFullScreen(!isFullScreen);
   };
 
