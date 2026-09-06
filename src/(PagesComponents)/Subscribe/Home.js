@@ -20,6 +20,7 @@ import Badge from "@/Helpers/Badge";
 import Icon from "@/Components/Icon";
 import { saveUsers } from "@/Helpers/DB";
 import { clearSubscriberSubscriptionsCache } from "@/Hooks/useSubscriberSubscriptions";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -209,6 +210,7 @@ export default function Home() {
 
 function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
   const { t } = useTranslation();
+  const { requireYakiConnection } = useYakiGuard();
   const isPremium = false;
   const userKeys = useSelector((state) => state.userKeys);
   const [isLoading, setIsLoading] = useState(false);
@@ -227,6 +229,7 @@ function PlanCard({ plan, creatorPubkey, metadata, gatewayPubkey }) {
   };
 
   const handleFiatSubscribe = async () => {
+    if (!requireYakiConnection()) return;
     setIsLoading(true);
     let res = await getSubscriptionLink({
       creator_pubkey: creatorPubkey,

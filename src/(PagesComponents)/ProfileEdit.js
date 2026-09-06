@@ -19,6 +19,7 @@ import LinkWalletOverlay from "@/Components/LinkWalletOverlay";
 import useAccess from "@/Hooks/useAccess";
 import useNameClaim from "@/Hooks/useNameClaim";
 import useQuotaGuard from "@/Hooks/useQuotaGuard";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 import { claimUsername } from "@/Endpoints/Account";
 import { setSubscriptionStatus } from "@/Store/Slides/Subscription";
 import { openUpgradeSheet } from "@/Store/Slides/Upgrade";
@@ -34,6 +35,7 @@ export default function ProfileEdit() {
   const userAllRelays = useSelector((state) => state.userAllRelays);
   const toPublish = useSelector((state) => state.toPublish);
   const { handleAccessError } = useQuotaGuard();
+  const { requireYakiConnection } = useYakiGuard();
   const {
     isPaid,
     inTrial,
@@ -162,6 +164,7 @@ export default function ProfileEdit() {
 
   const claimPendingUsername = async () => {
     if (claimingUsername) return false;
+    if (!requireYakiConnection()) return false;
     setClaimingUsername(true);
     try {
       await claimUsername(usernameClaim.value);

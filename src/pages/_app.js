@@ -67,6 +67,10 @@ const OnboardingHost = dynamic(
   () => import("@/Components/Onboarding/OnboardingHost"),
   { ssr: false },
 );
+const YakiConnectPromptHost = dynamic(
+  () => import("@/Components/YakiConnectPromptHost"),
+  { ssr: false },
+);
 
 const tourSteps = [
   { selector: ".uplift-search-pill", title: "Search", description: "Find notes, profiles, and topics instantly." },
@@ -229,6 +233,7 @@ function App({ Component, pageProps }) {
         <UpgradeSheetHost />
         <PublishResultHostClient />
         <OnboardingHost />
+        <YakiConnectPromptHost />
         <NavbarClient />
         {!shouldHideSidebar && <TopNavbarClient />}
         <WarningBarClient />

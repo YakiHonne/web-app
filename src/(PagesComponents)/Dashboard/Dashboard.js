@@ -15,7 +15,6 @@ import Widgets from "./Widgets";
 import Bookmarks from "./Bookmarks";
 import Interests from "./Interests";
 import HomeTab from "./HomeTab";
-import Scheduled from "./Scheduled";
 import { SelectTabs } from "@/Components/SelectTabs";
 import { useTranslation } from "react-i18next";
 
@@ -308,7 +307,6 @@ export default function Dashboard() {
                 )}
                 {selectedTab === 7 && <Bookmarks />}
                 {selectedTab === 8 && <Interests />}
-                {selectedTab === 9 && <Scheduled />}
                 <div style={{ marginBottom: "100px" }}></div>
               </div>
             </div>

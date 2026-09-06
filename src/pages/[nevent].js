@@ -5,6 +5,7 @@ import { nip19 } from "nostr-tools";
 import HeadMetadata from "@/Components/HeadMetadata";
 import { getEmptyuserMetadata, getParsedAuthor } from "@/Helpers/Encryptions";
 import { getDataForSSG } from "@/Helpers/lib";
+import { bannedListSet } from "@/Content/BannedList";
 
 const NotFoundComponent = dynamic(() => import("@/(PagesComponents)/404"), {
   ssr: false,
@@ -36,6 +37,8 @@ const isNostrSchema = (value) => {
 
 export default function Page({ event, nprofile }) {
   if (!event) return <NotFoundComponent />;
+  if (event?.pubkey && bannedListSet.has(event.pubkey))
+    return <NotFoundComponent />;
 
   const data = {
     title: event.display_name || event.name,
@@ -84,6 +87,10 @@ export async function getStaticProps({ params }) {
 
   if (!pubkey) {
     return { props: { event: null }, revalidate: 60 };
+  }
+
+  if (bannedListSet.has(pubkey)) {
+    return { props: { event: null }, revalidate: 3600 };
   }
 
   const [resMetaData, resFollowings, resPinned] = await Promise.all([

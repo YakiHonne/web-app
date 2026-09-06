@@ -7,6 +7,7 @@ import { setIsConnectedToYaki } from "@/Store/Slides/YakiChest";
 import { setToast } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import Overlay from "@/Components/Overlay";
+import { getLoginsParams } from "@/Helpers/Helpers";
 
 export default function LoginWithAPI({ exit }) {
   const dispatch = useDispatch();
@@ -21,6 +22,18 @@ export default function LoginWithAPI({ exit }) {
     try {
       e.stopPropagation();
       setIsLoading(true);
+
+      let { password } = await getLoginsParams(userKeys.pub, userKeys);
+      if (!password) {
+        dispatch(
+          setToast({
+            type: 2,
+            desc: t("AIgTTfv"),
+          })
+        );
+        setIsLoading(false);
+        return;
+      }
 
       let data = await LoginToAPI(userKeys.pub, userKeys);
       if (data) {

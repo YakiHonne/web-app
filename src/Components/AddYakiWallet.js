@@ -8,12 +8,14 @@ import { useTranslation } from "react-i18next";
 import { downloadAsFile } from "@/Helpers/Encryptions";
 import Icon from "@/Components/Icon";
 import useQuotaGuard from "@/Hooks/useQuotaGuard";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 
 export default function AddYakiWallet({ refresh }) {
   const dispatch = useDispatch();
   const userMetadata = useSelector((state) => state.userMetadata);
   const { t } = useTranslation();
   const { handleAccessError } = useQuotaGuard();
+  const { requireYakiConnection } = useYakiGuard();
   const [isLoading, setIsLoading] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showErrorMessage, setShowMessageError] = useState(false);
@@ -31,6 +33,7 @@ export default function AddYakiWallet({ refresh }) {
         setShowMessageEmtpyUN(true);
         return;
       }
+      if (!requireYakiConnection()) return;
       setIsLoading(true);
       let url = await axiosInstance.post("/api/v1/wallet", {
         username: userName?.toLowerCase(),

@@ -497,7 +497,7 @@ function KindOne({
                     userProfile={userProfile}
                     setShowComments={setShowComments}
                   />
-                  <EventStats postActions={postActions} />
+                  <EventStats postActions={postActions} seenOn={event.seenOn} />
                 </div>
               </>
             )}

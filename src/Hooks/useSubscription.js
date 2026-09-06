@@ -8,9 +8,11 @@ import {
   changeSubscriptionPlan,
   cancelPendingChange,
 } from "@/Endpoints/Subscription";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 
 export default function useSubscription() {
   const dispatch = useDispatch();
+  const { handleAuthError } = useYakiGuard();
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -40,11 +42,12 @@ export default function useSubscription() {
       dispatch(setToast({ type: 1, desc: "Subscription will end at the current period." }));
       await fetch();
     } catch (e) {
+      if (handleAuthError(e)) return;
       dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to cancel subscription." }));
     } finally {
       setCancelling(false);
     }
-  }, [fetch, dispatch]);
+  }, [fetch, dispatch, handleAuthError]);
 
   const resume = useCallback(async () => {
     setResuming(true);
@@ -53,11 +56,12 @@ export default function useSubscription() {
       dispatch(setToast({ type: 1, desc: "Subscription resumed successfully." }));
       await fetch();
     } catch (e) {
+      if (handleAuthError(e)) return;
       dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to resume subscription." }));
     } finally {
       setResuming(false);
     }
-  }, [fetch, dispatch]);
+  }, [fetch, dispatch, handleAuthError]);
 
   const changePlan = useCallback(async ({ new_plan, new_price_id }) => {
     setChangingPlan(new_plan);
@@ -66,11 +70,12 @@ export default function useSubscription() {
       dispatch(setToast({ type: 1, desc: "Plan change scheduled for next cycle." }));
       await fetch();
     } catch (e) {
+      if (handleAuthError(e)) return;
       dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to schedule plan change." }));
     } finally {
       setChangingPlan(null);
     }
-  }, [fetch, dispatch]);
+  }, [fetch, dispatch, handleAuthError]);
 
   const cancelChange = useCallback(async () => {
     setCancellingChange(true);
@@ -79,11 +84,12 @@ export default function useSubscription() {
       dispatch(setToast({ type: 1, desc: "Pending plan change cancelled." }));
       await fetch();
     } catch (e) {
+      if (handleAuthError(e)) return;
       dispatch(setToast({ type: 2, desc: e?.response?.data?.message || "Failed to cancel pending change." }));
     } finally {
       setCancellingChange(false);
     }
-  }, [fetch, dispatch]);
+  }, [fetch, dispatch, handleAuthError]);
 
   return {
     status,

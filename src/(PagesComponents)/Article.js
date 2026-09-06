@@ -844,7 +844,7 @@ const PostStats = ({
         />
         <div className="fx-centered">
 
-          <EventStats postActions={postActions} isRepEvent={true} />
+          <EventStats postActions={postActions} isRepEvent={true} seenOn={post.seenOn} />
           <EventOptions event={post} component="repEvents" />
         </div>
       </div>

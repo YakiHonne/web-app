@@ -7,6 +7,7 @@ import Spinner from "@/Components/Spinner";
 import YakiNameField from "@/Components/YakiNameField";
 import useNameClaim from "@/Hooks/useNameClaim";
 import useQuotaGuard from "@/Hooks/useQuotaGuard";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 import { claimNip05 } from "@/Endpoints/Account";
 import { setToast } from "@/Store/Slides/Publishers";
 
@@ -23,6 +24,7 @@ export default function YakiNip05Overlay({
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { handleAccessError } = useQuotaGuard();
+  const { requireYakiConnection } = useYakiGuard();
   const [claiming, setClaiming] = useState(false);
 
   const owned = !!nip05Name;
@@ -43,6 +45,7 @@ export default function YakiNip05Overlay({
 
   const handleClaim = async () => {
     if (!claim.claimable || claiming) return;
+    if (!requireYakiConnection()) return;
     setClaiming(true);
     try {
       await claimNip05({ name: claim.value, pubkey });

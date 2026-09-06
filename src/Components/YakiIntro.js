@@ -40,13 +40,11 @@ const content = [
 ];
 
 export const updatesList = [
-  "Added a publishing confirmation popup when notes and articles are published successfully.",
-  "Improved the paid notes payment flow for a smoother premium content experience.",
-  "Added a dedicated pricing page.",
-  "Fixed several issues affecting the AI Assistant and Second Reader.",
-  "Added support for kind 1111 comments and replies.",
-  "Fixed issues with comment thread display and rendering.",
-  "Resolved various issues on the Edit Profile page.",
+  "Added video compression in the media upload editor for smaller files and faster uploads, with a progress bar.",
+  "Added new dashboard filters: All, Scheduled, Paid notes and Premium for notes, plus Premium for articles.",
+  "Added a seen on section to the post stats showing the relays a post was found on.",
+  "Fixed a bug in the search page.",
+  "Various bug fixes and improvements.",
 ];
 
 export const proUpdatesVersion = "1.0.1";

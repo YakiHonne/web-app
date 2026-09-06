@@ -23,6 +23,8 @@ import ContentSourceAndFilter from "@/Components/ContentSourceAndFilter";
 import RecentPosts from "@/Components/RecentPosts";
 import { straightUp } from "@/Helpers/Helpers";
 import { getNDKInstance } from "@/Helpers/utils/ndkInstancesCache";
+import { isGallerySpamEvent } from "@/Helpers/SpamPattern";
+import { hasAdultUrls } from "@/Helpers/AdultContent";
 import { Virtuoso } from "react-virtuoso";
 import Icon from "@/Components/Icon";
 
@@ -52,7 +54,7 @@ export default function Articles() {
 
   return (
     <>
-      <div style={{ overflow: "auto" }}>
+      <div style={{ overflow: "clip" }}>
         <ArrowUp />
         <div className="fit-container fx-centered fx-start-h fx-start-v">
           <div
@@ -153,16 +155,20 @@ const ExploreFeed = ({
         setLastEventsTimestamps(articles[articles.length - 1].created_at - 1);
 
       let sortedData = articles
-        .map((event) =>
-          selectedCategory.value === "top"
-            ? event.content
-              ? {
-                ...getParsedRepEvent(JSON.parse(event.content)),
-                created_at: event.created_at,
-              }
-              : false
-            : getParsedRepEvent(event)
-        )
+        .map((event) => {
+          if (selectedCategory.value === "top") {
+            if (!event.content) return false;
+            let innerEvent = JSON.parse(event.content);
+            if (isGallerySpamEvent(innerEvent) || hasAdultUrls(innerEvent))
+              return false;
+            return {
+              ...getParsedRepEvent(innerEvent),
+              created_at: event.created_at,
+            };
+          }
+          if (isGallerySpamEvent(event) || hasAdultUrls(event)) return false;
+          return getParsedRepEvent(event);
+        })
         .filter((event) => {
           if (event && event.title) return event;
         });

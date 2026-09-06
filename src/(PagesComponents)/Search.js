@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import ArrowUp from "@/Components/ArrowUp";
 import { useDispatch, useSelector } from "react-redux";
 import { nip19 } from "nostr-tools";
@@ -17,7 +17,6 @@ import KindOne from "@/Components/KindOne";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import bannedList from "@/Content/BannedList";
-import { useRouter } from "next/router";
 import InfiniteScroll from "@/Components/InfiniteScroll";
 import { getDataForSearch } from "@/Helpers/lib";
 import Link from "next/link";
@@ -31,8 +30,12 @@ const getKeyword = () => {
   return keyword || "";
 };
 
+const getTab = () => {
+  let tab = parseInt(new URLSearchParams(window.location.search).get("tab"), 10);
+  return Number.isInteger(tab) && tab >= 0 && tab <= 3 ? tab : 0;
+};
+
 export default function Search() {
-  const { query } = useRouter();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const urlKeyword = getKeyword();
@@ -49,14 +52,28 @@ export default function Search() {
   }, []);
   const [searchKeyword, setSearchKeyword] = useState(urlKeyword);
   const [results, setResults] = useState([]);
+  const searchGenRef = useRef(0);
+  const isFirstSearchRef = useRef(true);
   const [isLoading, setIsLoading] = useState(true);
   const [launchSearching, setLaunchSearching] = useState(
     searchKeyword || false
   );
   const [lastTimestamp, setLastTimestamp] = useState(undefined);
-  const [selectedTab, setSelectedTab] = useState(
-    query?.tab ? query?.tab : 0
-  );
+  const [selectedTab, setSelectedTab] = useState(getTab);
+  const visibleResults = useMemo(() => {
+    let seen = new Set();
+    return results.filter((item) => {
+      if (
+        !item?.id ||
+        ![1, 30023, 34235].includes(item.kind) ||
+        userMutedList.includes(item.pubkey) ||
+        seen.has(item.id)
+      )
+        return false;
+      seen.add(item.id);
+      return true;
+    });
+  }, [results, userMutedList]);
   const followed = useMemo(() => {
     return userInterestList.find(
       (interest) => interest === searchKeyword.toLowerCase()
@@ -72,6 +89,7 @@ export default function Search() {
   const handleOnChange = (e) => {
     let value = e.target.value;
     if (!value) {
+      searchGenRef.current += 1;
       setSearchKeyword("");
       setResults([]);
       setIsLoading(false);
@@ -96,23 +114,21 @@ export default function Search() {
 
   useEffect(() => {
     if (!searchKeyword) {
+      searchGenRef.current += 1;
       setResults([]);
       setIsLoading(false);
       setLastTimestamp(undefined);
       return;
     }
 
-    var timer = setTimeout(null);
-    if (searchKeyword) {
-      timer = setTimeout(async () => {
-        if (selectedTab === 0) searchForUser();
-        if (selectedTab !== 0) {
-          searchForContent();
-        }
-      }, 1000);
-    } else {
-      clearTimeout(timer);
-    }
+    let delay = isFirstSearchRef.current ? 0 : 300;
+    isFirstSearchRef.current = false;
+    var timer = setTimeout(async () => {
+      if (selectedTab === 0) searchForUser();
+      if (selectedTab !== 0) {
+        searchForContent();
+      }
+    }, delay);
     return () => {
       clearTimeout(timer);
     };
@@ -219,6 +235,7 @@ export default function Search() {
   };
 
   const searchForContent = async () => {
+    const gen = searchGenRef.current;
     let tag = searchKeyword.replaceAll("#", "");
     let tags = [
       tag,
@@ -231,20 +248,29 @@ export default function Search() {
       `#${String(tag).charAt(0).toUpperCase() + String(tag).slice(1)}`,
     ];
     let filter = {
-      limit: 300,
+      limit: 100,
       "#t": tags,
       until: lastTimestamp ? lastTimestamp - 1 : lastTimestamp,
     };
     if (selectedTab === 1) filter.kinds = [1];
     if (selectedTab === 2) filter.kinds = [30023];
     if (selectedTab === 3) filter.kinds = [34235, 34236, 21, 22, 20];
-    let content = await getDataForSearch(
-      [filter, { ...filter, search: searchKeyword, "#t": undefined }],
-      100,
-      1000,
-      userSearchRelays
-    );
-    let content_ = content.data.map((event) => {
+    const lowerKeyword = searchKeyword.toLowerCase();
+    const matchesKeyword = (event) => {
+      if (
+        event.tags?.some(
+          (_) => _[0] === "t" && _[1]?.toLowerCase().replace("#", "") === tag.toLowerCase()
+        )
+      )
+        return true;
+      if (event.content?.toLowerCase().includes(lowerKeyword)) return true;
+      return event.tags?.some(
+        (_) =>
+          ["title", "summary", "description", "alt"].includes(_[0]) &&
+          _[1]?.toLowerCase().includes(lowerKeyword)
+      );
+    };
+    const parseEvent = (event) => {
       if (event.kind === 1) {
         let parsedNote = getParsedNote(event, true);
         return parsedNote;
@@ -253,14 +279,48 @@ export default function Search() {
       } else if ([34235, 34236, 21, 22, 20].includes(event.kind)) {
         return getParsedMedia(event);
       }
-    });
-    if (content_.length === 0) setIsLoading(false);
-    setResults((prev) => [...prev, ...content_]);
+    };
+    const appendedIds = new Set();
+    let buffer = [];
+    let flushTimer = null;
+    const flush = () => {
+      flushTimer = null;
+      if (gen !== searchGenRef.current || buffer.length === 0) {
+        buffer = [];
+        return;
+      }
+      const batch = buffer;
+      buffer = [];
+      const parsed = batch.filter(matchesKeyword).map(parseEvent).filter(Boolean);
+      if (parsed.length === 0) return;
+      setResults((prev) =>
+        [...prev, ...parsed].sort((a, b) => b.created_at - a.created_at)
+      );
+    };
+    const onEvent = (event) => {
+      if (gen !== searchGenRef.current) return;
+      if (!event?.id || appendedIds.has(event.id)) return;
+      appendedIds.add(event.id);
+      buffer.push(event);
+      if (!flushTimer) flushTimer = setTimeout(flush, 350);
+    };
+    let content = await getDataForSearch(
+      [filter, { ...filter, search: searchKeyword, "#t": undefined }],
+      1500,
+      100,
+      userSearchRelays,
+      onEvent
+    );
+    if (flushTimer) clearTimeout(flushTimer);
+    flush();
+    if (gen !== searchGenRef.current) return;
+    setIsLoading(false);
     saveUsers(content.pubkeys);
   };
 
   const handleSelectedTab = (data) => {
     if (data === selectedTab) return;
+    searchGenRef.current += 1;
     setSelectedTab(data);
     setIsLoading(true);
     setLastTimestamp(undefined);
@@ -307,6 +367,7 @@ export default function Search() {
     if (isLoading && results.length === 0) {
       return;
     }
+    searchGenRef.current += 1;
     setSearchKeyword(interest.toLowerCase());
     setResults([]);
     setLastTimestamp(undefined);
@@ -317,6 +378,7 @@ export default function Search() {
     if (isLoading && results.length === 0) {
       return;
     }
+    searchGenRef.current += 1;
     setSearchKeyword("");
     setLastTimestamp(undefined);
     setResults([]);
@@ -332,7 +394,7 @@ export default function Search() {
     setLaunchSearching(Date.now());
   };
   return (
-    <div style={{ overflow: "auto" }}>
+    <div style={{ overflow: "clip" }}>
       <ArrowUp />
       <div className="fit-container fx-centered fx-start-h fx-start-v">
         <div
@@ -456,29 +518,28 @@ export default function Search() {
                     );
                 }
               })}
-            {results.length > 0 && selectedTab !== 3 && (
+            {visibleResults.length > 0 && [1, 2].includes(selectedTab) && (
               <Virtuoso
                 style={{ width: "100%", height: "100vh" }}
                 skipAnimationFrameInResizeObserver={true}
                 overscan={1000}
                 useWindowScroll={true}
-                totalCount={results.length}
+                totalCount={visibleResults.length}
+                computeItemKey={(index) => visibleResults[index]?.id}
                 increaseViewportBy={1000}
                 endReached={(index) => {
-                  setLastTimestamp(results[index].created_at - 1);
+                  if (isLoading) return;
+                  const item = visibleResults[index];
+                  if (!item?.created_at) return;
+                  setIsLoading(true);
+                  setLastTimestamp(item.created_at - 1);
                 }}
                 itemContent={(index) => {
-                  let item = results[index];
-                  if (
-                    [1].includes(item.kind) &&
-                    !userMutedList.includes(item.pubkey)
-                  )
-                    return <KindOne key={item.id} event={item} border={true} />;
-                  if (
-                    [30023, 34235].includes(item.kind) &&
-                    !userMutedList.includes(item.pubkey)
-                  )
-                    return <RepEventPreviewCard key={item.id} item={item} />;
+                  let item = visibleResults[index];
+                  if (!item) return null;
+                  if (item.kind === 1)
+                    return <KindOne event={item} border={true} />;
+                  return <RepEventPreviewCard item={item} />;
                 }}
               />
             )}
@@ -488,7 +549,10 @@ export default function Search() {
             {isLoading && (
               <div
                 className="fit-container fx-centered"
-                style={{ height: "80vh" }}
+                style={{
+                  height: results.length > 0 ? "auto" : "80vh",
+                  padding: results.length > 0 ? "1rem 0" : 0,
+                }}
               >
                 <Spinner size={32} />
               </div>

@@ -2,9 +2,14 @@ import axiosInstance from "@/Helpers/HTTP_Client";
 import React, { useState, useEffect } from "react";
 import { getRedPacket, setRedPacket } from "@/Helpers/utils/redpacketCache";
 import { encrypt44 } from "@/Helpers/Encryptions";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import { setToast } from "@/Store/Slides/Publishers";
+import { openYakiConnectPrompt } from "@/Store/Slides/YakiChest";
 
 export default function useRedPacket({ preimage, created_at }) {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const [isRedeemed, setIsRedeemed] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
@@ -56,6 +61,10 @@ export default function useRedPacket({ preimage, created_at }) {
       process.env.NEXT_PUBLIC_CHECKER_PUBKEY,
       payload,
     );
+    if (!encodedSecret) {
+      dispatch(setToast({ type: 2, desc: t("AIgTTfv") }));
+      return false;
+    }
     try {
       let res = await axiosInstance.post("/claim-redpacket", {
         token: encodedSecret,
@@ -74,6 +83,7 @@ export default function useRedPacket({ preimage, created_at }) {
       return false;
     } catch (err) {
       console.log(err);
+      if (err?.response?.status === 401) dispatch(openYakiConnectPrompt());
       return false;
     }
   };

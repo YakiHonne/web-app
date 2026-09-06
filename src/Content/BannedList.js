@@ -48,6 +48,10 @@ let bannedList = [
   "64de4e339f03bdad853c47026ef0d80b37bc781c6f2af050041340da20fad093",
   "744e24b492d4d211f0fe8a63245e271312403dbdbc1ee6f096d20b051d69fc4f",
   "b6d14afed050bfea8222c56e471afa67b50bf1171995a157785763eeb2af5b0d",
-  "76c439b088bcdffa90dc0b23276c0a9b33148a3c4c58bbb622384c76359e7f4e"
+  "76c439b088bcdffa90dc0b23276c0a9b33148a3c4c58bbb622384c76359e7f4e",
+  "b33069be2bc59e3514ce1bc6fa7d0bdfca377fe67564bc0aeaa8014f0fea83a3",
+  "5b512c9ae2baf54bb7726da19b304d5c788328cceb990c1d0d200dd8f2f9db8f"
 ];
+export const bannedListSet = new Set(bannedList);
+
 export default bannedList;

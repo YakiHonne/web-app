@@ -5,6 +5,12 @@ import HeadMetadata from "@/Components/HeadMetadata";
 import { getAuthPubkeyFromNip05 } from "@/Helpers/Helpers";
 import { nip19 } from "nostr-tools";
 import { getDataForSSG, parseNip05 } from "@/Helpers/lib";
+import { safeDecode, MAX_PARAM_LENGTH } from "@/Helpers/ssgParams";
+import { bannedListSet } from "@/Content/BannedList";
+
+const NotFoundComponent = dynamic(() => import("@/(PagesComponents)/404"), {
+  ssr: false,
+});
 
 const ClientComponent = dynamic(
   () => import("@/(PagesComponents)/User/UserHome"),
@@ -14,6 +20,8 @@ const ClientComponent = dynamic(
 );
 
 export default function Page({ event, nprofile }) {
+  if (event?.pubkey && bannedListSet.has(event.pubkey))
+    return <NotFoundComponent />;
   let data = {
     title: event?.display_name || event?.name,
     description: event.about || "N/A",
@@ -32,6 +40,7 @@ export default function Page({ event, nprofile }) {
 
 export async function getStaticProps({ locale, params }) {
   const { userId } = params;
+  if (bannedListSet.has(userId)) return { notFound: true, revalidate: 3600 };
   let pubkey = userId.includes("@")
     ? await parseNip05(userId)
     : decodePubkey(userId);
@@ -53,6 +62,7 @@ export async function getStaticProps({ locale, params }) {
       },
     };
   }
+  if (bannedListSet.has(pubkey)) return { notFound: true, revalidate: 3600 };
   const [resMetaData, resFollowings, resPinned] = await Promise.all([
     getDataForSSG([{ authors: [pubkey], kinds: [0] }], 500, 3),
     getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 3),
@@ -94,18 +104,11 @@ export async function getStaticProps({ locale, params }) {
 }
 
 const decodePubkey = (pubkey) => {
-  try {
-    if (pubkey.length < 32) {
-      return false;
-    }
-    let hexPubkey =
-      nip19.decode(pubkey).data.pubkey || nip19.decode(pubkey).data;
-    return hexPubkey;
-  } catch (err) {
-    console.log(pubkey);
-    console.log(err);
-    return false;
-  }
+  if (typeof pubkey !== "string") return false;
+  if (pubkey.length < 32 || pubkey.length > MAX_PARAM_LENGTH) return false;
+  const decoded = safeDecode(pubkey);
+  if (!decoded) return false;
+  return decoded.data?.pubkey || decoded.data || false;
 };
 
 export async function getStaticPaths() {

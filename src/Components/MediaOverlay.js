@@ -160,7 +160,7 @@ export default function MediaOverlay({ item, postActions, full = false }) {
               postActions={postActions}
               userProfile={userProfile}
             />
-            <EventStats postActions={postActions} />
+            <EventStats postActions={postActions} seenOn={item.seenOn} />
           </div>
         </div>
         <CommentsSection

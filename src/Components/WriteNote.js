@@ -37,6 +37,7 @@ import Link from "next/link";
 import { iconsNames } from "@/Content/IconV2URL";
 import usePaidNoteCost from "@/Hooks/usePaidNoteCost";
 import usePoints from "@/Hooks/usePoints";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 import { publishPaidNoteWithPoints, waitForPaidNote } from "@/Endpoints/Points";
 import NumberShrink from "@/Components/NumberShrink";
 
@@ -56,6 +57,7 @@ export default function WriteNote({
   const userMetadata = useSelector((state) => state.userMetadata);
   const userRelays = useSelector((state) => state.userRelays);
   const { paidNoteAmount, isPremiumPlan, isBasicPlan } = usePaidNoteCost();
+  const { requireYakiConnection, handleAuthError } = useYakiGuard();
   const { config: pointsConfig, fetchConfig: fetchPointsConfig, refreshBalance: refreshPointsBalance } = usePoints();
   const consumablePoints = useSelector((state) => state.yakiChestStats?.consumablePoints);
   const pointsCost = pointsConfig?.paid_note?.[isBasicPlan ? "basic" : "free"];
@@ -330,6 +332,7 @@ export default function WriteNote({
       proceedToPublish(eventInitEx, relay, true);
     } catch (err) {
       setIsLoading(false);
+      if (handleAuthError(err)) return;
       dispatch(
         setToast({
           type: 2,
@@ -341,6 +344,7 @@ export default function WriteNote({
 
   const publishAsPaid = async (content, tags_, relay, payMethod) => {
     try {
+      if (!requireYakiConnection()) return;
       setIsLoading(true);
 
       let tags = structuredClone(tags_);

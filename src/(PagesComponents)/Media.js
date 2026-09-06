@@ -48,7 +48,7 @@ export default function Media() {
   const [selectedFilter, setSelectedFilter] = useState(getDefaultFilter(3));
   const [selectedCategory, setSelectedCategory] = useState(false);
   return (
-    <div style={{ overflow: "auto" }}>
+    <div style={{ overflow: "clip" }}>
       <ArrowUp />
       <div className="fit-container fx-centered fx-start-h fx-start-v">
         <div

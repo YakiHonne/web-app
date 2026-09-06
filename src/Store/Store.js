@@ -40,6 +40,7 @@ import {
   YakiChestStatsReducer,
   IsYakiChestLoadedReducer,
   UpdatedActionFromYakiChestSliceReducer,
+  YakiConnectPromptReducer,
 } from "./Slides/YakiChest";
 import { SubscriptionReducer } from "./Slides/Subscription";
 import { CreatorsSubscriptionsReducer } from "./Slides/CreatorsSubscriptions";
@@ -98,6 +99,7 @@ export const store = configureStore({
     initDMS: InitDMSReducer,
     followersCountSL: FollowersCountSLReducer,
     updatedActionFromYakiChest: UpdatedActionFromYakiChestSliceReducer,
+    yakiConnectPrompt: YakiConnectPromptReducer,
     userFollowingsRelays: UserFollowingsRelaysReducer,
     importantFlashNews: ImportantFlashNewsReducer,
     trendingUsers: TrendingUsersReducer,

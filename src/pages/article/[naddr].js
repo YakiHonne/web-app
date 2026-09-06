@@ -10,12 +10,22 @@ import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getDataForSSG } from "@/Helpers/lib";
 import { safeDecode } from "@/Helpers/ssgParams";
+import { bannedListSet } from "@/Content/BannedList";
+
+const NotFoundComponent = dynamic(() => import("@/(PagesComponents)/404"), {
+  ssr: false,
+});
+
+import { isGallerySpamEvent } from "@/Helpers/SpamPattern";
+import { hasAdultUrls, isSelfDeclaredSensitive } from "@/Helpers/AdultContent";
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Article"), {
   ssr: false,
 });
 
-export default function Page({ event, author, naddrData, naddr }) {
+export default function Page({ event, author, naddrData, naddr, noindex }) {
+  if (event?.pubkey && bannedListSet.has(event.pubkey))
+    return <NotFoundComponent />;
   let parsedEvent = getParsedRepEvent(event);
   let data = {
     title:
@@ -28,6 +38,7 @@ export default function Page({ event, author, naddrData, naddr }) {
       author?.picture ||
       author?.banner,
     path: `article/${naddr}`,
+    noindex: noindex || false,
   };
   // if (event)
   return (
@@ -50,6 +61,7 @@ export async function getStaticProps({ params }) {
   let { pubkey, identifier, kind, relays } = decoded.data || {};
   if (!pubkey || kind === undefined)
     return { notFound: true, revalidate: 3600 };
+  if (bannedListSet.has(pubkey)) return { notFound: true, revalidate: 3600 };
   const res = await getDataForSSG(
     [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }],
     5000,
@@ -62,6 +74,9 @@ export async function getStaticProps({ params }) {
           ...res.data[0],
         }
       : null;
+  if (event && (isGallerySpamEvent(event) || hasAdultUrls(event)))
+    return { notFound: true, revalidate: 3600 };
+  const noindex = event ? isSelfDeclaredSensitive(event) : false;
   const author = event
     ? await getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata(pubkey);
@@ -71,6 +86,7 @@ export async function getStaticProps({ params }) {
       event,
       naddrData: { pubkey, identifier, kind, relays: relays || [] },
       naddr,
+      noindex,
       author:
         author.data?.length > 0
           ? getParsedAuthor(author.data[0])

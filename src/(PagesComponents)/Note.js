@@ -327,7 +327,7 @@ export default function Note({ event, nevent }) {
                     userProfile={userProfile}
                   />
                   <div className="fx-centered">
-                    <EventStats postActions={postActions} />
+                    <EventStats postActions={postActions} seenOn={note.seenOn?.length ? note.seenOn : relayHints} />
                   </div>
                 </div>
                 <MutedThreadWarning event={note} />

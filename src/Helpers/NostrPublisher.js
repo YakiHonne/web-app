@@ -28,7 +28,8 @@ const uploadToS3 = async (img, pubkey) => {
         headers: { "Content-Type": "multipart/formdata" },
       });
       return data.data.image_path;
-    } catch {
+    } catch (err) {
+      if (err?.response?.status === 401) return { unauthenticated: true };
       return false;
     }
   }

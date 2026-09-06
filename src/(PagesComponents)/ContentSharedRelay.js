@@ -133,7 +133,7 @@ export default function ContentSharedRelay() {
           actionButtonLabel={t("AUmONF7")}
         />
       )}
-      <div style={{ overflow: "auto" }}>
+      <div style={{ overflow: "clip" }}>
         <YakiIntro />
         <ArrowUp />
         <div className="fit-container fx-centered fx-start-h fx-start-v">

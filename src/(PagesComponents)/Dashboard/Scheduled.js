@@ -11,8 +11,7 @@ export default function Scheduled() {
 
   return (
     <div className="fit-container">
-      <div className="fit-container fx-scattered fx-col fx-start-h fx-start-v box-pad-v-m box-pad-h">
-        <h4 className="p-caps">{t("Az2KlKc")}</h4>
+      <div className="fit-container fx-scattered fx-col fx-start-h fx-start-v box-pad-h">
         {scheduledEvents.map((event) => {
           return (
             <ScheduledEventCard

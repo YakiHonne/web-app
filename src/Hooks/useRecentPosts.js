@@ -1,6 +1,8 @@
 import { getSubData } from "@/Helpers/Controlers";
 import { saveUsers } from "@/Helpers/DB";
 import { filterContent, getParsedRepEvent } from "@/Helpers/Encryptions";
+import { isGallerySpamEvent } from "@/Helpers/SpamPattern";
+import { hasAdultUrls } from "@/Helpers/AdultContent";
 import { ndkInstance } from "@/Helpers/NDKInstance";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -39,7 +41,9 @@ export default function useRecentPosts(
             if (
               ![1, 6].includes(event.kind) &&
               event.content &&
-              !userMutedList.includes(event.pubkey)
+              !userMutedList.includes(event.pubkey) &&
+              !isGallerySpamEvent(event) &&
+              !hasAdultUrls(event)
             ) {
               pubkeys.push(event.pubkey);
               let parsedPost = getParsedRepEvent(event);

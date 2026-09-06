@@ -12,6 +12,9 @@ import NumberShrink from "@/Components/NumberShrink";
 import useLightningPayment from "@/Hooks/useLightningPayment";
 import { useTranslation } from "react-i18next";
 import { customHistory } from "@/Helpers/History";
+import { useDispatch } from "react-redux";
+import { setToast } from "@/Store/Slides/Publishers";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 
 const COMPARE_ROWS = [
   { labelKey: "ALx6onZ", free: true, creator: true, pro: true },
@@ -169,6 +172,8 @@ function LightningInvoiceModal({ invoice, planName, sats, onClose, userPub }) {
 
 function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, pointsConfig, redeemingPlan, onRedeemSubscription, hasAnyPointsEligiblePlan }) {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const { requireYakiConnection, handleAuthError } = useYakiGuard();
   const [isLoading, setIsLoading] = useState(false);
   const [lightningInvoice, setLightningInvoice] = useState(null);
   const [activePlan, setActivePlan] = useState(null);
@@ -202,6 +207,7 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
       customHistory("/login");
       return;
     }
+    if (!requireYakiConnection()) return;
     if (isPoints) {
       await onRedeemSubscription(plan.id);
       onClose();
@@ -215,7 +221,11 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
       } else {
         await getSubscriptionLink({ plan: plan.plan });
       }
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+      if (!handleAuthError(err))
+        dispatch(setToast({ type: 2, desc: err?.response?.data?.message || t("AJY8vLC") }));
+    }
     setIsLoading(false);
   };
 

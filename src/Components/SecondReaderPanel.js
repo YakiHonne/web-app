@@ -6,6 +6,7 @@ import aiChatDb, { scopeKey } from "@/lib/aiChatDb";
 import { setToast } from "@/Store/Slides/Publishers";
 import { getErrorReason, getErrorStatus } from "@/Hooks/useQuotaGuard";
 import useFeatureQuota from "@/Hooks/useFeatureQuota";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 import QuotaBanner from "@/Components/QuotaBanner";
 import Icon from "@/Components/Icon";
 import { iconsNames } from "@/Content/IconV2URL";
@@ -424,6 +425,7 @@ export default function SecondReaderPanel({
   } = useFeatureQuota("second-reader");
   const { exceeded: aiQuotaExceeded, refresh: refreshAiQuota } =
     useFeatureQuota("chat-articles");
+  const { handleAuthError } = useYakiGuard();
   const pubkey = useSelector((state) => state.userKeys?.pub) || "";
   const [view, setView] = useState("picker");
   const [reduced, setReduced] = useState(false);
@@ -537,6 +539,7 @@ export default function SecondReaderPanel({
       } catch (err) {
         console.error("[SecondReader] full analysis failed", err);
         const status = getErrorStatus(err);
+        if (handleAuthError(err)) return;
         if (status === 429 || status === 403) {
           markExceeded(getErrorReason(err));
           refreshQuota({ assumeExceeded: true });

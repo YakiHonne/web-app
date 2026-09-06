@@ -336,7 +336,7 @@ export default function NotesComment({
                         )}
                         {isNoteTranslating && <Spinner />}
                       </div> */}
-                      <EventStats postActions={postActions} />
+                      <EventStats postActions={postActions} seenOn={event.seenOn} />
                     </div>
                   </>
                 )}

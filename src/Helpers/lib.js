@@ -4,6 +4,7 @@ import {
 } from "@/Helpers/SSGNDKInstance";
 import { nip19, sortEvents } from "nostr-tools";
 import { getAuthPubkeyFromNip05, sleepTimer } from "./Helpers";
+import { bannedListSet } from "@/Content/BannedList";
 import axios from "axios";
 
 export async function getDataForSSG(
@@ -26,14 +27,28 @@ export async function getDataForSearch(
   timeout = 1000,
   maxEvents = 1,
   relays = [],
+  onEvent,
 ) {
   const ndkInstance = await getSearchNdkInstance(relays);
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
-  let data = await Promise.race([
-    launchDataFetching(filter, timeout, maxEvents, ndkInstance),
-    sleepTimer(3000),
-  ]);
-  return data || { data: [], pubkeys: [] };
+  let results = await Promise.all(
+    filter.map((f) =>
+      launchDataFetching([f], timeout, maxEvents, ndkInstance, onEvent),
+    ),
+  );
+  let seen = new Set();
+  let data = [];
+  let pubkeys = new Set();
+  for (let result of results) {
+    if (!result) continue;
+    for (let event of result.data)
+      if (!seen.has(event.id)) {
+        seen.add(event.id);
+        data.push(event);
+      }
+    for (let pubkey of result.pubkeys) pubkeys.add(pubkey);
+  }
+  return { data: sortEvents(data), pubkeys: [...pubkeys] };
 }
 
 const launchDataFetching = async (
@@ -41,6 +56,7 @@ const launchDataFetching = async (
   timeout = 1000,
   maxEvents = 1,
   ndkInstance,
+  onEvent,
 ) => {
   return new Promise((resolve) => {
     let events = [];
@@ -78,15 +94,36 @@ const launchDataFetching = async (
     startTimer();
 
     sub.on("event", (event) => {
+      if (bannedListSet.has(event.pubkey)) return;
       if (events.length <= maxEvents) {
         pubkeys.push(event.pubkey);
-        if (event.id) events.push(event.rawEvent());
+        if (event.id) {
+          let rawEvent = event.rawEvent();
+          events.push(rawEvent);
+          if (onEvent) {
+            try {
+              onEvent(rawEvent);
+            } catch (err) {
+              console.log(err);
+            }
+          }
+        }
         if (maxEvents === 1) {
           sub.stop();
           resolve({
             data: events,
             pubkeys: [...new Set(pubkeys)],
           });
+          return;
+        }
+        if (events.length > maxEvents) {
+          if (timer) clearTimeout(timer);
+          sub.stop();
+          resolve({
+            data: sortEvents(events),
+            pubkeys: [...new Set(pubkeys)],
+          });
+          return;
         }
         startTimer();
       }

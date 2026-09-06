@@ -48,6 +48,7 @@ import {
   setRelayMetadata,
 } from "./utils/relayMetadataCache";
 import { relayConnectionFilter } from "@/Helpers/utils/relayConnectionFilter";
+import { bannedListSet } from "@/Content/BannedList";
 
 const ConnectNDK = async (relays) => {
   try {
@@ -600,6 +601,7 @@ const getSubData = async (
       },
       {
         onEvent(event) {
+          if (bannedListSet.has(event.pubkey)) return;
           if (events.length <= maxEvents) {
             pubkeys.push(event.pubkey);
             if (event.id) events.push(raw ? event.rawEvent() : event);

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { askArticleAI } from "@/Endpoints/ArticleAI";
 import { getErrorReason, getErrorStatus } from "@/Hooks/useQuotaGuard";
 import useFeatureQuota from "@/Hooks/useFeatureQuota";
+import useYakiGuard from "@/Hooks/useYakiGuard";
 import QuotaBanner from "@/Components/QuotaBanner";
 import Button from "@/Components/UI/Button";
 import aiChatDb, { scopeKey } from "@/lib/aiChatDb";
@@ -87,6 +88,7 @@ export default function ArticleAIPanel({
     refresh: refreshQuota,
     markExceeded,
   } = useFeatureQuota("chat-articles");
+  const { handleAuthError } = useYakiGuard();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [sessionLoaded, setSessionLoaded] = useState(false);
@@ -210,6 +212,11 @@ export default function ArticleAIPanel({
     } catch (err) {
       const status = getErrorStatus(err);
       const reason = getErrorReason(err);
+
+      if (handleAuthError(err)) {
+        setIsAILoading(false);
+        return;
+      }
 
       if (status === 429 || status === 403) {
         markExceeded(reason);

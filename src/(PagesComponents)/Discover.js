@@ -76,7 +76,7 @@ export default function Discover() {
 
   return (
     <>
-      <div style={{ overflow: "auto" }}>
+      <div style={{ overflow: "clip" }}>
         <ArrowUp />
         <div className="fit-container fx-centered fx-start-h fx-start-v">
           <div

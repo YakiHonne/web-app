@@ -9,12 +9,19 @@ import {
 import HeadMetadata from "@/Components/HeadMetadata";
 import { getDataForSSG } from "@/Helpers/lib";
 import { safeDecode } from "@/Helpers/ssgParams";
+import { bannedListSet } from "@/Content/BannedList";
+
+const NotFoundComponent = dynamic(() => import("@/(PagesComponents)/404"), {
+  ssr: false,
+});
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Image"), {
   ssr: false,
 });
 
 export default function Page({ event, author, nevent }) {
+  if (event?.pubkey && bannedListSet.has(event.pubkey))
+    return <NotFoundComponent />;
   let parsedEvent = getParsedMedia(event);
   let data = {
     title: parsedEvent?.description || author?.display_name || author?.name,
@@ -44,6 +51,8 @@ export async function getStaticProps({ params }) {
   let { pubkey, id, relays } =
     decoded.type === "note" ? { id: decoded.data } : decoded.data || {};
   if (!id) return { notFound: true, revalidate: 3600 };
+  if (pubkey && bannedListSet.has(pubkey))
+    return { notFound: true, revalidate: 3600 };
   const res = await getDataForSSG(
     [{ ids: [id] }],
     5000,
@@ -56,6 +65,8 @@ export async function getStaticProps({ params }) {
           ...res.data[0],
         }
       : null;
+  if (event && bannedListSet.has(event.pubkey))
+    return { notFound: true, revalidate: 3600 };
 
   const author = event
     ? await getDataForSSG([{ authors: [event.pubkey], kinds: [0] }], 1000, 1)

@@ -17,6 +17,7 @@ import { nip19 } from "nostr-tools";
 import { customHistory } from "@/Helpers/History";
 import Icon from "@/Components/Icon";
 import Overlay from "../Overlay";
+import { compressVideoFile } from "@/Helpers/VideoCompressor";
 
 const applyImageFilter = (file, filter = "grayscale(1)") => {
   return new Promise((resolve) => {
@@ -113,6 +114,7 @@ export default function PostMedia({ exit }) {
   const [description, setDescription] = useState("");
   const [mainPostUploadPerc, setMainPostUploadPerc] = useState(0);
   const [videoCoverUploadPerc, setVideoCoverUploadPerc] = useState(0);
+  const [compressionPerc, setCompressionPerc] = useState(0);
   const { t } = useTranslation();
   const handlePickFile = (file) => {
     setFile(file);
@@ -136,6 +138,7 @@ export default function PostMedia({ exit }) {
     setVideoCover(null);
     setMainPostUploadPerc(0);
     setVideoCoverUploadPerc(0);
+    setCompressionPerc(0);
   };
 
   const publishPost = async () => {
@@ -166,6 +169,11 @@ export default function PostMedia({ exit }) {
       let file_ = isImg
         ? await applyImageFilter(file, IMAGE_FILTERS[filter])
         : await trimVideoFile(file, range);
+      if (!isImg) {
+        let compressed = await compressVideoFile(file_.file, setCompressionPerc);
+        if (compressed) file_ = { ...file_, file: compressed };
+        setCompressionPerc(0);
+      }
       let toUpload = await FileUpload({
         file: file_.file,
         userKeys: userKeys_,
@@ -340,6 +348,7 @@ export default function PostMedia({ exit }) {
               <LoadingState
                 videoCoverUploadPerc={videoCoverUploadPerc}
                 mainPostUploadPerc={mainPostUploadPerc}
+                compressionPerc={compressionPerc}
                 isImg={isImg}
               />
               <div className="fit-container fx-centered box-pad-h-m box-pad-v-m">
@@ -367,11 +376,46 @@ export default function PostMedia({ exit }) {
   );
 }
 
-const LoadingState = ({ videoCoverUploadPerc, mainPostUploadPerc, isImg }) => {
+const LoadingState = ({
+  videoCoverUploadPerc,
+  mainPostUploadPerc,
+  compressionPerc,
+  isImg,
+}) => {
   const { t } = useTranslation();
-  if (videoCoverUploadPerc < 100 && mainPostUploadPerc < 100) return null;
+  if (
+    videoCoverUploadPerc < 100 &&
+    mainPostUploadPerc < 100 &&
+    compressionPerc === 0
+  )
+    return null;
   return (
     <div className="fit-container fx-centered fx-start-h fx-start-v box-pad-h-m">
+      {compressionPerc > 0 && (
+        <div
+          className="fx-centered fx-col fx-start-h fx-start-v"
+          style={{ gap: "3px", width: "50%" }}
+        >
+          {compressionPerc < 100 && (
+            <p className="orange-c p-italic p-medium">{t("A6xHL3F")}</p>
+          )}
+          {compressionPerc === 100 && (
+            <p className="green-c p-medium">{t("AjjPaxB")}</p>
+          )}
+          <div
+            style={{
+              width: `${compressionPerc}%`,
+              height: "3px",
+              backgroundColor:
+                compressionPerc < 100
+                  ? "var(--orange-main)"
+                  : "var(--green-main)",
+              borderRadius: "12px",
+              transition: "width 0.2s ease-in-out",
+            }}
+          ></div>
+        </div>
+      )}
       {videoCoverUploadPerc > 0 && (
         <div
           className="fx-centered fx-col fx-start-h fx-start-v"

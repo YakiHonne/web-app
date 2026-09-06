@@ -826,6 +826,9 @@ export function getParsedNote(
     }
 
     let nEvent = event?.encode ? event.encode() : nEventEncode(event.id);
+    let seenOn = event.onRelays
+      ? [...new Set(event.onRelays.map((relay) => relay.url))]
+      : [];
 
     let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
     if (event.kind === 1 || event.kind === 1111) {
@@ -853,6 +856,7 @@ export function getParsedNote(
         isPaidNote,
         isCollapsedNote: isCollapsedNote_,
         nEvent,
+        seenOn,
         isProtected,
         isPremium
       };

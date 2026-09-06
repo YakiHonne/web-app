@@ -8,6 +8,9 @@ export default function HeadMetadata({ data }) {
       <Head>
         <title>{`Yakihonne | ${data.title}`}</title>
         <link rel="manifest" href="/manifest.json" />
+        {data.noindex && (
+          <meta name="robots" content="noindex, nofollow, noarchive" />
+        )}
         <meta name="description" content={data.description} />
         <meta property="og:description" content={data.description} />
         <meta

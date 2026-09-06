@@ -6,12 +6,19 @@ import HeadMetadata from "@/Components/HeadMetadata";
 import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getDataForSSG } from "@/Helpers/lib";
 import { safeDecode } from "@/Helpers/ssgParams";
+import { bannedListSet } from "@/Content/BannedList";
+
+const NotFoundComponent = dynamic(() => import("@/(PagesComponents)/404"), {
+  ssr: false,
+});
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Note"), {
   ssr: false,
 });
 
 export default function Page({ event, author, nevent }) {
+  if (event?.pubkey && bannedListSet.has(event.pubkey))
+    return <NotFoundComponent />;
   let data = {
     title: author?.display_name || author?.name,
     description: event?.content || "Note not found",
@@ -49,6 +56,8 @@ export async function getStaticProps({ params }) {
         ...res.data[0],
       }
       : null;
+  if (event && bannedListSet.has(event.pubkey))
+    return { notFound: true, revalidate: 3600 };
   const author = event
     ? await getDataForSSG([{ authors: [event.pubkey], kinds: [0] }], 1000, 1)
     : getEmptyuserMetadata("");

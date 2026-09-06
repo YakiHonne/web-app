@@ -67,6 +67,7 @@
     "lucide-react": "^1.24.0",
     "markdown-to-jsx": "^7.7.12",
     "marked": "^16.1.2",
+    "mediabunny": "^1.55.7",
     "nanoid": "^5.1.5",
     "next": "15.4.5",
     "next-i18next": "^15.4.2",

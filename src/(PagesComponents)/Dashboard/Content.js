@@ -12,6 +12,8 @@ import Spinner from "@/Components/Spinner";
 import { useTranslation } from "react-i18next";
 import ContentCard from "./ContentCard";
 import Icon from "@/Components/Icon";
+import Scheduled from "./Scheduled";
+import usePremiumRelays from "@/Hooks/usePremiumRelays";
 
 const eventsReducer = (notes, action) => {
   switch (action.type) {
@@ -40,6 +42,9 @@ const eventsReducer = (notes, action) => {
 };
 const eventsInitialState = {
   notes: [],
+  "paid-notes": [],
+  "premium-notes": [],
+  "premium-articles": [],
   articles: [],
   drafts: [],
   curations: [],
@@ -47,6 +52,9 @@ const eventsInitialState = {
   pictures: [],
   widgets: [],
 };
+
+const notesTabs = ["notes", "scheduled", "paid-notes", "premium-notes"];
+const articlesTabs = ["articles", "drafts", "premium-articles"];
 
 export default function Content({ filter, setPostToNote, localDraft, init }) {
   const { t } = useTranslation();
@@ -66,6 +74,9 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
     eventsReducer,
     eventsInitialState,
   );
+  const isPremiumTab = contentFrom.startsWith("premium-");
+  const { premiumRelays, isPremiumRelaysLoading, getPremiumNDK } =
+    usePremiumRelays(userKeys?.pub, isPremiumTab);
   const emptyContent = {
     articles: t("AH90wGL"),
     drafts: t("A14HHPP"),
@@ -74,6 +85,9 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
     pictures: t("Aa73Zgk"),
     widgets: t("AvEJw6B"),
     notes: t("A6rkFum"),
+    "paid-notes": t("A6rkFum"),
+    "premium-notes": t("A6rkFum"),
+    "premium-articles": t("AH90wGL"),
   };
 
   useEffect(() => {
@@ -81,8 +95,38 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
       try {
         if (!isLoading) setIsLoading(true);
         let filter = getFilter();
-        let data = await getSubData([filter]);
-        let parsedEvents = data.data.map((event) => {
+        let premiumNDK;
+        if (isPremiumTab) {
+          if (isPremiumRelaysLoading) return;
+          if (premiumRelays.length === 0) {
+            setHasMore(false);
+            setIsLoading(false);
+            return;
+          }
+          premiumNDK = await getPremiumNDK();
+          if (!premiumNDK) {
+            setHasMore(false);
+            setIsLoading(false);
+            return;
+          }
+        }
+        let data = isPremiumTab
+          ? await getSubData(
+              [filter],
+              200,
+              premiumRelays,
+              premiumNDK,
+              undefined,
+              undefined,
+              "ONLY_RELAY",
+            )
+          : await getSubData([filter]);
+        let events_ = isPremiumTab
+          ? data.data.filter((event) =>
+              (event.tags || []).some((tag) => tag[0] === "nip63"),
+            )
+          : data.data;
+        let parsedEvents = events_.map((event) => {
           if (event.kind === 1) {
             return event;
           }
@@ -98,11 +142,21 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
         console.log(err);
       }
     };
-    if (userKeys) fetchHomeData();
-  }, [userKeys, contentFrom, lastEventTime]);
+    if (userKeys && contentFrom !== "scheduled") fetchHomeData();
+  }, [
+    userKeys,
+    contentFrom,
+    lastEventTime,
+    isPremiumRelaysLoading,
+    premiumRelays,
+  ]);
 
   useEffect(() => {
     if (isLoading) return;
+    if (
+      ["scheduled", "premium-notes", "premium-articles"].includes(contentFrom)
+    )
+      return;
     let filter = getFilter();
     let since = Math.floor(Date.now() / 1000);
     let subscription = ndkInstance.subscribe([{ ...filter, since }]);
@@ -133,7 +187,7 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
 
   useEffect(() => {
     const handleScroll = () => {
-      if (isLoading || !hasMore) return;
+      if (isLoading || !hasMore || contentFrom === "scheduled") return;
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
       const clientHeight = document.documentElement.clientHeight;
       const scrollHeight = document.documentElement.scrollHeight;
@@ -163,6 +217,12 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
     if (contentFrom === "pictures") filter.kinds = [20];
     if (contentFrom === "widgets") filter.kinds = [30033];
     if (contentFrom === "notes") filter.kinds = [1, 6];
+    if (contentFrom === "paid-notes") {
+      filter.kinds = [1];
+      filter["#l"] = ["FLASH NEWS"];
+    }
+    if (contentFrom === "premium-notes") filter.kinds = [1];
+    if (contentFrom === "premium-articles") filter.kinds = [30023];
     return filter;
   };
 
@@ -185,7 +245,7 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
   };
 
   const handleAddContent = () => {
-    if (["articles", "drafts"].includes(contentFrom)) {
+    if (articlesTabs.includes(contentFrom)) {
       customHistory("/write-article");
       return;
     }
@@ -193,7 +253,7 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
       customHistory("/smart-widget-builder");
       return;
     }
-    if (["notes"].includes(contentFrom)) {
+    if (notesTabs.includes(contentFrom)) {
       setPostToNote("");
       return;
     }
@@ -238,106 +298,123 @@ export default function Content({ filter, setPostToNote, localDraft, init }) {
       <div className="fit-container">
         <div className="fit-container fx-scattered  box-pad-v-m box-pad-h">
           <h4 className="p-caps">
-            {["articles", "drafts"].includes(contentFrom) && t("AesMg52")}
+            {articlesTabs.includes(contentFrom) && t("AesMg52")}
             {contentFrom === "widgets" && t("A2mdxcf")}
             {contentFrom === "pictures" && t("Aa73Zgk")}
             {contentFrom === "videos" && t("AStkKfQ")}
             {contentFrom === "curations" && t("AVysZ1s")}
-            {contentFrom === "notes" && t("AYIXG83")}
+            {notesTabs.includes(contentFrom) && t("AYIXG83")}
           </h4>
           <div className="fx-centered">
-            {["articles", "drafts"].includes(contentFrom) && (
+            {articlesTabs.includes(contentFrom) && (
               <Select
                 options={[
                   { display_name: t("A65LO6w"), value: "articles" },
                   { display_name: t("Ayh5F4w"), value: "drafts" },
+                  { display_name: t("AMT1D0j"), value: "premium-articles" },
                 ]}
                 value={contentFrom}
                 setSelectedValue={switchContentType}
                 noBorder={true}
               />
             )}
-            {["articles", "drafts", "notes"].includes(contentFrom) && (
+            {notesTabs.includes(contentFrom) && (
+              <Select
+                options={[
+                  { display_name: t("AR9ctVs"), value: "notes" },
+                  { display_name: t("Az2KlKc"), value: "scheduled" },
+                  { display_name: t("AV5f3lP"), value: "paid-notes" },
+                  { display_name: t("AMT1D0j"), value: "premium-notes" },
+                ]}
+                value={contentFrom}
+                setSelectedValue={switchContentType}
+                noBorder={true}
+              />
+            )}
+            {[...articlesTabs, ...notesTabs].includes(contentFrom) && (
               <button className="btn btn-normal" onClick={handleAddContent}>
                 <Icon name="plus-sign" />
               </button>
             )}
           </div>
         </div>
-        <div className="fit-container fx-centered fx-col fx-start-v box-pad-h">
-          {contentFrom === "drafts" && localDraft?.artDraft && (
-            <div className="fit-container fx-centered fx-start-v fx-col">
-              <div className="fit-container fx-centered fx-col fx-start-v">
-                {localDraft?.artDraft && (
-                  <>
-                    <p className="c1-c">{t("A7noclE")}</p>
-                    <ContentCard event={localDraft?.artDraft} />
-                  </>
-                )}
+        {contentFrom === "scheduled" && <Scheduled />}
+        {contentFrom !== "scheduled" && (
+          <div className="fit-container fx-centered fx-col fx-start-v box-pad-h">
+            {contentFrom === "drafts" && localDraft?.artDraft && (
+              <div className="fit-container fx-centered fx-start-v fx-col">
+                <div className="fit-container fx-centered fx-col fx-start-v">
+                  {localDraft?.artDraft && (
+                    <>
+                      <p className="c1-c">{t("A7noclE")}</p>
+                      <ContentCard event={localDraft?.artDraft} />
+                    </>
+                  )}
+                </div>
+                {events[contentFrom].length > 0 && <p>Saved</p>}
               </div>
-              {events[contentFrom].length > 0 && <p>Saved</p>}
-            </div>
-          )}
-          {contentFrom === "notes" && localDraft?.noteDraft && (
-            <div className="fit-container fx-centered fx-start-v fx-col">
-              <div className="fit-container fx-centered fx-col fx-start-v">
-                {localDraft?.noteDraft && (
-                  <>
-                    <p className="c1-c">{t("A7noclE")}</p>
-                    <ContentCard
-                      event={localDraft?.noteDraft}
-                      setPostToNote={setPostToNote}
-                      refreshAfterDeletion={handleEventDeletion}
-                    />
-                  </>
-                )}
+            )}
+            {contentFrom === "notes" && localDraft?.noteDraft && (
+              <div className="fit-container fx-centered fx-start-v fx-col">
+                <div className="fit-container fx-centered fx-col fx-start-v">
+                  {localDraft?.noteDraft && (
+                    <>
+                      <p className="c1-c">{t("A7noclE")}</p>
+                      <ContentCard
+                        event={localDraft?.noteDraft}
+                        setPostToNote={setPostToNote}
+                        refreshAfterDeletion={handleEventDeletion}
+                      />
+                    </>
+                  )}
+                </div>
+                {events[contentFrom].length > 0 && <p>{t("AQG30hM")}</p>}
               </div>
-              {events[contentFrom].length > 0 && <p>{t("AQG30hM")}</p>}
-            </div>
-          )}
-          {contentFrom === "widgets" && localDraft?.smartWidgetDraft && (
-            <div className="fit-container fx-centered fx-start-v fx-col">
-              <div className="fit-container fx-centered fx-col fx-start-v">
-                {localDraft?.smartWidgetDraft && (
-                  <>
-                    <p className="c1-c">{t("A7noclE")}</p>
-                    <ContentCard event={localDraft?.smartWidgetDraft} />
-                  </>
-                )}
+            )}
+            {contentFrom === "widgets" && localDraft?.smartWidgetDraft && (
+              <div className="fit-container fx-centered fx-start-v fx-col">
+                <div className="fit-container fx-centered fx-col fx-start-v">
+                  {localDraft?.smartWidgetDraft && (
+                    <>
+                      <p className="c1-c">{t("A7noclE")}</p>
+                      <ContentCard event={localDraft?.smartWidgetDraft} />
+                    </>
+                  )}
+                </div>
+                {events[contentFrom].length > 0 && <p>{t("AQG30hM")}</p>}
               </div>
-              {events[contentFrom].length > 0 && <p>{t("AQG30hM")}</p>}
-            </div>
-          )}
-          {events[contentFrom].map((event) => {
-            return (
-              <ContentCard
-                event={event}
-                key={event.id}
-                refreshAfterDeletion={handleEventDeletion}
-                setPostToNote={setPostToNote}
-              />
-            );
-          })}
-          {!isLoading && events[contentFrom].length === 0 && (
-            <div
-              className="fit-container fx-centered fx-col"
-              style={{ height: "40vh" }}
-            >
-              <h4>{emptyContent[contentFrom]}</h4>
-              <p className="gray-c">{t("AcPmGuk")}</p>
-            </div>
-          )}
-          {(isLoading || (hasMore && events[contentFrom].length > 0)) && (
-            <div
-              className="fit-container fx-centered"
-              style={{ height: "80px" }}
-            >
-              <div className="fx-centered">
-                <Spinner size={32} />
+            )}
+            {events[contentFrom].map((event) => {
+              return (
+                <ContentCard
+                  event={event}
+                  key={event.id}
+                  refreshAfterDeletion={handleEventDeletion}
+                  setPostToNote={setPostToNote}
+                />
+              );
+            })}
+            {!isLoading && events[contentFrom].length === 0 && (
+              <div
+                className="fit-container fx-centered fx-col"
+                style={{ height: "40vh" }}
+              >
+                <h4>{emptyContent[contentFrom]}</h4>
+                <p className="gray-c">{t("AcPmGuk")}</p>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+            {(isLoading || (hasMore && events[contentFrom].length > 0)) && (
+              <div
+                className="fit-container fx-centered"
+                style={{ height: "80px" }}
+              >
+                <div className="fx-centered">
+                  <Spinner size={32} />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

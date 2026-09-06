@@ -1,3 +1,11 @@
+# (v6.0.2) 06/09/2026
+
+* Video compression in the media upload editor — smaller files, faster uploads, with a progress bar.
+* New filters on the dashboard — All, Scheduled, Paid notes, and Premium for notes, plus Premium for articles.
+* Post stats now show the relays a post was found on.
+* Fixed a bug in the search page.
+* Various bug fixes and improvements.
+
 # (v6.0.1) 25/08/2026
 
 * Added a publishing confirmation popup when notes and articles are published successfully.

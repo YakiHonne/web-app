@@ -84,7 +84,7 @@ export default function NoteSharedRelay() {
 
   return (
     <>
-      <div style={{ overflow: "auto" }}>
+      <div style={{ overflow: "clip" }}>
         <YakiIntro />
         <ArrowUp />
         <div className="fit-container fx-centered fx-start-h fx-start-v">

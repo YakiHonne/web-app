@@ -14,6 +14,7 @@ import { relaysOnPlatform } from "@/Content/Relays";
 import { getImagePlaceholder } from "@/Content/NostrPPPlaceholder";
 import { store } from "@/Store/Store";
 import { setToast } from "@/Store/Slides/Publishers";
+import { openYakiConnectPrompt } from "@/Store/Slides/YakiChest";
 import { uploadToS3 } from "./NostrPublisher";
 import { customHistory } from "./History";
 import MediaUploaderServer from "@/Content/MediaUploaderServer";
@@ -156,14 +157,16 @@ const getLinkPreview = async (url) => {
 
 const nip05Cache = new Map();
 const CACHE_EXPIRY = 60 * 60 * 1000;
+const NIP05_FAILURE_CACHE_EXPIRY = 5 * 60 * 1000;
 
 const getAuthPubkeyFromNip05 = async (nip05Addr) => {
   try {
     const cacheKey = nip05Addr.toLowerCase();
     const cached = nip05Cache.get(cacheKey);
 
-    if (cached && Date.now() - cached.timestamp < CACHE_EXPIRY) {
-      return cached.pubkey;
+    if (cached) {
+      const expiry = cached.pubkey ? CACHE_EXPIRY : NIP05_FAILURE_CACHE_EXPIRY;
+      if (Date.now() - cached.timestamp < expiry) return cached.pubkey;
     }
 
     let addressParts = nip05Addr.split("@");
@@ -172,6 +175,7 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
     }
     const data = await axios.get(
       `https://${addressParts[1]}/.well-known/nostr.json?name=${addressParts[0]}`,
+      { timeout: 5000 },
     );
 
     let pubkey = data.data?.names ? data.data.names[addressParts[0]] : false;
@@ -187,6 +191,10 @@ const getAuthPubkeyFromNip05 = async (nip05Addr) => {
     return pubkey;
   } catch (err) {
     console.error(err);
+    nip05Cache.set(nip05Addr.toLowerCase(), {
+      pubkey: false,
+      timestamp: Date.now(),
+    });
     return false;
   }
 };
@@ -1058,6 +1066,10 @@ const regularServerFileUpload = async ({
 
   if (endpoint === "yakihonne") {
     let imageURL = await uploadToS3(file, userKeys.pub);
+    if (imageURL?.unauthenticated) {
+      store.dispatch(openYakiConnectPrompt());
+      return false;
+    }
     if (imageURL) return imageURL;
     if (!imageURL) {
       store.dispatch(
@@ -1712,6 +1724,7 @@ export {
   shuffleArray,
   formatMinutesToMMSS,
   LoginToAPI,
+  getLoginsParams,
   levelCount,
   getCurrentLevel,
   validateWidgetValues,

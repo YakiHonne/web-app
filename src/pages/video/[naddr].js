@@ -7,12 +7,19 @@ import { extractFirstImage } from "@/Helpers/ImageExtractor";
 import { getVideoContent } from "@/Helpers/Helpers";
 import { getDataForSSG } from "@/Helpers/lib";
 import { safeDecode } from "@/Helpers/ssgParams";
+import { bannedListSet } from "@/Content/BannedList";
+
+const NotFoundComponent = dynamic(() => import("@/(PagesComponents)/404"), {
+  ssr: false,
+});
 
 const ClientComponent = dynamic(() => import("@/(PagesComponents)/Video"), {
   ssr: false,
 });
 
 export default function Page({ event, author, naddrData, naddr }) {
+  if (event?.pubkey && bannedListSet.has(event.pubkey))
+    return <NotFoundComponent />;
   let parsedEvent = getVideoContent(event);
   let data = {
     title: parsedEvent?.title || author?.display_name || author?.name,
@@ -46,6 +53,8 @@ export async function getStaticProps({ params }) {
   let { pubkey, identifier, kind, id, relays } =
     decoded.type === "note" ? { id: decoded.data } : decoded.data || {};
   if (!identifier && !id) return { notFound: true, revalidate: 3600 };
+  if (pubkey && bannedListSet.has(pubkey))
+    return { notFound: true, revalidate: 3600 };
   const res = await getDataForSSG(
     identifier
       ? [{ authors: [pubkey], kinds: [kind], "#d": [identifier] }]
@@ -60,6 +69,8 @@ export async function getStaticProps({ params }) {
           ...res.data[0],
         }
       : null;
+  if (event && bannedListSet.has(event.pubkey))
+    return { notFound: true, revalidate: 3600 };
 
   const author = event
     ? await getDataForSSG([{ authors: [event.pubkey], kinds: [0] }], 1000, 1)
