@@ -1,6 +1,8 @@
 import {
   getSearchNdkInstance,
   getSSGNdkInstance,
+  holdHintRelays,
+  releaseHintRelays,
 } from "@/Helpers/SSGNDKInstance";
 import { nip19, sortEvents } from "nostr-tools";
 import { getAuthPubkeyFromNip05, sleepTimer } from "./Helpers";
@@ -13,12 +15,18 @@ export async function getDataForSSG(
   maxEvents = 1,
   relays = [],
 ) {
-  const ndkInstance = await getSSGNdkInstance(relays);
+  const { instance: ndkInstance, hintUrls } = await getSSGNdkInstance(relays);
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
-  let data = await Promise.race([
-    launchDataFetching(filter, timeout, maxEvents, ndkInstance),
-    sleepTimer(Math.max(timeout, 1000) + 4000),
-  ]);
+  holdHintRelays(ndkInstance, hintUrls);
+  let data;
+  try {
+    data = await Promise.race([
+      launchDataFetching(filter, timeout, maxEvents, ndkInstance, undefined, hintUrls),
+      sleepTimer(Math.max(timeout, 1000) + 4000),
+    ]);
+  } finally {
+    releaseHintRelays(ndkInstance, hintUrls);
+  }
   return data || { data: [], pubkeys: [] };
 }
 
@@ -29,13 +37,19 @@ export async function getDataForSearch(
   relays = [],
   onEvent,
 ) {
-  const ndkInstance = await getSearchNdkInstance(relays);
+  const { instance: ndkInstance, hintUrls } = await getSearchNdkInstance(relays);
   if (!filter || filter.length === 0) return { data: [], pubkeys: [] };
-  let results = await Promise.all(
-    filter.map((f) =>
-      launchDataFetching([f], timeout, maxEvents, ndkInstance, onEvent),
-    ),
-  );
+  holdHintRelays(ndkInstance, hintUrls);
+  let results;
+  try {
+    results = await Promise.all(
+      filter.map((f) =>
+        launchDataFetching([f], timeout, maxEvents, ndkInstance, onEvent, hintUrls),
+      ),
+    );
+  } finally {
+    releaseHintRelays(ndkInstance, hintUrls);
+  }
   let seen = new Set();
   let data = [];
   let pubkeys = new Set();
@@ -51,12 +65,31 @@ export async function getDataForSearch(
   return { data: sortEvents(data), pubkeys: [...pubkeys] };
 }
 
+const closeAbandonedRelaySubs = (ndkInstance) => {
+  for (let relay of ndkInstance.pool.relays.values()) {
+    let groups = relay.subs?.subscriptions;
+    if (!groups) continue;
+    for (let list of groups.values()) {
+      for (let relaySub of [...list]) {
+        if (relaySub.items.size > 0) continue;
+        try {
+          relaySub.close();
+        } catch (err) {}
+        try {
+          relaySub.cleanup();
+        } catch (err) {}
+      }
+    }
+  }
+};
+
 const launchDataFetching = async (
   filter,
   timeout = 1000,
   maxEvents = 1,
   ndkInstance,
   onEvent,
+  hintUrls = [],
 ) => {
   return new Promise((resolve) => {
     let events = [];
@@ -75,15 +108,30 @@ const launchDataFetching = async (
       resolve({ data: [], pubkeys: [] });
       return;
     }
+    let relayUrls = [
+      ...new Set([
+        ...ndkInstance.pool.connectedRelays().map((relay) => relay.url),
+        ...hintUrls,
+      ]),
+    ];
+    if (relayUrls.length === 0) {
+      resolve({ data: [], pubkeys: [] });
+      return;
+    }
     let sub = ndkInstance.subscribe(filter_, {
       groupable: false,
+      relayUrls,
       // cacheUsage: "ONLY_RELAY",
     });
+    const stopSub = () => {
+      sub.stop();
+      closeAbandonedRelaySubs(ndkInstance);
+    };
     let timer;
     const startTimer = () => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(() => {
-        sub.stop();
+        stopSub();
         resolve({
           data: sortEvents(events),
           pubkeys: [...new Set(pubkeys)],
@@ -109,7 +157,7 @@ const launchDataFetching = async (
           }
         }
         if (maxEvents === 1) {
-          sub.stop();
+          stopSub();
           resolve({
             data: events,
             pubkeys: [...new Set(pubkeys)],
@@ -118,7 +166,7 @@ const launchDataFetching = async (
         }
         if (events.length > maxEvents) {
           if (timer) clearTimeout(timer);
-          sub.stop();
+          stopSub();
           resolve({
             data: sortEvents(events),
             pubkeys: [...new Set(pubkeys)],
