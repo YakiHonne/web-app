@@ -76,10 +76,12 @@ function isValidImageUrl(url) {
     "pexels.com",
   ];
 
-  const hostname = new URL(url).hostname.toLowerCase();
-  if (imageHosts.some((host) => hostname.includes(host))) {
-    return true;
-  }
+  try {
+    const hostname = new URL(url).hostname.toLowerCase();
+    if (imageHosts.some((host) => hostname.includes(host))) {
+      return true;
+    }
+  } catch (err) {}
 
   const imageKeywords = [
     "image",
