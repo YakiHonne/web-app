@@ -157,6 +157,7 @@ const launchDataFetching = async (
           }
         }
         if (maxEvents === 1) {
+          if (timer) clearTimeout(timer);
           stopSub();
           resolve({
             data: events,
