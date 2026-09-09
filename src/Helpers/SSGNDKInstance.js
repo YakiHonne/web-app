@@ -69,6 +69,22 @@ const getHintCache = (instance) => {
   return cache;
 };
 
+const explicitUrlSets = new WeakMap();
+
+const getExplicitUrls = (instance) => {
+  let set = explicitUrlSets.get(instance);
+  if (!set) {
+    set = new Set();
+    for (let url of instance.explicitRelayUrls || []) {
+      try {
+        set.add(normalizeRelayUrl(url));
+      } catch (err) {}
+    }
+    explicitUrlSets.set(instance, set);
+  }
+  return set;
+};
+
 const parkHintRelay = (instance, cache, url) => {
   if ((cache.inFlight.get(url) || 0) > 0) return;
   let timer = cache.timers.get(url);
@@ -110,6 +126,15 @@ const dropHintRelay = (instance, cache, url) => {
   try {
     relay.connectivity?.keepalive?.stop?.();
   } catch (err) {}
+  let connectivity = relay.connectivity;
+  if (connectivity?.wsStateMonitor) {
+    clearInterval(connectivity.wsStateMonitor);
+    connectivity.wsStateMonitor = undefined;
+  }
+  if (connectivity?.sleepDetector) {
+    clearInterval(connectivity.sleepDetector);
+    connectivity.sleepDetector = undefined;
+  }
   try {
     relay.updateValidationRatio = () => {};
   } catch (err) {}
@@ -150,10 +175,11 @@ const useHintRelays = async (instance, extRelays) => {
   let cache = getHintCache(instance);
   let urls = [];
   let pending = [];
+  let explicitUrls = getExplicitUrls(instance);
   for (let relay of extRelays) {
     try {
       let url = normalizeRelayUrl(`${relay}`);
-      if (instance.explicitRelayUrls?.includes(url)) continue;
+      if (explicitUrls.has(url)) continue;
       if (urls.includes(url)) continue;
       let hintRelay = cache.relays.get(url);
       if (!hintRelay) {
@@ -211,6 +237,7 @@ export async function getSSGNdkInstance(extRelays = []) {
   if (!ssgInstance) {
     ssgInstance = new NDK({
       explicitRelayUrls: [...new Set(SSGRelays)],
+      enableOutboxModel: false,
     });
     boundFlappingBackoff(ssgInstance);
     ssgInstance.connect(2000).catch(() => {
@@ -230,6 +257,7 @@ export async function getSearchNdkInstance(extRelays = []) {
   if (!searchInstance) {
     searchInstance = new NDK({
       explicitRelayUrls: [...new Set(searchRelays)],
+      enableOutboxModel: false,
     });
     boundFlappingBackoff(searchInstance);
     searchInstance.connect(2000).catch(() => {
