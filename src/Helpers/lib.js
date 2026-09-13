@@ -1,4 +1,5 @@
 import {
+  getHintRelayObjects,
   getSearchNdkInstance,
   getSSGNdkInstance,
   holdHintRelays,
@@ -65,13 +66,36 @@ export async function getDataForSearch(
   return { data: sortEvents(data), pubkeys: [...pubkeys] };
 }
 
+/**
+ * NDK 2.18.1 retains an NDKRelaySubscription forever when the relay never
+ * EOSEs. `removeItem()` empties `items`, then bails on `if (!this.eosed)
+ * return;` without calling `cleanup()` -- and `cleanup()` is the only caller of
+ * `onClose`, which is the only thing that removes the entry from the per-relay
+ * `subs.subscriptions` Map. Dead and slow relays (what crawler traffic hits
+ * constantly) therefore accumulate one retained relay-sub per abandoned query.
+ *
+ * The Map lives on the relay object, not on the pool, so the sweep must also
+ * cover hint relays that the TTL has parked out of `pool.relays` -- otherwise
+ * whatever they are still holding becomes permanently unreachable.
+ */
 const closeAbandonedRelaySubs = (ndkInstance) => {
-  for (let relay of ndkInstance.pool.relays.values()) {
+  let relays = [
+    ...ndkInstance.pool.relays.values(),
+    ...getHintRelayObjects(ndkInstance),
+  ];
+  let seen = new Set();
+  for (let relay of relays) {
+    if (!relay || seen.has(relay)) continue;
+    seen.add(relay);
     let groups = relay.subs?.subscriptions;
     if (!groups) continue;
-    for (let list of groups.values()) {
+    for (let [fingerprint, list] of [...groups.entries()]) {
+      let live = [];
       for (let relaySub of [...list]) {
-        if (relaySub.items.size > 0) continue;
+        if (relaySub.items.size > 0) {
+          live.push(relaySub);
+          continue;
+        }
         try {
           relaySub.close();
         } catch (err) {}
@@ -79,8 +103,31 @@ const closeAbandonedRelaySubs = (ndkInstance) => {
           relaySub.cleanup();
         } catch (err) {}
       }
+      // `cleanup()` only unlinks the entry when NDK's own onClose hook is
+      // still attached; drop anything it left behind so the Map cannot grow.
+      let remaining = groups.get(fingerprint);
+      if (!remaining) continue;
+      if (live.length === 0) groups.delete(fingerprint);
+      else if (remaining.length !== live.length) groups.set(fingerprint, live);
     }
   }
+};
+
+/**
+ * `ndk.subscribe()` defers `subscription.start()` into a `setTimeout(..., 0)`,
+ * and `start()` has no stopped-guard. A subscription we stop synchronously --
+ * or before that timer fires -- still goes on to build a fresh
+ * NDKRelaySubscription that nothing will ever close. Stopping the subscription
+ * *and* neutering its `start` closes that window.
+ */
+const stopSubscription = (sub) => {
+  if (!sub) return;
+  try {
+    sub.start = () => null;
+  } catch (err) {}
+  try {
+    sub.stop();
+  } catch (err) {}
 };
 
 const launchDataFetching = async (
@@ -124,7 +171,7 @@ const launchDataFetching = async (
       // cacheUsage: "ONLY_RELAY",
     });
     const stopSub = () => {
-      sub.stop();
+      stopSubscription(sub);
       closeAbandonedRelaySubs(ndkInstance);
     };
     let timer;

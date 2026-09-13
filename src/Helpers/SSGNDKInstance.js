@@ -138,6 +138,23 @@ const dropHintRelay = (instance, cache, url) => {
   try {
     relay.updateValidationRatio = () => {};
   } catch (err) {}
+  // NDKRelaySubscription objects live on the relay, not the pool. Drop them
+  // with the relay, otherwise they are retained for the process lifetime.
+  try {
+    let groups = relay.subs?.subscriptions;
+    if (groups) {
+      for (let list of [...groups.values()])
+        for (let relaySub of [...list]) {
+          try {
+            relaySub.close();
+          } catch (err) {}
+          try {
+            relaySub.cleanup();
+          } catch (err) {}
+        }
+      groups.clear();
+    }
+  } catch (err) {}
   try {
     relay.removeAllListeners();
   } catch (err) {}
@@ -211,6 +228,19 @@ const useHintRelays = async (instance, extRelays) => {
     ),
   ]);
   return urls;
+};
+
+/**
+ * Every hint relay object this instance is still holding, including ones that
+ * have been parked out of `pool.relays` by the TTL. `closeAbandonedRelaySubs`
+ * needs these: a relay that leaves the pool keeps its own
+ * `subs.subscriptions` Map, and anything left in it is otherwise unreachable.
+ */
+export const getHintRelayObjects = (instance) => {
+  if (!instance) return [];
+  let cache = hintRelayCaches.get(instance);
+  if (!cache) return [];
+  return [...cache.relays.values()];
 };
 
 export const holdHintRelays = (instance, urls) => {
