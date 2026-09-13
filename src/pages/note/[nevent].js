@@ -25,6 +25,11 @@ export default function Page({ event, author, nevent }) {
     image:
       extractFirstImage(event?.content) || author?.picture || author?.banner,
     path: `note/${nevent}`,
+    // Individual notes are not indexed: they are an effectively unbounded URL
+    // space that crawlers walk exhaustively, at a measured ~4 search visits a
+    // week against >1M renders. SSG is kept for link-unfurl meta tags and for
+    // fast client-side access from the feed; only search indexing is dropped.
+    noindex: true,
   };
   // if (event)
   return (

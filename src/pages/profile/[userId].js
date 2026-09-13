@@ -27,6 +27,9 @@ export default function Page({ event, nprofile }) {
     description: event.about || "N/A",
     image: event?.picture || event?.banner,
     path: `profile/${nprofile}`,
+    // Not indexed -- see the note in pages/note/[nevent].js. SSG stays for
+    // unfurl meta tags and fast client-side access.
+    noindex: true,
   };
 
   if (event)

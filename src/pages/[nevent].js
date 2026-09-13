@@ -45,6 +45,8 @@ export default function Page({ event, nprofile }) {
     description: event.about || "N/A",
     image: event.picture || event.banner,
     path: `${nprofile}`,
+    // Bare npub/nprofile landing -- same policy as /profile/[userId].
+    noindex: true,
   };
 
   return (

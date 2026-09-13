@@ -1,3 +1,13 @@
 # https://www.robotstxt.org/robotstxt.html
+
 User-agent: *
 Disallow:
+
+# NOTE: /note/* and /profile/* (and bare npub/nprofile landings) are served with
+# a `noindex` robots meta tag instead of being disallowed here. That is
+# deliberate: a Disallow rule would stop crawlers fetching those URLs, so they
+# would never see the noindex and the pages already in the index would linger.
+# Once they have dropped out of the index, adding an explicit Disallow here is
+# the follow-up step that stops the crawl traffic itself.
+
+Sitemap: https://yakihonne.com/sitemap.xml
