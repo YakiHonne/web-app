@@ -7,9 +7,8 @@ export default function useLightningPayment(pubkey) {
   useEffect(() => {
     if (!pubkey) return;
 
-    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
     const base = process.env.NEXT_PUBLIC_API_URL;
-    const url = `${base}/api/lightning/payment-stream/${pubkey}?api_key=${encodeURIComponent(apiKey)}`;
+    const url = `${base}/api/lightning/payment-stream/${pubkey}`;
 
     const es = new EventSource(url, { withCredentials: true });
 
