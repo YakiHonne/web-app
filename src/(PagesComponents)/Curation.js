@@ -189,7 +189,7 @@ export default function Curation({ event, userProfile }) {
                       <div className="fx-centered fx-col fx-start-v">
                         <div>
                           <p className="gray-c">{t("AVG3Uga")}</p>
-                          <p className="p-big p-caps">
+                          <p className="p-big">
                             {userProfile.display_name ||
                               userProfile.name ||
                               minimizeKey(curation.pubkey)}

@@ -246,7 +246,7 @@ export default function UserMetadata({ user }) {
             style={{ width: "min(100%, 800px)" }}
           >
             <div className="fx-centered" style={{ gap: "6px" }}>
-              <h3 className="p-caps">{user?.display_name || user?.name}</h3>
+              <h3>{user?.display_name || user?.name}</h3>
               {isNip05Verified && (
                 <Icon name="checkmark-c1" size={24} isColored />
               )}

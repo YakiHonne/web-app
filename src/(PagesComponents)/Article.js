@@ -321,7 +321,7 @@ export default function Article({ event, userProfile, naddrData }) {
                             />
                             <div className="fx-centered fx-start-h">
                               <div>
-                                <p className="p-caps">
+                                <p>
                                   {t("AsXpL4b", {
                                     name:
                                       userProfile.display_name ||
@@ -716,7 +716,7 @@ const AuthPreview = ({ pubkey }) => {
         <div>
           {/* <p className="p-medium gray-c">{t("AVG3Uga")}</p> */}
           <div className="fx-centered" style={{ gap: "3px" }}>
-            <p className=" p-caps">
+            <p>
               {userProfile.display_name || userProfile.name}
             </p>
             {isNip05Verified && <Icon name="checkmark-c1" size={20} isColored />}
