@@ -390,7 +390,7 @@ export default function TopNavbar() {
             <div className="box-pad-v-s" />
             <ul className="fit-container" style={{ paddingLeft: "1.25rem", display: "flex", flexDirection: "column", rowGap: "0.5rem" }}>
               {updatesList.map((item, i) => (
-                <li key={i} style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.875rem", lineHeight: 1.5 }}>{item}</li>
+                <li key={i} style={{ color: "var(--black)", opacity: 0.75, fontSize: "0.875rem", lineHeight: 1.5 }}>{item}</li>
               ))}
             </ul>
             <div className="box-pad-v-s" />
@@ -401,7 +401,7 @@ export default function TopNavbar() {
             <div className="box-pad-v-s" />
             <ul className="fit-container" style={{ paddingLeft: "1.25rem", display: "flex", flexDirection: "column", rowGap: "0.5rem" }}>
               {proUpdatesList.map((item, i) => (
-                <li key={i} style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.875rem", lineHeight: 1.5 }}>{item}</li>
+                <li key={i} style={{ color: "var(--black)", opacity: 0.75, fontSize: "0.875rem", lineHeight: 1.5 }}>{item}</li>
               ))}
             </ul>
           </div>
