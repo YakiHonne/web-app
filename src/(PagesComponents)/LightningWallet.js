@@ -460,7 +460,7 @@ export default function LightningWallet() {
 
             {(userKeys.ext || userKeys.sec || userKeys.bunker) &&
               wallets.length > 0 && (
-                <div className="box-pad-v box-pad-h">
+                <div className="box-pad-v box-pad-h nav-flush">
                   <div className="fit-container fx-centered">
                     <div>
                       <SelectTabs

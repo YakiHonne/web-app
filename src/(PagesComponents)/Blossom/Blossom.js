@@ -49,7 +49,7 @@ export default function Blossom() {
           }}
         />
       )}
-      <div className="fit-container box-pad-h box-pad-v">
+      <div className="fit-container box-pad-h box-pad-v nav-flush">
         <div className="fit-container fx-scattered ">
           <div className="fx-centered fx-col fx-start-h fx-start-v">
             <h4>{t("AGYERPI")}</h4>

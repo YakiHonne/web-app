@@ -1,3 +1,15 @@
+# (v6.0.4) 28/09/2026
+
+* Bringing back the classic sidebar, you can now switch between two kind of navigation layouts in the settings (topbar or sidebar).
+* Toggle on/off the glass effect for those who wants a classic look.
+* General bug fix and improvements.
+
+# (v6.0.3) 21/09/2026
+
+* Fixed profiles mention preview in the article page
+* Fixed reactions extended window when the editor is neer the window viewport
+* Fix the return from notes overlay when component behind it could not be clicked
+
 # (v6.0.2) 06/09/2026
 
 * Video compression in the media upload editor — smaller files, faster uploads, with a progress bar.

@@ -69,7 +69,7 @@ const getOutboxPubkey = (kind, tags) => {
   return pTag[1];
 };
 
-export default function Publishing({ displayOff = false }) {
+export default function Publishing({ displayOff = false, variant = "card", collapsed = false, flyoutProps }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const toPublish = useSelector((state) => state.toPublish);
@@ -732,7 +732,18 @@ export default function Publishing({ displayOff = false }) {
           </div>
         </Overlay>
       )}
-      {showToast && (
+      {variant === "sidebar" && (
+        <SidebarPublishing
+          collapsed={collapsed}
+          flyoutProps={flyoutProps}
+          publishing={showToast}
+          percentage={lastEventStats.percentage}
+          succeeded={succeededEvents}
+          failed={failedEvents}
+          onOpen={() => setShowDetails(true)}
+        />
+      )}
+      {variant === "card" && showToast && (
         <div className="fit-container box-pad-v-m box-pad-h-m box-marg-s sc-s-18 slide-up-down fx-scattered link-label">
           <div className="fx-centered ">
             <p>{t("Aas6Xk5")}</p>
@@ -741,13 +752,14 @@ export default function Publishing({ displayOff = false }) {
           <ProgressCirc percentage={lastEventStats.percentage} size={32} />
         </div>
       )}
-      {showToast && (
+      {variant === "card" && showToast && (
         <div className="fx-centered desk-hide mb-show slide-up-down mb-show box-marg-s ">
           <div className="round-icon">
             <ProgressCirc percentage={lastEventStats.percentage} size={32} />
           </div>
         </div>
       )}
+      {variant === "card" && (
       <div
         className="sc-s-18 fit-container fx-centered pointer option link-label"
         style={{
@@ -781,6 +793,54 @@ export default function Publishing({ displayOff = false }) {
           </div>
         </div>
       </div>
+      )}
     </>
+  );
+}
+
+function SidebarPublishing({ collapsed, flyoutProps, publishing, percentage, succeeded, failed, onOpen }) {
+  const { t } = useTranslation();
+  const label = publishing
+    ? `${t("Aas6Xk5")} ${percentage}%`
+    : `${t("Apv9nXe")}: ${succeeded} ${t("ATJXba6")}, ${failed} ${t("AOxW08J")}`;
+  const hover = flyoutProps ? flyoutProps(label) : {};
+
+  if (collapsed) {
+    return (
+      <button type="button" className="csb-row csb-events-icon" aria-label={label} onClick={onOpen} {...hover}>
+        <span className="csb-row-icon">
+          {publishing ? <Spinner size={18} /> : <Icon name="total-events" size={22} />}
+          {failed > 0 && !publishing ? <span className="csb-dot is-red" aria-hidden="true" /> : null}
+        </span>
+      </button>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className={`csb-events${failed > 0 && !publishing ? " has-failed" : ""}`}
+      aria-label={label}
+      onClick={onOpen}
+    >
+      <span className="csb-events-title">
+        {publishing ? <Spinner size={16} /> : <Icon name="total-events" size={18} />}
+        <span>{publishing ? t("Aas6Xk5") : t("Apv9nXe")}</span>
+      </span>
+      {publishing ? (
+        <span className="csb-events-count gray-c">{percentage}%</span>
+      ) : (
+        <span className="csb-events-count">
+          <span className="csb-events-stat is-ok" title={t("ATJXba6")}>
+            <Icon name="succeeded-events" size={14} /> {succeeded}
+          </span>
+          {failed > 0 && (
+            <span className="csb-events-stat is-bad" title={t("AOxW08J")}>
+              <Icon name="failed-events" size={14} /> {failed}
+            </span>
+          )}
+        </span>
+      )}
+    </button>
   );
 }

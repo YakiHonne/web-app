@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { openUpgradeSheet } from "@/Store/Slides/Upgrade";
 import useAccess from "@/Hooks/useAccess";
 import { customHistory } from "@/Helpers/History";
+import Icon from "@/Components/Icon";
 
 const BANNER_URL =
   "https://yakihonne.s3.ap-east-1.amazonaws.com/media/images/premium-banner.png";
@@ -15,14 +16,11 @@ export const getTrialDaysLeft = (trialEndsAt) => {
   return Math.max(0, Math.ceil((end - Date.now()) / (24 * 60 * 60 * 1000)));
 };
 
-export default function PremiumSidebarBanner() {
+export function usePremiumBannerState() {
   const dispatch = useDispatch();
-  const { t } = useTranslation();
   const userKeys = useSelector((state) => state.userKeys);
   const status = useSelector((state) => state.subscription?.status);
   const { isFree, inTrial } = useAccess();
-
-  if (!isFree && !inTrial) return null;
 
   const openUpgrade = () => {
     if (!userKeys) {
@@ -32,12 +30,54 @@ export default function PremiumSidebarBanner() {
     dispatch(openUpgradeSheet({ source: "sidebar-banner" }));
   };
 
+  return {
+    visible: Boolean(isFree || inTrial),
+    inTrial: Boolean(inTrial),
+    daysLeft: inTrial ? getTrialDaysLeft(status?.trial_ends_at) : 0,
+    openUpgrade,
+  };
+}
+
+export default function PremiumSidebarBanner({ variant = "banner", flyoutProps, maxHeight }) {
+  const { t } = useTranslation();
+  const { visible, inTrial, daysLeft, openUpgrade } = usePremiumBannerState();
+
+  if (!visible) return null;
+
   const onKeyDown = (e) => {
     if (e.key === "Enter" || e.key === " ") openUpgrade();
   };
 
+  if (variant === "icon") {
+    const label = inTrial ? t("AsbTrLf", { count: daysLeft }) : t("AsbGoPr");
+    return (
+      <button
+        type="button"
+        className="csb-row csb-premium-icon"
+        aria-label={label}
+        onClick={openUpgrade}
+        {...(flyoutProps ? flyoutProps(label) : {})}
+      >
+        <span className="csb-row-icon">
+          <Icon name="crown" size={22} isBoldThemeColor />
+        </span>
+      </button>
+    );
+  }
+
+  if (variant === "compact") {
+    return (
+      <button type="button" className="csb-premium-strip" onClick={openUpgrade}>
+        <span className="csb-premium-strip-text">
+          <Icon name="crown" size={16} isBoldThemeColor />
+          <span>{inTrial ? t("AsbTrLf", { count: daysLeft }) : t("AsbGoPr")}</span>
+        </span>
+        <span className="csb-premium-strip-cta">{t("AGo17y4")}</span>
+      </button>
+    );
+  }
+
   if (inTrial) {
-    const daysLeft = getTrialDaysLeft(status?.trial_ends_at);
     return (
       <div className="premium-sidebar-slot">
         <div
@@ -67,7 +107,12 @@ export default function PremiumSidebarBanner() {
         tabIndex={0}
         onKeyDown={onKeyDown}
       >
-        <img src={BANNER_URL} alt={t("AApRZBN")} loading="lazy" />
+        <img
+          src={BANNER_URL}
+          alt={t("AApRZBN")}
+          loading="lazy"
+          style={maxHeight ? { maxHeight, width: "auto", maxWidth: "100%", margin: "0 auto", display: "block" } : undefined}
+        />
       </div>
     </div>
   );

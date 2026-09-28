@@ -96,7 +96,7 @@ export default function CashuWallet() {
       )}
       {ops === "send" && <SendTokens exit={() => setOps("")} />}
       {ops === "receive" && <ReceiveTokens exit={() => setOps("")} />}
-      <div className="box-pad-h box-pad-v">
+      <div className="box-pad-h box-pad-v nav-flush">
         <div className="fit-container fx-centered">
           <div>
 

@@ -79,7 +79,7 @@ export default function HomeTab({
           type={"following"}
         />
       )}
-      <div className="fit-container box-pad-h">
+      <div className="fit-container box-pad-h nav-flush">
         <div className="fit-container fx-scattered"></div>
         <div className="fit-container fx-centered fx-col box-pad-v">
           <div className="fit-container fx-centered fx-stretch fx-wrap">

@@ -344,3 +344,9 @@
 :global([data-theme='creamy']) .btnSkip:hover {
   color: rgba(60, 40, 10, 0.65);
 }
+
+:global(html[data-glass="classic"]) .tooltip,
+:global(html[data-glass="classic"]) .controls {
+  background: var(--solid-surface) !important;
+  background-color: var(--solid-surface) !important;
+}

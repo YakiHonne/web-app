@@ -384,7 +384,7 @@ export default function ContentSource({
               maxHeight={userFavRelays.relays?.length === 0 ? "80vh" : "40vh"}
             >
               <div
-                className="fit-container fx-scattered"
+                className="fit-container fx-scattered glass-solid-on-classic"
                 style={{ padding: "10px 12px 6px", position: "sticky", top: 0, zIndex: 100, borderBottom: "1px solid rgba(255,255,255,0.06)", backgroundColor: "var(--white-high-transparent)", backdropFilter: "blur(20px)" }}
               >
                 <p className="gray-c p-medium">{type === 1 ? t("AuUadPD") : t("A84qogb")}</p>
