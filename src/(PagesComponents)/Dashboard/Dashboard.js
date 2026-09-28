@@ -223,10 +223,10 @@ export default function Dashboard() {
               <div ref={columnRef} className="fit-container">
                 <div
                   ref={tabsBarRef}
-                  className="box-pad-h-m"
+                  className="box-pad-h-m nav-flush"
                   style={{
                     position: "fixed",
-                    top: "96px",
+                    top: "var(--nav-bar-top, 96px)",
                     left: tabsRect ? `${tabsRect.left}px` : 0,
                     width: tabsRect ? `${tabsRect.width}px` : "auto",
                     boxSizing: "border-box",

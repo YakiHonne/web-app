@@ -203,7 +203,7 @@ export default function UserLevels() {
           className="fx-centered fx-start-v"
         >
           <div
-            className={`fx-centered  fx-wrap box-pad-h main-middle`}
+            className={`fx-centered  fx-wrap box-pad-h main-middle nav-flush`}
           >
             {isConnectedToYaki && (
               <>

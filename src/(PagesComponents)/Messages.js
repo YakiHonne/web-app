@@ -201,10 +201,10 @@ export default function Messages() {
         className="fx-centered fx-start-v"
         style={{
           position: "fixed",
-          top: "84px",
-          left: "50%",
+          top: "var(--nav-offset, 84px)",
+          left: "var(--nav-center, 50%)",
           transform: "translateX(-50%)",
-          width: "min(100%, 800px)",
+          width: "min(var(--nav-content-w, 100%), var(--nav-panel-w, 800px))",
           bottom: 0,
           padding: "1rem",
         }}

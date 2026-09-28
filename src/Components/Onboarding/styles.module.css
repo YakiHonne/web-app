@@ -600,3 +600,8 @@
 :global([data-theme='creamy']) .consentHint {
   color: rgba(60, 40, 10, 0.55);
 }
+
+:global(html[data-glass="classic"]) .card {
+  background: var(--solid-surface) !important;
+  background-color: var(--solid-surface) !important;
+}

@@ -40,11 +40,9 @@ const content = [
 ];
 
 export const updatesList = [
-  "Added video compression in the media upload editor for smaller files and faster uploads, with a progress bar.",
-  "Added new dashboard filters: All, Scheduled, Paid notes and Premium for notes, plus Premium for articles.",
-  "Added a seen on section to the post stats showing the relays a post was found on.",
-  "Fixed a bug in the search page.",
-  "Various bug fixes and improvements.",
+  "Bringing back the classic sidebar, you can now switch between two kind of navigation layouts in the settings (topbar or sidebar).",
+  "Toggle on/off the glass effect for those who wants a classic look.",
+  "General bug fix and improvements.",
 ];
 
 export const proUpdatesVersion = "1.0.1";

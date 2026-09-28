@@ -41,6 +41,8 @@ import { proUpdatesList, proUpdatesVersion, updatesList } from "@/Components/Yak
 import Overlay from "@/Components/Overlay";
 import useIsMobile from "@/Hooks/useIsMobile";
 import MobileDemo from "./MobileDemo";
+import ClassicSidebar from "@/Components/ClassicSidebar";
+import { NAV_LAYOUTS, useAppearance, useIsSidebarViewport } from "@/Helpers/utils/appearance";
 
 export default function TopNavbar() {
   const { t } = useTranslation();
@@ -55,6 +57,9 @@ export default function TopNavbar() {
   const userSettings = useCustomizationSettings();
 
   const isMobile = useIsMobile();
+  const { navLayout, sidebarCollapsed } = useAppearance();
+  const isSidebarViewport = useIsSidebarViewport();
+  const sidebarActive = navLayout === NAV_LAYOUTS.sidebar && isSidebarViewport;
   const [showSearch, setShowSearch] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -269,6 +274,13 @@ export default function TopNavbar() {
     } catch { return null; }
   };
 
+  const switchAccount = (account) => {
+    handleSwitchAccount(account);
+    clearTimeout(switchingTimerRef.current);
+    setIsAccountSwitching(true);
+    switchingTimerRef.current = setTimeout(() => setIsAccountSwitching(false), 900);
+  };
+
   const singleLogout = () => {
     const wallets = getWallets();
     if (wallets.find((_) => _.kind !== 1)) { setShowConfirmationBox(1); return; }
@@ -427,13 +439,38 @@ export default function TopNavbar() {
         openMore={openMore}
       />
 
+      {sidebarActive && (
+        <ClassicSidebar
+          pathname={pathname}
+          collapsed={sidebarCollapsed}
+          userKeys={userKeys}
+          userMetadata={userMetadata}
+          accounts={accounts}
+          userBalance={userBalance}
+          fiatValue={fiatValue}
+          currency={currency}
+          walletUrl={walletUrl}
+          newNotificationsCount={newNotifications.length}
+          isNewMsg={isNewMsg}
+          createItems={createItems}
+          canCreate={Boolean(userKeys?.ext || userKeys?.sec || userKeys?.bunker)}
+          isAccountSwitching={isAccountSwitching}
+          onProfile={handleProfileLink}
+          onSingleLogout={singleLogout}
+          onMultiLogout={multiLogout}
+          onSwitchAccount={switchAccount}
+          onShowDemo={() => setShowDemo(true)}
+          onShowChangelog={() => setShowChangelog(true)}
+        />
+      )}
+
       <nav className={`uplift-navbar${navHidden ? " uplift-navbar-hidden" : ""}`}>
 
         <div className="uplift-navbar-left">
-          <div className="uplift-logo-btn" onClick={() => customHistory("/", true)}>
+          <div className="uplift-logo-btn" data-vt="logo" onClick={() => customHistory("/", true)}>
             <Icon name="yaki-logomark" size={48} />
           </div>
-          <div className="uplift-search-pill" onClick={() => setShowSearch(true)}>
+          <div className="uplift-search-pill" data-vt="search" onClick={() => setShowSearch(true)}>
             <Icon name={iconsNames.search_magnifying_glass} size={15} v={2} />
             <span className="uplift-search-pill-label">{t("A0omdiR")}</span>
 
@@ -445,6 +482,7 @@ export default function TopNavbar() {
           <div className="uplift-nav-pill">
             <div
               className={`uplift-nav-icon-btn${isPage("/") ? " uplift-active" : ""}`}
+              data-vt="home"
               aria-label={t("AJDdA3h")}
               onClick={() => customHistory("/", true)}
             >
@@ -456,6 +494,7 @@ export default function TopNavbar() {
 
             <div
               className={`uplift-nav-icon-btn${isPage("/articles") ? " uplift-active" : ""}`}
+              data-vt="articles"
               aria-label={t("AesMg52")}
               onClick={() => customHistory("/articles", true)}
             >
@@ -468,6 +507,7 @@ export default function TopNavbar() {
             <button
               ref={plusBtnRef}
               className={`uplift-plus-btn${createOpen ? " uplift-plus-open" : ""}`}
+              data-vt="write"
               aria-label={t("AajDfNN")}
               onClick={toggleCreate}
             >
@@ -478,6 +518,7 @@ export default function TopNavbar() {
 
             <div
               className={`uplift-nav-icon-btn${isPage("/messages") ? " uplift-active" : ""}`}
+              data-vt="messages"
               aria-label={t("As2zi6P")}
               onClick={() => customHistory("/messages")}
             >
@@ -491,6 +532,7 @@ export default function TopNavbar() {
             <div
               ref={moreBtnRef}
               className={`uplift-nav-icon-btn${showMore ? " uplift-active" : ""}`}
+              data-vt="more"
               aria-label={t("Ayc6Y5B")}
               onClick={openMore}
             >
@@ -505,6 +547,7 @@ export default function TopNavbar() {
         <div className="uplift-nav-right">
           {userKeys && (
             <div
+              data-vt="balance"
               className={`uplift-balance-chip${balanceHover && fiatValue !== null ? " uplift-balance-chip-hover" : ""}`}
               onClick={() => customHistory(walletUrl)}
               onMouseEnter={() => setBalanceHover(true)}
@@ -529,6 +572,7 @@ export default function TopNavbar() {
 
           <div
             className="uplift-icon-btn"
+            data-vt="notifications"
             aria-label={t("ASSFfFZ")}
             onClick={() => customHistory("/notifications")}
           >
@@ -539,7 +583,7 @@ export default function TopNavbar() {
           </div>
 
           {userKeys ? (
-            <div ref={avatarRef} className={`uplift-avatar-btn${isAccountSwitching ? " uplift-avatar-switching" : ""}`} onClick={openProfileMenu}>
+            <div ref={avatarRef} data-vt="account" className={`uplift-avatar-btn${isAccountSwitching ? " uplift-avatar-switching" : ""}`} onClick={openProfileMenu}>
               <UserProfilePic
                 size={40}
                 mainAccountUser
@@ -549,7 +593,7 @@ export default function TopNavbar() {
               />
             </div>
           ) : (
-            <button className="uplift-login-btn" onClick={redirectToLogin}>
+            <button className="uplift-login-btn" data-vt="login" onClick={redirectToLogin}>
               {t("AmOtzoL")}
             </button>
           )}
@@ -651,10 +695,7 @@ export default function TopNavbar() {
                     className={`uplift-dropdown-account-item${userKeys.pub === account.pubkey ? " uplift-account-active" : ""}`}
                     onClick={() => {
                       closeProfileMenu();
-                      handleSwitchAccount(account);
-                      clearTimeout(switchingTimerRef.current);
-                      setIsAccountSwitching(true);
-                      switchingTimerRef.current = setTimeout(() => setIsAccountSwitching(false), 900);
+                      switchAccount(account);
                     }}
                   >
                     <div className="uplift-dropdown-account-info">
@@ -779,7 +820,7 @@ export default function TopNavbar() {
 
               <div className="uplift-more-drawer-section-label">{t("Apv9nXe")}</div>
               <div className="uplift-more-drawer-publishing">
-                <Publishing />
+                {!sidebarActive && <Publishing />}
               </div>
               <div className="uplift-more-drawer-updates-card">
                 <p className="uplift-more-drawer-updates-title">{t("Acq7mWs")}</p>

@@ -202,7 +202,7 @@ export function ConversationBox({ convo, back, noHeader = false, showBack = fals
           {legacy && (
             <div
               className="fit-container"
-              style={{ position: "sticky", zIndex: 100, top: "84px" }}
+              style={{ position: "sticky", zIndex: 100, top: "var(--nav-offset, 84px)" }}
             >
               <div className="fit-container">
                 <div className="box-pad-h-m box-pad-v-m fx-centered fx-start-h fit-container sc-s-18">

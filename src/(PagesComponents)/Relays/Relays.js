@@ -81,12 +81,12 @@ export default function Relays() {
         className="fit-container fx-centered fx-start-v"
         style={{ minHeight: "100vh" }}
       >
-        <div className="fit-container fx-centered fx-start-v fx-col box-pad-h-m box-pad-v">
+        <div className="fit-container fx-centered fx-start-v fx-col box-pad-h-m box-pad-v nav-flush">
           <div
             style={{
               position: "fixed",
-              top: "96px",
-              left: "50%",
+              top: "var(--nav-bar-top, 96px)",
+              left: "var(--nav-center, 50%)",
               transform: barHidden ? "translateX(-50%) translateY(-24px)" : "translateX(-50%) translateY(0)",
               opacity: barHidden ? 0 : 1,
               pointerEvents: barHidden ? "none" : "auto",

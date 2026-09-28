@@ -30,6 +30,9 @@ const getKeyword = () => {
   return keyword || "";
 };
 
+const TYPING_DELAY = 500;
+const MIN_KEYWORD_LENGTH = 2;
+
 const getTab = () => {
   let tab = parseInt(new URLSearchParams(window.location.search).get("tab"), 10);
   return Number.isInteger(tab) && tab >= 0 && tab <= 3 ? tab : 0;
@@ -51,12 +54,15 @@ export default function Search() {
       .filter((_) => _);
   }, []);
   const [searchKeyword, setSearchKeyword] = useState(urlKeyword);
+  const [activeKeyword, setActiveKeyword] = useState(urlKeyword.trim());
   const [results, setResults] = useState([]);
   const searchGenRef = useRef(0);
   const isFirstSearchRef = useRef(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const typingTimerRef = useRef(null);
+  const usersRequestRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(Boolean(urlKeyword.trim()));
   const [launchSearching, setLaunchSearching] = useState(
-    searchKeyword || false
+    urlKeyword.trim() || false
   );
   const [lastTimestamp, setLastTimestamp] = useState(undefined);
   const [selectedTab, setSelectedTab] = useState(getTab);
@@ -76,9 +82,9 @@ export default function Search() {
   }, [results, userMutedList]);
   const followed = useMemo(() => {
     return userInterestList.find(
-      (interest) => interest === searchKeyword.toLowerCase()
+      (interest) => interest === activeKeyword.toLowerCase()
     );
-  }, [searchKeyword, userInterestList]);
+  }, [activeKeyword, userInterestList]);
   const tabsContent = {
     people: t("AJ1Zfct"),
     "all-media": t("A7DfXrs"),
@@ -86,14 +92,44 @@ export default function Search() {
     notes: t("AYIXG83"),
     media: t("Media"),
   };
+  const resetSearch = () => {
+    clearTimeout(typingTimerRef.current);
+    usersRequestRef.current?.abort();
+    searchGenRef.current += 1;
+    setSearchKeyword("");
+    setActiveKeyword("");
+    setResults([]);
+    setIsLoading(false);
+    setLastTimestamp(undefined);
+    setLaunchSearching(false);
+  };
+
+  const launchSearch = (keyword, force = false) => {
+    clearTimeout(typingTimerRef.current);
+    const value = keyword.trim();
+    if (value.length < MIN_KEYWORD_LENGTH) return;
+    if (!force && value === activeKeyword) return;
+    usersRequestRef.current?.abort();
+    searchGenRef.current += 1;
+    setActiveKeyword(value);
+    setResults([]);
+    setLastTimestamp(undefined);
+    setIsLoading(true);
+    setLaunchSearching(Date.now());
+  };
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(typingTimerRef.current);
+      usersRequestRef.current?.abort();
+    };
+  }, []);
+
   const handleOnChange = (e) => {
     let value = e.target.value;
-    if (!value) {
-      searchGenRef.current += 1;
-      setSearchKeyword("");
-      setResults([]);
-      setIsLoading(false);
-      setLastTimestamp(undefined);
+    if (!value.trim()) {
+      resetSearch();
+      setSearchKeyword(value);
       return;
     }
     let tempKeyword = value.replaceAll("nostr:", "");
@@ -105,15 +141,18 @@ export default function Search() {
         tempKeyword.startsWith("note")) &&
       tempKeyword.length > 10
     ) {
+      clearTimeout(typingTimerRef.current);
       let link = getLinkFromAddr(tempKeyword);
       customHistory(link);
       return;
     }
     setSearchKeyword(value);
+    clearTimeout(typingTimerRef.current);
+    typingTimerRef.current = setTimeout(() => launchSearch(value), TYPING_DELAY);
   };
 
   useEffect(() => {
-    if (!searchKeyword) {
+    if (!activeKeyword) {
       searchGenRef.current += 1;
       setResults([]);
       setIsLoading(false);
@@ -135,13 +174,19 @@ export default function Search() {
   }, [launchSearching, selectedTab, lastTimestamp, userSearchRelays]);
 
   const getUsersFromCache = async () => {
+    const gen = searchGenRef.current;
+    usersRequestRef.current?.abort();
+    const controller = new AbortController();
+    usersRequestRef.current = controller;
     try {
       setIsLoading(true);
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_CACHE_BASE_URL;
 
       let data = await axios.get(
-        `${API_BASE_URL}/api/v1/users/search/${searchKeyword}`
+        `${API_BASE_URL}/api/v1/users/search/${encodeURIComponent(activeKeyword)}`,
+        { signal: controller.signal }
       );
+      if (gen !== searchGenRef.current) return;
       saveFetchedUsers(data.data);
       setResults((prev) => {
         let tempData = [...prev, ...data.data];
@@ -156,10 +201,11 @@ export default function Search() {
             return event;
         });
 
-        return sortByKeyword(tempData, searchKeyword).slice(0, 30);
+        return sortByKeyword(tempData, activeKeyword).slice(0, 30);
       });
       setIsLoading(false);
     } catch (err) {
+      if (axios.isCancel(err) || gen !== searchGenRef.current) return;
       console.log(err);
       setIsLoading(false);
     }
@@ -167,10 +213,10 @@ export default function Search() {
 
   const searchForUser = () => {
     let filteredUsers = [];
-    if (!searchKeyword) {
+    if (!activeKeyword) {
       filteredUsers = Array.from(userFollowingsMetadata.slice(0, 30));
     }
-    if (searchKeyword) {
+    if (activeKeyword) {
       let checkFollowings = sortByKeyword(
         userFollowingsMetadata.filter((user) => {
           if (
@@ -178,21 +224,21 @@ export default function Search() {
             ((typeof user.display_name === "string" &&
               user.display_name
                 ?.toLowerCase()
-                .includes(searchKeyword?.toLowerCase())) ||
+                .includes(activeKeyword?.toLowerCase())) ||
               (typeof user.name === "string" &&
                 user.name
                   ?.toLowerCase()
-                  .includes(searchKeyword?.toLowerCase())) ||
+                  .includes(activeKeyword?.toLowerCase())) ||
               (typeof user.nip05 === "string" &&
                 user.nip05
                   ?.toLowerCase()
-                  .includes(searchKeyword?.toLowerCase()))) &&
+                  .includes(activeKeyword?.toLowerCase()))) &&
             isHex(user.pubkey) &&
             typeof user.about === "string"
           )
             return user;
         }),
-        searchKeyword
+        activeKeyword
       ).slice(0, 30);
       if (checkFollowings.length > 0) {
         filteredUsers = structuredClone(checkFollowings);
@@ -209,21 +255,21 @@ export default function Search() {
                 ((typeof user.display_name === "string" &&
                   user.display_name
                     ?.toLowerCase()
-                    .includes(searchKeyword?.toLowerCase())) ||
+                    .includes(activeKeyword?.toLowerCase())) ||
                   (typeof user.name === "string" &&
                     user.name
                       ?.toLowerCase()
-                      .includes(searchKeyword?.toLowerCase())) ||
+                      .includes(activeKeyword?.toLowerCase())) ||
                   (typeof user.nip05 === "string" &&
                     user.nip05
                       ?.toLowerCase()
-                      .includes(searchKeyword?.toLowerCase()))) &&
+                      .includes(activeKeyword?.toLowerCase()))) &&
                 isHex(user.pubkey) &&
                 typeof user.about === "string"
               )
                 return user;
             }),
-            searchKeyword
+            activeKeyword
           ).slice(0, 30),
         ];
       }
@@ -236,7 +282,7 @@ export default function Search() {
 
   const searchForContent = async () => {
     const gen = searchGenRef.current;
-    let tag = searchKeyword.replaceAll("#", "");
+    let tag = activeKeyword.replaceAll("#", "");
     let tags = [
       tag,
       `${String(tag).charAt(0).toUpperCase() + String(tag).slice(1)}`,
@@ -255,7 +301,7 @@ export default function Search() {
     if (selectedTab === 1) filter.kinds = [1];
     if (selectedTab === 2) filter.kinds = [30023];
     if (selectedTab === 3) filter.kinds = [34235, 34236, 21, 22, 20];
-    const lowerKeyword = searchKeyword.toLowerCase();
+    const lowerKeyword = activeKeyword.toLowerCase();
     const matchesKeyword = (event) => {
       if (
         event.tags?.some(
@@ -305,7 +351,7 @@ export default function Search() {
       if (!flushTimer) flushTimer = setTimeout(flush, 350);
     };
     let content = await getDataForSearch(
-      [filter, { ...filter, search: searchKeyword, "#t": undefined }],
+      [filter, { ...filter, search: activeKeyword, "#t": undefined }],
       1500,
       100,
       userSearchRelays,
@@ -342,9 +388,9 @@ export default function Search() {
     try {
       let tags = userInterestList.map((_) => ["t", _]);
       if (!followed) {
-        tags = [["t", searchKeyword.toLowerCase()], ...tags];
+        tags = [["t", activeKeyword.toLowerCase()], ...tags];
       } else {
-        tags = tags.filter((_) => _[1] !== searchKeyword.toLowerCase());
+        tags = tags.filter((_) => _[1] !== activeKeyword.toLowerCase());
       }
       dispatch(
         setToPublish({
@@ -364,34 +410,13 @@ export default function Search() {
   };
 
   const handleSelectInterest = (interest) => {
-    if (isLoading && results.length === 0) {
-      return;
-    }
-    searchGenRef.current += 1;
     setSearchKeyword(interest.toLowerCase());
-    setResults([]);
-    setLastTimestamp(undefined);
-    setIsLoading(true);
-    setLaunchSearching(Date.now());
-  };
-  const handleClearSearch = () => {
-    if (isLoading && results.length === 0) {
-      return;
-    }
-    searchGenRef.current += 1;
-    setSearchKeyword("");
-    setLastTimestamp(undefined);
-    setResults([]);
-    setLaunchSearching(false);
+    launchSearch(interest.toLowerCase());
   };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (!searchKeyword || (isLoading && results.length === 0)) {
-      return;
-    }
-    setIsLoading(true);
-    setLaunchSearching(Date.now());
+    launchSearch(searchKeyword, true);
   };
   return (
     <div style={{ overflow: "clip" }}>
@@ -406,8 +431,7 @@ export default function Search() {
             className={`fx-centered fx-wrap fit-container main-middle`}
           >
             <div className="fit-container fx-centered fx-col box-pad-v-s">
-              {!launchSearching && (
-                <form
+              <form
                   className="slide-up fx-centered fit-container  box-pad-h-s "
                   style={{
                     position: "relative",
@@ -417,7 +441,13 @@ export default function Search() {
                   }}
                   onSubmit={handleSearch}
                 >
-                  <Icon name="search_magnifying_glass" v={2} size={24} />
+                  <span className="fx-centered" style={{ width: "24px", height: "24px", flexShrink: 0 }}>
+                    {isLoading && activeKeyword ? (
+                      <Spinner size={18} color="var(--c1)" />
+                    ) : (
+                      <Icon name="search_magnifying_glass" v={2} size={24} />
+                    )}
+                  </span>
                   <input
                     type="text"
                     placeholder="Search people, notes and content"
@@ -427,6 +457,17 @@ export default function Search() {
                     style={{ paddingLeft: ".5rem" }}
                     autoFocus
                   />
+                  {searchKeyword && (
+                    <div
+                      onClick={resetSearch}
+                      className="round-icon-small round-icon-tooltip"
+                      data-tooltip={t("AboMK2E")}
+                    >
+                      <div className="close" style={{ position: "static" }}>
+                        <div></div>
+                      </div>
+                    </div>
+                  )}
                   <button className="btn btn-normal btn-small">
                     {t("A0omdiR")}
                   </button>
@@ -437,26 +478,15 @@ export default function Search() {
                     <Icon name="setting" size={24} />
                   </Link>
                 </form>
-              )}
               {launchSearching && (
                 <div
                   className="fx-scattered fit-container box-pad-v-s slide-down"
                   style={{ zIndex: 1, position: "relative" }}
                 >
-                  <h3 onDoubleClick={handleClearSearch}>
-                    #{searchKeyword.replaceAll("#", "")}
+                  <h3>
+                    #{activeKeyword.replaceAll("#", "")}
                   </h3>
                   <div className="fx-centered">
-                    <div
-                      onClick={handleClearSearch}
-                      className="round-icon-small round-icon-tooltip"
-                      data-tooltip={t("AboMK2E")}
-                    >
-                      <div className="close" style={{ position: "static" }}>
-                        <div></div>
-                      </div>
-                    </div>
-
                     {userKeys && (
                       <div
                         className="round-icon-tooltip"
@@ -488,7 +518,7 @@ export default function Search() {
               <InterestList
                 userInterestList={userInterestList}
                 handleSelectInterest={handleSelectInterest}
-                searchKeyword={searchKeyword}
+                searchKeyword={activeKeyword}
               />
             </div>
             {launchSearching && (

@@ -46,8 +46,8 @@ export default function Global({
         className="bg-dropdown fx-centered"
         style={{
           position: "fixed",
-          top: barHidden ? "104px" : "160px",
-          left: "50%",
+          top: barHidden ? "calc(var(--nav-bar-top, 96px) + 8px)" : "calc(var(--nav-bar-top, 96px) + 64px)",
+          left: "var(--nav-center, 50%)",
           transform: "translateX(-50%)",
           zIndex: 199,
           width: "min(480px, calc(100vw - 48px))",

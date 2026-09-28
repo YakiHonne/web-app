@@ -37,7 +37,7 @@ const Main = () => {
   }, [searchKeyword]);
 
   return (
-    <div className="box-pad-h-m">
+    <div className="box-pad-h-m nav-flush">
       <div
         className="fx-centered fit-container fx-start-h fx-col box-pad-v"
         style={{ gap: 0, minHeight: "100vh" }}

@@ -111,9 +111,9 @@ export default function NotificationCenterMain() {
             className="fx-centered slide-down"
             style={{
               position: "fixed",
-              left: 0,
-              right: 0,
-              top: !barHidden ? "155px" : "56px",
+              insetInlineStart: "var(--nav-content-left, 0px)",
+              width: "var(--nav-content-w, 100%)",
+              top: !barHidden ? "calc(var(--nav-bar-top, 96px) + 59px)" : "max(16px, calc(var(--nav-bar-top, 96px) - 40px))",
               zIndex: 201,
               pointerEvents: "none",
               transition: "top 0.3s cubic-bezier(0.4, 0, 0.2, 1)",

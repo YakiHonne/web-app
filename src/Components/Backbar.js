@@ -15,7 +15,7 @@ export default function Backbar() {
       className="fx-centered fit-container box-pad-v-s "
       style={{
         padding: ".5rem",
-        top: "50px",
+        top: "max(12px, calc(var(--nav-offset, 84px) - 34px))",
         backgroundColor: "transparent",
         zIndex: 1000,
         position: "sticky",
