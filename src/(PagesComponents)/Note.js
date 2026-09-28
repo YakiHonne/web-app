@@ -215,7 +215,7 @@ export default function Note({ event, nevent }) {
                 <>
                   <div
                     className="bg-dropdown box-marg-s fx-centered pointer sticky"
-                    style={{ top: "94px", width: "max-content" }}
+                    style={{ top: "calc(var(--nav-offset, 84px) + 10px)", width: "max-content" }}
                     onClick={() => setShowHistory(!showHistory)}
                   >
                     <div className="fx-centered box-pad-h-m" style={{ maxHeight: "0px" }}>

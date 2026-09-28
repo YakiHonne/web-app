@@ -1359,7 +1359,7 @@ export default function WritingArticle() {
           <div className="fit-container">
             <main className="fit-container" style={{ overflow: "visible" }}>
               <div className="fx-centered fit-container fx-start-h fx-start-v">
-                <div className="box-pad-h-m fit-container">
+                <div className="box-pad-h-m fit-container nav-flush">
                   {isFetchingPost && (
                     <div
                       className="fit-container fx-centered"
@@ -1383,7 +1383,7 @@ export default function WritingArticle() {
                                 position: "sticky",
                                 // Sit below the full navbar (84px) for V2 so it never
                                 // slips under it; keep V1 at its original offset.
-                                top: useV2Editor ? "84px" : "50px",
+                                top: useV2Editor ? "var(--nav-offset, 84px)" : "max(12px, calc(var(--nav-offset, 84px) - 34px))",
                                 zIndex: 150,
                                 padding: "8px 0",
                                 backgroundColor: "transparent",

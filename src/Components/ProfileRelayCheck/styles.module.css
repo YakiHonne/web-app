@@ -274,3 +274,8 @@
 :global([data-theme='creamy']) .closeButton:hover {
   background-color: rgba(180, 150, 110, 0.08);
 }
+
+:global(html[data-glass="classic"]) .card {
+  background: var(--solid-surface) !important;
+  background-color: var(--solid-surface) !important;
+}

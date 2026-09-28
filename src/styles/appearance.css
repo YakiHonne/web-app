@@ -1,0 +1,179 @@
+html[data-glass="classic"] {
+  --solid-surface: #161617;
+  --solid-bar: var(--white);
+}
+
+html[data-glass="classic"][data-theme="gray"] {
+  --solid-surface: #232325;
+}
+
+html[data-glass="classic"][data-theme="light"],
+html[data-glass="classic"][data-theme="white"] {
+  --solid-surface: #ffffff;
+}
+
+html[data-glass="classic"][data-theme="creamy"] {
+  --solid-surface: #fffcf8;
+}
+
+html[data-glass="classic"] *,
+html[data-glass="classic"] *::before,
+html[data-glass="classic"] *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html[data-glass="classic"] .bg-dropdown,
+html[data-glass="classic"] .bg-dropdown-t,
+html[data-glass="classic"] .uplift-create-menu-glass,
+html[data-glass="classic"] .uplift-profile-dropdown-wrapper,
+html[data-glass="classic"] .overlay-sheet,
+html[data-glass="classic"] .mobile-sheet,
+html[data-glass="classic"] .di-panel,
+html[data-glass="classic"] .dynamic-island-dropdown,
+html[data-glass="classic"] .pack-overlay-sheet,
+html[data-glass="classic"] .csb-pop-glass,
+html[data-glass="classic"] .signup-wallet-ring,
+html[data-glass="classic"] .carousel-card-desc {
+  background: var(--solid-surface) !important;
+  background-color: var(--solid-surface) !important;
+}
+
+html[data-glass="classic"] .uplift-navbar,
+html[data-glass="classic"] .uplift-mini-navbar,
+html[data-glass="classic"] .uplift-bottom-nav,
+html[data-glass="classic"] .uplift-filter-bar,
+html[data-glass="classic"] .sticky {
+  background: var(--solid-bar) !important;
+  background-color: var(--solid-bar) !important;
+}
+
+html[data-glass="classic"] .glass-solid-on-classic {
+  background: var(--solid-surface) !important;
+  background-color: var(--solid-surface) !important;
+}
+
+.ap-prev {
+  position: relative;
+  height: 84px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--dim-gray);
+  background: var(--c1-side);
+  isolation: isolate;
+}
+
+.ap-blob {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.ap-blob-a {
+  width: 72px;
+  height: 72px;
+  top: -6px;
+  left: 18%;
+  background: var(--c1);
+  animation: ap-drift-a 7s ease-in-out infinite alternate;
+}
+
+.ap-blob-b {
+  width: 58px;
+  height: 58px;
+  bottom: -8px;
+  right: 22%;
+  background: #e8467c;
+  animation: ap-drift-b 6s ease-in-out infinite alternate;
+}
+
+.ap-blob-c {
+  width: 30px;
+  height: 30px;
+  top: 12px;
+  right: 34%;
+  background: #f5b841;
+  animation: ap-drift-c 5s ease-in-out infinite alternate;
+}
+
+.ap-panel {
+  position: absolute;
+  z-index: 1;
+  inset: 16px 24%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border-radius: 10px;
+}
+
+.ap-panel-glass,
+html[data-glass="classic"] .ap-panel-glass {
+  background: color-mix(in srgb, var(--white) 30%, transparent) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 6px 18px rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(12px) saturate(1.3) !important;
+  backdrop-filter: blur(12px) saturate(1.3) !important;
+}
+
+html[data-theme="light"] .ap-panel-glass,
+html[data-theme="white"] .ap-panel-glass,
+html[data-theme="creamy"] .ap-panel-glass {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.ap-panel-solid {
+  background: var(--white);
+  border: 1px solid var(--dim-gray);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
+}
+
+.ap-panel-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ap-panel-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--gray);
+}
+
+.ap-panel-dot.is-accent {
+  background: var(--c1);
+}
+
+.ap-panel-line {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--gray);
+  opacity: 0.7;
+}
+
+@keyframes ap-drift-a {
+  to {
+    transform: translate(34px, 18px);
+  }
+}
+
+@keyframes ap-drift-b {
+  to {
+    transform: translate(-40px, -14px);
+  }
+}
+
+@keyframes ap-drift-c {
+  to {
+    transform: translate(-30px, -8px) scale(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-blob {
+    animation: none;
+  }
+}

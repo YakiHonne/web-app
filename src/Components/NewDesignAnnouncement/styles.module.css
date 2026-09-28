@@ -206,3 +206,8 @@
   background: rgba(240, 232, 220, 0.6);
   border-color: rgba(180, 150, 110, 0.15);
 }
+
+:global(html[data-glass="classic"]) .card {
+  background: var(--solid-surface) !important;
+  background-color: var(--solid-surface) !important;
+}

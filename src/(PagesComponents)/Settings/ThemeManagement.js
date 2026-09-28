@@ -5,6 +5,104 @@ import { changePrimary, getPrimaryColor } from "@/Helpers/Helpers";
 import { primaryColors } from "@/Content/PrimaryColors";
 import Icon from "@/Components/Icon";
 import { localStorage_ } from "@/Helpers/utils/clientLocalStorage";
+import Toggle from "@/Components/Toggle";
+import {
+  GLASS_MODES,
+  NAV_LAYOUTS,
+  setGlassMode,
+  setNavLayoutAnimated,
+  setSidebarCollapsed,
+  useAppearance,
+} from "@/Helpers/utils/appearance";
+
+function LayoutPreview({ kind }) {
+  const line = (width, accent) => (
+    <div
+      style={{
+        height: "5px",
+        width,
+        borderRadius: "3px",
+        backgroundColor: accent ? "var(--c1)" : "var(--dim-gray)",
+      }}
+    />
+  );
+  const feed = (
+    <div style={{ flex: 1, display: "flex", justifyContent: "center", padding: "8px" }}>
+      <div style={{ width: "70%", borderRadius: "5px", backgroundColor: "var(--dim-gray)", opacity: 0.6 }} />
+    </div>
+  );
+  return (
+    <div
+      className="fit-container"
+      style={{
+        display: "flex",
+        flexDirection: kind === NAV_LAYOUTS.topbar ? "column" : "row",
+        justifyContent: "center",
+        height: "84px",
+        borderRadius: "8px",
+        overflow: "hidden",
+        backgroundColor: "var(--c1-side)",
+        border: "1px solid var(--dim-gray)",
+      }}
+    >
+      {kind === NAV_LAYOUTS.topbar ? (
+        <>
+          <div
+            style={{
+              height: "18px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderBottom: "1px solid var(--dim-gray)",
+            }}
+          >
+            {line("46%")}
+          </div>
+          {feed}
+        </>
+      ) : (
+        <div style={{ width: "72%", display: "flex" }}>
+          <div
+            style={{
+              width: "32%",
+              borderRight: "1px solid var(--dim-gray)",
+              padding: "8px 6px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+            }}
+          >
+            {line("70%", true)}
+            {line("100%")}
+            {line("100%")}
+            {line("60%")}
+            {line("60%")}
+          </div>
+          {feed}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GlassPreview({ mode }) {
+  const glass = mode === GLASS_MODES.glass;
+  return (
+    <div className="fit-container ap-prev" aria-hidden="true">
+      <span className="ap-blob ap-blob-a" />
+      <span className="ap-blob ap-blob-b" />
+      <span className="ap-blob ap-blob-c" />
+      <div className={`ap-panel${glass ? " ap-panel-glass" : " ap-panel-solid"}`}>
+        {[78, 56, 66].map((width, i) => (
+          <div key={width} className="ap-panel-row">
+            <span className={`ap-panel-dot${i === 0 ? " is-accent" : ""}`} />
+            <span className="ap-panel-line" style={{ width: `${width}%` }} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const FONT_SIZES = [
   { label: "Small", value: "14px" },
@@ -28,6 +126,7 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
   const { theme, setTheme } = useTheme();
   const [primaryColor, setPrimaryColor] = useState(getPrimaryColor());
   const [fontIndex, setFontIndex] = useState(getStoredFontIndex);
+  const { navLayout, sidebarCollapsed, glassMode } = useAppearance();
 
   useEffect(() => {
     document.documentElement.style.fontSize = FONT_SIZES[fontIndex].value;
@@ -241,6 +340,72 @@ export function ThemeManagement({ selectedTab, setSelectedTab }) {
               </div>
               <span style={{ fontSize: "20px", fontWeight: 700, opacity: 0.5, flexShrink: 0 }}>A</span>
             </div>
+          </div>
+
+          <div className="fit-container box-pad-h-m box-pad-v-s">
+            <p>{t("AsbNavL")}</p>
+            <p className="gray-c p-medium">{t("AsbNavD")}</p>
+          </div>
+          <div className="fit-container fx-scattered box-pad-h-m fx-wrap">
+            {[
+              { id: NAV_LAYOUTS.topbar, label: t("AsbTopB"), desc: t("AsbTopD") },
+              { id: NAV_LAYOUTS.sidebar, label: t("AsbSide"), desc: t("AsbSidD") },
+            ].map((option) => (
+              <div
+                key={option.id}
+                className="fx-centered fx fx-col fx-start-v sc-s-18 box-pad-h-s box-pad-v-s"
+                style={{
+                  borderColor: navLayout === option.id ? "var(--c1)" : "",
+                  gap: "10px",
+                }}
+                onClick={() => setNavLayoutAnimated(option.id)}
+              >
+                <LayoutPreview kind={option.id} />
+                <div>
+                  <p>{option.label}</p>
+                  <p className="p-medium gray-c">{option.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          {navLayout === NAV_LAYOUTS.sidebar && (
+            <div className="fx-scattered fit-container box-pad-h-m box-pad-v-s">
+              <div>
+                <p>{t("AsbStCl")}</p>
+                <p className="p-medium gray-c">{t("AsbStCD")}</p>
+              </div>
+              <Toggle
+                status={sidebarCollapsed}
+                setStatus={() => setSidebarCollapsed(!sidebarCollapsed)}
+              />
+            </div>
+          )}
+
+          <div className="fit-container box-pad-h-m box-pad-v-s">
+            <p>{t("AsbGlsT")}</p>
+            <p className="gray-c p-medium">{t("AsbGlsD")}</p>
+          </div>
+          <div className="fit-container fx-scattered box-pad-h-m fx-wrap" style={{ paddingBottom: "16px" }}>
+            {[
+              { id: GLASS_MODES.glass, label: t("AsbGlas"), desc: t("AsbGlaD") },
+              { id: GLASS_MODES.classic, label: t("AsbClsc"), desc: t("AsbClsD") },
+            ].map((option) => (
+              <div
+                key={option.id}
+                className="fx-centered fx fx-col fx-start-v sc-s-18 box-pad-h-s box-pad-v-s"
+                style={{
+                  borderColor: glassMode === option.id ? "var(--c1)" : "",
+                  gap: "10px",
+                }}
+                onClick={() => setGlassMode(option.id)}
+              >
+                <GlassPreview mode={option.id} />
+                <div>
+                  <p>{option.label}</p>
+                  <p className="p-medium gray-c">{option.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

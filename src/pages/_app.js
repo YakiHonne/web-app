@@ -17,12 +17,15 @@ import "@/styles/articlePreview.css";
 import "@/styles/tiptap.css";
 import "@/styles/legalDoc.css";
 import "@/styles/pointsSystem.css";
+import "@/styles/classicSidebar.css";
+import "@/styles/appearance.css";
 
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import "@/lib/i18n";
 import ReduxProvider from "@/Store/ReduxProvider";
 import { ThemeProvider } from "next-themes";
+import { applyAppearanceAttributes, isSidebarLayoutActive } from "@/Helpers/utils/appearance";
 import AppInit from "@/Components/AppInit";
 import { useRouter } from "next/router";
 import Spinner from "@/Components/Spinner";
@@ -84,7 +87,9 @@ const tourSteps = [
   { selector: ".uplift-navbar .uplift-avatar-btn", title: "Profile", description: "Your identity, settings, and connected accounts.", requiresClick: true },
 ];
 
+const SELF_PADDED_PAGES = ["/note/[nevent]", "/smart-widget-checker", "/pricing"];
 const NO_SIDEBAR_PAGES = new Set([
+  "/sidebar-design",
   "/yakihonne-mobile-app",
   "/yakihonne-paid-notes",
   "/yakihonne-smart-widgets",
@@ -178,6 +183,10 @@ function App({ Component, pageProps }) {
   const isDesktop = () => typeof window !== "undefined" && window.innerWidth > 800;
 
   useEffect(() => {
+    applyAppearanceAttributes();
+  }, []);
+
+  useEffect(() => {
     try {
       const idx = parseInt(localStorage.getItem("yaki-font-size"), 10);
       const sizes = ["14px", "16px", "18px", "20px"];
@@ -188,9 +197,10 @@ function App({ Component, pageProps }) {
   }, []);
 
   useEffect(() => {
+    if (router.pathname === "/sidebar-design") return;
     if (!localStorage.getItem("yakihonne_design_v2_seen")) {
       setShowAnnouncement(true);
-    } else if (!localStorage.getItem("yakihonne_tour_v2_seen") && isDesktop()) {
+    } else if (!localStorage.getItem("yakihonne_tour_v2_seen") && isDesktop() && !isSidebarLayoutActive()) {
       setShowTour(true);
     }
   }, []);
@@ -198,7 +208,7 @@ function App({ Component, pageProps }) {
   const handleAnnouncementDismiss = () => {
     localStorage.setItem("yakihonne_design_v2_seen", "true");
     setShowAnnouncement(false);
-    if (!localStorage.getItem("yakihonne_tour_v2_seen") && isDesktop()) setShowTour(true);
+    if (!localStorage.getItem("yakihonne_tour_v2_seen") && isDesktop() && !isSidebarLayoutActive()) setShowTour(true);
   };
 
   const handleTourComplete = () => {
@@ -242,7 +252,7 @@ function App({ Component, pageProps }) {
           className={`page-container fit-container fx-centered fx-start-v${!shouldHideSidebar ? " uplift-page-offset" : ""}`}
           style={{ minHeight: "100dvh" }}
         >
-          <div className={`main-container${router.pathname === "/write-article" ? " main-container--wide" : ""}${router.pathname === "/pricing" ? " main-container--xwide" : ""}`}>
+          <div className={`main-container${router.pathname === "/write-article" ? " main-container--wide" : ""}${router.pathname === "/pricing" ? " main-container--xwide" : ""}${SELF_PADDED_PAGES.includes(router.pathname) ? " main-container--self-padded" : ""}`}>
             <main className="fit-container fx-centered fx-end-h fx-start-v">
               <div
                 className="fit-container"

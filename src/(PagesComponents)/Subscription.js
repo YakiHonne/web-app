@@ -643,7 +643,7 @@ export default function SubscriptionPage() {
 
   return (
     <>
-      <div className="fx-centered fx-col fx-start-v" style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px 48px", rowGap: "16px" }}>
+      <div className="fx-centered fx-col fx-start-v nav-flush nav-flush-w" style={{ maxWidth: 720, margin: "0 auto", padding: "24px 16px 48px", rowGap: "16px" }}>
         {isConnectedToYaki && (
           <div style={{ width: "fit-content", margin: "0 auto" }}>
             <SelectTabs tabs={[t("ArUKrGp"), t("APtVGe1")]} selectedTab={selectedTab} setSelectedTab={setSelectedTab} small={true} />

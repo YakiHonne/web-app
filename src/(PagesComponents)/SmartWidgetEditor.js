@@ -680,7 +680,7 @@ const SmartWidgetBuilder = ({ back, template, identifier }) => {
       )}
       <div
         ref={canvasRef}
-        className="fit-container fx-centered fx-col fx-start-h"
+        className="fit-container fx-centered fx-col fx-start-h nav-flush-w"
         style={{ maxWidth: "700px", margin: "0 auto" }}
       >
         <div
