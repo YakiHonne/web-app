@@ -68,6 +68,33 @@ const isEvictable = (key) => {
 };
 
 /**
+ * Entries that must never reach disk.
+ *
+ * The root-level `/[nevent]` route answers every URL nothing else claims. For a
+ * nostr id, a malformed name or a username that does not resolve it returns
+ * `event: null` -- an empty shell that costs nothing to render again. Persisting
+ * it writes a new `.html` + `.json` pair straight into the pages dir for every
+ * distinct URL a crawler invents, and that route is not in EVICTABLE_ROUTES, so
+ * nothing ever removed them.
+ *
+ * Deleting them later would not be enough either: ext4 never shrinks a
+ * directory's index, so the pages dir only grows with the number of names it
+ * has ever held. Measured in production 2026-10-11: the pages dir itself had
+ * reached 1,061,183,488 bytes, the ceiling of a 2-level htree, after which the
+ * kernel refused every new entry ("index full, reach max htree level") and the
+ * app stopped serving. The only fix that holds is to never create the names.
+ *
+ * Resolved username profiles (`event` set) are still cached as before.
+ */
+const isUncacheable = (key, data) => {
+  if (typeof key !== "string" || !data || data.kind !== "PAGES") return false;
+  // Root level only: a single path segment, e.g. "/nevent1..." or "/foo".
+  if (key.replace(/^\//, "").includes("/")) return false;
+  const pageProps = data.pageData && data.pageData.pageProps;
+  return !!pageProps && pageProps.event === null;
+};
+
+/**
  * Defaults are deliberately small. The cap is not only a disk limit: the size
  * of this directory is also what anything that walks it has to pay, including
  * `seed()` below and Docker/Coolify container-size collection. Measured
@@ -195,6 +222,7 @@ module.exports = class YakiCacheHandler extends FileSystemCache {
   }
 
   async set(key, data, ctx) {
+    if (isUncacheable(key, data)) return;
     const shortKey = shortenKey(key);
     const result = await super.set(shortKey, data, ctx);
 
