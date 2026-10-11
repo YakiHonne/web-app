@@ -95,9 +95,14 @@ import { addExplicitRelays, ndkInstance } from "@/Helpers/NDKInstance";
 import {
   changePrimary,
   handleAppDirection,
-  LoginToAPI,
+  getLoginsParams,
   toggleColorScheme,
 } from "@/Helpers/Helpers";
+import {
+  clearCachedSubscription,
+  getCachedSubscription,
+  saveCachedSubscription,
+} from "@/Helpers/utils/subscriptionCache";
 import {
   getKeys,
   getMetadataFromCachedAccounts,
@@ -140,6 +145,7 @@ export default function AppInit() {
   const userKeys = useSelector((state) => state.userKeys);
   const initDMS = useSelector((state) => state.initDMS);
   const isConnectedToYaki = useSelector((state) => state.isConnectedToYaki);
+  const subscription = useSelector((state) => state.subscription);
   const prevPubkeyRef = useRef(null);
   useSubscriberSubscriptions();
   const chatrooms =
@@ -544,6 +550,7 @@ export default function AppInit() {
         dispatch(setYakiChestStats(false));
         dispatch(clearSubscriptionStatus());
         localStorage.removeItem("connect_yc");
+        clearCachedSubscription(prevPubkeyRef.current);
         axiosInstance.post("/api/v1/logout").catch(() => {});
       }
       prevPubkeyRef.current = null;
@@ -552,13 +559,56 @@ export default function AppInit() {
 
     if (pub === prevPubkeyRef.current) return;
 
+    const REQUEST_TIMEOUT = 12000;
+    const RETRY_DELAYS = [2000, 6000, 15000];
+    const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const isStale = () => prevPubkeyRef.current !== pub;
+    const isRetryable = (err) => !err?.response || err.response.status >= 500;
+
     const fetchAndStoreSubscription = async (account) => {
-      if (account) dispatch(mergeAccountFields(pickAccountFields(account)));
+      const fields = pickAccountFields(account);
+      if (fields) dispatch(mergeAccountFields(fields));
+      for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+        if (isStale()) return;
+        try {
+          const { data } = await axiosInstance.get(
+            "/api/v1/subscription-status",
+            { timeout: REQUEST_TIMEOUT },
+          );
+          if (isStale()) return;
+          dispatch(setSubscriptionStatus(data));
+          return;
+        } catch (err) {
+          if (!isRetryable(err)) {
+            if (!isStale()) dispatch(setSubscriptionStatus(null));
+            return;
+          }
+          if (attempt < RETRY_DELAYS.length) await wait(RETRY_DELAYS[attempt]);
+        }
+      }
+      // The account fields returned by online/login already carry the plan, so
+      // a status endpoint that keeps failing does not downgrade the user.
+      if (!isStale()) dispatch(setSubscriptionStatus(fields));
+    };
+
+    // Signs a login without retrying the signer itself: a refused or missing
+    // signer must not turn into repeated extension prompts or bunker popups.
+    const loginQuietly = async () => {
+      if (userKeys.ext && !window.nostr) {
+        for (let i = 0; i < 10 && !window.nostr; i++) await wait(500);
+        if (!window.nostr) return { retry: false };
+      }
+      const { pubkey, password } = await getLoginsParams(pub, userKeys);
+      if (!(pubkey && password)) return { retry: false };
       try {
-        const { data } = await axiosInstance.get("/api/v1/subscription-status");
-        dispatch(setSubscriptionStatus(data));
-      } catch {
-        dispatch(setSubscriptionStatus(null));
+        const { data } = await axiosInstance.post(
+          "/api/v1/login",
+          { password, pubkey },
+          { timeout: REQUEST_TIMEOUT },
+        );
+        return { data };
+      } catch (err) {
+        return { retry: isRetryable(err) || !!userKeys.sec };
       }
     };
 
@@ -572,31 +622,64 @@ export default function AppInit() {
       }
       prevPubkeyRef.current = pub;
 
-      try {
-        const online = await axiosInstance.get("/api/v1/online");
-        const onlineData = online?.data;
-        if (onlineData && (onlineData.pubkey === pub || onlineData.user_stats?.pubkey === pub)) {
+      const cached = await getCachedSubscription(pub);
+      if (isStale()) return;
+      if (cached) dispatch(mergeAccountFields(cached));
+
+      let sessionInvalid = false;
+      for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+        if (isStale()) return;
+
+        if (!sessionInvalid) {
+          try {
+            const online = await axiosInstance.get("/api/v1/online", {
+              timeout: REQUEST_TIMEOUT,
+            });
+            if (isStale()) return;
+            const onlineData = online?.data;
+            if (onlineData && (onlineData.pubkey === pub || onlineData.user_stats?.pubkey === pub)) {
+              localStorage.setItem("connect_yc", `${new Date().getTime()}`);
+              if (onlineData.user_stats) updateYakiChestStats(onlineData.user_stats);
+              dispatch(setIsConnectedToYaki(true));
+              fetchAndStoreSubscription(onlineData);
+              return;
+            }
+            sessionInvalid = true;
+          } catch (err) {
+            if (isStale()) return;
+            if (!isRetryable(err)) sessionInvalid = true;
+          }
+        }
+
+        const login = await loginQuietly();
+        if (isStale()) return;
+        if (login.data) {
           localStorage.setItem("connect_yc", `${new Date().getTime()}`);
-          if (onlineData.user_stats) updateYakiChestStats(onlineData.user_stats);
+          if (login.data.is_new) initiFirstLoginStats(login.data);
           dispatch(setIsConnectedToYaki(true));
-          fetchAndStoreSubscription(onlineData);
+          fetchAndStoreSubscription(login.data);
           return;
         }
-      } catch {}
+        if (!login.retry) break;
+        if (attempt < RETRY_DELAYS.length) await wait(RETRY_DELAYS[attempt]);
+      }
 
-      try {
-        const data = await LoginToAPI(pub, userKeys);
-        if (data) {
-          localStorage.setItem("connect_yc", `${new Date().getTime()}`);
-          if (data.is_new) initiFirstLoginStats(data);
-          dispatch(setIsConnectedToYaki(true));
-          fetchAndStoreSubscription(data);
-        }
-      } catch {}
+      // Not connected: drop anything painted from the cache, and the cache
+      // itself, so the account behaves exactly like any other disconnected one.
+      if (isStale()) return;
+      if (cached) dispatch(clearSubscriptionStatus());
+      clearCachedSubscription(pub);
     };
 
     autoConnect();
   }, [userKeys]);
+
+  useEffect(() => {
+    const pub = userKeys?.pub;
+    const status = subscription?.status;
+    if (!pub || !subscription?.loaded || status?.pubkey !== pub) return;
+    saveCachedSubscription(pub, pickAccountFields(status));
+  }, [subscription, userKeys]);
 
   useEffect(() => {
     let subscription = null;

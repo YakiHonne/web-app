@@ -36,6 +36,7 @@ import { removeEventStats } from "@/Helpers/DB";
 import DatePicker from "../DatePicker";
 import { publishScheduledEvent } from "@/Helpers/EventSchedulerHelper";
 import Icon from "@/Components/Icon";
+import { addToSpamSafelist, markAsSpam } from "@/Helpers/NSpam";
 
 export default function EventOptions({
   event,
@@ -43,6 +44,8 @@ export default function EventOptions({
   border,
   refreshAfterDeletion,
   deleteTags = [],
+  isSpam = false,
+  isSafelisted = false,
 }) {
   const { t } = useTranslation();
   const { userProfile } = useUserProfile(event.pubkey);
@@ -393,6 +396,30 @@ export default function EventOptions({
     </div>
   );
 
+  const notSpam = isSpam ? (
+    <div
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+      onClick={() => addToSpamSafelist(event.pubkey)}
+    >
+      <Icon name="check" size={20} />
+      <p>{t("AXrN0BV")}</p>
+    </div>
+  ) : (
+    ""
+  );
+
+  const markSpam = isSafelisted ? (
+    <div
+      className="pointer fit-container fx-centered fx-start-h box-pad-h-s box-pad-v-s option-no-scale"
+      onClick={() => markAsSpam(event.pubkey)}
+    >
+      <Icon name="eye-closed" size={20} />
+      <p>{t("AdGHX0i")}</p>
+    </div>
+  ) : (
+    ""
+  );
+
   const muteUser =
     userKeys && event.pubkey !== userKeys.pub ? (
       <div
@@ -489,6 +516,8 @@ export default function EventOptions({
           noteBookmark,
           shareLink,
           HR,
+          notSpam,
+          markSpam,
           muteThread,
           muteUser,
           toDeleteEvent,

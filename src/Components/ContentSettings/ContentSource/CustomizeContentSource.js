@@ -18,6 +18,7 @@ const mixedContentDefaultCF = [
 const NotesDefaultCF = [
   ["recent", true],
   ["recent_with_replies", true],
+  ["highlights", true],
   ["global", true],
   ["paid", true],
   ["widgets", true],

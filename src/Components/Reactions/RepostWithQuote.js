@@ -46,7 +46,7 @@ export default function RepostWithQuote({ isReposted, isQuoted, event, actions, 
     const sub = ndkInstance.subscribe([{ ids: [repostEventID] }], { groupable: false });
     sub.on("event", (event_) => {
       let stats = getEventStatAfterEOSE(event_, "reposts", actions, undefined);
-      saveEventStats(event.id, stats);
+      saveEventStats(event.aTag || event.id, stats);
       sub.stop();
       setRepostEventID(false);
     });
@@ -79,14 +79,20 @@ export default function RepostWithQuote({ isReposted, isQuoted, event, actions, 
         setIsLoading(true);
         let eventInitEx = await InitEvent(5, "This repost will be deleted!", [["e", isReposted.id]]);
         if (!eventInitEx) { setIsLoading(false); return; }
-        dispatch(setToPublish({ eventInitEx, allRelays: [], toRemoveFromCache: { kind: "reposts", eventId: event.id } }));
+        dispatch(setToPublish({ eventInitEx, allRelays: [], toRemoveFromCache: { kind: "reposts", eventId: event.aTag || event.id } }));
         closeDropdown();
         setIsLoading(false);
         return;
       }
       setIsLoading(true);
       let toRepost = { id: event.id, pubkey: event.pubkey, content: event.content, tags: event.tags, created_at: event.created_at, kind: event.kind, sig: event.sig };
-      let eventInitEx = await InitEvent(6, JSON.stringify(toRepost), [["e", event.id], ["p", event.pubkey]]);
+      let isGenericRepost = event.kind !== 1;
+      let repostTags = [["e", event.id], ["p", event.pubkey]];
+      if (isGenericRepost) {
+        repostTags.push(["k", `${event.kind}`]);
+        if (event.aTag) repostTags.push(["a", event.aTag]);
+      }
+      let eventInitEx = await InitEvent(isGenericRepost ? 16 : 6, JSON.stringify(toRepost), repostTags);
       if (!eventInitEx) { setIsLoading(false); return; }
       dispatch(setToPublish({ eventInitEx, allRelays: [] }));
       setRepostEventID(eventInitEx.id);

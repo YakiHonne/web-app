@@ -33,6 +33,9 @@ export const pickAccountFields = (account) => {
   if (account.onboarded !== undefined) fields.onboarded = account.onboarded;
   if (account.in_trial !== undefined) fields.in_trial = account.in_trial;
   if (account.plan !== undefined) fields.plan = account.plan;
+  if (account.active !== undefined) fields.active = account.active;
+  if (account.trial_used !== undefined) fields.trial_used = account.trial_used;
+  if (account.trial_ends_at !== undefined) fields.trial_ends_at = account.trial_ends_at;
   if (account.wallets !== undefined) fields.wallets = account.wallets;
   if (account.nip05 !== undefined) fields.nip05 = account.nip05;
   return Object.keys(fields).length ? fields : null;

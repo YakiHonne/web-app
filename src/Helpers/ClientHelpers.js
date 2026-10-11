@@ -23,7 +23,7 @@ import { setRefreshAppSettings } from "@/Store/Slides/Extras";
 import { nanoid } from "nanoid";
 import { hkdf } from "@noble/hashes/hkdf.js";
 import { sha256 } from "@noble/hashes/sha2.js";
-import { checkJWT, decodeJWT } from "./Encryptions";
+import { checkJWT, decodeJWT, getParsedMedia, getParsedRepEvent } from "./Encryptions";
 const RedPacketBox = dynamic(
   () => import("@/Components/RedPacket/RedPacketBox"),
   { ssr: false },
@@ -38,6 +38,7 @@ const NoteMediaContext = createContext(null);
 const NoteTreeWithMedia = ({ children, mediaItems, pubkey, noBlur, sliderPortalId }) => {
   const [galleryIndex, setGalleryIndex] = useState(null);
   const [portalTarget, setPortalTarget] = useState(null);
+  const [activeMediaIndex, setActiveMediaIndex] = useState(null);
 
   useEffect(() => {
     if (!sliderPortalId) return;
@@ -50,7 +51,14 @@ const NoteTreeWithMedia = ({ children, mediaItems, pubkey, noBlur, sliderPortalI
   );
 
   return (
-    <NoteMediaContext.Provider value={{ mediaItems, openGallery: setGalleryIndex }}>
+    <NoteMediaContext.Provider
+      value={{
+        mediaItems,
+        openGallery: setGalleryIndex,
+        activeMediaIndex,
+        setActiveMediaIndex,
+      }}
+    >
       {children}
       {!portalTarget && slider}
       {portalTarget && createPortal(slider, portalTarget)}
@@ -72,6 +80,7 @@ const MediaChip = ({ type, url, mediaIndex }) => {
   const ctx = useContext(NoteMediaContext);
   const iconName = type === "image" ? "image_01" : "monitor_play";
   const label = type === "image" ? "image" : "video";
+  const isActive = ctx?.activeMediaIndex === mediaIndex;
   return (
     <span
       style={{ position: "relative", display: "inline-flex", verticalAlign: "middle" }}
@@ -80,17 +89,86 @@ const MediaChip = ({ type, url, mediaIndex }) => {
         e.preventDefault();
         if (ctx?.openGallery) ctx.openGallery(mediaIndex);
       }}
+      onMouseEnter={() => ctx?.setActiveMediaIndex?.(mediaIndex)}
+      onMouseLeave={() => ctx?.setActiveMediaIndex?.(null)}
     >
       <span
         className="pointer sticker sticker-normal sticker-small fx-centered"
-        style={{ gap: "4px", transform: "translateY(2px)", cursor: "pointer", color: "var(--gray-c)" }}
+        style={{
+          gap: "4px",
+          transform: "translateY(2px)",
+          cursor: "pointer",
+          color: isActive ? "var(--c1)" : "var(--gray-c)",
+        }}
       >
         <Icon name={iconName} v={2} size={14} />
-        <p style={{ margin: 0 }}>{label}</p>
+        <p style={{ margin: 0 }}>
+          {label} {mediaIndex + 1}
+        </p>
+        <Icon name="arrow_down_sm" v={2} size={12} />
       </span>
     </span>
   );
 };
+
+const SlideIndexBadge = ({ index }) => {
+  const ctx = useContext(NoteMediaContext);
+  const isActive = ctx?.activeMediaIndex === index;
+  return (
+    <span
+      className="fx-centered p-small"
+      style={{
+        position: "absolute",
+        top: "8px",
+        left: "8px",
+        zIndex: 2,
+        minWidth: "22px",
+        height: "22px",
+        padding: "0 6px",
+        borderRadius: "11px",
+        background: isActive ? "var(--c1)" : "rgba(0,0,0,0.55)",
+        color: "#fff",
+        fontWeight: 700,
+        pointerEvents: "none",
+      }}
+    >
+      {index + 1}
+    </span>
+  );
+};
+
+const useActiveSlide = (index) => {
+  const ctx = useContext(NoteMediaContext);
+  const ref = useRef(null);
+  const isActive = ctx?.activeMediaIndex === index;
+  useEffect(() => {
+    if (!isActive || !ref.current) return;
+    const track = ref.current.parentElement;
+    if (!track) return;
+    const slideRect = ref.current.getBoundingClientRect();
+    const trackRect = track.getBoundingClientRect();
+    const target =
+      track.scrollLeft +
+      (slideRect.left - trackRect.left) -
+      (track.clientWidth - slideRect.width) / 2;
+    track.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+  }, [isActive]);
+  return { ref, isActive };
+};
+
+const SlideActiveRing = ({ isActive }) =>
+  isActive ? (
+    <span
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 2,
+        border: "2px solid var(--c1)",
+        borderRadius: "inherit",
+        pointerEvents: "none",
+      }}
+    />
+  ) : null;
 
 const SLIDE_WIDTH = "calc((100% - 8px) / 2.3)";
 
@@ -107,12 +185,16 @@ const slideStyle = {
 
 const VideoThumbnailSlide = ({ url, onOpen, index, onSlideClick }) => {
   const thumbnail = useVideoThumbnail(url);
+  const { ref, isActive } = useActiveSlide(index);
   return (
     <div
+      ref={ref}
       className="pointer"
       style={slideStyle}
       onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSlideClick(e, index); }}
     >
+      <SlideIndexBadge index={index} />
+      <SlideActiveRing isActive={isActive} />
       {thumbnail ? (
         <img
           src={thumbnail}
@@ -134,12 +216,17 @@ const VideoThumbnailSlide = ({ url, onOpen, index, onSlideClick }) => {
   );
 };
 
-const ImageSlide = ({ url, onOpen, index, onSlideClick }) => (
+const ImageSlide = ({ url, onOpen, index, onSlideClick }) => {
+  const { ref, isActive } = useActiveSlide(index);
+  return (
   <div
+    ref={ref}
     className="pointer"
     style={slideStyle}
     onClick={(e) => { e.stopPropagation(); e.preventDefault(); onSlideClick(e, index); }}
   >
+    <SlideIndexBadge index={index} />
+      <SlideActiveRing isActive={isActive} />
     <img
       src={url}
       alt="media"
@@ -148,7 +235,8 @@ const ImageSlide = ({ url, onOpen, index, onSlideClick }) => (
       style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
     />
   </div>
-);
+  );
+};
 
 const DRAG_THRESHOLD = 5;
 
@@ -775,6 +863,53 @@ export const isLockedPremiumEvent = (event) => {
   return !isPremiumNoteAccessible(event.pubkey);
 };
 
+export const HIGHLIGHT_KIND = 9802;
+export const GENERIC_REPOST_KIND = 16;
+const MEDIA_KINDS = [20, 21, 22];
+
+export function getHighlightData(event) {
+  const tags = event?.tags || [];
+  const findTag = (name, check = () => true) =>
+    tags.find((tag) => tag[0] === name && tag[1] && check(tag));
+  const notMention = (tag) => tag[tag.length - 1] !== "mention";
+  const aTag = findTag("a", notMention);
+  const eTag = findTag("e", notMention);
+  const rTag =
+    findTag("r", (tag) => tag[2] === "source") || findTag("r", notMention);
+  const iTag = findTag("i");
+  let url = rTag?.[1] || (/^https?:\/\//i.test(iTag?.[1] || "") ? iTag[1] : "");
+  let domain = "";
+  try {
+    if (url) domain = new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    domain = "";
+  }
+  let sourceType = aTag ? "address" : eTag ? "event" : url ? "web" : "";
+  return {
+    text: event?.content || "",
+    comment: (findTag("comment")?.[1] || "").trim(),
+    context: findTag("context")?.[1] || "",
+    sourceType,
+    aTag: aTag?.[1] || "",
+    eTag: eTag?.[1] || "",
+    relayHint: (aTag || eTag)?.[2] || "",
+    url,
+    domain,
+    authors: tags
+      .filter((tag) => tag[0] === "p" && tag[1] && notMention(tag))
+      .map((tag) => tag[1]),
+  };
+}
+
+export const getParsedRepostedEvent = (event) => {
+  if (!event?.kind) return false;
+  if ([1, 1111, HIGHLIGHT_KIND].includes(event.kind))
+    return getParsedNote(event, true);
+  if (MEDIA_KINDS.includes(event.kind)) return getParsedMedia(event);
+  if (event.kind >= 30000 && event.kind < 40000) return getParsedRepEvent(event);
+  return false;
+};
+
 export function getParsedNote(
   event,
   isCollapsedNote = false,
@@ -831,6 +966,36 @@ export function getParsedNote(
       : [];
 
     let rawEvent = (event?.rawEvent && event.rawEvent()) || { ...event };
+    if (event.kind === HIGHLIGHT_KIND) {
+      const highlight = getHighlightData(event);
+      return {
+        ...rawEvent,
+        note_tree: highlight.comment
+          ? getNoteTree(
+            highlight.comment,
+            undefined,
+            false,
+            undefined,
+            event.pubkey,
+            false,
+            `slider-${event.id}`,
+            emojiMap,
+          )
+          : "",
+        highlight,
+        isQuote: "",
+        isComment: false,
+        isRoot: true,
+        rootData: undefined,
+        isReply: false,
+        isPaidNote: false,
+        isCollapsedNote: false,
+        nEvent,
+        seenOn,
+        isProtected,
+        isPremium,
+      };
+    }
     if (event.kind === 1 || event.kind === 1111) {
       let note_tree = parseContent
         ? getNoteTree(
@@ -869,6 +1034,24 @@ export function getParsedNote(
       return {
         ...rawEvent,
         relatedEvent,
+      };
+    }
+    if (event.kind === GENERIC_REPOST_KIND) {
+      let repostedEvent = false;
+      try {
+        repostedEvent = event.content ? JSON.parse(event.content) : false;
+      } catch {
+        repostedEvent = false;
+      }
+      let relatedEvent = getParsedRepostedEvent(repostedEvent);
+      let repostedATag = repostedEvent
+        ? ""
+        : event.tags.find((tag) => tag[0] === "a" && tag[1])?.[1] || "";
+      if (!relatedEvent && !repostedATag) return false;
+      return {
+        ...rawEvent,
+        relatedEvent,
+        repostedATag,
       };
     }
     return false;
@@ -1594,6 +1777,10 @@ const mergeConsecutivePElements = (arr, pubkey, noBlur) => {
 
   for (const element of cleanedArray) {
     if (["p", "span"].includes(element.type)) {
+      if (currentImages.length > 0) {
+        result.push(createImageGrid(currentImages, pubkey, noBlur));
+        currentImages = [];
+      }
       if (!currentTextElement) {
         currentTextElement = { ...element };
         currentTextElement.props = {

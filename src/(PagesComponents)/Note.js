@@ -1,4 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import HighlightCard, { HighlightTag } from "@/Components/HighlightCard";
+import HighlightSelectionPopup from "@/Components/HighlightSelectionPopup";
 import ArrowUp from "@/Components/ArrowUp";
 import UserProfilePic from "@/Components/UserProfilePic";
 import Date_ from "@/Components/Date_";
@@ -60,6 +62,7 @@ export default function Note({ event, nevent }) {
   const [showPaidNoteInfo, setShowPaidNoteInfo] = useState(false);
   const { userProfile, isNip05Verified, proUser } = useUserProfile(note?.pubkey);
   const { postActions } = useNoteStats(note?.id, note?.pubkey);
+  const noteBodyRef = useRef(null);
   const relayHints = useMemo(() => {
     try {
       const decoded = nip19.decode(nevent);
@@ -69,7 +72,7 @@ export default function Note({ event, nevent }) {
     }
   }, [nevent]);
   const unsupportedKind = useMemo(() => {
-    return ![1, 1111].includes(note?.kind);
+    return ![1, 1111, 9802].includes(note?.kind);
   }, [note]);
   useEffect(() => {
     const fetchNote = async () => {
@@ -122,7 +125,9 @@ export default function Note({ event, nevent }) {
       return;
     }
     try {
-      let res = await translate(note.content);
+      let res = await translate(
+        note.kind === 9802 ? note.highlight?.comment : note.content,
+      );
       if (res.status !== 200) {
         handleTranslateError(res);
       }
@@ -187,7 +192,7 @@ export default function Note({ event, nevent }) {
         </Link>
       </div>
     );
-  if (![1, 1111].includes(note?.kind))
+  if (![1, 1111, 9802].includes(note?.kind))
     return customHistory(
       "/unsupported/" + nip19.neventEncode({ id: event?.id }),
     );
@@ -272,6 +277,7 @@ export default function Note({ event, nevent }) {
                     </div>
                   </div>
                   <div className="fx-centered">
+                    {note.kind === 9802 && <HighlightTag />}
                     {note.isPaidNote && (
                       <div
                         className="sticker sticker-paid sticker-click pointer"
@@ -286,7 +292,7 @@ export default function Note({ event, nevent }) {
                     {showPaidNoteInfo && (
                       <PaidNoteInfoOverlay onClose={() => setShowPaidNoteInfo(false)} />
                     )}
-                    {!isNoteTranslating && <Icon name="translate" onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                    {!isNoteTranslating && (note.kind !== 9802 || note.highlight?.comment) && <Icon name="translate" onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
                     {isNoteTranslating && <Spinner />}
                     <EventOptions
                       event={note}
@@ -299,9 +305,22 @@ export default function Note({ event, nevent }) {
                     />
                   </div>
                 </div>
-                <div className="fit-container box-pad-h-m" dir="auto">
-                  {showTranslation ? translatedNote : note.note_tree}
-                </div>
+                {(note.kind !== 9802 || note.highlight?.comment) && (
+                  <div className="fit-container box-pad-h-m" dir="auto" ref={noteBodyRef}>
+                    {showTranslation ? translatedNote : note.note_tree}
+                  </div>
+                )}
+                {note.kind !== 9802 && (
+                  <HighlightSelectionPopup
+                    containerRef={noteBodyRef}
+                    sourceEvent={note}
+                  />
+                )}
+                {note.kind === 9802 && note.highlight && (
+                  <div className="fit-container box-pad-h-m">
+                    <HighlightCard highlight={note.highlight} />
+                  </div>
+                )}
                 {postActions?.zaps?.zaps?.length > 0 && (
                   <div className="fit-container box-pad-h-m">
                     <ZapAd

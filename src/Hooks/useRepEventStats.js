@@ -40,7 +40,7 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
             since: actions.likes.since,
           },
           {
-            kinds: [6],
+            kinds: [6, 16],
             "#a": [aTag],
             since: actions.reposts.since,
           },
@@ -111,7 +111,7 @@ const useRepEventStats = (aTag, aTagPubkey, supported = true) => {
                 created_at: event.created_at,
               });
           }
-          if (event.kind === 6) {
+          if (event.kind === 6 || event.kind === 16) {
             if (!kind6Since || kind6Since < event.created_at)
               kind6Since = event.created_at;
             kind6.push({

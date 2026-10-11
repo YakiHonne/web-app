@@ -72,7 +72,8 @@ export default function PostReaction({
     postActions.reposts.reposts.length + postActions.quotes.quotes.length;
 
   const showRepostQuote =
-    event.kind === 1 && (order.repost > -1 || order.quote > -1);
+    [1, 9802, 30023].includes(event.kind) &&
+    (order.repost > -1 || order.quote > -1);
   const repostQuoteOrder =
     order.repost > -1 ? order.repost : order.quote > -1 ? order.quote : -1;
   return (

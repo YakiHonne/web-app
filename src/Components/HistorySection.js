@@ -43,8 +43,8 @@ const traceEventPath = (id, all, mainEventID, tagKind) => {
     let mainEvent = all.find((comment) => comment.id === mainEventID);
     if (mainEvent) {
       let parsedEvent;
-      if (mainEvent.kind === 1 || mainEvent.kind === 1111) parsedEvent = getParsedNote(mainEvent, true);
-      if (mainEvent.kind !== 1 && mainEvent.kind !== 1111) parsedEvent = getParsedMedia(mainEvent);
+      if ([1, 1111, 9802].includes(mainEvent.kind)) parsedEvent = getParsedNote(mainEvent, true);
+      if (![1, 1111, 9802].includes(mainEvent.kind)) parsedEvent = getParsedMedia(mainEvent);
       path.unshift(parsedEvent);
     }
   }
@@ -181,13 +181,15 @@ export default function HistorySection({
       className="fit-container fx-centered fx-col box-marg-s"
       style={{ gap: 0 }}
     >
-      {netComments.length > 0 && netComments[0].kind !== 1 && (
-        <div className="box-pad-h fit-container box-marg-s">
-          <LinkRepEventPreview event={netComments[0]} />
-        </div>
-      )}
+      {netComments.length > 0 &&
+        netComments[0].kind !== 1 &&
+        netComments[0].kind !== 9802 && (
+          <div className="box-pad-h fit-container box-marg-s">
+            <LinkRepEventPreview event={netComments[0]} />
+          </div>
+        )}
       {netComments.map((comment, index) => {
-        if (comment.kind === 1 || comment.kind === 1111)
+        if ([1, 1111, 9802].includes(comment.kind))
           return (
             <NotesComment
               event={comment}

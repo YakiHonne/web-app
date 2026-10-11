@@ -45,12 +45,13 @@ export const updatesList = [
   "General bug fix and improvements.",
 ];
 
-export const proUpdatesVersion = "1.0.1";
+export const proUpdatesVersion = "1.0.2";
 
 export const proUpdatesList = [
-  "Fixed several issues affecting the AI Assistant and Second Reader.",
-  "Added direct redirection to the YakiPro mobile app.",
-  "Added an explanatory slider to guide creators through the subscription management flow.",
+  "Fixed issues related to publishing premium content.",
+  "Added BLOSSOM servers managements in settings.",
+  "Added more filters on content page for notes and articles.",
+  "General bug fixes.",
 ];
 
 export default function YakiIntro() {
