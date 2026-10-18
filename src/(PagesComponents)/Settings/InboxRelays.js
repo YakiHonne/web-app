@@ -24,9 +24,9 @@ export function InboxRelays({ setShowRelaysInfo, allRelays }) {
   const suggestedRelays = useMemo(() => {
     let relays = [
       "wss://auth.nostr1.com",
-      "wss://nostr-01.uid.ovh",
-      "wss://nostr-02.uid.ovh",
-      "wss://relay.0xchat.com",
+      "wss://chat.wisp.talk",
+      "wss://relay.ditto.pub",
+      "wss://relay.nmail.li",
     ];
     if (tempUserRelays.length === 0) return relays;
     return relays.filter((relay) => {
