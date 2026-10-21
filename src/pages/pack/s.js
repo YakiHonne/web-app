@@ -12,7 +12,7 @@ const ClientComponent = dynamic(
 
 export default function index({ dTag, event }) {
   let data = {
-    path: `pack/s${dTag ? `?r=${dTag}` : ""}`,
+    path: `pack/s${dTag ? `?d=${dTag}` : ""}`,
     title: event?.title || "Notes from a starter pack",
     description:
       event?.description ||
@@ -32,10 +32,12 @@ export default function index({ dTag, event }) {
 
 export async function getServerSideProps({ query }) {
   const { d } = query;
-  let pack = undefined;
-  const data = await getDataForSSG([{ kinds: [39089], "#d": [d] }]);
-  if (data.data.length > 0) {
-    pack = getParsedPacksEvent(data.data[0]);
+  let pack = null;
+  if (d) {
+    const data = await getDataForSSG([{ kinds: [39089], "#d": [d] }]);
+    if (data.data.length > 0) {
+      pack = getParsedPacksEvent(data.data[0]) ?? null;
+    }
   }
   return {
     props: {

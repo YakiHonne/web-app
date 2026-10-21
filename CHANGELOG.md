@@ -1,4 +1,4 @@
-# (v6.0.5) 15/10/2026
+# (v6.0.5) 21/10/2026
 
 * Added highlights, rendered everywhere with reactions, reposts, comments and zaps.
 * Highlight any text in a note or an article and share it in a note.
