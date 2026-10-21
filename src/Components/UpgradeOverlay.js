@@ -15,6 +15,7 @@ import { customHistory } from "@/Helpers/History";
 import { useDispatch } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import useYakiGuard from "@/Hooks/useYakiGuard";
+import useAccess from "@/Hooks/useAccess";
 
 const COMPARE_ROWS = [
   { labelKey: "ALx6onZ", free: true, creator: true, pro: true },
@@ -174,6 +175,7 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { requireYakiConnection, handleAuthError } = useYakiGuard();
+  const { plan: currentPlan, active, inTrial } = useAccess();
   const [isLoading, setIsLoading] = useState(false);
   const [lightningInvoice, setLightningInvoice] = useState(null);
   const [activePlan, setActivePlan] = useState(null);
@@ -284,13 +286,14 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
           const pointsEligible = !!eligibility?.[plan.id]?.eligible;
           const pointsCost = pointsConfig?.subscription?.[plan.id];
           const isRedeeming = redeemingPlan === plan.id;
-          const cardDisabled = isPoints && !pointsEligible;
+          const isCurrent = !!userPub && active && !inTrial && plan.id === currentPlan;
+          const cardDisabled = isCurrent || (isPoints && !pointsEligible);
 
           return (
             <div
               key={plan.id}
               className={`lp-plan-card bg-dropdown${isHighlighted ? " lp-plan-card-pro" : ""}`}
-              style={cardDisabled ? { opacity: 0.5 } : undefined}
+              style={isCurrent ? { outline: "1px solid var(--c1)", outlineOffset: "-1px" } : cardDisabled ? { opacity: 0.5 } : undefined}
             >
               <div>
                 <div className="lp-plan-name">{plan.name}</div>
@@ -330,7 +333,7 @@ function PricingCards({ plans, mode, setMode, userPub, onClose, eligibility, poi
                 disabled={isLoading || isRedeeming || cardDisabled}
                 onClick={() => !cardDisabled && handleCheckout(plan)}
               >
-                {isLoading || isRedeeming ? <Spinner /> : isHighlighted ? t("ACPuCzH") : t("Ac2yDI1")}
+                {isLoading || isRedeeming ? <Spinner /> : isCurrent ? t("A8wDj0f") : isHighlighted ? t("ACPuCzH") : t("Ac2yDI1")}
               </button>
             </div>
           );

@@ -41,6 +41,9 @@ const getContentFromValue = (contentSource) => {
   if (["af", "rsf"].includes(contentSource.group)) return "algo";
 };
 
+const REPOST_KINDS = [6, 16];
+const FOLLOWINGS_FEEDS = ["recent", "recent_with_replies", "highlights"];
+
 const notesReducer = (notes, action) => {
   switch (action.type) {
     case "empty-recent": {
@@ -58,10 +61,12 @@ const notesReducer = (notes, action) => {
             tempArr.findIndex(
               (_) =>
                 _.id === note.id ||
-                (note.kind === 6 &&
+                (REPOST_KINDS.includes(note.kind) &&
+                  note.relatedEvent &&
                   (note.relatedEvent.id === _.id ||
                     note.relatedEvent.id === _.relatedEvent?.id)) ||
-                (_.kind === 6 &&
+                (REPOST_KINDS.includes(_.kind) &&
+                  _.relatedEvent &&
                   (_.relatedEvent.id === note.id ||
                     _.relatedEvent.id === note.relatedEvent?.id)),
             ) === index
@@ -215,7 +220,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
     if (userKeys) {
       tempUserFollowings.push(userKeys.pub);
     }
-    if (["recent", "recent_with_replies"].includes(notesContentFrom)) {
+    if (FOLLOWINGS_FEEDS.includes(notesContentFrom)) {
       if (tempUserFollowings.length === 0) {
         tempUserFollowings = [
           ...tempUserFollowings,
@@ -229,7 +234,11 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
             ? [...tempUserFollowings, ...getBackupWOTList()]
             : tempUserFollowings;
       let recentKinds =
-        notesContentFrom === "recent_with_replies" ? [1, 6, 1111] : [1, 6];
+        notesContentFrom === "highlights"
+          ? [9802]
+          : notesContentFrom === "recent_with_replies"
+            ? [1, 6, 16, 1111, 9802]
+            : [1, 6, 16, 9802];
       filter = [{ authors, kinds: recentKinds, until, since, limit: 100 }];
       return {
         filter,
@@ -337,13 +346,13 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
               algoRelay.length === 0
             ) {
               if (!event_.isComment) {
-                if (event.kind === 6) {
+                if (event_.relatedEvent?.pubkey) {
                   eventsPubkeys.push(event_.relatedEvent.pubkey);
                 }
                 return event_;
               }
             } else {
-              if (event.kind === 6) {
+              if (event_.relatedEvent?.pubkey) {
                 eventsPubkeys.push(event_.relatedEvent.pubkey);
               }
               return event_;
@@ -364,9 +373,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
       ["cf", "af", "rsf", "pf"].includes(selectedCategory?.group)
     ) {
       if (
-        (["recent", "recent_with_replies"].includes(notesContentFrom) &&
+        (FOLLOWINGS_FEEDS.includes(notesContentFrom) &&
           isUserFollowingsLoaded) ||
-        !["recent", "recent_with_replies"].includes(notesContentFrom)
+        !FOLLOWINGS_FEEDS.includes(notesContentFrom)
       )
         contentFromRelays();
     }
@@ -397,7 +406,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
           onClick={handleRecentPostsClick}
         />
       )}
-      {["recent", "recent_with_replies"].includes(notesContentFrom) &&
+      {FOLLOWINGS_FEEDS.includes(notesContentFrom) &&
         userFollowings &&
         userFollowings?.length < 5 &&
         isUserFollowingsLoaded &&
@@ -473,9 +482,9 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
             let note = notes[index];
             if (![...userMutedList, ...bannedList].includes(note.pubkey)) {
               if (
-                note.kind === 6 &&
+                REPOST_KINDS.includes(note.kind) &&
                 ![...userMutedList, ...bannedList].includes(
-                  note.relatedEvent.pubkey,
+                  note.relatedEvent?.pubkey,
                 )
               )
                 return (
@@ -487,7 +496,7 @@ const HomeFeed = ({ selectedCategory, selectedFilter }) => {
                     )}
                   </Fragment>
                 );
-              if (note.kind !== 6)
+              if (!REPOST_KINDS.includes(note.kind))
                 return (
                   <Fragment key={note.id}>
                     <KindOne event={note} border={true} />

@@ -29,6 +29,11 @@ export default function ContentFeedCategoryPreview({
             <Icon name="recent-wr" size={24} />
           </div>
         )}
+        {category.value === "highlights" && (
+          <div>
+            <Icon name="highlighter" size={24} />
+          </div>
+        )}
         {category.value === "paid" && (
           <div>
             <Icon name="sats" size={24} />

@@ -17,7 +17,7 @@ export default function useRecentNotes(
   const [recentNotes, setRecentNotes] = useState([]);
 
   const getPubkey = (event) => {
-    if (event.kind === 6) {
+    if (event.kind === 6 || event.kind === 16) {
       try {
         let parsedNote = JSON.parse(event.content);
         return [...new Set([parsedNote.pubkey, event.pubkey])];
@@ -46,12 +46,13 @@ export default function useRecentNotes(
         {
           onEvent(event) {
             if (
-              [1, 6, 1111].includes(event.kind) &&
-              event.content &&
+              [1, 6, 16, 1111, 9802].includes(event.kind) &&
+              (event.content || event.kind === 9802) &&
               !userMutedList.includes(event.pubkey)
             ) {
-              pubkeys.push(getPubkey(event));
               let parsedNote = getParsedNote(event);
+              if (!parsedNote) return;
+              pubkeys.push(getPubkey(event));
               if (contentFrom !== "recent_with_replies") {
                 if (!parsedNote.isComment) {
                   if (isEose) {

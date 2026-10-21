@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState, useEffect } from "react";
+import HighlightSelectionPopup from "@/Components/HighlightSelectionPopup";
 import ArticlePreview from "@/Components/ArticlePreview";
 import {
   checkForLUDS,
@@ -64,6 +65,7 @@ export default function Article({ event, userProfile, naddrData }) {
   const [showTranslation, setShowTranslation] = useState(false);
   const [isContentTranslating, setIsContentTranslating] = useState(false);
   const containerRef = useRef(null);
+  const articleBodyRef = useRef(null);
   const { muteUnmute, isMuted } = useIsMute(
     naddrData ? naddrData.pubkey : null,
   );
@@ -536,6 +538,7 @@ export default function Article({ event, userProfile, naddrData }) {
                     <div
                       className="article fit-container"
                       dir={showTranslation ? translatedDir : post.dir}
+                      ref={articleBodyRef}
                     >
                       <ArticlePreview
                         content={
@@ -543,6 +546,10 @@ export default function Article({ event, userProfile, naddrData }) {
                         }
                       />
                     </div>
+                    <HighlightSelectionPopup
+                      containerRef={articleBodyRef}
+                      sourceEvent={post}
+                    />
                     {post.tTags?.length > 0 && (
                       <div
                         className="fx-centered fx-start-h fx-wrap box-pad-v-m"

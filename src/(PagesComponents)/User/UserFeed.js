@@ -152,7 +152,7 @@ export default function UserFeed({ user }) {
   const getNotesFilter = () => {
     let pinnedNotesIds = isCurrentUser ? pinnedNotes : userPinnedNotes;
     let kinds = {
-      notes: [1, 6],
+      notes: [1, 6, 16, 9802],
       replies: [1, 1111],
       mentions: [1],
       articles: [30023],
@@ -271,7 +271,7 @@ export default function UserFeed({ user }) {
         let ev = [];
         if (data.length > 0) {
           ev = data.map((event) => {
-            if ([1, 6, 1111].includes(event.kind)) {
+            if ([1, 6, 16, 1111, 9802].includes(event.kind)) {
               let event_ = getParsedNote(event, true);
               if (event_) {
                 if (
@@ -281,7 +281,7 @@ export default function UserFeed({ user }) {
                 ) {
                   return event_;
                 } else if (contentFrom === "notes" && !event_.isComment) {
-                  if (event.kind === 6) {
+                  if (event_.relatedEvent?.pubkey) {
                     pubkeys.push(event_.relatedEvent.pubkey);
                   }
                   return event_;
@@ -530,7 +530,7 @@ export default function UserFeed({ user }) {
                     deleteWidget={() => null}
                   />
                 );
-              if (item.kind === 6)
+              if (item.kind === 6 || item.kind === 16)
                 return <KindSix event={item} key={item.id} />;
               return <KindOne event={item} key={item.id} border={true} />;
             }}

@@ -68,7 +68,7 @@ export default function StarterPack({ event }) {
   const router = useRouter();
   const { t } = useTranslation();
   const extrasRef = useRef(null);
-  const d = router.query.r;
+  const d = router.query.d || router.query.r;
   const [pack, setPack] = useState(event || null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -100,7 +100,7 @@ export default function StarterPack({ event }) {
       }
       setIsLoading(false);
     };
-    if (!event) fetchData();
+    if (!event && d) fetchData();
   }, [d]);
 
   if (isLoading)

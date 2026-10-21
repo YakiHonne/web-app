@@ -466,6 +466,14 @@ main {
     background-color: rgba(128, 128, 128, 0.1);
 }
 
+.highlight-source-link {
+    transition: background-color 0.15s ease;
+}
+
+.highlight-source-link:hover {
+    background-color: rgba(128, 128, 128, 0.12);
+}
+
 .icon-hover {
     transition: .2s ease-in-out;
 }

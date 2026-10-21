@@ -5,6 +5,7 @@ import Date_ from "@/Components/Date_";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast } from "@/Store/Slides/Publishers";
 import { translate } from "@/Helpers/Controlers";
+import HighlightCard, { HighlightTag } from "@/Components/HighlightCard";
 import useNoteStats from "@/Hooks/useNoteStats";
 import Comments from "@/Components/Reactions/Comments";
 import { customHistory } from "@/Helpers/History";
@@ -35,6 +36,8 @@ export default function NotesComment({
   tagKind = "e",
   rootKind = null,
   fromKindOne = false,
+  isSpam = false,
+  isSafelisted = false,
 }) {
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -96,7 +99,9 @@ export default function NotesComment({
         });
         return;
       }
-      let res = await translate(event.content);
+      let res = await translate(
+        event.kind === 9802 ? event.highlight?.comment : event.content,
+      );
       if (res.status !== 200) {
         handleTranslateError(res);
       }
@@ -220,13 +225,16 @@ export default function NotesComment({
                   )}
                 </div>
                 <div className="fx-centered">
-                  {!isNoteTranslating && <Icon name={"translate"} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                  {event.kind === 9802 && <HighlightTag />}
+                  {!isNoteTranslating && (event.kind !== 9802 || event.highlight?.comment) && <Icon name={"translate"} onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
                   {isNoteTranslating && <Spinner />}
                   {!noReactions && (
                     <EventOptions
                       event={event}
                       component="notes"
                       refreshAfterDeletion={() => setIsDeleted(true)}
+                      isSpam={isSpam}
+                      isSafelisted={isSafelisted}
                     />
                   )}
                 </div>
@@ -268,18 +276,23 @@ export default function NotesComment({
           >
             {!isMuted && (
               <>
-                <Link
-                  href={`/note/${event.nEvent}`}
-                  className="fit-container pointer no-hover"
-                >
-                  <div
-                    className="fit-container pointer"
-                    // onClick={onClick}
-                    dir="auto"
+                {(event.kind !== 9802 || event.highlight?.comment) && (
+                  <Link
+                    href={`/note/${event.nEvent}`}
+                    className="fit-container pointer no-hover"
                   >
-                    {showTranslation ? translatedNote : event.note_tree}
-                  </div>
-                </Link>
+                    <div
+                      className="fit-container pointer"
+                      // onClick={onClick}
+                      dir="auto"
+                    >
+                      {showTranslation ? translatedNote : event.note_tree}
+                    </div>
+                  </Link>
+                )}
+                {event.kind === 9802 && event.highlight && (
+                  <HighlightCard highlight={event.highlight} />
+                )}
                 <div id={`slider-${event.id}`} />
                 {event.isCollapsedNote && (
                   <div

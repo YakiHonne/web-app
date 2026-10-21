@@ -68,6 +68,10 @@ if (typeof window !== "undefined") {
     publishedEvents: "",
     wotFilterList: "",
   });
+
+  db.version(5).stores({
+    layoutHints: "",
+  });
 }
 export { db, ndkdb };
 

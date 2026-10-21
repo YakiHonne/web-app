@@ -1214,7 +1214,7 @@ const extractNip19 = (note) => {
       if (decoded.id.includes("30031")) tags.push(["l", "smart-widget"]);
       processedNote.push(decoded.scheme);
     } else if (word.startsWith("#")) {
-      tags.push(["t", word.replaceAll("#", "")]);
+      tags.push(["t", word.replaceAll("#", "").toLowerCase()]);
       processedNote.push(word);
     } else {
       processedNote.push(word);

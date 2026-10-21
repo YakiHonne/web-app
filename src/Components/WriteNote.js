@@ -5,12 +5,14 @@ import MentionSuggestions from "@/Components/MentionSuggestions";
 import { useDispatch, useSelector } from "react-redux";
 import { setToast, setToPublish } from "@/Store/Slides/Publishers";
 import { extractNip19, filterImetas } from "@/Helpers/Helpers";
-import { getNoteDraft, updateNoteDraft } from "@/Helpers/ClientHelpers";
+import { getNoteDraft, getNoteTree, updateNoteDraft } from "@/Helpers/ClientHelpers";
 import { InitEvent } from "@/Helpers/Controlers";
 import { encodeJWT, encryptEventData, shortenKey } from "@/Helpers/Encryptions";
 import axios from "axios";
 import dynamic from "next/dynamic";
 import NotePreview from "@/Components/NotePreview";
+import HighlightCard from "@/Components/HighlightCard";
+import ScrollFade from "@/Components/ScrollFade";
 
 const QRCode = dynamic(() => import("react-qr-code"), { ssr: false });
 
@@ -49,6 +51,7 @@ export default function WriteNote({
   linkedEvent,
   isQuote = false,
   protectedRelay = false,
+  highlight,
 }) {
   const navigateTo = useRouter();
   const { query: { r } } = router();
@@ -101,13 +104,13 @@ export default function WriteNote({
   }, [note, selectedTab]);
 
   useEffect(() => {
-    if (userKeys && !content && !linkedEvent) {
+    if (userKeys && !content && !linkedEvent && !highlight) {
       setNote(getNoteDraft("root"));
     }
   }, [userKeys]);
 
   useEffect(() => {
-    if (!content && !linkedEvent) updateNoteDraft("root", note);
+    if (!content && !linkedEvent && !highlight) updateNoteDraft("root", note);
   }, [note]);
 
   const adjustHeight = () => {
@@ -115,9 +118,13 @@ export default function WriteNote({
       let cursorPosition = textareaRef.current.selectionStart;
       if (note.charAt(cursorPosition - 1) === "@")
         setShowMentionSuggestions(true);
+      const previousScrollTop = textareaRef.current.scrollTop;
+      const isCaretAtEnd = cursorPosition >= textareaRef.current.value.length;
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-      textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+      textareaRef.current.scrollTop = isCaretAtEnd
+        ? textareaRef.current.scrollHeight
+        : previousScrollTop;
       textareaRef.current.focus();
     }
   };
@@ -146,6 +153,10 @@ export default function WriteNote({
     try {
       if (isLoading) return;
       if (!userKeys) return;
+      if (highlight) {
+        publishHighlight();
+        return;
+      }
       if (!note && !linkedEvent) {
         dispatch(
           setToast({
@@ -210,11 +221,36 @@ export default function WriteNote({
     }
   };
 
-  const publishAsFree = async (content, tags, relay) => {
+  const publishHighlight = () => {
+    let tags = [
+      [
+        "client",
+        "Yakihonne",
+        "31990:20986fb83e775d96d188ca5c9df10ce6d613e0eb7e5768a0f0b12b37cdac21b3:1700732875747",
+      ],
+      ...highlight.tags,
+    ];
+    if (highlight.context && highlight.context !== highlight.text)
+      tags.push(["context", highlight.context]);
+    let comment = note?.trim();
+    if (comment) {
+      let processedComment = extractNip19(comment);
+      tags.push(["comment", processedComment.content]);
+      tags.push(...processedComment.tags);
+    }
+    publishAsFree(
+      highlight.text,
+      tags,
+      isProtected && singleRelayToPublish ? singleRelayToPublish : false,
+      9802,
+    );
+  };
+
+  const publishAsFree = async (content, tags, relay, kind = 1) => {
     setIsLoading(true);
 
     let eventInitEx = await InitEvent(
-      1,
+      kind,
       content,
       tags,
       selectedScheduleDate,
@@ -230,7 +266,7 @@ export default function WriteNote({
         event: eventInitEx,
         relays: relay ? [relay] : userRelays,
       });
-      updateNoteDraft("root", "");
+      if (!highlight) updateNoteDraft("root", "");
       let timer = setTimeout(() => {
         navigateTo.push("/dashboard?tabNumber=9");
         exit();
@@ -247,7 +283,7 @@ export default function WriteNote({
         showResult: { kind: "note", isPaid: false },
       }),
     );
-    updateNoteDraft("root", "");
+    if (!highlight) updateNoteDraft("root", "");
     exit();
     setIsLoading(false);
   };
@@ -474,7 +510,7 @@ export default function WriteNote({
     if (isSave) {
       exit();
     } else {
-      updateNoteDraft("root", "");
+      if (!highlight) updateNoteDraft("root", "");
       exit();
     }
   };
@@ -516,7 +552,7 @@ export default function WriteNote({
                   >
                     {t("AT7NTrQ")}
                   </button>
-                  {!linkedEvent && (
+                  {!linkedEvent && !highlight && (
                     <button
                       className="btn btn-gst"
                       onClick={() => handleDiscard(true)}
@@ -626,7 +662,7 @@ export default function WriteNote({
       >
         <div
           className="fit-container fx-scattered fx-start-h fx-start-v box-pad-h box-pad-v"
-          style={{ height: linkedEvent ? "55vh" : "45vh", paddingBottom: 0 }}
+          style={{ height: linkedEvent || highlight ? "55vh" : "45vh", paddingBottom: 0 }}
         >
           <div style={{ paddingTop: ".2rem" }}>
             <ProfilesPicker setSelectedProfile={setSelectedProfile} />
@@ -646,8 +682,8 @@ export default function WriteNote({
                 className="fit-container fx-scattered fx-col fx-start-h fx-start-v"
                 style={{
                   height:
-                    linkedEvent && selectedTab === 0
-                      ? "calc(100% - 115px)"
+                    (linkedEvent || highlight) && selectedTab === 0
+                      ? `calc(100% - ${highlight ? 175 : 115}px)`
                       : "100%",
                 }}
               >
@@ -717,7 +753,7 @@ export default function WriteNote({
                       }}
                       value={note}
                       className="ifs-full if if-no-border"
-                      placeholder={t("AGAXMQ3")}
+                      placeholder={highlight ? t("Am6cULd") : t("AGAXMQ3")}
                       ref={textareaRef}
                       onChange={handleChange}
                       onKeyDown={handleKeyDown}
@@ -732,18 +768,37 @@ export default function WriteNote({
                     )}
                   </div>
                 )}
-                {selectedTab === 1 && (
+                {selectedTab === 1 && !highlight && (
                   <NotePreview
                     content={note}
                     linkedEvent={linkedEvent}
                     viewPort={true}
                   />
                 )}
+                {selectedTab === 1 && highlight && (
+                  <div
+                    className="fit-container box-pad-h-m box-pad-v-m sc-s-18 bg-sp fx-centered fx-col fx-start-h fx-start-v"
+                    style={{ maxHeight: "100%", overflow: "scroll" }}
+                  >
+                    <h5 className="gray-c">{t("Ao1TlO5")}</h5>
+                    {note?.trim() && (
+                      <div className="fit-container" dir="auto">
+                        {getNoteTree(note, false, false, undefined, userKeys?.pub)}
+                      </div>
+                    )}
+                    <HighlightCard highlight={{ ...highlight.preview, comment: note?.trim() || "" }} />
+                  </div>
+                )}
               </div>
               {linkedEvent && selectedTab === 0 && (
                 <div className="fit-container">
                   <LinkRepEventPreview event={linkedEvent} />
                 </div>
+              )}
+              {highlight && selectedTab === 0 && (
+                <ScrollFade className="fit-container" maxHeight="170px">
+                  <HighlightCard highlight={highlight.preview} />
+                </ScrollFade>
               )}
             </div>
           </div>
@@ -811,15 +866,17 @@ export default function WriteNote({
               <div onClick={() => setShowDatePicker(true)}>
                 <Icon v={2} opacity=".5" name={iconsNames.calendar} size={24} />
               </div>
-              <div className="fx-centered sc-s-18 bg-sp box-pad-h-s ">
-                <p
-                  className="gray-c p-medium"
-                  style={{ minWidth: "max-content" }}
-                >
-                  {t("AfkY3WI")}
-                </p>
-                <Toggle status={isPaid} setStatus={setIsPaid} small={true} />
-              </div>
+              {!highlight && (
+                <div className="fx-centered sc-s-18 bg-sp box-pad-h-s ">
+                  <p
+                    className="gray-c p-medium"
+                    style={{ minWidth: "max-content" }}
+                  >
+                    {t("AfkY3WI")}
+                  </p>
+                  <Toggle status={isPaid} setStatus={setIsPaid} small={true} />
+                </div>
+              )}
             </div>
             <div className="fx-centered fx-wrap" style={{ gap: "8px" }}>
               <button
