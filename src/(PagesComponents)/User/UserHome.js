@@ -1,10 +1,33 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import ArrowUp from "@/Components/ArrowUp";
 import UserMetadata from "./UserMetadata";
 import UserFeed from "./UserFeed";
 import PagePlaceholder from "@/Components/PagePlaceholder";
+import useUserProfile from "@/Hooks/useUsersProfile";
+import { saveUsers } from "@/Helpers/DB";
 
-export default function UserHome({ user }) {
+export default function UserHome({ user: ssrUser }) {
+  const isMissingMetadata = !!ssrUser.pubkey && ssrUser.created_at === 0;
+  const { userProfile } = useUserProfile(
+    isMissingMetadata ? ssrUser.pubkey : "",
+    false,
+  );
+  const user = useMemo(() => {
+    if (!isMissingMetadata || userProfile.empty) return ssrUser;
+    if (userProfile.pubkey !== ssrUser.pubkey) return ssrUser;
+    return {
+      ...ssrUser,
+      ...userProfile,
+      followings: ssrUser.followings,
+      pinned: ssrUser.pinned,
+      nprofile: ssrUser.nprofile,
+    };
+  }, [ssrUser, userProfile, isMissingMetadata]);
+
+  useEffect(() => {
+    if (isMissingMetadata) saveUsers([ssrUser.pubkey]);
+  }, [ssrUser.pubkey, isMissingMetadata]);
+
   return (
     <>
       <div>
