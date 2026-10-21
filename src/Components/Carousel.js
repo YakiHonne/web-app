@@ -5,6 +5,23 @@ import VideoLoader from "@/Components/VideoLoader";
 import { createPortal } from "react-dom";
 
 // imgs can be an array of strings (image URLs) or {url, type} objects
+const isOnRenderedImage = (e) => {
+  const img = e.currentTarget;
+  if (!img.naturalWidth || !img.naturalHeight) return true;
+  const rect = img.getBoundingClientRect();
+  const scale = Math.min(rect.width / img.naturalWidth, rect.height / img.naturalHeight);
+  const width = img.naturalWidth * scale;
+  const height = img.naturalHeight * scale;
+  const left = rect.left + (rect.width - width) / 2;
+  const top = rect.top + (rect.height - height) / 2;
+  return (
+    e.clientX >= left &&
+    e.clientX <= left + width &&
+    e.clientY >= top &&
+    e.clientY <= top + height
+  );
+};
+
 export default function Carousel({ imgs, selectedImage, back }) {
   const [currentImg, setCurrentImg] = useState(selectedImage);
   const [mounted, setMounted] = useState(false);
@@ -99,7 +116,6 @@ export default function Carousel({ imgs, selectedImage, back }) {
                     key={index}
                     className="fit-container fx-centered fx-shrink"
                     style={{ height: "100vh" }}
-                    onClick={(e) => { e.stopPropagation(); }}
                   >
                     {item.type === "video" ? (
                       <div
@@ -113,6 +129,10 @@ export default function Carousel({ imgs, selectedImage, back }) {
                         src={item.url}
                         style={{ objectFit: "contain" }}
                         className="fit-container fit-height"
+                        onClick={(e) => {
+                          if (!isOnRenderedImage(e)) return;
+                          e.stopPropagation();
+                        }}
                       />
                     )}
                   </div>
@@ -155,6 +175,7 @@ export default function Carousel({ imgs, selectedImage, back }) {
               border: "none",
             }}
             className="fx-centered box-pad-h-m box-pad-v-s bg-dropdown"
+            onClick={(e) => e.stopPropagation()}
           >
             <p style={{ minWidth: "max-content" }}>
               {currentImg + 1} /{" "}

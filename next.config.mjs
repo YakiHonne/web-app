@@ -72,6 +72,15 @@ const nextConfig = {
           },
         ],
       },
+      {
+        source: "/nspam/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
     ];
   },
   // Turbopack (used by `next dev --turbo`) reads this alias.

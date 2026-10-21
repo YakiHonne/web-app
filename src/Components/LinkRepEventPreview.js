@@ -32,7 +32,7 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
     }
   };
 
-  if (event.kind === 1 || event.kind === 1111)
+  if (event.kind === 1 || event.kind === 1111 || event.kind === 9802)
     return (
       <div
         className="sc-s-18 bg-sp fit-container pointer box-pad-h-m box-pad-v-m"
@@ -96,7 +96,15 @@ export default function LinkRepEventPreview({ event, allowClick = true }) {
               <div className="fit-container" onClick={onClick} dir="auto">
                 <div
                   className="p-two-lines"
-                  style={{ wordBreak: "break-word" }}
+                  style={
+                    event.kind === 9802
+                      ? {
+                        wordBreak: "break-word",
+                        borderLeft: "3px solid var(--c1)",
+                        paddingLeft: "10px",
+                      }
+                      : { wordBreak: "break-word" }
+                  }
                 >
                   {event.content}
                 </div>

@@ -177,7 +177,7 @@ function Nip19Parsing({ addr, minimal = false }) {
             getEmptyuserMetadata(event.pubkey);
           setEvent({ ...content, kind: 0 });
         }
-        if (event.kind === 1 || event.kind === 1111) {
+        if (event.kind === 1 || event.kind === 1111 || event.kind === 9802) {
           let parsedEvent = getParsedNote(event, true);
 
           setEvent(parsedEvent);
@@ -221,7 +221,7 @@ function Nip19Parsing({ addr, minimal = false }) {
         }
         if (
           ![
-            0, 1, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21,
+            0, 1, 1111, 9802, 6969, 30033, 30031, 30004, 30005, 30023, 34235, 22, 21,
           ].includes(event.kind)
         ) {
           setIsUnsupported(true);
@@ -293,14 +293,14 @@ function Nip19Parsing({ addr, minimal = false }) {
       </>
     );
   if (
-    event?.kind === 1 || event?.kind === 1111 ||
+    event?.kind === 1 || event?.kind === 1111 || event?.kind === 9802 ||
     ((addr.startsWith("nevent") || addr.startsWith("note")) && addr.length > 20)
   )
     return (
       <>
         {!minimal && (
           <>
-            {(event?.kind === 1 || event?.kind === 1111) && (
+            {(event?.kind === 1 || event?.kind === 1111 || event?.kind === 9802) && (
               <div
                 className="fit-container sc-s "
                 style={{

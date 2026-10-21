@@ -16,6 +16,7 @@ import {
 } from "@/Helpers/ClientHelpers";
 import WOTExplanation from "./WOTExplanation";
 import Icon from "@/Components/Icon";
+import { isSpamFilterEnabled, toggleSpamFilter } from "@/Helpers/NSpam";
 
 export function ContentModerationManagement({
   selectedTab,
@@ -28,6 +29,7 @@ export function ContentModerationManagement({
   const [customServer, setCustomServer] = useState(false);
   const [legacyDM, setLegacyDM] = useState(localStorage?.getItem("legacy-dm"));
   const [wotConfig, setWotConfig] = useState(getWotConfig());
+  const [spamFilter, setSpamFilter] = useState(isSpamFilterEnabled());
   const [showMutedList, setShowMutedList] = useState(false);
   const [showMediaUploader, setShowMediaUploader] = useState(false);
   const [showWOTExplanation, setShowWOTExplanation] = useState(false);
@@ -102,6 +104,9 @@ export function ContentModerationManagement({
       localStorage?.setItem("legacy-dm", `${Date.now()}`);
       setLegacyDM(true);
     }
+  };
+  const handleSpamFilter = () => {
+    setSpamFilter(toggleSpamFilter());
   };
   const handleChangeWotConfig = (key, value) => {
     if (key === "score") {
@@ -378,6 +383,17 @@ export function ContentModerationManagement({
                 nip-04.
               </a>
             </p>
+
+            <div className="fx-scattered fit-container">
+              <div>
+                <p>{t("AOpoOpe")}</p>
+                <p className="p-medium gray-c">{t("AQw9JcI")}</p>
+              </div>
+              <div
+                className={`toggle ${spamFilter ? "toggle-c1" : "toggle-dim-gray"}`}
+                onClick={handleSpamFilter}
+              ></div>
+            </div>
           </div>
         )}
       </div>

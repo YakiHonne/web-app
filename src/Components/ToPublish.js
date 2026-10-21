@@ -96,7 +96,7 @@ export default function ToPublish({
       ];
       if (zapSplitEnabled) tags = [...tags, ...zapSplit];
       for (let cat of selectedCategories) {
-        tags.push(["t", cat]);
+        tags.push(["t", cat.toLowerCase()]);
       }
       if (contentSensitive) {
         tags.push(["L", "content-warning"]);

@@ -99,7 +99,7 @@ export default function ToPublishVideo({
       ];
       if (zapSplit) tags = [...tags, ...zapSplit];
       for (let cat of selectedCategories) {
-        tags.push(["t", cat]);
+        tags.push(["t", cat.toLowerCase()]);
       }
       tags.push(["thumb", thumbnailUrl]);
       tags.push(["image", thumbnailUrl]);

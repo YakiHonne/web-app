@@ -136,6 +136,7 @@ export default function ContentSource({
               value: "recent_with_replies",
               enabled: true,
             },
+            { display_name: t("AWj53bb"), value: "highlights", enabled: true },
             { display_name: t("AMxeg1d"), value: "trending", enabled: true },
             { display_name: t("A0gGIxM"), value: "global", enabled: true },
             { display_name: t("AAg9D6c"), value: "paid", enabled: true },
@@ -540,7 +541,7 @@ function SourceFilterPortalPanel({ barRef, optionsRef, dismissing, onClose, maxH
 
 const getSourcesArray = (sources, cfBackup, t, type) => {
   let newSources = [];
-  if (type === 2) newSources = ["trending"];
+  if (type === 2) newSources = ["trending", "highlights"];
   let sourcesArray = [];
   let community_feed_keys = {
     top: t("AZKPdUC"),
@@ -551,6 +552,7 @@ const getSourcesArray = (sources, cfBackup, t, type) => {
     recent_with_replies: t("AgF8nZU"),
     paid: t("AAg9D6c"),
     widgets: t("AM4vyRX"),
+    highlights: t("AWj53bb"),
   };
   let sourcesList = sources["community"]?.list.map((_) => {
     let value = _[0].replaceAll("-", "_");

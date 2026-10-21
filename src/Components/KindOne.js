@@ -18,6 +18,7 @@ import {
   isImageUrl,
   isVid,
   compactContent,
+  HIGHLIGHT_KIND,
 } from "@/Helpers/ClientHelpers";
 import { useTranslation } from "react-i18next";
 import Spinner from "@/Components/Spinner";
@@ -34,6 +35,7 @@ import UnsupportedKindPreview from "./UnsupportedKindPreview";
 import Link from "next/link";
 import LinkRepEventPreview from "./LinkRepEventPreview";
 import Icon from "@/Components/Icon";
+import HighlightCard, { HighlightTag } from "@/Components/HighlightCard";
 import Badge from "@/Helpers/Badge";
 import {
   getEventFromCache,
@@ -195,7 +197,9 @@ function KindOne({
         });
         return;
       }
-      let res = await translate(event.content);
+      let res = await translate(
+        event.kind === HIGHLIGHT_KIND ? event.highlight?.comment : event.content,
+      );
       if (res.status !== 200) {
         handleTranslateError(res);
       }
@@ -402,6 +406,7 @@ function KindOne({
                     </div>
                   </div>
                   <div className="fx-centered">
+                    {event.kind === HIGHLIGHT_KIND && <HighlightTag />}
                     {event.isPaidNote && (
                       <div
                         className="sticker sticker-paid sticker-click pointer"
@@ -416,7 +421,7 @@ function KindOne({
                     {showPaidNoteInfo && (
                       <PaidNoteInfoOverlay onClose={() => setShowPaidNoteInfo(false)} />
                     )}
-                    {!isNoteTranslating && <Icon name="translate" onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
+                    {!isNoteTranslating && (event.kind !== HIGHLIGHT_KIND || event.highlight?.comment) && <Icon name="translate" onClick={translateNote} opacity={!isNoteTranslating && !showTranslation ? ".5" : "1"} size={20} />}
                     {isNoteTranslating && <Spinner />}
                     {reactions && (
                       <EventOptions
@@ -430,6 +435,22 @@ function KindOne({
                 {event.isComment && !isThread && (
                   <RelatedEvent event={event.isComment} isThread={isThread} />
                 )}
+                {event.kind === HIGHLIGHT_KIND && event.highlight && (
+                  <>
+                    {event.highlight.comment && (
+                      <Link
+                        href={`/note/${event.nEvent}`}
+                        className="fit-container pointer no-hover"
+                      >
+                        <div className="fit-container" dir="auto">
+                          {showTranslation ? translatedNote : event.note_tree}
+                        </div>
+                      </Link>
+                    )}
+                    <HighlightCard highlight={event.highlight} />
+                  </>
+                )}
+                {event.kind !== HIGHLIGHT_KIND && (
                 <Link
                   href={`/note/${event.nEvent}`}
                   className="fit-container pointer no-hover"
@@ -454,6 +475,7 @@ function KindOne({
                     </div>
                   </div>
                 </Link>
+                )}
                 {!minimal && <div id={`slider-${event.id}`} />}
               </div>
             </div>

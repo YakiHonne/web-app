@@ -21,6 +21,14 @@ import {
 } from "@/Helpers/Threads";
 import { relaysOnPlatform, SSGRelays } from "@/Content/Relays";
 import Icon from "@/Components/Icon";
+import {
+  getSpamAuthors,
+  getSpamMarkedList,
+  getSpamSafelist,
+  initNSpam,
+  isSpamFilterEnabled,
+  NSPAM_UPDATED,
+} from "@/Helpers/NSpam";
 
 const COMMENT_KINDS = [1, 1111];
 const MAX_ROUNDS = 4;
@@ -105,8 +113,12 @@ export default function CommentsSection({
   const userKeys = useSelector((state) => state.userKeys);
   const userAllRelays = useSelector((state) => state.userAllRelays);
   const { userMutedList } = useSelector((state) => state.userMutedList);
+  const userFollowings = useSelector((state) => state.userFollowings);
   const { t } = useTranslation();
   const [comments, setComments] = useState([]);
+  const [spamAuthors, setSpamAuthors] = useState([]);
+  const [spamSafelist, setSpamSafelist] = useState([]);
+  const [spamTimestamp, setSpamTimestamp] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showWriteNote, setShowWriteNote] = useState(leaveComment);
   const [netComments, setNetComments] = useState([]);
@@ -290,6 +302,54 @@ export default function CommentsSection({
     setShowWriteNote(leaveComment);
   }, [leaveComment]);
 
+  useEffect(() => {
+    const handleSpamUpdate = () => setSpamTimestamp(Date.now());
+    window.addEventListener(NSPAM_UPDATED, handleSpamUpdate);
+    return () => {
+      window.removeEventListener(NSPAM_UPDATED, handleSpamUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const detectSpam = async () => {
+      if (!isSpamFilterEnabled()) {
+        setSpamAuthors((prev) => (prev.length === 0 ? prev : []));
+        setSpamSafelist((prev) => (prev.length === 0 ? prev : []));
+        return;
+      }
+      initNSpam();
+      const safelist = getSpamSafelist();
+      const marked = getSpamMarkedList();
+      setSpamSafelist(safelist);
+      const excluded = new Set([
+        ...(Array.isArray(userFollowings) ? userFollowings : []),
+        ...safelist,
+        ...marked,
+        userKeys?.pub,
+        eventPubkey,
+      ]);
+      const pubkeys = [
+        ...new Set(comments.map((comment) => comment.pubkey)),
+      ].filter((pubkey) => !excluded.has(pubkey));
+      const detected = [
+        ...marked,
+        ...(await getSpamAuthors(pubkeys, comments)),
+      ];
+      if (cancelled) return;
+      setSpamAuthors((prev) =>
+        prev.length === detected.length &&
+        prev.every((pubkey) => detected.includes(pubkey))
+          ? prev
+          : detected,
+      );
+    };
+    detectSpam();
+    return () => {
+      cancelled = true;
+    };
+  }, [comments, userFollowings, userKeys, eventPubkey, spamTimestamp]);
+
   return (
     <>
       {isLogin && <LoginSignup exit={() => setIsLogin(false)} />}
@@ -365,19 +425,14 @@ export default function CommentsSection({
               <h4>{t("AENEcn9")}</h4>
             </div>
           )}
-          {netComments.map((comment) => {
-            return (
-              <Comment
-                comment={comment}
-                key={comment.id}
-                noteID={id}
-                eventPubkey={author.pubkey}
-                kind={"article"}
-                tagKind={tagKind}
-                rootKind={rootKind}
-              />
-            );
-          })}
+          <CommentsList
+            comments={netComments}
+            spamAuthors={spamAuthors}
+            spamSafelist={spamSafelist}
+            eventPubkey={author.pubkey}
+            tagKind={tagKind}
+            rootKind={rootKind}
+          />
           {(netComments.length == 0 || isCommentsMuted) && !isLoading && (
             <div
               className="fit-container fx-centered fx-col"
@@ -393,6 +448,109 @@ export default function CommentsSection({
   );
 }
 
+const CommentsList = ({
+  comments,
+  spamAuthors = [],
+  spamSafelist = [],
+  eventPubkey,
+  isReply = false,
+  index = 0,
+  tagKind = "e",
+  rootKind = null,
+}) => {
+  const { t } = useTranslation();
+  const { userMutedList } = useSelector((state) => state.userMutedList);
+  const [showSpam, setShowSpam] = useState(false);
+  const regularComments = useMemo(() => {
+    return comments.filter((comment) => !spamAuthors.includes(comment.pubkey));
+  }, [comments, spamAuthors]);
+  const spamComments = useMemo(() => {
+    return comments.filter(
+      (comment) =>
+        spamAuthors.includes(comment.pubkey) &&
+        !userMutedList?.includes(comment.pubkey),
+    );
+  }, [comments, spamAuthors, userMutedList]);
+  const hasSpam = spamComments.length > 0;
+
+  return (
+    <>
+      {regularComments.map((comment, index_) => {
+        return (
+          <Comment
+            index={index}
+            comment={comment}
+            key={comment.id}
+            eventPubkey={eventPubkey}
+            isReply={isReply}
+            isReplyBorder={
+              isReply && (index_ < regularComments.length - 1 || hasSpam)
+            }
+            tagKind={tagKind}
+            rootKind={rootKind}
+            spamAuthors={spamAuthors}
+            spamSafelist={spamSafelist}
+            isSafelisted={spamSafelist.includes(comment.pubkey)}
+          />
+        );
+      })}
+      {hasSpam && (
+        <div
+          className={`fit-container ${isReply && showSpam ? "reply-side-border" : ""}`}
+        >
+          <div
+            className="fx-centered fx-start-h box-pad-h pointer"
+            style={{
+              position: "relative",
+              paddingTop: isReply ? "2rem" : "1rem",
+              paddingBottom: isReply ? 0 : "1rem",
+            }}
+            onClick={() => setShowSpam(!showSpam)}
+          >
+            {isReply && (
+              <div
+                className="reply-tail"
+                style={{ left: showSpam ? "-.0625rem" : 0 }}
+              ></div>
+            )}
+            <div
+              className="fx-centered box-pad-h-s box-pad-v-s sc-s-18 option"
+              style={{ padding: ".25rem .5rem" }}
+            >
+              <Icon
+                name="arrow"
+                transform={showSpam ? "rotate(180deg)" : "unset"}
+              />
+              <p className="gray-c p-medium">
+                {t("AIj8MF6", { count: spamComments.length })}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      {hasSpam &&
+        showSpam &&
+        spamComments.map((comment, index_) => {
+          return (
+            <Comment
+              index={index}
+              comment={comment}
+              key={comment.id}
+              eventPubkey={eventPubkey}
+              isReply={isReply}
+              isReplyBorder={isReply && index_ < spamComments.length - 1}
+              tagKind={tagKind}
+              rootKind={rootKind}
+              spamAuthors={spamAuthors}
+              spamSafelist={spamSafelist}
+              isSpam={true}
+            />
+          );
+        })}
+    </>
+  );
+};
+
 const Comment = ({
   comment,
   eventPubkey,
@@ -401,6 +559,10 @@ const Comment = ({
   index = 0,
   tagKind = "e",
   rootKind = null,
+  spamAuthors = [],
+  spamSafelist = [],
+  isSpam = false,
+  isSafelisted = false,
 }) => {
   const { t } = useTranslation();
   const { userMutedList } = useSelector((state) => state.userMutedList);
@@ -422,6 +584,8 @@ const Comment = ({
         isReplyBorder={isReplyBorder}
         tagKind={tagKind}
         rootKind={rootKind}
+        isSpam={isSpam}
+        isSafelisted={isSafelisted}
       />
       {comment.replies.length > 0 && index < 3 && (
         <div className="fit-container fx-centered fx-end-h">
@@ -432,20 +596,16 @@ const Comment = ({
               gap: 0,
             }}
           >
-            {comment.replies.map((comment_, index_) => {
-              return (
-                <Comment
-                  index={index + 1}
-                  comment={comment_}
-                  key={comment_.id}
-                  eventPubkey={eventPubkey}
-                  isReply={true}
-                  isReplyBorder={index_ < comment.replies.length - 1}
-                  tagKind={tagKind}
-                  rootKind={rootKind}
-                />
-              );
-            })}
+            <CommentsList
+              comments={comment.replies}
+              spamAuthors={spamAuthors}
+              spamSafelist={spamSafelist}
+              eventPubkey={eventPubkey}
+              isReply={true}
+              index={index + 1}
+              tagKind={tagKind}
+              rootKind={rootKind}
+            />
           </div>
         </div>
       )}

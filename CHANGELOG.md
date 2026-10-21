@@ -1,3 +1,16 @@
+# (v6.0.5) 21/10/2026
+
+* Added highlights, rendered everywhere with reactions, reposts, comments and zaps.
+* Highlight any text in a note or an article and share it in a note.
+* Highlights are now in the home feed, relay feeds and profiles, with a dedicated tab in the content source.
+* Added reposting for articles and highlights.
+* Added a potential spam filter in comments, toggle it in the content moderation settings.
+* Hashtags are now always published in lowercase.
+* Grouped images placeholder now has a loading highlight.
+* Fixed a new line being added before the text when hitting enter in the note editor.
+* Fixed text rendering before an image link with no new line between them.
+* General bug fix and improvements.
+
 # (v6.0.4) 28/09/2026
 
 * Bringing back the classic sidebar, you can now switch between two kind of navigation layouts in the settings (topbar or sidebar).

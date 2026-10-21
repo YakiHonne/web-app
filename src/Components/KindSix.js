@@ -3,11 +3,18 @@ import { getEmptyuserMetadata } from "@/Helpers/Encryptions";
 import UserProfilePic from "@/Components/UserProfilePic";
 import KindOne from "@/Components/KindOne";
 import { useSelector } from "react-redux";
-import { getUser } from "@/Helpers/Controlers";
 import ShowUsersList from "@/Components/ShowUsersList";
 import { useTranslation } from "react-i18next";
 import useIsMute from "@/Hooks/useIsMute";
 import Icon from "@/Components/Icon";
+import RepEventPreviewCard from "@/Components/RepEventPreviewCard";
+import LinkRepEventPreview from "@/Components/LinkRepEventPreview";
+import { getSubData, getUser } from "@/Helpers/Controlers";
+import { getParsedRepostedEvent } from "@/Helpers/ClientHelpers";
+import { getEventFromCache, setEventFromCache } from "@/Helpers/utils/eventsCache";
+
+const NOTE_KINDS = [1, 1111, 9802];
+const REP_EVENT_KINDS = [30023, 30004, 30005, 34235];
 
 export default function KindSix({ event }) {
   const { t } = useTranslation();
@@ -15,15 +22,47 @@ export default function KindSix({ event }) {
   const [user, setUser] = useState(getEmptyuserMetadata(event.pubkey));
   const [reposts, setResposts] = useState([]);
   const [showReposts, setShowReposts] = useState(false);
-  const { isMuted: isMutedId } = useIsMute(event.relatedEvent?.id, "e");
+  const [relatedEvent, setRelatedEvent] = useState(() => {
+    if (event.relatedEvent) return event.relatedEvent;
+    const cached = event.repostedATag ? getEventFromCache(event.repostedATag) : null;
+    return cached ? getParsedRepostedEvent(cached) : false;
+  });
+  const { isMuted: isMutedId } = useIsMute(relatedEvent?.id, "e");
   const { isMuted: isMutedComment } = useIsMute(
-    event.relatedEvent?.isComment,
+    relatedEvent?.isComment,
     "e"
   );
   const { isMuted: isMutedRoot } = useIsMute(
-    event.relatedEvent.rootData ? event.relatedEvent.rootData[1] : false,
+    relatedEvent?.rootData ? relatedEvent.rootData[1] : false,
     "e"
   );
+
+  useEffect(() => {
+    if (relatedEvent || !event.repostedATag) return;
+    const [kind, pubkey, ...identifier] = event.repostedATag.split(":");
+    if (!kind || !pubkey) return;
+    let cancelled = false;
+    const fetchRepostedEvent = async () => {
+      try {
+        const res = await getSubData(
+          [{ kinds: [parseInt(kind)], authors: [pubkey], "#d": [identifier.join(":")] }],
+          2500
+        );
+        const found = res.data[0];
+        if (!found || cancelled) return;
+        const raw = (found.rawEvent && found.rawEvent()) || found;
+        setEventFromCache(event.repostedATag, raw);
+        const parsed = getParsedRepostedEvent(raw);
+        if (parsed) setRelatedEvent(parsed);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchRepostedEvent();
+    return () => {
+      cancelled = true;
+    };
+  }, [event.repostedATag]);
   useEffect(() => {
     let auth = getUser(event.pubkey);
     if (auth) {
@@ -31,7 +70,7 @@ export default function KindSix({ event }) {
     }
   }, [nostrAuthors]);
 
-  if (isMutedId || isMutedComment || isMutedRoot) return null;
+  if (isMutedId || isMutedComment || isMutedRoot || !relatedEvent) return null;
 
   return (
     <>
@@ -86,11 +125,22 @@ export default function KindSix({ event }) {
             )}
           </div>
         </div>
-        <KindOne
-          event={event.relatedEvent}
-          border={true}
-          getReposts={setResposts}
-        />
+        {NOTE_KINDS.includes(relatedEvent.kind) && (
+          <KindOne
+            event={relatedEvent}
+            border={true}
+            getReposts={setResposts}
+          />
+        )}
+        {REP_EVENT_KINDS.includes(relatedEvent.kind) && (
+          <RepEventPreviewCard item={relatedEvent} />
+        )}
+        {!NOTE_KINDS.includes(relatedEvent.kind) &&
+          !REP_EVENT_KINDS.includes(relatedEvent.kind) && (
+            <div className="fit-container box-pad-v-s">
+              <LinkRepEventPreview event={relatedEvent} />
+            </div>
+          )}
       </div>
     </>
   );

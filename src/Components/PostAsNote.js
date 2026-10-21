@@ -7,6 +7,7 @@ export default function PostAsNote({
   content = "",
   linkedEvent,
   protectedRelay,
+  highlight,
 }) {
   return (
     <Overlay exit={exit} width={650}>
@@ -20,6 +21,7 @@ export default function PostAsNote({
           content={content}
           linkedEvent={linkedEvent}
           protectedRelay={protectedRelay}
+          highlight={highlight}
         />
       </div>
     </Overlay>

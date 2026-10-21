@@ -51,10 +51,12 @@ const notesReducer = (notes, action) => {
             tempArr.findIndex(
               (_) =>
                 _.id === note.id ||
-                (note.kind === 6 &&
+                ([6, 16].includes(note.kind) &&
+                  note.relatedEvent &&
                   (note.relatedEvent.id === _.id ||
                     note.relatedEvent.id === _.relatedEvent?.id)) ||
-                (_.kind === 6 &&
+                ([6, 16].includes(_.kind) &&
+                  _.relatedEvent &&
                   (_.relatedEvent.id === note.id ||
                     _.relatedEvent.id === note.relatedEvent?.id)),
             ) === index
@@ -272,7 +274,7 @@ const HomeFeed = ({ relay }) => {
       let eventsPubkeys = [];
       let events = [];
       let fallBackEvents = [];
-      let kinds = [1, 6, 30023, 34235, 21, 22];
+      let kinds = [1, 6, 16, 9802, 30023, 34235, 21, 22];
 
       let towDaysPeriod = (2 * 24 * 60 * 60 * 1000) / 1000;
       let twoDaysPrior = Math.floor(
@@ -283,7 +285,7 @@ const HomeFeed = ({ relay }) => {
         : notesLastEventTime;
       let since = twoDaysPrior;
 
-      if (contentFrom === 0) kinds = [1, 6, 1111];
+      if (contentFrom === 0) kinds = [1, 6, 16, 1111, 9802];
       if (contentFrom === 1) kinds = [30023];
       if (contentFrom === 2) kinds = [34235, 34236, 20, 21, 22];
       if (contentFrom === 3) kinds = [30004, 30005];
@@ -301,11 +303,11 @@ const HomeFeed = ({ relay }) => {
         .splice(0, 50)
         .map((event) => {
           eventsPubkeys.push(event.pubkey);
-          if ([1, 6, 1111].includes(event.kind)) {
+          if ([1, 6, 16, 1111, 9802].includes(event.kind)) {
             let event_ = getParsedNote(event, true);
             if (event_) fallBackEvents.push(event_);
             if (event_) {
-              if (event.kind === 6) {
+              if (event_.relatedEvent?.pubkey) {
                 eventsPubkeys.push(event_.relatedEvent.pubkey);
               }
               return event_;
@@ -377,9 +379,9 @@ const HomeFeed = ({ relay }) => {
             let item = notes[index];
             if (![...userMutedList, ...bannedList].includes(item.pubkey)) {
               if (
-                item.kind === 6 &&
+                [6, 16].includes(item.kind) &&
                 ![...userMutedList, ...bannedList].includes(
-                  item.relatedEvent.pubkey,
+                  item.relatedEvent?.pubkey,
                 )
               )
                 return (
@@ -387,7 +389,7 @@ const HomeFeed = ({ relay }) => {
                     <KindSix event={item} />
                   </Fragment>
                 );
-              if ([1, 1111].includes(item.kind))
+              if ([1, 1111, 9802].includes(item.kind))
                 return (
                   <Fragment key={item.id}>
                     <KindOne event={item} border={true} />
