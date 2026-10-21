@@ -67,7 +67,7 @@ export async function getStaticProps({ locale, params }) {
   }
   if (bannedListSet.has(pubkey)) return { notFound: true, revalidate: 3600 };
   const [resMetaData, resFollowings, resPinned] = await Promise.all([
-    getDataForSSG([{ authors: [pubkey], kinds: [0] }], 500, 3),
+    getDataForSSG([{ authors: [pubkey], kinds: [0] }], 1000, 3),
     getDataForSSG([{ authors: [pubkey], kinds: [3] }], 1000, 3),
     getDataForSSG([{ authors: [pubkey], kinds: [10001] }], 1000, 3),
   ]);
@@ -102,7 +102,7 @@ export async function getStaticProps({ locale, params }) {
         nprofile: nip19.nprofileEncode({ pubkey: pubkey }),
       },
     },
-    revalidate: metadata_ ? 86400 : 3600,
+    revalidate: metadata_ ? 86400 : 60,
   };
 }
 
