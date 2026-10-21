@@ -169,18 +169,19 @@ export default function HighlightSelectionPopup({ containerRef, sourceEvent }) {
         createPortal(
           <div
             ref={popupRef}
-            className="bg-dropdown box-pad-h-s box-pad-v-s fx-centered dynamic-island-dropdown"
             style={{
               position: "absolute",
               top: selection.top,
               left: selection.left,
               transform: "translate(-50%, calc(-100% - 10px))",
               zIndex: 1100,
-              borderRadius: "16px",
-              gap: "4px",
             }}
             onMouseDown={(e) => e.preventDefault()}
           >
+            <div
+              className="bg-dropdown box-pad-h-s box-pad-v-s fx-centered dynamic-island-dropdown origin-bottom"
+              style={{ borderRadius: "16px", gap: "4px" }}
+            >
             <div
               className="fx-centered pointer option-no-scale box-pad-h-s box-pad-v-s repost-dropdown-item"
               style={{ columnGap: "8px" }}
@@ -196,6 +197,7 @@ export default function HighlightSelectionPopup({ containerRef, sourceEvent }) {
             >
               <Icon name="copy" size={18} />
               <p>{t("Anwd2wT")}</p>
+            </div>
             </div>
           </div>,
           document.body,
