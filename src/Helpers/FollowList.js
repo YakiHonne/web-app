@@ -1,5 +1,6 @@
 import { ndkInstance } from "./NDKInstance";
 import { InitEvent } from "./Controlers";
+import { assignClientTag } from "./Helpers";
 import { getFollowings, saveFollowings } from "./DB";
 import { relaysOnPlatform } from "@/Content/Relays";
 import { store } from "@/Store/Store";
@@ -95,7 +96,12 @@ export const updateFollowList = async ({ follow = [], unfollow = [] }) => {
     (base?.created_at || 0) + 1,
     (cached?.last_timestamp || 0) + 1,
   );
-  const eventInitEx = await InitEvent(3, base?.content || "", nextTags, createdAt);
+  const eventInitEx = await InitEvent(
+    3,
+    base?.content || "",
+    assignClientTag(nextTags.filter((tag) => tag[0] !== "client")),
+    createdAt,
+  );
   if (!eventInitEx) return { error: "signing" };
   lastPublished = eventInitEx;
   saveFollowings(eventInitEx, userKeys.pub);

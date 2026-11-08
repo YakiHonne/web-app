@@ -10,7 +10,11 @@ import LNBCInvoice from "@/Components/LNBCInvoice";
 import Nip19Parsing from "@/Components/Nip19Parsing";
 import VideoLoader from "@/Components/VideoLoader";
 import BlossomMedia from "@/Components/BlossomMedia";
-import { isBlossomURI, parseBlossomURI } from "./BlossomURI";
+import {
+  isBlossomURI,
+  parseBlossomURI,
+  replaceBlossomURI,
+} from "./BlossomURI";
 import Link from "next/link";
 import { Fragment, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -393,7 +397,8 @@ export function getNoteTree(
     .trim()
     .split(/(\n)/)
     .flatMap((segment) => (segment === "\n" ? "\n" : segment.split(/\s+/)))
-    .filter(Boolean);
+    .filter(Boolean)
+    .map(replaceBlossomURI);
 
   let totalMedia = 0;
   for (let i = 0; i < (isCollapsedNote ? wordsCount : tree.length); i++) {

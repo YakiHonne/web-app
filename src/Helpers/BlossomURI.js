@@ -12,6 +12,7 @@ const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "avif", "svg", "b
 const VIDEO_EXTENSIONS = ["mp4", "webm", "mov", "m4v", "mkv", "ogv"];
 const AUDIO_EXTENSIONS = ["mp3", "ogg", "wav", "m4a", "aac", "flac", "opus"];
 const resolved = new Map();
+const resolvedUrls = new Map();
 
 export const isBlossomURI = (value) =>
   typeof value === "string" && value.toLowerCase().startsWith("blossom:");
@@ -101,5 +102,22 @@ export const resolveBlossomURI = (parsed) => {
     return findFirstAvailable(FALLBACK_SERVERS, parsed, tried);
   })();
   resolved.set(parsed.uri, promise);
+  promise.then((url) => {
+    if (url) resolvedUrls.set(parsed.uri, url);
+  });
   return promise;
+};
+
+export const getBlossomUrl = (parsed) => {
+  if (resolvedUrls.has(parsed.uri)) return resolvedUrls.get(parsed.uri);
+  if (parsed.servers.length === 0) return null;
+  resolveBlossomURI(parsed);
+  return getBlobUrl(parsed.servers[0], parsed);
+};
+
+export const replaceBlossomURI = (token) => {
+  if (!isBlossomURI(token)) return token;
+  const parsed = parseBlossomURI(token.replace(/[,|']+$/, ""));
+  if (!parsed) return token;
+  return getBlossomUrl(parsed) || token;
 };
