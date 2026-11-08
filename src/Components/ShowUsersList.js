@@ -6,10 +6,9 @@ import UserProfilePic from "@/Components/UserProfilePic";
 import ShortenKey from "@/Components/ShortenKey";
 import NumberShrink from "@/Components/NumberShrink";
 import EmojiImg from "@/Components/EmojiImg";
-import { useDispatch, useSelector } from "react-redux";
-import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
+import { publishFollowChanges } from "@/Helpers/FollowList";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
 
@@ -26,10 +25,6 @@ export default function ShowUsersList({
   extras,
   extrasType = "zap",
 }) {
-  const dispatch = useDispatch();
-  const userFollowings = useSelector((state) => state.userFollowings);
-  const userRelays = useSelector((state) => state.userRelays);
-  const userKeys = useSelector((state) => state.userKeys);
   const { t } = useTranslation();
 
   const [people, setPeople] = useState([]);
@@ -111,25 +106,13 @@ export default function ShowUsersList({
       const toUnfollowList = bulkList
         .filter((item) => !item.to_follow)
         .map((item) => item.pubkey);
-
-      let tempTags = Array.from(
-        userFollowings
-          ?.filter((item) => !toUnfollowList.includes(item))
-          .map((_) => ["p", _]) || [],
-      );
-      for (let item of bulkList) {
-        if (item.to_follow) tempTags.push(["p", item.pubkey]);
-      }
-
-      dispatch(
-        setToPublish({
-          userKeys: userKeys,
-          kind: 3,
-          content: "",
-          tags: tempTags,
-          allRelays: userRelays,
-        }),
-      );
+      const toFollowList = bulkList
+        .filter((item) => item.to_follow)
+        .map((item) => item.pubkey);
+      await publishFollowChanges({
+        follow: toFollowList,
+        unfollow: toUnfollowList,
+      });
       exit();
     } catch (err) {
       console.log(err);

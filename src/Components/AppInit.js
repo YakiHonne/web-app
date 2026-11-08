@@ -861,7 +861,11 @@ export default function AppInit() {
       );
       subscription.on("event", async (event) => {
         if (event.kind === 3) {
-          tempUserFollowings = { ...event };
+          if (
+            !tempUserFollowings ||
+            event.created_at > tempUserFollowings.created_at
+          )
+            tempUserFollowings = { ...event };
           if (eose) saveFollowings(event, userKeys.pub);
         }
         if (event.kind === 10063) {

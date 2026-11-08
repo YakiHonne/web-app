@@ -1,3 +1,8 @@
+# (v6.0.6) 08/11/2026
+
+* Fixed an issue where following or unfollowing could overwrite your follow list with an older or empty copy.
+* Added support for blossom image links (BUD-10), shown like any other image in notes and galleries.
+
 # (v6.0.5) 21/10/2026
 
 * Added highlights, rendered everywhere with reactions, reposts, comments and zaps.

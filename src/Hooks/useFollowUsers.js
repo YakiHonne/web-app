@@ -1,14 +1,12 @@
-import { useDispatch, useSelector } from "react-redux";
-import { InitEvent } from "@/Helpers/Controlers";
-import { setToPublish } from "@/Store/Slides/Publishers";
+import { useSelector } from "react-redux";
 import { useMemo, useState } from "react";
+import { publishFollowChanges } from "@/Helpers/FollowList";
 
 const checkFollowing = (list, toFollowKey) => {
   if (!list) return false;
   return list.find((people) => people === toFollowKey) ? true : false;
 };
 export default function useFollowUsers({ pubkey, pubkeys }) {
-  const dispatch = useDispatch();
   const userFollowings = useSelector((state) => state.userFollowings);
   const isFollowing = useMemo(() => {
     if (!pubkey) return false;
@@ -23,27 +21,10 @@ export default function useFollowUsers({ pubkey, pubkeys }) {
   }, [userFollowings, pubkey]);
   const followUnfollow = async () => {
     try {
-      if (isFollowLoading) setIsFollowLoading(true);
-      let tempTags = Array.from(userFollowings || []);
-      if (isFollowing) {
-        let index = tempTags.findIndex((item) => item === pubkey);
-        tempTags.splice(index, 1);
-      } else {
-        tempTags.push(pubkey);
-      }
-      const eventInitEx = await InitEvent(
-        3,
-        "",
-        tempTags.map((p) => ["p", p]),
-      );
-      if (!eventInitEx) {
-        setIsFollowLoading(false);
-        return;
-      }
-      dispatch(
-        setToPublish({
-          eventInitEx,
-        }),
+      if (isFollowLoading) return;
+      setIsFollowLoading(true);
+      await publishFollowChanges(
+        isFollowing ? { unfollow: [pubkey] } : { follow: [pubkey] },
       );
       setIsFollowLoading(false);
     } catch (error) {
@@ -55,24 +36,8 @@ export default function useFollowUsers({ pubkey, pubkeys }) {
     try {
       if (isFollowLoading) return;
       setIsFollowLoading(true);
-      let tempTags = Array.from(userFollowings || []);
-      if (!isAllFollowing) {
-        tempTags.push(...pubkeys);
-      } else tempTags = tempTags.filter((_) => !pubkeys.includes(_));
-      tempTags = [...new Set(tempTags)];
-      const eventInitEx = await InitEvent(
-        3,
-        "",
-        tempTags.map((p) => ["p", p]),
-      );
-      if (!eventInitEx) {
-        setIsFollowLoading(false);
-        return;
-      }
-      dispatch(
-        setToPublish({
-          eventInitEx,
-        }),
+      await publishFollowChanges(
+        isAllFollowing ? { unfollow: pubkeys } : { follow: pubkeys },
       );
       setIsFollowLoading(false);
     } catch (error) {
