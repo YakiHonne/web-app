@@ -2122,7 +2122,6 @@
   "AjjPaxB": "A videó tömörítve",
   "Am6cULd": "Oszd meg a gondolataidat erről a kiemelésről (opcionális)",
   "A0oJnJc": "Kiemelve innen:",
-  "ADjYzrA": "",
   "A2pWJYL": "",
   "AO9VVot": "",
   "A2U3Ag8": "",
@@ -2314,5 +2313,6 @@
   "AXrN0BV": "Nem spam",
   "AOpoOpe": "Lehetséges spam szűrő",
   "AQw9JcI": "A spamnek tűnő szerzők válaszainak összecsukása. Bármikor kibonthatod őket.",
-  "AdGHX0i": "Megjelölés lehetséges spamként"
+  "AdGHX0i": "Megjelölés lehetséges spamként",
+  "ADjYzrA": "Nem sikerült betölteni a követési listádat, próbáld újra."
 }

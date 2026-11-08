@@ -567,6 +567,12 @@ export const saveFollowings = async (event, pubkey, lastTimestamp) => {
     try {
       await Dexie.ignoreTransaction(async () => {
         await db.transaction("rw", db.followings, async () => {
+          let stored = await db.followings.get(pubkey);
+          if (
+            stored?.last_timestamp &&
+            (!event || stored.last_timestamp >= event.created_at)
+          )
+            return;
           await db.followings.put(eventToStore, pubkey);
         });
       });
