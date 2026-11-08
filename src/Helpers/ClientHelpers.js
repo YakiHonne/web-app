@@ -9,6 +9,8 @@ import LinkPreview from "@/Components/LinkPreview";
 import LNBCInvoice from "@/Components/LNBCInvoice";
 import Nip19Parsing from "@/Components/Nip19Parsing";
 import VideoLoader from "@/Components/VideoLoader";
+import BlossomMedia from "@/Components/BlossomMedia";
+import { isBlossomURI, parseBlossomURI } from "./BlossomURI";
 import Link from "next/link";
 import { Fragment, createContext, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -525,6 +527,17 @@ export function getNoteTree(
             </a>{" "}
           </Fragment>,
         );
+    } else if (isBlossomURI(el) && parseBlossomURI(el.replace(/[,|']+$/, ""))) {
+      const blob = parseBlossomURI(el.replace(/[,|']+$/, ""));
+      finalTree.push(
+        minimal ? (
+          <Fragment key={key}>
+            <span style={{ wordBreak: "break-all" }}>{blob.uri}</span>{" "}
+          </Fragment>
+        ) : (
+          <BlossomMedia blob={blob} pubkey={pubkey} key={key} />
+        ),
+      );
     } else if (isRelayUrl(el))
       finalTree.push(
         <Fragment key={key}>
