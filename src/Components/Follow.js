@@ -1,12 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { filterRelays } from "@/Helpers/Encryptions";
 import Spinner from "@/Components/Spinner";
-import { useDispatch, useSelector } from "react-redux";
-import { setToPublish } from "@/Store/Slides/Publishers";
+import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import LoginSignup from "@/Components/LoginSignup";
-import { relaysOnPlatform } from "@/Content/Relays";
-import { InitEvent } from "@/Helpers/Controlers";
+import { publishFollowChanges } from "@/Helpers/FollowList";
 import Icon from "@/Components/Icon";
 
 const FOLLOWING = <Icon name="user-followed-w" size={24} />;
@@ -62,11 +59,9 @@ const FollowText = ({
   size,
   full,
 }) => {
-  const dispatch = useDispatch();
   const userMetadata = useSelector((state) => state.userMetadata);
   const userFollowings = useSelector((state) => state.userFollowings);
   const userKeys = useSelector((state) => state.userKeys);
-  const userRelays = useSelector((state) => state.userRelays);
   const [isLoading, setIsLoading] = useState(false);
   const [tags, setTags] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
@@ -99,24 +94,12 @@ const FollowText = ({
 
   const followUnfollow = async () => {
     try {
+      if (isLoading) return;
       setIsLoading(true);
-      let tempTags = Array.from(userFollowings || []);
-      if (isFollowing.status) {
-        let index = tempTags.findIndex((item) => item === toFollowKey);
-        tempTags.splice(index, 1);
-      } else {
-        tempTags.push(toFollowKey);
-      }
-      const eventInitEx = await InitEvent(
-        3,
-        "",
-        tempTags.map((p) => ["p", p])
-      );
-      if (!eventInitEx) { setIsLoading(false); return; }
-      dispatch(
-        setToPublish({
-          eventInitEx,
-        })
+      await publishFollowChanges(
+        isFollowing.status
+          ? { unfollow: [toFollowKey] }
+          : { follow: [toFollowKey] }
       );
       setIsLoading(false);
     } catch (err) {
@@ -216,11 +199,9 @@ const FollowIcon = ({
   setBulkList,
   size,
 }) => {
-  const dispatch = useDispatch();
   const userMetadata = useSelector((state) => state.userMetadata);
   const userFollowings = useSelector((state) => state.userFollowings);
   const userKeys = useSelector((state) => state.userKeys);
-  const userRelays = useSelector((state) => state.userRelays);
   const isPublishing = useSelector((state) => state.isPublishing);
   const [isLoading, setIsLoading] = useState(false);
   const [tags, setTags] = useState([]);
@@ -254,22 +235,12 @@ const FollowIcon = ({
 
   const followUnfollow = async () => {
     try {
+      if (isLoading) return;
       setIsLoading(true);
-      let tempTags = Array.from(userFollowings || []);
-      if (isFollowing.status) {
-        let index = tempTags.findIndex((item) => item === toFollowKey);
-        tempTags.splice(index, 1);
-      } else {
-        tempTags.push(toFollowKey);
-      }
-      dispatch(
-        setToPublish({
-          userKeys: userKeys,
-          kind: 3,
-          content: "",
-          tags: tempTags.map((p) => ["p", p]),
-          allRelays: [...filterRelays(relaysOnPlatform, userRelays)],
-        })
+      await publishFollowChanges(
+        isFollowing.status
+          ? { unfollow: [toFollowKey] }
+          : { follow: [toFollowKey] }
       );
       setIsLoading(false);
     } catch (err) {

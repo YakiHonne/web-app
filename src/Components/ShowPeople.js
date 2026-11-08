@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { relaysOnPlatform } from "@/Content/Relays";
 import { getParsedAuthor } from "@/Helpers/Encryptions";
 import LoadingScreen from "@/Components/LoadingScreen";
 import Follow from "@/Components/Follow";
 import UserProfilePic from "@/Components/UserProfilePic";
-import { useDispatch, useSelector } from "react-redux";
-import { setToPublish } from "@/Store/Slides/Publishers";
 import { useTranslation } from "react-i18next";
 import { getSubData } from "@/Helpers/Controlers";
+import { publishFollowChanges } from "@/Helpers/FollowList";
 import Icon from "@/Components/Icon";
 import Overlay from "@/Components/Overlay";
 
@@ -18,11 +16,7 @@ const getBulkListStats = (list) => {
 };
 
 export default function ShowPeople({ exit, list, type = "following" }) {
-  const dispatch = useDispatch();
-  const userKeys = useSelector((state) => state.userKeys);
-  const userRelays = useSelector((state) => state.userRelays);
   const { t } = useTranslation();
-  const userFollowings = useSelector((state) => state.userFollowings);
   const [people, setPeople] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [bulkList, setBulkList] = useState([]);
@@ -60,26 +54,13 @@ export default function ShowPeople({ exit, list, type = "following" }) {
       const toUnfollowList = bulkList
         .filter((item) => !item.to_follow)
         .map((item) => item.pubkey);
-
-      let tempTags = Array.from(
-        userFollowings
-          ?.filter((item) => !toUnfollowList.includes(item))
-          .map((item) => ["p", item]) || [],
-      );
-      for (let item of bulkList) {
-        if (item.to_follow)
-          tempTags.push(["p", item.pubkey, relaysOnPlatform[0]]);
-      }
-
-      dispatch(
-        setToPublish({
-          userKeys: userKeys,
-          kind: 3,
-          content: "",
-          tags: tempTags,
-          allRelays: userRelays,
-        }),
-      );
+      const toFollowList = bulkList
+        .filter((item) => item.to_follow)
+        .map((item) => item.pubkey);
+      await publishFollowChanges({
+        follow: toFollowList,
+        unfollow: toUnfollowList,
+      });
 
       exit();
     } catch (err) {
